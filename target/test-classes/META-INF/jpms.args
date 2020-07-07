@@ -1,0 +1,4 @@
+--patch-module
+nl.naturalis.common=_
+--add-reads
+nl.naturalis.common=ALL-UNNAMED

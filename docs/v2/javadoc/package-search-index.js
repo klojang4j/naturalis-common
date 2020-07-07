@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"m":"nl.naturalis.common","l":"nl.naturalis.common.exception"},{"m":"nl.naturalis.common","l":"nl.naturalis.common.function"}]

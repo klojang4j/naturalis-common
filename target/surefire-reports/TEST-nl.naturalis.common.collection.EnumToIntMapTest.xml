@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="nl.naturalis.common.collection.EnumToIntMapTest" time="0.024" tests="14" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="sun.desktop" value="gnome"/>
+    <property name="awt.toolkit" value="sun.awt.X11.XToolkit"/>
+    <property name="java.specification.version" value="11"/>
+    <property name="sun.cpu.isalist" value=""/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="/home/ayco/git-repos/naturalis-common/target/test-classes:/home/ayco/.m2/repository/junit/junit/4.13/junit-4.13.jar:/home/ayco/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.vendor.url" value="http://java.oracle.com/"/>
+    <property name="user.timezone" value=""/>
+    <property name="java.vm.specification.version" value="11"/>
+    <property name="os.name" value="Linux"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="US"/>
+    <property name="sun.boot.library.path" value="/usr/lib/jvm/jdk-11.0.6/lib"/>
+    <property name="sun.java.command" value="org.apache.maven.surefire.booter.ForkedBooter /home/ayco/git-repos/naturalis-common/target/surefire 2020-07-06T15-06-13_909-jvmRun1 surefire161498984175058939tmp surefire_013567463887423932494tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="/home/ayco/git-repos/naturalis-common/target/test-classes:/home/ayco/.m2/repository/junit/junit/4.13/junit-4.13.jar:/home/ayco/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/home/ayco"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="jdk.module.path" value="/home/ayco/git-repos/naturalis-common/target/classes"/>
+    <property name="java.version.date" value="2020-01-14"/>
+    <property name="java.home" value="/usr/lib/jvm/jdk-11.0.6"/>
+    <property name="file.separator" value="/"/>
+    <property name="basedir" value="/home/ayco/git-repos/naturalis-common"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.awt.graphicsenv" value="sun.awt.X11GraphicsEnvironment"/>
+    <property name="surefire.real.class.path" value="/home/ayco/.m2/repository/org/apache/maven/surefire/surefire-booter/3.0.0-M4/surefire-booter-3.0.0-M4.jar:/home/ayco/.m2/repository/org/apache/maven/surefire/surefire-api/3.0.0-M4/surefire-api-3.0.0-M4.jar:/home/ayco/.m2/repository/org/apache/maven/surefire/surefire-logger-api/3.0.0-M4/surefire-logger-api-3.0.0-M4.jar:/home/ayco/git-repos/naturalis-common/target/test-classes:/home/ayco/.m2/repository/junit/junit/4.13/junit-4.13.jar:/home/ayco/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/home/ayco/.m2/repository/org/apache/maven/surefire/surefire-junit4/3.0.0-M4/surefire-junit4-3.0.0-M4.jar:/home/ayco/.m2/repository/org/apache/maven/surefire/common-java5/3.0.0-M4/common-java5-3.0.0-M4.jar:/home/ayco/.m2/repository/org/apache/maven/surefire/common-junit3/3.0.0-M4/common-junit3-3.0.0-M4.jar:/home/ayco/.m2/repository/org/apache/maven/surefire/common-junit4/3.0.0-M4/common-junit4-3.0.0-M4.jar"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="11.0.6+8-LTS"/>
+    <property name="user.name" value="ayco"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="5.3.0-61-generic"/>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="java.vendor.version" value="18.9"/>
+    <property name="localRepository" value="/home/ayco/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="http://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="/tmp"/>
+    <property name="java.version" value="11.0.6"/>
+    <property name="user.dir" value="/home/ayco/git-repos/naturalis-common"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="java.awt.printerjob" value="sun.print.PSPrinterJob"/>
+    <property name="sun.os.patch.level" value="unknown"/>
+    <property name="java.library.path" value="/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.info" value="mixed mode"/>
+    <property name="java.vm.version" value="11.0.6+8-LTS"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="55.0"/>
+  </properties>
+  <testcase name="containsKey01" classname="nl.naturalis.common.collection.EnumToIntMapTest" time="0"/>
+  <testcase name="values01" classname="nl.naturalis.common.collection.EnumToIntMapTest" time="0"/>
+  <testcase name="size01" classname="nl.naturalis.common.collection.EnumToIntMapTest" time="0"/>
+  <testcase name="EnumToIntMap01" classname="nl.naturalis.common.collection.EnumToIntMapTest" time="0"/>
+  <testcase name="EnumToIntMap02" classname="nl.naturalis.common.collection.EnumToIntMapTest" time="0"/>
+  <testcase name="EnumToIntMap03" classname="nl.naturalis.common.collection.EnumToIntMapTest" time="0"/>
+  <testcase name="EnumToIntMap04" classname="nl.naturalis.common.collection.EnumToIntMapTest" time="0"/>
+  <testcase name="put01" classname="nl.naturalis.common.collection.EnumToIntMapTest" time="0"/>
+  <testcase name="put02" classname="nl.naturalis.common.collection.EnumToIntMapTest" time="0"/>
+  <testcase name="set01" classname="nl.naturalis.common.collection.EnumToIntMapTest" time="0"/>
+  <testcase name="containsValue01" classname="nl.naturalis.common.collection.EnumToIntMapTest" time="0"/>
+  <testcase name="putAll01" classname="nl.naturalis.common.collection.EnumToIntMapTest" time="0"/>
+  <testcase name="putAll02" classname="nl.naturalis.common.collection.EnumToIntMapTest" time="0"/>
+  <testcase name="putAll03" classname="nl.naturalis.common.collection.EnumToIntMapTest" time="0"/>
+</testsuite>
