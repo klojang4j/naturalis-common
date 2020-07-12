@@ -634,50 +634,38 @@ public class StringMethods {
   }
 
   /**
-   * Returns everything up to (not including) the <i>last</i> occurence of the specfied character.
-   * //@formatter:off
-   * <table>
-   * <tr><td>substr(null, 'z')</td><td>"" (empty string)</td></tr>
-   * <tr><td>substr("Hello", 'z')</td><td>"Hello"</td></tr>
-   * <tr><td>substr("README.txt", '.')</td><td>"README"</td></tr>
-   * <tr><td>substr("README.log.txt", '.')</td><td>"README.log"</td></tr>
-   * </table>
-   * //@formatter:on
+   * Returns everything up to (not including) the first or last occurence of the <code>until</code> within the string, or the entire string
+   * if it does not contain <code>until</code>.
    * 
-   * @param subject The {@code String} to extract a substring from
-   * @param c The character whose last occurrence marks the end of the substring.
-   * @return The substring
+   * @param subject
+   * @param until
+   * @param firstOccurrence
+   * @return
    */
-  public static String maxSubstr(Object subject, char c) {
+  public static String substr(Object subject, String until, boolean firstOccurrence) {
     if (subject == null) {
       return EMPTY;
     }
     String str = subject.toString();
-    int i = str.lastIndexOf(c);
+    int i = firstOccurrence ? str.indexOf(until) : str.lastIndexOf(until);
     return i == -1 ? str : str.substring(0, i);
   }
 
   /**
-   * Returns everything up to (not including) the <i>first</i> occurence of the specfied character.
-   * //@formatter:off
-   * <table>
-   * <tr><td>substr(null, 'z')</td><td>"" (empty string)</td></tr>
-   * <tr><td>substr("Hello", 'z')</td><td>"Hello"</td></tr>
-   * <tr><td>substr("README.txt", '.')</td><td>"README"</td></tr>
-   * <tr><td>substr("README", '.')</td><td>"README"</td></tr>
-   * </table>
-   * //@formatter:on
+   * Returns everything up to (not including) the first or last occurence of the <code>until</code> within the string, or the entire string
+   * if it does not contain <code>until</code>.
    * 
-   * @param subject The {@code String} to extract a substring from
-   * @param c The character whose last occurrence marks the end of the substring.
-   * @return The substring
+   * @param subject
+   * @param until
+   * @param firstOccurrence
+   * @return
    */
-  public static String minSubstr(Object subject, char c) {
+  public static String substr(Object subject, char until, boolean firstOccurrence) {
     if (subject == null) {
       return EMPTY;
     }
     String str = subject.toString();
-    int i = str.indexOf(c);
+    int i = firstOccurrence ? str.indexOf(until) : str.lastIndexOf(until);
     return i == -1 ? str : str.substring(0, i);
   }
 
