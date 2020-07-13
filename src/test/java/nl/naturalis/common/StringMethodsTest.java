@@ -8,7 +8,15 @@ import static org.junit.Assert.assertTrue;
 public class StringMethodsTest {
 
   @Test
-  public void endsWith() {
+  public void count() {
+    String s = "This is This is This is BLISS!";
+    assertEquals("01", 3, StringMethods.count(s, "This is"));
+    assertEquals("02", 6, StringMethods.count(s, "is"));
+    assertEquals("03", 7, StringMethods.count(s, "is", true));
+  }
+
+  @Test
+  public void endsWith_01() {
     String s = "The cat is both dead and alive";
     assertTrue("01", StringMethods.endsWith(s, true, "ALIVE", "test"));
     assertTrue("02", StringMethods.endsWith(s, true, "test", "ALIVE"));
@@ -18,13 +26,13 @@ public class StringMethodsTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void endsWith2() {
+  public void endsWith_02() {
     String s = "The cat is both dead and alive";
     assertTrue("01", StringMethods.endsWith(s, true, "", "both"));
   }
 
   @Test
-  public void substr_3_args() {
+  public void substr_3args() {
     assertEquals("01", "", StringMethods.substr(null, 0, 5));
     assertEquals("02", "", StringMethods.substr("", 0, -1));
     assertEquals("03", "", StringMethods.substr("whatever", 0, -1));
@@ -42,7 +50,7 @@ public class StringMethodsTest {
   }
 
   @Test
-  public void substr_2_args() {
+  public void substr_2args() {
     assertEquals("01", "", StringMethods.substr(null, 0));
     assertEquals("02", "", StringMethods.substr(null, -3));
     assertEquals("03", "", StringMethods.substr(null, 500));
@@ -55,7 +63,7 @@ public class StringMethodsTest {
   }
 
   @Test
-  public void zpad_3_args() {
+  public void zpad_3args() {
     assertEquals("01", "00whatever|", StringMethods.zpad("whatever", 10, "|"));
     assertEquals("02", "00whatever|||", StringMethods.zpad("whatever", 10, "|||"));
     assertEquals("03", "0whatever|", StringMethods.zpad("whatever", 9, "|"));
@@ -70,7 +78,7 @@ public class StringMethodsTest {
   }
 
   @Test
-  public void zpad_2_args() {
+  public void zpad_2args() {
     assertEquals("01", "00whatever", StringMethods.zpad("whatever", 10));
     assertEquals("02", "0whatever", StringMethods.zpad("whatever", 9));
     assertEquals("03", "whatever", StringMethods.zpad("whatever", 8));
