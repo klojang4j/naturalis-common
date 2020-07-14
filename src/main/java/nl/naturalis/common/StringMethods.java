@@ -119,7 +119,7 @@ public class StringMethods {
       Check.notNull(suffixes, "suffixes");
       String str = subject.toString();
       for (String suf : suffixes) {
-        Check.argument(isNotEmpty(suf), "Suffix must not be empty");
+        Check.argument(notEmpty(suf), "Suffix must not be empty");
         if (str.regionMatches(ignoreCase, str.length() - suf.length(), suf, 0, suf.length())) {
           return true;
         }
@@ -154,7 +154,7 @@ public class StringMethods {
    * @param object The string to check
    * @return Whether it is neither null nor blank
    */
-  public static boolean isNotBlank(Object object) {
+  public static boolean notBlank(Object object) {
     return !isBlank(object);
   }
 
@@ -164,7 +164,7 @@ public class StringMethods {
    * @param subject The string to check
    * @return Whether it is neither null nor empty
    */
-  public static boolean isNotEmpty(Object subject) {
+  public static boolean notEmpty(Object subject) {
     return !isEmpty(subject);
   }
 

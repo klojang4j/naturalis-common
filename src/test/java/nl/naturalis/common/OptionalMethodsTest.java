@@ -2,9 +2,7 @@ package nl.naturalis.common;
 
 import java.io.File;
 import java.util.Optional;
-
 import org.junit.Test;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -58,9 +56,9 @@ public class OptionalMethodsTest {
   }
 
   @Test
-  public void narrowContent_01() {
+  public void get_01() {
     Optional<CharSequence> opt = Optional.of("Hello, world");
-    String s = OptionalMethods.narrowContent(opt);
+    String s = OptionalMethods.get(opt);
     assertTrue(s == opt.get());
   }
 

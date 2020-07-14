@@ -105,31 +105,6 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the first non-null argument or null if all arguments are null.
-   * 
-   * @param <T>
-   * @param arg0
-   * @param arg1
-   * @param moreArgs
-   * @return
-   */
-  @SuppressWarnings("unchecked")
-  public static <T> T firstNonNull(T arg0, T arg1, T... moreArgs) {
-    if (arg0 != null) {
-      return arg0;
-    } else if (arg1 != null) {
-      return arg1;
-    } else {
-      for (T arg : moreArgs) {
-        if (arg != null) {
-          return arg;
-        }
-      }
-    }
-    return null;
-  }
-
-  /**
    * Returns the 1st argument if it is not null, else the 2nd argument.
    * 
    * @see StringMethods#ifEmpty(String, String)
@@ -183,8 +158,7 @@ public class ObjectMethods {
   }
 
   /**
-   * Executes the specified <code>Runnable</code> if the specified condition evaluates to
-   * <code>true</code>.
+   * Executes the specified <code>Runnable</code> if the specified condition is true.
    * 
    * @param condition
    * @param then
@@ -196,8 +170,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Applies the provided operation on <code>value</code> if the condition equals <code>true</code>,
-   * else returns <code>value</code>.
+   * Returns <code>value</code> if the provided condition is true, else the outcome of the provided
+   * operation on <code>value</code>.
    * 
    * @param <T>
    * @param condition
@@ -210,8 +184,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Applies the provided operation on <code>value</code> if the condition equals <code>false</code>,
-   * else returns <code>value</code>.
+   * Returns <code>value</code> if the provided condition is false, else the outcome of the provided
+   * operation on <code>value</code>.
    * 
    * @param <T>
    * @param condition

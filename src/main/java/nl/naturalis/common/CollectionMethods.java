@@ -32,7 +32,7 @@ public class CollectionMethods {
    * @param c
    * @return
    */
-  public static boolean isNotEmpty(Collection<?> c) {
+  public static boolean notEmpty(Collection<?> c) {
     return !isEmpty(c);
   }
 
@@ -77,10 +77,12 @@ public class CollectionMethods {
   }
 
   /**
-   * Returns a slice of the provided list starting with starting with element {@code from} and containing at most {@code length} elements.
+   * Returns a slice of the provided list starting with starting with element {@code from} and
+   * containing at most {@code length} elements.
    * <ol>
    * <li>If {@code from} is less than zero, it is taken relative to the end of the list.
-   * <li>If {@code length} is zero or {@code from} is past the end of the list, an empty list is returned.
+   * <li>If {@code length} is zero or {@code from} is past the end of the list, an empty list is
+   * returned.
    * </ol>
    * 
    * @param list
@@ -121,7 +123,7 @@ public class CollectionMethods {
   }
 
   /**
-   * returns a mutable {@link HashMap} containing the provided key-value pairs.
+   * Returns a mutable {@link HashMap} containing the provided key-value pairs.
    * 
    * @param <K>
    * @param <V>
@@ -134,32 +136,12 @@ public class CollectionMethods {
    */
   @SuppressWarnings("unchecked")
   public static <K, V> HashMap<K, V> newHashMap(K k0, V v0, K k1, V v1, Object... moreKVPairs) {
-    Check.argument(moreKVPairs.length % 2 == 0, "moreKVPairs array must contain even number of elements");
+    Check.argument(moreKVPairs.length % 2 == 0, "moreKVPairs array must contain an even number of elements");
     HashMap<K, V> map = new HashMap<>();
     map.put(k0, v0);
     map.put(k1, v1);
     for (int i = 0; i < moreKVPairs.length; i += 2) {
       map.put((K) moreKVPairs[i], (V) moreKVPairs[i + 1]);
-    }
-    return map;
-  }
-
-  /**
-   * Returns a mutable {@link HashMap} containing the provided key-value pairs. Though mutable, the map is sized just large enough to
-   * contain the provided key-value pairs.
-   * 
-   * @param <K>
-   * @param <V>
-   * @param keyValuePairs
-   * @return
-   */
-  @SuppressWarnings("unchecked")
-  public static <K, V> HashMap<K, V> tightHashMap(Tuple<K, V>... keyValuePairs) {
-    Check.notNull(keyValuePairs, "keyValuePairs");
-    int sz = (int) (keyValuePairs.length / 0.75F + 1.0F);
-    HashMap<K, V> map = new HashMap<>(sz);
-    for (Tuple<K, V> kv : keyValuePairs) {
-      map.put(kv.getLeft(), kv.getRight());
     }
     return map;
   }

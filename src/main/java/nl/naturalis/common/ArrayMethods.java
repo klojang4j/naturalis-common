@@ -74,14 +74,16 @@ public class ArrayMethods {
   }
 
   /**
-   * Syntactic sugar avoiding <code>new Object[] {obj}</code> notation. Use as static import for increased sugar content.
+   * Returns the provided array. Syntactic sugar avoiding
+   * <code>new Object[] {obj1, obj2, obj3, etc}</code> notation. Use as static import for increased
+   * sugar content.
    * 
    * @param <T>
    * @param objs
    * @return
    */
   @SafeVarargs
-  public static <T> T[] toArray(T... objs) {
+  public static <T> T[] pack(T... objs) {
     return objs;
   }
 
@@ -148,8 +150,8 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns an array for a generic type, using the provided array as a template. The returned array will have the same length and element
-   * type as the provided array.
+   * Returns an array for a generic type, using the provided array as a template. The returned array
+   * will have the same length and element type as the provided array.
    * 
    * @param <T> The type of the elements in the requested array
    * @param template An array with the same length and element type as the requested array
@@ -159,8 +161,9 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns an array for a generic type, using the provided array as a template. The returned array will have the same element type as the
-   * provded array. The length of the provided array is specified through the {@code length} parameter.
+   * Returns an array for a generic type, using the provided array as a template. The returned array
+   * will have the same element type as the provded array. The length of the provided array is
+   * specified through the {@code length} parameter.
    * 
    * @param <T> The type of the elements in the requested array
    * @param template An array with the same element type as the requested array
@@ -173,8 +176,8 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns the array index of the first occurrence of {@code value} within the provided array. Returns -1 if the array does not contain
-   * the value.
+   * Returns the array index of the first occurrence of {@code value} within the provided array.
+   * Returns -1 if the array does not contain the value.
    * 
    * @param array The array to search
    * @param value The value to search for
@@ -190,9 +193,9 @@ public class ArrayMethods {
   }
 
   /**
-   * Whether or not the provided array is null or has a zero length. The {@code array} argument is of type {@code Object} so we don't need
-   * to overload for primitive and non-primitive arrays. An {@link IllegalArgumentException} is thrown if the provided object is not in fact
-   * an array.
+   * Whether or not the provided array is null or has a zero length. The {@code array} argument is of
+   * type {@code Object} so we don't need to overload for primitive and non-primitive arrays. An
+   * {@link IllegalArgumentException} is thrown if the provided object is not in fact an array.
    * 
    * @param array The array to check
    * @return Whether it is null or empty
@@ -207,9 +210,10 @@ public class ArrayMethods {
   }
 
   /**
-   * Whether or not the provided array is neither null nor has a zero length. The {@code array} argument is of type {@code Object} so we
-   * don't need to overload for primitive and non-primitive arrays. An {@link IllegalArgumentException} is thrown if the provided object is
-   * not in fact an array.
+   * Whether or not the provided array is neither null nor has a zero length. The {@code array}
+   * argument is of type {@code Object} so we don't need to overload for primitive and non-primitive
+   * arrays. An {@link IllegalArgumentException} is thrown if the provided object is not in fact an
+   * array.
    * 
    * @param array The array to check
    * @return Whether or not the provided array is neither null nor has a zero length

@@ -257,7 +257,7 @@ public abstract class Check {
    * @throws IllegalArgumentException If the argument is empty
    */
   public static String notEmpty(String arg) {
-    return argument(arg, StringMethods::isNotEmpty, "Illegal argument: empty string");
+    return argument(arg, StringMethods::notEmpty, "Illegal argument: empty string");
   }
 
   /**
@@ -271,7 +271,7 @@ public abstract class Check {
    * @throws IllegalArgumentException If the argument is empty
    */
   public static String notEmpty(String arg, String argName) {
-    return argument(arg, StringMethods::isNotEmpty, "%s must not be empty", argName);
+    return argument(arg, StringMethods::notEmpty, "%s must not be empty", argName);
   }
 
   /**
@@ -286,7 +286,7 @@ public abstract class Check {
    * @throws IllegalArgumentException If the argument is empty
    */
   public static String notEmpty(String arg, String message, Object msgArg, Object... moreMsgArgs) {
-    return argument(arg, StringMethods::isNotEmpty, message, msgArg, moreMsgArgs);
+    return argument(arg, StringMethods::notEmpty, message, msgArg, moreMsgArgs);
   }
 
   /**
@@ -298,7 +298,7 @@ public abstract class Check {
    * @throws IllegalArgumentException If the argument is blank
    */
   public static String notBlank(String arg) {
-    return argument(arg, StringMethods::isNotBlank, "Illegal argument: blank string");
+    return argument(arg, StringMethods::notBlank, "Illegal argument: blank string");
   }
 
   /**
@@ -312,7 +312,7 @@ public abstract class Check {
    * @throws IllegalArgumentException If the argument is blank
    */
   public static String notBlank(String arg, String argName) {
-    return argument(arg, StringMethods::isNotBlank, "%s must not be blank", argName);
+    return argument(arg, StringMethods::notBlank, "%s must not be blank", argName);
   }
 
   /**
@@ -327,7 +327,7 @@ public abstract class Check {
    * @throws IllegalArgumentException If the argument is blank
    */
   public static String notBlank(String arg, String message, Object msgArg, Object... moreMsgArgs) {
-    return argument(arg, StringMethods::isNotBlank, message, msgArg, moreMsgArgs);
+    return argument(arg, StringMethods::notBlank, message, msgArg, moreMsgArgs);
   }
 
   /**
