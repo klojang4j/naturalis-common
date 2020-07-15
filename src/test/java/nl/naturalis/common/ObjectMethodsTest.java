@@ -3,6 +3,7 @@ package nl.naturalis.common;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -10,7 +11,30 @@ import static org.junit.Assert.assertTrue;
 
 public class ObjectMethodsTest {
 
+  // Just to make sure we know Java
   @Test
+  @SuppressWarnings("unlikely-arg-type")
+  public void test01() {
+    int[] ints = new int[] {1, 2, 3, 4, 5};
+    long[] longs = new long[] {1L, 2L, 3L, 4L, 5L};
+    Integer[] integers = new Integer[] {1, 2, 3, 4, 5};
+    Object[] objects = new Object[] {1, 2, 3, 4, 5};
+    assertFalse("01", ClassMethods.isA(ints.getClass(), longs.getClass()));
+    assertFalse("02", ClassMethods.isA(longs.getClass(), ints.getClass()));
+    assertFalse("03", ClassMethods.isA(ints.getClass(), integers.getClass()));
+    assertFalse("04", ClassMethods.isA(integers.getClass(), ints.getClass()));
+    assertTrue("05", ClassMethods.isA(integers.getClass(), objects.getClass()));
+    assertFalse("06", ClassMethods.isA(objects.getClass(), integers.getClass()));
+    assertFalse("07", ints.equals(longs));
+    assertFalse("08", longs.equals(ints));
+    assertFalse("09", ints.equals(integers));
+    assertFalse("10", integers.equals(ints));
+    assertFalse("11", objects.equals(integers));
+    assertFalse("12", integers.equals(objects));
+  }
+
+  @Test
+  @Ignore
   public void testEquals() {
     assertTrue("01", ObjectMethods.equals("", null));
     assertTrue("02", ObjectMethods.equals(null, ""));
