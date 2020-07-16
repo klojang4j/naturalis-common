@@ -1,8 +1,7 @@
 package nl.naturalis.common;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
@@ -31,6 +30,18 @@ public class ObjectMethodsTest {
     assertFalse("10", integers.equals(ints));
     assertFalse("11", objects.equals(integers));
     assertFalse("12", integers.equals(objects));
+  }
+
+  // We rely on this within our equals method
+  @Test
+  @SuppressWarnings("rawtypes")
+  public void testIsEmpty01() {
+    Object test = new Object();
+    Set set1 = Set.of("a", 1, test, "", new ArrayList());
+    Set set2 = (Set) set1.stream().collect(Collectors.toSet());
+    Set set3 = (Set) set1.stream().filter(obj -> !ObjectMethods.isEmpty(obj)).collect(Collectors.toSet());
+    assertEquals(set1, set2);
+    assertEquals(Set.of("a", 1, test), set3);
   }
 
   @Test

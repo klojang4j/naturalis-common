@@ -1,16 +1,11 @@
 package nl.naturalis.common;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-import static nl.naturalis.common.ClassMethods.isA;
-import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
 
 /**
  * General methods applicable to objects of any type.
@@ -22,13 +17,15 @@ public class ObjectMethods {
   private ObjectMethods() {}
 
   /**
-   * Returns whether or not the provided object
+   * Returns whether or not the provided object is empty. Returns <code>true</code> if:
    * <ul>
    * <li>is null
+   * <li><b>or</b> an empty <code>String</code>
    * <li><b>or</b> an empty <code>Collection</code>
+   * <li><b>or</b> an empty <code>Map</code>
+   * <li><b>or</b> a zero-length array
    * <li><b>or</b> a zero-size {@link Sizeable}
    * <li><b>or</b> an empty {@link Emptyable}
-   * <li><b>or</b> a zero-length array
    * </ul>
    * 
    * @param obj
@@ -37,23 +34,48 @@ public class ObjectMethods {
   @SuppressWarnings("rawtypes")
   public static boolean isEmpty(Object obj) {
     return obj == null ||
-        obj instanceof CharSequence && ((CharSequence) obj).length() == 0 ||
+        obj instanceof String && ((String) obj).isEmpty() ||
         obj instanceof Collection && ((Collection) obj).isEmpty() ||
+        obj instanceof Map && ((Map) obj).isEmpty() ||
+        obj.getClass().isArray() && Array.getLength(obj) == 0 ||
         obj instanceof Sizeable && ((Sizeable) obj).size() == 0 ||
-        obj instanceof Emptyable && ((Emptyable) obj).isEmpty() ||
-        obj.getClass().isArray() && Array.getLength(obj) == 0;
+        obj instanceof Emptyable && ((Emptyable) obj).isEmpty();
   }
 
   /**
-   * Tests the provided objects for equality using empty-equals-null semantics. If one of the
-   * arguments is null and the other is an empty <code>String</code>, array or
-   * <code>Collection</code>, this method returns <code>true</code>. Otherwise this method delegates
-   * to {@link Objects#deepEquals(Object, Object) Objects.deepEquals}. This method does not
-   * recursively test the elements of arrays and collections: an array with an empty
-   * <code>String</code> as the 1st element is not equal to an array with null as the 1st element.
-   * Also, an empty array will not be equal to an empty <code>String</code> or an empty
-   * <code>Collection</code>.
+   * Returns <code>null</code> if the provided object is empty as per {@link #isEmpty(Object)
+   * isEmpty}, else the provided object.
    * 
+   * @param <T>
+   * @param obj
+   * @return
+   */
+  public static <T> T emptyToNull(T obj) {
+    return isEmpty(obj) ? null : obj;
+  }
+
+  /**
+   * <p>
+   * Tests the provided objects for equality using empty-equals-null semantics.
+   * </p>
+   * <p>
+   * The following applies:
+   * <ul>
+   * <li><code>null</code> equals an empty <code>String</code>
+   * <li><code>null</code> equals an empty <code>List</code>
+   * <li><code>null</code> equals an empty <code>Set</code>
+   * <li><code>null</code> equals an empty <code>Map</code>
+   * <li><code>null</code> equals a zero-length array
+   * <li>An empty <code>String</code>, <code>List</code>, <code>Set</code>, <code>Map</code> and array
+   * are <b>not</b> equal to each other
+   * <li>Equality for non-empty arrays, lists and sets is determined recursively
+   * <li>Maps are equal if they are the same size and they have the same key-value pairs. Only the
+   * values are compared using this method. Keys must be equal in the strict sense
+   * <li>For any other combination of objects this method the result of <code>Objects.deepEquals<code>
+   * </ul>
+   * </p>
+   * 
+   * @see #isEmpty(Object)
    * @see StringMethods#isEmpty(Object)
    * @see ArrayMethods#isEmpty(Object)
    * @see CollectionMethods#isEmpty(Collection)
@@ -62,23 +84,25 @@ public class ObjectMethods {
    * @param obj2
    * @return
    */
+  @SuppressWarnings("rawtypes")
   public static <T> boolean equals(T obj1, T obj2) {
     if (obj1 == obj2) {
       return true;
     } else if (!isEmpty(obj1)) {
       if (!isEmpty(obj2)) {
-        if (!isA(obj1.getClass(), obj2.getClass()) && !isA(obj2.getClass(), obj1.getClass())) {
-          return false;
-        } else if (isPrimitiveArray(obj1)) {
-          return Objects.deepEquals(obj1, obj2);
-        } else if (obj1 instanceof Object[]) {
-          return arraysEqual(obj1, obj2);
-        } else if (obj1 instanceof Collection) {
-          return collectionsEqual(obj1, obj2);
+        if (obj1 instanceof Object[] && obj2 instanceof Object[]) {
+          return arraysEqual((Object[]) obj1, (Object[]) obj2);
+        } else if (obj1 instanceof List && obj2 instanceof List) {
+          return listsEqual((List) obj1, (List) obj2);
+        } else if (obj1 instanceof Set && obj2 instanceof Set) {
+          return setsEqual((Set) obj1, (Set) obj2);
+        } else if (obj1 instanceof Map && obj2 instanceof Map) {
+          return mapsEqual((Map) obj1, (Map) obj2);
         }
+        return Objects.deepEquals(obj1, obj2);
       }
     } else if (isEmpty(obj2)) {
-      return true;
+      return canCompare(obj1, obj2);
     }
     return false;
   }
@@ -224,9 +248,7 @@ public class ObjectMethods {
     return !condition ? then.apply(value) : value;
   }
 
-  private static <T> boolean arraysEqual(T obj1, T obj2) {
-    Object[] objs1 = (Object[]) obj1;
-    Object[] objs2 = (Object[]) obj2;
+  private static boolean arraysEqual(Object[] objs1, Object[] objs2) {
     if (objs1.length == objs2.length) {
       for (int i = 0; i < objs1.length; ++i) {
         if (!equals(objs1[i], objs2[i])) {
@@ -238,25 +260,59 @@ public class ObjectMethods {
   }
 
   @SuppressWarnings("rawtypes")
-  private static <T> boolean collectionsEqual(T obj1, T obj2) {
-    Collection c1 = (Collection) obj1;
-    Collection c2 = (Collection) obj2;
-    if (c1.equals(c2)) {
-      return true;
-    } else if (c1.size() == c2.size()) {
-      // We'll rely on the iterators, but these may not yield elements in the same order!
-      Iterator it1 = c1.iterator();
-      Iterator it2 = c2.iterator();
+  private static boolean listsEqual(List list1, List list2) {
+    if (list1.size() == list2.size()) {
+      Iterator it1 = list1.iterator();
+      Iterator it2 = list2.iterator();
       while (it1.hasNext()) {
-        if (!it2.hasNext()) { // just in case the iterator doesn't even yield all elements
-          return false;
-        } else if (!equals(it1, it2)) {
+        if (!it2.hasNext() || !it1.next().equals(it2.next())) {
           return false;
         }
       }
       return true;
     }
     return false;
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private static boolean setsEqual(Set set1, Set set2) {
+    Comparator cmp = (e1, e2) -> {
+      if (equals(e1, e2)) {
+        return 0;
+      } else if (e1 == null) {
+        return -e2.hashCode();
+      } else if (e2 == null) {
+        return e1.hashCode();
+      }
+      return e1.hashCode() - e2.hashCode();
+    };
+    TreeSet s1 = new TreeSet<>(cmp);
+    TreeSet s2 = new TreeSet<>(cmp);
+    set1.forEach(s1::add);
+    set2.forEach(s2::add);
+    return s1.equals(s2);
+  }
+
+  @SuppressWarnings({"rawtypes"})
+  private static boolean mapsEqual(Map map1, Map map2) {
+    if (map1.size() == map2.size()) {
+      for (Object k : map1.keySet()) {
+        if (!map2.containsKey(k) || !equals(map1.get(k), map2.get(k))) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  private static boolean canCompare(Object obj1, Object obj2) {
+    return obj1 == null
+        || obj2 == null
+        || obj1.getClass() == obj2.getClass() // Covers empty strings and zero-length primitive arrays
+        || (obj1 instanceof List && obj2 instanceof List)
+        || (obj1 instanceof Set && obj2 instanceof Set)
+        || (obj1 instanceof Map && obj2 instanceof Map)
+        || (obj1 instanceof Object[] && obj2 instanceof Object[]);
   }
 
 }
