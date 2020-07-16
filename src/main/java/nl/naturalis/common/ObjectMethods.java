@@ -126,6 +126,7 @@ public class ObjectMethods {
     if (obj == null ||
         obj instanceof String && ((String) obj).isEmpty() ||
         obj instanceof Collection && ((Collection) obj).isEmpty() ||
+        obj instanceof Map && ((Map) obj).isEmpty() ||
         obj.getClass().isArray() && Array.getLength(obj) == 0) {
       return 0;
     }
@@ -255,6 +256,7 @@ public class ObjectMethods {
           return false;
         }
       }
+      return true;
     }
     return true;
   }
