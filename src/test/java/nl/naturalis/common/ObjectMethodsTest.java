@@ -32,55 +32,54 @@ public class ObjectMethodsTest {
     assertFalse("12", integers.equals(objects));
   }
 
-  // We rely on this within our equals method
   @Test
   @SuppressWarnings("rawtypes")
-  public void testIsEmpty01() {
+  public void setsEquals() {
     Object test = new Object();
     Set set1 = Set.of("a", 1, test, "", new ArrayList());
     Set set2 = (Set) set1.stream().collect(Collectors.toSet());
-    Set set3 = (Set) set1.stream().filter(obj -> !ObjectMethods.isEmpty(obj)).collect(Collectors.toSet());
+    Set set3 = (Set) set1.stream().filter(ObjectMethods::notEmpty).collect(Collectors.toSet());
     assertEquals(set1, set2);
     assertEquals(Set.of("a", 1, test), set3);
   }
 
   @Test
   @Ignore
-  public void testEquals() {
-    assertTrue("01", ObjectMethods.equals("", null));
-    assertTrue("02", ObjectMethods.equals(null, ""));
-    assertTrue("03", ObjectMethods.equals(null, new Enum[0]));
-    assertTrue("04", ObjectMethods.equals(new int[0], null));
-    assertTrue("05", ObjectMethods.equals(new String[0], null));
-    assertTrue("06", ObjectMethods.equals(new String[0], null));
-    assertTrue("07", ObjectMethods.equals(Collections.emptyList(), null));
-    assertTrue("08", ObjectMethods.equals(null, new HashSet<>()));
-    assertTrue("09", ObjectMethods.equals(null, null));
-    assertTrue("10", ObjectMethods.equals("", ""));
-    assertTrue("11", ObjectMethods.equals(List.of(1, 2, 3, 4, 5), List.of(1, 2, 3, 4, 5)));
-    assertTrue("12", ObjectMethods.equals(new String[] {"To", "be", "or", "not"}, new String[] {"To", "be", "or", "not"}));
-    assertTrue("13", ObjectMethods.equals(new int[] {1, 2, 3, 4, 5}, new int[] {1, 2, 3, 4, 5}));
-    assertFalse("14", ObjectMethods.equals(new int[0], new HashSet<>()));
-    assertFalse("15", ObjectMethods.equals("", new HashSet<>()));
+  public void e2nEqualsRecursive() {
+    assertTrue("01", ObjectMethods.e2nEqualsRecursive("", null));
+    assertTrue("02", ObjectMethods.e2nEqualsRecursive(null, ""));
+    assertTrue("03", ObjectMethods.e2nEqualsRecursive(null, new Enum[0]));
+    assertTrue("04", ObjectMethods.e2nEqualsRecursive(new int[0], null));
+    assertTrue("05", ObjectMethods.e2nEqualsRecursive(new String[0], null));
+    assertTrue("06", ObjectMethods.e2nEqualsRecursive(new String[0], null));
+    assertTrue("07", ObjectMethods.e2nEqualsRecursive(Collections.emptyList(), null));
+    assertTrue("08", ObjectMethods.e2nEqualsRecursive(null, new HashSet<>()));
+    assertTrue("09", ObjectMethods.e2nEqualsRecursive(null, null));
+    assertTrue("10", ObjectMethods.e2nEqualsRecursive("", ""));
+    assertTrue("11", ObjectMethods.e2nEqualsRecursive(List.of(1, 2, 3, 4, 5), List.of(1, 2, 3, 4, 5)));
+    assertTrue("12", ObjectMethods.e2nEqualsRecursive(new String[] {"To", "be", "or", "not"}, new String[] {"To", "be", "or", "not"}));
+    assertTrue("13", ObjectMethods.e2nEqualsRecursive(new int[] {1, 2, 3, 4, 5}, new int[] {1, 2, 3, 4, 5}));
+    assertFalse("14", ObjectMethods.e2nEqualsRecursive(new int[0], new HashSet<>()));
+    assertFalse("15", ObjectMethods.e2nEqualsRecursive("", new HashSet<>()));
   }
 
   @Test // implicitly also tests ObjectMethods.hashCode
-  public void testHash() {
+  public void e2nHash() {
     assertEquals("01",
-        ObjectMethods.hash(null, 5, "hallo", null),
-        ObjectMethods.hash(null, 5, "hallo", null));
+        ObjectMethods.e2nHash(null, 5, "hallo", null),
+        ObjectMethods.e2nHash(null, 5, "hallo", null));
     assertEquals("02",
-        ObjectMethods.hash(null, 5, "hallo", null),
-        ObjectMethods.hash(Collections.emptyList(), 5, "hallo", Collections.emptySet()));
+        ObjectMethods.e2nHash(null, 5, "hallo", null),
+        ObjectMethods.e2nHash(Collections.emptyList(), 5, "hallo", Collections.emptySet()));
     assertEquals("03",
-        ObjectMethods.hash(null, 5, "hallo", null),
-        ObjectMethods.hash(new int[0], 5, "hallo", new Enum[0]));
+        ObjectMethods.e2nHash(null, 5, "hallo", null),
+        ObjectMethods.e2nHash(new int[0], 5, "hallo", new Enum[0]));
     // Ouch, surprise (but true):
     assertEquals("04",
-        ObjectMethods.hash(Collections.emptyList(), 5, "hallo", Collections.emptySet()),
-        ObjectMethods.hash(new int[0], 5, "hallo", new Enum[0]));
-    assertEquals("05", 0, ObjectMethods.hash());
-    assertEquals("06", 0, ObjectMethods.hash((Object[]) null));
+        ObjectMethods.e2nHash(Collections.emptyList(), 5, "hallo", Collections.emptySet()),
+        ObjectMethods.e2nHash(new int[0], 5, "hallo", new Enum[0]));
+    assertEquals("05", 0, ObjectMethods.e2nHash());
+    assertEquals("06", 0, ObjectMethods.e2nHash((Object[]) null));
   }
 
 }

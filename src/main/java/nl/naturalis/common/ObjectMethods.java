@@ -2,10 +2,10 @@ package nl.naturalis.common;
 
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * General methods applicable to objects of any type.
@@ -17,9 +17,9 @@ public class ObjectMethods {
   private ObjectMethods() {}
 
   /**
-   * Returns whether or not the provided object is empty. Returns <code>true</code> if:
+   * Returns whether or not the provided object is empty. Returns <code>true</code> if ths object:
    * <ul>
-   * <li>is null
+   * <li>is <code>null</code>
    * <li><b>or</b> an empty <code>String</code>
    * <li><b>or</b> an empty <code>Collection</code>
    * <li><b>or</b> an empty <code>Map</code>
@@ -43,8 +43,17 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns <code>null</code> if the provided object is empty as per {@link #isEmpty(Object)
-   * isEmpty}, else the provided object.
+   * Returns the reverse of {@link #isEmpty(Object) isEmpty}.
+   * 
+   * @param obj
+   * @return
+   */
+  public static boolean notEmpty(Object obj) {
+    return !isEmpty(obj);
+  }
+
+  /**
+   * Returns <code>null</code> if the argument is empty, else the argument itself.
    * 
    * @param <T>
    * @param obj
@@ -56,23 +65,23 @@ public class ObjectMethods {
 
   /**
    * <p>
-   * Tests the provided objects for equality using empty-equals-null semantics.
+   * Tests the provided objects for equality using empty-equals-null semantics. The following applies:
    * </p>
    * <p>
-   * The following applies:
-   * <ul>
+   * <ol>
    * <li><code>null</code> equals an empty <code>String</code>
    * <li><code>null</code> equals an empty <code>List</code>
    * <li><code>null</code> equals an empty <code>Set</code>
    * <li><code>null</code> equals an empty <code>Map</code>
    * <li><code>null</code> equals a zero-length array
-   * <li>An empty <code>String</code>, <code>List</code>, <code>Set</code>, <code>Map</code> and array
-   * are <b>not</b> equal to each other
-   * <li>Equality for non-empty arrays, lists and sets is determined recursively
-   * <li>Maps are equal if they are the same size and they have the same key-value pairs. Only the
-   * values are compared using this method. Keys must be equal in the strict sense
-   * <li>For any other combination of objects this method the result of <code>Objects.deepEquals<code>
-   * </ul>
+   * <li><code>null</code> equals an empty {@link Emptyable}
+   * <li><code>null</code> equals a zero-size {@link Sizeable}
+   * <li>An empty/zero-size <code>String</code>, <code>List</code>, <code>Set</code>,
+   * <code>Map</code>, array, <code>Emptyable</code> and <code>Sizeable</code> are <b>not</b> equal to
+   * each other
+   * <li>For any other combination of objects this method returns the result of
+   * <code>Objects.equals<code>
+   * </ol>
    * </p>
    * 
    * @see #isEmpty(Object)
@@ -84,35 +93,42 @@ public class ObjectMethods {
    * @param obj2
    * @return
    */
-  @SuppressWarnings("rawtypes")
-  public static <T> boolean equals(T obj1, T obj2) {
+  public static <T> boolean e2nEquals(T obj1, T obj2) {
     if (obj1 == obj2) {
       return true;
-    } else if (!isEmpty(obj1)) {
-      if (!isEmpty(obj2)) {
-        if (obj1 instanceof Object[] && obj2 instanceof Object[]) {
-          return arraysEqual((Object[]) obj1, (Object[]) obj2);
-        } else if (obj1 instanceof List && obj2 instanceof List) {
-          return listsEqual((List) obj1, (List) obj2);
-        } else if (obj1 instanceof Set && obj2 instanceof Set) {
-          return setsEqual((Set) obj1, (Set) obj2);
-        } else if (obj1 instanceof Map && obj2 instanceof Map) {
-          return mapsEqual((Map) obj1, (Map) obj2);
-        }
-        return Objects.deepEquals(obj1, obj2);
-      }
-    } else if (isEmpty(obj2)) {
-      return canCompare(obj1, obj2);
+    } else if (isEmpty(obj1)) {
+      return isEmpty(obj2) ? canCompare(obj1, obj2) : false;
     }
-    return false;
+    return isEmpty(obj2) ? false : Objects.equals(obj1, obj2);
+  }
+
+  /**
+   * Recursively tests the provided objects for equality using empty-equals-null semantics. In other
+   * words, for non-empty arrays, lists and sets the elements within them are also compared using
+   * <code>e2nEqualsRecursive</code>. For non-empty maps only the values are compared using
+   * <code>e2nEqualsRecursive</code>; the keys are compared normally (using their <code>equals</code>
+   * method.
+   * 
+   * @param obj1
+   * @param obj2
+   * @return
+   */
+  public static <T> boolean e2nEqualsRecursive(T obj1, T obj2) {
+    if (obj1 == obj2) {
+      return true;
+    } else if (isEmpty(obj1)) {
+      return isEmpty(obj2) ? canCompare(obj1, obj2) : false;
+    }
+    return isEmpty(obj2) ? false : eq(obj1, obj2);
   }
 
   /**
    * Generates a hash code for the provided object using using empty-equals-null semantics. That is:
-   * null, empty strings, arrays and collections all return 0 (in other words, they all have the same
-   * hash code!). The hash code of non-empty arrays will be calculated using
-   * {@link Arrays#deepHashCode(Object[])}. For any other type of object this method simply calls
-   * hashCode() on it.
+   * null and empty objects (as per {@link #isEmpty(Object) isEmpty}) all have a zero hash code. In
+   * other words, they all have the same hash code! The hash code is also not calculated recursively
+   * for arrays, list and sets. Therefore maps and sets relying on this method to find keys and
+   * elements will likely have to fall back more often on <code>e2nEquals</code> or
+   * <code>e2nEqualsRecursive</code>.
    * 
    * @see StringMethods#isEmpty(Object)
    * @see ArrayMethods#isEmpty(Object)
@@ -122,21 +138,22 @@ public class ObjectMethods {
    * @return
    */
   @SuppressWarnings("rawtypes")
-  public static int hashCode(Object obj) {
-    if (obj == null ||
-        obj instanceof String && ((String) obj).isEmpty() ||
-        obj instanceof Collection && ((Collection) obj).isEmpty() ||
-        obj instanceof Map && ((Map) obj).isEmpty() ||
-        obj.getClass().isArray() && Array.getLength(obj) == 0) {
+  public static int e2nHashCode(Object obj) {
+    if (obj == null
+        || obj instanceof String && ((String) obj).isEmpty()
+        || obj instanceof Collection && ((Collection) obj).isEmpty()
+        || obj instanceof Map && ((Map) obj).isEmpty()
+        || obj.getClass().isArray() && Array.getLength(obj) == 0
+        || obj instanceof Emptyable && ((Emptyable) obj).isEmpty()
+        || obj instanceof Sizeable && ((Sizeable) obj).size() == 0) {
       return 0;
     }
-
     return obj.hashCode();
   }
 
   /**
-   * Generates a hash code for the provided array of object using using empty-equals-null semantics.
-   * See {@link #hashCode()}.
+   * Generates a hash code for the provided arguments using using empty-equals-null semantics. See
+   * {@link #hashCode()}.
    * 
    * @see StringMethods#isEmpty(Object)
    * @see ArrayMethods#isEmpty(Object)
@@ -145,19 +162,19 @@ public class ObjectMethods {
    * @param objs
    * @return
    */
-  public static int hash(Object... objs) {
+  public static int e2nHash(Object... objs) {
     if (objs == null || objs.length == 0) {
       return 0;
     }
     int hash = 17;
     for (Object obj : objs) {
-      hash = hash * 31 + hashCode(obj);
+      hash = hash * 31 + e2nHashCode(obj);
     }
     return hash;
   }
 
   /**
-   * Returns the 1st argument if it is not null, else the 2nd argument.
+   * Returns the 1st argument if it is not <code>null</code>, else the 2nd argument.
    * 
    * @see StringMethods#ifEmpty(String, String)
    * @see StringMethods#ifBlank(Object, String)
@@ -172,7 +189,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the 1st argument if it is not null, else the value supplied by the <code>Supplier</code>.
+   * Returns the 1st argument if it is not <code>null</code>, else the value supplied by the
+   * <code>Supplier</code>.
    * 
    * @param <T>
    * @param value The value to check and return if not null
@@ -184,46 +202,37 @@ public class ObjectMethods {
   }
 
   /**
-   * Converts the 1st argument into an instance of type <code>U</code> if it is not null.
+   * Returns <code>null</code> if the 1st argument is <code>null</code>, else the result of applying
+   * the provided <code>Function</code> to the 1st argument.
    * 
    * @param <T> The type of the first argument
    * @param <U> The return type
    * @param value The value to check
-   * @param then The function to call if value is not null
-   * @return The result of apply the function to the value
+   * @param then The transformation to apply to the value if it is not null
+   * @return
    */
   public static <T, U> U ifNotNull(T value, Function<T, U> then) {
     return value == null ? null : then.apply(value);
   }
 
   /**
-   * Processes the 1st argument using the provided <code>Consumer</code> if it is not null.
+   * Returns the 3rd argument if the 1st argument is <code>null</code>, else the result of applying
+   * the provided <code>Function</code> to the 1st argument.
    * 
-   * @param <T>
-   * @param value
-   * @param then
+   * @param <T> The type of the first argument
+   * @param <U> The return type
+   * @param value The value to check
+   * @param then The transformation to apply to the value if it is not null
+   * @param dfault The value to return in case the provided value is null
+   * @return
    */
-  public static <T> void doIfNotNull(T value, Consumer<T> then) {
-    if (value != null) {
-      then.accept(value);
-    }
+  public static <T, U> U ifNotNull(T value, Function<T, U> then, U dfault) {
+    return value == null ? dfault : then.apply(value);
   }
 
   /**
-   * Executes the specified <code>Runnable</code> if the specified condition is true.
-   * 
-   * @param condition
-   * @param then
-   */
-  public static void doIf(boolean condition, Runnable then) {
-    if (condition) {
-      then.run();
-    }
-  }
-
-  /**
-   * Returns <code>value</code> if the provided condition is true, else the outcome of the provided
-   * operation on <code>value</code>.
+   * Returns the 3rd argument if the condition evaluates to <code>true</code>, else the result of
+   * applying the provided operation on the 3rd argument.
    * 
    * @param <T>
    * @param condition
@@ -236,8 +245,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns <code>value</code> if the provided condition is false, else the outcome of the provided
-   * operation on <code>value</code>.
+   * Returns the 3rd argument if the condition evaluates to <code>false</code>, else the result of
+   * applying the provided operation on the 3rd argument.
    * 
    * @param <T>
    * @param condition
@@ -249,10 +258,24 @@ public class ObjectMethods {
     return !condition ? then.apply(value) : value;
   }
 
+  @SuppressWarnings("rawtypes")
+  private static <T> boolean eq(T obj1, T obj2) {
+    if (obj1 instanceof Object[] && obj2 instanceof Object[]) {
+      return arraysEqual((Object[]) obj1, (Object[]) obj2);
+    } else if (obj1 instanceof List && obj2 instanceof List) {
+      return listsEqual((List) obj1, (List) obj2);
+    } else if (obj1 instanceof Set && obj2 instanceof Set) {
+      return setsEqual((Set) obj1, (Set) obj2);
+    } else if (obj1 instanceof Map && obj2 instanceof Map) {
+      return mapsEqual((Map) obj1, (Map) obj2);
+    }
+    return Objects.deepEquals(obj1, obj2);
+  }
+
   private static boolean arraysEqual(Object[] objs1, Object[] objs2) {
     if (objs1.length == objs2.length) {
       for (int i = 0; i < objs1.length; ++i) {
-        if (!equals(objs1[i], objs2[i])) {
+        if (!e2nEqualsRecursive(objs1[i], objs2[i])) {
           return false;
         }
       }
@@ -267,7 +290,7 @@ public class ObjectMethods {
       Iterator it1 = list1.iterator();
       Iterator it2 = list2.iterator();
       while (it1.hasNext()) {
-        if (!it2.hasNext() || !it1.next().equals(it2.next())) {
+        if (!it2.hasNext() || !e2nEqualsRecursive(it1.next(), it2.next())) {
           return false;
         }
       }
@@ -276,45 +299,52 @@ public class ObjectMethods {
     return false;
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
+  @SuppressWarnings({"rawtypes"})
   private static boolean setsEqual(Set set1, Set set2) {
-    Comparator cmp = (e1, e2) -> {
-      if (equals(e1, e2)) {
-        return 0;
-      } else if (e1 == null) {
-        return -e2.hashCode();
-      } else if (e2 == null) {
-        return e1.hashCode();
+    Set s1 = (Set) set1.stream().map(ObjectMethods::emptyToNull).collect(toSet());
+    Set s2 = (Set) set2.stream().map(ObjectMethods::emptyToNull).collect(toSet());
+    if (s1.size() != s2.size()) {
+      return false;
+    } else if (s1.equals(s2)) {
+      return true;
+    }
+    for (Object obj1 : s1) {
+      boolean found = false;
+      for (Object obj2 : s2) {
+        if (e2nEqualsRecursive(obj1, obj2)) {
+          found = true;
+          break;
+        }
       }
-      return e1.hashCode() - e2.hashCode();
-    };
-    TreeSet s1 = new TreeSet<>(cmp);
-    TreeSet s2 = new TreeSet<>(cmp);
-    set1.forEach(s1::add);
-    set2.forEach(s2::add);
-    return s1.equals(s2);
+      if (!found) {
+        return false;
+      }
+      s2.remove(obj1);
+    }
+    return true;
   }
 
   @SuppressWarnings({"rawtypes"})
   private static boolean mapsEqual(Map map1, Map map2) {
     if (map1.size() == map2.size()) {
       for (Object k : map1.keySet()) {
-        if (!map2.containsKey(k) || !equals(map1.get(k), map2.get(k))) {
+        if (!map2.containsKey(k) || !e2nEqualsRecursive(map1.get(k), map2.get(k))) {
           return false;
         }
       }
+      return true;
     }
-    return true;
+    return false;
   }
 
-  private static boolean canCompare(Object obj1, Object obj2) {
-    return obj1 == null
-        || obj2 == null
-        || obj1.getClass() == obj2.getClass() // Covers empty strings and zero-length primitive arrays
-        || (obj1 instanceof List && obj2 instanceof List)
-        || (obj1 instanceof Set && obj2 instanceof Set)
-        || (obj1 instanceof Map && obj2 instanceof Map)
-        || (obj1 instanceof Object[] && obj2 instanceof Object[]);
+  private static boolean canCompare(Object empty1, Object empty2) {
+    return empty1 == null // can always compare null to any type of empty object
+        || empty2 == null
+        || empty1.getClass() == empty2.getClass()
+        || empty1 instanceof List && empty2 instanceof List
+        || empty1 instanceof Set && empty2 instanceof Set
+        || empty1 instanceof Map && empty2 instanceof Map
+        || empty1 instanceof Object[] && empty2 instanceof Object[];
   }
 
 }
