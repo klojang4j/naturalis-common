@@ -12,6 +12,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * @author Ayco Holleman
  */
+@SuppressWarnings("rawtypes")
 public class ObjectMethods {
 
   private ObjectMethods() {}
@@ -31,15 +32,14 @@ public class ObjectMethods {
    * @param obj
    * @return
    */
-  @SuppressWarnings("rawtypes")
   public static boolean isEmpty(Object obj) {
-    return obj == null ||
-        obj instanceof String && ((String) obj).isEmpty() ||
-        obj instanceof Collection && ((Collection) obj).isEmpty() ||
-        obj instanceof Map && ((Map) obj).isEmpty() ||
-        obj.getClass().isArray() && Array.getLength(obj) == 0 ||
-        obj instanceof Sizeable && ((Sizeable) obj).size() == 0 ||
-        obj instanceof Emptyable && ((Emptyable) obj).isEmpty();
+    return obj == null
+        || obj instanceof String && ((String) obj).isEmpty()
+        || obj instanceof Collection && ((Collection) obj).isEmpty()
+        || obj instanceof Map && ((Map) obj).isEmpty()
+        || obj.getClass().isArray() && Array.getLength(obj) == 0
+        || obj instanceof Sizeable && ((Sizeable) obj).size() == 0
+        || obj instanceof Emptyable && ((Emptyable) obj).isEmpty();
   }
 
   /**
@@ -50,6 +50,44 @@ public class ObjectMethods {
    */
   public static boolean notEmpty(Object obj) {
     return !isEmpty(obj);
+  }
+
+  /**
+   * Returns <code>true</code> if the provided object is not null and, if it is an array or
+   * <code>Collection</code>, none of its elements are null. Otherwise this method returns
+   * <code>false</code>.
+   * 
+   * @param obj
+   * @return
+   */
+  public static boolean notNullRecursive(Object obj) {
+    if (obj == null) {
+      return false;
+    } else if (obj instanceof Object[]) {
+      return Arrays.stream((Object[]) obj).allMatch(ObjectMethods::notNullRecursive);
+    } else if (obj instanceof Collection) {
+      return ((Collection) obj).stream().allMatch(ObjectMethods::notNullRecursive);
+    }
+    return true;
+  }
+
+  /**
+   * Returns <code>true</code> if the provided object is not empty and, if it is an array or
+   * <code>Collection</code>, none of its elements are empty. Otherwise this method returns
+   * <code>false</code>.
+   * 
+   * @param obj
+   * @return
+   */
+  public static boolean notEmptyRecursive(Object obj) {
+    if (obj == null) {
+      return false;
+    } else if (obj instanceof Object[]) {
+      return Arrays.stream((Object[]) obj).allMatch(ObjectMethods::notEmptyRecursive);
+    } else if (obj instanceof Collection) {
+      return ((Collection) obj).stream().allMatch(ObjectMethods::notEmptyRecursive);
+    }
+    return true;
   }
 
   /**
@@ -64,10 +102,7 @@ public class ObjectMethods {
   }
 
   /**
-   * <p>
    * Tests the provided objects for equality using empty-equals-null semantics. The following applies:
-   * </p>
-   * <p>
    * <ol>
    * <li><code>null</code> equals an empty <code>String</code>
    * <li><code>null</code> equals an empty <code>List</code>
@@ -82,12 +117,7 @@ public class ObjectMethods {
    * <li>For any other combination of objects this method returns the result of
    * <code>Objects.equals<code>
    * </ol>
-   * </p>
    * 
-   * @see #isEmpty(Object)
-   * @see StringMethods#isEmpty(Object)
-   * @see ArrayMethods#isEmpty(Object)
-   * @see CollectionMethods#isEmpty(Collection)
    * 
    * @param obj1
    * @param obj2
@@ -104,10 +134,10 @@ public class ObjectMethods {
 
   /**
    * Recursively tests the provided objects for equality using empty-equals-null semantics. In other
-   * words, for non-empty arrays, lists and sets the elements within them are also compared using
-   * <code>e2nEqualsRecursive</code>. For non-empty maps only the values are compared using
-   * <code>e2nEqualsRecursive</code>; the keys are compared normally (using their <code>equals</code>
-   * method.
+   * words, if the provided arguments are non-empty arrays, lists or sets, their elements are also
+   * compared using <code>e2nEqualsRecursive</code>. If the provided arguments are non-empty maps,
+   * then the keys are compared normally (using <code>equals</code>) while the values are compared
+   * using <code>e2nEqualsRecursive</code>.
    * 
    * @param obj1
    * @param obj2
@@ -124,20 +154,15 @@ public class ObjectMethods {
 
   /**
    * Generates a hash code for the provided object using using empty-equals-null semantics. That is:
-   * null and empty objects (as per {@link #isEmpty(Object) isEmpty}) all have a zero hash code. In
-   * other words, they all have the same hash code! The hash code is also not calculated recursively
-   * for arrays, list and sets. Therefore maps and sets relying on this method to find keys and
+   * null and empty objects (as per {@link #isEmpty(Object) ObjectMethods.isEmpty}) all have a zero
+   * hash code. In other words, they all have the same hash code! The hash code is also not calculated
+   * recursively. Therefore maps and sets relying on empty-equals-null semantics to find keys and
    * elements will likely have to fall back more often on <code>e2nEquals</code> or
    * <code>e2nEqualsRecursive</code>.
-   * 
-   * @see StringMethods#isEmpty(Object)
-   * @see ArrayMethods#isEmpty(Object)
-   * @see CollectionMethods#isEmpty(Collection)
    * 
    * @param objs
    * @return
    */
-  @SuppressWarnings("rawtypes")
   public static int e2nHashCode(Object obj) {
     if (obj == null
         || obj instanceof String && ((String) obj).isEmpty()
@@ -258,7 +283,6 @@ public class ObjectMethods {
     return !condition ? then.apply(value) : value;
   }
 
-  @SuppressWarnings("rawtypes")
   private static <T> boolean eq(T obj1, T obj2) {
     if (obj1 instanceof Object[] && obj2 instanceof Object[]) {
       return arraysEqual((Object[]) obj1, (Object[]) obj2);
@@ -284,7 +308,6 @@ public class ObjectMethods {
     return true;
   }
 
-  @SuppressWarnings("rawtypes")
   private static boolean listsEqual(List list1, List list2) {
     if (list1.size() == list2.size()) {
       Iterator it1 = list1.iterator();
@@ -299,7 +322,6 @@ public class ObjectMethods {
     return false;
   }
 
-  @SuppressWarnings({"rawtypes"})
   private static boolean setsEqual(Set set1, Set set2) {
     Set s1 = (Set) set1.stream().map(ObjectMethods::emptyToNull).collect(toSet());
     Set s2 = (Set) set2.stream().map(ObjectMethods::emptyToNull).collect(toSet());
@@ -313,18 +335,17 @@ public class ObjectMethods {
       for (Object obj2 : s2) {
         if (e2nEqualsRecursive(obj1, obj2)) {
           found = true;
+          s2.remove(obj1);
           break;
         }
       }
       if (!found) {
         return false;
       }
-      s2.remove(obj1);
     }
     return true;
   }
 
-  @SuppressWarnings({"rawtypes"})
   private static boolean mapsEqual(Map map1, Map map2) {
     if (map1.size() == map2.size()) {
       for (Object k : map1.keySet()) {

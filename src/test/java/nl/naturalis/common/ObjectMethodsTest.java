@@ -2,7 +2,6 @@ package nl.naturalis.common;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -36,16 +35,15 @@ public class ObjectMethodsTest {
   @SuppressWarnings("rawtypes")
   public void setsEquals() {
     Object test = new Object();
-    Set set1 = Set.of("a", 1, test, "", new ArrayList());
+    Set set1 = setOf("a", 1, test, "", new ArrayList());
     Set set2 = (Set) set1.stream().collect(Collectors.toSet());
     Set set3 = (Set) set1.stream().filter(ObjectMethods::notEmpty).collect(Collectors.toSet());
     assertEquals(set1, set2);
-    assertEquals(Set.of("a", 1, test), set3);
+    assertEquals(setOf("a", 1, test), set3);
   }
 
   @Test
-  @Ignore
-  public void e2nEqualsRecursive() {
+  public void e2nEqualsRecursive_01() {
     assertTrue("01", ObjectMethods.e2nEqualsRecursive("", null));
     assertTrue("02", ObjectMethods.e2nEqualsRecursive(null, ""));
     assertTrue("03", ObjectMethods.e2nEqualsRecursive(null, new Enum[0]));
@@ -61,6 +59,45 @@ public class ObjectMethodsTest {
     assertTrue("13", ObjectMethods.e2nEqualsRecursive(new int[] {1, 2, 3, 4, 5}, new int[] {1, 2, 3, 4, 5}));
     assertFalse("14", ObjectMethods.e2nEqualsRecursive(new int[0], new HashSet<>()));
     assertFalse("15", ObjectMethods.e2nEqualsRecursive("", new HashSet<>()));
+  }
+
+  @Test // behaviour with sets
+  @SuppressWarnings("rawtypes")
+  public void e2nEqualsRecursive_02() {
+
+    Set subsubset1 = setOf("John");
+    Set subsubset2 = setOf("John", null);
+    Set subsubset3 = setOf("John", "", null, new int[0]);
+    Set subsubset4 = setOf("John", "", null, new short[0]);
+    Set subsubset5 = setOf("John", Collections.emptyList(), null, new short[0]);
+    Set subsubset6 = setOf("Mark", Collections.emptyList(), null, new short[0]);
+    Set subsubset7 = setOf("John", "Mark", new String[0], null, new short[0]);
+
+    Set subset1 = setOf("Mary", subsubset1, subsubset2, subsubset4);
+    Set subset2 = setOf("Mary", subsubset2, subsubset3, subsubset4);
+    Set subset3 = setOf("Mary", subsubset2, subsubset3, subsubset4, Collections.emptySet());
+    Set subset4 = setOf("Mary", subsubset3, subsubset4, subsubset5, new short[0]);
+    Set subset5 = setOf("Mary", subsubset4, subsubset5, new short[] {1, 2});
+    Set subset6 = setOf(subsubset4);
+    Set subset7 = setOf(subsubset5);
+
+    assertFalse("01", ObjectMethods.e2nEqualsRecursive(subsubset1, subsubset2));
+    assertTrue("02", ObjectMethods.e2nEqualsRecursive(subsubset2, subsubset3));
+    assertTrue("03", ObjectMethods.e2nEqualsRecursive(subsubset4, subsubset5));
+    assertFalse("04", ObjectMethods.e2nEqualsRecursive(subsubset5, subsubset6));
+    assertFalse("05", ObjectMethods.e2nEqualsRecursive(subsubset5, subsubset7));
+
+    assertFalse("06", ObjectMethods.e2nEqualsRecursive(subset1, subset2));
+    assertFalse("07", ObjectMethods.e2nEqualsRecursive(subset2, subset4));
+    assertTrue("08", ObjectMethods.e2nEqualsRecursive(subset3, subset4));
+    assertFalse("09", ObjectMethods.e2nEqualsRecursive(subset4, subset5));
+    assertTrue("10", ObjectMethods.e2nEqualsRecursive(subset6, subset7));
+
+  }
+
+  @SuppressWarnings("rawtypes")
+  private static Set setOf(Object... objs) {
+    return Arrays.stream(objs).collect(Collectors.toSet());
   }
 
   @Test // implicitly also tests ObjectMethods.hashCode

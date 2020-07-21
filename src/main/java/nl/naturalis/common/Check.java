@@ -1,7 +1,5 @@
 package nl.naturalis.common;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
@@ -14,25 +12,57 @@ import java.util.function.Supplier;
  */
 public abstract class Check {
 
+  /**
+   * Returns a {@code Check} object that allows you to execute multiple checks on the provided
+   * {@code String} without having to repeat the argument name every time.
+   * 
+   * @param arg
+   * @param argName
+   * @return
+   */
   public static Check that(String arg, String argName) {
     return new StringCheck(arg, argName);
   }
 
+  /**
+   * Returns a {@code Check} object that allows you to execute multiple checks on the provided integer
+   * without having to repeat the argument name every time.
+   * 
+   * @param arg
+   * @param argName
+   * @return
+   */
   public static Check that(int arg, String argName) {
     return new IntCheck(arg, argName);
   }
 
+  /**
+   * Returns a {@code Check} object that allows you to execute multiple checks on the provided
+   * {@code Integer} without having to repeat the argument name every time.
+   * 
+   * @param arg
+   * @param argName
+   * @return
+   */
   public static Check that(Integer arg, String argName) {
     return new IntegerCheck(arg, argName);
   }
 
+  /**
+   * Returns a {@code Check} object that allows you to execute multiple checks on the provided
+   * argument without having to repeat the argument name every time.
+   * 
+   * @param arg
+   * @param argName
+   * @return
+   */
   public static <T> Check that(T arg, String argName) {
     return new ObjectCheck<>(arg, argName);
   }
 
   /**
-   * Generic check method. Can also be used for other purposes than checking preconditions. Throws the exception supplied by the provided
-   * supplier if the provided condition evaluates to false.
+   * Generic check method. Can also be used for other purposes than checking preconditions. Throws the
+   * exception supplied by the provided supplier if the provided condition evaluates to false.
    * 
    * @param <T> The type of exception thrown if the condition fails
    * @param condition The condition to evaluate
@@ -46,8 +76,9 @@ public abstract class Check {
   }
 
   /**
-   * Generic check method. Can also be used for other purposes than checking preconditions. Throws the exception supplied by the provided
-   * exception supplier if the provided condition evaluates to false, else returns {@code result}.
+   * Generic check method. Can also be used for other purposes than checking preconditions. Throws the
+   * exception supplied by the provided exception supplier if the provided condition evaluates to
+   * false, else returns {@code result}.
    * 
    * @param <T> The type of exception thrown if the condition fails
    * @param <U> The type of object returned if the condition is met
@@ -65,8 +96,9 @@ public abstract class Check {
   }
 
   /**
-   * Generic check method. Can also be used for other purposes than checking preconditions. Throws the exception supplied by the provided
-   * exception supplier if the provided condition evaluates to false, else returns the result supplied by the result supplier.
+   * Generic check method. Can also be used for other purposes than checking preconditions. Throws the
+   * exception supplied by the provided exception supplier if the provided condition evaluates to
+   * false, else returns the result supplied by the result supplier.
    * 
    * @param <T> The type of exception thrown if the condition fails
    * @param <U> The type of object returned if the condition is met
@@ -84,8 +116,8 @@ public abstract class Check {
   }
 
   /**
-   * Does nothing if the provided condition evaluates to {@code true}, else throws an {@link IllegalArgumentException} with the provided
-   * message.
+   * Does nothing if the provided condition evaluates to {@code true}, else throws an
+   * {@code IllegalArgumentException} with the provided message.
    * 
    * @param condition The condition to be evaluated
    * @param message The exception message
@@ -96,7 +128,8 @@ public abstract class Check {
   }
 
   /**
-   * Returns {@code arg} if it passes the provided {@code test}, else throws an {@link IllegalArgumentException} with the provided message.
+   * Returns {@code arg} if it passes the provided {@code test}, else throws an
+   * {@code IllegalArgumentException} with the provided message.
    * 
    * @param <T>
    * @param arg
@@ -109,7 +142,8 @@ public abstract class Check {
   }
 
   /**
-   * Returns {@code arg} if it passes the provided {@code test}, else throws an {@link IllegalArgumentException} with the provided message.
+   * Returns {@code arg} if it passes the provided {@code test}, else throws an
+   * {@code IllegalArgumentException} with the provided message.
    * 
    * @param arg
    * @param test
@@ -124,8 +158,8 @@ public abstract class Check {
   }
 
   /**
-   * Does nothing if the provided condition evaluates to {@code true}, else throws an {@link IllegalArgumentException} with the provided
-   * message and message arguments.
+   * Does nothing if the provided condition evaluates to {@code true}, else throws an
+   * {@code IllegalArgumentException} with the provided message and message arguments.
    * 
    * @param condition The condition to be evaluated
    * @param message The exception message
@@ -134,12 +168,13 @@ public abstract class Check {
    * @throws IllegalArgumentException If the condition evaluates to false
    */
   public static void argument(boolean condition, String message, Object msgArg, Object... moreMsgArgs) {
-    that(condition, () -> badArgument(message, withArguments(msgArg, moreMsgArgs)));
+    that(condition, () -> badArgument(message, withMessageArguments(msgArg, moreMsgArgs)));
   }
 
   /**
-   * Returns {@code arg} if it passes the provided {@code test}, else throws an {@link IllegalArgumentException} with the provided message
-   * and message arguments. {@code msgArg} is allowed to be null, in which case it is ignored as a message argument.
+   * Returns {@code arg} if it passes the provided {@code test}, else throws an
+   * {@code IllegalArgumentException} with the provided message and message arguments. The message
+   * arguments may be {@code null}, in which case they are ignored as message arguments.
    * 
    * @param <T>
    * @param arg
@@ -150,12 +185,13 @@ public abstract class Check {
    * @return
    */
   public static <T> T argument(T arg, Predicate<T> test, String message, Object msgArg, Object... moreMsgArgs) {
-    return that(test.test(arg), arg, () -> badArgument(message, withArguments(msgArg, moreMsgArgs)));
+    return that(test.test(arg), arg, () -> badArgument(message, withMessageArguments(msgArg, moreMsgArgs)));
   }
 
   /**
-   * Returns {@code arg} if it passes the provided {@code test}, else throws an {@link IllegalArgumentException} with the provided message
-   * and message arguments. {@code msgArg} is allowed to be null, in which case it is ignored as a message argument.
+   * Returns {@code arg} if it passes the provided {@code test}, else throws an
+   * {@code IllegalArgumentException} with the provided message and message arguments. The message
+   * arguments may be {@code null}, in which case they are ignored.
    * 
    * @param arg
    * @param test
@@ -168,12 +204,12 @@ public abstract class Check {
     if (test.test(arg)) {
       return arg;
     }
-    throw badArgument(message, withArguments(msgArg, moreMsgArgs));
+    throw badArgument(message, withMessageArguments(msgArg, moreMsgArgs));
   }
 
   /**
-   * Returns {@code arg} if it is not null, else throws an {@link IllegalArgumentException} with the message:
-   * <code>Illegal argument: null</code>.
+   * Returns {@code arg} if it is not null, else throws an {@code IllegalArgumentException} with the
+   * message: <b>Illegal argument: null</b>.
    * 
    * @param <T> The type of the argument being tested
    * @param arg The argument being tested
@@ -185,15 +221,8 @@ public abstract class Check {
   }
 
   /**
-   * Returns {@code arg} if it is not null, else throws an {@link IllegalArgumentException} with the message:
-   * <code>&lt;argName&gt; must not be null</code>. In other words, the 2nd argument is not supposed to be a complete message but just the
-   * name of the argument being tested. For example:
-   * 
-   * <pre>
-   * public void accelerate(Engine engine) {
-   *   Check.notNull(engine, "engine"); // engine must not be null
-   * }
-   * </pre>
+   * Returns {@code arg} if it is not null, else throws an {@code IllegalArgumentException} with the
+   * message: <b>${argName} must not be null</b>.
    * 
    * @param <T> The type of the argument being tested
    * @param arg The argument being tested
@@ -206,8 +235,9 @@ public abstract class Check {
   }
 
   /**
-   * Returns {@code arg} if it is not null, else throws an {@link IllegalArgumentException} with the provided message and message arguments.
-   * {@code msgArg} is allowed to be null, in which case it is ignored as a message argument.
+   * Returns {@code arg} if it is not null, else throws an {@code IllegalArgumentException} with the
+   * provided message and message arguments. The message arguments may be {@code null}, in which case
+   * they are ignored.
    * 
    * @param <T> The type of the argument being tested
    * @param arg The argument being tested
@@ -222,61 +252,56 @@ public abstract class Check {
   }
 
   /**
-   * Returns the provided array if it is not null and none of its elements are null, else throws an {@link IllegalArgumentException}.
+   * Returns {@code arg} if it is not null and, in case of an array or <code>Collection</code>, none
+   * of its elements are null. Otherwise this method throws an {@code IllegalArgumentException} with
+   * the message: <b>${argName} must not be null or contain null values</b>.
+   * 
+   * @see ObjectMethods#notNullRecursive(Object)
    * 
    * @param <T>
    * @param array
    * @param argName
    * @return
    */
-  public static <T> T[] noneNull(T[] array, String argName) {
-    Arrays.stream(notNull(array, argName)).forEach(e -> notNull(e, "%s must not contain null values", argName));
-    return array;
+  public static <T> T noneNull(T arg, String argName) {
+    return argument(arg, ObjectMethods::notNullRecursive, "%s must not be null or contain null values", argName);
   }
 
   /**
-   * Returns the provided collection if it is not null and none of its elements are null, else throws an {@link IllegalArgumentException}.
+   * Returns {@code arg} if it is not empty, else throws an {@code IllegalArgumentException} with the
+   * message: <b>Illegal argument: empty</b>.
    * 
-   * @param <E>
-   * @param <T>
-   * @param collection
-   * @param argName
-   * @return
-   */
-  public static <E, T extends Collection<E>> T noneNull(T collection, String argName) {
-    notNull(collection, argName).stream().forEach(e -> notNull(e, "%s must not contain null values", argName));
-    return collection;
-  }
-
-  /**
-   * Returns {@code arg} if it is not empty, else throws an {@link IllegalArgumentException} with the message:
-   * <code>Illegal argument: empty string</code>.
+   * @see ObjectMethods#isEmpty(Object)
    * 
    * @param arg The argument being tested
    * @return The argument
    * @throws IllegalArgumentException If the argument is empty
    */
-  public static String notEmpty(String arg) {
-    return argument(arg, StringMethods::notEmpty, "Illegal argument: empty string");
+  public static <T> T notEmpty(T arg) {
+    return notEmpty(arg, "Illegal argument: empty", null);
   }
 
   /**
-   * Returns {@code arg} if it is not empty, else throws an {@link IllegalArgumentException} with the message:
-   * <code>&lt;argName&gt; must not be empty</code>. In other words, the 2nd argument is not supposed to be a complete message but just the
-   * name of the argument being tested.
+   * Returns {@code arg} if it is not empty, else throws an {@code IllegalArgumentException} with the
+   * message: <b>${argName} must not be empty</b>.
+   * 
+   * @see ObjectMethods#isEmpty(Object)
    * 
    * @param arg The argument being tested
    * @param argName The name of the argument being tested
    * @return The argument
    * @throws IllegalArgumentException If the argument is empty
    */
-  public static String notEmpty(String arg, String argName) {
-    return argument(arg, StringMethods::notEmpty, "%s must not be empty", argName);
+  public static <T> T notEmpty(T arg, String argName) {
+    return notEmpty(arg, "%s must not be empty", argName);
   }
 
   /**
-   * Returns {@code arg} if it is not empty, else throws an {@link IllegalArgumentException} with the provided message and message
-   * arguments. {@code msgArg} is allowed to be null, in which case it is ignored as a message argument.
+   * Returns {@code arg} if it is not empty, else throws an {@code IllegalArgumentException} with the
+   * provided message and message arguments. The message arguments may be {@code null}, in which case
+   * they are ignored.
+   * 
+   * @see ObjectMethods#isEmpty(Object)
    * 
    * @param arg The argument being tested
    * @param message The exception message
@@ -285,26 +310,41 @@ public abstract class Check {
    * @return The argument
    * @throws IllegalArgumentException If the argument is empty
    */
-  public static String notEmpty(String arg, String message, Object msgArg, Object... moreMsgArgs) {
-    return argument(arg, StringMethods::notEmpty, message, msgArg, moreMsgArgs);
+  public static <T> T notEmpty(T arg, String message, Object msgArg, Object... moreMsgArgs) {
+    return argument(arg, ObjectMethods::notEmpty, message, msgArg, moreMsgArgs);
   }
 
   /**
-   * Returns {@code arg} if it is not blank, else throws an {@link IllegalArgumentException} with the message:
-   * <code>Illegal argument: blank string</code>.
+   * Returns {@code arg} if it is not empty and, in case of an array or <code>Collection</code>, none
+   * of its elements are empty. Otherwise this method throws an {@code IllegalArgumentException} with
+   * the message: <b>${argName} empty not be null or contain empty values</b>.
+   * 
+   * @see ObjectMethods#notEmptyRecursive(Object)
+   * 
+   * @param <T>
+   * @param array
+   * @param argName
+   * @return
+   */
+  public static <T> T noneEmpty(T arg, String argName) {
+    return argument(arg, ObjectMethods::notEmptyRecursive, "%s must not be empty or contain empty values", argName);
+  }
+
+  /**
+   * Returns {@code arg} if it is not blank, else throws an {@code IllegalArgumentException} with the
+   * message: <b>Illegal argument: blank</b>.
    * 
    * @param arg The argument being tested
    * @return The argument
    * @throws IllegalArgumentException If the argument is blank
    */
   public static String notBlank(String arg) {
-    return argument(arg, StringMethods::notBlank, "Illegal argument: blank string");
+    return argument(arg, StringMethods::notBlank, "Illegal argument: blank");
   }
 
   /**
-   * Returns {@code arg} if it is not blank, else throws an {@link IllegalArgumentException} with the message:
-   * <code>&lt;argName&gt; must not be blank</code>. In other words, the 2nd argument is not supposed to be a complete message but just the
-   * name of the argument being tested.
+   * Returns {@code arg} if it is not blank, else throws an {@code IllegalArgumentException} with the
+   * message: <b>${argName} must not be blank</b>.
    * 
    * @param arg The argument being tested
    * @param argName The name of the argument being tested
@@ -316,8 +356,9 @@ public abstract class Check {
   }
 
   /**
-   * Returns {@code arg} if it is not blank, else throws an {@link IllegalArgumentException} with the provided message and message
-   * arguments. {@code msgArg} is allowed to be null, in which case it is ignored as a message argument.
+   * Returns {@code arg} if it is not blank, else throws an {@code IllegalArgumentException} with the
+   * provided message and message arguments. {@code msgArg} is allowed to be null, in which case it is
+   * ignored as a message argument.
    * 
    * @param arg The argument being tested
    * @param message The exception message
@@ -331,7 +372,8 @@ public abstract class Check {
   }
 
   /**
-   * Returns {@code arg} if it is greater than <code>min</code>, else throws an {@link IllegalArgumentException}.
+   * Returns {@code arg} if it is greater than <code>min</code>, else throws an
+   * {@code IllegalArgumentException}.
    * 
    * @param arg
    * @param min
@@ -343,7 +385,8 @@ public abstract class Check {
   }
 
   /**
-   * Returns {@code arg} if it is greater than or equal to <code>min</code>, else throws an {@link IllegalArgumentException}.
+   * Returns {@code arg} if it is greater than or equal to <code>min</code>, else throws an
+   * {@code IllegalArgumentException}.
    * 
    * @param arg
    * @param min
@@ -355,7 +398,8 @@ public abstract class Check {
   }
 
   /**
-   * Returns {@code arg} if it is less than <code>max</code>, else throws an {@link IllegalArgumentException}.
+   * Returns {@code arg} if it is less than <code>max</code>, else throws an
+   * {@code IllegalArgumentException}.
    * 
    * @param arg
    * @param max
@@ -367,7 +411,8 @@ public abstract class Check {
   }
 
   /**
-   * Returns {@code arg} is less than or equal to <code>max</code>, else throws an {@link IllegalArgumentException}.
+   * Returns {@code arg} is less than or equal to <code>max</code>, else throws an
+   * {@code IllegalArgumentException}.
    * 
    * @param arg
    * @param max
@@ -379,8 +424,8 @@ public abstract class Check {
   }
 
   /**
-   * Does nothing if the provided condition evaluates to {@code true}, else throws an {@link IllegalStateException} with the provided
-   * message.
+   * Does nothing if the provided condition evaluates to {@code true}, else throws an
+   * {@link IllegalStateException} with the provided message.
    * 
    * @param condition The condition to be evaluated
    * @param message The exception message
@@ -391,8 +436,9 @@ public abstract class Check {
   }
 
   /**
-   * Does nothing if the provided condition evaluates to {@code true}, else throws an {@link IllegalStateException} with the provided
-   * message and message arguments. {@code msgArg} is allowed to be null, in which case it is ignored as a message argument.
+   * Does nothing if the provided condition evaluates to {@code true}, else throws an
+   * {@link IllegalStateException} with the provided message and message arguments. {@code msgArg} is
+   * allowed to be null, in which case it is ignored as a message argument.
    * 
    * @param condition
    * @param message The exception message
@@ -401,7 +447,7 @@ public abstract class Check {
    * @throws IllegalStateException If the condition evaluates to {@code false}
    */
   public static void state(boolean condition, String message, Object msgArg, Object... moreMsgArgs) {
-    that(condition, () -> badState(message, withArguments(msgArg, moreMsgArgs)));
+    that(condition, () -> badState(message, withMessageArguments(msgArg, moreMsgArgs)));
   }
 
   private static IllegalArgumentException badArgument(String msg, Object... msgArgs) {
@@ -412,7 +458,7 @@ public abstract class Check {
     return new IllegalStateException(String.format(msg, msgArgs));
   }
 
-  private static Object[] withArguments(Object msgArg, Object[] moreMsgArgs) {
+  private static Object[] withMessageArguments(Object msgArg, Object[] moreMsgArgs) {
     if (msgArg == null) {
       if (moreMsgArgs == null) {
         return ArrayMethods.EMPTY_OBJECT_ARRAY;
@@ -442,8 +488,16 @@ public abstract class Check {
     throw notApplicable("notNull");
   }
 
+  public Check noneNull() {
+    throw notApplicable("noneNull");
+  }
+
   public Check notEmpty() {
     throw notApplicable("notEmpty");
+  }
+
+  public Check noneEmpty() {
+    throw notApplicable("noneEmpty");
   }
 
   public Check notBlank() {
@@ -519,8 +573,27 @@ public abstract class Check {
       this.arg = arg;
     }
 
+    @Override
     public ObjectCheck<T> notNull() {
       notNull(arg, argName);
+      return this;
+    }
+
+    @Override
+    public ObjectCheck<T> noneNull() {
+      noneNull(arg, argName);
+      return this;
+    }
+
+    @Override
+    public ObjectCheck<T> notEmpty() {
+      notEmpty(arg, argName);
+      return this;
+    }
+
+    @Override
+    public ObjectCheck<T> noneEmpty() {
+      noneEmpty(arg, argName);
       return this;
     }
 
@@ -536,12 +609,6 @@ public abstract class Check {
 
     private StringCheck(String arg, String argName) {
       super(arg, argName);
-    }
-
-    @Override
-    public StringCheck notEmpty() {
-      notEmpty(arg, argName);
-      return this;
     }
 
     @Override
