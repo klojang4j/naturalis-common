@@ -13,20 +13,12 @@ import java.util.function.Supplier;
 public abstract class Check {
 
   /**
-   * Returns a {@code Check} object that allows you to execute multiple checks on the provided
-   * {@code String} without having to repeat the argument name every time.
+   * Returns a {@code Check} object that allows you to chain multiple checks on the provided integer
+   * without having to repeat the argument name every time. For example:
    * 
-   * @param arg
-   * @param argName
-   * @return
-   */
-  public static Check that(String arg, String argName) {
-    return new StringCheck(arg, argName);
-  }
-
-  /**
-   * Returns a {@code Check} object that allows you to execute multiple checks on the provided integer
-   * without having to repeat the argument name every time.
+   * <pre>
+   * int i = Check.that(numChairs, "numChairs").positive().satisfies(x -> x % 2 == 0).value();
+   * </pre>
    * 
    * @param arg
    * @param argName
@@ -37,7 +29,20 @@ public abstract class Check {
   }
 
   /**
-   * Returns a {@code Check} object that allows you to execute multiple checks on the provided
+   * Returns a {@code Check} object that allows you to chain multiple checks on the provided
+   * {@code String} without having to repeat the argument name every time.
+   * 
+   * 
+   * @param arg
+   * @param argName
+   * @return
+   */
+  public static Check that(String arg, String argName) {
+    return new StringCheck(arg, argName);
+  }
+
+  /**
+   * Returns a {@code Check} object that allows you to chain multiple checks on the provided
    * {@code Integer} without having to repeat the argument name every time.
    * 
    * @param arg
@@ -49,8 +54,8 @@ public abstract class Check {
   }
 
   /**
-   * Returns a {@code Check} object that allows you to execute multiple checks on the provided
-   * argument without having to repeat the argument name every time.
+   * Returns a {@code Check} object that allows you to chain multiple checks on the provided argument
+   * without having to repeat the argument name every time.
    * 
    * @param arg
    * @param argName
@@ -76,9 +81,8 @@ public abstract class Check {
   }
 
   /**
-   * Generic check method. Can also be used for other purposes than checking preconditions. Throws the
-   * exception supplied by the provided exception supplier if the provided condition evaluates to
-   * false, else returns {@code result}.
+   * Generic check method. Throws the exception supplied by the provided exception supplier if the
+   * provided condition evaluates to false, else returns {@code result}.
    * 
    * @param <T> The type of exception thrown if the condition fails
    * @param <U> The type of object returned if the condition is met
@@ -96,9 +100,8 @@ public abstract class Check {
   }
 
   /**
-   * Generic check method. Can also be used for other purposes than checking preconditions. Throws the
-   * exception supplied by the provided exception supplier if the provided condition evaluates to
-   * false, else returns the result supplied by the result supplier.
+   * Generic check method. Throws the exception supplied by the provided exception supplier if the
+   * provided condition evaluates to false, else returns the result supplied by the result supplier.
    * 
    * @param <T> The type of exception thrown if the condition fails
    * @param <U> The type of object returned if the condition is met
@@ -159,7 +162,8 @@ public abstract class Check {
 
   /**
    * Does nothing if the provided condition evaluates to {@code true}, else throws an
-   * {@code IllegalArgumentException} with the provided message and message arguments.
+   * {@code IllegalArgumentException} with the provided message and message arguments. The message
+   * arguments may be {@code null}, in which case they are ignored.
    * 
    * @param condition The condition to be evaluated
    * @param message The exception message
@@ -252,15 +256,15 @@ public abstract class Check {
   }
 
   /**
-   * Returns {@code arg} if it is not null and, in case of an array or <code>Collection</code>, none
-   * of its elements are null. Otherwise this method throws an {@code IllegalArgumentException} with
-   * the message: <b>${argName} must not be null or contain null values</b>.
+   * Returns {@code arg} if it is not null and, in case of an array or {@code Collection}, none of its
+   * elements are null. Otherwise this method throws an {@code IllegalArgumentException} with the
+   * message: <b>${argName} must not be null or contain null values</b>.
    * 
    * @see ObjectMethods#notNullRecursive(Object)
    * 
-   * @param <T>
-   * @param array
-   * @param argName
+   * @param <T> The type of the argument being tested
+   * @param arg The argument being tested
+   * @param argName The argument name
    * @return
    */
   public static <T> T noneNull(T arg, String argName) {
@@ -315,15 +319,15 @@ public abstract class Check {
   }
 
   /**
-   * Returns {@code arg} if it is not empty and, in case of an array or <code>Collection</code>, none
-   * of its elements are empty. Otherwise this method throws an {@code IllegalArgumentException} with
-   * the message: <b>${argName} empty not be null or contain empty values</b>.
+   * Returns {@code arg} if it is not empty and, in case of an array or {@code Collection}, none of
+   * its elements are empty. Otherwise this method throws an {@code IllegalArgumentException} with the
+   * message: <b>${argName} empty not be null or contain empty values</b>.
    * 
    * @see ObjectMethods#notEmptyRecursive(Object)
    * 
-   * @param <T>
-   * @param array
-   * @param argName
+   * @param <T> The argument being tested
+   * @param arg The exception message
+   * @param argName The argument name
    * @return
    */
   public static <T> T noneEmpty(T arg, String argName) {
@@ -372,55 +376,93 @@ public abstract class Check {
   }
 
   /**
-   * Returns {@code arg} if it is greater than <code>min</code>, else throws an
+   * Returns {@code arg} if it is greater than {@code minVal}, else throws an
    * {@code IllegalArgumentException}.
    * 
    * @param arg
-   * @param min
+   * @param minVal
    * @param argName
    * @return
    */
-  public static int greaterThan(int arg, int min, String argName) {
-    return integer(arg, x -> x > min, "%s must be greater than %d", argName, min);
+  public static int gt(int arg, int minVal, String argName) {
+    return integer(arg, x -> x > minVal, "%s must be greater than %d", argName, minVal);
   }
 
   /**
-   * Returns {@code arg} if it is greater than or equal to <code>min</code>, else throws an
+   * Returns {@code arg} if it is greater than or equal to {@code minVal}, else throws an
    * {@code IllegalArgumentException}.
    * 
    * @param arg
-   * @param min
+   * @param minVal
    * @param argName
    * @return
    */
-  public static int notLessThan(int arg, int min, String argName) {
-    return integer(arg, x -> x >= min, "%s must be greater than or equal to %d", argName, min);
+  public static int gte(int arg, int minVal, String argName) {
+    return integer(arg, x -> x >= minVal, "%s must be greater than or equal to %d", argName, minVal);
   }
 
   /**
-   * Returns {@code arg} if it is less than <code>max</code>, else throws an
+   * Returns {@code arg} if it is less than {@code maxVal}, else throws an
    * {@code IllegalArgumentException}.
    * 
    * @param arg
-   * @param max
+   * @param maxVal
    * @param argName
    * @return
    */
-  public static int lessThan(int arg, int max, String argName) {
-    return integer(arg, x -> x < max, "%s must be less than %d", argName, max);
+  public static int lt(int arg, int maxVal, String argName) {
+    return integer(arg, x -> x < maxVal, "%s must be less than %d", argName, maxVal);
   }
 
   /**
-   * Returns {@code arg} is less than or equal to <code>max</code>, else throws an
+   * Returns {@code arg} is less than or equal to {@code maxVal}, else throws an
    * {@code IllegalArgumentException}.
    * 
    * @param arg
-   * @param max
+   * @param maxVal
    * @param argName
    * @return
    */
-  public static int notGreaterThan(int arg, int max, String argName) {
-    return integer(arg, x -> x <= max, "%s must be less than or equal to %d", argName, max);
+  public static int lte(int arg, int maxVal, String argName) {
+    return integer(arg, x -> x <= maxVal, "%s must be less than or equal to %d", argName, maxVal);
+  }
+
+  /**
+   * Returns {@code arg} if it is between {@code minInclusive} and {@code maxExclusive}, else throws
+   * an {@code IllegalArgumentException}.
+   * 
+   * @param arg
+   * @param minInclusive
+   * @param maxExclusive
+   * @param argName
+   * @return
+   */
+  public static int between(int arg, int minInclusive, int maxExclusive, String argName) {
+    return integer(arg,
+        x -> x >= minInclusive && x < maxExclusive,
+        "%s must be between %d and %d (exclusive)",
+        argName,
+        minInclusive,
+        maxExclusive);
+  }
+
+  /**
+   * Returns {@code arg} if it is between {@code minInclusive} and {@code maxInclusive}, else throws
+   * an {@code IllegalArgumentException}.
+   * 
+   * @param arg
+   * @param minInclusive
+   * @param maxInclusive
+   * @param argName
+   * @return
+   */
+  public static int inRange(int arg, int minInclusive, int maxInclusive, String argName) {
+    return integer(arg,
+        x -> x >= minInclusive && x <= maxInclusive,
+        "%s must be between %d and %d (inclusive)",
+        argName,
+        minInclusive,
+        maxInclusive);
   }
 
   /**
@@ -484,6 +526,31 @@ public abstract class Check {
     this.argName = argName;
   }
 
+  /**
+   * See {@link #argument(Object, Predicate, String)}.
+   *
+   * @param test
+   * @return
+   */
+  public Check satisfies(Predicate<Object> test) {
+    throw notApplicable("satisfies");
+  }
+
+  /**
+   * See {@link #integer(int, IntPredicate, String)}.
+   *
+   * @param test
+   * @return
+   */
+  public Check satisfies(IntPredicate test) {
+    throw notApplicable("satisfies");
+  }
+
+  /**
+   * See {@link #notNull(Object, String)}.
+   * 
+   * @return
+   */
   public Check notNull() {
     throw notApplicable("notNull");
   }
@@ -492,66 +559,150 @@ public abstract class Check {
     throw notApplicable("noneNull");
   }
 
+  /**
+   * See #notEmpty(Object, String).
+   * 
+   * @return
+   */
   public Check notEmpty() {
     throw notApplicable("notEmpty");
   }
 
+  /**
+   * See {@link #noneEmpty(Object, String)}.
+   * 
+   * @return
+   */
   public Check noneEmpty() {
     throw notApplicable("noneEmpty");
   }
 
+  /**
+   * See {@link #notBlank(String, String)}.
+   * 
+   * @return
+   */
   public Check notBlank() {
     throw notApplicable("notBlank");
   }
 
   /**
-   * @param minValue
+   * See {@link #gt(int, int, String)}.
+   * 
+   * @param minVal
    */
-  public Check greaterThan(int minValue) {
-    throw notApplicable("greaterThan");
+  public Check gt(int minVal) {
+    throw notApplicable("gt");
   }
 
   /**
-   * @param maxValue
+   * See {@link #gte(int, int, String)}.
+   *
+   * @param minVal
    */
-  public Check lessThan(int maxValue) {
-    throw notApplicable("lessThan");
+  public Check gte(int minVal) {
+    throw notApplicable("gte");
   }
 
   /**
-   * @param maxValue
+   * See {@link #lt(int, int, String)}.
+   * 
+   * @param maxVal
    */
-  public Check notGreaterThan(int maxValue) {
-    throw notApplicable("notGreaterThan");
+  public Check lt(int maxVal) {
+    throw notApplicable("lt");
   }
 
   /**
-   * @param minValue
+   * See {@link #lte(int, int, String)}.
+   * 
+   * @param maxVal
    */
-  public Check notLessThan(int minValue) {
-    throw notApplicable("notLessThan");
+  public Check lte(int maxVal) {
+    throw notApplicable("lte");
   }
 
+  /**
+   * Equivalent to <code>gt(0)</code>.
+   *
+   * @return
+   */
   public Check positive() {
-    return greaterThan(0);
+    return gt(0);
   }
 
+  /**
+   * Equivalent to <code>lt(0)</code>.
+   *
+   * @return
+   */
   public Check negative() {
-    return lessThan(0);
+    return lt(0);
   }
 
+  /**
+   * Equivalent to <code>lte(0)</code>.
+   *
+   * @return
+   */
   public Check notPositive() {
-    return notGreaterThan(0);
+    return lte(0);
   }
 
+  /**
+   * Equivalent to <code>gte(0)</code>.
+   *
+   * @return
+   */
   public Check notNegative() {
-    return notLessThan(0);
+    return gte(0);
   }
 
+  /**
+   * See {@link #between(int, int, int, String)}.
+   * 
+   * @param minInclusive
+   * @param maxExclusive
+   * @return
+   */
+  public Check between(int minInclusive, int maxExclusive) {
+    throw notApplicable("between");
+  }
+
+  /**
+   * See {@link #inRange(int, int, int, String)}.
+   *
+   * @param minInclusive
+   * @param maxInclusive
+   * @return
+   */
+  public Check inRange(int minInclusive, int maxInclusive) {
+    throw notApplicable("inRange");
+  }
+
+  /**
+   * Returns the argument being tested. To be used as the last call after a chain of checks. For
+   * example:
+   * 
+   * <pre>
+   * Integer i = Check.that(counter, "counter").notNull().notNegative().value();
+   * </pre>
+   * 
+   * @param <U>
+   * @return
+   */
   public <U> U value() {
     return null;
   }
 
+  /**
+   * Returns the argument being tested as an {@code int}. If the argument being tested actually is an
+   * {@code int} rather than an {@code Integer}, this method saves the cost of unboxing incurred by
+   * {@link #value()}. If the argument neither is {@code int} nor an {@code Integer} this method
+   * throws a {@code ClassCastException}.
+   * 
+   * @return
+   */
   public int intValue() {
     throw new ClassCastException(argName + "cannot be cast to int");
   }
@@ -571,6 +722,12 @@ public abstract class Check {
     private ObjectCheck(T arg, String argName) {
       super(argName);
       this.arg = arg;
+    }
+
+    @Override
+    public Check satisfies(Predicate<Object> test) {
+      argument(arg, test, argName, "%s does not satisfy %s", argName, test);
+      return this;
     }
 
     @Override
@@ -618,7 +775,7 @@ public abstract class Check {
     }
   }
 
-  public static class IntCheck extends Check {
+  private static class IntCheck extends Check {
 
     final int arg;
 
@@ -628,26 +785,44 @@ public abstract class Check {
     }
 
     @Override
-    public IntCheck greaterThan(int max) {
-      greaterThan(arg, max, argName);
+    public Check satisfies(IntPredicate test) {
+      integer(arg, test, argName, " %s does not satisfy %s", argName, test);
       return this;
     }
 
     @Override
-    public IntCheck lessThan(int max) {
-      lessThan(arg, max, argName);
+    public IntCheck gt(int min) {
+      gt(arg, min, argName);
       return this;
     }
 
     @Override
-    public IntCheck notGreaterThan(int max) {
-      notGreaterThan(arg, max, argName);
+    public IntCheck gte(int min) {
+      gte(arg, min, argName);
       return this;
     }
 
     @Override
-    public IntCheck notLessThan(int max) {
-      notLessThan(arg, max, argName);
+    public IntCheck lt(int max) {
+      lt(arg, max, argName);
+      return this;
+    }
+
+    @Override
+    public IntCheck lte(int max) {
+      lte(arg, max, argName);
+      return this;
+    }
+
+    @Override
+    public Check between(int minInclusive, int maxExclusive) {
+      between(arg, minInclusive, maxExclusive, argName);
+      return this;
+    }
+
+    @Override
+    public Check inRange(int minInclusive, int maxInclusive) {
+      inRange(arg, minInclusive, maxInclusive, argName);
       return this;
     }
 
@@ -670,26 +845,44 @@ public abstract class Check {
     }
 
     @Override
-    public IntegerCheck greaterThan(int max) {
-      notLessThan(arg.intValue(), max, argName);
+    public Check satisfies(IntPredicate test) {
+      integer(arg.intValue(), test, argName, " %s does not satisfy %s", argName, test);
       return this;
     }
 
     @Override
-    public IntegerCheck lessThan(int max) {
-      lessThan(arg.intValue(), max, argName);
+    public IntegerCheck gt(int max) {
+      gt(arg.intValue(), max, argName);
       return this;
     }
 
     @Override
-    public IntegerCheck notLessThan(int max) {
-      notLessThan(arg.intValue(), max, argName);
+    public IntegerCheck gte(int max) {
+      gte(arg.intValue(), max, argName);
       return this;
     }
 
     @Override
-    public IntegerCheck notGreaterThan(int max) {
-      notGreaterThan(arg.intValue(), max, argName);
+    public IntegerCheck lt(int max) {
+      lt(arg.intValue(), max, argName);
+      return this;
+    }
+
+    @Override
+    public IntegerCheck lte(int max) {
+      lte(arg.intValue(), max, argName);
+      return this;
+    }
+
+    @Override
+    public Check between(int minInclusive, int maxExclusive) {
+      between(arg.intValue(), minInclusive, maxExclusive, argName);
+      return this;
+    }
+
+    @Override
+    public Check inRange(int minInclusive, int maxInclusive) {
+      inRange(arg.intValue(), minInclusive, maxInclusive, argName);
       return this;
     }
 

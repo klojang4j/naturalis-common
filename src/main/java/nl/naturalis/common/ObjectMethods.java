@@ -18,9 +18,9 @@ public class ObjectMethods {
   private ObjectMethods() {}
 
   /**
-   * Returns whether or not the provided object is empty. Returns <code>true</code> if ths object:
+   * Returns whether or not the provided object is empty. Returns {@code true} if the object:
    * <ul>
-   * <li>is <code>null</code>
+   * <li>is {@code null}
    * <li><b>or</b> an empty <code>String</code>
    * <li><b>or</b> an empty <code>Collection</code>
    * <li><b>or</b> an empty <code>Map</code>
@@ -53,9 +53,9 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns <code>true</code> if the provided object is not null and, if it is an array or
+   * Returns {@code true} if the provided object is not null and, if it is an array or
    * <code>Collection</code>, none of its elements are null. Otherwise this method returns
-   * <code>false</code>.
+   * {@code false}.
    * 
    * @param obj
    * @return
@@ -72,9 +72,9 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns <code>true</code> if the provided object is not empty and, if it is an array or
+   * Returns {@code true} if the provided object is not empty and, if it is an array or
    * <code>Collection</code>, none of its elements are empty. Otherwise this method returns
-   * <code>false</code>.
+   * {@code false}.
    * 
    * @param obj
    * @return
@@ -91,7 +91,7 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns <code>null</code> if the argument is empty, else the argument itself.
+   * Returns {@code null} if the argument is empty, else the argument itself.
    * 
    * @param <T>
    * @param obj
@@ -102,20 +102,20 @@ public class ObjectMethods {
   }
 
   /**
-   * Tests the provided objects for equality using empty-equals-null semantics. The following applies:
+   * Tests the provided objects for equality using <i>empty-equals-null</i> semantics. The following
+   * applies:
    * <ol>
-   * <li><code>null</code> equals an empty <code>String</code>
-   * <li><code>null</code> equals an empty <code>List</code>
-   * <li><code>null</code> equals an empty <code>Set</code>
-   * <li><code>null</code> equals an empty <code>Map</code>
-   * <li><code>null</code> equals a zero-length array
-   * <li><code>null</code> equals an empty {@link Emptyable}
-   * <li><code>null</code> equals a zero-size {@link Sizeable}
-   * <li>An empty/zero-size <code>String</code>, <code>List</code>, <code>Set</code>,
+   * <li>{@code null} equals an empty <code>String</code>
+   * <li>{@code null} equals an empty <code>List</code>
+   * <li>{@code null} equals an empty <code>Set</code>
+   * <li>{@code null} equals an empty <code>Map</code>
+   * <li>{@code null} equals a zero-length array
+   * <li>{@code null} equals an empty {@link Emptyable}
+   * <li>{@code null} equals a zero-size {@link Sizeable}
+   * <li>An empty/zero-length <code>String</code>, <code>List</code>, <code>Set</code>,
    * <code>Map</code>, array, <code>Emptyable</code> and <code>Sizeable</code> are <b>not</b> equal to
    * each other
-   * <li>For any other combination of objects this method returns the result of
-   * <code>Objects.equals<code>
+   * <li>For any other pair of objects this method returns the result of <code>Objects.equals<code>
    * </ol>
    * 
    * 
@@ -133,11 +133,11 @@ public class ObjectMethods {
   }
 
   /**
-   * Recursively tests the provided objects for equality using empty-equals-null semantics. In other
-   * words, if the provided arguments are non-empty arrays, lists or sets, their elements are also
-   * compared using <code>e2nEqualsRecursive</code>. If the provided arguments are non-empty maps,
-   * then the keys are compared normally (using <code>equals</code>) while the values are compared
-   * using <code>e2nEqualsRecursive</code>.
+   * Recursively tests the provided objects for equality using <i>empty-equals-null</i> semantics. In
+   * other words, if the provided arguments are non-empty arrays, lists or sets, their elements are
+   * also compared using {@code e2nEqualsRecursive}. If the provided arguments are non-empty maps,
+   * then keys are compared normally (using {@code equals}) while values are compared using
+   * {@code e2nEqualsRecursive}.
    * 
    * @param obj1
    * @param obj2
@@ -153,32 +153,23 @@ public class ObjectMethods {
   }
 
   /**
-   * Generates a hash code for the provided object using using empty-equals-null semantics. That is:
-   * null and empty objects (as per {@link #isEmpty(Object) ObjectMethods.isEmpty}) all have a zero
-   * hash code. In other words, they all have the same hash code! The hash code is also not calculated
-   * recursively. Therefore maps and sets relying on empty-equals-null semantics to find keys and
-   * elements will likely have to fall back more often on <code>e2nEquals</code> or
-   * <code>e2nEqualsRecursive</code>.
+   * Generates a hash code for the provided object using using <i>empty-equals-null</i> semantics.
+   * That is: null and empty objects (as per {@link #isEmpty(Object) ObjectMethods.isEmpty}) all have
+   * hash code zero. The hash code is not calculated recursively for arrays and
+   * <code>Collection</code> objects. Therefore maps and sets relying on <i>empty-equals-null</i>
+   * semantics to find keys and elements will likely have to fall back more often on
+   * <code>e2nEquals</code> or {@code e2nEqualsRecursive}.
    * 
-   * @param objs
+   * @param obj
    * @return
    */
   public static int e2nHashCode(Object obj) {
-    if (obj == null
-        || obj instanceof String && ((String) obj).isEmpty()
-        || obj instanceof Collection && ((Collection) obj).isEmpty()
-        || obj instanceof Map && ((Map) obj).isEmpty()
-        || obj.getClass().isArray() && Array.getLength(obj) == 0
-        || obj instanceof Emptyable && ((Emptyable) obj).isEmpty()
-        || obj instanceof Sizeable && ((Sizeable) obj).size() == 0) {
-      return 0;
-    }
-    return obj.hashCode();
+    return isEmpty(obj) ? 0 : obj.hashCode();
   }
 
   /**
-   * Generates a hash code for the provided arguments using using empty-equals-null semantics. See
-   * {@link #hashCode()}.
+   * Generates a hash code for the provided arguments using using <i>empty-equals-null</i> semantics.
+   * See {@link #hashCode()}.
    * 
    * @see StringMethods#isEmpty(Object)
    * @see ArrayMethods#isEmpty(Object)
@@ -199,7 +190,7 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the 1st argument if it is not <code>null</code>, else the 2nd argument.
+   * Returns {@code dfault} if {@code value} is {@code null}, else {@code value}.
    * 
    * @see StringMethods#ifEmpty(String, String)
    * @see StringMethods#ifBlank(Object, String)
@@ -214,8 +205,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the 1st argument if it is not <code>null</code>, else the value supplied by the
-   * <code>Supplier</code>.
+   * Returns value provided by the {@code Supplier} if {@code value} is {@code null}, else
+   * {@code value}.
    * 
    * @param <T>
    * @param value The value to check and return if not null
@@ -227,8 +218,35 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns <code>null</code> if the 1st argument is <code>null</code>, else the result of applying
-   * the provided <code>Function</code> to the 1st argument.
+   * Returns {@code dfault} if {@code value} is empty, else {@code value}.
+   * 
+   * @see StringMethods#ifEmpty(String, String)
+   * @see StringMethods#ifBlank(Object, String)
+   * 
+   * @param <T>
+   * @param value
+   * @param dfault
+   * @return
+   */
+  public static <T> T ifEmpty(T value, T dfault) {
+    return isEmpty(value) ? dfault : value;
+  }
+
+  /**
+   * Returns value provided by the {@code Supplier} if {@code value} is empty, else {@code value}.
+   * 
+   * @param <T>
+   * @param value The value to check and return if not null
+   * @param then The <code>Supplier</code> supplying the value if null
+   * @return
+   */
+  public static <T> T ifEmpty(T value, Supplier<T> then) {
+    return isEmpty(value) ? then.get() : value;
+  }
+
+  /**
+   * Applies the provided transformation to {@code value} if it is not {@code null}, else returns
+   * {@code null}.
    * 
    * @param <T> The type of the first argument
    * @param <U> The return type
@@ -241,8 +259,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the 3rd argument if the 1st argument is <code>null</code>, else the result of applying
-   * the provided <code>Function</code> to the 1st argument.
+   * Applies the provided transformation to {@code value} if it is not {@code null}, else returns
+   * {@code dfault}.
    * 
    * @param <T> The type of the first argument
    * @param <U> The return type
@@ -256,10 +274,44 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the 3rd argument if the condition evaluates to <code>true</code>, else the result of
-   * applying the provided operation on the 3rd argument.
+   * Applies the provided transformation to {@code value} if it is not empty, else returns
+   * {@code null}.
+   * 
+   * @param <T> The type of the first argument
+   * @param <U> The return type
+   * @param value The value to check
+   * @param then The transformation to apply to the value if it is not null
+   * @return
+   */
+  public static <T, U> U ifNotEmpty(T value, Function<T, U> then) {
+    return notEmpty(value) ? then.apply(value) : null;
+  }
+
+  /**
+   * Applies the provided transformation to {@code value} if it is not empty else returns
+   * {@code dfault}.
+   * 
+   * @param <T> The type of the first argument
+   * @param <U> The return type
+   * @param value The value to check
+   * @param then The transformation to apply to the value if it is not null
+   * @param dfault The value to return in case the provided value is null
+   * @return
+   */
+  public static <T, U> U ifNotEmpty(T value, Function<T, U> then, U dfault) {
+    return notEmpty(value) ? then.apply(value) : dfault;
+  }
+
+  /**
+   * Applies the provided transformation to {@code value} if the condition evaluates to {@code true},
+   * else returns {@code value}. For example:
+   *
+   * <pre>
+   * String s = ifTrue(ignoreCase, String::toLowerCase, name);
+   * </pre>
    * 
    * @param <T>
+   * 
    * @param condition
    * @param then
    * @param value
@@ -270,8 +322,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the 3rd argument if the condition evaluates to <code>false</code>, else the result of
-   * applying the provided operation on the 3rd argument.
+   * Applies the provided transformation to {@code value} if the condition evaluates to {@code false},
+   * else returns {@code value}.
    * 
    * @param <T>
    * @param condition

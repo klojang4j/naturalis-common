@@ -128,7 +128,7 @@ public class CheckTest {
   @Test
   public void greaterThan01() {
     try {
-      Check.greaterThan(3, 5, "counter");
+      Check.gt(3, 5, "counter");
     } catch (IllegalArgumentException e) {
       assertEquals("counter must be greater than 5", e.getMessage());
       return;
@@ -138,8 +138,14 @@ public class CheckTest {
 
   @Test
   public void greaterThan02() {
-    int i = Check.greaterThan(5, 3, "counter");
+    int i = Check.gt(5, 3, "counter");
     assertEquals(5, i);
+  }
+
+  @Test
+  public void testCheckChaining() {
+    Integer i = Check.that(Integer.valueOf(5), "numBirds").notNull().gte(2).lt(10).value();
+    assertEquals(Integer.valueOf(5), i);
   }
 
 }
