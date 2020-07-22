@@ -213,7 +213,7 @@ public abstract class Check {
 
   /**
    * Returns {@code arg} if it is not null, else throws an {@code IllegalArgumentException} with the
-   * message: <b>Illegal argument: null</b>.
+   * message: <i>Illegal argument: null</i>.
    * 
    * @param <T> The type of the argument being tested
    * @param arg The argument being tested
@@ -226,7 +226,7 @@ public abstract class Check {
 
   /**
    * Returns {@code arg} if it is not null, else throws an {@code IllegalArgumentException} with the
-   * message: <b>${argName} must not be null</b>.
+   * message: <i>${argName} must not be null</i>.
    * 
    * @param <T> The type of the argument being tested
    * @param arg The argument being tested
@@ -258,7 +258,7 @@ public abstract class Check {
   /**
    * Returns {@code arg} if it is not null and, in case of an array or {@code Collection}, none of its
    * elements are null. Otherwise this method throws an {@code IllegalArgumentException} with the
-   * message: <b>${argName} must not be null or contain null values</b>.
+   * message: <i>${argName} must not be null or contain null values</i>.
    * 
    * @see ObjectMethods#notNullRecursive(Object)
    * 
@@ -273,7 +273,7 @@ public abstract class Check {
 
   /**
    * Returns {@code arg} if it is not empty, else throws an {@code IllegalArgumentException} with the
-   * message: <b>Illegal argument: empty</b>.
+   * message: <i>Illegal argument: empty</i>.
    * 
    * @see ObjectMethods#isEmpty(Object)
    * 
@@ -287,7 +287,7 @@ public abstract class Check {
 
   /**
    * Returns {@code arg} if it is not empty, else throws an {@code IllegalArgumentException} with the
-   * message: <b>${argName} must not be empty</b>.
+   * message: <i>${argName} must not be empty</i>.
    * 
    * @see ObjectMethods#isEmpty(Object)
    * 
@@ -321,7 +321,7 @@ public abstract class Check {
   /**
    * Returns {@code arg} if it is not empty and, in case of an array or {@code Collection}, none of
    * its elements are empty. Otherwise this method throws an {@code IllegalArgumentException} with the
-   * message: <b>${argName} empty not be null or contain empty values</b>.
+   * message: <i>${argName} empty not be null or contain empty values</i>.
    * 
    * @see ObjectMethods#notEmptyRecursive(Object)
    * 
@@ -336,7 +336,7 @@ public abstract class Check {
 
   /**
    * Returns {@code arg} if it is not blank, else throws an {@code IllegalArgumentException} with the
-   * message: <b>Illegal argument: blank</b>.
+   * message: <i>Illegal argument: blank</i>.
    * 
    * @param arg The argument being tested
    * @return The argument
@@ -348,7 +348,7 @@ public abstract class Check {
 
   /**
    * Returns {@code arg} if it is not blank, else throws an {@code IllegalArgumentException} with the
-   * message: <b>${argName} must not be blank</b>.
+   * message: <i>${argName} must not be blank</i>.
    * 
    * @param arg The argument being tested
    * @param argName The name of the argument being tested
@@ -555,6 +555,11 @@ public abstract class Check {
     throw notApplicable("notNull");
   }
 
+  /**
+   * See {@link #noneNull(Object, String)}.
+   *
+   * @return
+   */
   public Check noneNull() {
     throw notApplicable("noneNull");
   }
