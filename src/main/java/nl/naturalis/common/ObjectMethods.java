@@ -21,12 +21,12 @@ public class ObjectMethods {
    * Returns whether or not the provided object is empty. Returns {@code true} if the object:
    * <ul>
    * <li>is {@code null}
-   * <li><b>or</b> an empty <code>String</code>
-   * <li><b>or</b> an empty <code>Collection</code>
-   * <li><b>or</b> an empty <code>Map</code>
-   * <li><b>or</b> a zero-length array
-   * <li><b>or</b> a zero-size {@link Sizeable}
-   * <li><b>or</b> an empty {@link Emptyable}
+   * <li>an empty <code>String</code>
+   * <li>an empty <code>Collection</code>
+   * <li>an empty <code>Map</code>
+   * <li>a zero-length array
+   * <li>a zero-size {@link Sizeable}
+   * <li>an empty {@link Emptyable}
    * </ul>
    * 
    * @param obj
@@ -80,7 +80,7 @@ public class ObjectMethods {
    * @return
    */
   public static boolean notEmptyRecursive(Object obj) {
-    if (obj == null) {
+    if (isEmpty(obj)) {
       return false;
     } else if (obj instanceof Object[]) {
       return Arrays.stream((Object[]) obj).allMatch(ObjectMethods::notEmptyRecursive);
@@ -102,8 +102,14 @@ public class ObjectMethods {
   }
 
   /**
-   * Tests the provided objects for equality using <i>empty-equals-null</i> semantics. The following
-   * applies:
+   * Tests the provided objects for equality using <i>empty-equals-null</i> semantics. This is more or
+   * less equivalent to:
+   * 
+   * <pre>
+   * Objects.equals(emptyToNull(obj1), emptyToNull(obj2))
+   * </pre>
+   * 
+   * The following applies:
    * <ol>
    * <li>{@code null} equals an empty <code>String</code>
    * <li>{@code null} equals an empty <code>List</code>
@@ -205,7 +211,7 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns value provided by the {@code Supplier} if {@code value} is {@code null}, else
+   * Returns value supplied by the {@code Supplier} if {@code value} is {@code null}, else
    * {@code value}.
    * 
    * @param <T>
@@ -215,6 +221,50 @@ public class ObjectMethods {
    */
   public static <T> T ifNull(T value, Supplier<T> then) {
     return value == null ? then.get() : value;
+  }
+
+  /**
+   * Applies the provided transformation to {@code value} if it is not {@code null}, else returns
+   * {@code null}.
+   * 
+   * @param <T> The type of the first argument
+   * @param <U> The return type
+   * @param value The value to check
+   * @param then The transformation to apply to the value if it is not null
+   * @return
+   */
+  public static <T, U> U ifNotNull(T value, Function<T, U> then) {
+    return value != null ? then.apply(value) : null;
+  }
+
+  /**
+   * Applies the provided transformation to {@code value} if it is not {@code null}, else returns
+   * {@code dfault}.
+   * 
+   * @param <T> The type of the first argument
+   * @param <U> The return type
+   * @param value The value to check
+   * @param then The transformation to apply to the value if it is not null
+   * @param dfault The value to return in case the provided value is null
+   * @return
+   */
+  public static <T, U> U ifNotNull(T value, Function<T, U> then, U dfault) {
+    return value != null ? then.apply(value) : dfault;
+  }
+
+  /**
+   * Applies the provided transformation to {@code value} if it is not {@code null}, else returns the
+   * value supplied by the {@code Supplier}.
+   * 
+   * @param <T> The type of the first argument
+   * @param <U> The return type
+   * @param value The value to check
+   * @param then The transformation to apply to the value if it is not null
+   * @param otherwise A supplier providing the default value
+   * @return
+   */
+  public static <T, U> U ifNotNull(T value, Function<T, U> then, Supplier<U> otherwise) {
+    return value != null ? then.apply(value) : otherwise.get();
   }
 
   /**
@@ -242,35 +292,6 @@ public class ObjectMethods {
    */
   public static <T> T ifEmpty(T value, Supplier<T> then) {
     return isEmpty(value) ? then.get() : value;
-  }
-
-  /**
-   * Applies the provided transformation to {@code value} if it is not {@code null}, else returns
-   * {@code null}.
-   * 
-   * @param <T> The type of the first argument
-   * @param <U> The return type
-   * @param value The value to check
-   * @param then The transformation to apply to the value if it is not null
-   * @return
-   */
-  public static <T, U> U ifNotNull(T value, Function<T, U> then) {
-    return value == null ? null : then.apply(value);
-  }
-
-  /**
-   * Applies the provided transformation to {@code value} if it is not {@code null}, else returns
-   * {@code dfault}.
-   * 
-   * @param <T> The type of the first argument
-   * @param <U> The return type
-   * @param value The value to check
-   * @param then The transformation to apply to the value if it is not null
-   * @param dfault The value to return in case the provided value is null
-   * @return
-   */
-  public static <T, U> U ifNotNull(T value, Function<T, U> then, U dfault) {
-    return value == null ? dfault : then.apply(value);
   }
 
   /**
@@ -303,8 +324,23 @@ public class ObjectMethods {
   }
 
   /**
+   * Applies the provided transformation to {@code value} if it is not empty else returns value
+   * supplied by the {@code Supplier}.
+   * 
+   * @param <T> The type of the first argument
+   * @param <U> The return type
+   * @param value The value to check
+   * @param then The transformation to apply to the value if it is not null
+   * @param otherwise A supplier providing the default value
+   * @return
+   */
+  public static <T, U> U ifNotEmpty(T value, Function<T, U> then, Supplier<U> otherwise) {
+    return notEmpty(value) ? then.apply(value) : otherwise.get();
+  }
+
+  /**
    * Applies the provided transformation to {@code value} if the condition evaluates to {@code true},
-   * else returns {@code value}. For example:
+   * else returns {@code value} unaltered. For example:
    *
    * <pre>
    * String s = ifTrue(ignoreCase, String::toLowerCase, name);
@@ -323,7 +359,7 @@ public class ObjectMethods {
 
   /**
    * Applies the provided transformation to {@code value} if the condition evaluates to {@code false},
-   * else returns {@code value}.
+   * else returns {@code value} unaltered.
    * 
    * @param <T>
    * @param condition
@@ -335,7 +371,7 @@ public class ObjectMethods {
     return !condition ? then.apply(value) : value;
   }
 
-  private static <T> boolean eq(T obj1, T obj2) {
+  private static boolean eq(Object obj1, Object obj2) {
     if (obj1 instanceof Object[] && obj2 instanceof Object[]) {
       return arraysEqual((Object[]) obj1, (Object[]) obj2);
     } else if (obj1 instanceof List && obj2 instanceof List) {
@@ -357,7 +393,7 @@ public class ObjectMethods {
       }
       return true;
     }
-    return true;
+    return false;
   }
 
   private static boolean listsEqual(List list1, List list2) {
