@@ -6,7 +6,16 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
- * Methods for checking preconditions.
+ * Methods for checking preconditions. If you want to check a single precondition for an argument,
+ * you can use the static methods. If you want to check multiple preconditions for a single
+ * argument, you might prefer to use the instance methods instead.
+ * 
+ * <pre>
+ * int i = Check.that(numChairs, "numChairs")
+ *     .atLeast(2)
+ *     .atMost(10)
+ *     .satisfies(x -> x % 2 == 0).value();
+ * </pre>
  *
  * @author Ayco Holleman
  */
@@ -14,11 +23,7 @@ public abstract class Check {
 
   /**
    * Returns a {@code Check} object that allows you to chain multiple checks on the provided integer
-   * without having to repeat the argument name every time. For example:
-   * 
-   * <pre>
-   * int i = Check.that(numChairs, "numChairs").positive().satisfies(x -> x % 2 == 0).value();
-   * </pre>
+   * without having to repeat the argument name every time.
    * 
    * @param arg
    * @param argName
@@ -275,7 +280,7 @@ public abstract class Check {
    * Returns {@code arg} if it is not empty, else throws an {@code IllegalArgumentException} with the
    * message: <i>Illegal argument: empty</i>.
    * 
-   * @see ObjectMethods#isEmpty(Object)
+   * @see ObjectMethods#notEmpty(Object)
    * 
    * @param arg The argument being tested
    * @return The argument
@@ -289,7 +294,7 @@ public abstract class Check {
    * Returns {@code arg} if it is not empty, else throws an {@code IllegalArgumentException} with the
    * message: <i>${argName} must not be empty</i>.
    * 
-   * @see ObjectMethods#isEmpty(Object)
+   * @see ObjectMethods#notEmpty(Object)
    * 
    * @param arg The argument being tested
    * @param argName The name of the argument being tested
@@ -305,7 +310,7 @@ public abstract class Check {
    * provided message and message arguments. The message arguments may be {@code null}, in which case
    * they are ignored.
    * 
-   * @see ObjectMethods#isEmpty(Object)
+   * @see ObjectMethods#notEmpty(Object)
    * 
    * @param arg The argument being tested
    * @param message The exception message
@@ -384,7 +389,7 @@ public abstract class Check {
    * @param argName
    * @return
    */
-  public static int gt(int arg, int minVal, String argName) {
+  public static int greaterThan(int arg, int minVal, String argName) {
     return integer(arg, x -> x > minVal, "%s must be greater than %d", argName, minVal);
   }
 
@@ -397,7 +402,7 @@ public abstract class Check {
    * @param argName
    * @return
    */
-  public static int gte(int arg, int minVal, String argName) {
+  public static int atLeast(int arg, int minVal, String argName) {
     return integer(arg, x -> x >= minVal, "%s must be greater than or equal to %d", argName, minVal);
   }
 
@@ -410,7 +415,7 @@ public abstract class Check {
    * @param argName
    * @return
    */
-  public static int lt(int arg, int maxVal, String argName) {
+  public static int lessThan(int arg, int maxVal, String argName) {
     return integer(arg, x -> x < maxVal, "%s must be less than %d", argName, maxVal);
   }
 
@@ -423,7 +428,7 @@ public abstract class Check {
    * @param argName
    * @return
    */
-  public static int lte(int arg, int maxVal, String argName) {
+  public static int atMost(int arg, int maxVal, String argName) {
     return integer(arg, x -> x <= maxVal, "%s must be less than or equal to %d", argName, maxVal);
   }
 
@@ -565,7 +570,7 @@ public abstract class Check {
   }
 
   /**
-   * See #notEmpty(Object, String).
+   * See {@link #notEmpty(Object, String)}.
    * 
    * @return
    */
@@ -592,75 +597,75 @@ public abstract class Check {
   }
 
   /**
-   * See {@link #gt(int, int, String)}.
+   * See {@link #greaterThan(int, int, String)}.
    * 
    * @param minVal
    */
-  public Check gt(int minVal) {
+  public Check greaterThan(int minVal) {
     throw notApplicable("gt");
   }
 
   /**
-   * See {@link #gte(int, int, String)}.
+   * See {@link #atLeast(int, int, String)}.
    *
    * @param minVal
    */
-  public Check gte(int minVal) {
+  public Check atLeast(int minVal) {
     throw notApplicable("gte");
   }
 
   /**
-   * See {@link #lt(int, int, String)}.
+   * See {@link #lessThan(int, int, String)}.
    * 
    * @param maxVal
    */
-  public Check lt(int maxVal) {
+  public Check lessThan(int maxVal) {
     throw notApplicable("lt");
   }
 
   /**
-   * See {@link #lte(int, int, String)}.
+   * See {@link #atMost(int, int, String)}.
    * 
    * @param maxVal
    */
-  public Check lte(int maxVal) {
+  public Check atMost(int maxVal) {
     throw notApplicable("lte");
   }
 
   /**
-   * Equivalent to <code>gt(0)</code>.
+   * Equivalent to <code>greaterThan(0)</code>.
    *
    * @return
    */
   public Check positive() {
-    return gt(0);
+    return greaterThan(0);
   }
 
   /**
-   * Equivalent to <code>lt(0)</code>.
+   * Equivalent to <code>lessThan(0)</code>.
    *
    * @return
    */
   public Check negative() {
-    return lt(0);
+    return lessThan(0);
   }
 
   /**
-   * Equivalent to <code>lte(0)</code>.
+   * Equivalent to <code>atMost(0)</code>.
    *
    * @return
    */
   public Check notPositive() {
-    return lte(0);
+    return atMost(0);
   }
 
   /**
-   * Equivalent to <code>gte(0)</code>.
+   * Equivalent to <code>atLeast(0)</code>.
    *
    * @return
    */
   public Check notNegative() {
-    return gte(0);
+    return atLeast(0);
   }
 
   /**
@@ -796,26 +801,26 @@ public abstract class Check {
     }
 
     @Override
-    public IntCheck gt(int min) {
-      gt(arg, min, argName);
+    public IntCheck greaterThan(int min) {
+      greaterThan(arg, min, argName);
       return this;
     }
 
     @Override
-    public IntCheck gte(int min) {
-      gte(arg, min, argName);
+    public IntCheck atLeast(int min) {
+      atLeast(arg, min, argName);
       return this;
     }
 
     @Override
-    public IntCheck lt(int max) {
-      lt(arg, max, argName);
+    public IntCheck lessThan(int max) {
+      lessThan(arg, max, argName);
       return this;
     }
 
     @Override
-    public IntCheck lte(int max) {
-      lte(arg, max, argName);
+    public IntCheck atMost(int max) {
+      atMost(arg, max, argName);
       return this;
     }
 
@@ -856,26 +861,26 @@ public abstract class Check {
     }
 
     @Override
-    public IntegerCheck gt(int max) {
-      gt(arg.intValue(), max, argName);
+    public IntegerCheck greaterThan(int max) {
+      greaterThan(arg.intValue(), max, argName);
       return this;
     }
 
     @Override
-    public IntegerCheck gte(int max) {
-      gte(arg.intValue(), max, argName);
+    public IntegerCheck atLeast(int max) {
+      atLeast(arg.intValue(), max, argName);
       return this;
     }
 
     @Override
-    public IntegerCheck lt(int max) {
-      lt(arg.intValue(), max, argName);
+    public IntegerCheck lessThan(int max) {
+      lessThan(arg.intValue(), max, argName);
       return this;
     }
 
     @Override
-    public IntegerCheck lte(int max) {
-      lte(arg.intValue(), max, argName);
+    public IntegerCheck atMost(int max) {
+      atMost(arg.intValue(), max, argName);
       return this;
     }
 
