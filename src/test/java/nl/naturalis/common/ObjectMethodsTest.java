@@ -3,13 +3,29 @@ package nl.naturalis.common;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.junit.Test;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertTrue;
-import static nl.naturalis.common.ObjectMethods.e2nEqualsRecursive;
+import static nl.naturalis.common.ObjectMethods.*;
 
 public class ObjectMethodsTest {
 
-  @Test // Just to make sure we understand Java
+  @Test
+  public void ifTrue_01() {
+    boolean ignoreCase = true;
+    assertEquals("01", "hello, world!", ifTrue(ignoreCase, String::toLowerCase, "Hello, World!"));
+    ignoreCase = false;
+    assertEquals("02", "Hello, World!", ifTrue(ignoreCase, String::toLowerCase, "Hello, World!"));
+  }
+
+  @Test
+  public void ifFalse_01() {
+    boolean keepCapitals = true;
+    assertEquals("01", "Hello, World!", ifFalse(keepCapitals, String::toLowerCase, "Hello, World!"));
+    keepCapitals = false;
+    assertEquals("02", "hello, world!", ifFalse(keepCapitals, String::toLowerCase, "Hello, World!"));
+  }
+
+  @Test // *** Just to make sure we understand Java ***
   @SuppressWarnings("unlikely-arg-type")
   public void test01() {
     int[] ints = new int[] {1, 2, 3, 4, 5};
