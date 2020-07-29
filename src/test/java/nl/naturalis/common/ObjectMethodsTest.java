@@ -32,6 +32,13 @@ public class ObjectMethodsTest {
     assertFalse("12", integers.equals(objects));
   }
 
+  public void ifEmpty_01() {
+    assertEquals("01", "Hi there", ifEmpty("", "Hi There"));
+    assertEquals("02", "Hi there", ifEmpty("", () -> "Hi There"));
+    assertEquals("03", "World", ifEmpty("World", () -> "Hi There"));
+    assertEquals("04", List.of("Hi there"), ifEmpty(Collections.emptyList(), () -> Arrays.asList("Hi There")));
+  }
+
   @Test
   public void ifNull_01() {
     assertEquals("01", "13", ifNull("13", "14"));
@@ -47,8 +54,6 @@ public class ObjectMethodsTest {
     s = null;
     i = ifNotNull(s, Integer::valueOf);
     assertNull("02", i);
-    i = ifNotNull(s, Integer::valueOf, 8);
-    assertEquals("03", 8, i.intValue());
     i = ifNotNull(s, Integer::valueOf, () -> 8);
     assertEquals("04", 8, i.intValue());
     String[] strs = ifNotNull("Hello Crazy World", x -> x.split(" "));

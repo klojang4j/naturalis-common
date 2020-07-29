@@ -95,9 +95,9 @@ public class ObjectMethods {
    * Returns {@code null} if the argument is {@link #isEmpty(Object) empty}, else
    * the argument itself.
    * 
-   * @param <T>
-   * @param obj
-   * @return
+   * @param <T> The type of the argument
+   * @param obj The argument
+   * @return The argument itself or {@code null}
    */
   public static <T> T emptyToNull(T obj) {
     return isEmpty(obj) ? null : obj;
@@ -241,21 +241,6 @@ public class ObjectMethods {
 
   /**
    * Applies the provided transformation to {@code value} if it is not
-   * {@code null}, else returns {@code dfault}.
-   * 
-   * @param <T> The type of the first argument
-   * @param <U> The return type
-   * @param value The value to check
-   * @param then The transformation to apply to the value if it is not null
-   * @param dfault The value to return in case the provided value is null
-   * @return
-   */
-  public static <T, U> U ifNotNull(T value, Function<T, U> then, U dfault) {
-    return value != null ? then.apply(value) : dfault;
-  }
-
-  /**
-   * Applies the provided transformation to {@code value} if it is not
    * {@code null}, else returns the value supplied by the {@code Supplier}.
    * 
    * @param <T> The type of the first argument
@@ -271,9 +256,6 @@ public class ObjectMethods {
 
   /**
    * Returns {@code dfault} if {@code value} is empty, else {@code value}.
-   * 
-   * @see StringMethods#ifEmpty(String, String)
-   * @see StringMethods#ifBlank(Object, String)
    * 
    * @param <T>
    * @param value
