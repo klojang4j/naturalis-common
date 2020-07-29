@@ -22,7 +22,26 @@ import java.util.function.Supplier;
  *     .value();
  * </pre>
  * </p>
- *
+ * <p>
+ * To facilitate concise coding, some check methods just require you to pass the
+ * name of the argument (along with the argument itself). For example:
+ * </p>
+ * <p>
+ * 
+ * <pre>
+ * Check.notNull(name, "name"); // -> "name must not null"
+ * </pre>
+ * </p>
+ * <p>
+ * If you want to provide a custom message, choose the overloaded method that
+ * takes message arguments:
+ * 
+ * <pre>
+ * Check.notNull(name, "Please specify a name", null); // -> "Please specify a name"
+ * Check.notNull(name, "Please specify a %s", "toy"); // -> "Please specify a toy"
+ * </pre>
+ * </p>
+ * 
  * @author Ayco Holleman
  */
 public abstract class Check {
