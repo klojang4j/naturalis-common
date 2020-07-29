@@ -223,7 +223,11 @@ public class ObjectMethods {
 
   /**
    * Applies the provided transformation to {@code value} if it is not
-   * {@code null}, else returns {@code null}.
+   * {@code null}, else returns {@code null}. For example:
+   * 
+   * <pre>
+   * String[] strs = ifNotNull("Hello Crazy World", x -> x.split(" "));
+   * </pre>
    * 
    * @param <T> The type of the first argument
    * @param <U> The return type

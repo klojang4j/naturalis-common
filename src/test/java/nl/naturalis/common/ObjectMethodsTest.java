@@ -51,6 +51,8 @@ public class ObjectMethodsTest {
     assertEquals("03", 8, i.intValue());
     i = ifNotNull(s, Integer::valueOf, () -> 8);
     assertEquals("04", 8, i.intValue());
+    String[] strs = ifNotNull("Hello Crazy World", x -> x.split(" "));
+    assertEquals("05", 3, strs.length);
   }
 
   @Test
