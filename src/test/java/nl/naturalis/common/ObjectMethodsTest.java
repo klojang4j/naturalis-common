@@ -3,31 +3,17 @@ package nl.naturalis.common;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static nl.naturalis.common.ObjectMethods.*;
 
 public class ObjectMethodsTest {
 
-  @Test
-  public void ifTrue_01() {
-    boolean ignoreCase = true;
-    assertEquals("01", "hello, world!", ifTrue(ignoreCase, String::toLowerCase, "Hello, World!"));
-    ignoreCase = false;
-    assertEquals("02", "Hello, World!", ifTrue(ignoreCase, String::toLowerCase, "Hello, World!"));
-  }
-
-  @Test
-  public void ifFalse_01() {
-    boolean keepCapitals = true;
-    assertEquals("01", "Hello, World!", ifFalse(keepCapitals, String::toLowerCase, "Hello, World!"));
-    keepCapitals = false;
-    assertEquals("02", "hello, world!", ifFalse(keepCapitals, String::toLowerCase, "Hello, World!"));
-  }
-
-  @Test // *** Just to make sure we understand Java ***
+  @Test // ** Just to make sure we understand Java **
   @SuppressWarnings("unlikely-arg-type")
-  public void test01() {
+  public void foo() {
     int[] ints = new int[] {1, 2, 3, 4, 5};
     long[] longs = new long[] {1L, 2L, 3L, 4L, 5L};
     Integer[] integers = new Integer[] {1, 2, 3, 4, 5};
@@ -47,27 +33,65 @@ public class ObjectMethodsTest {
   }
 
   @Test
-  public void e2nEqualsRecursive_01() {
-    assertTrue("01", e2nEqualsRecursive("", null));
-    assertTrue("02", e2nEqualsRecursive(null, ""));
-    assertTrue("03", e2nEqualsRecursive(null, new Enum[0]));
-    assertTrue("04", e2nEqualsRecursive(new int[0], null));
-    assertTrue("05", e2nEqualsRecursive(new String[0], null));
-    assertTrue("06", e2nEqualsRecursive(new String[0], null));
-    assertTrue("07", e2nEqualsRecursive(Collections.emptyList(), null));
-    assertTrue("08", e2nEqualsRecursive(null, new HashSet<>()));
-    assertTrue("09", e2nEqualsRecursive(null, null));
-    assertTrue("10", e2nEqualsRecursive("", ""));
-    assertTrue("11", e2nEqualsRecursive(List.of(1, 2, 3, 4, 5), List.of(1, 2, 3, 4, 5)));
-    assertTrue("12", e2nEqualsRecursive(new String[] {"To", "be", "or", "not"}, new String[] {"To", "be", "or", "not"}));
-    assertTrue("13", e2nEqualsRecursive(new int[] {1, 2, 3, 4, 5}, new int[] {1, 2, 3, 4, 5}));
-    assertFalse("14", e2nEqualsRecursive(new int[0], new HashSet<>()));
-    assertFalse("15", e2nEqualsRecursive("", new HashSet<>()));
+  public void ifNull_01() {
+    assertEquals("01", "13", ifNull("13", "14"));
+    assertEquals("02", "14", ifNull(null, "14"));
+    assertEquals("03", "14", ifNull(null, () -> "14"));
+  }
+
+  @Test
+  public void ifNotNull_01() {
+    String s = "7";
+    Integer i = ifNotNull(s, Integer::valueOf);
+    assertEquals("01", 7, i.intValue());
+    s = null;
+    i = ifNotNull(s, Integer::valueOf);
+    assertNull("02", i);
+    i = ifNotNull(s, Integer::valueOf, 8);
+    assertEquals("03", 8, i.intValue());
+    i = ifNotNull(s, Integer::valueOf, () -> 8);
+    assertEquals("04", 8, i.intValue());
+  }
+
+  @Test
+  public void ifTrue_01() {
+    boolean ignoreCase = true;
+    assertEquals("01", "hello, world!", ifTrue(ignoreCase, String::toLowerCase, "Hello, World!"));
+    ignoreCase = false;
+    assertEquals("02", "Hello, World!", ifTrue(ignoreCase, String::toLowerCase, "Hello, World!"));
+  }
+
+  @Test
+  public void ifFalse_01() {
+    boolean keepCapitals = true;
+    assertEquals("01", "Hello, World!", ifFalse(keepCapitals, String::toLowerCase, "Hello, World!"));
+    keepCapitals = false;
+    assertEquals("02", "hello, world!", ifFalse(keepCapitals, String::toLowerCase, "Hello, World!"));
+  }
+
+  @Test
+  public void e2nDeepEquals_01() {
+    assertTrue("01", e2nDeepEquals("", null));
+    assertTrue("02", e2nDeepEquals(null, ""));
+    assertTrue("03", e2nDeepEquals(null, new Enum[0]));
+    assertTrue("04", e2nDeepEquals(new int[0], null));
+    assertTrue("05", e2nDeepEquals(new String[0], null));
+    assertTrue("06", e2nDeepEquals(new String[0], null));
+    assertTrue("07", e2nDeepEquals(Collections.emptyList(), null));
+    assertTrue("08", e2nDeepEquals(null, new HashSet<>()));
+    assertTrue("09", e2nDeepEquals(null, null));
+    assertTrue("10", e2nDeepEquals("", ""));
+    assertTrue("11", e2nDeepEquals(List.of(1, 2, 3, 4, 5), List.of(1, 2, 3, 4, 5)));
+    assertTrue("12", e2nDeepEquals(new String[] {"To", "be", "or"}, new String[] {"To", "be", "or"}));
+    assertTrue("13", e2nDeepEquals(new int[] {1, 2, 3, 4, 5}, new int[] {1, 2, 3, 4, 5}));
+    assertFalse("14", e2nDeepEquals(new int[0], new HashSet<>()));
+    assertFalse("15", e2nDeepEquals("", new HashSet<>()));
+    assertFalse("16", e2nDeepEquals(new ArrayList<>(), new HashSet<>()));
   }
 
   @Test // behaviour with sets
   @SuppressWarnings("rawtypes")
-  public void e2nEqualsRecursive_02() {
+  public void e2nDeepEquals_02() {
 
     Set subsubset1 = setOf("John");
     Set subsubset2 = setOf("John", null);
@@ -85,17 +109,17 @@ public class ObjectMethodsTest {
     Set subset6 = setOf(subsubset4);
     Set subset7 = setOf(subsubset5);
 
-    assertFalse("01", e2nEqualsRecursive(subsubset1, subsubset2));
-    assertTrue("02", e2nEqualsRecursive(subsubset2, subsubset3));
-    assertTrue("03", e2nEqualsRecursive(subsubset4, subsubset5));
-    assertFalse("04", e2nEqualsRecursive(subsubset5, subsubset6));
-    assertFalse("05", e2nEqualsRecursive(subsubset5, subsubset7));
+    assertFalse("01", e2nDeepEquals(subsubset1, subsubset2));
+    assertTrue("02", e2nDeepEquals(subsubset2, subsubset3));
+    assertTrue("03", e2nDeepEquals(subsubset4, subsubset5));
+    assertFalse("04", e2nDeepEquals(subsubset5, subsubset6));
+    assertFalse("05", e2nDeepEquals(subsubset5, subsubset7));
 
-    assertFalse("06", e2nEqualsRecursive(subset1, subset2));
-    assertFalse("07", e2nEqualsRecursive(subset2, subset4));
-    assertTrue("08", e2nEqualsRecursive(subset3, subset4));
-    assertFalse("09", e2nEqualsRecursive(subset4, subset5));
-    assertTrue("10", e2nEqualsRecursive(subset6, subset7));
+    assertFalse("06", e2nDeepEquals(subset1, subset2));
+    assertFalse("07", e2nDeepEquals(subset2, subset4));
+    assertTrue("08", e2nDeepEquals(subset3, subset4));
+    assertFalse("09", e2nDeepEquals(subset4, subset5));
+    assertTrue("10", e2nDeepEquals(subset6, subset7));
 
   }
 

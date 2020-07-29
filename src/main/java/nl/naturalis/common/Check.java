@@ -265,7 +265,7 @@ public abstract class Check {
    * elements are null. Otherwise this method throws an {@code IllegalArgumentException} with the
    * message: <i>${argName} must not be null or contain null values</i>.
    * 
-   * @see ObjectMethods#notNullRecursive(Object)
+   * @see ObjectMethods#deepNotNull(Object)
    * 
    * @param <T> The type of the argument being tested
    * @param arg The argument being tested
@@ -273,7 +273,7 @@ public abstract class Check {
    * @return
    */
   public static <T> T noneNull(T arg, String argName) {
-    return argument(arg, ObjectMethods::notNullRecursive, "%s must not be null or contain null values", argName);
+    return argument(arg, ObjectMethods::deepNotNull, "%s must not be null or contain null values", argName);
   }
 
   /**
@@ -328,7 +328,7 @@ public abstract class Check {
    * its elements are empty. Otherwise this method throws an {@code IllegalArgumentException} with the
    * message: <i>${argName} empty not be null or contain empty values</i>.
    * 
-   * @see ObjectMethods#notEmptyRecursive(Object)
+   * @see ObjectMethods#deepNotEmpty(Object)
    * 
    * @param <T> The argument being tested
    * @param arg The exception message
@@ -336,7 +336,7 @@ public abstract class Check {
    * @return
    */
   public static <T> T noneEmpty(T arg, String argName) {
-    return argument(arg, ObjectMethods::notEmptyRecursive, "%s must not be empty or contain empty values", argName);
+    return argument(arg, ObjectMethods::deepNotEmpty, "%s must not be empty or contain empty values", argName);
   }
 
   /**

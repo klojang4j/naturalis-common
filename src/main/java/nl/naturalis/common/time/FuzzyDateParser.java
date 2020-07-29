@@ -17,18 +17,18 @@ import static java.time.temporal.ChronoField.YEAR;
  * <p>
  * Parses date strings into {@code FuzzyDate} instances. Fuzzy dates will have at least their year set, but any other field may be unknown.
  * The {@link #DEFAULT} parser parses a wide variety of date strings. See below. If you know which types of date strings to expect, it might
- * be better to specify your own {@link ParseSpec} instances, either manually or through a properties file.
+ * be better to specify your own {@link ParseInfo} instances, either manually or through a properties file.
  * </p>
  * <p>
- * Date strings are parsed by iterating over a list of {@link ParseSpec} instances, which specify how to parse the input string. As soon as
+ * Date strings are parsed by iterating over a list of {@link ParseInfo} instances, which specify how to parse the input string. As soon as
  * a {@code ParseSpec} is capable of parsing the date string into a {@code java.time} object, the iteration stops. Therefore the more
- * granular {@link ParseSpec} instances should come first in the list. A {@code FuzzyDateParser} can be instantiated with a list of
- * hard-coded {@link ParseSpec} instances or with a properties file defining the {@link ParseSpec} instances. The layout of the properties
+ * granular {@link ParseInfo} instances should come first in the list. A {@code FuzzyDateParser} can be instantiated with a list of
+ * hard-coded {@link ParseInfo} instances or with a properties file defining the {@link ParseInfo} instances. The layout of the properties
  * file is shown below.
  * </p>
  * <p>
  * Note about performance: date parsing is said to be relatively expensive, but the cost does not come from the pattern-matching phase, but
- * in what happens next: the construction of a {@link TemporalAccessor} object. Therefore the number of {@link ParseSpec} instances with
+ * in what happens next: the construction of a {@link TemporalAccessor} object. Therefore the number of {@link ParseInfo} instances with
  * which the parser is instantiated does not greatly impact performance.
  * </p>
  * <p>
@@ -96,7 +96,7 @@ public class FuzzyDateParser {
    */
   public static final FuzzyDateParser DEFAULT = new FuzzyDateParser();
 
-  private final List<ParseSpec> parseSpecs;
+  private final List<ParseInfo> parseSpecs;
 
   // Reserved for the default parser
   private FuzzyDateParser() {
@@ -129,8 +129,8 @@ public class FuzzyDateParser {
    * @param parseSpec1
    * @param moreParseSpecs
    */
-  public FuzzyDateParser(ParseSpec parseSpec0, ParseSpec parseSpec1, ParseSpec... moreParseSpecs) {
-    List<ParseSpec> parseSpecs = new ArrayList<>(moreParseSpecs.length + 2);
+  public FuzzyDateParser(ParseInfo parseSpec0, ParseInfo parseSpec1, ParseInfo... moreParseSpecs) {
+    List<ParseInfo> parseSpecs = new ArrayList<>(moreParseSpecs.length + 2);
     parseSpecs.add(parseSpec0);
     parseSpecs.add(parseSpec1);
     parseSpecs.addAll(Arrays.asList(moreParseSpecs));
@@ -142,7 +142,7 @@ public class FuzzyDateParser {
    * 
    * @param parseSpecs
    */
-  public FuzzyDateParser(List<ParseSpec> parseSpecs) {
+  public FuzzyDateParser(List<ParseInfo> parseSpecs) {
     this.parseSpecs = parseSpecs;
   }
 
@@ -158,7 +158,7 @@ public class FuzzyDateParser {
     Check.notNull(dateString, "text");
     String input; // goes into the formatter
     TemporalAccessor ta; // comes out of the formatter
-    for (ParseSpec parseSpec : parseSpecs) {
+    for (ParseInfo parseSpec : parseSpecs) {
       if (parseSpec.filter == null) {
         input = dateString;
       } else {

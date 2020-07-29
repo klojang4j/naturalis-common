@@ -221,7 +221,7 @@ public class FuzzyDateParserTest {
     UnaryOperator<String> filter = new YearFilter();
     DateTimeFormatter formatter = formatter("uuuu");
     TemporalQuery<?>[] parseInto = new TemporalQuery[] {Year::from};
-    List<ParseSpec> parseSpecs = Arrays.asList(new ParseSpec(filter, formatter, parseInto));
+    List<ParseInfo> parseSpecs = Arrays.asList(new ParseInfo(filter, formatter, parseInto));
     FuzzyDateParser parser = new FuzzyDateParser(parseSpecs);
     FuzzyDate date = parser.parse("2008a");
     assertTrue("01", date.isFuzzyDate());
@@ -287,9 +287,9 @@ public class FuzzyDateParserTest {
   @Test
   public void test200() throws FuzzyDateException {
 
-    ParseSpec ps0 = new ParseSpec("uuuu/MM/dd HH:mm:ss", LocalDateTime::from);
-    ParseSpec ps1 = new ParseSpec("uuuu/MM/dd", LocalDate::from);
-    ParseSpec ps2 = new ParseSpec("uuuu/MM/dd[ HH:mm:ss]", LocalDate::from);
+    ParseInfo ps0 = new ParseInfo("uuuu/MM/dd HH:mm:ss", LocalDateTime::from);
+    ParseInfo ps1 = new ParseInfo("uuuu/MM/dd", LocalDate::from);
+    ParseInfo ps2 = new ParseInfo("uuuu/MM/dd[ HH:mm:ss]", LocalDate::from);
 
     FuzzyDateParser parser = new FuzzyDateParser(ps0, ps1, ps2);
     FuzzyDate date = parser.parse("2018/08/14 13:42:33");
@@ -314,10 +314,10 @@ public class FuzzyDateParserTest {
   }
 
   private static FuzzyDateParser simpleParser(String pattern, TemporalQuery<?> parseInto) {
-    List<ParseSpec> parseSpecs = new ArrayList<>(1);
+    List<ParseInfo> parseSpecs = new ArrayList<>(1);
     DateTimeFormatter formatter = formatter(pattern);
     TemporalQuery<?>[] into = new TemporalQuery[] {parseInto};
-    parseSpecs.add(new ParseSpec(null, formatter, into));
+    parseSpecs.add(new ParseInfo(null, formatter, into));
     return new FuzzyDateParser(parseSpecs);
   }
 

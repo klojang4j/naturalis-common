@@ -69,16 +69,16 @@ class ParseSpecProperties extends Properties {
    * @return
    * @throws FuzzyDateException
    */
-  List<ParseSpec> createParseSpecs() throws FuzzyDateException {
-    List<ParseSpec> parseSpecs = new ArrayList<>();
+  List<ParseInfo> createParseSpecs() throws FuzzyDateException {
+    List<ParseInfo> parseSpecs = new ArrayList<>();
     for (String dateType : supportedDateTypes.keySet()) {
       parseSpecs.addAll(createParseSpecs(dateType));
     }
     return parseSpecs;
   }
 
-  private List<ParseSpec> createParseSpecs(String dateType) throws FuzzyDateException {
-    List<ParseSpec> parseSpecs = new ArrayList<>();
+  private List<ParseInfo> createParseSpecs(String dateType) throws FuzzyDateException {
+    List<ParseInfo> parseSpecs = new ArrayList<>();
     for (int i = 0;; i++) {
       String key = dateType + "." + i + ".name";
       String val = getProperty(key);
@@ -86,7 +86,7 @@ class ParseSpecProperties extends Properties {
         UnaryOperator<String> filter = getFilter(dateType, i);
         DateTimeFormatter formatter = getNamedFormatter(val);
         TemporalQuery<?>[] parseInto = getParseInto(dateType);
-        parseSpecs.add(new ParseSpec(filter, formatter, parseInto));
+        parseSpecs.add(new ParseInfo(filter, formatter, parseInto));
       } else {
         key = dateType + "." + i + ".pattern";
         val = getProperty(key);
@@ -105,7 +105,7 @@ class ParseSpecProperties extends Properties {
         UnaryOperator<String> filter = getFilter(dateType, i);
         DateTimeFormatter formatter = builder.toFormatter();
         TemporalQuery<?>[] parseInto = getParseInto(dateType);
-        parseSpecs.add(new ParseSpec(filter, formatter, parseInto));
+        parseSpecs.add(new ParseInfo(filter, formatter, parseInto));
       }
     }
     return parseSpecs;

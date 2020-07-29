@@ -10,9 +10,9 @@ public class ClassMethods {
   private ClassMethods() {}
 
   /**
-   * Tests whether the 1st argument extends or implements the 2nd argument. In case you keep
-   * forgetting who should be the caller and who the callee with <code>Class.isAssignableFrom</code>
-   * method.
+   * Tests whether the 1st argument extends or implements the 2nd argument. In
+   * case you keep forgetting who should be the caller and who the callee with
+   * <code>Class.isAssignableFrom</code> method.
    * 
    * @param classToTest
    * @param superOrInterface
