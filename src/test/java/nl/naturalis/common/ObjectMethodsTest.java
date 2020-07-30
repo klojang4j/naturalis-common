@@ -78,25 +78,27 @@ public class ObjectMethodsTest {
 
   @Test
   public void e2nDeepEquals_01() {
-    assertTrue("01", e2nDeepEquals("", null));
-    assertTrue("02", e2nDeepEquals(null, ""));
+    assertTrue("01", e2nDeepEquals(null, ""));
+    assertTrue("02", e2nDeepEquals(null, null));
     assertTrue("03", e2nDeepEquals(null, new Enum[0]));
     assertTrue("04", e2nDeepEquals(new int[0], null));
     assertTrue("05", e2nDeepEquals(new String[0], null));
-    assertTrue("06", e2nDeepEquals(new String[0], null));
-    assertTrue("07", e2nDeepEquals(Collections.emptyList(), null));
-    assertTrue("08", e2nDeepEquals(null, new HashSet<>()));
-    assertTrue("09", e2nDeepEquals(null, null));
-    assertTrue("10", e2nDeepEquals("", ""));
-    assertTrue("11", e2nDeepEquals(List.of(1, 2, 3, 4, 5), List.of(1, 2, 3, 4, 5)));
-    assertTrue("12", e2nDeepEquals(new String[] {"To", "be", "or"}, new String[] {"To", "be", "or"}));
-    assertTrue("13", e2nDeepEquals(new int[] {1, 2, 3, 4, 5}, new int[] {1, 2, 3, 4, 5}));
-    assertFalse("14", e2nDeepEquals(new int[0], new HashSet<>()));
-    assertFalse("15", e2nDeepEquals("", new HashSet<>()));
-    assertFalse("16", e2nDeepEquals(new ArrayList<>(), new HashSet<>()));
+    assertFalse("06", e2nDeepEquals(new String[] {""}, null));
+    assertFalse("07", e2nDeepEquals(new String[] {"", null, ""}, null));
+    assertFalse("08", e2nDeepEquals(new String[] {"", null, ""}, new String[] {"", null, "", "", ""}));
+    assertTrue("09", e2nDeepEquals(Collections.emptyList(), null));
+    assertTrue("10", e2nDeepEquals(null, new HashSet<>()));
+    assertTrue("11", e2nDeepEquals(null, null));
+    assertTrue("12", e2nDeepEquals("", ""));
+    assertTrue("13", e2nDeepEquals(List.of(1, 2, 3, 4), List.of(1, 2, 3, 4)));
+    assertTrue("14", e2nDeepEquals(new String[] {"To", "be", "or"}, new String[] {"To", "be", "or"}));
+    assertTrue("15", e2nDeepEquals(new int[] {1, 2, 3, 4}, new int[] {1, 2, 3, 4}));
+    assertFalse("16", e2nDeepEquals(new int[0], new HashSet<>()));
+    assertFalse("17", e2nDeepEquals("", new HashSet<>()));
+    assertFalse("18", e2nDeepEquals(new ArrayList<>(), new HashSet<>()));
   }
 
-  @Test // behaviour with sets
+  @Test // behaviour with sets (pretty extreme edge cases)
   @SuppressWarnings("rawtypes")
   public void e2nDeepEquals_02() {
 

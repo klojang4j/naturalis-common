@@ -30,7 +30,7 @@ public class ObjectMethods {
    * <li>an empty {@link Emptyable}
    * </ul>
    * 
-   * @param obj The object being tested
+   * @param obj The object to be tested
    * @return Whether or not it is empty
    */
   public static boolean isEmpty(Object obj) {
@@ -46,7 +46,7 @@ public class ObjectMethods {
   /**
    * Returns the reverse of {@link #isEmpty(Object) isEmpty}.
    * 
-   * @param obj The object being tested
+   * @param obj The object to be tested
    * @return Whether or not it is empty
    */
   public static boolean notEmpty(Object obj) {
@@ -54,11 +54,46 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns {@code true} if the provided argument is not null and, if it is an
-   * array or collection, none of its elements are null. Otherwise this method
-   * returns {@code false}.
+   * Returns {@code true} if the argument is {@link #isEmpty(Object) empty} or, if
+   * it is an array, collection or map, only contains deeply empty values.
+   * Otherwise this method returns {@code false}. Map keys are not checked for
+   * empty-ness.
    * 
-   * @param obj The object being tested
+   * @param obj The object to be tested
+   * @return Whether or not it is recursively empty
+   */
+  public static boolean deepIsEmpty(Object obj) {
+    return obj == null
+        || obj instanceof String && ((String) obj).isEmpty()
+        || obj instanceof Collection
+            && ((Collection) obj).stream().allMatch(ObjectMethods::deepIsEmpty)
+        || obj instanceof Map
+            && ((Map) obj).values().stream().allMatch(ObjectMethods::deepIsEmpty)
+        || obj instanceof Object[]
+            && Arrays.stream((Object[]) obj).allMatch(ObjectMethods::deepIsEmpty)
+        || obj.getClass().isArray() && Array.getLength(obj) == 0
+        || obj instanceof Sizeable && ((Sizeable) obj).size() == 0
+        || obj instanceof Emptyable && ((Emptyable) obj).isEmpty();
+  }
+
+  /**
+   * Returns {@code true} if the argument is not empty and, if it is an array,
+   * collection or map, none of its values are deeply empty. Otherwise this method
+   * returns {@code false}. Map keys are not checked for empty-ness.
+   * 
+   * @param obj The object to be tested
+   * @return Whether or not it is recursively not empty
+   */
+  public static boolean deepNotEmpty(Object obj) {
+    return !deepIsEmpty(obj);
+  }
+
+  /**
+   * Returns {@code true} if the argument is not null and, if it is an array,
+   * collection or map, none of its values are null. Otherwise this method returns
+   * {@code false}. Map keys are not checked for null values.
+   * 
+   * @param obj The object to be tested
    * @return Whether or not it is not null recursively
    */
   public static boolean deepNotNull(Object obj) {
@@ -68,25 +103,8 @@ public class ObjectMethods {
       return Arrays.stream((Object[]) obj).allMatch(ObjectMethods::deepNotNull);
     } else if (obj instanceof Collection) {
       return ((Collection) obj).stream().allMatch(ObjectMethods::deepNotNull);
-    }
-    return true;
-  }
-
-  /**
-   * Returns {@code true} if the provided object is not empty and, if it is an
-   * array or collection, none of its elements are empty. Otherwise this method
-   * returns {@code false}.
-   * 
-   * @param obj The object being tested
-   * @return Whether or not it is not empty recursively
-   */
-  public static boolean deepNotEmpty(Object obj) {
-    if (isEmpty(obj)) {
-      return false;
-    } else if (obj instanceof Object[]) {
-      return Arrays.stream((Object[]) obj).allMatch(ObjectMethods::deepNotEmpty);
-    } else if (obj instanceof Collection) {
-      return ((Collection) obj).stream().allMatch(ObjectMethods::deepNotEmpty);
+    } else if (obj instanceof Map) {
+      return ((Map) obj).values().stream().allMatch(ObjectMethods::deepNotNull);
     }
     return true;
   }
@@ -124,7 +142,7 @@ public class ObjectMethods {
    * <code>Set</code>, <code>Map</code>, array, <code>Emptyable</code> and
    * <code>Sizeable</code> are <b>not</b> equal to each other
    * <li>For any other pair of objects this method returns the result of
-   * <code>Objects.equals<code>
+   * <code>Objects.equals(obj1, obj2)<code>
    * </ol>
    * 
    * 
@@ -144,10 +162,8 @@ public class ObjectMethods {
   /**
    * Recursively tests the provided objects for equality using
    * <i>empty-equals-null</i> semantics. In other words, if the provided arguments
-   * are non-empty arrays, lists or sets, their elements are also compared using
-   * {@code e2nDeepEquals}. If the provided arguments are non-empty maps, then
-   * keys are compared normally (using {@code equals}) while values are compared
-   * using {@code e2nDeepEquals}.
+   * are non-empty arrays, collections or maps, their elements c.q. values are
+   * also compared using {@code e2nDeepEquals}.
    * 
    * @param obj1
    * @param obj2
