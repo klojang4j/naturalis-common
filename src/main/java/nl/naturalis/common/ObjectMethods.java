@@ -57,7 +57,7 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns {@code true} if the argument is {@link #notEmpty(Object)not empty}
+   * Returns {@code true} if the argument is {@link #notEmpty(Object) not empty}
    * and, if it is an array or collection or map, only contains deeply non-empty
    * values. Otherwise this method returns {@code false}. Map keys are not checked
    * for empty-ness.
