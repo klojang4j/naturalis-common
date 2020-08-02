@@ -38,19 +38,20 @@ public class ClassMethods {
   }
 
   /**
-   * Tests whether the provided object is an array of primitives.
+   * Tests whether the provided object is an array of primitives without using
+   * reflection.
    * 
    * @param obj
    * @return
    */
   public static boolean isPrimitiveArray(Object obj) {
-    return Check.notNull(obj, "obj") instanceof int[]
+    return obj != null && (obj instanceof int[]
         || obj instanceof double[]
         || obj instanceof long[]
         || obj instanceof byte[]
         || obj instanceof char[]
         || obj instanceof float[]
-        || obj instanceof short[];
+        || obj instanceof short[]);
   }
 
 }

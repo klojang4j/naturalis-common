@@ -6,6 +6,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import static java.util.stream.Collectors.toSet;
+import static nl.naturalis.common.ClassMethods.*;
+import static java.util.function.Predicate.*;
 
 /**
  * General methods applicable to objects of any type.
@@ -38,13 +40,14 @@ public class ObjectMethods {
         || obj instanceof String && ((String) obj).isEmpty()
         || obj instanceof Collection && ((Collection) obj).isEmpty()
         || obj instanceof Map && ((Map) obj).isEmpty()
-        || obj.getClass().isArray() && Array.getLength(obj) == 0
+        || obj instanceof Object[] && ((Object[]) obj).length == 0
+        || isPrimitiveArray(obj) && Array.getLength(obj) == 0
         || obj instanceof Sizeable && ((Sizeable) obj).size() == 0
         || obj instanceof Emptyable && ((Emptyable) obj).isEmpty();
   }
 
   /**
-   * Returns the reverse of {@link #isEmpty(Object) isEmpty}.
+   * Returns the inverse of {@link #isEmpty(Object) isEmpty}.
    * 
    * @param obj The object to be tested
    * @return Whether or not it is empty
@@ -54,44 +57,35 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns {@code true} if the argument is {@link #isEmpty(Object) empty} or, if
-   * it is an array, collection or map, only contains deeply empty values.
-   * Otherwise this method returns {@code false}. Map keys are not checked for
-   * empty-ness.
-   * 
-   * @param obj The object to be tested
-   * @return Whether or not it is recursively empty
-   */
-  public static boolean deepIsEmpty(Object obj) {
-    return obj == null
-        || obj instanceof String && ((String) obj).isEmpty()
-        || obj instanceof Collection
-            && ((Collection) obj).stream().allMatch(ObjectMethods::deepIsEmpty)
-        || obj instanceof Map
-            && ((Map) obj).values().stream().allMatch(ObjectMethods::deepIsEmpty)
-        || obj instanceof Object[]
-            && Arrays.stream((Object[]) obj).allMatch(ObjectMethods::deepIsEmpty)
-        || obj.getClass().isArray() && Array.getLength(obj) == 0
-        || obj instanceof Sizeable && ((Sizeable) obj).size() == 0
-        || obj instanceof Emptyable && ((Emptyable) obj).isEmpty();
-  }
-
-  /**
-   * Returns {@code true} if the argument is not empty and, if it is an array,
-   * collection or map, none of its values are deeply empty. Otherwise this method
-   * returns {@code false}. Map keys are not checked for empty-ness.
+   * Returns {@code true} if the argument is {@link #notEmpty(Object)not empty}
+   * and, if it is an array or collection or map, only contains deeply non-empty
+   * values. Otherwise this method returns {@code false}. Map keys are not checked
+   * for empty-ness.
    * 
    * @param obj The object to be tested
    * @return Whether or not it is recursively not empty
    */
   public static boolean deepNotEmpty(Object obj) {
-    return !deepIsEmpty(obj);
+    return obj != null
+        && (!(obj instanceof String) || ((String) obj).length() > 0)
+        && (!(obj instanceof Collection) || (((Collection) obj).size() > 0
+            && ((Collection) obj).stream().filter(not(ObjectMethods::deepNotEmpty)).findFirst().isEmpty()))
+        && (!(obj instanceof Map) || (((Map) obj).size() > 0
+            && ((Map) obj).values().stream().filter(not(ObjectMethods::deepNotEmpty)).findFirst().isEmpty()))
+        && (!(obj instanceof Object[]) || (((Object[]) obj).length > 0
+            && Arrays.stream((Object[]) obj).filter(not(ObjectMethods::deepNotEmpty)).findFirst().isEmpty()))
+        && (!isPrimitiveArray(obj) || Array.getLength(obj) > 0)
+        && (!(obj instanceof Sizeable) || ((Sizeable) obj).size() > 0)
+        && (!(obj instanceof Emptyable) || !((Emptyable) obj).isEmpty());
   }
 
   /**
    * Returns {@code true} if the argument is not null and, if it is an array,
-   * collection or map, none of its values are null. Otherwise this method returns
-   * {@code false}. Map keys are not checked for null values.
+   * collection or map, only contains non-null vaues. Otherwise this method
+   * returns {@code false}. Map keys are not checked for null values. Contrary to
+   * {@link #deepNotEmpty(Object) deepNotEmpty}, this method returns {@code true}
+   * for empty arrays, collections and maps. It only checks that the values they
+   * do contain are non-null.
    * 
    * @param obj The object to be tested
    * @return Whether or not it is not null recursively
@@ -132,8 +126,7 @@ public class ObjectMethods {
    * More specifically:
    * <ol>
    * <li>{@code null} equals an empty <code>String</code>
-   * <li>{@code null} equals an empty <code>List</code>
-   * <li>{@code null} equals an empty <code>Set</code>
+   * <li>{@code null} equals an empty <code>Collection</code>
    * <li>{@code null} equals an empty <code>Map</code>
    * <li>{@code null} equals a zero-length array
    * <li>{@code null} equals an empty {@link Emptyable}
@@ -141,13 +134,16 @@ public class ObjectMethods {
    * <li>An empty/zero-length <code>String</code>, <code>List</code>,
    * <code>Set</code>, <code>Map</code>, array, <code>Emptyable</code> and
    * <code>Sizeable</code> are <b>not</b> equal to each other
+   * <li>Two empty {@code Emptyable} instances and two zero-size {@code Sizeable}
+   * instances or only equal to each other if they are instances of exactly the
+   * same class.
    * <li>For any other pair of objects this method returns the result of
    * <code>Objects.equals(obj1, obj2)<code>
    * </ol>
    * 
    * 
-   * @param obj1
-   * @param obj2
+   * @param obj1 The 1st of the pair of objects to compare
+   * @param obj2 The 2nd of the pair of objects to compare
    * @return
    */
   public static boolean e2nEquals(Object obj1, Object obj2) {
@@ -161,12 +157,11 @@ public class ObjectMethods {
 
   /**
    * Recursively tests the provided objects for equality using
-   * <i>empty-equals-null</i> semantics. In other words, if the provided arguments
-   * are non-empty arrays, collections or maps, their elements c.q. values are
-   * also compared using {@code e2nDeepEquals}.
+   * <i>empty-equals-null</i> semantics. In other words, for arrays, collections
+   * and maps, elements c.q. values are also compared using {@code e2nDeepEquals}.
    * 
-   * @param obj1
-   * @param obj2
+   * @param obj1 The 1st of the pair of objects to compare
+   * @param obj2 The 2nd of the pair of objects to compare
    * @return
    */
   public static boolean e2nDeepEquals(Object obj1, Object obj2) {
@@ -187,7 +182,7 @@ public class ObjectMethods {
    * {@link #e2nEquals(Object, Object) e2nEquals} or
    * {@link #e2nDeepEquals(Object, Object) e2nDeepEquals}.
    * 
-   * @param obj
+   * @param obj The object to generate a hash code for
    * @return
    */
   public static int e2nHashCode(Object obj) {
@@ -198,7 +193,7 @@ public class ObjectMethods {
    * Generates a hash code for the provided arguments using using
    * <i>empty-equals-null</i> semantics. See {@link #hashCode()}.
    * 
-   * @param objs
+   * @param objs The objects to generate a hash code for
    * @return
    */
   public static int e2nHash(Object... objs) {
@@ -213,7 +208,7 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns {@code dfault} if {@code value} is {@code null}, else {@code value}.
+   * Returns the 2nd argument if the 1st argument is null, else the 1st argument.
    * 
    * @param <T>
    * @param value
@@ -225,8 +220,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns value supplied by the {@code Supplier} if {@code value} is
-   * {@code null}, else {@code value}.
+   * Returns value supplied by the {@code Supplier} if the 1st argument is null,
+   * else 1st argument.
    * 
    * @param <T>
    * @param value The value to check and return if not null
@@ -271,7 +266,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns {@code dfault} if {@code value} is empty, else {@code value}.
+   * Returns the 2nd argument if the 1st argument {@link #isEmpty(Object) is
+   * empty}, else the 1st argument.
    * 
    * @param <T>
    * @param value
@@ -283,8 +279,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns value provided by the {@code Supplier} if {@code value} is empty,
-   * else {@code value}.
+   * Returns the value provided by the {@code Supplier} if the 1st argument
+   * {@link #isEmpty(Object) is empty}, else the 1st argument.
    * 
    * @param <T>
    * @param value The value to check and return if not null

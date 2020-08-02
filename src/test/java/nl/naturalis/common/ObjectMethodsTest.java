@@ -32,11 +32,28 @@ public class ObjectMethodsTest {
     assertFalse("12", integers.equals(objects));
   }
 
+  @Test
+  public void deepNotEmpty_01() {
+    assertTrue("01", deepNotEmpty(List.of("Hi", new String[] {"Hi", "There"})));
+    assertFalse("02", deepNotEmpty(List.of("Hi", new String[0])));
+    assertTrue("03", deepNotEmpty(List.of("Hi", Collections.singletonMap("a", "b"))));
+    assertFalse("04", deepNotEmpty(List.of("Hi", Collections.emptyMap())));
+    assertFalse("05", deepNotEmpty(List.of("Hi",
+        Collections.singletonMap(
+            "a",
+            Collections.singletonMap(
+                "b",
+                Collections.emptyMap())))));
+    assertTrue("06", deepNotEmpty(List.of("Hi", Set.of(new Object(),new Object()))));
+    assertFalse("07", deepNotEmpty(List.of("Hi", Collections.emptySet())));
+  }
+
+  @Test
   public void ifEmpty_01() {
-    assertEquals("01", "Hi there", ifEmpty("", "Hi There"));
-    assertEquals("02", "Hi there", ifEmpty("", () -> "Hi There"));
+    assertEquals("01", "Hi There", ifEmpty("", "Hi There"));
+    assertEquals("02", "Hi There", ifEmpty("", () -> "Hi There"));
     assertEquals("03", "World", ifEmpty("World", () -> "Hi There"));
-    assertEquals("04", List.of("Hi there"), ifEmpty(Collections.emptyList(), () -> Arrays.asList("Hi There")));
+    assertEquals("04", List.of("Hi There"), ifEmpty(Collections.emptyList(), () -> Arrays.asList("Hi There")));
   }
 
   @Test
