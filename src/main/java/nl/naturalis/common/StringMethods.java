@@ -74,8 +74,8 @@ public class StringMethods {
     if (subject == null) {
       return 0;
     }
-    String str = ifTrue(ignoreCase, String::toLowerCase, subject.toString());
-    substr = ifTrue(ignoreCase, String::toLowerCase, substr);
+    String str = ifTrue(ignoreCase, subject.toString(), String::toLowerCase);
+    substr = ifTrue(ignoreCase, substr, String::toLowerCase);
     return (int) Pattern.compile(Pattern.quote(substr))
         .matcher(str).results().count();
   }

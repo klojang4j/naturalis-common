@@ -80,17 +80,17 @@ public class ObjectMethodsTest {
   @Test
   public void ifTrue_01() {
     boolean ignoreCase = true;
-    assertEquals("01", "hello, world!", ifTrue(ignoreCase, String::toLowerCase, "Hello, World!"));
+    assertEquals("01", "hello, world!", ifTrue(ignoreCase, "Hello, World!", String::toLowerCase));
     ignoreCase = false;
-    assertEquals("02", "Hello, World!", ifTrue(ignoreCase, String::toLowerCase, "Hello, World!"));
+    assertEquals("02", "Hello, World!", ifTrue(ignoreCase, "Hello, World!", String::toLowerCase));
   }
 
   @Test
   public void ifFalse_01() {
     boolean keepCapitals = true;
-    assertEquals("01", "Hello, World!", ifFalse(keepCapitals, String::toLowerCase, "Hello, World!"));
+    assertEquals("01", "Hello, World!", ifFalse(keepCapitals, "Hello, World!", String::toLowerCase));
     keepCapitals = false;
-    assertEquals("02", "hello, world!", ifFalse(keepCapitals, String::toLowerCase, "Hello, World!"));
+    assertEquals("02", "hello, world!", ifFalse(keepCapitals, "Hello, World!", String::toLowerCase));
   }
 
   @Test
