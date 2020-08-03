@@ -5,7 +5,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
 
@@ -81,12 +80,12 @@ public class ObjectMethods {
   public static boolean deepNotEmpty(Object obj) {
     return obj != null
         && (!(obj instanceof String) || ((String) obj).length() > 0)
-        && (!(obj instanceof Collection)
-            || !((Collection) obj).stream().anyMatch(not(ObjectMethods::deepNotEmpty)))
-        && (!(obj instanceof Map)
-            || !((Map) obj).values().stream().anyMatch(not(ObjectMethods::deepNotEmpty)))
-        && (!(obj instanceof Object[])
-            || !Arrays.stream((Object[]) obj).anyMatch(not(ObjectMethods::deepNotEmpty)))
+        && (!(obj instanceof Collection) || ((Collection) obj).size() > 0
+            && ((Collection) obj).stream().allMatch(ObjectMethods::deepNotEmpty))
+        && (!(obj instanceof Map) || ((Map) obj).size() > 0
+            && ((Map) obj).values().stream().allMatch(ObjectMethods::deepNotEmpty))
+        && (!(obj instanceof Object[]) || ((Object[]) obj).length > 0
+            && Arrays.stream((Object[]) obj).allMatch(ObjectMethods::deepNotEmpty))
         && (!isPrimitiveArray(obj) || Array.getLength(obj) > 0)
         && (!(obj instanceof Sizeable) || ((Sizeable) obj).size() > 0)
         && (!(obj instanceof Emptyable) || !((Emptyable) obj).isEmpty());
@@ -159,12 +158,6 @@ public class ObjectMethods {
    * <li>An empty/zero-size <code>String</code>, <code>List</code>,
    * <code>Set</code>, <code>Map</code>, array, <code>Emptyable</code> and
    * <code>Sizeable</code> are <b>not</b> equal to each other
-   * <li>Two empty {@code Emptyable} instances are equal to each other if they are
-   * instances of exactly the same class.
-   * <li>Two zero-size {@code Sizeable} instances are equal to each other if they
-   * are instances of exactly the same class.
-   * <li>Two zero-length primitive arrays are equal to each other if they are
-   * instances of exactly the same class (e.g. int[])
    * <li>For any other pair of arguments this method returns the result of
    * <code>Objects.equals(obj1, obj2)<code>
    * </ol>
