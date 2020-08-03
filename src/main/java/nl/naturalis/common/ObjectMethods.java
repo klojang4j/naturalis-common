@@ -62,7 +62,8 @@ public class ObjectMethods {
 
   /**
    * <p>
-   * Returns {@code true} if the argument is:
+   * Returns whether or not the argument is recursively non-empty. Returns
+   * {@code true} if the argument is:
    * <p>
    * <ul>
    * <li>not {@link #notEmpty(Object) empty}
@@ -93,7 +94,8 @@ public class ObjectMethods {
 
   /**
    * <p>
-   * Returns {@code true} if the argument is:
+   * Returns whether or not the argument is recursively non-null. Returns
+   * {@code true} if the argument is:
    * <p>
    * <ul>
    * <li>not {@link #notEmpty(Object) empty}
