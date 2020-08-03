@@ -97,7 +97,7 @@ public class ObjectMethods {
    * {@code true} if the argument is:
    * <p>
    * <ul>
-   * <li>not {@link #notEmpty(Object) empty}
+   * <li>not null
    * <li>if it is an array or {@code Collection}, only contains recursively
    * non-null elements
    * <li>if it is a {@code Map}, only contains recursively non-null values. Map
