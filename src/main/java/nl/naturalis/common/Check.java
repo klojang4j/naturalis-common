@@ -13,7 +13,7 @@ import java.util.function.Supplier;
  * the instance methods instead. For example:
  * </p>
  * <p>
- * 
+ *
  * <pre>
  * int i = Check.that(numChairs, "numChairs")
  *     .atLeast(2)
@@ -27,7 +27,7 @@ import java.util.function.Supplier;
  * name of the argument (along with the argument itself). For example:
  * </p>
  * <p>
- * 
+ *
  * <pre>
  * Check.notNull(name, "name"); // -> "name must not null"
  * </pre>
@@ -35,13 +35,13 @@ import java.util.function.Supplier;
  * <p>
  * If you want to provide a custom message, choose the overloaded method that
  * takes message arguments:
- * 
+ *
  * <pre>
  * Check.notNull(name, "Please specify a name", null); // -> "Please specify a name"
  * Check.notNull(name, "Please specify a %s", "toy"); // -> "Please specify a toy"
  * </pre>
  * </p>
- * 
+ *
  * @author Ayco Holleman
  */
 public abstract class Check {
@@ -49,7 +49,7 @@ public abstract class Check {
   /**
    * Returns a {@code Check} object that allows you to chain multiple checks on
    * the provided integer without having to repeat the argument name every time.
-   * 
+   *
    * @param arg
    * @param argName
    * @return
@@ -62,8 +62,8 @@ public abstract class Check {
    * Returns a {@code Check} object that allows you to chain multiple checks on
    * the provided {@code String} without having to repeat the argument name every
    * time.
-   * 
-   * 
+   *
+   *
    * @param arg
    * @param argName
    * @return
@@ -76,7 +76,7 @@ public abstract class Check {
    * Returns a {@code Check} object that allows you to chain multiple checks on
    * the provided {@code Integer} without having to repeat the argument name every
    * time.
-   * 
+   *
    * @param arg
    * @param argName
    * @return
@@ -88,7 +88,7 @@ public abstract class Check {
   /**
    * Returns a {@code Check} object that allows you to chain multiple checks on
    * the provided argument without having to repeat the argument name every time.
-   * 
+   *
    * @param arg
    * @param argName
    * @return
@@ -101,7 +101,7 @@ public abstract class Check {
    * Generic check method. Can also be used for other purposes than checking
    * preconditions. Throws the exception supplied by the provided supplier if the
    * provided condition evaluates to false.
-   * 
+   *
    * @param <T> The type of exception thrown if the condition fails
    * @param condition The condition to evaluate
    * @param exceptionSupplier The exception supplier
@@ -117,7 +117,7 @@ public abstract class Check {
    * Generic check method. Throws the exception supplied by the provided exception
    * supplier if the provided condition evaluates to false, else returns
    * {@code result}.
-   * 
+   *
    * @param <T> The type of exception thrown if the condition fails
    * @param <U> The type of object returned if the condition is met
    * @param condition The condition to evaluate
@@ -137,7 +137,7 @@ public abstract class Check {
    * Generic check method. Throws the exception supplied by the provided exception
    * supplier if the provided condition evaluates to false, else returns the
    * result supplied by the result supplier.
-   * 
+   *
    * @param <T> The type of exception thrown if the condition fails
    * @param <U> The type of object returned if the condition is met
    * @param condition The condition to evaluate
@@ -156,7 +156,7 @@ public abstract class Check {
   /**
    * Does nothing if the provided condition evaluates to {@code true}, else throws
    * an {@code IllegalArgumentException} with the provided message.
-   * 
+   *
    * @param condition The condition to be evaluated
    * @param message The exception message
    * @throws IllegalArgumentException If the condition evaluates to false
@@ -168,7 +168,7 @@ public abstract class Check {
   /**
    * Returns {@code arg} if it passes the provided {@code test}, else throws an
    * {@code IllegalArgumentException} with the provided message.
-   * 
+   *
    * @param <T>
    * @param arg
    * @param test
@@ -182,7 +182,7 @@ public abstract class Check {
   /**
    * Returns {@code arg} if it passes the provided {@code test}, else throws an
    * {@code IllegalArgumentException} with the provided message.
-   * 
+   *
    * @param arg
    * @param test
    * @param message
@@ -200,7 +200,7 @@ public abstract class Check {
    * an {@code IllegalArgumentException} with the provided message and message
    * arguments. The message arguments may be {@code null}, in which case they are
    * ignored.
-   * 
+   *
    * @param condition The condition to be evaluated
    * @param message The exception message
    * @param msgArg The 1st {@code String.format} message argument
@@ -216,7 +216,7 @@ public abstract class Check {
    * {@code IllegalArgumentException} with the provided message and message
    * arguments. The message arguments may be {@code null}, in which case they are
    * ignored as message arguments.
-   * 
+   *
    * @param <T>
    * @param arg
    * @param test
@@ -234,7 +234,7 @@ public abstract class Check {
    * {@code IllegalArgumentException} with the provided message and message
    * arguments. The message arguments may be {@code null}, in which case they are
    * ignored.
-   * 
+   *
    * @param arg
    * @param test
    * @param message
@@ -250,10 +250,38 @@ public abstract class Check {
   }
 
   /**
+   * Returns {@code arg} if it is between zero and {@code maxExclusive}, else
+   * throws an {@code ArrayIndexOutOfBoundsException}.
+   *
+   * @param arg
+   * @param maxExclusive
+   * @return
+   */
+  public static int index(int arg, int maxExclusive) {
+    return index(arg, 0, maxExclusive);
+  }
+
+  /**
+   * Returns {@code arg} if it is between {@code minInclusive} and
+   * {@code maxExclusive}, else throws an {@code ArrayIndexOutOfBoundsException}.
+   *
+   * @param arg
+   * @param minInclusive
+   * @param maxExclusive
+   * @return
+   */
+  public static int index(int arg, int minInclusive, int maxExclusive) {
+    if (arg >= minInclusive && arg < maxExclusive) {
+      return arg;
+    }
+    throw new ArrayIndexOutOfBoundsException(arg);
+  }
+
+  /**
    * Returns {@code arg} if it is not null, else throws an
    * {@code IllegalArgumentException} with the message: <i>Illegal argument:
    * null</i>.
-   * 
+   *
    * @param <T> The type of the argument being tested
    * @param arg The argument being tested
    * @return The argument
@@ -267,7 +295,7 @@ public abstract class Check {
    * Returns {@code arg} if it is not null, else throws an
    * {@code IllegalArgumentException} with the message: <i>${argName} must not be
    * null</i>.
-   * 
+   *
    * @param <T> The type of the argument being tested
    * @param arg The argument being tested
    * @param argName The name of the argument being tested
@@ -283,7 +311,7 @@ public abstract class Check {
    * {@code IllegalArgumentException} with the provided message and message
    * arguments. The message arguments may be {@code null}, in which case they are
    * ignored.
-   * 
+   *
    * @param <T> The type of the argument being tested
    * @param arg The argument being tested
    * @param message The exception message
@@ -301,9 +329,9 @@ public abstract class Check {
    * {@code Collection}, none of its elements are null. Otherwise this method
    * throws an {@code IllegalArgumentException} with the message: <i>${argName}
    * must not be null or contain null values</i>.
-   * 
+   *
    * @see ObjectMethods#deepNotNull(Object)
-   * 
+   *
    * @param <T> The type of the argument being tested
    * @param arg The argument being tested
    * @param argName The argument name
@@ -317,9 +345,9 @@ public abstract class Check {
    * Returns {@code arg} if it is not empty, else throws an
    * {@code IllegalArgumentException} with the message: <i>Illegal argument:
    * empty</i>.
-   * 
+   *
    * @see ObjectMethods#notEmpty(Object)
-   * 
+   *
    * @param arg The argument being tested
    * @return The argument
    * @throws IllegalArgumentException If the argument is empty
@@ -332,9 +360,9 @@ public abstract class Check {
    * Returns {@code arg} if it is not empty, else throws an
    * {@code IllegalArgumentException} with the message: <i>${argName} must not be
    * empty</i>.
-   * 
+   *
    * @see ObjectMethods#notEmpty(Object)
-   * 
+   *
    * @param arg The argument being tested
    * @param argName The name of the argument being tested
    * @return The argument
@@ -349,9 +377,9 @@ public abstract class Check {
    * {@code IllegalArgumentException} with the provided message and message
    * arguments. The message arguments may be {@code null}, in which case they are
    * ignored.
-   * 
+   *
    * @see ObjectMethods#notEmpty(Object)
-   * 
+   *
    * @param arg The argument being tested
    * @param message The exception message
    * @param msgArg The 1st {@code String.format} message argument
@@ -364,15 +392,15 @@ public abstract class Check {
   }
 
   /**
-   * Returns {@code arg} if it is not empty and, in case of an array or
-   * {@code Collection}, none of its elements are empty. Otherwise this method
-   * throws an {@code IllegalArgumentException} with the message: <i>${argName}
-   * empty not be null or contain empty values</i>.
-   * 
+   * Returns {@code arg} if it is not empty according to
+   * {@link ObjectMethods#deepNotEmpty(Object)}. Otherwise this method throws an
+   * {@code IllegalArgumentException} with the message: <i>${argName} must not be
+   * empty or contain empty values</i>.
+   *
    * @see ObjectMethods#deepNotEmpty(Object)
-   * 
-   * @param <T> The argument being tested
-   * @param arg The exception message
+   *
+   * @param <T> The type of the argument
+   * @param arg The argument being tested
    * @param argName The argument name
    * @return
    */
@@ -381,10 +409,30 @@ public abstract class Check {
   }
 
   /**
+   * Returns {@code arg} if it is not empty according to
+   * {@link ObjectMethods#deepNotEmpty(Object)}. Otherwise this method throws an
+   * {@code IllegalArgumentException} with the provided message and message
+   * arguments. The message arguments may be {@code null}, in which case they are
+   * ignored.
+   *
+   * @param <T> The type of the argument
+   * @param arg The argument being tested
+   * @param message The exception message
+   * @param msgArg The 1st message argument (or null if the message has no message
+   *        arguments)
+   * @param moreMsgArgs The remaining message arguments (or null if the message
+   *        has no message arguments)
+   * @return The argument
+   */
+  public static <T> T noneEmpty(T arg, String message, Object msgArg, Object... moreMsgArgs) {
+    return argument(arg, ObjectMethods::deepNotEmpty, message, msgArg, moreMsgArgs);
+  }
+
+  /**
    * Returns {@code arg} if it is not blank, else throws an
    * {@code IllegalArgumentException} with the message: <i>Illegal argument:
    * blank</i>.
-   * 
+   *
    * @param arg The argument being tested
    * @return The argument
    * @throws IllegalArgumentException If the argument is blank
@@ -397,7 +445,7 @@ public abstract class Check {
    * Returns {@code arg} if it is not blank, else throws an
    * {@code IllegalArgumentException} with the message: <i>${argName} must not be
    * blank</i>.
-   * 
+   *
    * @param arg The argument being tested
    * @param argName The name of the argument being tested
    * @return The argument
@@ -412,7 +460,7 @@ public abstract class Check {
    * {@code IllegalArgumentException} with the provided message and message
    * arguments. {@code msgArg} is allowed to be null, in which case it is ignored
    * as a message argument.
-   * 
+   *
    * @param arg The argument being tested
    * @param message The exception message
    * @param msgArg The 1st {@code String.format} message argument
@@ -427,7 +475,7 @@ public abstract class Check {
   /**
    * Returns {@code arg} if it is greater than {@code minVal}, else throws an
    * {@code IllegalArgumentException}.
-   * 
+   *
    * @param arg
    * @param minVal
    * @param argName
@@ -440,7 +488,7 @@ public abstract class Check {
   /**
    * Returns {@code arg} if it is greater than or equal to {@code minVal}, else
    * throws an {@code IllegalArgumentException}.
-   * 
+   *
    * @param arg
    * @param minVal
    * @param argName
@@ -453,7 +501,7 @@ public abstract class Check {
   /**
    * Returns {@code arg} if it is less than {@code maxVal}, else throws an
    * {@code IllegalArgumentException}.
-   * 
+   *
    * @param arg
    * @param maxVal
    * @param argName
@@ -466,7 +514,7 @@ public abstract class Check {
   /**
    * Returns {@code arg} is less than or equal to {@code maxVal}, else throws an
    * {@code IllegalArgumentException}.
-   * 
+   *
    * @param arg
    * @param maxVal
    * @param argName
@@ -479,7 +527,7 @@ public abstract class Check {
   /**
    * Returns {@code arg} if it is between {@code minInclusive} and
    * {@code maxExclusive}, else throws an {@code IllegalArgumentException}.
-   * 
+   *
    * @param arg
    * @param minInclusive
    * @param maxExclusive
@@ -498,7 +546,7 @@ public abstract class Check {
   /**
    * Returns {@code arg} if it is between {@code minInclusive} and
    * {@code maxInclusive}, else throws an {@code IllegalArgumentException}.
-   * 
+   *
    * @param arg
    * @param minInclusive
    * @param maxInclusive
@@ -517,7 +565,7 @@ public abstract class Check {
   /**
    * Does nothing if the provided condition evaluates to {@code true}, else throws
    * an {@link IllegalStateException} with the provided message.
-   * 
+   *
    * @param condition The condition to be evaluated
    * @param message The exception message
    * @throws IllegalStateException If the condition evaluates to {@code false}
@@ -531,7 +579,7 @@ public abstract class Check {
    * an {@link IllegalStateException} with the provided message and message
    * arguments. {@code msgArg} is allowed to be null, in which case it is ignored
    * as a message argument.
-   * 
+   *
    * @param condition
    * @param message The exception message
    * @param msgArg The 1st {@code String.format} message argument
@@ -598,7 +646,7 @@ public abstract class Check {
 
   /**
    * See {@link #notNull(Object, String)}.
-   * 
+   *
    * @return
    */
   public Check notNull() {
@@ -616,7 +664,7 @@ public abstract class Check {
 
   /**
    * See {@link #notEmpty(Object, String)}.
-   * 
+   *
    * @return
    */
   public Check notEmpty() {
@@ -625,7 +673,7 @@ public abstract class Check {
 
   /**
    * See {@link #noneEmpty(Object, String)}.
-   * 
+   *
    * @return
    */
   public Check noneEmpty() {
@@ -634,7 +682,7 @@ public abstract class Check {
 
   /**
    * See {@link #notBlank(String, String)}.
-   * 
+   *
    * @return
    */
   public Check notBlank() {
@@ -643,7 +691,7 @@ public abstract class Check {
 
   /**
    * See {@link #greaterThan(int, int, String)}.
-   * 
+   *
    * @param minVal
    */
   public Check greaterThan(int minVal) {
@@ -661,7 +709,7 @@ public abstract class Check {
 
   /**
    * See {@link #lessThan(int, int, String)}.
-   * 
+   *
    * @param maxVal
    */
   public Check lessThan(int maxVal) {
@@ -670,7 +718,7 @@ public abstract class Check {
 
   /**
    * See {@link #atMost(int, int, String)}.
-   * 
+   *
    * @param maxVal
    */
   public Check atMost(int maxVal) {
@@ -715,7 +763,7 @@ public abstract class Check {
 
   /**
    * See {@link #between(int, int, int, String)}.
-   * 
+   *
    * @param minInclusive
    * @param maxExclusive
    * @return
@@ -738,11 +786,11 @@ public abstract class Check {
   /**
    * Returns the argument being tested. To be used as the last call after a chain
    * of checks. For example:
-   * 
+   *
    * <pre>
    * Integer i = Check.that(counter, "counter").notNull().notNegative().value();
    * </pre>
-   * 
+   *
    * @param <U>
    * @return
    */
@@ -756,7 +804,7 @@ public abstract class Check {
    * saves the cost of unboxing incurred by {@link #value()}. If the argument
    * neither is {@code int} nor an {@code Integer} this method throws a
    * {@code ClassCastException}.
-   * 
+   *
    * @return
    */
   public int intValue() {

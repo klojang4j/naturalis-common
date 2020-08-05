@@ -5,7 +5,7 @@
  * possible replicating functionality already present in libraries such as
  * Apache Commons and Google Guava, but since it is designed to be
  * self-contained, some overlap in inevitable.
- * 
+ *
  * @author Ayco Holleman
  *
  */
@@ -15,6 +15,7 @@ module nl.naturalis.common {
   exports nl.naturalis.common.collection;
   exports nl.naturalis.common.exception;
   exports nl.naturalis.common.function;
+  exports nl.naturalis.common.path;
   exports nl.naturalis.common.time;
 
 }
