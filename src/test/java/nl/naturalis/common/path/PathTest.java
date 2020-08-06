@@ -2,7 +2,7 @@ package nl.naturalis.common.path;
 
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class PathTest {
 
@@ -16,6 +16,52 @@ public class PathTest {
     assertEquals("04", "0", path.segment(1));
     assertEquals("05", "scientificName", path.segment(2));
     assertEquals("06", "fullScientificName", path.segment(3));
+  }
+
+  @Test
+  public void parse01() {
+    Path path = new Path("identifications.awk^.ward.scientificName");
+    assertEquals("01", 3, path.size());
+    assertEquals("02", "identifications", path.segment(0));
+    assertEquals("03", "awk.ward", path.segment(1));
+    assertEquals("04", "scientificName", path.segment(2));
+  }
+
+  @Test
+  public void parse02() {
+    Path path = new Path("identifications.awk^^.ward.scientificName");
+    assertEquals("01", 4, path.size());
+    assertEquals("02", "identifications", path.segment(0));
+    assertEquals("03", "awk^", path.segment(1));
+    assertEquals("04", "ward", path.segment(2));
+    assertEquals("05", "scientificName", path.segment(3));
+  }
+
+  @Test
+  public void parse03() {
+    Path path = new Path("identifications.^^^..scientificName");
+    assertEquals("01", 3, path.size());
+    assertEquals("02", "identifications", path.segment(0));
+    assertEquals("03", "^.", path.segment(1));
+    assertEquals("05", "scientificName", path.segment(2));
+  }
+
+  @Test
+  public void parse04() {
+    Path path = new Path("identifications.awk^ward.scientificName");
+    assertEquals("01", 3, path.size());
+    assertEquals("02", "identifications", path.segment(0));
+    assertEquals("03", "awk^ward", path.segment(1));
+    assertEquals("05", "scientificName", path.segment(2));
+  }
+
+  @Test
+  public void parse05() {
+    Path path = new Path("identifications.^awk^^^^ward^^.scientificName");
+    assertEquals("01", 3, path.size());
+    assertEquals("02", "identifications", path.segment(0));
+    assertEquals("03", "^awk^^ward^", path.segment(1));
+    assertEquals("05", "scientificName", path.segment(2));
   }
 
   @Test
