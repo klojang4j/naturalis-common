@@ -11,14 +11,14 @@ import static java.util.Arrays.copyOfRange;
 import static java.util.function.Predicate.not;
 
 /**
- * Specifies a path to a within a {@code Map} or object. Path segments are
- * spearated by SEP (dot). For example: {@code employee.address.street}. Array
- * indices are specified as separate path segments. For example:
+ * Specifies a path to a value within a object. Path segments are spearated by
+ * '.' (dot). For example: {@code employee.address.street}. Array indices are
+ * specified as separate path segments. For example:
  * {@code employees.3.address.street} (the street that the 4th employee lives
  * on). The {@code Path} class is agnostic about whether a non-numeric path
- * segment denotes a map key or a field within an object. Therefore there are
- * zero constraints on what constitutes a valid path segment (a map key can be
- * anything, including null).
+ * segment denotes a map key or a field within an object. Therefore the
+ * {@code Path} class imposes zero constraints on what constitutes a valid path
+ * segment, since a map key can be anything (including null or an empty string).
  *
  * @author Ayco Holleman
  *
@@ -42,9 +42,9 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    * can, but does not have to be escaped unless it is followed by the segment
    * separator. So {@code awk^ward.lastName} denotes the same path as
    * {@code awk^^ward.lastName}. Only escape a path string when passing it in its
-   * entirety (as a {@code String}) to the {@link #Path(String) Path constructor}.
-   * Do not escape individual path segments when passing them as a {@code String}
-   * array to the {@link #Path(String[]) Path constructor}.
+   * entirety to the {@link #Path(String) Path constructor}. Do not escape
+   * individual path segments when passing them as a {@code String} array to the
+   * {@link #Path(String[]) Path constructor}.
    */
   public static final char ESC = '^';
   /**
@@ -54,8 +54,41 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    */
   public static final String NULL_SEGMENT = "^0";
 
+  /**
+   * Applies escaping to a path segment. Can be used to construct path strings. Do
+   * not use when passing individual path segments as a {@code String} array to
+   * the {@link #Path(String[]) constructor}.
+   *
+   * @param segment
+   * @return
+   */
+  public static String escape(String segment) {
+    if (segment == null) {
+      return NULL_SEGMENT;
+    }
+    StringBuilder sb = new StringBuilder(segment.length() << 4);
+    for (int i = 0; i < segment.length(); i++) {
+      switch (segment.charAt(i)) {
+        case SEP:
+          sb.append(ESC).append(SEP);
+          break;
+        case ESC:
+          sb.append(ESC);
+          if (i < segment.length() - 1 && segment.charAt(i + 1) == SEP) {
+            sb.append(ESC);
+          }
+          break;
+        default:
+          sb.append(segment.charAt(i));
+      }
+    }
+    return sb.toString();
+  }
+
   static boolean isArrayIndex(String segment) {
-    return !segment.isEmpty() && segment.codePoints().allMatch(i -> Character.isDigit(i));
+    return segment != null
+        && !segment.isEmpty()
+        && segment.codePoints().allMatch(i -> Character.isDigit(i));
   }
 
   private final String[] elems;
@@ -143,7 +176,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   public Path subpath(int from, int to) {
     int i = from < 0 ? elems.length - from : from;
     Check.index(i, elems.length);
-    Check.index(to, i + 1, elems.length + 1);
+    Check.index(to, i, elems.length);
     return new Path(copyOfRange(elems, i, to));
   }
 
@@ -325,29 +358,6 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
       elems.add(StringMethods.EMPTY);
     }
     return elems.toArray(new String[elems.size()]);
-  }
-
-  private static String escape(String segment) {
-    if (segment == null) {
-      return NULL_SEGMENT;
-    }
-    StringBuilder sb = new StringBuilder(segment.length() << 4);
-    for (int i = 0; i < segment.length(); i++) {
-      switch (segment.charAt(i)) {
-        case SEP:
-          sb.append(ESC).append(SEP);
-          break;
-        case ESC:
-          sb.append(ESC);
-          if (i < segment.length() - 1 && segment.charAt(i + 1) == SEP) {
-            sb.append(ESC);
-          }
-          break;
-        default:
-          sb.append(segment.charAt(i));
-      }
-    }
-    return sb.toString();
   }
 
 }

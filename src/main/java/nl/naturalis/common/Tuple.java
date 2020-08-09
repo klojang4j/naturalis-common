@@ -2,10 +2,11 @@ package nl.naturalis.common;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Generic, immutable Tuple class.
- * 
+ *
  * @author Ayco Holleman
  *
  * @param <LEFT> The type of the first element (or key) of the tuple
@@ -14,8 +15,8 @@ import java.util.Map;
 public final class Tuple<LEFT, RIGHT> {
 
   /**
-   * Creates a tuple from the provided two values. Use as static import to concisely create tuple instances.
-   * 
+   * Creates a tuple containing the provided values.
+   *
    * @param <K> The type of the first element (or key) of the tuple
    * @param <V> The type of the second element (or value) of the tuple
    * @param left The first element (or key) of the tupl
@@ -31,7 +32,7 @@ public final class Tuple<LEFT, RIGHT> {
 
   /**
    * Creates a tuple containing the provided values.
-   * 
+   *
    * @param left The first element of the tuple
    * @param right The second element of the tuple
    */
@@ -42,7 +43,7 @@ public final class Tuple<LEFT, RIGHT> {
 
   /**
    * Returns the first element of the tuple.
-   * 
+   *
    * @return
    */
   public LEFT getLeft() {
@@ -51,7 +52,7 @@ public final class Tuple<LEFT, RIGHT> {
 
   /**
    * Returns the second element of the tuple.
-   * 
+   *
    * @return
    */
   public RIGHT getRight() {
@@ -59,8 +60,9 @@ public final class Tuple<LEFT, RIGHT> {
   }
 
   /**
-   * Returns a singleton map with the left element as the key and the right element as the value.
-   * 
+   * Returns a singleton map with the left element as the key and the right
+   * element as the value.
+   *
    * @return
    */
   public Map<LEFT, RIGHT> toMap() {
@@ -69,7 +71,7 @@ public final class Tuple<LEFT, RIGHT> {
 
   /**
    * Converts the tuple to a map entry.
-   * 
+   *
    * @return
    */
   public Map.Entry<LEFT, RIGHT> toEntry() {
@@ -94,6 +96,24 @@ public final class Tuple<LEFT, RIGHT> {
         return old;
       }
     };
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(left, right);
+  }
+
+  @Override
+  @SuppressWarnings("rawtypes")
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || obj.getClass() != Tuple.class) {
+      return false;
+    }
+    Tuple other = (Tuple) obj;
+    return Objects.equals(left, other.left) && Objects.equals(right, other.right);
   }
 
 }

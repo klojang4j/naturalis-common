@@ -250,28 +250,38 @@ public abstract class Check {
   }
 
   /**
-   * Returns {@code arg} if it is between zero and {@code maxExclusive}, else
-   * throws an {@code ArrayIndexOutOfBoundsException}.
+   * Throws an {@code ArrayIndexOutOfBoundsException} if {@code arg} is less than
+   * zero or greater than or equal to {@code maxExclusive}, else returns
+   * {@code arg}. This is especially useful to test "from" arguments, which
+   * generally should be <i>less than</i> length or size of the object operated
+   * upon ({@code maxExclusive} would then be that length or size).
    *
-   * @param arg
-   * @param maxExclusive
+   * @param arg The argument to test
+   * @param maxExclusive The maximum allowed value (exclusive)
    * @return
    */
   public static int index(int arg, int maxExclusive) {
-    return index(arg, 0, maxExclusive);
+    if (arg < maxExclusive) {
+      return arg;
+    }
+    throw new ArrayIndexOutOfBoundsException(arg);
   }
 
   /**
-   * Returns {@code arg} if it is between {@code minInclusive} and
-   * {@code maxExclusive}, else throws an {@code ArrayIndexOutOfBoundsException}.
+   * Throws an {@code ArrayIndexOutOfBoundsException} if {@code arg} is less then
+   * {@code min} or greater than {@code max} it is between {@code min} and
+   * {@code max}, else returns {@code arg}. This is especially useful to test "to"
+   * or "until" arguments, which generally should be greater than <i>or equal
+   * to</i> the "from" argument, and less than <i>or equal to</i> to the length or
+   * size of the object operated upon.
    *
-   * @param arg
-   * @param minInclusive
-   * @param maxExclusive
+   * @param arg The argument to test
+   * @param min The minimum allowed value (inclusive)
+   * @param max The maximum allowed value (inclusive)
    * @return
    */
-  public static int index(int arg, int minInclusive, int maxExclusive) {
-    if (arg >= minInclusive && arg < maxExclusive) {
+  public static int index(int arg, int min, int max) {
+    if (arg >= min && arg <= max) {
       return arg;
     }
     throw new ArrayIndexOutOfBoundsException(arg);
