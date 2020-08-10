@@ -34,7 +34,7 @@ import static nl.naturalis.common.path.PathWalkerException.illegalAccess;
  * @author Ayco Holleman
  *
  */
-public class PathWalker {
+public final class PathWalker {
 
   /**
    * A special value indicating that a path could not be walked all the way to the
@@ -42,7 +42,7 @@ public class PathWalker {
    */
   public static final Object DEAD_END = new Object();
 
-  private final List<Path> paths;
+  private final Path[] paths;
   private final boolean useDeadEnd;
   private final Function<Object, String> stringifier;
 
@@ -82,10 +82,12 @@ public class PathWalker {
    * @param paths The paths to walk
    * @param useDeadEndValue Whether to use {@link #DEAD_END} or null for paths
    *        that could not be walked all the way to the end
-   * @param mapKeyStringifier A function that converts map keys to strings.
+   * @param mapKeyStringifier A function that converts map keys to strings (may be
+   *        null if no stringification is required)
    */
   public PathWalker(List<Path> paths, boolean useDeadEndValue, Function<Object, String> mapKeyStringifier) {
-    this.paths = Check.notEmpty(paths);
+    Check.that(paths, "paths").notEmpty().noneNull();
+    this.paths = paths.toArray(Path[]::new);
     this.useDeadEnd = useDeadEndValue;
     this.stringifier = mapKeyStringifier;
   }
@@ -98,8 +100,8 @@ public class PathWalker {
    * @throws PathWalkerException
    */
   public Map<Path, Object> readValues(Object obj) throws PathWalkerException {
-    Map<Path, Object> res = new HashMap<>(paths.size());
-    paths.forEach(p -> res.put(p, readObj(obj, p)));
+    Map<Path, Object> res = new HashMap<>(paths.length);
+    Arrays.stream(paths).forEach(p -> res.put(p, readObj(obj, p)));
     return res;
   }
 
@@ -114,7 +116,7 @@ public class PathWalker {
    */
   @SuppressWarnings("unchecked")
   public <T> T readValue(Object obj) {
-    return (T) readObj(obj, paths.get(0));
+    return (T) readObj(obj, paths[0]);
   }
 
   @SuppressWarnings({"rawtypes"})

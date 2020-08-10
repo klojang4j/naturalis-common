@@ -1,7 +1,9 @@
 package nl.naturalis.common.path;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 class Employee extends Person {
 
@@ -10,7 +12,7 @@ class Employee extends Person {
   private int[] birthDate;
   private URL twitter;
   private URL facebook;
-  private Map<String, Object> extraInfo;
+  private Map<Object, Object> extraInfo;
 
   public int getId() {
     return id;
@@ -52,12 +54,38 @@ class Employee extends Person {
     this.facebook = facebook;
   }
 
-  public Map<String, Object> getExtraInfo() {
+  public Map<Object, Object> getExtraInfo() {
     return extraInfo;
   }
 
-  public void setExtraInfo(Map<String, Object> extraInfo) {
+  public void setExtraInfo(Map<Object, Object> extraInfo) {
     this.extraInfo = extraInfo;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = super.hashCode();
+    result = prime * result + Arrays.hashCode(birthDate);
+    result = prime * result + Objects.hash(extraInfo, facebook, id, salary, twitter);
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (!super.equals(obj)) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    Employee other = (Employee) obj;
+    return Arrays.equals(birthDate, other.birthDate) && Objects.equals(extraInfo, other.extraInfo)
+        && Objects.equals(facebook, other.facebook) && id == other.id
+        && Double.doubleToLongBits(salary) == Double.doubleToLongBits(other.salary) && Objects.equals(twitter, other.twitter);
   }
 
 }

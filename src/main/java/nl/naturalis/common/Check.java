@@ -4,6 +4,10 @@ import java.util.Objects;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import nl.naturalis.common.internal.IntCheck;
+import nl.naturalis.common.internal.IntegerCheck;
+import nl.naturalis.common.internal.ObjectCheck;
+import nl.naturalis.common.internal.StringCheck;
 
 /**
  * <p>
@@ -289,20 +293,6 @@ public abstract class Check {
 
   /**
    * Returns {@code arg} if it is not null, else throws an
-   * {@code IllegalArgumentException} with the message: <i>Illegal argument:
-   * null</i>.
-   *
-   * @param <T> The type of the argument being tested
-   * @param arg The argument being tested
-   * @return The argument
-   * @throws IllegalArgumentException If the argument is null
-   */
-  public static <T> T notNull(T arg) {
-    return notNull(arg, "Illegal argument: null", null);
-  }
-
-  /**
-   * Returns {@code arg} if it is not null, else throws an
    * {@code IllegalArgumentException} with the message: <i>${argName} must not be
    * null</i>.
    *
@@ -336,9 +326,9 @@ public abstract class Check {
 
   /**
    * Returns {@code arg} if it is not null and, in case of an array or
-   * {@code Collection}, none of its elements are null. Otherwise this method
-   * throws an {@code IllegalArgumentException} with the message: <i>${argName}
-   * must not be null or contain null values</i>.
+   * {@code Collection} or {@code Map}, none of its elements/values are null.
+   * Otherwise this method throws an {@code IllegalArgumentException} with the
+   * message: <i>${argName} must not be null or contain null values</i>.
    *
    * @see ObjectMethods#deepNotNull(Object)
    *
@@ -349,21 +339,6 @@ public abstract class Check {
    */
   public static <T> T noneNull(T arg, String argName) {
     return argument(arg, ObjectMethods::deepNotNull, "%s must not be null or contain null values", argName);
-  }
-
-  /**
-   * Returns {@code arg} if it is not empty, else throws an
-   * {@code IllegalArgumentException} with the message: <i>Illegal argument:
-   * empty</i>.
-   *
-   * @see ObjectMethods#notEmpty(Object)
-   *
-   * @param arg The argument being tested
-   * @return The argument
-   * @throws IllegalArgumentException If the argument is empty
-   */
-  public static <T> T notEmpty(T arg) {
-    return notEmpty(arg, "Illegal argument: empty", null);
   }
 
   /**
@@ -402,10 +377,10 @@ public abstract class Check {
   }
 
   /**
-   * Returns {@code arg} if it is not empty according to
-   * {@link ObjectMethods#deepNotEmpty(Object)}. Otherwise this method throws an
-   * {@code IllegalArgumentException} with the message: <i>${argName} must not be
-   * empty or contain empty values</i>.
+   * Returns {@code arg} if it is {@link ObjectMethods#deepNotEmpty(Object) deeply
+   * non-empty}. Otherwise this method throws an {@code IllegalArgumentException}
+   * with the message: <i>${argName} must not be empty or contain empty
+   * values</i>.
    *
    * @see ObjectMethods#deepNotEmpty(Object)
    *
@@ -419,11 +394,10 @@ public abstract class Check {
   }
 
   /**
-   * Returns {@code arg} if it is not empty according to
-   * {@link ObjectMethods#deepNotEmpty(Object)}. Otherwise this method throws an
-   * {@code IllegalArgumentException} with the provided message and message
-   * arguments. The message arguments may be {@code null}, in which case they are
-   * ignored.
+   * Returns {@code arg} if it is {@link ObjectMethods#deepNotEmpty(Object) deeply
+   * non-empty} Otherwise this method throws an {@code IllegalArgumentException}
+   * with the provided message and message arguments. The message arguments may be
+   * {@code null}, in which case they are ignored.
    *
    * @param <T> The type of the argument
    * @param arg The argument being tested
@@ -436,19 +410,6 @@ public abstract class Check {
    */
   public static <T> T noneEmpty(T arg, String message, Object msgArg, Object... moreMsgArgs) {
     return argument(arg, ObjectMethods::deepNotEmpty, message, msgArg, moreMsgArgs);
-  }
-
-  /**
-   * Returns {@code arg} if it is not blank, else throws an
-   * {@code IllegalArgumentException} with the message: <i>Illegal argument:
-   * blank</i>.
-   *
-   * @param arg The argument being tested
-   * @return The argument
-   * @throws IllegalArgumentException If the argument is blank
-   */
-  public static String notBlank(String arg) {
-    return argument(arg, StringMethods::notBlank, "Illegal argument: blank");
   }
 
   /**
@@ -621,16 +582,12 @@ public abstract class Check {
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Instance fiels / methods
+  // Instance fields / methods
   //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  final String argName;
+  protected final String argName;
 
-  private Check() { // won't be called
-    this(null);
-  }
-
-  private Check(String argName) {
+  protected Check(String argName) {
     this.argName = argName;
   }
 
@@ -823,187 +780,6 @@ public abstract class Check {
 
   private ClassCastException notApplicable(String check) {
     return new ClassCastException(String.format("%s check not applicable to %s", check, argName));
-  }
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Private subclasses of Check
-  //////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  private static class ObjectCheck<T> extends Check {
-
-    final T arg;
-
-    private ObjectCheck(T arg, String argName) {
-      super(argName);
-      this.arg = arg;
-    }
-
-    @Override
-    public Check satisfies(Predicate<Object> test) {
-      argument(arg, test, argName, "%s does not satisfy %s", argName, test);
-      return this;
-    }
-
-    @Override
-    public ObjectCheck<T> notNull() {
-      notNull(arg, argName);
-      return this;
-    }
-
-    @Override
-    public ObjectCheck<T> noneNull() {
-      noneNull(arg, argName);
-      return this;
-    }
-
-    @Override
-    public ObjectCheck<T> notEmpty() {
-      notEmpty(arg, argName);
-      return this;
-    }
-
-    @Override
-    public ObjectCheck<T> noneEmpty() {
-      noneEmpty(arg, argName);
-      return this;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <U> U value() {
-      return (U) arg;
-    }
-
-  }
-
-  private static class StringCheck extends ObjectCheck<String> {
-
-    private StringCheck(String arg, String argName) {
-      super(arg, argName);
-    }
-
-    @Override
-    public StringCheck notBlank() {
-      notBlank(arg, argName);
-      return this;
-    }
-  }
-
-  private static class IntCheck extends Check {
-
-    final int arg;
-
-    private IntCheck(int arg, String argName) {
-      super(argName);
-      this.arg = arg;
-    }
-
-    @Override
-    public Check satisfies(IntPredicate test) {
-      integer(arg, test, argName, " %s does not satisfy %s", argName, test);
-      return this;
-    }
-
-    @Override
-    public IntCheck greaterThan(int min) {
-      greaterThan(arg, min, argName);
-      return this;
-    }
-
-    @Override
-    public IntCheck atLeast(int min) {
-      atLeast(arg, min, argName);
-      return this;
-    }
-
-    @Override
-    public IntCheck lessThan(int max) {
-      lessThan(arg, max, argName);
-      return this;
-    }
-
-    @Override
-    public IntCheck atMost(int max) {
-      atMost(arg, max, argName);
-      return this;
-    }
-
-    @Override
-    public Check between(int minInclusive, int maxExclusive) {
-      between(arg, minInclusive, maxExclusive, argName);
-      return this;
-    }
-
-    @Override
-    public Check inRange(int minInclusive, int maxInclusive) {
-      inRange(arg, minInclusive, maxInclusive, argName);
-      return this;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <U> U value() {
-      return (U) Integer.valueOf(arg);
-    }
-
-    @Override
-    public int intValue() {
-      return arg;
-    }
-
-  }
-
-  private static class IntegerCheck extends ObjectCheck<Integer> {
-    private IntegerCheck(Integer arg, String argName) {
-      super(arg.intValue(), argName);
-    }
-
-    @Override
-    public Check satisfies(IntPredicate test) {
-      integer(arg.intValue(), test, argName, " %s does not satisfy %s", argName, test);
-      return this;
-    }
-
-    @Override
-    public IntegerCheck greaterThan(int max) {
-      greaterThan(arg.intValue(), max, argName);
-      return this;
-    }
-
-    @Override
-    public IntegerCheck atLeast(int max) {
-      atLeast(arg.intValue(), max, argName);
-      return this;
-    }
-
-    @Override
-    public IntegerCheck lessThan(int max) {
-      lessThan(arg.intValue(), max, argName);
-      return this;
-    }
-
-    @Override
-    public IntegerCheck atMost(int max) {
-      atMost(arg.intValue(), max, argName);
-      return this;
-    }
-
-    @Override
-    public Check between(int minInclusive, int maxExclusive) {
-      between(arg.intValue(), minInclusive, maxExclusive, argName);
-      return this;
-    }
-
-    @Override
-    public Check inRange(int minInclusive, int maxInclusive) {
-      inRange(arg.intValue(), minInclusive, maxInclusive, argName);
-      return this;
-    }
-
-    @Override
-    public int intValue() {
-      return arg.intValue();
-    }
   }
 
 }

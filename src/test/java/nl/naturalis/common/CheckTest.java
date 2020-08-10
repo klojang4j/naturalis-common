@@ -53,17 +53,6 @@ public class CheckTest {
   }
 
   @Test
-  public void notNull01() {
-    try {
-      Check.notNull(null);
-    } catch (IllegalArgumentException e) {
-      assertEquals("Illegal argument: null", e.getMessage());
-      return;
-    }
-    fail();
-  }
-
-  @Test
   public void notNull02() {
     try {
       Check.notNull(null, "storage");
@@ -121,7 +110,7 @@ public class CheckTest {
   @Test
   public void notNull07() {
     Object obj0 = new Object();
-    Object obj1 = Check.notNull(obj0);
+    Object obj1 = Check.notNull(obj0, "foo");
     assertTrue(obj0 == obj1);
   }
 

@@ -1,5 +1,7 @@
 package nl.naturalis.common.path;
 
+import java.util.Objects;
+
 public class Address {
 
   private String street;
@@ -44,6 +46,27 @@ public class Address {
 
   public void setCity(String city) {
     this.city = city;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(city, street, streetNo, zip);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    Address other = (Address) obj;
+    return Objects.equals(city, other.city) && Objects.equals(street, other.street) && Objects.equals(streetNo, other.streetNo)
+        && Objects.equals(zip, other.zip);
   }
 
 }

@@ -11,14 +11,14 @@ import static java.util.Arrays.copyOfRange;
 import static java.util.function.Predicate.not;
 
 /**
- * Specifies a path to a value within a object. Path segments are spearated by
- * '.' (dot). For example: {@code employee.address.street}. Array indices are
- * specified as separate path segments. For example:
- * {@code employees.3.address.street} (the street that the 4th employee lives
- * on). The {@code Path} class is agnostic about whether a non-numeric path
- * segment denotes a map key or a field within an object. Therefore the
- * {@code Path} class imposes zero constraints on what constitutes a valid path
- * segment, since a map key can be anything (including null or an empty string).
+ * Specifies a path to a value within an object. Path segments are spearated by
+ * '.' (dot). For example: {@code employee.address.street} (the street name
+ * within the Address object of an Employee object). Array indices are specified
+ * as separate path segments. For example: {@code employees.3.address.street}
+ * (the street that the 4th employee lives on). Non-numeric segments can be
+ * either fields or map keys. Therefore the {@code Path} class imposes zero
+ * constraints on what constitutes a valid path segment, since a map key can be
+ * anything (including null or an empty string).
  *
  * @author Ayco Holleman
  *
@@ -36,47 +36,39 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   public static final char SEP = '.';
   /**
    * The escape character: &#39;^&#39; (circumflex). If a path segment contains
-   * the segment separator, you must escape it with this character. Using the
+   * the segment separator, it must be escaped with this character. (Using the
    * backslash character as an escape character would have made it needlessly
-   * complicated to write path strings in Java code. The escape character itself
-   * can, but does not have to be escaped unless it is followed by the segment
-   * separator. So {@code awk^ward.lastName} denotes the same path as
-   * {@code awk^^ward.lastName}. Only escape a path string when passing it in its
-   * entirety to the {@link #Path(String) Path constructor}. Do not escape
-   * individual path segments when passing them as a {@code String} array to the
-   * {@link #Path(String[]) Path constructor}.
+   * cumbersome to write path strings in Java code.) The escape character itself
+   * must <i>not</i> be escaped. You can let the {@link #escape(String) escape}
+   * method do the escaping for you.
    */
   public static final char ESC = '^';
   /**
    * The character sequence to use for {@code null} keys: "^0". So
-   * {@code lookups.^0} accesses the object with key {@code null} in the
-   * {@code lookups} map.
+   * {@code lookups.^0.name} retrieves the value of the name field within an
+   * object with key {@code null} in the {@code lookups} map.
    */
   public static final String NULL_SEGMENT = "^0";
 
   /**
-   * Applies escaping to a path segment. Can be used to construct path strings. Do
-   * not use when passing individual path segments as a {@code String} array to
-   * the {@link #Path(String[]) constructor}.
+   * Applies escaping to a path segment. Can be used to construct complete path
+   * strings. Do not use when passing individual path segments as a {@code String}
+   * array to the {@link #Path(String[]) constructor}.
    *
-   * @param segment
-   * @return
+   * @param segment The path segment to escape
+   * @return The escaped version of the segment
    */
   public static String escape(String segment) {
     if (segment == null) {
       return NULL_SEGMENT;
+    } else if (segment.indexOf(SEP) == -1) {
+      return segment;
     }
-    StringBuilder sb = new StringBuilder(segment.length() << 4);
+    StringBuilder sb = new StringBuilder(segment.length() + 4);
     for (int i = 0; i < segment.length(); i++) {
       switch (segment.charAt(i)) {
         case SEP:
           sb.append(ESC).append(SEP);
-          break;
-        case ESC:
-          sb.append(ESC);
-          if (i < segment.length() - 1 && segment.charAt(i + 1) == SEP) {
-            sb.append(ESC);
-          }
           break;
         default:
           sb.append(segment.charAt(i));
@@ -120,7 +112,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    *
    * @param segments
    */
-  public Path(String[] segments) {
+  public Path(String... segments) {
     Check.notNull(segments, "segments");
     elems = new String[segments.length];
     arraycopy(segments, 0, elems, 0, segments.length);
@@ -340,8 +332,8 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
           sb.setLength(0);
           break;
         case ESC:
-          if (i < path.length() - 1 && (path.charAt(i + 1) == ESC || path.charAt(i + 1) == SEP)) {
-            sb.append(path.charAt(i + 1));
+          if (i < path.length() - 1 && path.charAt(i + 1) == SEP) {
+            sb.append(SEP);
             ++i;
           } else {
             sb.append(ESC);

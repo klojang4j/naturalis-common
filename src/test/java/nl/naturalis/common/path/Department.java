@@ -1,5 +1,7 @@
 package nl.naturalis.common.path;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 
 public class Department {
@@ -48,6 +50,31 @@ public class Department {
 
   public void setEmployees(Set<Employee> employees) {
     this.employees = employees;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + Arrays.hashCode(telNos);
+    result = prime * result + Objects.hash(address, employees, manager, name);
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    Department other = (Department) obj;
+    return Objects.equals(address, other.address) && Objects.equals(employees, other.employees) && Objects.equals(manager, other.manager)
+        && Objects.equals(name, other.name) && Arrays.equals(telNos, other.telNos);
   }
 
 }

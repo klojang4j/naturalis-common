@@ -10,29 +10,33 @@ import static java.util.stream.Collectors.toUnmodifiableMap;
 import static nl.naturalis.common.Check.notNull;
 
 /**
- * Parses strings into enum constants by using a normalizer for both enum constant names and the strings to be parsed into the enum
- * constants. Internally the <code>EnumParser</code> creates a string-to-enum map with the normalized enum constant names as keys to
- * optimize the speed of parsing.
- * 
+ * Parses strings into enum constants by using a normalizer for both enum
+ * constant names and the strings to be parsed into the enum constants.
+ * Internally the <code>EnumParser</code> creates a string-to-enum map with the
+ * normalized enum constant names as keys to optimize the speed of parsing.
+ *
  * @author Ayco Holleman
  *
  */
 public class EnumParser<T extends Enum<T>> {
 
   /**
-   * The default way of normalizing enum constant names and client-provided strings to be parsed into enum constants. Removes ' ', '-' and
-   * '_', and makes it an all-lowercase string.
+   * The default way of normalizing enum constant names and client-provided
+   * strings to be parsed into enum constants. Removes ' ', '-' and '_', and makes
+   * it an all-lowercase string.
    */
-  public static final UnaryOperator<String> DEFAULT_NORMALIZER = s -> notNull(s).replaceAll("[-_ ]", "").toLowerCase();
+  public static final UnaryOperator<String> DEFAULT_NORMALIZER =
+      s -> notNull(s, "enum string").replaceAll("[-_ ]", "").toLowerCase();
 
   private final Class<T> enumClass;
   private final UnaryOperator<String> normalizer;
   private final Map<String, T> lookups;
 
   /**
-   * Creates an <code>EnumParser</code> for the provided enum class, using the {@link #DEFAULT_NORMALIZER} to normalize enum constant names
-   * the strings passed to the {@link #parse(String) parse} method.
-   * 
+   * Creates an <code>EnumParser</code> for the provided enum class, using the
+   * {@link #DEFAULT_NORMALIZER} to normalize enum constant names the strings
+   * passed to the {@link #parse(String) parse} method.
+   *
    * @param enumClass
    */
   public EnumParser(Class<T> enumClass) {
@@ -40,9 +44,10 @@ public class EnumParser<T extends Enum<T>> {
   }
 
   /**
-   * Creates an <code>EnumParser</code> for the provided enum class, using the provided <code>normalizer</code> to normalize enum constant
-   * names as well as the strings passed to the {@link #parse(String) parse} method.
-   * 
+   * Creates an <code>EnumParser</code> for the provided enum class, using the
+   * provided <code>normalizer</code> to normalize enum constant names as well as
+   * the strings passed to the {@link #parse(String) parse} method.
+   *
    * @param enumClass
    * @param normalizer
    */
@@ -55,8 +60,9 @@ public class EnumParser<T extends Enum<T>> {
   }
 
   /**
-   * Parses the provided value into an instant of the enum class managed by this <code>EnumParser</code>.
-   * 
+   * Parses the provided value into an instant of the enum class managed by this
+   * <code>EnumParser</code>.
+   *
    * @param value
    * @return
    */
