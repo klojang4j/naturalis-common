@@ -2,6 +2,7 @@ package nl.naturalis.common;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -34,7 +35,7 @@ public class ObjectMethods {
    * </ul>
    * <p>
    * Otherwise this method returns {@code false}.
-   * 
+   *
    * @param obj The object to be tested
    * @return Whether or not it is empty
    */
@@ -51,7 +52,7 @@ public class ObjectMethods {
 
   /**
    * Returns the inverse of {@link #isEmpty(Object) isEmpty}.
-   * 
+   *
    * @param obj The object to be tested
    * @return Whether or not it is non-empty
    */
@@ -73,7 +74,7 @@ public class ObjectMethods {
    * </ul>
    * <p>
    * Otherwise this method returns {@code false}.
-   * 
+   *
    * @param obj The object to be tested
    * @return Whether or not it is non-empty recursively
    */
@@ -108,7 +109,7 @@ public class ObjectMethods {
    * {@link #deepNotEmpty(Object) deepNotEmpty}, this method returns {@code true}
    * for empty arrays, collections and maps. It only checks that the values they
    * do contain are non-null.
-   * 
+   *
    * @param obj The object to be tested
    * @return Whether or not it is not null recursively
    */
@@ -128,7 +129,7 @@ public class ObjectMethods {
   /**
    * Returns {@code null} if the argument is {@link #isEmpty(Object) empty}, else
    * the argument itself.
-   * 
+   *
    * @param <T> The type of the argument
    * @param obj The argument
    * @return The argument itself or {@code null}
@@ -141,11 +142,11 @@ public class ObjectMethods {
    * <p>
    * Tests the provided arguments for equality using <i>empty-equals-null</i>
    * semantics. This is more or less equivalent to:
-   * 
+   *
    * <pre>
    * Objects.equals(emptyToNull(obj1), emptyToNull(obj2))
    * </pre>
-   * 
+   *
    * More specifically:
    * <p>
    * <ol>
@@ -161,8 +162,8 @@ public class ObjectMethods {
    * <li>For any other pair of arguments this method returns the result of
    * <code>Objects.equals(obj1, obj2)<code>
    * </ol>
-   * 
-   * 
+   *
+   *
    * @param obj1 The 1st of the pair of objects to compare
    * @param obj2 The 2nd of the pair of objects to compare
    * @return
@@ -180,7 +181,7 @@ public class ObjectMethods {
    * Recursively tests the arguments for equality using <i>empty-equals-null</i>
    * semantics. In other words, for arrays, collections and maps, elements c.q.
    * values are also compared using {@code e2nDeepEquals}.
-   * 
+   *
    * @param obj1 The 1st of the pair of objects to compare
    * @param obj2 The 2nd of the pair of objects to compare
    * @return
@@ -201,7 +202,7 @@ public class ObjectMethods {
    * <i>empty-equals-null</i> semantics to find keys and elements will likely have
    * to fall back more often on {@link #e2nEquals(Object, Object) e2nEquals} or
    * {@link #e2nDeepEquals(Object, Object) e2nDeepEquals}.
-   * 
+   *
    * @param obj The object to generate a hash code for
    * @return
    */
@@ -212,7 +213,7 @@ public class ObjectMethods {
   /**
    * Generates a hash code for the provided arguments using using
    * <i>empty-equals-null</i> semantics. See {@link #hashCode()}.
-   * 
+   *
    * @param objs The objects to generate a hash code for
    * @return
    */
@@ -229,7 +230,7 @@ public class ObjectMethods {
 
   /**
    * Returns the 2nd argument if the 1st argument is null, else the 1st argument.
-   * 
+   *
    * @param <T>
    * @param value
    * @param dfault
@@ -242,7 +243,7 @@ public class ObjectMethods {
   /**
    * Returns value supplied by the {@code Supplier} if the 1st argument is null,
    * else 1st argument.
-   * 
+   *
    * @param <T>
    * @param value The value to check and return if not null
    * @param then The <code>Supplier</code> supplying the value if null
@@ -255,11 +256,11 @@ public class ObjectMethods {
   /**
    * Returns null if the 1st argument is null, else the result of applying the
    * specified {@code Function} to the 1st argument. For example:
-   * 
+   *
    * <pre>
    * String[] strs = ifNotNull("Hello World", x -> x.split(" "));
    * </pre>
-   * 
+   *
    * @param <T> The type of the first argument
    * @param <U> The return type
    * @param value The value to check
@@ -274,7 +275,7 @@ public class ObjectMethods {
    * Returns the value supplied by the specified {@code Supplier} if the 1st
    * argument is null, else the result of applying the specified {@code Function}
    * to the 1st argument.
-   * 
+   *
    * @param <T> The type of the first argument
    * @param <U> The return type
    * @param value The value to check
@@ -287,9 +288,23 @@ public class ObjectMethods {
   }
 
   /**
+   * Does nothing if the 1st argument is null, else calls {@code apply} on the
+   * specified {@code Consumer}, passing it the 1st argument.
+   *
+   * @param <T> The type of the object to evaluate
+   * @param value The object to evaluate
+   * @param then The {@code Consumer} whose {@code apply} method to call
+   */
+  public static <T> void whenNotNull(T value, Consumer<T> then) {
+    if (value != null) {
+      then.accept(value);
+    }
+  }
+
+  /**
    * Returns the 2nd argument if the 1st argument {@link #isEmpty(Object) is
    * empty}, else the 1st argument.
-   * 
+   *
    * @param <T>
    * @param value
    * @param dfault
@@ -302,7 +317,7 @@ public class ObjectMethods {
   /**
    * Returns the value provided by the {@code Supplier} if the 1st argument
    * {@link #isEmpty(Object) is empty}, else the 1st argument.
-   * 
+   *
    * @param <T>
    * @param value The value to check and return if not null
    * @param then The <code>Supplier</code> supplying the value if null
@@ -316,7 +331,7 @@ public class ObjectMethods {
    * Returns null if the 1st argument is {@link #isEmpty(Object) is empty}, else
    * the result of applying the specified {@code Function} to the 1st argument.
    * For example:
-   * 
+   *
    * @param <T> The type of the first argument
    * @param <U> The return type
    * @param value The value to check
@@ -331,7 +346,7 @@ public class ObjectMethods {
    * Returns the 3rd argument if the 1st argument is {@link #isEmpty(Object)
    * empty}, else the result of applying the specified {@code Function} to the 1st
    * argument.
-   * 
+   *
    * @param <T> The type of the first argument
    * @param <U> The return type
    * @param value The value to check
@@ -347,7 +362,7 @@ public class ObjectMethods {
    * Returns the value supplied by the {@code Supplier} if the 1st argument is
    * {@link #isEmpty(Object) empty}, else the result of applying the specified
    * function to the 1st argument.
-   * 
+   *
    * @param <T> The type of the first argument
    * @param <U> The return type
    * @param value The value to check
@@ -367,9 +382,9 @@ public class ObjectMethods {
    * <pre>
    * String s = ifTrue(ignoreCase, name, String::toLowerCase);
    * </pre>
-   * 
+   *
    * @param <T> The return type
-   * 
+   *
    * @param condition The condition to evaluate
    * @param value The value value to return or to apply the transformation to
    * @param then The operation to apply if the condition evaluates to {@code true}
@@ -382,7 +397,7 @@ public class ObjectMethods {
   /**
    * Returns the result of the specified operation on the 2nd argument if the
    * condition evaluates the {@code false}, else the 2nd argument itself.
-   * 
+   *
    * @param <T> The return type
    * @param condition The condition to evaluate
    * @param value The value value to return or to apply the transformation to
