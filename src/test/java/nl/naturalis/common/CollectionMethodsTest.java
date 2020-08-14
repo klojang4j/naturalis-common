@@ -32,7 +32,6 @@ public class CollectionMethodsTest {
     assertEquals(input, output);
   }
 
-  @Test
   public void sublist04() {
     List<String> input = Arrays.asList("a", "b");
     List<String> output = CollectionMethods.sublist(input, -3, 0);
@@ -76,16 +75,16 @@ public class CollectionMethodsTest {
 
   @Test
   public void sublist10() {
-    List<String> input = Arrays.asList("a", "b","c","d");
+    List<String> input = Arrays.asList("a", "b", "c", "d");
     List<String> output = CollectionMethods.sublist(input, -3, 2);
-    assertEquals(Arrays.asList("b","c"), output);
+    assertEquals(Arrays.asList("b", "c"), output);
   }
 
   @Test
   public void sublist11() {
-    List<String> input = Arrays.asList("a", "b","c","d");
+    List<String> input = Arrays.asList("a", "b", "c", "d");
     List<String> output = CollectionMethods.sublist(input, 1, 2);
-    assertEquals(Arrays.asList("b","c"), output);
+    assertEquals(Arrays.asList("b", "c"), output);
   }
 
 }

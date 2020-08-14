@@ -127,7 +127,7 @@ public class CollectionMethods {
    */
   public static <T> List<T> sublist(List<T> list, int from, int length) {
     Check.notNull(list, "list");
-    Check.positive(length, "length");
+    Check.integer(length, i -> i >= 0, "length must not be negative");
     if (length == 0 || from >= list.size()) {
       return Collections.emptyList();
     }
