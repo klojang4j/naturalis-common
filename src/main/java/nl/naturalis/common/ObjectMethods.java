@@ -254,6 +254,18 @@ public class ObjectMethods {
   }
 
   /**
+   * Executes the {@code Runnable} if the {@code obj} is null, else does nothing.
+   *
+   * @param obj The object to test
+   * @param then The action to execute
+   */
+  public static void whenNull(Object obj, Runnable then) {
+    if (obj == null) {
+      then.run();
+    }
+  }
+
+  /**
    * Returns null if the 1st argument is null, else the result of applying the
    * specified {@code Function} to the 1st argument. For example:
    *
@@ -343,22 +355,6 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the 3rd argument if the 1st argument is {@link #isEmpty(Object)
-   * empty}, else the result of applying the specified {@code Function} to the 1st
-   * argument.
-   *
-   * @param <T> The type of the first argument
-   * @param <U> The return type
-   * @param value The value to check
-   * @param then The transformation to apply to the value if it is not null
-   * @param dfault The value to return in case the provided value is null
-   * @return
-   */
-  public static <T, U> U ifNotEmpty(T value, Function<T, U> then, U dfault) {
-    return notEmpty(value) ? then.apply(value) : dfault;
-  }
-
-  /**
    * Returns the value supplied by the {@code Supplier} if the 1st argument is
    * {@link #isEmpty(Object) empty}, else the result of applying the specified
    * function to the 1st argument.
@@ -372,6 +368,20 @@ public class ObjectMethods {
    */
   public static <T, U> U ifNotEmpty(T value, Function<T, U> then, Supplier<U> otherwise) {
     return notEmpty(value) ? then.apply(value) : otherwise.get();
+  }
+
+  /**
+   * Does nothing if the 1st argument is empty, else calls {@code apply} on the
+   * specified {@code Consumer}, passing it the 1st argument.
+   *
+   * @param <T> The type of the object to evaluate
+   * @param value The object to evaluate
+   * @param then The {@code Consumer} whose {@code apply} method to call
+   */
+  public static <T> void whenNotEmpty(T value, Consumer<T> then) {
+    if (notEmpty(value)) {
+      then.accept(value);
+    }
   }
 
   /**
@@ -395,6 +405,19 @@ public class ObjectMethods {
   }
 
   /**
+   * Runs the provided {@code Runnable} if the condition evaluates to
+   * {@code true}, else does nothing.
+   *
+   * @param condition The condition to evaluate
+   * @param then The action to execute
+   */
+  public static void whenTrue(boolean condition, Runnable then) {
+    if (condition) {
+      then.run();
+    }
+  }
+
+  /**
    * Returns the result of the specified operation on the 2nd argument if the
    * condition evaluates the {@code false}, else the 2nd argument itself.
    *
@@ -407,6 +430,19 @@ public class ObjectMethods {
    */
   public static <T> T ifFalse(boolean condition, T value, UnaryOperator<T> then) {
     return !condition ? then.apply(value) : value;
+  }
+
+  /**
+   * Runs the provided {@code Runnable} if the condition evaluates to
+   * {@code false}, else does nothing.
+   *
+   * @param condition The condition to evaluate
+   * @param then The action to execute
+   */
+  public static void whenFalse(boolean condition, Runnable then) {
+    if (!condition) {
+      then.run();
+    }
   }
 
   private static boolean eq(Object obj1, Object obj2) {

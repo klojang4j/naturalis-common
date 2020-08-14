@@ -325,6 +325,17 @@ public abstract class Check {
   }
 
   /**
+   * Checks that the provided argument is null, else throws an
+   * {@code IllegalArgumentException}.
+   *
+   * @param arg The argument being tested
+   * @param argName The argument name
+   */
+  public static void isNull(Object arg, String argName) {
+    argument(arg == null, "%s must be null", argName);
+  }
+
+  /**
    * Returns {@code arg} if it is not null and, in case of an array or
    * {@code Collection} or {@code Map}, none of its elements/values are null.
    * Otherwise this method throws an {@code IllegalArgumentException} with the
@@ -454,6 +465,18 @@ public abstract class Check {
    */
   public static int greaterThan(int arg, int minVal, String argName) {
     return integer(arg, x -> x > minVal, "%s must be greater than %d", argName, minVal);
+  }
+
+  /**
+   * Returns {@code arg} if it greater than zero, else throws an
+   * {@code IllegalArgumentException}.
+   *
+   * @param arg
+   * @param argName
+   * @return
+   */
+  public static int positive(int arg, String argName) {
+    return greaterThan(arg, 0, argName);
   }
 
   /**

@@ -70,6 +70,19 @@ public final class PathWalker {
    *
    * @param paths
    */
+  public PathWalker(String... paths) {
+    Check.that(paths, "paths").notEmpty().noneNull();
+    this.paths = Arrays.stream(paths).map(Path::new).toArray(Path[]::new);
+    this.useDeadEnd = false;
+    this.stringifier = null;
+  }
+
+  /**
+   * Creates a {@code MapReader} for the specified paths, setting the value for
+   * paths that code not be walked all the way to the end to null.
+   *
+   * @param paths
+   */
   public PathWalker(List<Path> paths) {
     this(paths, false, null);
   }

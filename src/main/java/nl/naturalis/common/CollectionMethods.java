@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * Methods extending the Java Collection framework.
@@ -18,7 +19,7 @@ public class CollectionMethods {
 
   /**
    * Whether or not the provided <code>Collection</code> is null or empty.
-   * 
+   *
    * @param c
    * @return
    */
@@ -27,8 +28,9 @@ public class CollectionMethods {
   }
 
   /**
-   * Whether or not the provided <code>Collection</code> is neither null nor empty.
-   * 
+   * Whether or not the provided <code>Collection</code> is neither null nor
+   * empty.
+   *
    * @param c
    * @return
    */
@@ -36,55 +38,88 @@ public class CollectionMethods {
     return !isEmpty(c);
   }
 
+  /**
+   * Returns the specified list if it is not empty else an immutable list
+   * containing only the specified element.
+   *
+   * @param <T>
+   * @param list
+   * @param e0
+   * @return
+   */
   public static <T> List<T> ifEmpty(List<T> list, T e0) {
-    return isEmpty(list) ? List.of(e0) : list;
+    return isEmpty(list) ? Collections.singletonList(e0) : list;
   }
 
-  public static <T> List<T> ifEmpty(List<T> list, T e0, T e1) {
-    return isEmpty(list) ? List.of(e0, e1) : list;
-  }
-
+  /**
+   * Returns the specified list if it is not empty else an immutable list
+   * containing the specified elements.
+   *
+   * @param <T>
+   * @param list
+   * @param e0
+   * @param e1
+   * @param moreElems
+   * @return
+   */
   @SafeVarargs
   public static <T> List<T> ifEmpty(List<T> list, T e0, T e1, T... moreElems) {
     return isEmpty(list) ? List.of(ArrayMethods.prefix(moreElems, e0, e1)) : list;
   }
 
-  public static <T> List<T> ifEmpty(List<T> list, Collection<T> use) {
-    if (isEmpty(list)) {
-      return use instanceof List ? (List<T>) use : List.copyOf(use);
-    }
-    return list;
-  }
-
+  /**
+   * Returns the specified set if it is not empty else an immutable set containing
+   * only the specified element.
+   *
+   * @param <T>
+   * @param set
+   * @param e0
+   * @return
+   */
   public static <T> Set<T> ifEmpty(Set<T> set, T e0) {
-    return isEmpty(set) ? Set.of(e0) : set;
+    return isEmpty(set) ? Collections.singleton(e0) : set;
   }
 
-  public static <T> Set<T> ifEmpty(Set<T> set, T e0, T e1) {
-    return isEmpty(set) ? Set.of(e0, e1) : set;
-  }
-
+  /**
+   * Returns the specified set if it is not empty else an immutable set containing
+   * the specified elements.
+   *
+   * @param <T>
+   * @param set
+   * @param e0
+   * @param e1
+   * @param moreElems
+   * @return
+   */
   @SafeVarargs
   public static <T> Set<T> ifEmpty(Set<T> set, T e0, T e1, T... moreElems) {
     return isEmpty(set) ? Set.of(ArrayMethods.prefix(moreElems, e0, e1)) : set;
   }
 
-  public static <T> Set<T> ifEmpty(Set<T> set, Collection<T> use) {
-    if (isEmpty(set)) {
-      return use instanceof Set ? (Set<T>) use : Set.copyOf(use);
-    }
-    return set;
+  /**
+   * Returns {@code collection} if not empty, else the {@code Collection} provided
+   * by {@code alternative}.
+   *
+   * @param <T>
+   * @param <U>
+   * @param collection
+   * @param alternative
+   * @return
+   */
+  public static <T, U extends Collection<T>> U ifEmpty(U collection, Supplier<U> alternative) {
+    return isEmpty(collection) ? alternative.get() : collection;
   }
 
   /**
-   * Returns a slice of the provided list starting with starting with element {@code from} and
-   * containing at most {@code length} elements.
+   * Returns a slice of the provided list starting with starting with element
+   * {@code from} and containing at most {@code length} elements.
    * <ol>
-   * <li>If {@code from} is less than zero, it is taken relative to the end of the list.
-   * <li>If {@code length} is zero or {@code from} is past the end of the list, an empty list is
-   * returned.
+   * <li>If {@code from} is less than zero, it is taken relative to the end of the
+   * list.
+   * <li>If {@code length} is zero or {@code from} is past the end of the list, an
+   * empty list is returned.
    * </ol>
-   * 
+   *
    * @param list
    * @param from
    * @param length
@@ -92,7 +127,7 @@ public class CollectionMethods {
    */
   public static <T> List<T> sublist(List<T> list, int from, int length) {
     Check.notNull(list, "list");
-    Check.argument(length >= 0, "length must not be negative");
+    Check.positive(length, "length");
     if (length == 0 || from >= list.size()) {
       return Collections.emptyList();
     }
@@ -105,8 +140,9 @@ public class CollectionMethods {
   }
 
   /**
-   * Creates and returns a mutable {@link HashSet} containing the provided elements.
-   * 
+   * Creates and returns a mutable {@link HashSet} containing the provided
+   * elements.
+   *
    * @param <T>
    * @param e0
    * @param e1
@@ -124,7 +160,7 @@ public class CollectionMethods {
 
   /**
    * Returns a mutable {@link HashMap} containing the provided key-value pairs.
-   * 
+   *
    * @param <K>
    * @param <V>
    * @param k0
@@ -147,8 +183,9 @@ public class CollectionMethods {
   }
 
   /**
-   * Creates and returns a mutable {@link LinkedHashMap} containing the provided key-value pairs.
-   * 
+   * Creates and returns a mutable {@link LinkedHashMap} containing the provided
+   * key-value pairs.
+   *
    * @param <K>
    * @param <V>
    * @param k0
