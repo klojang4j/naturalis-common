@@ -20,8 +20,8 @@ import nl.naturalis.common.internal.StringCheck;
  *
  * <pre>
  * int i = Check.that(numChairs, "numChairs")
- *     .atLeast(2)
- *     .atMost(10)
+ *     .gte(2)
+ *     .lte(10)
  *     .satisfies(x -> x % 2 == 0)
  *     .value();
  * </pre>
