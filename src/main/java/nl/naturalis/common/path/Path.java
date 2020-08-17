@@ -152,9 +152,9 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    * @return
    */
   public Path subpath(int from) {
-    int i = from < 0 ? elems.length - from : from;
-    Check.index(i, elems.length);
-    return new Path(copyOfRange(elems, i, elems.length));
+    int from0 = from < 0 ? elems.length - from : from;
+    Check.index(from0, elems.length);
+    return new Path(copyOfRange(elems, from0, elems.length));
   }
 
   /**
@@ -166,10 +166,10 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    * @return
    */
   public Path subpath(int from, int to) {
-    int i = from < 0 ? elems.length - from : from;
-    Check.index(i, elems.length);
-    Check.index(to, i, elems.length);
-    return new Path(copyOfRange(elems, i, to));
+    int from0 = from < 0 ? elems.length - from : from;
+    Check.index(from0, elems.length);
+    Check.index(to, from0, elems.length);
+    return new Path(copyOfRange(elems, from0, to));
   }
 
   /**

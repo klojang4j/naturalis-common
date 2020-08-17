@@ -16,26 +16,26 @@ public class IntegerCheck extends ObjectCheck<Integer> {
   }
 
   @Override
-  public IntegerCheck greaterThan(int max) {
-    greaterThan(arg.intValue(), max, argName);
+  public IntegerCheck gt(int max) {
+    gt(arg.intValue(), max, argName);
     return this;
   }
 
   @Override
-  public IntegerCheck atLeast(int max) {
-    atLeast(arg.intValue(), max, argName);
+  public IntegerCheck gte(int max) {
+    gte(arg.intValue(), max, argName);
     return this;
   }
 
   @Override
-  public IntegerCheck lessThan(int max) {
-    lessThan(arg.intValue(), max, argName);
+  public IntegerCheck lt(int max) {
+    lt(arg.intValue(), max, argName);
     return this;
   }
 
   @Override
-  public IntegerCheck atMost(int max) {
-    atMost(arg.intValue(), max, argName);
+  public IntegerCheck lte(int max) {
+    lte(arg.intValue(), max, argName);
     return this;
   }
 

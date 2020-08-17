@@ -257,14 +257,15 @@ public abstract class Check {
    * Throws an {@code ArrayIndexOutOfBoundsException} if {@code arg} is less than
    * zero or greater than or equal to {@code maxExclusive}, else returns
    * {@code arg}. This is especially useful to test "from" arguments, which
-   * generally should be <i>less than</i> length or size of the object operated
-   * upon ({@code maxExclusive} would then be that length or size).
+   * generally should be less than length or size of the object operated upon
+   * ({@code maxExclusive} would then be that length or size).
    *
    * @param arg The argument to test
    * @param maxExclusive The maximum allowed value (exclusive)
    * @return
+   * @throws ArrayIndexOutOfBoundsException
    */
-  public static int index(int arg, int maxExclusive) {
+  public static int index(int arg, int maxExclusive) throws ArrayIndexOutOfBoundsException {
     if (arg < maxExclusive) {
       return arg;
     }
@@ -272,19 +273,19 @@ public abstract class Check {
   }
 
   /**
-   * Throws an {@code ArrayIndexOutOfBoundsException} if {@code arg} is less then
-   * {@code min} or greater than {@code max} it is between {@code min} and
-   * {@code max}, else returns {@code arg}. This is especially useful to test "to"
-   * or "until" arguments, which generally should be greater than <i>or equal
-   * to</i> the "from" argument, and less than <i>or equal to</i> to the length or
-   * size of the object operated upon.
+   * Throws an {@code ArrayIndexOutOfBoundsException} if {@code arg} is less than
+   * {@code min} or greater than {@code max}, else returns {@code arg}. This is
+   * especially useful to test "to" or "until" arguments, which generally should
+   * be greater than or equal to the "from" argument, and less than <i>or equal
+   * to</i> to the length or size of the object operated upon.
    *
    * @param arg The argument to test
    * @param min The minimum allowed value (inclusive)
    * @param max The maximum allowed value (inclusive)
    * @return
+   * @throws ArrayIndexOutOfBoundsException
    */
-  public static int index(int arg, int min, int max) {
+  public static int index(int arg, int min, int max) throws ArrayIndexOutOfBoundsException {
     if (arg >= min && arg <= max) {
       return arg;
     }
@@ -463,20 +464,8 @@ public abstract class Check {
    * @param argName
    * @return
    */
-  public static int greaterThan(int arg, int minVal, String argName) {
+  public static int gt(int arg, int minVal, String argName) {
     return integer(arg, x -> x > minVal, "%s must be greater than %d", argName, minVal);
-  }
-
-  /**
-   * Returns {@code arg} if it greater than zero, else throws an
-   * {@code IllegalArgumentException}.
-   *
-   * @param arg
-   * @param argName
-   * @return
-   */
-  public static int positive(int arg, String argName) {
-    return greaterThan(arg, 0, argName);
   }
 
   /**
@@ -488,7 +477,7 @@ public abstract class Check {
    * @param argName
    * @return
    */
-  public static int atLeast(int arg, int minVal, String argName) {
+  public static int gte(int arg, int minVal, String argName) {
     return integer(arg, x -> x >= minVal, "%s must be greater than or equal to %d", argName, minVal);
   }
 
@@ -501,7 +490,7 @@ public abstract class Check {
    * @param argName
    * @return
    */
-  public static int lessThan(int arg, int maxVal, String argName) {
+  public static int lt(int arg, int maxVal, String argName) {
     return integer(arg, x -> x < maxVal, "%s must be less than %d", argName, maxVal);
   }
 
@@ -514,7 +503,7 @@ public abstract class Check {
    * @param argName
    * @return
    */
-  public static int atMost(int arg, int maxVal, String argName) {
+  public static int lte(int arg, int maxVal, String argName) {
     return integer(arg, x -> x <= maxVal, "%s must be less than or equal to %d", argName, maxVal);
   }
 
@@ -680,75 +669,39 @@ public abstract class Check {
   }
 
   /**
-   * See {@link #greaterThan(int, int, String)}.
+   * See {@link #gt(int, int, String)}.
    *
    * @param minVal
    */
-  public Check greaterThan(int minVal) {
+  public Check gt(int minVal) {
     throw notApplicable("gt");
   }
 
   /**
-   * See {@link #atLeast(int, int, String)}.
+   * See {@link #gte(int, int, String)}.
    *
    * @param minVal
    */
-  public Check atLeast(int minVal) {
+  public Check gte(int minVal) {
     throw notApplicable("gte");
   }
 
   /**
-   * See {@link #lessThan(int, int, String)}.
+   * See {@link #lt(int, int, String)}.
    *
    * @param maxVal
    */
-  public Check lessThan(int maxVal) {
+  public Check lt(int maxVal) {
     throw notApplicable("lt");
   }
 
   /**
-   * See {@link #atMost(int, int, String)}.
+   * See {@link #lte(int, int, String)}.
    *
    * @param maxVal
    */
-  public Check atMost(int maxVal) {
+  public Check lte(int maxVal) {
     throw notApplicable("lte");
-  }
-
-  /**
-   * Equivalent to <code>greaterThan(0)</code>.
-   *
-   * @return
-   */
-  public Check positive() {
-    return greaterThan(0);
-  }
-
-  /**
-   * Equivalent to <code>lessThan(0)</code>.
-   *
-   * @return
-   */
-  public Check negative() {
-    return lessThan(0);
-  }
-
-  /**
-   * Equivalent to <code>atMost(0)</code>.
-   *
-   * @return
-   */
-  public Check notPositive() {
-    return atMost(0);
-  }
-
-  /**
-   * Equivalent to <code>atLeast(0)</code>.
-   *
-   * @return
-   */
-  public Check notNegative() {
-    return atLeast(0);
   }
 
   /**
@@ -778,7 +731,7 @@ public abstract class Check {
    * of checks. For example:
    *
    * <pre>
-   * Integer i = Check.that(counter, "counter").notNull().notNegative().value();
+   * Integer i = Check.that(counter, "counter").notNull().value();
    * </pre>
    *
    * @param <U>

@@ -19,26 +19,26 @@ public class IntCheck extends Check {
   }
 
   @Override
-  public IntCheck greaterThan(int min) {
-    greaterThan(arg, min, argName);
+  public IntCheck gt(int min) {
+    gt(arg, min, argName);
     return this;
   }
 
   @Override
-  public IntCheck atLeast(int min) {
-    atLeast(arg, min, argName);
+  public IntCheck gte(int min) {
+    gte(arg, min, argName);
     return this;
   }
 
   @Override
-  public IntCheck lessThan(int max) {
-    lessThan(arg, max, argName);
+  public IntCheck lt(int max) {
+    lt(arg, max, argName);
     return this;
   }
 
   @Override
-  public IntCheck atMost(int max) {
-    atMost(arg, max, argName);
+  public IntCheck lte(int max) {
+    lte(arg, max, argName);
     return this;
   }
 
