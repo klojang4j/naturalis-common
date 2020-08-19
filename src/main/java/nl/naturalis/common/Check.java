@@ -54,8 +54,8 @@ public abstract class Check {
    * Returns a {@code Check} object that allows you to chain multiple checks on
    * the provided integer without having to repeat the argument name every time.
    *
-   * @param arg
-   * @param argName
+   * @param arg The argument to be tested
+   * @param argName The argument name
    * @return
    */
   public static Check that(int arg, String argName) {
@@ -68,8 +68,8 @@ public abstract class Check {
    * time.
    *
    *
-   * @param arg
-   * @param argName
+   * @param arg The argument to be tested
+   * @param argName The argument name
    * @return
    */
   public static Check that(String arg, String argName) {
@@ -81,8 +81,8 @@ public abstract class Check {
    * the provided {@code Integer} without having to repeat the argument name every
    * time.
    *
-   * @param arg
-   * @param argName
+   * @param arg The argument to be tested
+   * @param argName The argument name
    * @return
    */
   public static Check that(Integer arg, String argName) {
@@ -93,8 +93,8 @@ public abstract class Check {
    * Returns a {@code Check} object that allows you to chain multiple checks on
    * the provided argument without having to repeat the argument name every time.
    *
-   * @param arg
-   * @param argName
+   * @param arg The argument to be tested
+   * @param argName The argument name
    * @return
    */
   public static <T> Check that(T arg, String argName) {
@@ -174,7 +174,7 @@ public abstract class Check {
    * {@code IllegalArgumentException} with the provided message.
    *
    * @param <T>
-   * @param arg
+   * @param arg The argument to be tested
    * @param test
    * @param message
    * @return
@@ -187,7 +187,7 @@ public abstract class Check {
    * Returns {@code arg} if it passes the provided {@code test}, else throws an
    * {@code IllegalArgumentException} with the provided message.
    *
-   * @param arg
+   * @param arg The argument to be tested
    * @param test
    * @param message
    * @return
@@ -222,7 +222,7 @@ public abstract class Check {
    * ignored as message arguments.
    *
    * @param <T>
-   * @param arg
+   * @param arg The argument to be tested
    * @param test
    * @param message
    * @param msgArg
@@ -239,7 +239,7 @@ public abstract class Check {
    * arguments. The message arguments may be {@code null}, in which case they are
    * ignored.
    *
-   * @param arg
+   * @param arg The argument to be tested
    * @param test
    * @param message
    * @param msgArg
@@ -260,7 +260,7 @@ public abstract class Check {
    * generally should be less than length or size of the object operated upon
    * ({@code maxExclusive} would then be that length or size).
    *
-   * @param arg The argument to test
+   * @param arg The argument to be tested The argument to test
    * @param maxExclusive The maximum allowed value (exclusive)
    * @return
    * @throws ArrayIndexOutOfBoundsException
@@ -279,7 +279,7 @@ public abstract class Check {
    * be greater than or equal to the "from" argument, and less than <i>or equal
    * to</i> to the length or size of the object operated upon.
    *
-   * @param arg The argument to test
+   * @param arg The argument to be tested The argument to test
    * @param min The minimum allowed value (inclusive)
    * @param max The maximum allowed value (inclusive)
    * @return
@@ -297,9 +297,9 @@ public abstract class Check {
    * {@code IllegalArgumentException} with the message: <i>${argName} must not be
    * null</i>.
    *
-   * @param <T> The type of the argument being tested
-   * @param arg The argument being tested
-   * @param argName The name of the argument being tested
+   * @param <T> The type of the argument to be tested
+   * @param arg The argument to be tested
+   * @param argName The argument name
    * @return The argument
    * @throws IllegalArgumentException If the argument is null
    */
@@ -313,8 +313,8 @@ public abstract class Check {
    * arguments. The message arguments may be {@code null}, in which case they are
    * ignored.
    *
-   * @param <T> The type of the argument being tested
-   * @param arg The argument being tested
+   * @param <T> The type of the argument to be tested
+   * @param arg The argument to be tested
    * @param message The exception message
    * @param msgArg The 1st {@code String.format} message argument
    * @param moreMsgArgs The remaining {@code String.format} message arguments
@@ -329,7 +329,7 @@ public abstract class Check {
    * Checks that the provided argument is null, else throws an
    * {@code IllegalArgumentException}.
    *
-   * @param arg The argument being tested
+   * @param arg The argument to be tested
    * @param argName The argument name
    */
   public static void isNull(Object arg, String argName) {
@@ -344,8 +344,8 @@ public abstract class Check {
    *
    * @see ObjectMethods#deepNotNull(Object)
    *
-   * @param <T> The type of the argument being tested
-   * @param arg The argument being tested
+   * @param <T> The type of the argument to be tested
+   * @param arg The argument to be tested
    * @param argName The argument name
    * @return
    */
@@ -360,8 +360,8 @@ public abstract class Check {
    *
    * @see ObjectMethods#notEmpty(Object)
    *
-   * @param arg The argument being tested
-   * @param argName The name of the argument being tested
+   * @param arg The argument to be tested
+   * @param argName The argument name
    * @return The argument
    * @throws IllegalArgumentException If the argument is empty
    */
@@ -377,7 +377,7 @@ public abstract class Check {
    *
    * @see ObjectMethods#notEmpty(Object)
    *
-   * @param arg The argument being tested
+   * @param arg The argument to be tested
    * @param message The exception message
    * @param msgArg The 1st {@code String.format} message argument
    * @param moreMsgArgs The remaining {@code String.format} message arguments
@@ -397,7 +397,7 @@ public abstract class Check {
    * @see ObjectMethods#deepNotEmpty(Object)
    *
    * @param <T> The type of the argument
-   * @param arg The argument being tested
+   * @param arg The argument to be tested
    * @param argName The argument name
    * @return
    */
@@ -412,7 +412,7 @@ public abstract class Check {
    * {@code null}, in which case they are ignored.
    *
    * @param <T> The type of the argument
-   * @param arg The argument being tested
+   * @param arg The argument to be tested
    * @param message The exception message
    * @param msgArg The 1st message argument (or null if the message has no message
    *        arguments)
@@ -429,8 +429,8 @@ public abstract class Check {
    * {@code IllegalArgumentException} with the message: <i>${argName} must not be
    * blank</i>.
    *
-   * @param arg The argument being tested
-   * @param argName The name of the argument being tested
+   * @param arg The argument to be tested
+   * @param argName The argument name
    * @return The argument
    * @throws IllegalArgumentException If the argument is blank
    */
@@ -444,7 +444,7 @@ public abstract class Check {
    * arguments. {@code msgArg} is allowed to be null, in which case it is ignored
    * as a message argument.
    *
-   * @param arg The argument being tested
+   * @param arg The argument to be tested
    * @param message The exception message
    * @param msgArg The 1st {@code String.format} message argument
    * @param moreMsgArgs The remaining {@code String.format} message arguments
@@ -459,9 +459,9 @@ public abstract class Check {
    * Returns {@code arg} if it is greater than {@code minVal}, else throws an
    * {@code IllegalArgumentException}.
    *
-   * @param arg
-   * @param minVal
-   * @param argName
+   * @param arg The argument to be tested
+   * @param minVal The argument's lower bound (exclusive)
+   * @param argName The argument name
    * @return
    */
   public static int gt(int arg, int minVal, String argName) {
@@ -469,52 +469,119 @@ public abstract class Check {
   }
 
   /**
+   * Returns {@code arg} if it is greater than {@code minVal}, else throws an
+   * {@code IllegalArgumentException}.
+   *
+   * @param arg The argument to be tested
+   * @param minVal The argument's lower bound (exclusive)
+   * @param message The error message
+   * @param msgArg The first message argument (may be null)
+   * @param moreMsgArgs The remaining message arguments (may be null or empty)
+   * @return
+   * @throws IllegalArgumentException
+   */
+  public static int gt(int arg, int minVal, String message, Object msgArg, Object... moreMsgArgs) throws IllegalArgumentException {
+    return integer(arg, x -> x > minVal, message, msgArg, moreMsgArgs);
+  }
+
+  /**
    * Returns {@code arg} if it is greater than or equal to {@code minVal}, else
    * throws an {@code IllegalArgumentException}.
    *
-   * @param arg
-   * @param minVal
-   * @param argName
+   * @param arg The argument to be tested
+   * @param minVal The argument's lower bound (inclusive)
+   * @param argName The argument name
    * @return
+   * @throws IllegalArgumentException
    */
-  public static int gte(int arg, int minVal, String argName) {
+  public static int gte(int arg, int minVal, String argName) throws IllegalArgumentException {
     return integer(arg, x -> x >= minVal, "%s must be greater than or equal to %d", argName, minVal);
+  }
+
+  /**
+   * Returns {@code arg} if it is greater than or equal to {@code minVal}, else
+   * throws an {@code IllegalArgumentException}.
+   *
+   * @param arg The argument to be tested
+   * @param minVal The argument's lower bound (inclusive)
+   * @param message The error message
+   * @param msgArg The first message argument (may be null)
+   * @param moreMsgArgs The remaining message arguments (may be null or empty)
+   * @return
+   * @throws IllegalArgumentException
+   */
+  public static int gte(int arg, int minVal, String message, Object msgArg, Object... moreMsgArgs) throws IllegalArgumentException {
+    return integer(arg, x -> x >= minVal, message, msgArg, moreMsgArgs);
   }
 
   /**
    * Returns {@code arg} if it is less than {@code maxVal}, else throws an
    * {@code IllegalArgumentException}.
    *
-   * @param arg
-   * @param maxVal
-   * @param argName
+   * @param arg The argument to be tested
+   * @param maxVal The argument's upper bound (exclusive)
+   * @param argName The argument name
    * @return
+   * @throws IllegalArgumentException
    */
-  public static int lt(int arg, int maxVal, String argName) {
+  public static int lt(int arg, int maxVal, String argName) throws IllegalArgumentException {
     return integer(arg, x -> x < maxVal, "%s must be less than %d", argName, maxVal);
+  }
+
+  /**
+   * Returns {@code arg} if it is less than {@code maxVal}, else throws an
+   * {@code IllegalArgumentException}.
+   *
+   * @param arg The argument to be tested
+   * @param maxVal The argument's upper bound (exclusive)
+   * @param message The error message
+   * @param msgArg The first message argument (may be null)
+   * @param moreMsgArgs The remaining message arguments (may be null or empty)
+   * @return
+   * @throws IllegalArgumentException
+   */
+  public static int lt(int arg, int maxVal, String message, Object msgArg, Object... moreMsgArgs) throws IllegalArgumentException {
+    return integer(arg, x -> x > maxVal, message, msgArg, moreMsgArgs);
   }
 
   /**
    * Returns {@code arg} is less than or equal to {@code maxVal}, else throws an
    * {@code IllegalArgumentException}.
    *
-   * @param arg
-   * @param maxVal
-   * @param argName
+   * @param arg The argument to be tested
+   * @param maxVal The argument's upper bound (inclusive)
+   * @param argName The argument name
    * @return
+   * @throws IllegalArgumentException
    */
-  public static int lte(int arg, int maxVal, String argName) {
+  public static int lte(int arg, int maxVal, String argName) throws IllegalArgumentException {
     return integer(arg, x -> x <= maxVal, "%s must be less than or equal to %d", argName, maxVal);
+  }
+
+  /**
+   * Returns {@code arg} is less than or equal to {@code maxVal}, else throws an
+   * {@code IllegalArgumentException}.
+   *
+   * @param arg The argument to be tested
+   * @param maxVal The argument's upper bound (inclusive)
+   * @param message The error message
+   * @param msgArg The first message argument (may be null)
+   * @param moreMsgArgs The remaining message arguments (may be null or empty)
+   * @return
+   * @throws IllegalArgumentException
+   */
+  public static int lte(int arg, int maxVal, String message, Object msgArg, Object... moreMsgArgs) throws IllegalArgumentException {
+    return integer(arg, x -> x <= maxVal, message, msgArg, moreMsgArgs);
   }
 
   /**
    * Returns {@code arg} if it is between {@code minInclusive} and
    * {@code maxExclusive}, else throws an {@code IllegalArgumentException}.
    *
-   * @param arg
+   * @param arg The argument to be tested
    * @param minInclusive
    * @param maxExclusive
-   * @param argName
+   * @param argName The argument name
    * @return
    */
   public static int between(int arg, int minInclusive, int maxExclusive, String argName) {
@@ -530,10 +597,10 @@ public abstract class Check {
    * Returns {@code arg} if it is between {@code minInclusive} and
    * {@code maxInclusive}, else throws an {@code IllegalArgumentException}.
    *
-   * @param arg
+   * @param arg The argument to be tested
    * @param minInclusive
    * @param maxInclusive
-   * @param argName
+   * @param argName The argument name
    * @return
    */
   public static int inRange(int arg, int minInclusive, int maxInclusive, String argName) {

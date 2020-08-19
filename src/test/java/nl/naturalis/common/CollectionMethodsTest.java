@@ -1,90 +1,29 @@
 package nl.naturalis.common;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-
+import java.util.stream.Collectors;
 import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
+import static nl.naturalis.common.CollectionMethods.sublist;
 
 public class CollectionMethodsTest {
 
   @Test
   public void sublist01() {
-    List<String> input = new ArrayList<>();
-    List<String> output = CollectionMethods.sublist(input, 0, 10);
-    assertEquals(Collections.emptyList(), output);
+    List<String> chars = List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+    assertEquals("A", "234", concat(sublist(chars, 2, 3)));
+    assertEquals("B", "234", concat(sublist(chars, 4, -3)));
+    assertEquals("C", "01234", concat(sublist(chars, 4, -50)));
+    assertEquals("D", "0", concat(sublist(chars, 0, -50)));
+    assertEquals("E", "0", concat(sublist(chars, -20, -50)));
+    assertEquals("F", "89", concat(sublist(chars, -2, 2)));
+    assertEquals("G", "89", concat(sublist(chars, -2, 50)));
+    assertEquals("G", "78", concat(sublist(chars, -2, -2)));
+    assertEquals("G", "4567", concat(sublist(chars, -3, -4)));
   }
 
-  @Test
-  public void sublist02() {
-    List<String> input = Arrays.asList("a", "b");
-    List<String> output = CollectionMethods.sublist(input, 0, 10);
-    assertEquals(input, output);
-  }
-
-  @Test
-  public void sublist03() {
-    List<String> input = Arrays.asList("a", "b");
-    List<String> output = CollectionMethods.sublist(input, -3, 10);
-    assertEquals(input, output);
-  }
-
-  public void sublist04() {
-    List<String> input = Arrays.asList("a", "b");
-    List<String> output = CollectionMethods.sublist(input, -3, 0);
-    assertEquals(Collections.emptyList(), output);
-  }
-
-  @Test
-  public void sublist05() {
-    List<String> input = Arrays.asList("a", "b");
-    List<String> output = CollectionMethods.sublist(input, -3, 1);
-    assertEquals(Arrays.asList("a"), output);
-  }
-
-  @Test
-  public void sublist06() {
-    List<String> input = Arrays.asList("a", "b");
-    List<String> output = CollectionMethods.sublist(input, 8, 1);
-    assertEquals(Collections.emptyList(), output);
-  }
-
-  @Test
-  public void sublist07() {
-    List<String> input = Arrays.asList("a", "b");
-    List<String> output = CollectionMethods.sublist(input, 1, 1);
-    assertEquals(Arrays.asList("b"), output);
-  }
-
-  @Test
-  public void sublist08() {
-    List<String> input = Arrays.asList("a", "b");
-    List<String> output = CollectionMethods.sublist(input, 1, 7);
-    assertEquals(Arrays.asList("b"), output);
-  }
-
-  @Test
-  public void sublist09() {
-    List<String> input = Arrays.asList("a", "b");
-    List<String> output = CollectionMethods.sublist(input, -1, 7);
-    assertEquals(Arrays.asList("b"), output);
-  }
-
-  @Test
-  public void sublist10() {
-    List<String> input = Arrays.asList("a", "b", "c", "d");
-    List<String> output = CollectionMethods.sublist(input, -3, 2);
-    assertEquals(Arrays.asList("b", "c"), output);
-  }
-
-  @Test
-  public void sublist11() {
-    List<String> input = Arrays.asList("a", "b", "c", "d");
-    List<String> output = CollectionMethods.sublist(input, 1, 2);
-    assertEquals(Arrays.asList("b", "c"), output);
+  private static String concat(List<String> chars) {
+    return chars.stream().collect(Collectors.joining());
   }
 
 }

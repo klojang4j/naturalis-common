@@ -103,13 +103,139 @@ public class CollectionMethods {
   }
 
   /**
+   * Returns a mutable {@link HashMap} containing the provided key-value pairs.
+   *
+   * @param <K>
+   * @param <V>
+   * @param k0
+   * @param v0
+   * @param k1
+   * @param v1
+   * @param kvPairs
+   * @return
+   */
+  @SuppressWarnings("unchecked")
+  public static <K, V> HashMap<K, V> newHashMap(Object... kvPairs) {
+    Check.notNull(kvPairs, "kvPairs");
+    Check.integer(kvPairs.length, x -> x % 2 == 0, "kvPairs array must contain even number of elements");
+    HashMap<K, V> map = new HashMap<>(kvPairs.length);
+    for (int i = 0; i < kvPairs.length; i += 2) {
+      map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
+    }
+    return map;
+  }
+
+  /**
+   * Returns a mutable {@link HashSet} containing the provided elements.
+   *
+   * @param <T>
+   * @param elems
+   * @return
+   */
+  @SafeVarargs
+  public static <T> HashSet<T> newHashSet(T... elems) {
+    HashSet<T> set = new HashSet<>(elems.length);
+    Arrays.stream(elems).forEach(set::add);
+    return set;
+  }
+
+  /**
+   * Returns a mutable {@link LinkedHashMap} containing the provided key-value
+   * pairs.
+   *
+   * @param <K>
+   * @param <V>
+   * @param kvPairs
+   * @return
+   */
+  @SuppressWarnings("unchecked")
+  public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(Object... kvPairs) {
+    Check.notNull(kvPairs, "kvPairs");
+    Check.integer(kvPairs.length, x -> x % 2 == 0, "kvPairs array must contain even number of elements");
+    LinkedHashMap<K, V> map = new LinkedHashMap<>(kvPairs.length);
+    for (int i = 0; i < kvPairs.length; i += 2) {
+      map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
+    }
+    return map;
+  }
+
+  /**
+   * Returns a mutable {@link LinkedHashSet} containing the provided elements.
+   *
+   * @param <T>
+   * @param elems
+   * @return
+   */
+  @SafeVarargs
+  public static <T> LinkedHashSet<T> newLinkedHashSet(T... elems) {
+    LinkedHashSet<T> set = new LinkedHashSet<>(elems.length);
+    Arrays.stream(elems).forEach(set::add);
+    return set;
+  }
+
+  /**
+   * Right-shifts the provided list by one element.
+   *
+   * @param <T>
+   * @param list
+   * @return
+   */
+  public static <T> List<T> shrink(List<T> list) {
+    return shrink(list, 1);
+  }
+
+  /**
+   * Right-shifts the provided list by the specified number of elements.
+   *
+   * @param <T>
+   * @param list
+   * @param by
+   * @return
+   */
+  public static <T> List<T> shrink(List<T> list, int by) {
+    Check.notEmpty(list, "list");
+    Check.inRange(by, 0, list.size(), "by");
+    int sz = list.size();
+    return sz == by ? Collections.emptyList() : list.subList(0, sz - by);
+  }
+
+  /**
+   * Left-shifts the provided list by one element.
+   *
+   * @param <T>
+   * @param list
+   * @return
+   */
+  public static <T> List<T> shift(List<T> list) {
+    return shift(list, 1);
+  }
+
+  /**
+   * Left-shifts the provided list by the specified number of elements.
+   *
+   * @param <T>
+   * @param list
+   * @param by
+   * @return
+   */
+  public static <T> List<T> shift(List<T> list, int by) {
+    Check.notEmpty(list, "list");
+    Check.inRange(by, 0, list.size(), "by");
+    int sz = list.size();
+    return sz == by ? Collections.emptyList() : list.subList(by, sz);
+  }
+
+  /**
    * Returns a slice of the provided list starting with starting with element
    * {@code from} and containing at most {@code length} elements.
    * <ol>
-   * <li>If {@code from} is less than zero, it is taken relative to the end of the
+   * <li>If {@code from} is negative, the sublist is taken from the end of the
    * list.
-   * <li>If {@code length} is zero or {@code from} is past the end of the list, an
-   * empty list is returned.
+   * <li>If {@code length} is negative, the sublist is taken to the left of
+   * {@code from}.
+   * <li>Both {@code from} and {@code length} are clamped to their minimum and
+   * maximum values. In other words you will never get an
+   * {@link ArrayIndexOutOfBoundsException}.
    * </ol>
    *
    * @param list
@@ -119,84 +245,24 @@ public class CollectionMethods {
    */
   public static <T> List<T> sublist(List<T> list, int from, int length) {
     Check.notNull(list, "list");
-    Check.integer(length, i -> i >= 0, "length must not be negative");
-    if (length == 0 || from >= list.size()) {
+    if (length == 0) {
       return Collections.emptyList();
     }
     if (from < 0) {
-      from = list.size() + from;
+      from = Math.max(0, list.size() + from);
     }
-    from = Math.max(0, from);
+    if (length < 0) {
+      /*
+       * e.g. if from == 4 and length == -2, then element 4 (the 5th) element is the
+       * *last* of the sublist and element 4 the first.
+       */
+      length = Math.min(from + 1, Math.abs(length));
+      from = from - length + 1;
+    } else {
+      from = Math.min(list.size() - 1, from);
+    }
     int to = Math.min(list.size(), from + length);
     return list.subList(from, to);
-  }
-
-  /**
-   * Creates and returns a mutable {@link HashSet} containing the provided
-   * elements.
-   *
-   * @param <T>
-   * @param e0
-   * @param e1
-   * @param moreElements
-   * @return
-   */
-  @SafeVarargs
-  public static <T> HashSet<T> newHashSet(T e0, T e1, T... moreElements) {
-    HashSet<T> set = new HashSet<>();
-    set.add(e0);
-    set.add(e1);
-    Arrays.stream(moreElements).forEach(set::add);
-    return set;
-  }
-
-  /**
-   * Returns a mutable {@link HashMap} containing the provided key-value pairs.
-   *
-   * @param <K>
-   * @param <V>
-   * @param k0
-   * @param v0
-   * @param k1
-   * @param v1
-   * @param moreKVPairs
-   * @return
-   */
-  @SuppressWarnings("unchecked")
-  public static <K, V> HashMap<K, V> newHashMap(K k0, V v0, K k1, V v1, Object... moreKVPairs) {
-    Check.argument(moreKVPairs.length % 2 == 0, "moreKVPairs array must contain an even number of elements");
-    HashMap<K, V> map = new HashMap<>();
-    map.put(k0, v0);
-    map.put(k1, v1);
-    for (int i = 0; i < moreKVPairs.length; i += 2) {
-      map.put((K) moreKVPairs[i], (V) moreKVPairs[i + 1]);
-    }
-    return map;
-  }
-
-  /**
-   * Creates and returns a mutable {@link LinkedHashMap} containing the provided
-   * key-value pairs.
-   *
-   * @param <K>
-   * @param <V>
-   * @param k0
-   * @param v0
-   * @param k1
-   * @param v1
-   * @param moreKVPairs
-   * @return
-   */
-  @SuppressWarnings("unchecked")
-  public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(K k0, V v0, K k1, V v1, Object... moreKVPairs) {
-    Check.argument(moreKVPairs.length % 2 == 0, "moreKVPairs array must contain even number of elements");
-    LinkedHashMap<K, V> map = new LinkedHashMap<>();
-    map.put(k0, v0);
-    map.put(k1, v1);
-    for (int i = 0; i < moreKVPairs.length; i += 2) {
-      map.put((K) moreKVPairs[i], (V) moreKVPairs[i + 1]);
-    }
-    return map;
   }
 
 }
