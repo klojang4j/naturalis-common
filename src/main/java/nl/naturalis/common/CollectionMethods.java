@@ -174,7 +174,7 @@ public class CollectionMethods {
   }
 
   /**
-   * Right-shifts the provided list by one element.
+   * Shrinks the provided list by one element.
    *
    * @param <T>
    * @param list
@@ -185,7 +185,7 @@ public class CollectionMethods {
   }
 
   /**
-   * Right-shifts the provided list by the specified number of elements.
+   * Shrinks the provided list by the specified number of elements.
    *
    * @param <T>
    * @param list
@@ -229,10 +229,11 @@ public class CollectionMethods {
    * Returns a slice of the provided list starting with starting with element
    * {@code from} and containing at most {@code length} elements.
    * <ol>
-   * <li>If {@code from} is negative, the sublist is taken from the end of the
-   * list.
+   * <li>If {@code from} is negative, it is relative to the end of the list.
    * <li>If {@code length} is negative, the sublist is taken to the left of
-   * {@code from}.
+   * {@code from}. Note that <code>list.get(from)</code> is still included in the
+   * sublist (as the last element); {@code from} does not morph into the
+   * {@code to} (exclusive) parameter.
    * <li>Both {@code from} and {@code length} are clamped to their minimum and
    * maximum values. In other words you will never get an
    * {@link ArrayIndexOutOfBoundsException}.

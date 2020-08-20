@@ -2,7 +2,6 @@ package nl.naturalis.common;
 
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class StringMethodsTest {
@@ -18,17 +17,11 @@ public class StringMethodsTest {
   @Test
   public void endsWith_01() {
     String s = "The cat is both dead and alive";
-    assertTrue("01", StringMethods.endsWith(s, true, "ALIVE", "test"));
-    assertTrue("02", StringMethods.endsWith(s, true, "test", "ALIVE"));
-    assertTrue("03", StringMethods.endsWith(s, true, "test", "a", "b", "ALIVE", "c"));
-    assertFalse("04", StringMethods.endsWith(s, false, "DEAD", "ALIVE"));
-    assertFalse("05", StringMethods.endsWith(s, true, "dead", "and"));
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void endsWith_02() {
-    String s = "The cat is both dead and alive";
-    assertTrue("01", StringMethods.endsWith(s, true, "", "both"));
+    assertTrue("01", null != StringMethods.endsWith(s, true, "ALIVE", "test"));
+    assertTrue("02", null != StringMethods.endsWith(s, true, "test", "ALIVE"));
+    assertTrue("03", null != StringMethods.endsWith(s, true, "test", "a", "b", "ALIVE", "c"));
+    assertTrue("04", null == StringMethods.endsWith(s, false, "DEAD", "ALIVE"));
+    assertTrue("05", null == StringMethods.endsWith(s, true, "dead", "and"));
   }
 
   @Test
@@ -60,30 +53,6 @@ public class StringMethodsTest {
     assertEquals("06", "tever", StringMethods.substr("whatever", -5));
     assertEquals("07", "ver", StringMethods.substr("whatever", 5));
     assertEquals("08", "", StringMethods.substr("what", 4));
-  }
-
-  @Test
-  public void zpad_3args() {
-    assertEquals("01", "00whatever|", StringMethods.zpad("whatever", 10, "|"));
-    assertEquals("02", "00whatever|||", StringMethods.zpad("whatever", 10, "|||"));
-    assertEquals("03", "0whatever|", StringMethods.zpad("whatever", 9, "|"));
-    assertEquals("04", "whatever|", StringMethods.zpad("whatever", 8, "|"));
-    assertEquals("05", "whatever", StringMethods.zpad("whatever", 7));
-    assertEquals("06", "whatever", StringMethods.zpad("whatever", 6));
-    String hour = StringMethods.zpad(7, 2, ":");
-    String minute = StringMethods.zpad(38, 2, ":");
-    String sec = StringMethods.zpad(6, 2);
-    String time = hour + minute + sec;
-    assertEquals("07", "07:38:06", time);
-  }
-
-  @Test
-  public void zpad_2args() {
-    assertEquals("01", "00whatever", StringMethods.zpad("whatever", 10));
-    assertEquals("02", "0whatever", StringMethods.zpad("whatever", 9));
-    assertEquals("03", "whatever", StringMethods.zpad("whatever", 8));
-    assertEquals("04", "whatever", StringMethods.zpad("whatever", 7));
-    assertEquals("05", "whatever", StringMethods.zpad("whatever", 6));
   }
 
   @Test
