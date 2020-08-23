@@ -147,7 +147,7 @@ public class PathTest {
   @Test(expected = ArrayIndexOutOfBoundsException.class)
   public void subpath03() {
     Path p = new Path("identifications.0.scientificName");
-    p.subpath(-1, 3);
+    p.subpath(-1, 5);
   }
 
   @Test(expected = ArrayIndexOutOfBoundsException.class)
@@ -159,10 +159,28 @@ public class PathTest {
   @Test
   public void subpath05() {
     Path p = new Path("identifications.0.scientificName");
-    assertEquals("01", new Path("scientificName"), p.subpath(2, 3));
-    assertEquals("02", new Path("0.scientificName"), p.subpath(1, 3));
+    assertEquals("01", new Path("scientificName"), p.subpath(2, 1));
+    assertEquals("02", new Path("0.scientificName"), p.subpath(1, 2));
     assertEquals("03", new Path("identifications.0.scientificName"), p.subpath(0, 3));
     assertEquals("04", new Path("0.scientificName"), p.subpath(1));
+  }
+
+  @Test
+  public void subpath06() {
+    Path p = new Path("identifications.0.scientificName");
+    assertEquals("01", new Path("0.scientificName"), p.subpath(-2));
+    assertEquals("02", new Path("0"), p.subpath(-2, 1));
+    assertEquals("03", Path.EMPTY_PATH, p.subpath(-2, 0));
+  }
+
+  @Test
+  public void parent01() {
+    assertEquals("01", null, Path.EMPTY_PATH.parent());
+    Path p = new Path("identifications.0.scientificName");
+    assertEquals("02", new Path("identifications.0"), p.parent());
+    assertEquals("03", new Path("identifications"), p.parent().parent());
+    assertEquals("04", Path.EMPTY_PATH, p.parent().parent().parent());
+    assertEquals("05", null, p.parent().parent().parent().parent());
   }
 
 }

@@ -45,8 +45,8 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   public static final char ESC = '^';
   /**
    * The character sequence to use for {@code null} keys: "^0". So
-   * {@code lookups.^0.name} retrieves the value of the name field within an
-   * object with key {@code null} in the {@code lookups} map.
+   * {@code lookups.^0.name} gets the object with key null in the {@code lookups}
+   * map and then returns the value of that object's {@code name} field.
    */
   public static final String NULL_SEGMENT = "^0";
 
@@ -139,7 +139,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    */
   public String segment(int index) {
     int i = index < 0 ? elems.length + index : index;
-    return elems[Check.index(i, elems.length)];
+    return elems[Check.index(i, elems.length, "i")];
   }
 
   /**
@@ -152,24 +152,35 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    * @return
    */
   public Path subpath(int from) {
-    int from0 = from < 0 ? elems.length - from : from;
-    Check.index(from0, elems.length);
+    int from0 = from < 0 ? elems.length + from : from;
+    Check.index(from0, elems.length, "from0");
     return new Path(copyOfRange(elems, from0, elems.length));
   }
 
   /**
-   * Returns a new {@code Path} consisting of the segments from the 1st array
-   * index (inclusive) to the 2nd array index (exclusive). The 1st argument may be
-   * negative to indicate an offset from the last segment.
+   * Returns a new {@code Path} consisting of {@code len} starting with segment
+   * {@code from}. The 1st argument may be negative to indicate an offset from the
+   * last segment.
    *
    * @param from
    * @return
    */
-  public Path subpath(int from, int to) {
-    int from0 = from < 0 ? elems.length - from : from;
-    Check.index(from0, elems.length);
-    Check.index(to, from0, elems.length);
+  public Path subpath(int from, int len) {
+    int from0 = from < 0 ? elems.length + from : from;
+    int to = from0 + len;
+    Check.index(from0, elems.length, "from0");
+    Check.index(to, from0, elems.length, "to");
     return new Path(copyOfRange(elems, from0, to));
+  }
+
+  /**
+   * Return the parent of thie {@code Path} or null if this is an empty
+   * {@code Path}.
+   *
+   * @return
+   */
+  public Path parent() {
+    return elems.length == 0 ? null : new Path(copyOfRange(elems, 0, elems.length - 1));
   }
 
   /**
@@ -215,7 +226,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    * @return
    */
   public Path replace(int index, String newValue) {
-    Check.index(index, 0, elems.length);
+    Check.index(index, 0, elems.length, "index");
     String[] copy = Arrays.copyOf(elems, elems.length);
     copy[index] = newValue;
     return new Path(copy);
@@ -252,7 +263,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
       }
 
       public String next() {
-        return elems[Check.index(++i, elems.length)];
+        return elems[Check.index(++i, elems.length, "i")];
       }
     };
   }

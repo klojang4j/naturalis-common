@@ -265,11 +265,11 @@ public abstract class Check {
    * @return
    * @throws ArrayIndexOutOfBoundsException
    */
-  public static int index(int arg, int maxExclusive) throws ArrayIndexOutOfBoundsException {
+  public static int index(int arg, int maxExclusive, String argName) throws ArrayIndexOutOfBoundsException {
     if (arg < maxExclusive) {
       return arg;
     }
-    throw new ArrayIndexOutOfBoundsException(arg);
+    throw badIndex(arg, argName);
   }
 
   /**
@@ -285,11 +285,11 @@ public abstract class Check {
    * @return
    * @throws ArrayIndexOutOfBoundsException
    */
-  public static int index(int arg, int min, int max) throws ArrayIndexOutOfBoundsException {
+  public static int index(int arg, int min, int max, String argName) throws ArrayIndexOutOfBoundsException {
     if (arg >= min && arg <= max) {
       return arg;
     }
-    throw new ArrayIndexOutOfBoundsException(arg);
+    throw badIndex(arg, argName);
   }
 
   /**
@@ -646,6 +646,11 @@ public abstract class Check {
 
   private static IllegalStateException badState(String msg, Object... msgArgs) {
     return new IllegalStateException(String.format(msg, msgArgs));
+  }
+
+  private static ArrayIndexOutOfBoundsException badIndex(int arg, String argName) {
+    String fmt = "Index variable \"%s\" out of range: %d";
+    return new ArrayIndexOutOfBoundsException(String.format(fmt, argName, arg));
   }
 
   private static Object[] withMessageArguments(Object msgArg, Object[] moreMsgArgs) {
