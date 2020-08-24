@@ -10,7 +10,7 @@ public class IntegerCheck extends ObjectCheck<Integer> {
   }
 
   @Override
-  public Check satisfies(IntPredicate test) {
+  public Check testInt(IntPredicate test) {
     integer(arg.intValue(), test, argName, " %s does not satisfy %s", argName, test);
     return this;
   }

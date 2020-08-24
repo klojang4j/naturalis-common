@@ -681,8 +681,8 @@ public abstract class Check {
    * @param test
    * @return
    */
-  public Check satisfies(Predicate<Object> test) {
-    throw notApplicable("satisfies");
+  public Check test(Predicate<Object> test) {
+    throw notApplicable("test");
   }
 
   /**
@@ -691,8 +691,8 @@ public abstract class Check {
    * @param test
    * @return
    */
-  public Check satisfies(IntPredicate test) {
-    throw notApplicable("satisfies");
+  public Check testInt(IntPredicate test) {
+    throw notApplicable("testInt");
   }
 
   /**

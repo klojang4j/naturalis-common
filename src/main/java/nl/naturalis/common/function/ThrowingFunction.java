@@ -8,21 +8,21 @@ import java.util.function.Function;
  *
  * @author Ayco Holleman
  *
- * @param <X> The type of the input variable
- * @param <Y> The type of the return value
+ * @param <T> The type of the input variable
+ * @param <R> The type of the return value
  * @param <E> The type of the exception potentially being thrown
  */
 @FunctionalInterface
-public interface ThrowingFunction<X, Y, E extends Exception> {
+public interface ThrowingFunction<T, R, E extends Exception> {
 
   /**
-   * Calculates a value for x while potentially throwing an exception of type
-   * {@code E}.
+   * Calculates a value for the provided argument while potentially throwing an
+   * exception of type {@code E}.
    *
-   * @param x The input variable
+   * @param arg The input variable
    * @return A value of type {@code Y}
    * @throws E The exception potentially being thrown
    */
-  Y apply(X x) throws E;
+  R apply(T arg) throws E;
 
 }

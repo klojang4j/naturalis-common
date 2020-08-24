@@ -1,13 +1,16 @@
 package nl.naturalis.common.path;
 
-import java.lang.invoke.VarHandle;
 import java.lang.reflect.Array;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.function.Function;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 import nl.naturalis.common.Check;
 import nl.naturalis.common.ClassMethods;
+import static nl.naturalis.common.ClassMethods.getArrayType;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
 import static nl.naturalis.common.path.Path.isArrayIndex;
 import static nl.naturalis.common.path.PathWalkerException.illegalAccess;
@@ -39,17 +42,20 @@ import static nl.naturalis.common.path.PathWalkerException.illegalAccess;
  * @author Ayco Holleman
  *
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public final class PathWalker {
 
   /**
    * A special value indicating that a path could not be walked all the way to the
-   * end for the object currently being read.
+   * end for the object currently being read. Note that this can either mean that
+   * you really specified an invalid path given the <i>type</i> of object to walk,
+   * or that the object did not have the nested objects corresponding to the path.
    */
   public static final Object DEAD_END = new Object();
 
   private final Path[] paths;
   private final boolean useDeadEnd;
-  private final Function<Object, String> stringifier;
+  private final BiFunction<Map, String, Object> keyDeser;
 
   /**
    * Creates a {@code MapReader} for the specified paths, setting the value for
@@ -61,7 +67,7 @@ public final class PathWalker {
     Check.that(paths, "paths").notEmpty().noneNull();
     this.paths = Arrays.copyOf(paths, paths.length);
     this.useDeadEnd = false;
-    this.stringifier = null;
+    this.keyDeser = null;
   }
 
   /**
@@ -74,7 +80,7 @@ public final class PathWalker {
     Check.that(paths, "paths").notEmpty().noneNull();
     this.paths = Arrays.stream(paths).map(Path::new).toArray(Path[]::new);
     this.useDeadEnd = false;
-    this.stringifier = null;
+    this.keyDeser = null;
   }
 
   /**
@@ -105,78 +111,111 @@ public final class PathWalker {
    * {@code useDeadEndValue} equals {@code true}, then the value for a path that
    * could not be walked will be {@link #DEAD_END}, else {@code null}. If it is
    * important to distinguish between "real" null values and dead ends, pass
-   * {@code true}. If the objects to walk are or contain other than
-   * string-to-object maps, you need to provide a function that stringifies the
-   * map keys, such that they can be mapped to path segments.
+   * {@code true}. If you need to read from or write to maps with non-string keys,
+   * you must provide a function that converts path segments to map keys.
    *
    * @param paths The paths to walk
    * @param useDeadEndValue Whether to use {@link #DEAD_END} or null for paths
    *        that could not be walked all the way to the end
-   * @param mapKeyStringifier A function that converts map keys to strings (may be
-   *        null if no stringification is required)
+   * @param mapKeyDeserializer A function that converts strings to map keys (may
+   *        be null if no deserialization is required). The map being read is
+   *        passed as the 1st argument to the function; the path segment to be
+   *        deserialized as the 2nd argument.
    */
-  public PathWalker(List<Path> paths, boolean useDeadEndValue, Function<Object, String> mapKeyStringifier) {
+  public PathWalker(List<Path> paths,
+      boolean useDeadEndValue,
+      BiFunction<Map, String, Object> mapKeyDeserializer) {
     Check.that(paths, "paths").notEmpty().noneNull();
     this.paths = paths.toArray(Path[]::new);
     this.useDeadEnd = useDeadEndValue;
-    this.stringifier = mapKeyStringifier;
+    this.keyDeser = mapKeyDeserializer;
   }
 
   /**
-   * Walks all paths through to provided object and returns their values in the
-   * same order as the paths specified through the constructor.
+   * Returns the values of all paths within the provided object in the same order
+   * as the paths specified through the constructor.
    *
-   * @param obj The object to read the path values from
+   * @param host The object to read the path values from
    * @return
    * @throws PathWalkerException
    */
-  public Object[] readValues(Object obj) throws PathWalkerException {
-    return IntStream.range(0, paths.length).mapToObj(i -> readObj(obj, paths[i])).toArray();
+  public Object[] readValues(Object host) throws PathWalkerException {
+    return IntStream.range(0, paths.length).mapToObj(i -> readObj(host, paths[i])).toArray();
   }
 
   /**
-   * Walks all paths through to provided object and places their values in the
-   * provided output array. The values will be in the same order as the paths
+   * Reads the values of all paths within the provided object and places them in
+   * the provided output array. The values will be in the same order as the paths
    * specified through the constructors. The output array need not have the same
    * length as the path array.
    *
-   * @param obj
+   * @param host
    * @param output
    * @throws PathWalkerException
    */
-  public void readValues(Object obj, Object[] output) throws PathWalkerException {
+  public void readValues(Object host, Object[] output) throws PathWalkerException {
     int x = Math.min(paths.length, Check.notNull(output, "output").length);
-    IntStream.range(0, x).forEach(i -> output[i] = readObj(obj, paths[i]));
+    IntStream.range(0, x).forEach(i -> output[i] = readObj(host, paths[i]));
   }
 
   /**
-   * Walks all paths through to provided object and places their values in the
-   * provided path-to-value map.
+   * Reads the values of all paths within the provided object and places them in
+   * the provided path-to-value map.
    *
-   * @param obj
+   * @param host
    * @param output
    * @throws PathWalkerException
    */
-  public void readValues(Object obj, Map<Path, Object> output) throws PathWalkerException {
+  public void readValues(Object host, Map<Path, Object> output) throws PathWalkerException {
     Check.notNull(output, "output");
-    Arrays.stream(paths).forEach(p -> output.put(p, readObj(obj, p)));
+    Arrays.stream(paths).forEach(p -> output.put(p, readObj(host, p)));
   }
 
   /**
    * Returns the value of the first path. Useful if the {@code PathWalker} was
-   * created for just one path.
+   * created with just one path.
    *
    * @param <T> The type of the object that the path points to
    * @param obj The object to read the path values from
    * @return
    * @throws PathWalkerException
    */
-  @SuppressWarnings("unchecked")
-  public <T> T readValue(Object obj) {
+  public <T> T read(Object obj) {
     return (T) readObj(obj, paths[0]);
   }
 
-  @SuppressWarnings({"rawtypes"})
+  /**
+   * Sets the values of all paths within the provided object to the specified
+   * values. The number of values must be greater than or equal to the length as
+   * the number of {@code Path} objects specified through the constructor.
+   *
+   * @param host
+   * @param values
+   */
+  public void writeValues(Object host, Object... values) {
+    Check.notNull(values, "values");
+    Check.integer(values.length, x -> x == paths.length, "Invalid number of values: %d", values.length);
+    for (int i = 0; i < paths.length; ++i) {
+      write(host, paths[i], values[i]);
+    }
+  }
+
+  /**
+   * Sets the value of the first path within the provided object to the specified
+   * value. Useful if the {@code PathWalker} was created for just one path. This
+   * method will not throw an exception if path's parent does not exist within the
+   * provided object, or if the value of the path's parent is null. It will also
+   * not throw an exception when trying to set a value at an index that is out of
+   * bounds for the provided host object. It may throw a
+   * {@link ClassCastException}, however.
+   *
+   * @param host
+   * @param value
+   */
+  public void write(Object host, Object value) {
+    write(host, paths[0], value);
+  }
+
   private Object readObj(Object obj, Path path) {
     if (path.isEmpty() || obj == null || obj == DEAD_END) {
       return obj;
@@ -193,24 +232,15 @@ public final class PathWalker {
     }
   }
 
-  @SuppressWarnings({"rawtypes"})
   private Object readMap(Map map, Path path) {
     String segment = path.segment(0);
-    if (stringifier == null) {
-      if (map.containsKey(segment)) {
-        return readObj(map.get(segment), path.shift());
-      }
-    } else {
-      for (Entry e : (Set<Entry>) map.entrySet()) {
-        if (Objects.equals(stringifier.apply(e.getKey()), segment)) {
-          return readObj(e.getValue(), path.shift());
-        }
-      }
+    Object key = keyDeser == null ? segment : keyDeser.apply(map, segment);
+    if (map.containsKey(key)) {
+      return readObj(map.get(key), path.shift());
     }
     return deadEnd();
   }
 
-  @SuppressWarnings("rawtypes")
   private Object readElement(Collection collection, Path path) {
     String segment = path.segment(0);
     if (isArrayIndex(segment)) {
@@ -249,13 +279,72 @@ public final class PathWalker {
   private Object readAny(Object any, Path path) {
     String segment = path.segment(0);
     try {
-      VarHandle vh = ClassMethods.getVarHandle(any, segment);
-      if (vh == null) {
+      Field f = ClassMethods.getField(any, segment);
+      if (f == null) {
         return deadEnd();
       }
-      return readObj(vh.get(any), path.shift());
+      return readObj(f.get(any), path.shift());
     } catch (IllegalAccessException e) {
       throw illegalAccess(e, any, segment);
+    }
+  }
+
+  private void write(Object host, Path path, Object value) {
+    Path parent = path.parent();
+    String target = path.subpath(-1).toString();
+    if (isArrayIndex(target)) {
+      if (parent.isEmpty()) {
+        throw new PathWalkerException("Invalid path: " + path);
+      }
+      PathWalker pw = new PathWalker(parent);
+      Object parval = pw.read(host);
+      if (parval != null) {
+        int idx = Integer.parseInt(target);
+        writeElement(parval, idx, value);
+      }
+    } else {
+      PathWalker pw = new PathWalker(parent);
+      Object parval = pw.read(host);
+      if (parval != null) {
+        if (parval instanceof Map) {
+          Map map = (Map) parval;
+          if (keyDeser == null) {
+            map.put(target, value);
+          } else {
+            map.put(keyDeser.apply(map, target), value);
+          }
+        } else {
+          try {
+            Field f = ClassMethods.getField(parval, target);
+            f.set(parval, value);
+          } catch (IllegalAccessException e) {
+            throw illegalAccess(e, parval, target);
+          }
+        }
+      }
+    }
+  }
+
+  private static void writeElement(Object parval, int idx, Object value) {
+    if (parval instanceof List) {
+      List list = (List) parval;
+      if (idx < list.size()) {
+        list.set(idx, value);
+      }
+    } else if (parval instanceof Object[]) {
+      Object[] arr = (Object[]) parval;
+      if (idx < arr.length) {
+        arr[idx] = value;
+      }
+    } else if (isPrimitiveArray(parval)) {
+      Check.notNull(value, "Cannot assign null to element of %s[]", getArrayType(parval));
+      if (idx < Array.getLength(parval)) {
+        Array.set(parval, idx, value);
+      }
+    } else {
+      String fmt = "Cannot set value in object of type %s using array index";
+      String msg = String.format(fmt, parval.getClass().getName());
+      throw new PathWalkerException(msg);
     }
   }
 

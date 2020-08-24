@@ -13,8 +13,8 @@ public class IntCheck extends Check {
   }
 
   @Override
-  public Check satisfies(IntPredicate test) {
-    integer(arg, test, argName, " %s does not satisfy %s", argName, test);
+  public Check testInt(IntPredicate test) {
+    integer(arg, test, argName, "%s fails test %s", argName, test);
     return this;
   }
 

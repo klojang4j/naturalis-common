@@ -176,9 +176,9 @@ public class CollectionMethods {
   /**
    * Shrinks the provided list by one element.
    *
-   * @param <T>
-   * @param list
-   * @return
+   * @param <T> The type of the elements in the list
+   * @param list The list to shrink
+   * @return A sublist containing all but the last element of the provided list
    */
   public static <T> List<T> shrink(List<T> list) {
     return shrink(list, 1);
@@ -187,10 +187,11 @@ public class CollectionMethods {
   /**
    * Shrinks the provided list by the specified number of elements.
    *
-   * @param <T>
-   * @param list
-   * @param by
-   * @return
+   * @param <T> The type of the elements in the list
+   * @param list The list to shrink
+   * @param by The number of elements by which to shrink the list
+   * @return A sublist containing all but the last {@code by} elements of the
+   *         provided list
    */
   public static <T> List<T> shrink(List<T> list, int by) {
     Check.notEmpty(list, "list");

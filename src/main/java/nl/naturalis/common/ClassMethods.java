@@ -1,10 +1,6 @@
 package nl.naturalis.common;
 
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodHandles.Lookup;
-import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -54,45 +50,57 @@ public class ClassMethods {
   public static boolean isPrimitiveArray(Object obj) {
     return obj != null && (obj instanceof int[]
         || obj instanceof double[]
-        || obj instanceof long[]
+        || obj instanceof boolean[]
         || obj instanceof byte[]
+        || obj instanceof long[]
         || obj instanceof char[]
         || obj instanceof float[]
         || obj instanceof short[]);
   }
 
+  /**
+   * Returns a more friendlier description of an array than Java's innate
+   * toString().
+   *
+   * @param obj
+   * @return
+   */
+  public static String getArrayType(Object obj) {
+    Check.notNull(obj, "obj");
+    Check.argument(obj.getClass().isArray(), "obj must be an array");
+    return obj.getClass().getComponentType().getSimpleName() + "[]";
+  }
+
   @SuppressWarnings("rawtypes")
-  private static final HashMap<Tuple<String, Class>, VarHandle> varHandles = new HashMap<>();
+  private static final HashMap<Tuple<String, Class>, Field> fields = new HashMap<>();
 
   /**
-   * Returns a {@code VarHandle} object that lets you to retrieve the value of the
-   * specified field within the specified object.
+   * Returns a {@code Field} object corresponding to the provided field name
+   * within the provided object's type. The fields {@code accessible} flag will be
+   * set to {@code true}.
    *
    * @param obj
    * @param fieldName
    * @return
-   * @throws IllegalAccessException
    */
   @SuppressWarnings("rawtypes")
-  public static VarHandle getVarHandle(Object obj, String fieldName) throws IllegalAccessException {
+  public static Field getField(Object obj, String fieldName) {
     Tuple<String, Class> key = Tuple.tuple(fieldName, obj.getClass());
-    VarHandle vh = varHandles.get(key);
-    if (vh == null) {
-      if (!varHandles.containsKey(key)) {
-        for (Class c = obj.getClass(); c != Object.class; c = c.getSuperclass()) {
-          Field fld = Arrays.stream(c.getDeclaredFields())
-              .filter(f -> f.getName().equals(fieldName))
-              .findFirst().orElse(null);
-          if (fld != null) {
-            Lookup lookup = MethodHandles.privateLookupIn(c, MethodHandles.lookup());
-            vh = lookup.unreflectVarHandle(fld);
-            break;
+    Field field = fields.get(key);
+    if (field == null) {
+      if (!fields.containsKey(key)) {
+        LOOP: for (Class c = obj.getClass(); c != Object.class; c = c.getSuperclass()) {
+          for (Field f : c.getDeclaredFields()) {
+            if (f.getName().equals(fieldName)) {
+              f.setAccessible(true);
+              fields.put(key, field = f);
+              break LOOP;
+            }
           }
         }
-        varHandles.put(key, vh);
       }
     }
-    return vh;
+    return field;
   }
 
 }
