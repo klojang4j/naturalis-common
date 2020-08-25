@@ -130,6 +130,30 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
+   * Returns true if this {@code Path} consists of a single segment and that
+   * segment is an array index. Otherwise returns false.
+   *
+   * @return
+   */
+  public boolean isArrayIndex() {
+    return elems.length > 0
+        && elems[0] != null
+        && elems[0].length() > 0
+        && elems[0].codePoints().allMatch(i -> Character.isDigit(i));
+  }
+
+  /**
+   * Returns true if this {@code Path} consists of a single segment and that
+   * segment is null (meaning that this path can only possibly be valid for map
+   * objects that allow null keys). Otherwise returns false.
+   *
+   * @return
+   */
+  public boolean isNullSegment() {
+    return elems.length == 1 && elems[0] == null;
+  }
+
+  /**
    * Returns the path segment at the specified index. Specify a negative index to
    * count back from the last segment of the {@code Path} (-1 is the index of the
    * last path segment).
@@ -234,7 +258,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
 
   /**
    * Returns a new {@code Path} with all segments of this {@code Path} except the
-   * first element.
+   * first segment.
    *
    * @return
    */

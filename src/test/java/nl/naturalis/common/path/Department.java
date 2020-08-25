@@ -1,8 +1,8 @@
 package nl.naturalis.common.path;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 public class Department {
 
@@ -10,7 +10,7 @@ public class Department {
   private Address address;
   private String[] telNos;
   private Employee manager;
-  private Set<Employee> employees;
+  private List<Employee> employees;
 
   public String getName() {
     return name;
@@ -44,11 +44,11 @@ public class Department {
     this.manager = manager;
   }
 
-  public Set<Employee> getEmployees() {
+  public List<Employee> getEmployees() {
     return employees;
   }
 
-  public void setEmployees(Set<Employee> employees) {
+  public void setEmployees(List<Employee> employees) {
     this.employees = employees;
   }
 

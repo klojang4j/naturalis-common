@@ -13,8 +13,8 @@ public class ObjectCheck<T> extends Check {
   }
 
   @Override
-  public Check test(Predicate<Object> test) {
-    argument(arg, test, argName, "%s fails test %s", argName, test);
+  public Check test(Predicate<Object> test, String descr) {
+    argument(arg, test, argName, "%s fails test %s", argName, descr);
     return this;
   }
 

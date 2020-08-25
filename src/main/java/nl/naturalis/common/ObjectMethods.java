@@ -66,14 +66,20 @@ public class ObjectMethods {
    * {@code true} if the argument is:
    * <p>
    * <ul>
-   * <li>not {@link #notEmpty(Object) empty}
-   * <li>if it is an array or {@code collection}, only contains recursively
+   * <li>a singular non-empty object (as per {@link #notEmpty(Object) isEmpty}).
+   * <li>a non-empty array or {@code collection} containing only recursively
    * non-empty elements
-   * <li>if it is a {@code Map}, only contains recursively non-empty values. Map
-   * keys are not checked for empty-ness
+   * <li>a non-empty {@code Map}, containing only recursively non-empty values.
+   * Map keys are not checked for empty-ness
    * </ul>
    * <p>
    * Otherwise this method returns {@code false}.
+   * <p>
+   * NB There is no <i>deepIsEmpty</i> method because the semantics is less clear
+   * there. For example an array is {@code deepIsEmpty} if it <b>is</b> empty
+   * (null or zero-length) or if it <b>is not</b> empty, but it only contains
+   * recursively empty elements. However if that is what you want,
+   * {@code !deepNotEmpty} provides exactly this semantics.
    *
    * @param obj The object to be tested
    * @return Whether or not it is non-empty recursively

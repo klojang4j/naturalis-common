@@ -17,12 +17,13 @@ import static nl.naturalis.common.path.PathWalkerException.illegalAccess;
 
 /**
  * <p>
- * Walks one or more {@link Path paths} through a given object in order to
- * retrieve their values. No exceptions are thrown if a path could not be walked
- * all the way to the last segment due to:
+ * Reads or writes one or more values within a given Object using {@link Path}
+ * objects to specify which fields to read/write. No exceptions are thrown if a
+ * path could not be walked all the way to the last path segment due to:
  * <p>
  * <ul>
- * <li>a path segment did not correspond to any field or map key
+ * <li>one of the intermediate path segments referenced a null value
+ * <li>the path is invalid given the type of the object to read/write
  * <li>an array index was expected but not found in the path
  * <li>the array index was out of bounds
  * <li>the path continued after having reached a terminal value within the
@@ -34,10 +35,6 @@ import static nl.naturalis.common.path.PathWalkerException.illegalAccess;
  * <i>did</i> correspond to a field, but accessing the field caused an
  * {@link IllegalAccessException}, a {@link PathWalkerException} wrapping the
  * {@code IllegalAccessException} is thrown.
- * <p>
- * A path does not have to end at a terminal value. If it stops at a complex
- * object, then that object will be the value of the path, even though it may
- * contain any number of nested objects.
  *
  * @author Ayco Holleman
  *
@@ -291,15 +288,15 @@ public final class PathWalker {
 
   private void write(Object host, Path path, Object value) {
     Path parent = path.parent();
-    String target = path.subpath(-1).toString();
-    if (isArrayIndex(target)) {
+    Path target = path.subpath(-1);
+    if (target.isArrayIndex()) {
       if (parent.isEmpty()) {
         throw new PathWalkerException("Invalid path: " + path);
       }
       PathWalker pw = new PathWalker(parent);
       Object parval = pw.read(host);
       if (parval != null) {
-        int idx = Integer.parseInt(target);
+        int idx = Integer.parseInt(target.toString());
         writeElement(parval, idx, value);
       }
     } else {
@@ -308,18 +305,21 @@ public final class PathWalker {
       if (parval != null) {
         if (parval instanceof Map) {
           Map map = (Map) parval;
+          String key = target.isNullSegment() ? null : target.toString();
           if (keyDeser == null) {
-            map.put(target, value);
+            map.put(key, value);
           } else {
-            map.put(keyDeser.apply(map, target), value);
+            map.put(keyDeser.apply(map, key), value);
           }
-        } else {
+        } else if (!target.isNullSegment()) {
           try {
-            Field f = ClassMethods.getField(parval, target);
+            Field f = ClassMethods.getField(parval, target.toString());
             f.set(parval, value);
           } catch (IllegalAccessException e) {
-            throw illegalAccess(e, parval, target);
+            throw illegalAccess(e, parval, target.toString());
           }
+        } else {
+          throw new PathWalkerException("Null segment can only be used to write map value with key null");
         }
       }
     }

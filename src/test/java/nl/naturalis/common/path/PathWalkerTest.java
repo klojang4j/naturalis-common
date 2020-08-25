@@ -5,7 +5,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.Test;
@@ -181,10 +180,17 @@ public class PathWalkerTest {
   @Test
   public void write03() throws MalformedURLException {
     Company shell = shell();
-    PathWalker pw = new PathWalker("name", "departments.0.name");
-    pw.writeValues(shell, null, null);
-    assertEquals("01", null, shell.getName());
-    assertEquals("02", null, shell.getDepartments().get(0).getName());
+    PathWalker pw = new PathWalker("departments.0.employees.0.extraInfo.hobbies");
+    pw.write(shell, List.of("Karaoke", "judo"));
+    assertEquals("01", List.of("Karaoke", "judo"), shell.getDepartments().get(0).getEmployees().get(0).getExtraInfo().get("hobbies"));
+  }
+
+  @Test
+  public void write04() throws MalformedURLException {
+    Company shell = shell();
+    PathWalker pw = new PathWalker("departments.0.employees.0.extraInfo.^0");
+    pw.write(shell, List.of("Karaoke", "judo"));
+    assertEquals("01", List.of("Karaoke", "judo"), shell.getDepartments().get(0).getEmployees().get(0).getExtraInfo().get(null));
   }
 
   private static List<Path> paths(String... strings) {
@@ -210,7 +216,7 @@ public class PathWalkerTest {
     hr.setName("H&R");
     hr.setAddress(new Address("Koeienstraat", 5, "1111AA", "Rotterdam"));
     hr.setTelNos(new String[] {"040-123456"});
-    hr.setEmployees(new LinkedHashSet<>());
+    hr.setEmployees(new ArrayList<>());
     Employee piet = new Employee();
     piet.setId(1);
     piet.setFirstName("Piet");
