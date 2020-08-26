@@ -8,7 +8,7 @@ import nl.naturalis.common.internal.IntCheck;
 import nl.naturalis.common.internal.IntegerCheck;
 import nl.naturalis.common.internal.ObjectCheck;
 import nl.naturalis.common.internal.StringCheck;
-import static nl.naturalis.common.ObjectMethods.*;
+import static nl.naturalis.common.ObjectMethods.deepNotEmpty;
 
 /**
  * <p>
@@ -20,7 +20,11 @@ import static nl.naturalis.common.ObjectMethods.*;
  * <p>
  *
  * <pre>
- * int i = Check.that(numChairs, "numChairs").gte(2).lte(10).testInt(i -> i % 2 == 0, "i%2==0").value();
+ * int i = Check.that(numChairs, "numChairs")
+ *     .gte(2)
+ *     .lte(10)
+ *     .test(numChairs % 2 == 0, "numChairs%2==0")
+ *     .value();
  * </pre>
  * </p>
  * <p>
@@ -40,6 +44,7 @@ import static nl.naturalis.common.ObjectMethods.*;
  *
  * <pre>
  * Check.notNull(name, "Please specify a name", null); // -> "Please specify a name"
+ * Check.notNull(name, "Please specify a name", new Object[0]); // -> "Please specify a name"
  * Check.notNull(name, "Please specify a name", ""); // -> "Please specify a name"
  * Check.notNull(name, "Please specify a %s", "toy"); // -> "Please specify a toy"
  * </pre>
@@ -302,7 +307,7 @@ public abstract class Check {
    * @return The argument
    * @throws IllegalArgumentException If the argument is null
    */
-  public static <T> T notNull(T arg, String argName) {
+  public static <T> T notNull(T arg, String argName) throws IllegalArgumentException {
     return notNull(arg, "%s must not be null", argName);
   }
 
@@ -320,7 +325,7 @@ public abstract class Check {
    * @return The argument
    * @throws IllegalArgumentException If the argument is null
    */
-  public static <T> T notNull(T arg, String message, Object... msgArgs) {
+  public static <T> T notNull(T arg, String message, Object... msgArgs) throws IllegalArgumentException {
     return argument(arg, Objects::nonNull, message, msgArgs);
   }
 
@@ -331,7 +336,7 @@ public abstract class Check {
    * @param arg The argument to be tested
    * @param argName The argument name
    */
-  public static void isNull(Object arg, String argName) {
+  public static void isNull(Object arg, String argName) throws IllegalArgumentException {
     argument(arg == null, "%s must be null", argName);
   }
 
@@ -348,7 +353,7 @@ public abstract class Check {
    * @param argName The argument name
    * @return The argument
    */
-  public static <T> T noneNull(T arg, String argName) {
+  public static <T> T noneNull(T arg, String argName) throws IllegalArgumentException {
     return argument(arg, ObjectMethods::deepNotNull, "%s must not be null or contain null values", argName);
   }
 
@@ -364,7 +369,7 @@ public abstract class Check {
    * @return The argument
    * @throws IllegalArgumentException If the argument is empty
    */
-  public static <T> T notEmpty(T arg, String argName) {
+  public static <T> T notEmpty(T arg, String argName) throws IllegalArgumentException {
     return notEmpty(arg, "%s must not be empty", argName);
   }
 
@@ -383,7 +388,7 @@ public abstract class Check {
    * @return The argument
    * @throws IllegalArgumentException If the argument is empty
    */
-  public static <T> T notEmpty(T arg, String message, Object... msgArgs) {
+  public static <T> T notEmpty(T arg, String message, Object... msgArgs) throws IllegalArgumentException {
     return argument(arg, ObjectMethods::notEmpty, message, msgArgs);
   }
 
@@ -417,7 +422,7 @@ public abstract class Check {
    *        empty)
    * @return The argument
    */
-  public static <T> T noneEmpty(T arg, String message, Object... msgArgs) {
+  public static <T> T noneEmpty(T arg, String message, Object... msgArgs) throws IllegalArgumentException {
     return argument(arg, ObjectMethods::deepNotEmpty, message, msgArgs);
   }
 
@@ -431,7 +436,7 @@ public abstract class Check {
    * @return The argument
    * @throws IllegalArgumentException If the argument is blank
    */
-  public static String notBlank(String arg, String argName) {
+  public static String notBlank(String arg, String argName) throws IllegalArgumentException {
     return argument(arg, StringMethods::notBlank, "%s must not be blank", argName);
   }
 
@@ -448,7 +453,7 @@ public abstract class Check {
    * @return The argument
    * @throws IllegalArgumentException If the argument is blank
    */
-  public static String notBlank(String arg, String message, Object... msgArgs) {
+  public static String notBlank(String arg, String message, Object... msgArgs) throws IllegalArgumentException {
     return argument(arg, StringMethods::notBlank, message, msgArgs);
   }
 
@@ -461,7 +466,7 @@ public abstract class Check {
    * @param argName The argument name
    * @return
    */
-  public static int gt(int arg, int minVal, String argName) {
+  public static int gt(int arg, int minVal, String argName) throws IllegalArgumentException {
     return integer(arg, x -> x > minVal, "%s must be greater than %d", argName, minVal);
   }
 
@@ -581,7 +586,7 @@ public abstract class Check {
    * @param argName The argument name
    * @return The argument
    */
-  public static int between(int arg, int minInclusive, int maxExclusive, String argName) {
+  public static int between(int arg, int minInclusive, int maxExclusive, String argName) throws IllegalArgumentException {
     return integer(arg,
         x -> x >= minInclusive && x < maxExclusive,
         "%s must be between %d and %d (exclusive)",
@@ -667,126 +672,120 @@ public abstract class Check {
   }
 
   /**
-   * Applies the provided test to the argument
+   * Throws an {@l IllegalArgumentException} if the provided test evaluates to
+   * false, else return this {@code Check} instance.
    *
-   * @param test The test
+   * @param test The condition to evaluate
    * @param descr A description of the test.
    * @return This {@code Check} object
+   * @throws IllegalArgumentException If {@code test} evaluates to false
    */
-  public Check test(Predicate<Object> test, String descr) {
-    throw notApplicable("test");
+  public Check test(boolean test, String descr) throws IllegalArgumentException {
+    argument(test, "%s failed test %s", argName, descr);
+    return this;
   }
 
   /**
-   * Applies the provided test to the argument
+   * See {@link #notNull(Object, String) notNull}.
    *
-   * @param test The test
-   * @param descr A description of the test.
    * @return This {@code Check} object
-   */
-  public Check testInt(IntPredicate test, String descr) {
-    throw notApplicable("testInt");
-  }
-
-  /**
-   * See {@link #notNull(Object, String)}.
-   *
-   * @return
    */
   public Check notNull() {
     throw notApplicable("notNull");
   }
 
   /**
-   * See {@link #noneNull(Object, String)}.
+   * See {@link #noneNull(Object, String) noneNull}.
    *
-   * @return
+   * @return This {@code Check} object
    */
   public Check noneNull() {
     throw notApplicable("noneNull");
   }
 
   /**
-   * See {@link #notEmpty(Object, String)}.
+   * See {@link #notEmpty(Object, String) notEmpty}.
    *
-   * @return
+   * @return This {@code Check} object
    */
   public Check notEmpty() {
     throw notApplicable("notEmpty");
   }
 
   /**
-   * See {@link #noneEmpty(Object, String)}.
+   * See {@link #noneEmpty(Object, String) noneEmpty}.
    *
-   * @return
+   * @return This {@code Check} object
    */
   public Check noneEmpty() {
     throw notApplicable("noneEmpty");
   }
 
   /**
-   * See {@link #notBlank(String, String)}.
+   * See {@link #notBlank(String, String) notBlank}.
    *
-   * @return
+   * @return This {@code Check} object
    */
   public Check notBlank() {
     throw notApplicable("notBlank");
   }
 
   /**
-   * See {@link #gt(int, int, String)}.
+   * See {@link #gt(int, int, String) gt}.
    *
-   * @param minVal
+   * @return This {@code Check} object
    */
+  @SuppressWarnings("unused")
   public Check gt(int minVal) {
     throw notApplicable("gt");
   }
 
   /**
-   * See {@link #gte(int, int, String)}.
+   * See {@link #gte(int, int, String) gte}.
    *
-   * @param minVal
+   * @return This {@code Check} object
    */
+  @SuppressWarnings("unused")
   public Check gte(int minVal) {
     throw notApplicable("gte");
   }
 
   /**
-   * See {@link #lt(int, int, String)}.
+   * See {@link #lt(int, int, String) lt}.
    *
-   * @param maxVal
+   * @return This {@code Check} object
    */
+  @SuppressWarnings("unused")
   public Check lt(int maxVal) {
     throw notApplicable("lt");
   }
 
   /**
-   * See {@link #lte(int, int, String)}.
+   * See {@link #lte(int, int, String) lte}.
    *
-   * @param maxVal
+   * @return This {@code Check} object
    */
+  @SuppressWarnings("unused")
   public Check lte(int maxVal) {
     throw notApplicable("lte");
   }
 
   /**
-   * See {@link #between(int, int, int, String)}.
+   * See {@link #between(int, int, int, String) between}.
    *
-   * @param minInclusive
-   * @param maxExclusive
-   * @return
+   * @return This {@code Check} object
    */
+  @SuppressWarnings("unused")
   public Check between(int minInclusive, int maxExclusive) {
     throw notApplicable("between");
   }
 
   /**
-   * See {@link #inRange(int, int, int, String)}.
+   * See {@link #inRange(int, int, int, String) inRange}.
    *
-   * @param minInclusive
-   * @param maxInclusive
-   * @return
+   * @return This {@code Check} object
    */
+  @SuppressWarnings("unused")
   public Check inRange(int minInclusive, int maxInclusive) {
     throw notApplicable("inRange");
   }
@@ -800,7 +799,7 @@ public abstract class Check {
    * </pre>
    *
    * @param <U>
-   * @return
+   * @return The argument
    */
   public <U> U value() {
     return null;
@@ -813,7 +812,7 @@ public abstract class Check {
    * neither is {@code int} nor an {@code Integer} this method throws a
    * {@code ClassCastException}.
    *
-   * @return
+   * @return The argument cast or converted to an {@code int}
    */
   public int intValue() {
     throw new ClassCastException(argName + "cannot be cast to int");

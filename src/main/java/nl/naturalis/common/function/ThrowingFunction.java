@@ -20,7 +20,7 @@ public interface ThrowingFunction<T, R, E extends Exception> {
    * exception of type {@code E}.
    *
    * @param arg The input variable
-   * @return A value of type {@code Y}
+   * @return A value of type {@code R}
    * @throws E The exception potentially being thrown
    */
   R apply(T arg) throws E;

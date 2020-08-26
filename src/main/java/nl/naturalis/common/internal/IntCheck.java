@@ -1,6 +1,5 @@
 package nl.naturalis.common.internal;
 
-import java.util.function.IntPredicate;
 import nl.naturalis.common.Check;
 
 public class IntCheck extends Check {
@@ -10,12 +9,6 @@ public class IntCheck extends Check {
   public IntCheck(int arg, String argName) {
     super(argName);
     this.arg = arg;
-  }
-
-  @Override
-  public Check testInt(IntPredicate test, String descr) {
-    integer(arg, test, argName, "%s fails test %s", argName, descr);
-    return this;
   }
 
   @Override

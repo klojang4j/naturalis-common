@@ -66,7 +66,7 @@ public class CheckTest {
   @Test
   public void notNull03() {
     try {
-      Check.notNull(null, "The sky is blue", null);
+      Check.notNull(null, "The sky is blue", "");
     } catch (IllegalArgumentException e) {
       assertEquals("The sky is blue", e.getMessage());
       return;

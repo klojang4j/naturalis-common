@@ -1,6 +1,5 @@
 package nl.naturalis.common.internal;
 
-import java.util.function.Predicate;
 import nl.naturalis.common.Check;
 
 public class ObjectCheck<T> extends Check {
@@ -10,12 +9,6 @@ public class ObjectCheck<T> extends Check {
   public ObjectCheck(T arg, String argName) {
     super(argName);
     this.arg = arg;
-  }
-
-  @Override
-  public Check test(Predicate<Object> test, String descr) {
-    argument(arg, test, argName, "%s fails test %s", argName, descr);
-    return this;
   }
 
   @Override

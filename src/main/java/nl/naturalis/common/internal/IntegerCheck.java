@@ -1,18 +1,11 @@
 package nl.naturalis.common.internal;
 
-import java.util.function.IntPredicate;
 import nl.naturalis.common.Check;
 
 public class IntegerCheck extends ObjectCheck<Integer> {
 
   public IntegerCheck(Integer arg, String argName) {
     super(arg.intValue(), argName);
-  }
-
-  @Override
-  public Check testInt(IntPredicate test, String descr) {
-    integer(arg.intValue(), test, argName, " %s fails test %s", argName, descr);
-    return this;
   }
 
   @Override
