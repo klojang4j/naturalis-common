@@ -1,8 +1,9 @@
 package nl.naturalis.common.internal;
 
-import nl.naturalis.common.Check;
+import java.util.function.Function;
+import java.util.function.IntPredicate;
 
-public class IntegerCheck extends ObjectCheck<Integer> {
+public final class IntegerCheck extends ObjectCheck<Integer> {
 
   public IntegerCheck(Integer arg, String argName) {
     super(arg.intValue(), argName);
@@ -33,15 +34,28 @@ public class IntegerCheck extends ObjectCheck<Integer> {
   }
 
   @Override
-  public Check between(int minInclusive, int maxExclusive) {
+  public IntegerCheck between(int minInclusive, int maxExclusive) {
     between(arg.intValue(), minInclusive, maxExclusive, argName);
     return this;
   }
 
   @Override
-  public Check inRange(int minInclusive, int maxInclusive) {
+  public IntegerCheck inRange(int minInclusive, int maxInclusive) {
     inRange(arg.intValue(), minInclusive, maxInclusive, argName);
     return this;
+  }
+
+  @Override
+  public IntegerCheck testInt(IntPredicate test, String descr) throws IllegalArgumentException {
+    return testInt(test, descr, IllegalArgumentException::new);
+  }
+
+  @Override
+  public <E extends Exception> IntegerCheck testInt(IntPredicate test, String descr, Function<String, E> excProvider) throws E {
+    if (test.test(arg)) {
+      return this;
+    }
+    throw excProvider.apply(String.format(ERR_FAILED_TEST, argName, descr));
   }
 
   @Override

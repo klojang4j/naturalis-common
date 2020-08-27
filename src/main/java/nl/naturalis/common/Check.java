@@ -1,6 +1,7 @@
 package nl.naturalis.common;
 
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -52,7 +53,9 @@ import static nl.naturalis.common.ObjectMethods.deepNotEmpty;
  *
  * @author Ayco Holleman
  */
-public abstract class Check {
+public abstract class Check<T> {
+
+  protected static final String ERR_FAILED_TEST = "%s failed test %s";
 
   /**
    * Returns a {@code Check} object that allows you to chain multiple checks on
@@ -62,7 +65,7 @@ public abstract class Check {
    * @param argName The argument name
    * @return
    */
-  public static Check that(int arg, String argName) {
+  public static Check<Integer> that(int arg, String argName) {
     return new IntCheck(arg, argName);
   }
 
@@ -76,7 +79,7 @@ public abstract class Check {
    * @param argName The argument name
    * @return
    */
-  public static Check that(String arg, String argName) {
+  public static Check<String> that(String arg, String argName) {
     return new StringCheck(arg, argName);
   }
 
@@ -89,7 +92,7 @@ public abstract class Check {
    * @param argName The argument name
    * @return
    */
-  public static Check that(Integer arg, String argName) {
+  public static Check<Integer> that(Integer arg, String argName) {
     return new IntegerCheck(arg, argName);
   }
 
@@ -101,7 +104,7 @@ public abstract class Check {
    * @param argName The argument name
    * @return
    */
-  public static <T> Check that(T arg, String argName) {
+  public static <U> Check<U> that(U arg, String argName) {
     return new ObjectCheck<>(arg, argName);
   }
 
@@ -672,17 +675,97 @@ public abstract class Check {
   }
 
   /**
-   * Throws an {@l IllegalArgumentException} if the provided test evaluates to
-   * false, else return this {@code Check} instance.
+   * Throws an {@code IllegalArgumentException} if the provided condition
+   * evaluates to false, else return this {@code Check} instance.
    *
-   * @param test The condition to evaluate
+   * @param condition The condition to evaluate
+   * @param descr A description of the test.
+   * @return This {@code Check} object
+   * @throws IllegalArgumentException If the condition evaluates to false
+   */
+  public Check<T> test(boolean condition, String descr) throws IllegalArgumentException {
+    return test(condition, descr, IllegalArgumentException::new);
+  }
+
+  /**
+   *
+   * @param <E> The type of the exception being thrown
+   * @param condition The condition to evaluate
+   * @param descr A description of the test
+   * @param excProvider A function that takes a {@code String} and returns an
+   *        {@code Exception}
+   * @return This {@code Check} object
+   * @throws E If the condition evaluates to false
+   */
+  public <E extends Exception> Check<T> test(boolean condition, String descr, Function<String, E> excProvider) throws E {
+    that(condition, () -> excProvider.apply(String.format(ERR_FAILED_TEST, argName, descr)));
+    return this;
+  }
+
+  /**
+   * Throws an {@l IllegalArgumentException} if the provided predicate evaluates
+   * to false for the argument in this {@code Check} object, else return this
+   * {@code Check} instance.
+   *
+   * @param test The condition to apply to the argument
    * @param descr A description of the test.
    * @return This {@code Check} object
    * @throws IllegalArgumentException If {@code test} evaluates to false
    */
-  public Check test(boolean test, String descr) throws IllegalArgumentException {
-    argument(test, "%s failed test %s", argName, descr);
-    return this;
+  public Check<T> test(Predicate<T> test, String descr) throws IllegalArgumentException {
+    throw notSupported("test");
+  }
+
+  /**
+   * Throws an {@l IllegalArgumentException} if the provided predicate evaluates
+   * to false for the argument in this {@code Check} object, else return this
+   * {@code Check} instance. The type of exception being thrown is determined by
+   * the {@code excProvider} function which is passed the error message and
+   * returns the exception to be thrown.
+   *
+   * @param <E> The type of the exception being thrown
+   * @param test The condition to apply to the argument
+   * @param descr A description of the test.
+   * @param excProvider A function that takes a {@code String} and returns an
+   *        {@code Exception}
+   * @return This {@code Check} object
+   * @throws E If {@code test} evaluates to false
+   */
+  public <E extends Exception> Check<T> test(Predicate<T> test, String descr, Function<String, E> excProvider) throws E {
+    throw notSupported("test");
+  }
+
+  /**
+   * Throws an {@l IllegalArgumentException} if the provided predicate evaluates
+   * to false for the argument in this {@code Check} object, else return this
+   * {@code Check} instance.
+   *
+   * @param test The condition to apply to the argument
+   * @param descr A description of the test.
+   * @return This {@code Check} object
+   * @throws IllegalArgumentException If {@code test} evaluates to false
+   */
+  public Check<T> testInt(IntPredicate test, String descr) throws IllegalArgumentException {
+    throw notSupported("testInt");
+  }
+
+  /**
+   * Throws an {@l IllegalArgumentException} if the provided predicate evaluates
+   * to false for the argument in this {@code Check} object, else return this
+   * {@code Check} instance. The type of exception being thrown is determined by
+   * the {@code excProvider} function which is passed the error message and
+   * returns the exception to be thrown.
+   *
+   * @param <E> The type of the exception being thrown
+   * @param test The condition to apply to the argument
+   * @param descr A description of the test.
+   * @param excProvider Afunction that takes a {@code String} and returns an
+   *        {@code Exception}.
+   * @return This {@code Check} object
+   * @throws E If {@code test} evaluates to false
+   */
+  public <E extends Exception> Check<T> testInt(IntPredicate test, String descr, Function<String, E> excProvider) throws E {
+    throw notSupported("testInt");
   }
 
   /**
@@ -690,8 +773,8 @@ public abstract class Check {
    *
    * @return This {@code Check} object
    */
-  public Check notNull() {
-    throw notApplicable("notNull");
+  public Check<T> notNull() {
+    throw notSupported("notNull");
   }
 
   /**
@@ -699,8 +782,8 @@ public abstract class Check {
    *
    * @return This {@code Check} object
    */
-  public Check noneNull() {
-    throw notApplicable("noneNull");
+  public Check<T> noneNull() {
+    throw notSupported("noneNull");
   }
 
   /**
@@ -708,8 +791,8 @@ public abstract class Check {
    *
    * @return This {@code Check} object
    */
-  public Check notEmpty() {
-    throw notApplicable("notEmpty");
+  public Check<T> notEmpty() {
+    throw notSupported("notEmpty");
   }
 
   /**
@@ -717,8 +800,8 @@ public abstract class Check {
    *
    * @return This {@code Check} object
    */
-  public Check noneEmpty() {
-    throw notApplicable("noneEmpty");
+  public Check<T> noneEmpty() {
+    throw notSupported("noneEmpty");
   }
 
   /**
@@ -726,8 +809,8 @@ public abstract class Check {
    *
    * @return This {@code Check} object
    */
-  public Check notBlank() {
-    throw notApplicable("notBlank");
+  public Check<T> notBlank() {
+    throw notSupported("notBlank");
   }
 
   /**
@@ -736,8 +819,8 @@ public abstract class Check {
    * @return This {@code Check} object
    */
   @SuppressWarnings("unused")
-  public Check gt(int minVal) {
-    throw notApplicable("gt");
+  public Check<T> gt(int minVal) {
+    throw notSupported("gt");
   }
 
   /**
@@ -746,8 +829,8 @@ public abstract class Check {
    * @return This {@code Check} object
    */
   @SuppressWarnings("unused")
-  public Check gte(int minVal) {
-    throw notApplicable("gte");
+  public Check<T> gte(int minVal) {
+    throw notSupported("gte");
   }
 
   /**
@@ -756,8 +839,8 @@ public abstract class Check {
    * @return This {@code Check} object
    */
   @SuppressWarnings("unused")
-  public Check lt(int maxVal) {
-    throw notApplicable("lt");
+  public Check<T> lt(int maxVal) {
+    throw notSupported("lt");
   }
 
   /**
@@ -766,8 +849,8 @@ public abstract class Check {
    * @return This {@code Check} object
    */
   @SuppressWarnings("unused")
-  public Check lte(int maxVal) {
-    throw notApplicable("lte");
+  public Check<T> lte(int maxVal) {
+    throw notSupported("lte");
   }
 
   /**
@@ -776,8 +859,8 @@ public abstract class Check {
    * @return This {@code Check} object
    */
   @SuppressWarnings("unused")
-  public Check between(int minInclusive, int maxExclusive) {
-    throw notApplicable("between");
+  public Check<T> between(int minInclusive, int maxExclusive) {
+    throw notSupported("between");
   }
 
   /**
@@ -786,8 +869,8 @@ public abstract class Check {
    * @return This {@code Check} object
    */
   @SuppressWarnings("unused")
-  public Check inRange(int minInclusive, int maxInclusive) {
-    throw notApplicable("inRange");
+  public Check<T> inRange(int minInclusive, int maxInclusive) {
+    throw notSupported("inRange");
   }
 
   /**
@@ -801,9 +884,7 @@ public abstract class Check {
    * @param <U>
    * @return The argument
    */
-  public <U> U value() {
-    return null;
-  }
+  public abstract T value();
 
   /**
    * Returns the argument being tested as an {@code int}. If the argument being
@@ -815,11 +896,12 @@ public abstract class Check {
    * @return The argument cast or converted to an {@code int}
    */
   public int intValue() {
-    throw new ClassCastException(argName + "cannot be cast to int");
+    throw notSupported("intValue");
+
   }
 
-  private ClassCastException notApplicable(String check) {
-    return new ClassCastException(String.format("%s check not applicable to %s", check, argName));
+  private UnsupportedOperationException notSupported(String check) {
+    return new UnsupportedOperationException(String.format("%s method not supported for %s", check, argName));
   }
 
 }

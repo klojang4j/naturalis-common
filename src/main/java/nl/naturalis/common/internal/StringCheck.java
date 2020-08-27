@@ -1,6 +1,6 @@
 package nl.naturalis.common.internal;
 
-public class StringCheck extends ObjectCheck<String> {
+public final class StringCheck extends ObjectCheck<String> {
 
   public StringCheck(String arg, String argName) {
     super(arg, argName);

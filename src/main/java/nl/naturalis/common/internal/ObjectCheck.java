@@ -1,8 +1,10 @@
 package nl.naturalis.common.internal;
 
+import java.util.function.Function;
+import java.util.function.Predicate;
 import nl.naturalis.common.Check;
 
-public class ObjectCheck<T> extends Check {
+public class ObjectCheck<T> extends Check<T> {
 
   final T arg;
 
@@ -36,9 +38,21 @@ public class ObjectCheck<T> extends Check {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public <U> U value() {
-    return (U) arg;
+  public Check<T> test(Predicate<T> test, String descr) throws IllegalArgumentException {
+    return test(test, descr, IllegalArgumentException::new);
+  }
+
+  @Override
+  public <E extends Exception> Check<T> test(Predicate<T> test, String descr, Function<String, E> excProvider) throws E {
+    if (test.test(arg)) {
+      return this;
+    }
+    throw excProvider.apply(String.format(ERR_FAILED_TEST, argName, descr));
+  }
+
+  @Override
+  public T value() {
+    return arg;
   }
 
 }

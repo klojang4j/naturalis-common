@@ -1,10 +1,13 @@
 package nl.naturalis.common.internal;
 
+import java.util.function.Function;
+import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 import nl.naturalis.common.Check;
 
-public class IntCheck extends Check {
+public final class IntCheck extends Check<Integer> {
 
-  final int arg;
+  private final int arg;
 
   public IntCheck(int arg, String argName) {
     super(argName);
@@ -36,21 +39,49 @@ public class IntCheck extends Check {
   }
 
   @Override
-  public Check between(int minInclusive, int maxExclusive) {
+  public IntCheck between(int minInclusive, int maxExclusive) {
     between(arg, minInclusive, maxExclusive, argName);
     return this;
   }
 
   @Override
-  public Check inRange(int minInclusive, int maxInclusive) {
+  public IntCheck inRange(int minInclusive, int maxInclusive) {
     inRange(arg, minInclusive, maxInclusive, argName);
     return this;
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  public <U> U value() {
-    return (U) Integer.valueOf(arg);
+  public IntCheck test(Predicate<Integer> test, String descr) throws IllegalArgumentException {
+    return test(test, descr, IllegalArgumentException::new);
+  }
+
+  @Override
+  public <E extends Exception> IntCheck test(Predicate<Integer> test, String descr, Function<String, E> excProvider) throws E {
+    if (test.test(arg)) {
+      return this;
+    }
+    throw excProvider.apply(String.format(ERR_FAILED_TEST, argName, descr));
+  }
+
+  @Override
+  public Check<Integer> testInt(IntPredicate test, String descr) throws IllegalArgumentException {
+    if (test.test(arg)) {
+      return this;
+    }
+    throw new IllegalArgumentException(String.format(ERR_FAILED_TEST, argName, descr));
+  }
+
+  @Override
+  public <E extends Exception> IntCheck testInt(IntPredicate test, String descr, Function<String, E> excProvider) throws E {
+    if (test.test(arg)) {
+      return this;
+    }
+    throw excProvider.apply(String.format(ERR_FAILED_TEST, argName, descr));
+  }
+
+  @Override
+  public Integer value() {
+    return Integer.valueOf(arg);
   }
 
   @Override
