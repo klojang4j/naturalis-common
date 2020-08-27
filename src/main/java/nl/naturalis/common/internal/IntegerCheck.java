@@ -3,59 +3,52 @@ package nl.naturalis.common.internal;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 
-public final class IntegerCheck extends ObjectCheck<Integer> {
+public final class IntegerCheck<E extends Exception> extends ObjectCheck<Integer, E> {
 
-  public IntegerCheck(Integer arg, String argName) {
-    super(arg.intValue(), argName);
+  public IntegerCheck(Integer arg, String argName, Function<String, E> excProvider) {
+    super(arg.intValue(), argName, excProvider);
   }
 
   @Override
-  public IntegerCheck gt(int max) {
-    gt(arg.intValue(), max, argName);
+  public IntegerCheck<E> gt(int minVal) throws E {
+    that(arg > minVal, smash(ERR_GREATER_THAN, argName, minVal));
     return this;
   }
 
   @Override
-  public IntegerCheck gte(int max) {
-    gte(arg.intValue(), max, argName);
+  public IntegerCheck<E> gte(int minVal) throws E {
+    that(arg >= minVal, smash(ERR_GREATER_OR_EQUAL, argName, minVal));
     return this;
   }
 
   @Override
-  public IntegerCheck lt(int max) {
-    lt(arg.intValue(), max, argName);
+  public IntegerCheck<E> lt(int maxVal) throws E {
+    that(arg < maxVal, smash(ERR_LESS_THAN, argName, maxVal));
     return this;
   }
 
   @Override
-  public IntegerCheck lte(int max) {
-    lte(arg.intValue(), max, argName);
+  public IntegerCheck<E> lte(int maxVal) throws E {
+    that(arg <= maxVal, smash(ERR_LESS_OR_EQUAL, argName, maxVal));
     return this;
   }
 
   @Override
-  public IntegerCheck between(int minInclusive, int maxExclusive) {
-    between(arg.intValue(), minInclusive, maxExclusive, argName);
+  public IntegerCheck<E> between(int minInclusive, int maxExclusive) throws E {
+    that(arg >= minInclusive && arg < maxExclusive, smash(ERR_BETWEEN, argName, minInclusive, maxExclusive));
     return this;
   }
 
   @Override
-  public IntegerCheck inRange(int minInclusive, int maxInclusive) {
-    inRange(arg.intValue(), minInclusive, maxInclusive, argName);
+  public IntegerCheck<E> inRange(int minInclusive, int maxInclusive) throws E {
+    that(arg >= minInclusive && arg <= maxInclusive, smash(ERR_IN_RANGE, argName, minInclusive, maxInclusive));
     return this;
   }
 
   @Override
-  public IntegerCheck testInt(IntPredicate test, String descr) throws IllegalArgumentException {
-    return testInt(test, descr, IllegalArgumentException::new);
-  }
-
-  @Override
-  public <E extends Exception> IntegerCheck testInt(IntPredicate test, String descr, Function<String, E> excProvider) throws E {
-    if (test.test(arg)) {
-      return this;
-    }
-    throw excProvider.apply(String.format(ERR_FAILED_TEST, argName, descr));
+  public IntegerCheck<E> testInt(IntPredicate test, String descr) throws E {
+    that(test.test(arg), smash(ERR_FAILED_TEST, argName, descr));
+    return this;
   }
 
   @Override

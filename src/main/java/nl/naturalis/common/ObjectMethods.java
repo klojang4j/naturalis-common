@@ -247,6 +247,47 @@ public class ObjectMethods {
   }
 
   /**
+   * Returns 0 if the argument is null, else the unboxed argument itself.
+   *
+   * @param i
+   * @return
+   */
+  public static int ifNull(Integer i) {
+    return ifNull(i, 0);
+  }
+
+  /**
+   * Returns 0 if the argument is null, else the unboxed argument itself.
+   *
+   * @param d
+   * @return
+   */
+  public static double ifNull(Double d) {
+    return ifNull(d, 0D);
+  }
+
+  /**
+   * Returns 0 if the argument is null, else the unboxed argument itself.
+   *
+   * @param l
+   * @return
+   */
+  public static long ifNull(Long l) {
+    return ifNull(l, 0L);
+  }
+
+  /**
+   * Returns {@code false} if the argument is null, else the unboxed argument
+   * itself.
+   *
+   * @param b
+   * @return
+   */
+  public static boolean ifNull(Boolean b) {
+    return ifNull(b, false);
+  }
+
+  /**
    * Returns value supplied by the {@code Supplier} if the 1st argument is null,
    * else 1st argument.
    *

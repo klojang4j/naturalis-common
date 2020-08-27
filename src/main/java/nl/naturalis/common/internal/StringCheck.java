@@ -1,14 +1,17 @@
 package nl.naturalis.common.internal;
 
-public final class StringCheck extends ObjectCheck<String> {
+import java.util.function.Function;
+import nl.naturalis.common.StringMethods;
 
-  public StringCheck(String arg, String argName) {
-    super(arg, argName);
+public final class StringCheck<E extends Exception> extends ObjectCheck<String, E> {
+
+  public StringCheck(String arg, String argName, Function<String, E> excProvider) {
+    super(arg, argName, excProvider);
   }
 
   @Override
-  public StringCheck notBlank() {
-    notBlank(arg, argName);
+  public StringCheck<E> notBlank() throws E {
+    that(StringMethods.isBlank(arg), smash(ERR_NOT_BLANK, argName));
     return this;
   }
 }

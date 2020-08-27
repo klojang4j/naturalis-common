@@ -3,51 +3,63 @@ package nl.naturalis.common.internal;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import nl.naturalis.common.Check;
+import nl.naturalis.common.ObjectMethods;
 
-public class ObjectCheck<T> extends Check<T> {
+public class ObjectCheck<T, E extends Exception> extends Check<T, E> {
 
   final T arg;
 
-  public ObjectCheck(T arg, String argName) {
-    super(argName);
+  public ObjectCheck(T arg, String argName, Function<String, E> excProvider) {
+    super(argName, excProvider);
     this.arg = arg;
   }
 
   @Override
-  public ObjectCheck<T> notNull() {
-    notNull(arg, argName);
+  public ObjectCheck<T, E> notNull() throws E {
+    that(arg != null, smash(ERR_NOT_NULL, argName));
     return this;
   }
 
   @Override
-  public ObjectCheck<T> noneNull() {
-    noneNull(arg, argName);
+  public ObjectCheck<T, E> noneNull() throws E {
+    that(ObjectMethods.deepNotNull(arg), smash(ERR_NONE_NULL, argName));
     return this;
   }
 
   @Override
-  public ObjectCheck<T> notEmpty() {
-    notEmpty(arg, argName);
+  public ObjectCheck<T, E> notEmpty() throws E {
+    that(ObjectMethods.notEmpty(arg), smash(ERR_NOT_EMPTY, argName));
     return this;
   }
 
   @Override
-  public ObjectCheck<T> noneEmpty() {
-    noneEmpty(arg, argName);
+  public ObjectCheck<T, E> noneEmpty() throws E {
+    that(ObjectMethods.deepNotEmpty(arg), smash(ERR_NONE_EMPTY, argName));
     return this;
   }
 
   @Override
-  public Check<T> test(Predicate<T> test, String descr) throws IllegalArgumentException {
-    return test(test, descr, IllegalArgumentException::new);
+  public Check<T, E> isNull() throws E {
+    that(arg == null, smash(ERR_MUST_BE_NULL, argName));
+    return this;
   }
 
   @Override
-  public <E extends Exception> Check<T> test(Predicate<T> test, String descr, Function<String, E> excProvider) throws E {
-    if (test.test(arg)) {
-      return this;
-    }
-    throw excProvider.apply(String.format(ERR_FAILED_TEST, argName, descr));
+  public Check<T, E> isEmpty() throws E {
+    that(ObjectMethods.isEmpty(arg), smash(ERR_MUST_BE_EMPTY, argName));
+    return this;
+  }
+
+  @Override
+  public Check<T, E> test(Predicate<T> test, String descr) throws E {
+    that(test.test(arg), smash(ERR_FAILED_TEST, argName, descr));
+    return this;
+  }
+
+  @Override
+  public Check<T, E> test(String field, Predicate<T> test, String descr) throws E {
+    that(test.test(arg), smash(ERR_FAILED_TEST, field(field), descr));
+    return this;
   }
 
   @Override

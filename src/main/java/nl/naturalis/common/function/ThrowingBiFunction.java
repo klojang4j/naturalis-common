@@ -22,7 +22,7 @@ public interface ThrowingBiFunction<T, U, R, E extends Exception> {
    * exception of type {@code E}.
    *
    * @param arg0 The 1st argument
-   * @param arg0 The 2nd argument
+   * @param arg1 The 2nd argument
    * @return A value of type {@code R}
    * @throws E The exception potentially being thrown
    */
