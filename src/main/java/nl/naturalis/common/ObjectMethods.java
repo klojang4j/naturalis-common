@@ -2,10 +2,7 @@ package nl.naturalis.common;
 
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
+import java.util.function.*;
 import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
 
@@ -62,27 +59,23 @@ public class ObjectMethods {
 
   /**
    * <p>
-   * Returns whether or not the argument is recursively non-empty. Returns
-   * {@code true} if the argument is:
+   * Returns whether or not the argument is recursively non-empty. More
+   * specifically, this method returns {@code true} if:
    * <p>
    * <ul>
-   * <li>a singular non-empty object (as per {@link #notEmpty(Object) isEmpty}).
-   * <li>a non-empty array or {@code collection} containing only recursively
-   * non-empty elements
-   * <li>a non-empty {@code Map}, containing only recursively non-empty values.
-   * Map keys are not checked for empty-ness
+   * <li>{@code obj} is a non-empty (non-primitive) array with only
+   * {@code deepNotEmpty} elements
+   * <li>{@code obj} is a non-empty {@code Collection} with only
+   * {@code deepNotEmpty} elements
+   * <li>{@code obj} is a non-empty {@code Map}, with only {@code deepNotEmpty}
+   * values (NB map keys are not checked for empty-ness)
+   * <li>{@code obj} is a non-empty object of any other type
    * </ul>
    * <p>
    * Otherwise this method returns {@code false}.
-   * <p>
-   * NB There is no <i>deepIsEmpty</i> method because the semantics is less clear
-   * there. For example an array is {@code deepIsEmpty} if it <b>is</b> empty
-   * (null or zero-length) or if it <b>is not</b> empty, but it only contains
-   * recursively empty elements. However if that is what you want,
-   * {@code !deepNotEmpty} provides exactly this semantics.
    *
    * @param obj The object to be tested
-   * @return Whether or not it is non-empty recursively
+   * @return Whether or not it is recursively non-empty
    */
   public static boolean deepNotEmpty(Object obj) {
     return obj != null
@@ -100,15 +93,17 @@ public class ObjectMethods {
 
   /**
    * <p>
-   * Returns whether or not the argument is recursively non-null. Returns
-   * {@code true} if the argument is:
+   * Returns whether or not the argument is recursively non-null. More
+   * specifically, this method returns {@code true} if:
    * <p>
    * <ul>
-   * <li>not null
-   * <li>if it is an array or {@code Collection}, only contains recursively
-   * non-null elements
-   * <li>if it is a {@code Map}, only contains recursively non-null values. Map
-   * keys are not checked for null values
+   * <li>{@code obj} is not null
+   * <li>{@code obj} is an empty array or a non-empty array with only non-null
+   * elements
+   * <li>{@code obj} is an empty {@code Collection} or a non-empty
+   * {@code Collection} with only non-null elements
+   * <li>{@code obj} is an empty {@code Map} non-empty {@code Map} with only
+   * non-null values (NB Map keys are not checked for empty-ness.)
    * </ul>
    * <p>
    * Otherwise this method returns {@code false}. Contrary to
@@ -117,7 +112,7 @@ public class ObjectMethods {
    * do contain are non-null.
    *
    * @param obj The object to be tested
-   * @return Whether or not it is not null recursively
+   * @return Whether or not it is recursively non-null
    */
   public static boolean deepNotNull(Object obj) {
     if (obj == null) {
@@ -235,7 +230,7 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the 2nd argument if the 1st argument is null, else the 1st argument.
+   * Returns {@code dfault} if {@code value} is null, else {@code value}.
    *
    * @param <T>
    * @param value
@@ -244,6 +239,20 @@ public class ObjectMethods {
    */
   public static <T> T ifNull(T value, T dfault) {
     return value == null ? dfault : value;
+  }
+
+  /**
+   * Returns the value supplied by {@code supplier} if {@code value} is null, else
+   * {@code value}.
+   *
+   * @param <T>
+   * @param value The value to test
+   * @param supplier A {@code Supplier} supplying a default value if {@code value}
+   *        is null
+   * @return
+   */
+  public static <T> T ifNull(T value, Supplier<T> supplier) {
+    return value == null ? supplier.get() : value;
   }
 
   /**
@@ -288,85 +297,12 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns value supplied by the {@code Supplier} if the 1st argument is null,
-   * else 1st argument.
+   * Returns {@code dfault} if {@code value} is {@link #isEmpty(Object) empty},
+   * else {@code value}.
    *
    * @param <T>
-   * @param value The value to check and return if not null
-   * @param then The <code>Supplier</code> supplying the value if null
-   * @return
-   */
-  public static <T> T ifNull(T value, Supplier<T> then) {
-    return value == null ? then.get() : value;
-  }
-
-  /**
-   * Executes the {@code Runnable} if the {@code obj} is null, else does nothing.
-   *
-   * @param obj The object to test
-   * @param then The action to execute
-   */
-  public static void whenNull(Object obj, Runnable then) {
-    if (obj == null) {
-      then.run();
-    }
-  }
-
-  /**
-   * Returns null if the 1st argument is null, else the result of applying the
-   * specified {@code Function} to the 1st argument. For example:
-   *
-   * <pre>
-   * String[] strs = ifNotNull("Hello World", x -> x.split(" "));
-   * </pre>
-   *
-   * @param <T> The type of the first argument
-   * @param <U> The return type
-   * @param value The value to check
-   * @param then The transformation to apply to the value if it is not null
-   * @return
-   */
-  public static <T, U> U ifNotNull(T value, Function<T, U> then) {
-    return value != null ? then.apply(value) : null;
-  }
-
-  /**
-   * Returns the value supplied by the specified {@code Supplier} if the 1st
-   * argument is null, else the result of applying the specified {@code Function}
-   * to the 1st argument.
-   *
-   * @param <T> The type of the first argument
-   * @param <U> The return type
-   * @param value The value to check
-   * @param then The transformation to apply to the value if it is not null
-   * @param otherwise A supplier providing the default value
-   * @return
-   */
-  public static <T, U> U ifNotNull(T value, Function<T, U> then, Supplier<U> otherwise) {
-    return value != null ? then.apply(value) : otherwise.get();
-  }
-
-  /**
-   * Does nothing if the 1st argument is null, else calls {@code apply} on the
-   * specified {@code Consumer}, passing it the 1st argument.
-   *
-   * @param <T> The type of the object to evaluate
-   * @param value The object to evaluate
-   * @param then The {@code Consumer} whose {@code apply} method to call
-   */
-  public static <T> void whenNotNull(T value, Consumer<T> then) {
-    if (value != null) {
-      then.accept(value);
-    }
-  }
-
-  /**
-   * Returns the 2nd argument if the 1st argument {@link #isEmpty(Object) is
-   * empty}, else the 1st argument.
-   *
-   * @param <T>
-   * @param value
-   * @param dfault
+   * @param value The value to test
+   * @param dfault The value to return if {@code value} is null
    * @return
    */
   public static <T> T ifEmpty(T value, T dfault) {
@@ -374,66 +310,21 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the value provided by the {@code Supplier} if the 1st argument
-   * {@link #isEmpty(Object) is empty}, else the 1st argument.
+   * Returns the value supplied by {@code supplier} if {@code value} is
+   * {@link #isEmpty(Object) empty}, else {@code value}.
    *
    * @param <T>
-   * @param value The value to check and return if not null
-   * @param then The <code>Supplier</code> supplying the value if null
+   * @param value The value to test
+   * @param supplier The <code>Supplier</code> supplying {@code value} is null
    * @return
    */
-  public static <T> T ifEmpty(T value, Supplier<T> then) {
-    return isEmpty(value) ? then.get() : value;
+  public static <T> T ifEmpty(T value, Supplier<T> supplier) {
+    return isEmpty(value) ? supplier.get() : value;
   }
 
   /**
-   * Returns null if the 1st argument is {@link #isEmpty(Object) is empty}, else
-   * the result of applying the specified {@code Function} to the 1st argument.
-   * For example:
-   *
-   * @param <T> The type of the first argument
-   * @param <U> The return type
-   * @param value The value to check
-   * @param then The transformation to apply to the value if it is not null
-   * @return
-   */
-  public static <T, U> U ifNotEmpty(T value, Function<T, U> then) {
-    return notEmpty(value) ? then.apply(value) : null;
-  }
-
-  /**
-   * Returns the value supplied by the {@code Supplier} if the 1st argument is
-   * {@link #isEmpty(Object) empty}, else the result of applying the specified
-   * function to the 1st argument.
-   *
-   * @param <T> The type of the first argument
-   * @param <U> The return type
-   * @param value The value to check
-   * @param then The transformation to apply to the value if it is not null
-   * @param otherwise A supplier providing the default value
-   * @return
-   */
-  public static <T, U> U ifNotEmpty(T value, Function<T, U> then, Supplier<U> otherwise) {
-    return notEmpty(value) ? then.apply(value) : otherwise.get();
-  }
-
-  /**
-   * Does nothing if the 1st argument is empty, else calls {@code apply} on the
-   * specified {@code Consumer}, passing it the 1st argument.
-   *
-   * @param <T> The type of the object to evaluate
-   * @param value The object to evaluate
-   * @param then The {@code Consumer} whose {@code apply} method to call
-   */
-  public static <T> void whenNotEmpty(T value, Consumer<T> then) {
-    if (notEmpty(value)) {
-      then.accept(value);
-    }
-  }
-
-  /**
-   * Returns the result of the specified operation on the 2nd argument if the
-   * condition evaluates the {@code true}, else the 2nd argument itself. For
+   * Returns the result of the specified operation on {@code value} if
+   * {@code condition} evaluates to {@code true}, else {@code value} itself. For
    * example:
    *
    * <pre>
@@ -441,7 +332,6 @@ public class ObjectMethods {
    * </pre>
    *
    * @param <T> The return type
-   *
    * @param condition The condition to evaluate
    * @param value The value value to return or to apply the transformation to
    * @param then The operation to apply if the condition evaluates to {@code true}
@@ -452,21 +342,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Runs the provided {@code Runnable} if the condition evaluates to
-   * {@code true}, else does nothing.
-   *
-   * @param condition The condition to evaluate
-   * @param then The action to execute
-   */
-  public static void whenTrue(boolean condition, Runnable then) {
-    if (condition) {
-      then.run();
-    }
-  }
-
-  /**
-   * Returns the result of the specified operation on the 2nd argument if the
-   * condition evaluates the {@code false}, else the 2nd argument itself.
+   * Returns the result of the specified operation on {@code value} if
+   * {@code condition} evaluates to {@code false}, else {@code value} itself.
    *
    * @param <T> The return type
    * @param condition The condition to evaluate
@@ -480,15 +357,145 @@ public class ObjectMethods {
   }
 
   /**
-   * Runs the provided {@code Runnable} if the condition evaluates to
-   * {@code false}, else does nothing.
+   * Returns the result of passing {@code value} to {@code then} if {@code value}
+   * is not null, else the value supplied by {@code otherwise}. For example:
+   *
+   * <pre>
+   * String[] strs = ifNotNull("Hello World", s -> s.split(" "));
+   * </pre>
+   *
+   * @param <T> The type of the first argument
+   * @param <U> The return type
+   * @param value The value to test
+   * @param then The transformation to apply to the value if it is not null
+   * @return
+   */
+  public static <T, U> U ifNotNull(T value, Function<T, U> then) {
+    return value != null ? then.apply(value) : null;
+  }
+
+  /**
+   * Returns the result of passing {@code value} to {@code then} if {@code value}
+   * is not null, else the value supplied by {@code otherwise}. For example:
+   *
+   * <pre>
+   * String[] strs = ifNotNull("Hello World", s -> s.split(" "), () -> new String[0]);
+   * </pre>
+   *
+   * @param <T> The type of the first argument
+   * @param <U> The return type
+   * @param value The value to test
+   * @param then The transformation to apply to the value if it is not null
+   * @param otherwise A supplier providing the default value
+   * @return
+   */
+  public static <T, U> U ifNotNull(T value, Function<T, U> then, Supplier<U> otherwise) {
+    return value != null ? then.apply(value) : otherwise.get();
+  }
+
+  /**
+   * Returns the result of passing {@code value} to {@code then} if {@code value}
+   * is not empty, else null.
+   *
+   * @param <T> The type of the first argument
+   * @param <U> The return type
+   * @param value The value to test
+   * @param then The transformation to apply to the value if it is not null
+   * @return
+   */
+  public static <T, U> U ifNotEmpty(T value, Function<T, U> then) {
+    return notEmpty(value) ? then.apply(value) : null;
+  }
+
+  /**
+   * Returns the result of passing {@code value} to {@code then} if {@code value}
+   * is not empty, else the value supplied by {@code otherwise}.
+   *
+   * @param <T> The type of the first argument
+   * @param <U> The return type
+   * @param value The value to test
+   * @param then The transformation to apply to the value if it is not null
+   * @param otherwise A supplier providing the default value
+   * @return
+   */
+  public static <T, U> U ifNotEmpty(T value, Function<T, U> then, Supplier<U> otherwise) {
+    return notEmpty(value) ? then.apply(value) : otherwise.get();
+  }
+
+  /**
+   * Executes the {@code Runnable} if the condition evaluates to {@code true},
+   * else does nothing.
    *
    * @param condition The condition to evaluate
    * @param then The action to execute
    */
-  public static void whenFalse(boolean condition, Runnable then) {
+  public static void when(boolean condition, Runnable then) {
+    if (condition) {
+      then.run();
+    }
+  }
+
+  /**
+   * Executes the {@code Runnable} if {@code value} is null, else does nothing.
+   *
+   * @param value The value to test
+   * @param then The action to execute
+   */
+  public static void whenNull(Object value, Runnable then) {
+    if (value == null) {
+      then.run();
+    }
+  }
+
+  /**
+   * Executes the {@code Runnable} if {@code value} is empty, else does nothing.
+   *
+   * @param value The value to test
+   * @param then The action to execute
+   */
+  public static void whenEmpty(Object value, Runnable then) {
+    if (isEmpty(value)) {
+      then.run();
+    }
+  }
+
+  /**
+   * Executes the {@code Runnable} if the condition evaluates to {@code false},
+   * else does nothing.
+   *
+   * @param condition The condition to evaluate
+   * @param then The action to execute
+   */
+  public static void whenNot(boolean condition, Runnable then) {
     if (!condition) {
       then.run();
+    }
+  }
+
+  /**
+   * Passes {@code value} to {@code consumer} if not null, else does nothing.
+   *
+   * @param <T> The type of the object to test
+   * @param value The value to test
+   * @param consumer The {@code Consumer} whose {@code accewpt} method to call
+   */
+  public static <T> void whenNotNull(T value, Consumer<T> consumer) {
+    if (value != null) {
+      consumer.accept(value);
+    }
+  }
+
+  /**
+   * Passes {@code value} to {@code consumer} if not {@link #notEmpty(Object)
+   * empty}, else does nothing.
+   *
+   * @param <T> The type of the object to test
+   * @param value The object to test
+   * @param consumer The {@code Consumer} whose {@code accept} method to call
+   */
+  public static <T> void whenNotEmpty(T value, Consumer<T> consumer) {
+    if (notEmpty(value)) {
+      consumer.accept(value);
     }
   }
 

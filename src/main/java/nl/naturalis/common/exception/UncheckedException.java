@@ -7,15 +7,18 @@ import java.io.PrintWriter;
 import nl.naturalis.common.ExceptionMethods;
 
 /**
- * A subclass of {@link RuntimeException} that behaves just like {@link Exception} it wraps. All methods overridden from {@code Exception}
- * do nothing but delegate to the same method on the wrapped exception. This behaviour might be useful when wrapping checked exceptions that
- * in practice often cannot sensibly be dealt with (like {@link IOException}), and are therefore runtime exceptions for all practical
- * purposes. By hiding completely behind the wrapped exception an {@code UncheckedException} has a less cumbersome stack trace than a
- * straight {@code RuntimeException}.
- * 
+ * A subclass of {@code RuntimeException} that behaves just like
+ * {@link Exception} it wraps. All methods overridden from {@code Exception} do
+ * nothing but delegate to the same method on the wrapped exception. This
+ * behaviour might be useful when wrapping checked exceptions that in practice
+ * often cannot sensibly be dealt with (like {@link IOException}), and are
+ * therefore runtime exceptions for all practical purposes. By hiding completely
+ * behind the wrapped exception an {@code UncheckedException} has a less
+ * cumbersome stack trace than a straight {@code RuntimeException}.
+ *
  * @see RootException
  * @see ExceptionMethods#uncheck(Throwable)
- * 
+ *
  * @author Ayco Holleman
  *
  */
@@ -23,7 +26,7 @@ public class UncheckedException extends RuntimeException {
 
   /**
    * Creates a {@code UncheckedException} wrapping the provided {@code Throwable}.
-   * 
+   *
    * @param cause
    */
   public UncheckedException(Throwable cause) {
@@ -31,8 +34,9 @@ public class UncheckedException extends RuntimeException {
   }
 
   /**
-   * Creates a {@code UncheckedException} with the provided custome message, wrapping the provided {@code Throwable}.
-   * 
+   * Creates a {@code UncheckedException} with the provided custome message,
+   * wrapping the provided {@code Throwable}.
+   *
    * @param cause
    */
   public UncheckedException(String message, Throwable cause) {
@@ -48,7 +52,7 @@ public class UncheckedException extends RuntimeException {
   }
 
   /**
-   * Calls {@code toString{}} on the wrapped {@code Exception}.
+   * Calls {@code toString()} on the wrapped {@code Exception}.
    */
   @Override
   public String toString() {

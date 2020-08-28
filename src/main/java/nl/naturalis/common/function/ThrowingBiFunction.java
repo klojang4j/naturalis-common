@@ -1,9 +1,9 @@
 package nl.naturalis.common.function;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
- * An alternative to Java's {@link Function} interface where the {@code apply}
+ * An alternative to Java's {@link BiFunction} interface where the {@code apply}
  * method is allowed to throw a checked exception.
  *
  * @author Ayco Holleman

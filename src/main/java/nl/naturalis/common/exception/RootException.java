@@ -8,14 +8,16 @@ import nl.naturalis.common.ExceptionMethods;
 import static nl.naturalis.common.ExceptionMethods.getRootCause;
 
 /**
- * A subclass of {@code RuntimeException} that behaves just like the root cause of the exception it wraps. The {@code RuntimeException}
- * methods it overrides do nothing but delegete to the same method on the root cause. This makes its stack trace very concise and probably
- * more informative than the stack trace of a {@code RuntimeException} (at the cost of course of not knowing how the original exception
- * bubbled up).
- * 
+ * A subclass of {@code RuntimeException} that behaves just like the root cause
+ * of the exception it wraps. The {@code RuntimeException} methods it overrides
+ * do nothing but delegete to the same method on the root cause. This makes its
+ * stack trace very concise and probably more informative than the stack trace
+ * of a {@code RuntimeException} (at the cost of course of not knowing how the
+ * original exception bubbled up).
+ *
  * @see UncheckedException
  * @see ExceptionMethods#getRootCause(Throwable)
- * 
+ *
  * @author Ayco Holleman
  *
  */
@@ -23,7 +25,7 @@ public class RootException extends RuntimeException {
 
   /**
    * Creates a {@code RootException} wrapping the provided {@code Exception}.
-   * 
+   *
    * @param cause The exception to wrap
    */
   public RootException(Throwable cause) {
@@ -31,8 +33,9 @@ public class RootException extends RuntimeException {
   }
 
   /**
-   * Creates a {@code RootException} with a custom message, wrapping the provided {@code Exception}.
-   * 
+   * Creates a {@code RootException} with a custom message, wrapping the provided
+   * {@code Exception}.
+   *
    * @param message A custom message
    * @param cause The exception to wrap
    */
@@ -49,7 +52,7 @@ public class RootException extends RuntimeException {
   }
 
   /**
-   * Calls {@code toString{}} on the root cause.
+   * Calls {@code toString()} on the root cause.
    */
   @Override
   public String toString() {
