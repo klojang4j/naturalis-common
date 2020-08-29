@@ -685,39 +685,39 @@ public final class StringMethods {
 
   /**
    * Returns everything up to (not including) the first or last occurence of
-   * <code>until</code> within the string, or the entire string if it does not
-   * contain <code>until</code>.
+   * {@code until} within the string, or the entire string if it does not contain
+   * {@code until}.
    *
-   * @param subject
-   * @param until
-   * @param firstOccurrence
-   * @return
+   * @param subject The string to take a substring from
+   * @param until The string up until which to take the substring
+   * @param first Whether to use the first of last occurrence of {@code until}
+   * @return The substring
    */
-  public static String substr(Object subject, String until, boolean firstOccurrence) {
+  public static String substr(Object subject, String until, boolean first) {
     if (subject == null) {
       return EMPTY;
     }
     String str = subject.toString();
-    int i = firstOccurrence ? str.indexOf(until) : str.lastIndexOf(until);
+    int i = first ? str.indexOf(until) : str.lastIndexOf(until);
     return i == -1 ? str : str.substring(0, i);
   }
 
   /**
    * Returns everything up to (not including) the first or last occurence of
-   * <code>until</code> within the string, or the entire string if it does not
-   * contain <code>until</code>.
+   * {@code until} within the string, or the entire string if it does not contain
+   * {@code until}.
    *
-   * @param subject
-   * @param until
-   * @param firstOccurrence
-   * @return
+   * @param subject The string to take a substring from
+   * @param until The string up until which to take the substring
+   * @param first Whether to use the first of last occurrence of {@code until}
+   * @return The substring
    */
-  public static String substr(Object subject, char until, boolean firstOccurrence) {
+  public static String substr(Object subject, char until, boolean first) {
     if (subject == null) {
       return EMPTY;
     }
     String str = subject.toString();
-    int i = firstOccurrence ? str.indexOf(until) : str.lastIndexOf(until);
+    int i = first ? str.indexOf(until) : str.lastIndexOf(until);
     return i == -1 ? str : str.substring(0, i);
   }
 
