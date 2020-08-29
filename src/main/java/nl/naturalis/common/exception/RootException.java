@@ -10,10 +10,9 @@ import static nl.naturalis.common.ExceptionMethods.getRootCause;
 /**
  * A subclass of {@code RuntimeException} that behaves just like the root cause
  * of the exception it wraps. The {@code RuntimeException} methods it overrides
- * do nothing but delegete to the same method on the root cause. This makes its
- * stack trace very concise and probably more informative than the stack trace
- * of a {@code RuntimeException} (at the cost of course of not knowing how the
- * original exception bubbled up).
+ * does nothing but delegete to the same method on the root cause. This makes
+ * its stack trace small and informative, at the cost of not knowing how the
+ * original exception bubbled up.
  *
  * @see UncheckedException
  * @see ExceptionMethods#getRootCause(Throwable)

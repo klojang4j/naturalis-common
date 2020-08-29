@@ -1,15 +1,14 @@
 package nl.naturalis.common.exception;
 
+import nl.naturalis.common.Check;
 import nl.naturalis.common.ExceptionMethods;
 import static nl.naturalis.common.ArrayMethods.isEmpty;
 import static nl.naturalis.common.ArrayMethods.notEmpty;
-import static nl.naturalis.common.StringMethods.appendIfAbsent;
-import static nl.naturalis.common.StringMethods.ifBlank;
+import static nl.naturalis.common.StringMethods.rtrim;
 
 /**
- * Provides detailed information about the origin of an exception. Useful if you
- * especially want to know from where exactly in your own code things flew off
- * the rails.
+ * Provides detailed information about the origin of an exception. Useful for
+ * tracing back an exception to a statement within your own code.
  *
  * <pre>
  * try {
@@ -17,12 +16,11 @@ import static nl.naturalis.common.StringMethods.ifBlank;
  *   // stuff
  *
  * } catch (Exception e) {
- *   ExceptionOrigin origin = new ExceptionOrigin(e, "nl.naturalis");
  *
- *   // Returns the original exception message plus class and line number
- *   // within the nl.naturalis code base where things flew off the rails
+ *   // Returns exception message plus class and line number
+ *   // within nl.naturalis code where things flew off the rails
  *
- *   logger.error(origin.getDetailedMessage());
+ *   logger.error(new ExceptionOrigin(e, "nl.naturalis").getDetailedMessage());
  * }
  * </pre>
  *
@@ -37,34 +35,39 @@ public class ExceptionOrigin {
   /**
    * Equivalent to {@code new ExceptionSource(t, null)}. Looks at the 1st entry in
    * the stack trace, which is the point of origin <i>if</i> the exception has no
-   * cause. If you expect wrapped exceptions (and who knows ...), this constructor
-   * is pretty useless.
+   * cause. Since ordinarily you cannot know this, this constructor is useless
+   * unless you explicitly pass it the root cause of an exception. See
+   * {@link ExceptionMethods#getDetailedMessage(Throwable)
+   * ExceptionMethods.getDetailedMessage} and
+   * {@link ExceptionMethods#getRootCause(Throwable)
+   * ExceptionMethods#getRootCause}.
    *
-   * @param t
+   * @param exc The exception to analyze
    */
-  public ExceptionOrigin(Throwable t) {
-    this(t, null);
+  public ExceptionOrigin(Throwable exc) {
+    this(exc, null);
   }
 
   /**
-   * Creates a new {@code ExceptionSource} for the provided exception, searching
+   * Creates a new {@code ExceptionOrigin} for the provided exception, searching
    * its stack trace for an execution point matching {@code search}. The
    * {@code search} argument is explicitly allowed to be null, in which case the
    * first element of the stack trace is used to provide extra information about
    * the exception.
    *
-   * @param t The exception to inspect
-   * @param search The string to search for in the stack trace.
+   * @param exc The exception to analyze
+   * @param search Any part of the package name or fully-qualified class name that
+   *        you want the exception to be traced back to. May be null.
    */
-  public ExceptionOrigin(Throwable t, String search) {
-    this.exc = t;
-    this.search = ifBlank(search, null);
-    if (isEmpty(t.getStackTrace())) {
+  public ExceptionOrigin(Throwable exc, String search) {
+    this.exc = Check.notNull(exc, "exc");
+    this.search = search;
+    if (isEmpty(exc.getStackTrace())) {
       this.ste = null;
     } else if (search == null) {
-      this.ste = t.getStackTrace()[0];
+      this.ste = exc.getStackTrace()[0];
     } else {
-      this.ste = findOrigin(t, search);
+      this.ste = findOrigin(exc, search);
     }
   }
 
@@ -78,12 +81,12 @@ public class ExceptionOrigin {
   public String getDetailedMessage() {
     StringBuilder sb = new StringBuilder(100);
     if (exc.getMessage() != null) {
-      sb.append(appendIfAbsent(exc.getMessage().strip(), "  =====  "));
+      sb.append(rtrim(exc.getMessage(), ". ")).append(". ");
     }
     sb.append(exc.getClass().getName());
     if (ste != null) {
       if (search != null) {
-        sb.append("  =====  Originating in ")
+        sb.append(" originating from ")
             .append(getClassName())
             .append('.')
             .append(getMethod())
@@ -91,7 +94,7 @@ public class ExceptionOrigin {
             .append(getLine())
             .append(")");
       } else {
-        sb.append(" (No origin in package/class \"")
+        sb.append(" (no origin in \"")
             .append(search)
             .append("\")");
       }
@@ -115,7 +118,7 @@ public class ExceptionOrigin {
   }
 
   /**
-   * Returns the execution point that was inspected.
+   * Returns the first stack trace element found to contain {@code search}
    *
    * @return
    */

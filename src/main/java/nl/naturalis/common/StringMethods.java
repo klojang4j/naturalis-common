@@ -16,7 +16,7 @@ import static nl.naturalis.common.ObjectMethods.ifTrue;
  * is returned (in most cases). Otherwise inspection or manipulation is done on
  * the string resulting from {@link Object#toString() Object.toString}.
  */
-public class StringMethods {
+public final class StringMethods {
 
   /**
    * The empty string.
@@ -26,9 +26,8 @@ public class StringMethods {
   private StringMethods() {}
 
   /**
-   * Appends to provided suffix to <code>subject</code> if it did not already have
-   * that suffix. If <code>subject</code> is null, <code>suffix</code> is
-   * returned.
+   * Appends to provided suffix to {@code subject} if it did not already have that
+   * suffix. If {@code subject} is null, <code>suffix</code> is returned.
    *
    * @param subject
    * @param suffix
@@ -67,12 +66,12 @@ public class StringMethods {
 
   /**
    * Counts the number of occurrences of <code>substr</code> within
-   * <code>subject</code>.
+   * {@code subject}.
    *
    * @param subject The string to search
    * @param substr The substring to search for
    * @param ignoreCase Whether or not to ignore case while matching
-   *        <code>substr</code> against <code>subject</code>
+   *        <code>substr</code> against {@code subject}
    * @return
    */
   public static int count(Object subject, String substr, boolean ignoreCase) {
@@ -101,7 +100,7 @@ public class StringMethods {
   }
 
   /**
-   * Whether or not <code>subject</code> ends with any of the provided suffixes.
+   * Whether or not {@code subject} ends with any of the provided suffixes.
    * Returns the first suffix found to be equals to the end of the string, or null
    * if thr string ended in none of the provided suffixes.
    *
@@ -309,13 +308,14 @@ public class StringMethods {
   }
 
   /**
-   * Removes the specified character from the beginning of the provided string
-   * until it no longer starts with that character.
+   * Left-trims the provided string. The resulting string will not start with the
+   * specified character.
    *
    * @param subject The {@code String} to trim
    * @param c The character to trim off the {@code String}
    *
-   * @return The trimmed {@code String}.
+   * @return The left-trimmed {@code String} or the input string if it did not
+   *         start with the specified character
    *
    */
   public static String ltrim(Object subject, char c) {
@@ -323,19 +323,20 @@ public class StringMethods {
   }
 
   /**
-   * Left-trims all characters contained in the <code>chars</code> argument from
-   * the provided provided string. The resulting string will not start with any of
-   * the charachters contained in <code>chars</code>.
+   * Left-trims all characters contained in {@code chars} from the provided
+   * provided string. The resulting string will not start with any of the
+   * charachters contained in {@code chars}.
    *
-   * @param subject
-   * @param chars
-   * @return
+   * @param subject The {@code String} to trim
+   * @param chars The character to trim off the {@code String}
+   * @return The left-trimmed {@code String} or the input string if it did not
+   *         start with any of the specified characters
    */
   public static String ltrim(Object subject, String chars) {
+    Check.notEmpty(chars, "chars");
     if (subject == null) {
       return EMPTY;
     }
-    Check.notNull(chars, "chars");
     String str0 = subject.toString();
     int i = 0;
     LOOP: for (; i < str0.length(); ++i) {
@@ -560,24 +561,47 @@ public class StringMethods {
   }
 
   /**
-   * Trim the specified character off the end of the specified {@code String}.
-   * This method returns an empty String if the specified {@code String} is null.
+   * Right-trims the provided string. The resulting string will not end with the
+   * specified character.
    *
    * @param subject The {@code String} to trim
    * @param c The character to trim off the {@code String}
    *
-   * @return The trimmed {@code String}.
+   * @return The right-trimmed {@code String} or the input string if it did not
+   *         end with the specified character
    *
    */
   public static String rtrim(Object subject, char c) {
+    return rtrim(subject, String.valueOf(c));
+  }
+
+  /**
+   * Right-trims all characters contained in {@code chars} from the provided
+   * provided string. The resulting string will not end with any of the
+   * charachters contained in {@code chars}.
+   *
+   * @param subject The {@code String} to trim
+   * @param chars The character to trim off the {@code String}
+   * @return The right-trimmed {@code String} or the input string if it did not
+   *         end with any of the specified characters
+   */
+
+  public static String rtrim(Object subject, String chars) {
+    Check.notEmpty(chars, "chars");
     if (subject == null) {
       return EMPTY;
     }
-    String str = subject.toString();
-    int i = str.length() - 1;
-    for (; i != -1 && str.charAt(i) == c; --i) {
+    String str0 = subject.toString();
+    int i = str0.length() - 1;
+    LOOP: for (; i >= 0; --i) {
+      for (int j = 0; j < chars.length(); ++j) {
+        if (str0.charAt(i) == chars.charAt(j)) {
+          continue LOOP;
+        }
+      }
+      break LOOP;
     }
-    return i == -1 ? EMPTY : str.substring(0, i + 1);
+    return i == str0.length() - 1 ? str0 : str0.substring(0, i + 1);
   }
 
   /**

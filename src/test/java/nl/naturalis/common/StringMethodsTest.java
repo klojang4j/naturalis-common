@@ -89,18 +89,41 @@ public class StringMethodsTest {
   }
 
   @Test
-  public void rtrim() {
-    assertEquals("01 Should be empty.", "", StringMethods.ltrim(null, 'a'));
-    assertEquals("02 Should be empty.", "", StringMethods.rtrim("", 'a'));
-    assertEquals("03 Should be empty.", "", StringMethods.rtrim("a", 'a'));
-    assertEquals("04 Should be empty.", "", StringMethods.rtrim("aa", 'a'));
-    assertEquals("05 Should be empty.", "", StringMethods.rtrim("aaa", 'a'));
-    assertEquals("06 Should be \"b\".", "b", StringMethods.rtrim("b", 'a'));
-    assertEquals("07 Should be \"b\".", "b", StringMethods.rtrim("baaa", 'a'));
-    assertEquals("08 Should be \"bb\".", "bb", StringMethods.rtrim("bbaaa", 'a'));
-    assertEquals("09 Should be \"bb\".", "bb", StringMethods.rtrim("bb", 'a'));
-    assertEquals("10 Should be \"abb\".", "abb", StringMethods.rtrim("abb", 'a'));
-    assertEquals("11 Should be \"aabb\".", "aabb", StringMethods.rtrim("aabb", 'a'));
+  public void rtrim01() {
+    assertEquals("01", "", StringMethods.ltrim(null, 'a'));
+    assertEquals("02", "", StringMethods.rtrim("", 'a'));
+    assertEquals("03", "", StringMethods.rtrim("a", 'a'));
+    assertEquals("04", "", StringMethods.rtrim("aa", 'a'));
+    assertEquals("05", "", StringMethods.rtrim("aaa", 'a'));
+    assertEquals("06", "b", StringMethods.rtrim("b", 'a'));
+    assertEquals("07", "b", StringMethods.rtrim("baaa", 'a'));
+    assertEquals("08", "bb", StringMethods.rtrim("bbaaa", 'a'));
+    assertEquals("09", "bb", StringMethods.rtrim("bb", 'a'));
+    assertEquals("10", "abb", StringMethods.rtrim("abb", 'a'));
+    assertEquals("11", "aabb", StringMethods.rtrim("aabb", 'a'));
+  }
+
+  @Test
+  public void rtrim02() {
+    assertEquals("01", "", StringMethods.ltrim(null, "a"));
+    assertEquals("02", "", StringMethods.rtrim("", "a"));
+    assertEquals("03", "", StringMethods.rtrim("a", "a"));
+    assertEquals("04", "", StringMethods.rtrim("aab", "ab"));
+    assertEquals("05", "", StringMethods.rtrim("aab", "ba"));
+    assertEquals("06", "", StringMethods.rtrim("aab", "cba"));
+    assertEquals("07", "aabd", StringMethods.rtrim("aabd", "cba"));
+    assertEquals("08", "aab", StringMethods.rtrim("aabdef", "fde"));
+    assertEquals("09", "a", StringMethods.rtrim("abdef", "gfdeb"));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void rtrim03() {
+    assertEquals("01", "", StringMethods.rtrim("a", null));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void rtrim04() {
+    assertEquals("01", "", StringMethods.rtrim("a", ""));
   }
 
   @Test

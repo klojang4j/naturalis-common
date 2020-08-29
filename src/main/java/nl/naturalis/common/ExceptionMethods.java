@@ -13,7 +13,7 @@ import nl.naturalis.common.exception.UncheckedException;
  * @author Ayco Holleman
  *
  */
-public class ExceptionMethods {
+public final class ExceptionMethods {
 
   private ExceptionMethods() {}
 
@@ -21,46 +21,48 @@ public class ExceptionMethods {
    * Returns the root cause of the provided throwable, or the throwable itself if
    * it has no cause.
    *
-   * @param t
-   * @return
+   * @param exc The exception whose root cause to retrieve
+   * @return The root cause of the exception
    */
-  public static Throwable getRootCause(Throwable t) {
-    while (t.getCause() != null) {
-      t = t.getCause();
+  public static Throwable getRootCause(Throwable exc) {
+    Check.notNull(exc, "exc");
+    while (exc.getCause() != null) {
+      exc = exc.getCause();
     }
-    return t;
+    return exc;
   }
 
   /**
    * Returns the stack trace of the root cause of {@code t} as a string.
    *
-   * @param t
+   * @param exc
    * @return
    */
-  public static String getRootStackTraceAsString(Throwable t) {
+  public static String getRootStackTraceAsString(Throwable exc) {
+    Check.notNull(exc, "exc");
     ByteArrayOutputStream baos = new ByteArrayOutputStream(2048);
-    getRootCause(t).printStackTrace(new PrintStream(baos));
+    getRootCause(exc).printStackTrace(new PrintStream(baos));
     return baos.toString(StandardCharsets.UTF_8);
   }
 
   /**
    * Returns a detailed exception message that includes the class, method and line
-   * of the absolute origin of the provided exception. Equivalent to
+   * number of the absolute origin of the provided exception. Equivalent to
    * {@code new ExceptionSource(getRootCause(t)).getDetailedMessage()}.
    *
    * @see ExceptionOrigin#getDetailedMessage()
    *
-   * @param t The exception to extract the extra information from
-   * @return
+   * @param exc The exception to extract the extra information from
+   * @return A detailed exception message
    */
-  public static String getDetailedMessage(Throwable t) {
-    return new ExceptionOrigin(getRootCause(t)).getDetailedMessage();
+  public static String getDetailedMessage(Throwable exc) {
+    Check.notNull(exc, "exc");
+    return new ExceptionOrigin(getRootCause(exc)).getDetailedMessage();
   }
 
   /**
-   * Returns a detailed exception message that gives better insight into where
-   * exactly in your own code things flew off the rails. Works well with
-   * {@link #uncheck(Throwable) ExceptionMethods.uncheck}. For example:
+   * Returns a detailed exception message that traces the thrown exception back to
+   * a particular package or class in your own code.
    *
    * <pre>
    * try {
@@ -68,61 +70,62 @@ public class ExceptionMethods {
    *   // stuff
    *
    * } catch (IOException e) {
-   *   throw unckeck(getDetailedMessage(e), e);
+   *   throw ExceptionMethods.unckeck(getDetailedMessage(e), e);
    * }
    * </pre>
    *
-   * @param t The exception to extract the extra information from
-   * @param origin The (partial) name of the package or class you want to zoom in
+   * @param exc The exception to extract the extra information from
+   * @param search The (partial) name of the package or class you want to zoom in
    *        on
-   * @return
+   * @return A detailed exception message
    */
-  public static String getDetailedMessage(Throwable t, String origin) {
-    return new ExceptionOrigin(t, origin).getDetailedMessage();
+  public static String getDetailedMessage(Throwable exc, String search) {
+    Check.notNull(exc, "exc");
+    return new ExceptionOrigin(exc, search).getDetailedMessage();
   }
 
   /**
    * Returns the provided throwable if it already is a {@link RuntimeException},
    * else a {@code RuntimeException} wrapping the throwable.
    *
-   * @param t A checked or unchecked exception
+   * @param exc A checked or unchecked exception
    * @return The provided throwable or a {@code RuntimeException} wrapping it
    */
-  public static RuntimeException wrap(Throwable t) {
-    if (t instanceof RuntimeException) {
-      return (RuntimeException) t;
+  public static RuntimeException wrap(Throwable exc) {
+    if (Check.notNull(exc, "exc") instanceof RuntimeException) {
+      return (RuntimeException) exc;
     }
-    return new RuntimeException(t);
+    return new RuntimeException(exc);
   }
 
   /**
    * Returns the provided throwable if it already is a {@link RuntimeException},
    * else an {@link UncheckedException} wrapping the throwable.
    *
-   * @param t A checked or unchecked exception
+   * @param exc A checked or unchecked exception
    * @param customMessage A custom message to pass to the constructor of
    *        {@code UncheckedException}
    * @return The provided throwable or an {@code UncheckedException} wrapping it
    */
-  public static RuntimeException uncheck(Throwable t, String customMessage) {
-    if (t instanceof RuntimeException) {
-      return (RuntimeException) t;
+  public static RuntimeException uncheck(Throwable exc, String customMessage) {
+    if (Check.notNull(exc, "exc") instanceof RuntimeException) {
+      return (RuntimeException) exc;
     }
-    return new UncheckedException(customMessage, t);
+    return new UncheckedException(customMessage, exc);
   }
 
   /**
    * Returns the provided throwable if it already is a {@link RuntimeException},
    * else an {@link UncheckedException} wrapping the throwable.
    *
-   * @param t A checked or unchecked exception
+   * @param exc A checked or unchecked exception
    * @return The provided throwable or an {@code UncheckedException} wrapping it
    */
-  public static RuntimeException uncheck(Throwable t) {
-    if (t instanceof RuntimeException) {
-      return (RuntimeException) t;
+  public static RuntimeException uncheck(Throwable exc) {
+    if (Check.notNull(exc, "exc") instanceof RuntimeException) {
+      return (RuntimeException) exc;
     }
-    return new UncheckedException(t);
+    return new UncheckedException(exc);
   }
 
 }
