@@ -323,15 +323,39 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the result of the specified operation on {@code value} if
-   * {@code condition} evaluates to {@code true}, else {@code value} itself. For
-   * example:
+   * Returns {@code value} if it is equal to {@code mustBe}, else null.
+   *
+   * @param <T> The input and return type
+   * @param value The value to test
+   * @param mustBe The value it must have in order to be returned
+   * @return {@code value} or null
+   */
+  public static <T> T ifEquals(T value, T mustBe) {
+    return ifTrue(Objects::equals, value, mustBe);
+  }
+
+  /**
+   * Returns {@code value} only if it is not equal to {@code mustNotBe}, else
+   * null.
+   *
+   * @param <T> The input and return type
+   * @param value The value to test
+   * @param mustBe The value it should have
+   * @return {@code value} or null
+   */
+  public static <T> T ifNotEquals(T value, T mustNotBe) {
+    return ifFalse(Objects::equals, value, mustNotBe);
+  }
+
+  /**
+   * Returns {@code value} if the condition evaluates to {@code true}, else the
+   * result of the specified operation on {@code value}. For example:
    *
    * <pre>
    * String s = ifTrue(ignoreCase, name, String::toLowerCase);
    * </pre>
    *
-   * @param <T> The return type
+   * @param <T> The input and return type
    * @param condition The condition to evaluate
    * @param value The value value to return or to apply the transformation to
    * @param then The operation to apply if the condition evaluates to {@code true}
@@ -342,8 +366,23 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the result of the specified operation on {@code value} if
-   * {@code condition} evaluates to {@code false}, else {@code value} itself.
+   * Returns {@code arg0} if the {@code comparison} function returns {@code true}
+   * for arguments {@code arg0} and {@code arg1}, else null.
+   *
+   * @param <T> The input and return type
+   * @param comparison A function that compares {@code value} and {@code mustBe}
+   *        and returns a {@code Boolean}
+   * @param arg0 The value to test
+   * @param arg1 The value to compare it to
+   * @return {@code value} or null
+   */
+  public static <T> T ifTrue(BiFunction<Object, Object, Boolean> comparison, T arg0, T arg1) {
+    return comparison.apply(arg0, arg1) ? arg0 : null;
+  }
+
+  /**
+   * Returns {@code value} if the condition evaluates to {@code false}, else the
+   * result of the specified operation on {@code value}. For example:
    *
    * @param <T> The return type
    * @param condition The condition to evaluate
@@ -354,6 +393,21 @@ public class ObjectMethods {
    */
   public static <T> T ifFalse(boolean condition, T value, UnaryOperator<T> then) {
     return !condition ? then.apply(value) : value;
+  }
+
+  /**
+   * Returns {@code arg0} if the {@code comparison} function returns {@code false}
+   * for arguments {@code arg0} and {@code arg1}, else null.
+   *
+   * @param <T> The input and return type
+   * @param comparison A function that compares {@code value} and {@code mustBe}
+   *        and returns a {@code Boolean}
+   * @param value The value to test
+   * @param mustNotBe The value to compare it to
+   * @return {@code value} or null
+   */
+  public static <T> T ifFalse(BiFunction<Object, Object, Boolean> comparison, T value, T mustNotBe) {
+    return comparison.apply(value, mustNotBe) ? null : value;
   }
 
   /**
