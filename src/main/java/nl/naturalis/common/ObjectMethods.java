@@ -51,7 +51,7 @@ public class ObjectMethods {
    * @param obj The object to be tested
    * @return Whether or not it is non-empty
    */
-  public static boolean notEmpty(Object obj) {
+  public static boolean isNotEmpty(Object obj) {
     return !isEmpty(obj);
   }
 
@@ -73,14 +73,14 @@ public class ObjectMethods {
    * @param obj The object to be tested
    * @return Whether or not it is recursively non-empty
    */
-  public static boolean deepNotEmpty(Object obj) {
+  public static boolean isDeeptNotEmpty(Object obj) {
     return obj != null && (!(obj instanceof String) || ((String) obj).length() > 0)
         && (!(obj instanceof Collection) || ((Collection) obj).size() > 0
-            && ((Collection) obj).stream().allMatch(ObjectMethods::deepNotEmpty))
+            && ((Collection) obj).stream().allMatch(ObjectMethods::isDeeptNotEmpty))
         && (!(obj instanceof Map) || ((Map) obj).size() > 0
-            && ((Map) obj).values().stream().allMatch(ObjectMethods::deepNotEmpty))
+            && ((Map) obj).values().stream().allMatch(ObjectMethods::isDeeptNotEmpty))
         && (!(obj instanceof Object[]) || ((Object[]) obj).length > 0
-            && Arrays.stream((Object[]) obj).allMatch(ObjectMethods::deepNotEmpty))
+            && Arrays.stream((Object[]) obj).allMatch(ObjectMethods::isDeeptNotEmpty))
         && (!isPrimitiveArray(obj) || Array.getLength(obj) > 0)
         && (!(obj instanceof Sizeable) || ((Sizeable) obj).size() > 0)
         && (!(obj instanceof Emptyable) || !((Emptyable) obj).isEmpty());
@@ -100,22 +100,22 @@ public class ObjectMethods {
    * keys are not checked for empty-ness.)
    * </ul>
    * <p>
-   * Otherwise this method returns {@code false}. Contrary to {@link #deepNotEmpty(Object)
+   * Otherwise this method returns {@code false}. Contrary to {@link #isDeeptNotEmpty(Object)
    * deepNotEmpty}, this method returns {@code true} for empty arrays, collections and maps. It only
    * checks that the values they do contain are non-null.
    *
    * @param obj The object to be tested
    * @return Whether or not it is recursively non-null
    */
-  public static boolean deepNotNull(Object obj) {
+  public static boolean isDeepNotNull(Object obj) {
     if (obj == null) {
       return false;
     } else if (obj instanceof Object[]) {
-      return Arrays.stream((Object[]) obj).allMatch(ObjectMethods::deepNotNull);
+      return Arrays.stream((Object[]) obj).allMatch(ObjectMethods::isDeepNotNull);
     } else if (obj instanceof Collection) {
-      return ((Collection) obj).stream().allMatch(ObjectMethods::deepNotNull);
+      return ((Collection) obj).stream().allMatch(ObjectMethods::isDeepNotNull);
     } else if (obj instanceof Map) {
-      return ((Map) obj).values().stream().allMatch(ObjectMethods::deepNotNull);
+      return ((Map) obj).values().stream().allMatch(ObjectMethods::isDeepNotNull);
     }
     return true;
   }
@@ -415,13 +415,14 @@ public class ObjectMethods {
    * {@code arg0} and {@code arg1}, else null.
    *
    * @param <T> The input and return type
+   * @param <U> The type of the second argument to the comparison function
    * @param comparison A function that compares {@code value} and {@code mustBe} and returns a
    *        {@code Boolean}
    * @param arg0 The value to test
    * @param arg1 The value to compare it to
    * @return {@code value} or null
    */
-  public static <T> T ifTrue(BiFunction<Object, Object, Boolean> comparison, T arg0, T arg1) {
+  public static <T, U> T ifTrue(BiFunction<T, U, Boolean> comparison, T arg0, U arg1) {
     return comparison.apply(arg0, arg1) ? arg0 : null;
   }
 
@@ -444,13 +445,14 @@ public class ObjectMethods {
    * {@code arg0} and {@code arg1}, else null.
    *
    * @param <T> The input and return type
+   * @param <U> The type of the second argument to the comparison function
    * @param comparison A function that compares {@code value} and {@code mustBe} and returns a
    *        {@code Boolean}
    * @param arg0 The value to test
    * @param arg1 The value to compare it to
    * @return {@code value} or null
    */
-  public static <T> T ifFalse(BiFunction<Object, Object, Boolean> comparison, T arg0, T arg1) {
+  public static <T, U> T ifFalse(BiFunction<T, U, Boolean> comparison, T arg0, U arg1) {
     return comparison.apply(arg0, arg1) ? null : arg0;
   }
 
@@ -502,7 +504,7 @@ public class ObjectMethods {
    * @return
    */
   public static <T, U> U ifNotEmpty(T value, Function<T, U> then) {
-    return notEmpty(value) ? then.apply(value) : null;
+    return isNotEmpty(value) ? then.apply(value) : null;
   }
 
   /**
@@ -517,7 +519,7 @@ public class ObjectMethods {
    * @return
    */
   public static <T, U> U ifNotEmpty(T value, Function<T, U> then, Supplier<U> otherwise) {
-    return notEmpty(value) ? then.apply(value) : otherwise.get();
+    return isNotEmpty(value) ? then.apply(value) : otherwise.get();
   }
 
   /**
@@ -549,42 +551,6 @@ public class ObjectMethods {
   }
 
   /**
-   * Executes the {@code Runnable} if {@code value} is null, else does nothing.
-   *
-   * @param value The value to test
-   * @param then The action to execute
-   */
-  public static void whenNull(Object value, Runnable then) {
-    if (value == null) {
-      then.run();
-    }
-  }
-
-  /**
-   * Executes the {@code Runnable} if {@code value} is empty, else does nothing.
-   *
-   * @param value The value to test
-   * @param then The action to execute
-   */
-  public static void whenEmpty(Object value, Runnable then) {
-    if (isEmpty(value)) {
-      then.run();
-    }
-  }
-
-  /**
-   * Executes the {@code Runnable} if the condition evaluates to {@code false}, else does nothing.
-   *
-   * @param condition The condition to evaluate
-   * @param then The action to execute
-   */
-  public static void whenNot(boolean condition, Runnable then) {
-    if (!condition) {
-      then.run();
-    }
-  }
-
-  /**
    * Passes {@code value} to {@code consumer} if not null, else does nothing.
    *
    * @param <T> The type of the object to test
@@ -593,20 +559,6 @@ public class ObjectMethods {
    */
   public static <T> void whenNotNull(T value, Consumer<T> consumer) {
     if (value != null) {
-      consumer.accept(value);
-    }
-  }
-
-  /**
-   * Passes {@code value} to {@code consumer} if not {@link #notEmpty(Object) empty}, else does
-   * nothing.
-   *
-   * @param <T> The type of the object to test
-   * @param value The object to test
-   * @param consumer The {@code Consumer} whose {@code accept} method to call
-   */
-  public static <T> void whenNotEmpty(T value, Consumer<T> consumer) {
-    if (notEmpty(value)) {
       consumer.accept(value);
     }
   }

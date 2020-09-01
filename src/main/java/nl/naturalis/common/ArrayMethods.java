@@ -216,7 +216,7 @@ public class ArrayMethods {
    *         length
    * @throws IllegalArgumentException if the provided object is not an array.
    */
-  public static boolean notEmpty(Object array) {
+  public static boolean isNotEmpty(Object array) {
     return !isEmpty(array);
   }
 

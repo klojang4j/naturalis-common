@@ -9,7 +9,7 @@ import nl.naturalis.common.internal.IntCheck;
 import nl.naturalis.common.internal.IntegerCheck;
 import nl.naturalis.common.internal.ObjectCheck;
 import nl.naturalis.common.internal.StringCheck;
-import static nl.naturalis.common.ObjectMethods.deepNotEmpty;
+import static nl.naturalis.common.ObjectMethods.isDeeptNotEmpty;
 import static nl.naturalis.common.ArrayMethods.*;
 
 /**
@@ -414,7 +414,7 @@ public abstract class Check<T, E extends Exception> {
    * {@code Collection} or {@code Map}, none of its elements c.q. values are null,
    * else throws an {@code IllegalArgumentException}.
    *
-   * @see ObjectMethods#deepNotNull(Object)
+   * @see ObjectMethods#isDeepNotNull(Object)
    *
    * @param <T> The type of the argument
    * @param arg The argument
@@ -422,7 +422,7 @@ public abstract class Check<T, E extends Exception> {
    * @return The argument
    */
   public static <T> T noneNull(T arg, String argName) throws IllegalArgumentException {
-    return argument(arg, ObjectMethods::deepNotNull, ERR_NONE_NULL, argName);
+    return argument(arg, ObjectMethods::isDeepNotNull, ERR_NONE_NULL, argName);
   }
 
   /**
@@ -430,7 +430,7 @@ public abstract class Check<T, E extends Exception> {
    * {@code IllegalArgumentException} with the message: <i>${argName} must not be
    * empty</i>.
    *
-   * @see ObjectMethods#notEmpty(Object)
+   * @see ObjectMethods#isNotEmpty(Object)
    *
    * @param arg The argument
    * @param argName The argument name
@@ -446,7 +446,7 @@ public abstract class Check<T, E extends Exception> {
    * {@code IllegalArgumentException} with the provided message and message
    * arguments.
    *
-   * @see ObjectMethods#notEmpty(Object)
+   * @see ObjectMethods#isNotEmpty(Object)
    *
    * @param arg The argument
    * @param message The exception message
@@ -456,14 +456,14 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the argument is empty
    */
   public static <T> T notEmpty(T arg, String message, Object msgArg0, Object... msgArgs) throws IllegalArgumentException {
-    return argument(arg, ObjectMethods::notEmpty, message, msgArg0, msgArgs);
+    return argument(arg, ObjectMethods::isNotEmpty, message, msgArg0, msgArgs);
   }
 
   /**
-   * Returns {@code arg} if it is {@link ObjectMethods#deepNotEmpty(Object) deeply
+   * Returns {@code arg} if it is {@link ObjectMethods#isDeeptNotEmpty(Object) deeply
    * non-empty}, else throws an {@code IllegalArgumentException}.
    *
-   * @see ObjectMethods#deepNotEmpty(Object)
+   * @see ObjectMethods#isDeeptNotEmpty(Object)
    *
    * @param <T> The type of the argument
    * @param arg The argument
@@ -471,11 +471,11 @@ public abstract class Check<T, E extends Exception> {
    * @return The argument
    */
   public static <T> T noneEmpty(T arg, String argName) {
-    return argument(arg, ObjectMethods::deepNotEmpty, ERR_NONE_EMPTY, argName);
+    return argument(arg, ObjectMethods::isDeeptNotEmpty, ERR_NONE_EMPTY, argName);
   }
 
   /**
-   * Returns {@code arg} if it is {@link ObjectMethods#deepNotEmpty(Object) deeply
+   * Returns {@code arg} if it is {@link ObjectMethods#isDeeptNotEmpty(Object) deeply
    * non-empty} Otherwise this method throws an {@code IllegalArgumentException}
    * with the provided message and message arguments.
    *
@@ -487,7 +487,7 @@ public abstract class Check<T, E extends Exception> {
    * @return The argument
    */
   public static <T> T noneEmpty(T arg, String message, Object msgArg0, Object... msgArgs) throws IllegalArgumentException {
-    return argument(arg, ObjectMethods::deepNotEmpty, message, msgArg0, msgArgs);
+    return argument(arg, ObjectMethods::isDeeptNotEmpty, message, msgArg0, msgArgs);
   }
 
   /**
@@ -500,7 +500,7 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the argument is blank
    */
   public static String notBlank(String arg, String argName) throws IllegalArgumentException {
-    return argument(arg, StringMethods::notBlank, ERR_NOT_BLANK, argName);
+    return argument(arg, StringMethods::isNotBlank, ERR_NOT_BLANK, argName);
   }
 
   /**
@@ -515,7 +515,7 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the argument is blank
    */
   public static String notBlank(String arg, String message, Object msgArg0, Object... msgArgs) throws IllegalArgumentException {
-    return argument(arg, StringMethods::notBlank, message, msgArg0, msgArgs);
+    return argument(arg, StringMethods::isNotBlank, message, msgArg0, msgArgs);
   }
 
   /**
@@ -701,7 +701,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   private static IllegalStateException badState(String msg, Object... msgArgs) {
-    if (deepNotEmpty(msgArgs)) {
+    if (isDeeptNotEmpty(msgArgs)) {
       return new IllegalStateException(String.format(msg, msgArgs));
     }
     throw new IllegalStateException(msg);
@@ -815,7 +815,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is {@link ObjectMethods#deepNotNull(Object)
+   * Verifies that the argument is {@link ObjectMethods#isDeepNotNull(Object)
    * deepNotNull}.
    *
    * @return This {@code Check} object
@@ -826,7 +826,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is not {@link ObjectMethods#notEmpty(Object)
+   * Verifies that the argument is not {@link ObjectMethods#isNotEmpty(Object)
    * empty}.
    *
    * @return This {@code Check} object
@@ -837,7 +837,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is {@link ObjectMethods#deepNotEmpty(Object)
+   * Verifies that the argument is {@link ObjectMethods#isDeeptNotEmpty(Object)
    * deepNotEmpty}.
    *
    * @return This {@code Check} object
@@ -848,7 +848,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is not {@link StringMethods#notBlank(Object)
+   * Verifies that the argument is not {@link StringMethods#isNotBlank(Object)
    * blank}.
    *
    * @return This {@code Check} object

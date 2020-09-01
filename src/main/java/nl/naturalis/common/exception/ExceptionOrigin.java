@@ -3,7 +3,7 @@ package nl.naturalis.common.exception;
 import nl.naturalis.common.Check;
 import nl.naturalis.common.ExceptionMethods;
 import static nl.naturalis.common.ArrayMethods.isEmpty;
-import static nl.naturalis.common.ArrayMethods.notEmpty;
+import static nl.naturalis.common.ArrayMethods.isNotEmpty;
 import static nl.naturalis.common.StringMethods.rtrim;
 
 /**
@@ -170,7 +170,7 @@ public class ExceptionOrigin {
   private static StackTraceElement findOrigin(Throwable exc, String search) {
     for (Throwable t = exc; t != null; t = t.getCause()) {
       StackTraceElement[] trace = t.getStackTrace();
-      if (notEmpty(trace)) {
+      if (isNotEmpty(trace)) {
         for (StackTraceElement ste : trace) {
           if (ste.getClassName().contains(search)) {
             return ste;

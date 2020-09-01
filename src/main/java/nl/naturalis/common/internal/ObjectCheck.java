@@ -22,19 +22,19 @@ public class ObjectCheck<T, E extends Exception> extends Check<T, E> {
 
   @Override
   public ObjectCheck<T, E> noneNull() throws E {
-    that(ObjectMethods.deepNotNull(arg), smash(ERR_NONE_NULL, argName));
+    that(ObjectMethods.isDeepNotNull(arg), smash(ERR_NONE_NULL, argName));
     return this;
   }
 
   @Override
   public ObjectCheck<T, E> notEmpty() throws E {
-    that(ObjectMethods.notEmpty(arg), smash(ERR_NOT_EMPTY, argName));
+    that(ObjectMethods.isNotEmpty(arg), smash(ERR_NOT_EMPTY, argName));
     return this;
   }
 
   @Override
   public ObjectCheck<T, E> noneEmpty() throws E {
-    that(ObjectMethods.deepNotEmpty(arg), smash(ERR_NONE_EMPTY, argName));
+    that(ObjectMethods.isDeeptNotEmpty(arg), smash(ERR_NONE_EMPTY, argName));
     return this;
   }
 

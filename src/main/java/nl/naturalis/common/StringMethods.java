@@ -148,7 +148,7 @@ public final class StringMethods {
    * @param object The string to check
    * @return Whether it is neither null nor blank
    */
-  public static boolean notBlank(Object object) {
+  public static boolean isNotBlank(Object object) {
     return !isBlank(object);
   }
 
@@ -158,7 +158,7 @@ public final class StringMethods {
    * @param subject The string to check
    * @return Whether it is neither null nor empty
    */
-  public static boolean notEmpty(Object subject) {
+  public static boolean isNotEmpty(Object subject) {
     return !isEmpty(subject);
   }
 
