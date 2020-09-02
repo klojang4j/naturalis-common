@@ -2,19 +2,17 @@ package nl.naturalis.common;
 
 import java.util.Collection;
 import java.util.regex.Pattern;
-import static nl.naturalis.common.ObjectMethods.ifTrue;
+import static nl.naturalis.common.ObjectMethods.*;
 
 /**
- * Methods for working with strings. This class tries to avoid duplicating the
- * functionality already present in Apache Commons and Google Guava, but since
- * the naturalis-common library as a whole is designed to be self-contained,
- * that is not always possible. All methods are null-safe for the
- * <code>String</code> being inspected or manipulated (usually named
- * {@code subject}). They also never <i>return</i> null unless otherwise
- * indicated. The string to be inspected or manipulated is always passed in as
- * an argument of type {@link Object}. If the argument is null, an empty string
- * is returned (in most cases). Otherwise inspection or manipulation is done on
- * the string resulting from {@link Object#toString() Object.toString}.
+ * Methods for working with strings. This class tries to avoid duplicating the functionality already
+ * present in Apache Commons and Google Guava, but since the naturalis-common library as a whole is
+ * designed to be self-contained, that is not always possible. All methods are null-safe for the
+ * <code>String</code> being inspected or manipulated (usually named {@code subject}). They also
+ * never <i>return</i> null unless otherwise indicated. The string to be inspected or manipulated is
+ * always passed in as an argument of type {@link Object}. If the argument is null, an empty string
+ * is returned (in most cases). Otherwise inspection or manipulation is done on the string resulting
+ * from {@link Object#toString() Object.toString}.
  */
 public final class StringMethods {
 
@@ -26,8 +24,8 @@ public final class StringMethods {
   private StringMethods() {}
 
   /**
-   * Appends to provided suffix to {@code subject} if it did not already have that
-   * suffix. If {@code subject} is null, <code>suffix</code> is returned.
+   * Appends to provided suffix to {@code subject} if it did not already have that suffix. If
+   * {@code subject} is null, <code>suffix</code> is returned.
    *
    * @param subject
    * @param suffix
@@ -42,8 +40,7 @@ public final class StringMethods {
   }
 
   /**
-   * Appends to provided suffix to {@code str} if it did not already have that
-   * suffix.
+   * Appends to provided suffix to {@code str} if it did not already have that suffix.
    *
    * @param subject
    * @param suffix
@@ -65,13 +62,12 @@ public final class StringMethods {
   }
 
   /**
-   * Counts the number of occurrences of <code>substr</code> within
-   * {@code subject}.
+   * Counts the number of occurrences of <code>substr</code> within {@code subject}.
    *
    * @param subject The string to search
    * @param substr The substring to search for
-   * @param ignoreCase Whether or not to ignore case while matching
-   *        <code>substr</code> against {@code subject}
+   * @param ignoreCase Whether or not to ignore case while matching <code>substr</code> against
+   *        {@code subject}
    * @return
    */
   public static int count(Object subject, String substr, boolean ignoreCase) {
@@ -85,9 +81,8 @@ public final class StringMethods {
   }
 
   /**
-   * Whether or not the provided string ends with any of the provided suffixes.
-   * They suffixes must not be null. They may be empty, but {@code endsWith}
-   * always returns {@code false} for them.
+   * Whether or not the provided string ends with any of the provided suffixes. They suffixes must not
+   * be null. They may be empty, but {@code endsWith} always returns {@code false} for them.
    *
    * @param subject The string to test
    * @param ignoreCase Whether or not to ignore case
@@ -100,9 +95,9 @@ public final class StringMethods {
   }
 
   /**
-   * Whether or not {@code subject} ends with any of the provided suffixes.
-   * Returns the first suffix found to be equals to the end of the string, or null
-   * if thr string ended in none of the provided suffixes.
+   * Whether or not {@code subject} ends with any of the provided suffixes. Returns the first suffix
+   * found to be equals to the end of the string, or null if thr string ended in none of the provided
+   * suffixes.
    *
    * @param subject
    * @param ignoreCase
@@ -163,8 +158,7 @@ public final class StringMethods {
   }
 
   /**
-   * Returns the 1st argument if it is not a whitespace-only string, else the 2nd
-   * argument.
+   * Returns the 1st argument if it is not a whitespace-only string, else the 2nd argument.
    *
    * @see ObjectMethods#ifNull(Object, Object)
    *
@@ -190,8 +184,8 @@ public final class StringMethods {
   }
 
   /**
-   * Removes all occurrences of the provided prefixes from the start of a string.
-   * The returned string will no longer start with any of the provided prefixes.
+   * Removes all occurrences of the provided prefixes from the start of a string. The returned string
+   * will no longer start with any of the provided prefixes.
    *
    * @param subject
    * @param ignoreCase
@@ -203,8 +197,8 @@ public final class StringMethods {
   }
 
   /**
-   * Removes all occurrences of the provided prefixes from the start of a string.
-   * The returned string will no longer start with any of the provided prefixes.
+   * Removes all occurrences of the provided prefixes from the start of a string. The returned string
+   * will no longer start with any of the provided prefixes.
    *
    * @param subject
    * @param ignoreCase
@@ -221,8 +215,7 @@ public final class StringMethods {
     do {
       changed = false;
       for (String prefix : prefixes) {
-        if (!prefix.isEmpty() && s0.regionMatches(ignoreCase, 0, prefix, 0,
-            prefix.length())) {
+        if (!prefix.isEmpty() && s0.regionMatches(ignoreCase, 0, prefix, 0, prefix.length())) {
           s0 = s0.substring(prefix.length());
           changed = true;
         }
@@ -232,13 +225,13 @@ public final class StringMethods {
   }
 
   /**
-   * Left-pads a string to the specified width using the space character (' ') and
-   * then appends the specified terminator.
+   * Left-pads a string to the specified width using the space character (' ') and then appends the
+   * specified terminator.
    *
-   * @param obj An object whose {@code toString()} method produces the string to
-   *        be padded. Null is treated as the empty string.
-   * @param width The total length of the padded string. If the string itself is
-   *        wider than the specified width, the string is printed without padding.
+   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
+   *        treated as the empty string.
+   * @param width The total length of the padded string. If the string itself is wider than the
+   *        specified width, the string is printed without padding.
    * @param terminator The delimiter to append to the left-padded string.
    * @return The left-padded string
    * @throws IllegalArgumentException If {@code terminator} is null
@@ -250,10 +243,10 @@ public final class StringMethods {
   /**
    * Left-pads a string to the specified width using the space character (' ').
    *
-   * @param obj An object whose {@code toString()} method produces the string to
-   *        be padded. Null is treated as the empty string.
-   * @param width The total length of the padded string. If the string itself is
-   *        wider than the specified width, the string is printed without padding.
+   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
+   *        treated as the empty string.
+   * @param width The total length of the padded string. If the string itself is wider than the
+   *        specified width, the string is printed without padding.
    * @return The left-padded string
    */
   public static String lpad(Object obj, int width) {
@@ -261,13 +254,12 @@ public final class StringMethods {
   }
 
   /**
-   * Left-pads a string to the specified width using the specified padding
-   * character.
+   * Left-pads a string to the specified width using the specified padding character.
    *
-   * @param obj An object whose {@code toString()} method produces the string to
-   *        be padded. Null is treated as the empty string.
-   * @param width The total length of the padded string. If the string itself is
-   *        wider than the specified width, the string is printed without padding.
+   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
+   *        treated as the empty string.
+   * @param width The total length of the padded string. If the string itself is wider than the
+   *        specified width, the string is printed without padding.
    * @param padChar The character used to left-pad the string
    * @return The left-padded string
    */
@@ -276,13 +268,13 @@ public final class StringMethods {
   }
 
   /**
-   * Left-pads a string to the specified width using the specified padding
-   * character and then appends the specified terminator.
+   * Left-pads a string to the specified width using the specified padding character and then appends
+   * the specified terminator.
    *
-   * @param obj An object whose {@code toString()} method produces the string to
-   *        be padded. Null is treated as the empty string.
-   * @param width The total length of the padded string. If the string itself is
-   *        wider than the specified width, the string is printed without padding.
+   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
+   *        treated as the empty string.
+   * @param width The total length of the padded string. If the string itself is wider than the
+   *        specified width, the string is printed without padding.
    * @param padChar The character used to left-pad the string
    * @param terminator The string to append to the left-padded string
    * @return The left-padded string
@@ -308,14 +300,13 @@ public final class StringMethods {
   }
 
   /**
-   * Left-trims the provided string. The resulting string will not start with the
-   * specified character.
+   * Left-trims the provided string. The resulting string will not start with the specified character.
    *
    * @param subject The {@code String} to trim
    * @param c The character to trim off the {@code String}
    *
-   * @return The left-trimmed {@code String} or the input string if it did not
-   *         start with the specified character
+   * @return The left-trimmed {@code String} or the input string if it did not start with the
+   *         specified character
    *
    */
   public static String ltrim(Object subject, char c) {
@@ -323,14 +314,13 @@ public final class StringMethods {
   }
 
   /**
-   * Left-trims all characters contained in {@code chars} from the provided
-   * provided string. The resulting string will not start with any of the
-   * charachters contained in {@code chars}.
+   * Left-trims all characters contained in {@code chars} from the provided provided string. The
+   * resulting string will not start with any of the charachters contained in {@code chars}.
    *
    * @param subject The {@code String} to trim
    * @param chars The character to trim off the {@code String}
-   * @return The left-trimmed {@code String} or the input string if it did not
-   *         start with any of the specified characters
+   * @return The left-trimmed {@code String} or the input string if it did not start with any of the
+   *         specified characters
    */
   public static String ltrim(Object subject, String chars) {
     Check.notEmpty(chars, "chars");
@@ -351,11 +341,10 @@ public final class StringMethods {
   }
 
   /**
-   * Centers (left- and right-pads) a string within the specified width using the
-   * space character.
+   * Centers (left- and right-pads) a string within the specified width using the space character.
    *
-   * @param obj An object whose {@code toString()} method produces the string to
-   *        be padded. Null is treated as the empty string.
+   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
+   *        treated as the empty string.
    * @param width
    * @return
    */
@@ -364,13 +353,13 @@ public final class StringMethods {
   }
 
   /**
-   * Centers (left- and right-pads) a string within the specified width using the
-   * specified padding character.
+   * Centers (left- and right-pads) a string within the specified width using the specified padding
+   * character.
    *
-   * @param obj An object whose {@code toString()} method produces the string to
-   *        be padded. Null is treated as the empty string.
-   * @param width The total length of the padded string. If the string itself is
-   *        wider than the specified width, the string is printed without padding.
+   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
+   *        treated as the empty string.
+   * @param width The total length of the padded string. If the string itself is wider than the
+   *        specified width, the string is printed without padding.
    * @param padChar The character used to left- and right-pad the string.
    * @return The left- and right-padded string plus the terminator
    */
@@ -379,13 +368,13 @@ public final class StringMethods {
   }
 
   /**
-   * Centers (left- and right-pads) a string within the specified width using the
-   * specified padding character and then appends the specified terminator.
+   * Centers (left- and right-pads) a string within the specified width using the specified padding
+   * character and then appends the specified terminator.
    *
-   * @param subject An object whose {@code toString()} method produces the string
-   *        to be padded. Null is treated as the empty string.
-   * @param width The total length of the padded string. If the string itself is
-   *        wider than the specified width, the string is printed without padding.
+   * @param subject An object whose {@code toString()} method produces the string to be padded. Null
+   *        is treated as the empty string.
+   * @param width The total length of the padded string. If the string itself is wider than the
+   *        specified width, the string is printed without padding.
    * @param padChar The character used to left- and right-pad the string.
    * @param terminator The string to append to the padded string
    * @return The left- and right-padded string plus the terminator
@@ -415,8 +404,7 @@ public final class StringMethods {
   }
 
   /**
-   * Prefixes {@code prefix} to {@code str} if {@code str} did not already start
-   * with it.
+   * Prefixes {@code prefix} to {@code str} if {@code str} did not already start with it.
    *
    * @param str
    * @param prefix
@@ -427,8 +415,7 @@ public final class StringMethods {
   }
 
   /**
-   * Appends to provided suffix to {@code str} if it did not already have that
-   * suffix.
+   * Appends to provided suffix to {@code str} if it did not already have that suffix.
    *
    * @param str
    * @param suffix
@@ -439,8 +426,8 @@ public final class StringMethods {
   }
 
   /**
-   * Removes all occurrences of the provided suffixes from the end of a string.
-   * The returned string will no longer end with any of the provided suffixes.
+   * Removes all occurrences of the provided suffixes from the end of a string. The returned string
+   * will no longer end with any of the provided suffixes.
    *
    * @param subject
    * @param ignoreCase
@@ -452,8 +439,8 @@ public final class StringMethods {
   }
 
   /**
-   * Removes all occurrences of the provided suffixes from the end of a string.
-   * The returned string will no longer end with any of the provided suffixes.
+   * Removes all occurrences of the provided suffixes from the end of a string. The returned string
+   * will no longer end with any of the provided suffixes.
    *
    * @param subject
    * @param ignoreCase
@@ -474,13 +461,13 @@ public final class StringMethods {
   }
 
   /**
-   * Right-pads a string to the specified width using the space character (' ')
-   * and then appends the specified terminator.
+   * Right-pads a string to the specified width using the space character (' ') and then appends the
+   * specified terminator.
    *
-   * @param obj An object whose {@code toString()} method produces the string to
-   *        be padded. Null is treated as the empty string.
-   * @param width The total length of the padded string. If the string itself is
-   *        wider than the specified width, the string is printed without padding.
+   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
+   *        treated as the empty string.
+   * @param width The total length of the padded string. If the string itself is wider than the
+   *        specified width, the string is printed without padding.
    * @param terminator The delimiter to append to the right-padded string.
    * @return The right-padded string
    */
@@ -491,10 +478,10 @@ public final class StringMethods {
   /**
    * Right-pads a string to the specified width using the space character (' ').
    *
-   * @param obj An object whose {@code toString()} method produces the string to
-   *        be padded. Null is treated as the empty string.
-   * @param width The total length of the padded string. If the string itself is
-   *        wider than the specified width, the string is printed without padding.
+   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
+   *        treated as the empty string.
+   * @param width The total length of the padded string. If the string itself is wider than the
+   *        specified width, the string is printed without padding.
    * @return The right-padded string
    */
   public static String rpad(Object obj, int width) {
@@ -502,13 +489,12 @@ public final class StringMethods {
   }
 
   /**
-   * Right-pads a string to the specified width using the specified padding
-   * character.
+   * Right-pads a string to the specified width using the specified padding character.
    *
-   * @param obj An object whose {@code toString()} method produces the string to
-   *        be padded. Null is treated as the empty string.
-   * @param width The total length of the padded string. If the string itself is
-   *        wider than the specified width, the string is printed without padding.
+   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
+   *        treated as the empty string.
+   * @param width The total length of the padded string. If the string itself is wider than the
+   *        specified width, the string is printed without padding.
    * @param padChar The character used to left-pad the string.
    * @return The right-padded string
    */
@@ -517,13 +503,13 @@ public final class StringMethods {
   }
 
   /**
-   * Right-pads a string to the specified width using the specified padding
-   * character and then appends the specified terminator.
+   * Right-pads a string to the specified width using the specified padding character and then appends
+   * the specified terminator.
    *
-   * @param obj An object whose {@code toString()} method produces the string to
-   *        be padded. Null is treated as the empty string.
-   * @param width The total length of the padded string. If the string itself is
-   *        wider than the specified width, the string is printed without padding.
+   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
+   *        treated as the empty string.
+   * @param width The total length of the padded string. If the string itself is wider than the
+   *        specified width, the string is printed without padding.
    * @param padChar The character used to left-pad the string.
    * @param terminator The string to append to the left-padded string
    * @return The right-padded string
@@ -547,8 +533,8 @@ public final class StringMethods {
   }
 
   /**
-   * Trims the specified character off both sides of the specified {@code String}.
-   * This method returns an empty String if the specified {@code String} is null.
+   * Trims the specified character off both sides of the specified {@code String}. This method returns
+   * an empty String if the specified {@code String} is null.
    *
    * @param subject The {@code String} to trim
    * @param c The character to trim off the {@code String}
@@ -561,14 +547,13 @@ public final class StringMethods {
   }
 
   /**
-   * Right-trims the provided string. The resulting string will not end with the
-   * specified character.
+   * Right-trims the provided string. The resulting string will not end with the specified character.
    *
    * @param subject The {@code String} to trim
    * @param c The character to trim off the {@code String}
    *
-   * @return The right-trimmed {@code String} or the input string if it did not
-   *         end with the specified character
+   * @return The right-trimmed {@code String} or the input string if it did not end with the specified
+   *         character
    *
    */
   public static String rtrim(Object subject, char c) {
@@ -576,14 +561,13 @@ public final class StringMethods {
   }
 
   /**
-   * Right-trims all characters contained in {@code chars} from the provided
-   * provided string. The resulting string will not end with any of the
-   * charachters contained in {@code chars}.
+   * Right-trims all characters contained in {@code chars} from the provided provided string. The
+   * resulting string will not end with any of the charachters contained in {@code chars}.
    *
    * @param subject The {@code String} to trim
    * @param chars The character to trim off the {@code String}
-   * @return The right-trimmed {@code String} or the input string if it did not
-   *         end with any of the specified characters
+   * @return The right-trimmed {@code String} or the input string if it did not end with any of the
+   *         specified characters
    */
 
   public static String rtrim(Object subject, String chars) {
@@ -605,8 +589,8 @@ public final class StringMethods {
   }
 
   /**
-   * Substring method that allows substring retrieval relative to the end of a
-   * string. See {@link #substr(String, int, int)}.
+   * Substring method that allows substring retrieval relative to the end of a string. See
+   * {@link #substr(Object, int, int)}.
    *
    * @param subject The {@code String} to extract a substring from
    * @param from The start index within {@code string} (may be negative)
@@ -624,8 +608,7 @@ public final class StringMethods {
   }
 
   /**
-   * Substring method that allows for substring retrieval relative to the end of a
-   * string.<br>
+   * Substring method that allows for substring retrieval relative to the end of a string.<br>
    * <br>
    * <table>
    * <tr>
@@ -684,9 +667,8 @@ public final class StringMethods {
   }
 
   /**
-   * Returns everything up to (not including) the first or last occurence of
-   * {@code until} within the string, or the entire string if it does not contain
-   * {@code until}.
+   * Returns everything up to (not including) the first or last occurence of {@code until} within the
+   * string, or the entire string if it does not contain {@code until}.
    *
    * @param subject The string to take a substring from
    * @param until The string up until which to take the substring
@@ -703,9 +685,8 @@ public final class StringMethods {
   }
 
   /**
-   * Returns everything up to (not including) the first or last occurence of
-   * {@code until} within the string, or the entire string if it does not contain
-   * {@code until}.
+   * Returns everything up to (not including) the first or last occurence of {@code until} within the
+   * string, or the entire string if it does not contain {@code until}.
    *
    * @param subject The string to take a substring from
    * @param until The string up until which to take the substring

@@ -34,7 +34,7 @@ public class ObjectCheck<T, E extends Exception> extends Check<T, E> {
 
   @Override
   public ObjectCheck<T, E> noneEmpty() throws E {
-    that(ObjectMethods.isDeeptNotEmpty(arg), smash(ERR_NONE_EMPTY, argName));
+    that(ObjectMethods.isDeepNotEmpty(arg), smash(ERR_NONE_EMPTY, argName));
     return this;
   }
 

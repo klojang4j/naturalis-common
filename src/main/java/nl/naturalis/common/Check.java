@@ -9,29 +9,24 @@ import nl.naturalis.common.internal.IntCheck;
 import nl.naturalis.common.internal.IntegerCheck;
 import nl.naturalis.common.internal.ObjectCheck;
 import nl.naturalis.common.internal.StringCheck;
-import static nl.naturalis.common.ObjectMethods.isDeeptNotEmpty;
+import static nl.naturalis.common.ObjectMethods.isDeepNotEmpty;
 import static nl.naturalis.common.ArrayMethods.*;
 
 /**
  * <p>
- * Methods for checking preconditions. If you want to check a single
- * precondition for an argument, you can use the static methods. If you need to
- * check multiple preconditions for a single argument, you might prefer to use
- * the instance methods instead. For example:
+ * Methods for checking preconditions. If you want to check a single precondition for an argument,
+ * you can use the static methods. If you need to check multiple preconditions for a single
+ * argument, you might prefer to use the instance methods instead. For example:
  * </p>
  * <p>
  *
  * <pre>
- * int i = Check.that(numChairs, "numChairs")
- *     .gte(2).lte(10)
- *     .test(numChairs % 2 == 0, "must be even")
- *     .value();
+ * int i = Check.that(numChairs, "numChairs").gte(2).lte(10).test(numChairs % 2 == 0, "must be even").value();
  * </pre>
  * </p>
  * <p>
- * To facilitate concise coding, some methods take just the argument to be
- * tested and the name of the argument, not a complete error message. For
- * example:
+ * To facilitate concise coding, some methods only take the argument to be tested and the name of
+ * the argument, not a complete error message. For example:
  * </p>
  * <p>
  *
@@ -40,8 +35,8 @@ import static nl.naturalis.common.ArrayMethods.*;
  * </pre>
  * </p>
  * <p>
- * If you want to provide a custom message, choose the overloaded method that
- * takes message arguments:
+ * If you want to provide a custom message, choose the overloaded method that takes message
+ * arguments:
  *
  * <pre>
  * Check.notNull(name, "Please specify a name", null); // -> "Please specify a name"
@@ -82,14 +77,14 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns a {@code Check} object for int arguments that will throw a custom
-   * exception if the argument fails to pass a test.
+   * Returns a {@code Check} object for int arguments that will throw a custom exception if the
+   * argument fails to pass a test.
    *
    * @param <F> The type of the exception being thrown
    * @param arg The argument
    * @param argName The argument name
-   * @param excProvider A function that takes a string (the error message) and
-   *        returns an {@code Exception}
+   * @param excProvider A function that takes a string (the error message) and returns an
+   *        {@code Exception}
    * @return A new {@code Check} object
    */
   public static <F extends Exception> Check<Integer, F> that(int arg, String argName, Function<String, F> excProvider) {
@@ -97,8 +92,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns a {@code Check} object for {@code String} arguments that will throw
-   * an {@code IllegalArgumentException} if the argument fails to pass a test.
+   * Returns a {@code Check} object for {@code String} arguments that will throw an
+   * {@code IllegalArgumentException} if the argument fails to pass a test.
    *
    *
    * @param arg The argument
@@ -110,14 +105,14 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns a {@code Check} object for {@code String} arguments that will throw a
-   * custom exception if the argument fails to pass a test.
+   * Returns a {@code Check} object for {@code String} arguments that will throw a custom exception if
+   * the argument fails to pass a test.
    *
    * @param <F> The type of the exception being thrown
    * @param arg The argument
    * @param argName The argument name
-   * @param excProvider A function that takes a string (the error message) and
-   *        returns an {@code Exception}
+   * @param excProvider A function that takes a string (the error message) and returns an
+   *        {@code Exception}
    * @return A new {@code Check} object
    */
   public static <F extends Exception> Check<String, F> that(String arg, String argName, Function<String, F> excProvider) {
@@ -125,8 +120,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns a {@code Check} object for {@code Integer} arguments that will throw
-   * a custom exception if the argument fails to pass a test.
+   * Returns a {@code Check} object for {@code Integer} arguments that will throw a custom exception
+   * if the argument fails to pass a test.
    *
    * @param arg The argument
    * @param argName The argument name
@@ -137,14 +132,14 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns a {@code Check} object for {@code Integer} arguments that will throw
-   * a custom exception if the argument fails to pass a test.
+   * Returns a {@code Check} object for {@code Integer} arguments that will throw a custom exception
+   * if the argument fails to pass a test.
    *
    * @param <F> The type of the exception being thrown
    * @param arg The argument
    * @param argName The argument name
-   * @param excProvider A function that takes a string (the error message) and
-   *        returns an {@code Exception}
+   * @param excProvider A function that takes a string (the error message) and returns an
+   *        {@code Exception}
    * @return A new {@code Check} object
    */
   public static <F extends Exception> Check<Integer, F> that(Integer arg, String argName, Function<String, F> excProvider) {
@@ -165,15 +160,15 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns a {@code Check} object for a generic argument that will throw a
-   * custom exception if the argument fails to pass a test.
+   * Returns a {@code Check} object for a generic argument that will throw a custom exception if the
+   * argument fails to pass a test.
    *
    * @param <U> The type of the argument
    * @param <F> The type of the exception being thrown
    * @param arg The argument
    * @param argName The argument name
-   * @param excProvider A function that takes a string (the error message) and
-   *        returns an {@code Exception}
+   * @param excProvider A function that takes a string (the error message) and returns an
+   *        {@code Exception}
    * @return A new {@code Check} object
    */
   public static <U, F extends Exception> Check<U, F> that(U arg, String argName, Function<String, F> excProvider) {
@@ -181,11 +176,10 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Generic check method. Throws the exception supplied by the provided supplier
-   * if the provided condition evaluates to false, else does nothing.
+   * Generic check method. Throws the exception supplied by the provided supplier if the provided
+   * condition evaluates to false, else does nothing.
    *
-   * @param <F> The type of exception thrown if {@code condition} evaluates to
-   *        false
+   * @param <F> The type of exception thrown if {@code condition} evaluates to false
    * @param condition The condition to evaluate
    * @param excSupplier The exception supplier
    * @throws F The exception thrown if the condition fails
@@ -197,13 +191,11 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Generic check method. Throws the exception supplied by the provided exception
-   * supplier if the provided condition evaluates to false, else returns
-   * {@code result}.
+   * Generic check method. Throws the exception supplied by the provided exception supplier if the
+   * provided condition evaluates to false, else returns {@code result}.
    *
    * @param <U> The type of the argument
-   * @param <F> The type of exception thrown if {@code condition} evaluates to
-   *        false
+   * @param <F> The type of exception thrown if {@code condition} evaluates to false
    * @param condition The condition to evaluate
    * @param result The value returned if {@code condition} evaluates to true
    * @param excSupplier The exception supplier
@@ -218,13 +210,11 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Generic check method. Throws the exception supplied by the provided exception
-   * supplier if the provided condition evaluates to false, else returns the
-   * result supplied by the result supplier.
+   * Generic check method. Throws the exception supplied by the provided exception supplier if the
+   * provided condition evaluates to false, else returns the result supplied by the result supplier.
    *
    * @param <U> The type of the argument
-   * @param <F> The type of exception thrown if {@code condition} evaluates to
-   *        false
+   * @param <F> The type of exception thrown if {@code condition} evaluates to false
    * @param condition The condition to evaluate
    * @param resultSupplier The result supplier
    * @param excSupplier The exception supplier
@@ -239,8 +229,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Does nothing if the provided condition evaluates to {@code true}, else throws
-   * an {@code IllegalArgumentException} with the provided message.
+   * Does nothing if the provided condition evaluates to {@code true}, else throws an
+   * {@code IllegalArgumentException} with the provided message.
    *
    * @param condition The condition to be evaluated
    * @param message The exception message
@@ -251,8 +241,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it passes {@code test}, else throws an
-   * {@code IllegalArgumentException} with the provided message.
+   * Returns {@code arg} if it passes {@code test}, else throws an {@code IllegalArgumentException}
+   * with the provided message.
    *
    * @param <U> The type of the argument
    * @param arg The argument
@@ -265,9 +255,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Does nothing if the provided condition evaluates to {@code true}, else throws
-   * an {@code IllegalArgumentException} with the provided message and message
-   * arguments.
+   * Does nothing if the provided condition evaluates to {@code true}, else throws an
+   * {@code IllegalArgumentException} with the provided message and message arguments.
    *
    * @param condition The condition to be evaluated
    * @param message The exception message
@@ -281,8 +270,7 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Returns {@code arg} if it passes the provided {@code test}, else throws an
-   * {@code IllegalArgumentException} with the provided message and message
-   * arguments.
+   * {@code IllegalArgumentException} with the provided message and message arguments.
    *
    * @param <T>
    * @param arg The argument
@@ -296,8 +284,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it passes {@code test}, else throws an
-   * {@code IllegalArgumentException} with the provided message.
+   * Returns {@code arg} if it passes {@code test}, else throws an {@code IllegalArgumentException}
+   * with the provided message.
    *
    * @param arg The argument
    * @param test
@@ -313,8 +301,7 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Returns {@code arg} if it passes the provided {@code test}, else throws an
-   * {@code IllegalArgumentException} with the provided message and message
-   * arguments.
+   * {@code IllegalArgumentException} with the provided message and message arguments.
    *
    * @param arg The argument
    * @param test The test
@@ -330,10 +317,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Throws an {@code ArrayIndexOutOfBoundsException} if {@code arg} is less than
-   * zero or greater than or equal to {@code maxExclusive}, else returns
-   * {@code arg}. This is especially useful to test "from" arguments (e.g. in
-   * {@code String.substring} or {@code List.sublist}.
+   * Throws an {@code ArrayIndexOutOfBoundsException} if {@code arg} is less than zero or greater than
+   * or equal to {@code maxExclusive}, else returns {@code arg}. This is especially useful to test
+   * "from" arguments (e.g. in {@code String.substring} or {@code List.sublist}.
    *
    * @param arg The argument The argument to test
    * @param maxExclusive The maximum allowed value (exclusive)
@@ -348,11 +334,10 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Throws an {@code ArrayIndexOutOfBoundsException} if {@code arg} is less than
-   * {@code min} or greater than {@code max}, else returns {@code arg}. This is
-   * especially useful to test "to" or "until" arguments, which generally should
-   * be greater than or equal to the "from" argument, and less than <i>or equal
-   * to</i> to the length or size of the object operated upon.
+   * Throws an {@code ArrayIndexOutOfBoundsException} if {@code arg} is less than {@code min} or
+   * greater than {@code max}, else returns {@code arg}. This is especially useful to test "to" or
+   * "until" arguments, which generally should be greater than or equal to the "from" argument, and
+   * less than <i>or equal to</i> to the length or size of the object operated upon.
    *
    * @param arg The argument The argument to test
    * @param minInclusive The minimum allowed value (inclusive)
@@ -368,8 +353,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is not null, else throws an
-   * {@code IllegalArgumentException}.
+   * Returns {@code arg} if it is not null, else throws an {@code IllegalArgumentException}.
    *
    * @param <T> The type of the argument
    * @param arg The argument
@@ -382,9 +366,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is not null, else throws an
-   * {@code IllegalArgumentException} with the provided message and message
-   * arguments.
+   * Returns {@code arg} if it is not null, else throws an {@code IllegalArgumentException} with the
+   * provided message and message arguments.
    *
    * @param <T> The type of the argument
    * @param arg The argument
@@ -399,8 +382,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Checks that the provided argument is null, else throws an
-   * {@code IllegalArgumentException}.
+   * Checks that the provided argument is null, else throws an {@code IllegalArgumentException}.
    *
    * @param arg The argument
    * @param argName The argument name
@@ -410,9 +392,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is not null and, in case of an array,
-   * {@code Collection} or {@code Map}, none of its elements c.q. values are null,
-   * else throws an {@code IllegalArgumentException}.
+   * Returns {@code arg} if it is not null and, in case of an array, {@code Collection} or
+   * {@code Map}, none of its elements c.q. values are null, else throws an
+   * {@code IllegalArgumentException}.
    *
    * @see ObjectMethods#isDeepNotNull(Object)
    *
@@ -426,9 +408,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is not empty, else throws an
-   * {@code IllegalArgumentException} with the message: <i>${argName} must not be
-   * empty</i>.
+   * Returns {@code arg} if it is not empty, else throws an {@code IllegalArgumentException} with the
+   * message: <i>${argName} must not be empty</i>.
    *
    * @see ObjectMethods#isNotEmpty(Object)
    *
@@ -442,9 +423,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is not empty, else throws an
-   * {@code IllegalArgumentException} with the provided message and message
-   * arguments.
+   * Returns {@code arg} if it is not empty, else throws an {@code IllegalArgumentException} with the
+   * provided message and message arguments.
    *
    * @see ObjectMethods#isNotEmpty(Object)
    *
@@ -460,10 +440,10 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is {@link ObjectMethods#isDeeptNotEmpty(Object) deeply
-   * non-empty}, else throws an {@code IllegalArgumentException}.
+   * Returns {@code arg} if it is {@link ObjectMethods#isDeepNotEmpty(Object) deeply non-empty}, else
+   * throws an {@code IllegalArgumentException}.
    *
-   * @see ObjectMethods#isDeeptNotEmpty(Object)
+   * @see ObjectMethods#isDeepNotEmpty(Object)
    *
    * @param <T> The type of the argument
    * @param arg The argument
@@ -471,13 +451,13 @@ public abstract class Check<T, E extends Exception> {
    * @return The argument
    */
   public static <T> T noneEmpty(T arg, String argName) {
-    return argument(arg, ObjectMethods::isDeeptNotEmpty, ERR_NONE_EMPTY, argName);
+    return argument(arg, ObjectMethods::isDeepNotEmpty, ERR_NONE_EMPTY, argName);
   }
 
   /**
-   * Returns {@code arg} if it is {@link ObjectMethods#isDeeptNotEmpty(Object) deeply
-   * non-empty} Otherwise this method throws an {@code IllegalArgumentException}
-   * with the provided message and message arguments.
+   * Returns {@code arg} if it is {@link ObjectMethods#isDeepNotEmpty(Object) deeply non-empty}
+   * Otherwise this method throws an {@code IllegalArgumentException} with the provided message and
+   * message arguments.
    *
    * @param <T> The type of the argument
    * @param arg The argument
@@ -487,12 +467,11 @@ public abstract class Check<T, E extends Exception> {
    * @return The argument
    */
   public static <T> T noneEmpty(T arg, String message, Object msgArg0, Object... msgArgs) throws IllegalArgumentException {
-    return argument(arg, ObjectMethods::isDeeptNotEmpty, message, msgArg0, msgArgs);
+    return argument(arg, ObjectMethods::isDeepNotEmpty, message, msgArg0, msgArgs);
   }
 
   /**
-   * Returns {@code arg} if it is not blank, else throws an
-   * {@code IllegalArgumentException}.
+   * Returns {@code arg} if it is not blank, else throws an {@code IllegalArgumentException}.
    *
    * @param arg The argument
    * @param argName The argument name
@@ -504,8 +483,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is not blank, else throws an
-   * {@code IllegalArgumentException}.
+   * Returns {@code arg} if it is not blank, else throws an {@code IllegalArgumentException}.
    *
    * @param arg The argument
    * @param message The exception message
@@ -548,8 +526,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is greater than or equal to {@code minVal}, else
-   * throws an {@code IllegalArgumentException}.
+   * Returns {@code arg} if it is greater than or equal to {@code minVal}, else throws an
+   * {@code IllegalArgumentException}.
    *
    * @param arg The argument
    * @param minVal The argument's lower bound (inclusive)
@@ -562,8 +540,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is greater than or equal to {@code minVal}, else
-   * throws an {@code IllegalArgumentException}.
+   * Returns {@code arg} if it is greater than or equal to {@code minVal}, else throws an
+   * {@code IllegalArgumentException}.
    *
    * @param arg The argument
    * @param minVal The argument's lower bound (inclusive)
@@ -593,8 +571,7 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Returns {@code arg} if it is less than {@code maxVal}, else throws an
-   * {@code IllegalArgumentException} with the provided message and message
-   * arguments.
+   * {@code IllegalArgumentException} with the provided message and message arguments.
    *
    * @param arg The argument
    * @param maxVal The argument's upper bound (exclusive)
@@ -639,8 +616,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is between {@code minInclusive} and
-   * {@code maxExclusive}, else throws an {@code IllegalArgumentException}.
+   * Returns {@code arg} if it is between {@code minInclusive} and {@code maxExclusive}, else throws
+   * an {@code IllegalArgumentException}.
    *
    * @param arg The argument
    * @param minInclusive
@@ -649,17 +626,12 @@ public abstract class Check<T, E extends Exception> {
    * @return The argument
    */
   public static int between(int arg, int minInclusive, int maxExclusive, String argName) throws IllegalArgumentException {
-    return integer(arg,
-        x -> x >= minInclusive && x < maxExclusive,
-        ERR_BETWEEN,
-        argName,
-        minInclusive,
-        maxExclusive);
+    return integer(arg, x -> x >= minInclusive && x < maxExclusive, ERR_BETWEEN, argName, minInclusive, maxExclusive);
   }
 
   /**
-   * Returns {@code arg} if it is between {@code minInclusive} and
-   * {@code maxInclusive}, else throws an {@code IllegalArgumentException}.
+   * Returns {@code arg} if it is between {@code minInclusive} and {@code maxInclusive}, else throws
+   * an {@code IllegalArgumentException}.
    *
    * @param arg The argument
    * @param minInclusive
@@ -668,23 +640,16 @@ public abstract class Check<T, E extends Exception> {
    * @return The argument
    */
   public static int inRange(int arg, int minInclusive, int maxInclusive, String argName) {
-    return integer(arg,
-        x -> x >= minInclusive && x <= maxInclusive,
-        ERR_IN_RANGE,
-        argName,
-        minInclusive,
-        maxInclusive);
+    return integer(arg, x -> x >= minInclusive && x <= maxInclusive, ERR_IN_RANGE, argName, minInclusive, maxInclusive);
   }
 
   /**
-   * Does nothing if the provided condition evaluates to {@code true}, else throws
-   * an {@link IllegalStateException} with the provided message and message
-   * arguments.
+   * Does nothing if the provided condition evaluates to {@code true}, else throws an
+   * {@link IllegalStateException} with the provided message and message arguments.
    *
    * @param condition The condition to evaluate
    * @param message The exception message
-   * @param msgArgs The {@code String.format} message arguments (may be null or
-   *        empty)
+   * @param msgArgs The {@code String.format} message arguments (may be null or empty)
    * @throws IllegalStateException If the condition evaluates to {@code false}
    */
   public static void state(boolean condition, String message, Object... msgArgs) throws IllegalStateException {
@@ -701,7 +666,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   private static IllegalStateException badState(String msg, Object... msgArgs) {
-    if (isDeeptNotEmpty(msgArgs)) {
+    if (isDeepNotEmpty(msgArgs)) {
       return new IllegalStateException(String.format(msg, msgArgs));
     }
     throw new IllegalStateException(msg);
@@ -725,8 +690,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the specified condition (supposedly related to the argument)
-   * evaluates to true.
+   * Verifies that the specified condition (supposedly related to the argument) evaluates to true.
    *
    * @param condition The condition to evaluate
    * @param descr A description of the test
@@ -739,8 +703,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the specified condition (supposedly related to the specified
-   * field within the argument) evaluates to true.
+   * Verifies that the specified condition (supposedly related to the specified field within the
+   * argument) evaluates to true.
    *
    * @param condition The condition to evaluate
    * @param descr A description of the test
@@ -765,8 +729,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the specified field within the argument passes the provided
-   * test.
+   * Verifies that the specified field within the argument passes the provided test.
    *
    * @param field The name of the field
    * @param test The test to apply to the field
@@ -791,8 +754,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the specified field within the argument passes the provided
-   * test.
+   * Verifies that the specified field within the argument passes the provided test.
    *
    * @param field The name of the field
    * @param test The test to apply to the field
@@ -815,8 +777,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is {@link ObjectMethods#isDeepNotNull(Object)
-   * deepNotNull}.
+   * Verifies that the argument is {@link ObjectMethods#isDeepNotNull(Object) deepNotNull}.
    *
    * @return This {@code Check} object
    * @throws E If the test fails
@@ -826,8 +787,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is not {@link ObjectMethods#isNotEmpty(Object)
-   * empty}.
+   * Verifies that the argument is not {@link ObjectMethods#isNotEmpty(Object) empty}.
    *
    * @return This {@code Check} object
    * @throws E If the test fails
@@ -837,8 +797,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is {@link ObjectMethods#isDeeptNotEmpty(Object)
-   * deepNotEmpty}.
+   * Verifies that the argument is {@link ObjectMethods#isDeepNotEmpty(Object) deepNotEmpty}.
    *
    * @return This {@code Check} object
    * @throws E If the test fails
@@ -848,8 +807,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is not {@link StringMethods#isNotBlank(Object)
-   * blank}.
+   * Verifies that the argument is not {@link StringMethods#isNotBlank(Object) blank}.
    *
    * @return This {@code Check} object
    * @throws E If the test fails
@@ -923,8 +881,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is greater than or equal to the 1st argument and
-   * less than the 2nd argument.
+   * Verifies that the argument is greater than or equal to the 1st argument and less than the 2nd
+   * argument.
    *
    * @param minInclusive The minimum allowed value (inclusive)
    * @param maxExclusive The maximum allowed value (exclusive)
@@ -936,8 +894,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is greater than or equal to the 1st argument and
-   * less than or equal to the 2nd argument.
+   * Verifies that the argument is greater than or equal to the 1st argument and less than or equal to
+   * the 2nd argument.
    *
    * @param minInclusive The minimum allowed value (inclusive)
    * @param maxInclusive The maximum allowed value (inclusive)
@@ -949,24 +907,22 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns the argument being tested. To be used as the last call after a chain
-   * of checks. For example:
+   * Returns the argument being tested. To be used as the last call after a chain of checks. For
+   * example:
    *
    * <pre>
    * Integer i = Check.that(counter, "counter").notNull().value();
    * </pre>
    *
-   * @param <T> The type of the argument
    * @return The argument
    */
   public abstract T value();
 
   /**
-   * Returns the argument being tested as an {@code int}. If the argument being
-   * tested actually is an {@code int} rather than an {@code Integer}, this method
-   * saves the cost of unboxing incurred by {@link #value()}. If the argument
-   * neither is {@code int} nor an {@code Integer} this method throws a
-   * {@code ClassCastException}.
+   * Returns the argument being tested as an {@code int}. If the argument being tested actually is an
+   * {@code int} rather than an {@code Integer}, this method saves the cost of unboxing incurred by
+   * {@link #value()}. If the argument neither is {@code int} nor an {@code Integer} this method
+   * throws a {@code ClassCastException}.
    *
    * @return The argument cast or converted to an {@code int}
    */

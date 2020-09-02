@@ -36,7 +36,8 @@ public class ObjectMethods {
    * @return Whether or not it is empty
    */
   public static boolean isEmpty(Object obj) {
-    return obj == null || obj instanceof String && ((String) obj).isEmpty()
+    return obj == null
+        || obj instanceof String && ((String) obj).isEmpty()
         || obj instanceof Collection && ((Collection) obj).isEmpty()
         || obj instanceof Map && ((Map) obj).isEmpty()
         || obj instanceof Object[] && ((Object[]) obj).length == 0
@@ -57,15 +58,19 @@ public class ObjectMethods {
 
   /**
    * <p>
-   * Returns whether or not the argument is recursively non-empty. More specifically, this method
-   * returns {@code true} if:
+   * Returns whether or not the argument is recursively non-empty. Returns {@code true} in any of the
+   * following cases
    * <p>
    * <ul>
-   * <li>{@code obj} is a non-empty (non-primitive) array with only {@code deepNotEmpty} elements
+   * <li>{@code obj} is null
+   * <li>{@code obj} is a non-empty {@code String}
    * <li>{@code obj} is a non-empty {@code Collection} with only {@code deepNotEmpty} elements
-   * <li>{@code obj} is a non-empty {@code Map}, with only {@code deepNotEmpty} values (NB map keys
-   * are not checked for empty-ness)
-   * <li>{@code obj} is a non-empty object of any other type
+   * <li>{@code obj} is a non-empty {@code Map}, with only {@code deepNotEmpty} values (map keys are
+   * not checked for empty-ness)
+   * <li>{@code obj} is a non-empty {@code Object} array with only {@code deepNotEmpty} elements
+   * <li>{@code obj} is a non-empty primitive array
+   * <li>{@code obj} is a non-empty {@link Emptyable}
+   * <li>{@code obj} is a non-zero-size {@link Sizeable}
    * </ul>
    * <p>
    * Otherwise this method returns {@code false}.
@@ -73,18 +78,29 @@ public class ObjectMethods {
    * @param obj The object to be tested
    * @return Whether or not it is recursively non-empty
    */
-  public static boolean isDeeptNotEmpty(Object obj) {
-    return obj != null && (!(obj instanceof String) || ((String) obj).length() > 0)
-        && (!(obj instanceof Collection) || ((Collection) obj).size() > 0
-            && ((Collection) obj).stream().allMatch(ObjectMethods::isDeeptNotEmpty))
-        && (!(obj instanceof Map) || ((Map) obj).size() > 0
-            && ((Map) obj).values().stream().allMatch(ObjectMethods::isDeeptNotEmpty))
-        && (!(obj instanceof Object[]) || ((Object[]) obj).length > 0
-            && Arrays.stream((Object[]) obj).allMatch(ObjectMethods::isDeeptNotEmpty))
+  public static boolean isDeepNotEmpty(Object obj) {
+    return obj != null
+        && (!(obj instanceof String) || !((String) obj).isEmpty())
+        && (!(obj instanceof Collection) || noneEmpty((Collection) obj))
+        && (!(obj instanceof Map) || noneEmpty((Map) obj))
+        && (!(obj instanceof Object[]) || noneEmpty((Object[]) obj))
         && (!isPrimitiveArray(obj) || Array.getLength(obj) > 0)
         && (!(obj instanceof Sizeable) || ((Sizeable) obj).size() > 0)
         && (!(obj instanceof Emptyable) || !((Emptyable) obj).isEmpty());
   }
+
+  private static boolean noneEmpty(Collection c) {
+    return !c.isEmpty() && c.stream().allMatch(ObjectMethods::isDeepNotEmpty);
+  }
+
+  private static boolean noneEmpty(Map m) {
+    return !m.isEmpty() && m.values().stream().allMatch(ObjectMethods::isDeepNotEmpty);
+  }
+
+  private static boolean noneEmpty(Object[] obj) {
+    return obj.length > 0 && Arrays.stream(obj).allMatch(ObjectMethods::isDeepNotEmpty);
+  }
+
 
   /**
    * <p>
@@ -100,7 +116,7 @@ public class ObjectMethods {
    * keys are not checked for empty-ness.)
    * </ul>
    * <p>
-   * Otherwise this method returns {@code false}. Contrary to {@link #isDeeptNotEmpty(Object)
+   * Otherwise this method returns {@code false}. Contrary to {@link #isDeepNotEmpty(Object)
    * deepNotEmpty}, this method returns {@code true} for empty arrays, collections and maps. It only
    * checks that the values they do contain are non-null.
    *
@@ -121,27 +137,23 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns {@code null} if the argument is {@link #isEmpty(Object) empty}, else the argument
-   * itself.
+   * (empty-to-null) Returns {@code null} if the argument is {@link #isEmpty(Object) empty}, else the
+   * argument itself.
    *
    * @param <T> The type of the argument
    * @param obj The argument
    * @return The argument itself or {@code null}
    */
-  public static <T> T emptyToNull(T obj) {
+  public static <T> T e2n(T obj) {
     return isEmpty(obj) ? null : obj;
   }
 
   /**
    * <p>
    * Tests the provided arguments for equality using <i>empty-equals-null</i> semantics. This is
-   * more or less equivalent to:
-   *
-   * <pre>
-   * Objects.equals(emptyToNull(obj1), emptyToNull(obj2))
-   * </pre>
-   *
-   * More specifically:
+   * equivalent to {@code Objects.equals(e2n(obj1), e2n(obj2))}, except that empty instance of one
+   * type (e.g. {@code String}) is <b>not</b> equal to an empty instance of another type (e.g.
+   * {@code Set}). So:
    * <p>
    * <ol>
    * <li>{@code null} equals an empty <code>String</code>
@@ -150,10 +162,6 @@ public class ObjectMethods {
    * <li>{@code null} equals a zero-length array
    * <li>{@code null} equals an empty {@link Emptyable}
    * <li>{@code null} equals a zero-size {@link Sizeable}
-   * <li>For any other pair of arguments this method returns the result of
-   * <code>Objects.equals(obj1, obj2)<code>
-   * <li><i>An empty instance of one type (e.g. {@code String}) is <b>not</b> equal to an empty
-   * instance of another type (e.g. {@code Set})</i>
    * </ol>
    *
    *
@@ -173,7 +181,7 @@ public class ObjectMethods {
   /**
    * Recursively tests the arguments for equality using <i>empty-equals-null</i> semantics. In other
    * words, for arrays, collections and maps, elements c.q. values are also compared using
-   * {@code e2nDeepEquals}.
+   * {@code e2nDeepEquals}. Map keys are compared as usual.
    *
    * @param obj1 The 1st of the pair of objects to compare
    * @param obj2 The 2nd of the pair of objects to compare
@@ -191,23 +199,23 @@ public class ObjectMethods {
   /**
    * Generates a hash code for the provided object using using <i>empty-equals-null</i> semantics.
    * That is: null and {@link #isEmpty(Object) empty} objects all have hash code zero. Therefore
-   * maps and sets relying on <i>empty-equals-null</i> semantics to find keys and elements will
-   * likely have to fall back more often on {@link #e2nEquals(Object, Object) e2nEquals} or
+   * non-generic maps and sets relying on <i>empty-equals-null</i> semantics to find keys and elements
+   * will likely have to fall back more often on {@link #e2nEquals(Object, Object) e2nEquals} or
    * {@link #e2nDeepEquals(Object, Object) e2nDeepEquals}.
    *
    * @param obj The object to generate a hash code for
-   * @return
+   * @return The hash code
    */
   public static int e2nHashCode(Object obj) {
     return isEmpty(obj) ? 0 : obj.hashCode();
   }
 
   /**
-   * Generates a hash code for the provided arguments using using <i>empty-equals-null</i>
-   * semantics. See {@link #hashCode()}.
+   * Generates a hash code for the provided arguments using using <i>empty-equals-null</i> semantics.
+   * See {@link #hashCode()}.
    *
    * @param objs The objects to generate a hash code for
-   * @return
+   * @return The hash code
    */
   public static int e2nHash(Object... objs) {
     if (objs == null) {
@@ -245,89 +253,83 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the default {@code int} value (0) if the argument is null, else the unboxed argument
-   * itself.
+   * Returns the default {@code int} value (0) if the argument is null, else the argument itself.
    *
-   * @param i The value to unbox
-   * @return The unboxed value or the default value of the corresponding primitive type
+   * @param i The primitive wrapper
+   * @return The argument or the default value of the corresponding primitive type
    */
-  public static int nvl(Integer i) {
+  public static Integer nvl(Integer i) {
     return ifNull(i, 0);
   }
 
   /**
-   * Returns the default {@code double} value (0) if the argument is null, else the unboxed argument
-   * itself.
+   * Returns the default {@code double} value (0) if the argument is null, else the argument itself.
    *
-   * @param d The value to unbox
-   * @return The unboxed value or the default value of the corresponding primitive type
+   * @param d The primitive wrapper
+   * @return The argument or the default value of the corresponding primitive type
    */
-  public static double nvl(Double d) {
+  public static Double nvl(Double d) {
     return ifNull(d, 0D);
   }
 
 
   /**
-   * Returns the default {@code long} value (0) if the argument is null, else the unboxed argument
-   * itself.
+   * Returns the default {@code long} value (0) if the argument is null, else the argument itself.
    *
-   * @param l The value to unbox
-   * @return The unboxed value or the default value of the corresponding primitive type
+   * @param l The primitive wrapper
+   * @return The argument or the default value of the corresponding primitive type
    */
-  public static long nvl(Long l) {
+  public static Long nvl(Long l) {
     return ifNull(l, 0L);
   }
 
   /**
-   * Returns the default {@code float} value (0) if the argument is null, else the unboxed argument
-   * itself.
+   * Returns the default {@code float} value (0) if the argument is null, else the argument itself.
    *
-   * @param f The value to unbox
-   * @return The unboxed value or the default value of the corresponding primitive type
+   * @param f The primitive wrapper
+   * @return The argument or the default value of the corresponding primitive type
    */
-  public static float nvl(Float f) {
+  public static Float nvl(Float f) {
     return ifNull(f, 0F);
   }
 
   /**
-   * Returns the default {@code short} value (0) if the argument is null, else the unboxed argument
-   * itself.
+   * Returns the default {@code short} value (0) if the argument is null, else the argument itself.
    *
-   * @param s The value to unbox
-   * @return The unboxed value or the default value of the corresponding primitive type
+   * @param s The primitive wrapper
+   * @return The argument or the default value of the corresponding primitive type
    */
-  public static short nvl(Short s) {
+  public static Short nvl(Short s) {
     return ifNull(s, (short) 0);
   }
 
   /**
-   * Returns the default {@code byte} value (0) if the argument is null, else the unboxed argument
-   * itself.
+   * Returns the default {@code byte} value (0) if the argument is null, else the argument itself.
    *
-   * @param b The value to unbox
-   * @return The unboxed value or the default value of the corresponding primitive type
+   * @param b The primitive wrapper
+   * @return The argument or the default value of the corresponding primitive type
    */
-  public static byte nvl(Byte b) {
+  public static Byte nvl(Byte b) {
     return ifNull(b, (byte) 0);
   }
 
   /**
    * Returns the default {@code boolean} value ({@code false}) if the argument is null, else the
-   * unboxed argument itself.
+   * argument itself.
    *
-   * @param b
-   * @return The unboxed value or the default value of the corresponding primitive type
+   * @param b The primitive wrapper
+   * @return The argument or the default value of the corresponding primitive type
    */
-  public static boolean nvl(Boolean b) {
-    return ifNull(b, false);
+  public static Boolean nvl(Boolean b) {
+    return ifNull(b, Boolean.FALSE);
   }
 
   /**
    * Returns the default {@code char} value ('\u0000') if the argument is null, else the unboxed
    * argument itself.
    *
-   * @param c The value to unbox
-   * @return The unboxed value or the default value of the corresponding primitive type
+   * @param c The primitive wrapper
+   * @return The argument or the default value of the corresponding primitive type
    */
   public static char nvl(Character c) {
     return ifNull(c, '\u0000');
@@ -369,30 +371,6 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns {@code value} only if it is equal to {@code requiredValue}, else null.
-   *
-   * @param <T> The input and return type
-   * @param value The value to test
-   * @param requiredValue The value it must have
-   * @return {@code value} or null
-   */
-  public static <T> T nullIfNotEquals(T value, T requiredValue) {
-    return ifTrue(Objects::equals, value, requiredValue);
-  }
-
-  /**
-   * Returns {@code value} unless it is equal to {@code illegalValue}, else null.
-   *
-   * @param <T> The input and return type
-   * @param value The value to test
-   * @param illegalValue The value it must not have
-   * @return {@code value} or null
-   */
-  public static <T> T nullIfEquals(T value, T illegalValue) {
-    return ifFalse(Objects::equals, value, illegalValue);
-  }
-
-  /**
    * Returns {@code value} if the condition evaluates to {@code true}, else the result of the
    * specified operation on {@code value}. For example:
    *
@@ -410,21 +388,6 @@ public class ObjectMethods {
     return condition ? then.apply(value) : value;
   }
 
-  /**
-   * Returns {@code arg0} if the {@code comparison} function returns {@code true} for arguments
-   * {@code arg0} and {@code arg1}, else null.
-   *
-   * @param <T> The input and return type
-   * @param <U> The type of the second argument to the comparison function
-   * @param comparison A function that compares {@code value} and {@code mustBe} and returns a
-   *        {@code Boolean}
-   * @param arg0 The value to test
-   * @param arg1 The value to compare it to
-   * @return {@code value} or null
-   */
-  public static <T, U> T ifTrue(BiFunction<T, U, Boolean> comparison, T arg0, U arg1) {
-    return comparison.apply(arg0, arg1) ? arg0 : null;
-  }
 
   /**
    * Returns {@code value} if the condition evaluates to {@code false}, else the result of the
@@ -441,8 +404,22 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns {@code arg0} if the {@code comparison} function returns {@code false} for arguments
-   * {@code arg0} and {@code arg1}, else null.
+   * Returns {@code value} unless it is equal to {@code illegalValue}, else null. Equivalent to
+   * <code>nullIf(Objects::equals, value, requiredValue)</code>.
+   *
+   * @param <T> The input and return type
+   * @param value The value to test
+   * @param illegalValue The value it must not have
+   * @return {@code value} or null
+   */
+  public static <T> T nullIf(T value, T illegalValue) {
+    return nullIf(Objects::equals, value, illegalValue);
+  }
+
+
+  /**
+   * Returns null if the {@code comparison} function returns {@code true} for {@code arg0} and
+   * {@code arg1}, else {@code arg0}.
    *
    * @param <T> The input and return type
    * @param <U> The type of the second argument to the comparison function
@@ -452,9 +429,42 @@ public class ObjectMethods {
    * @param arg1 The value to compare it to
    * @return {@code value} or null
    */
-  public static <T, U> T ifFalse(BiFunction<T, U, Boolean> comparison, T arg0, U arg1) {
+  public static <T, U> T nullIf(BiFunction<T, U, Boolean> comparison, T arg0, U arg1) {
     return comparison.apply(arg0, arg1) ? null : arg0;
   }
+
+
+  /**
+   * Returns {@code value} only if it is equal to {@code requiredValue}, else null. Equivalent to
+   * <code>nullUnless(Objects::equals, value, requiredValue)</code>.
+   *
+   * @param <T> The input and return type
+   * @param value The value to test
+   * @param requiredValue The value it must have
+   * @return {@code value} or null
+   */
+  public static <T> T nullUnless(T value, T requiredValue) {
+    return nullUnless(Objects::equals, value, requiredValue);
+  }
+
+
+
+  /**
+   * Returns null unless the {@code comparison} function returns {@code true} for {@code arg0} and
+   * {@code arg1}, else {@code arg0}.
+   *
+   * @param <T> The input and return type
+   * @param <U> The type of the second argument to the comparison function
+   * @param comparison A function that compares {@code value} and {@code mustBe} and returns a
+   *        {@code Boolean}
+   * @param arg0 The value to test
+   * @param arg1 The value to compare it to
+   * @return {@code value} or null
+   */
+  public static <T, U> T nullUnless(BiFunction<T, U, Boolean> comparison, T arg0, U arg1) {
+    return comparison.apply(arg0, arg1) ? arg0 : null;
+  }
+
 
   /**
    * Returns the result of passing {@code value} to {@code then} if {@code value} is not null, else
@@ -523,8 +533,7 @@ public class ObjectMethods {
   }
 
   /**
-   * Executes the {@code Runnable} if {@code condition} evaluates to {@code true}, else does
-   * nothing.
+   * Executes the {@code Runnable} if {@code condition} evaluates to {@code true}, else does nothing.
    *
    * @param condition The condition to evaluate
    * @param then The action to execute
@@ -603,8 +612,8 @@ public class ObjectMethods {
   }
 
   private static boolean setsEqual(Set set1, Set set2) {
-    Set s1 = (Set) set1.stream().map(ObjectMethods::emptyToNull).collect(toSet());
-    Set s2 = (Set) set2.stream().map(ObjectMethods::emptyToNull).collect(toSet());
+    Set s1 = (Set) set1.stream().map(ObjectMethods::e2n).collect(toSet());
+    Set s2 = (Set) set2.stream().map(ObjectMethods::e2n).collect(toSet());
     if (s1.size() != s2.size()) {
       return false;
     } else if (s1.equals(s2)) {
@@ -641,8 +650,7 @@ public class ObjectMethods {
   private static boolean canCompare(Object obj1, Object obj2) {
     return obj1 == null // can always compare null to any other type of empty object
         // String, Emptyable, Sizeable & primitive arrays:
-        || obj2 == null || obj1.getClass() == obj2.getClass()
-        || obj1 instanceof List && obj2 instanceof List
+        || obj2 == null || obj1.getClass() == obj2.getClass() || obj1 instanceof List && obj2 instanceof List
         || obj1 instanceof Set && obj2 instanceof Set || obj1 instanceof Map && obj2 instanceof Map
         || obj1 instanceof Object[] && obj2 instanceof Object[];
   }

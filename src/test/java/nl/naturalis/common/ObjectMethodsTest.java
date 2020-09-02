@@ -34,18 +34,18 @@ public class ObjectMethodsTest {
 
   @Test
   public void deepNotEmpty_01() {
-    assertTrue("01", isDeeptNotEmpty(List.of("Hi", new String[] {"Hi", "There"})));
-    assertFalse("02", isDeeptNotEmpty(List.of("Hi", new String[0])));
-    assertTrue("03", isDeeptNotEmpty(List.of("Hi", Collections.singletonMap("a", "b"))));
-    assertFalse("04", isDeeptNotEmpty(List.of("Hi", Collections.emptyMap())));
-    assertFalse("05", isDeeptNotEmpty(List.of("Hi",
+    assertTrue("01", isDeepNotEmpty(List.of("Hi", new String[] {"Hi", "There"})));
+    assertFalse("02", isDeepNotEmpty(List.of("Hi", new String[0])));
+    assertTrue("03", isDeepNotEmpty(List.of("Hi", Collections.singletonMap("a", "b"))));
+    assertFalse("04", isDeepNotEmpty(List.of("Hi", Collections.emptyMap())));
+    assertFalse("05", isDeepNotEmpty(List.of("Hi",
         Collections.singletonMap(
             "a",
             Collections.singletonMap(
                 "b",
                 Collections.emptyMap())))));
-    assertTrue("06", isDeeptNotEmpty(List.of("Hi", Set.of(new Object(),new Object()))));
-    assertFalse("07", isDeeptNotEmpty(List.of("Hi", Collections.emptySet())));
+    assertTrue("06", isDeepNotEmpty(List.of("Hi", Set.of(new Object(),new Object()))));
+    assertFalse("07", isDeepNotEmpty(List.of("Hi", Collections.emptySet())));
   }
 
   @Test

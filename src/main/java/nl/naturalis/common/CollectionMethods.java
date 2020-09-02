@@ -220,20 +220,18 @@ public class CollectionMethods {
   }
 
   /**
-   * Returns a slice of the provided list starting with starting with element {@code from} and
+   * Returns a sublist of the provided list starting with starting with element {@code from} and
    * containing at most {@code length} elements.
    * <ol>
    * <li>If {@code from} is negative, it is relative to the end of the list.
-   * <li>If {@code length} is negative, the sublist is taken to the left of {@code from}. Note that
-   * <code>list.get(from)</code> is still included in the sublist (as the last element); {@code from}
-   * does not morph into the {@code to} (exclusive) parameter.
+   * <li>If {@code length} is negative, the sublist is taken to the left of {@code from} (inclusive).
    * <li>Both {@code from} and {@code length} are clamped to their minimum and maximum values. In
    * other words you will never get an {@link ArrayIndexOutOfBoundsException}.
    * </ol>
    *
-   * @param list
-   * @param from
-   * @param length
+   * @param list The {@code List} to extract a sublist from
+   * @param from The start index
+   * @param length The length of the substr
    * @return
    */
   public static <T> List<T> sublist(List<T> list, int from, int length) {
@@ -246,8 +244,8 @@ public class CollectionMethods {
     }
     if (length < 0) {
       /*
-       * e.g. if from == 4 and length == -2, then element 4 (the 5th) element is the *last* of the sublist
-       * and element 4 the first.
+       * e.g. if from == 4 and length == -2, then the 5th element will be the last element of the sublist
+       * and the 4th element will be the first.
        */
       length = Math.min(from + 1, Math.abs(length));
       from = from - length + 1;
