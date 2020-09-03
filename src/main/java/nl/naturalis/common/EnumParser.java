@@ -1,32 +1,41 @@
 package nl.naturalis.common;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.function.UnaryOperator;
-import static java.util.Map.entry;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toUnmodifiableMap;
 import static nl.naturalis.common.Check.notNull;
 
 /**
- * Parses strings into enum constants by using a normalizer for both enum
- * constant names and the strings to be parsed into the enum constants.
- * Internally the <code>EnumParser</code> creates a string-to-enum map with the
- * normalized enum constant names as keys to optimize the speed of parsing.
+ * Parses strings into enum constants. Parsing is done via an string-to-enum map where the keys are
+ * normalized versions of {@code Enum.name()} and {@code Enum.toString()}. The strings to be parsed
+ * are normalized in the same way and then looked up in the map.
+ *
+ * <pre>
+ * enum TransportType {
+ *  CAR, BIKE, TRAIN;
+ *
+ *  private static EnumParser<TransportType> parser = new EnumParser(TransportType.class);
+ *
+ *  public static TransportType parse(String input) {
+ *      return parser.parse(input);
+ *  }
+ * </pre>
  *
  * @author Ayco Holleman
  *
  */
 public class EnumParser<T extends Enum<T>> {
 
+  private static final String ERR_NULL_VALUE = "Cannot parse null into enum constant";
+  private static final String ERR_INVALID_VALUE = "Invalid value for %s: \"%s\"";
+
   /**
-   * The default way of normalizing enum constant names and client-provided
-   * strings to be parsed into enum constants. Removes ' ', '-' and '_', and makes
-   * it an all-lowercase string.
+   * The default normalization function. Removes ' ', '-' and '_', and makes it an all-lowercase
+   * string.
    */
   public static final UnaryOperator<String> DEFAULT_NORMALIZER =
-      s -> notNull(s, "enum string").replaceAll("[-_ ]", "").toLowerCase();
+      s -> notNull(s, ERR_NULL_VALUE, "").replaceAll("[-_ ]", "").toLowerCase();
 
   private final Class<T> enumClass;
   private final UnaryOperator<String> normalizer;
@@ -34,8 +43,7 @@ public class EnumParser<T extends Enum<T>> {
 
   /**
    * Creates an <code>EnumParser</code> for the provided enum class, using the
-   * {@link #DEFAULT_NORMALIZER} to normalize enum constant names the strings
-   * passed to the {@link #parse(String) parse} method.
+   * {@link #DEFAULT_NORMALIZER}.
    *
    * @param enumClass
    */
@@ -44,37 +52,38 @@ public class EnumParser<T extends Enum<T>> {
   }
 
   /**
-   * Creates an <code>EnumParser</code> for the provided enum class, using the
-   * provided <code>normalizer</code> to normalize enum constant names as well as
-   * the strings passed to the {@link #parse(String) parse} method.
+   * Creates an {@code EnumParser} for the provided enum class, using the provided {@code normalizer}
+   * to normalize the strings to be parsed.
    *
-   * @param enumClass
-   * @param normalizer
+   * @param enumClass The enum class managed by this {@code EnumParser}
+   * @param normalizer The normalization function
    */
   public EnumParser(Class<T> enumClass, UnaryOperator<String> normalizer) {
-    this.enumClass = enumClass;
-    this.normalizer = normalizer;
-    this.lookups = Arrays.stream(enumClass.getEnumConstants())
-        .map(e -> entry(normalizer.apply(e.name()), e))
-        .collect(toUnmodifiableMap(Entry::getKey, Entry::getValue));
+    this.enumClass = Check.notNull(enumClass, "enumClass");
+    this.normalizer = Check.notNull(normalizer, "normalizer");
+    HashMap<String, T> tmp = new HashMap<>(enumClass.getEnumConstants().length * 2);
+    Arrays.stream(enumClass.getEnumConstants()).forEach(e -> {
+      tmp.put(normalizer.apply(e.toString()), e);
+      if (e.toString() != e.name()) {
+        tmp.put(normalizer.apply(e.name()), e);
+      }
+    });
+    this.lookups = tmp;
   }
 
   /**
-   * Parses the provided value into an instant of the enum class managed by this
-   * <code>EnumParser</code>.
+   * Parses the provided value into an instant of the enum class managed by this {@code EnumParser}.
    *
-   * @param value
-   * @return
+   * @param value The string to be parsed into an enum constant.
+   * @return The enum constant
+   * @throws IllegalArgumentException If the string could not be mapped to any of the enum's
+   *         constants.
    */
-  public T parse(String value) {
-    Check.notNull(value, "Cannot parse null into %s", enumClass.getSimpleName());
+  public T parse(String value) throws IllegalArgumentException {
+    Check.notNull(value, "value");
     T constant = lookups.get(normalizer.apply(value));
     if (constant == null) {
-      String msg = String.format("Invalid value for %s: \"%s\". Valid values: %s",
-          enumClass.getSimpleName(),
-          value,
-          Arrays.stream(enumClass.getEnumConstants()).map(Enum::toString).collect(joining(", ")));
-      throw new IllegalArgumentException(msg);
+      throw new IllegalArgumentException(String.format(ERR_INVALID_VALUE, enumClass.getSimpleName(), value));
     }
     return constant;
   }

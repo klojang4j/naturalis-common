@@ -64,10 +64,10 @@ public class ObjectMethods {
    * <ul>
    * <li>{@code obj} is null
    * <li>{@code obj} is a non-empty {@code String}
-   * <li>{@code obj} is a non-empty {@code Collection} with only {@code deepNotEmpty} elements
-   * <li>{@code obj} is a non-empty {@code Map}, with only {@code deepNotEmpty} values (map keys are
+   * <li>{@code obj} is a non-empty {@code Collection} with only {@code isDeepNotEmpty} elements
+   * <li>{@code obj} is a non-empty {@code Map}, with only {@code isDeepNotEmpty} values (map keys are
    * not checked for empty-ness)
-   * <li>{@code obj} is a non-empty {@code Object} array with only {@code deepNotEmpty} elements
+   * <li>{@code obj} is a non-empty {@code Object} array with only {@code isDeepNotEmpty} elements
    * <li>{@code obj} is a non-empty primitive array
    * <li>{@code obj} is a non-empty {@link Emptyable}
    * <li>{@code obj} is a non-zero-size {@link Sizeable}
@@ -167,7 +167,7 @@ public class ObjectMethods {
    *
    * @param obj1 The 1st of the pair of objects to compare
    * @param obj2 The 2nd of the pair of objects to compare
-   * @return
+   * @return Whether or not the provided arguments are equal using empty-equals-null semantics
    */
   public static boolean e2nEquals(Object obj1, Object obj2) {
     if (obj1 == obj2) {
@@ -185,7 +185,7 @@ public class ObjectMethods {
    *
    * @param obj1 The 1st of the pair of objects to compare
    * @param obj2 The 2nd of the pair of objects to compare
-   * @return
+   * @return Whether or not the provided arguments are deeply equal using empty-equals-null semantics
    */
   public static boolean e2nDeepEquals(Object obj1, Object obj2) {
     if (obj1 == obj2) {
@@ -198,9 +198,9 @@ public class ObjectMethods {
 
   /**
    * Generates a hash code for the provided object using using <i>empty-equals-null</i> semantics.
-   * That is: null and {@link #isEmpty(Object) empty} objects all have hash code zero. Therefore
-   * non-generic maps and sets relying on <i>empty-equals-null</i> semantics to find keys and elements
-   * will likely have to fall back more often on {@link #e2nEquals(Object, Object) e2nEquals} or
+   * Consequently, null and {@link #isEmpty(Object) empty} objects all have the same hash code: 0
+   * (zero). Therefore non-generic maps and sets relying on <i>empty-equals-null</i> semantics will
+   * likely have to fall back more often on {@link #e2nEquals(Object, Object) e2nEquals} or
    * {@link #e2nDeepEquals(Object, Object) e2nDeepEquals}.
    *
    * @param obj The object to generate a hash code for
@@ -245,7 +245,7 @@ public class ObjectMethods {
    *
    * @param <T> The input and return type
    * @param value The value to return if not null
-   * @param supplier A {@code Supplier} supplying a default value if {@code value} is null
+   * @param supplier A {@code Supplier} supplying the default value if {@code value} is null
    * @return a non-null value
    */
   public static <T> T ifNull(T value, Supplier<T> supplier) {
@@ -348,7 +348,7 @@ public class ObjectMethods {
   /**
    * Returns {@code dfault} if {@code value} is {@link #isEmpty(Object) empty}, else {@code value}.
    *
-   * @param <T>
+   * @param <T> The input and return type
    * @param value The value to test
    * @param dfault The value to return if {@code value} is null
    * @return a non-empty value
@@ -361,7 +361,7 @@ public class ObjectMethods {
    * Returns the value supplied by {@code supplier} if {@code value} is {@link #isEmpty(Object)
    * empty}, else {@code value}.
    *
-   * @param <T>
+   * @param <T> The input and return type
    * @param value The value to return if not empty
    * @param supplier A {@code Supplier} supplying a default value if {@code value} is empty
    * @return a non-empty value
@@ -371,8 +371,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns {@code value} if the condition evaluates to {@code true}, else the result of the
-   * specified operation on {@code value}. For example:
+   * Returns the result of the specified operation on {@code value} if the condition evaluates to
+   * {@code true}, else {@code value} itself. For example:
    *
    * <pre>
    * String s = ifTrue(ignoreCase, name, String::toLowerCase);
@@ -382,7 +382,7 @@ public class ObjectMethods {
    * @param condition The condition to evaluate
    * @param value The value value to return or to apply the transformation to
    * @param then The operation to apply if the condition evaluates to {@code true}
-   * @return
+   * @return {@code value}, possibly transformed by the unary operator
    */
   public static <T> T ifTrue(boolean condition, T value, UnaryOperator<T> then) {
     return condition ? then.apply(value) : value;
@@ -390,14 +390,14 @@ public class ObjectMethods {
 
 
   /**
-   * Returns {@code value} if the condition evaluates to {@code false}, else the result of the
-   * specified operation on {@code value}. For example:
+   * Returns the result of the specified operation on {@code value} if the condition evaluates to
+   * {@code false}, else {@code value} itself. For example:
    *
    * @param <T> The return type
    * @param condition The condition to evaluate
    * @param value The value value to return or to apply the transformation to
    * @param then The operation to apply if the condition evaluates to {@code false}
-   * @return
+   * @return {@code value}, possibly transformed by the unary operator
    */
   public static <T> T ifFalse(boolean condition, T value, UnaryOperator<T> then) {
     return !condition ? then.apply(value) : value;
@@ -649,9 +649,11 @@ public class ObjectMethods {
 
   private static boolean canCompare(Object obj1, Object obj2) {
     return obj1 == null // can always compare null to any other type of empty object
-        // String, Emptyable, Sizeable & primitive arrays:
-        || obj2 == null || obj1.getClass() == obj2.getClass() || obj1 instanceof List && obj2 instanceof List
-        || obj1 instanceof Set && obj2 instanceof Set || obj1 instanceof Map && obj2 instanceof Map
+        || obj2 == null
+        || obj1.getClass() == obj2.getClass()
+        || obj1 instanceof List && obj2 instanceof List
+        || obj1 instanceof Set && obj2 instanceof Set
+        || obj1 instanceof Map && obj2 instanceof Map
         || obj1 instanceof Object[] && obj2 instanceof Object[];
   }
 

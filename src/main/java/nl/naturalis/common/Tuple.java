@@ -60,8 +60,7 @@ public final class Tuple<LEFT, RIGHT> {
   }
 
   /**
-   * Returns a singleton map with the left element as the key and the right
-   * element as the value.
+   * Returns a singleton map with the left element as the key and the right element as the value.
    *
    * @return
    */
@@ -108,8 +107,7 @@ public final class Tuple<LEFT, RIGHT> {
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;
-    }
-    if (obj == null || obj.getClass() != Tuple.class) {
+    } else if (obj == null || obj.getClass() != Tuple.class) {
       return false;
     }
     Tuple other = (Tuple) obj;

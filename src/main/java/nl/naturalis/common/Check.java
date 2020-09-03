@@ -9,8 +9,8 @@ import nl.naturalis.common.internal.IntCheck;
 import nl.naturalis.common.internal.IntegerCheck;
 import nl.naturalis.common.internal.ObjectCheck;
 import nl.naturalis.common.internal.StringCheck;
+import static nl.naturalis.common.ArrayMethods.prefix;
 import static nl.naturalis.common.ObjectMethods.isDeepNotEmpty;
-import static nl.naturalis.common.ArrayMethods.*;
 
 /**
  * <p>
@@ -657,7 +657,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   private static IllegalArgumentException badArgument(String msg, Object msgArg0, Object... msgArgs) {
-    if (ObjectMethods.isEmpty(msgArg0)) {
+    if (StringMethods.isEmpty(msgArg0)) {
       return new IllegalArgumentException(msg);
     } else if (msgArgs == null) {
       return new IllegalArgumentException(String.format(msg, msgArg0));
