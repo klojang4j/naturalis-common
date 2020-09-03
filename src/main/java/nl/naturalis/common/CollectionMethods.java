@@ -2,9 +2,7 @@ package nl.naturalis.common;
 
 import java.util.*;
 
-/**
- * Methods extending the Java Collection framework.
- */
+/** Methods extending the Java Collection framework. */
 public class CollectionMethods {
 
   private CollectionMethods() {}
@@ -59,8 +57,8 @@ public class CollectionMethods {
   }
 
   /**
-   * Returns the specified set if it is not empty else an immutable set containing only the specified
-   * element.
+   * Returns the specified set if it is not empty else an immutable set containing only the
+   * specified element.
    *
    * @param <T>
    * @param set
@@ -88,8 +86,8 @@ public class CollectionMethods {
   }
 
   /**
-   * Returns {@code collection} if not empty, else the {@code Collection} provided by
-   * {@code alternative}.
+   * Returns {@code collection} if not empty, else the {@code Collection} provided by {@code
+   * alternative}.
    *
    * @param <T>
    * @param <U>
@@ -112,7 +110,8 @@ public class CollectionMethods {
   @SuppressWarnings("unchecked")
   public static <K, V> HashMap<K, V> newHashMap(Object... kvPairs) {
     Check.notNull(kvPairs, "kvPairs");
-    Check.integer(kvPairs.length, x -> x % 2 == 0, "kvPairs array must contain even number of elements");
+    Check.integer(
+        kvPairs.length, x -> x % 2 == 0, "kvPairs array must contain even number of elements");
     HashMap<K, V> map = new HashMap<>(kvPairs.length);
     for (int i = 0; i < kvPairs.length; i += 2) {
       map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
@@ -145,7 +144,8 @@ public class CollectionMethods {
   @SuppressWarnings("unchecked")
   public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(Object... kvPairs) {
     Check.notNull(kvPairs, "kvPairs");
-    Check.integer(kvPairs.length, x -> x % 2 == 0, "kvPairs array must contain even number of elements");
+    Check.integer(
+        kvPairs.length, x -> x % 2 == 0, "kvPairs array must contain even number of elements");
     LinkedHashMap<K, V> map = new LinkedHashMap<>(kvPairs.length);
     for (int i = 0; i < kvPairs.length; i += 2) {
       map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
@@ -222,11 +222,13 @@ public class CollectionMethods {
   /**
    * Returns a sublist of the provided list starting with starting with element {@code from} and
    * containing at most {@code length} elements.
+   *
    * <ol>
-   * <li>If {@code from} is negative, it is relative to the end of the list.
-   * <li>If {@code length} is negative, the sublist is taken to the left of {@code from} (inclusive).
-   * <li>Both {@code from} and {@code length} are clamped to their minimum and maximum values. In
-   * other words you will never get an {@link ArrayIndexOutOfBoundsException}.
+   *   <li>If {@code from} is negative, it is relative to the end of the list.
+   *   <li>If {@code length} is negative, the sublist is taken to the left of {@code from}
+   *       (inclusive).
+   *   <li>Both {@code from} and {@code length} are clamped to their minimum and maximum values. In
+   *       other words you will never get an {@link ArrayIndexOutOfBoundsException}.
    * </ol>
    *
    * @param list The {@code List} to extract a sublist from
@@ -255,5 +257,4 @@ public class CollectionMethods {
     int to = Math.min(list.size(), from + length);
     return list.subList(from, to);
   }
-
 }

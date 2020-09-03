@@ -19,7 +19,11 @@ import static nl.naturalis.common.collection.EnumToIntMapTest.TestEnum.RED;
 public class EnumToIntMapTest {
 
   public static enum TestEnum {
-    RED, BLUE, ORANGE, GREEN, BLACK
+    RED,
+    BLUE,
+    ORANGE,
+    GREEN,
+    BLACK
   }
 
   @Test
@@ -157,14 +161,11 @@ public class EnumToIntMapTest {
 
   @Test
   public void set01() {
-    EnumToIntMap<TestEnum> map = new EnumToIntMap<>(TestEnum.class)
-        .set(RED, 7)
-        .set(ORANGE, 4)
-        .set(BLUE, 28);
+    EnumToIntMap<TestEnum> map =
+        new EnumToIntMap<>(TestEnum.class).set(RED, 7).set(ORANGE, 4).set(BLUE, 28);
     assertEquals(3, map.size());
     assertTrue(map.containsKey(RED));
     assertTrue(map.containsKey(ORANGE));
     assertTrue(map.containsKey(BLUE));
   }
-
 }

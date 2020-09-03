@@ -73,8 +73,10 @@ public class Department {
       return false;
     }
     Department other = (Department) obj;
-    return Objects.equals(address, other.address) && Objects.equals(employees, other.employees) && Objects.equals(manager, other.manager)
-        && Objects.equals(name, other.name) && Arrays.equals(telNos, other.telNos);
+    return Objects.equals(address, other.address)
+        && Objects.equals(employees, other.employees)
+        && Objects.equals(manager, other.manager)
+        && Objects.equals(name, other.name)
+        && Arrays.equals(telNos, other.telNos);
   }
-
 }

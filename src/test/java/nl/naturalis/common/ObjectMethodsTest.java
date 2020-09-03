@@ -38,13 +38,14 @@ public class ObjectMethodsTest {
     assertFalse("02", isDeepNotEmpty(List.of("Hi", new String[0])));
     assertTrue("03", isDeepNotEmpty(List.of("Hi", Collections.singletonMap("a", "b"))));
     assertFalse("04", isDeepNotEmpty(List.of("Hi", Collections.emptyMap())));
-    assertFalse("05", isDeepNotEmpty(List.of("Hi",
-        Collections.singletonMap(
-            "a",
-            Collections.singletonMap(
-                "b",
-                Collections.emptyMap())))));
-    assertTrue("06", isDeepNotEmpty(List.of("Hi", Set.of(new Object(),new Object()))));
+    assertFalse(
+        "05",
+        isDeepNotEmpty(
+            List.of(
+                "Hi",
+                Collections.singletonMap(
+                    "a", Collections.singletonMap("b", Collections.emptyMap())))));
+    assertTrue("06", isDeepNotEmpty(List.of("Hi", Set.of(new Object(), new Object()))));
     assertFalse("07", isDeepNotEmpty(List.of("Hi", Collections.emptySet())));
   }
 
@@ -53,7 +54,10 @@ public class ObjectMethodsTest {
     assertEquals("01", "Hi There", ifEmpty("", "Hi There"));
     assertEquals("02", "Hi There", ifEmpty("", () -> "Hi There"));
     assertEquals("03", "World", ifEmpty("World", () -> "Hi There"));
-    assertEquals("04", List.of("Hi There"), ifEmpty(Collections.emptyList(), () -> Arrays.asList("Hi There")));
+    assertEquals(
+        "04",
+        List.of("Hi There"),
+        ifEmpty(Collections.emptyList(), () -> Arrays.asList("Hi There")));
   }
 
   @Test
@@ -88,9 +92,11 @@ public class ObjectMethodsTest {
   @Test
   public void ifFalse_01() {
     boolean keepCapitals = true;
-    assertEquals("01", "Hello, World!", ifFalse(keepCapitals, "Hello, World!", String::toLowerCase));
+    assertEquals(
+        "01", "Hello, World!", ifFalse(keepCapitals, "Hello, World!", String::toLowerCase));
     keepCapitals = false;
-    assertEquals("02", "hello, world!", ifFalse(keepCapitals, "Hello, World!", String::toLowerCase));
+    assertEquals(
+        "02", "hello, world!", ifFalse(keepCapitals, "Hello, World!", String::toLowerCase));
   }
 
   @Test
@@ -102,13 +108,15 @@ public class ObjectMethodsTest {
     assertTrue("05", e2nDeepEquals(new String[0], null));
     assertFalse("06", e2nDeepEquals(new String[] {""}, null));
     assertFalse("07", e2nDeepEquals(new String[] {"", null, ""}, null));
-    assertFalse("08", e2nDeepEquals(new String[] {"", null, ""}, new String[] {"", null, "", "", ""}));
+    assertFalse(
+        "08", e2nDeepEquals(new String[] {"", null, ""}, new String[] {"", null, "", "", ""}));
     assertTrue("09", e2nDeepEquals(Collections.emptyList(), null));
     assertTrue("10", e2nDeepEquals(null, new HashSet<>()));
     assertTrue("11", e2nDeepEquals(null, null));
     assertTrue("12", e2nDeepEquals("", ""));
     assertTrue("13", e2nDeepEquals(List.of(1, 2, 3, 4), List.of(1, 2, 3, 4)));
-    assertTrue("14", e2nDeepEquals(new String[] {"To", "be", "or"}, new String[] {"To", "be", "or"}));
+    assertTrue(
+        "14", e2nDeepEquals(new String[] {"To", "be", "or"}, new String[] {"To", "be", "or"}));
     assertTrue("15", e2nDeepEquals(new int[] {1, 2, 3, 4}, new int[] {1, 2, 3, 4}));
     assertFalse("16", e2nDeepEquals(new int[0], new HashSet<>()));
     assertFalse("17", e2nDeepEquals("", new HashSet<>()));
@@ -146,12 +154,10 @@ public class ObjectMethodsTest {
     assertTrue("08", e2nDeepEquals(subset3, subset4));
     assertFalse("09", e2nDeepEquals(subset4, subset5));
     assertTrue("10", e2nDeepEquals(subset6, subset7));
-
   }
 
   @SuppressWarnings("rawtypes")
   private static Set setOf(Object... objs) {
     return Arrays.stream(objs).collect(Collectors.toSet());
   }
-
 }

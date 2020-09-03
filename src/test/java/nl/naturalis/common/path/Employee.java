@@ -83,9 +83,11 @@ class Employee extends Person {
       return false;
     }
     Employee other = (Employee) obj;
-    return Arrays.equals(birthDate, other.birthDate) && Objects.equals(extraInfo, other.extraInfo)
-        && Objects.equals(facebook, other.facebook) && id == other.id
-        && Double.doubleToLongBits(salary) == Double.doubleToLongBits(other.salary) && Objects.equals(twitter, other.twitter);
+    return Arrays.equals(birthDate, other.birthDate)
+        && Objects.equals(extraInfo, other.extraInfo)
+        && Objects.equals(facebook, other.facebook)
+        && id == other.id
+        && Double.doubleToLongBits(salary) == Double.doubleToLongBits(other.salary)
+        && Objects.equals(twitter, other.twitter);
   }
-
 }

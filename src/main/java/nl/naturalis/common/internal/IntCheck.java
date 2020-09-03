@@ -40,13 +40,17 @@ public final class IntCheck<E extends Exception> extends Check<Integer, E> {
 
   @Override
   public IntCheck<E> between(int minInclusive, int maxExclusive) throws E {
-    that(arg >= minInclusive && arg < maxExclusive, smash(ERR_BETWEEN, argName, minInclusive, maxExclusive));
+    that(
+        arg >= minInclusive && arg < maxExclusive,
+        smash(ERR_BETWEEN, argName, minInclusive, maxExclusive));
     return this;
   }
 
   @Override
   public IntCheck<E> inRange(int minInclusive, int maxInclusive) throws E {
-    that(arg >= minInclusive && arg <= maxInclusive, smash(ERR_IN_RANGE, argName, minInclusive, maxInclusive));
+    that(
+        arg >= minInclusive && arg <= maxInclusive,
+        smash(ERR_IN_RANGE, argName, minInclusive, maxInclusive));
     return this;
   }
 
@@ -71,5 +75,4 @@ public final class IntCheck<E extends Exception> extends Check<Integer, E> {
   public int intValue() {
     return arg;
   }
-
 }

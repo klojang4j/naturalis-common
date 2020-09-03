@@ -15,7 +15,7 @@ import static nl.naturalis.common.ArrayMethods.indexOf;
 import static nl.naturalis.common.ArrayMethods.prefix;
 
 public class ArrayMethodsTest {
-  
+
   @Test
   public void append1() {
     String[] a = {"a", "b", "c"};
@@ -117,5 +117,4 @@ public class ArrayMethodsTest {
     String[] actual = prefix(a, "1", "2", "3", "4", "5", "6", "7");
     assertArrayEquals(expected, actual);
   }
-
 }

@@ -66,5 +66,4 @@ public class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   public T value() {
     return arg;
   }
-
 }

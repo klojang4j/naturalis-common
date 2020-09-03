@@ -5,21 +5,15 @@ import java.util.Arrays;
 import java.util.Objects;
 import static java.lang.System.arraycopy;
 
-/**
- * Methods for working with arrays.
- */
+/** Methods for working with arrays. */
 public class ArrayMethods {
 
   private ArrayMethods() {}
 
-  /**
-   * A zero-length Object array
-   */
+  /** A zero-length Object array */
   public static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
-  /**
-   * A zero-length String array
-   */
+  /** A zero-length String array */
   public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
   /**
@@ -44,8 +38,7 @@ public class ArrayMethods {
    * @param obj1 The 1st bject to append
    * @param obj2 The 2nd object to append
    * @param moreObjs More objects to append
-   * @return A concatenation of {@code array}, {@code obj1}, {@code obj2} and
-   *         {@code moreObjs}
+   * @return A concatenation of {@code array}, {@code obj1}, {@code obj2} and {@code moreObjs}
    */
   @SafeVarargs
   public static <T> T[] append(T[] array, T obj1, T obj2, T... moreObjs) {
@@ -85,11 +78,15 @@ public class ArrayMethods {
    */
   @SafeVarargs
   public static <T> T[] concat(T[] array1, T[] array2, T[] array3, T[]... moreArrays) {
-    long x = Check.notNull(array1, "array1").length
-        + Check.notNull(array2, "array2").length
-        + Check.notNull(array3, "array3").length
-        + Arrays.stream(Check.noneNull(moreArrays, "moreArrays")).flatMap(Arrays::stream).count();
-    Check.that(x <= Integer.MAX_VALUE, () -> new IllegalArgumentException("Concatenated array too large"));
+    long x =
+        Check.notNull(array1, "array1").length
+            + Check.notNull(array2, "array2").length
+            + Check.notNull(array3, "array3").length
+            + Arrays.stream(Check.noneNull(moreArrays, "moreArrays"))
+                .flatMap(Arrays::stream)
+                .count();
+    Check.that(
+        x <= Integer.MAX_VALUE, () -> new IllegalArgumentException("Concatenated array too large"));
     int i = (int) x;
     T[] all = fromTemplate(array1, i);
     i = 0;
@@ -109,8 +106,8 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns {@code true} if the provided array contains the specfied value,
-   * {@code false} otherwise.
+   * Returns {@code true} if the provided array contains the specfied value, {@code false}
+   * otherwise.
    *
    * @param array The array to search
    * @param value The value to search for
@@ -122,27 +119,24 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns a new, empty array with the same element type and length as the
-   * provided array's element type and length.
+   * Returns a new, empty array with the same element type and length as the provided array's
+   * element type and length.
    *
    * @param <T> The type of the elements in the requested array
-   * @param template An array with the same length and element type as the
-   *        requested array
+   * @param template An array with the same length and element type as the requested array
    */
   public static <T> T[] fromTemplate(T[] template) {
     return fromTemplate(template, template.length);
   }
 
   /**
-   * Returns a new, empty array with the same element type as the provided array's
-   * element type. The length of the returned array is specified through the
-   * {@code length} parameter.
+   * Returns a new, empty array with the same element type as the provided array's element type. The
+   * length of the returned array is specified through the {@code length} parameter.
    *
    * @param <T> The type of the elements in the requested array
    * @param template An array with the same element type as the requested array
    * @param length The desired length of the new array
-   * @return A new array with the same length and element type as the provided
-   *         array
+   * @return A new array with the same length and element type as the provided array
    */
   @SuppressWarnings("unchecked")
   public static <T> T[] fromTemplate(T[] template, int length) {
@@ -152,8 +146,8 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns the array index of the first occurrence of {@code value} within the
-   * provided array. Returns -1 if the array does not contain the value.
+   * Returns the array index of the first occurrence of {@code value} within the provided array.
+   * Returns -1 if the array does not contain the value.
    *
    * @param array The array to search
    * @param value The value to search for
@@ -170,8 +164,8 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns the array index of the first occurrence of {@code value} within the
-   * provided array. Returns -1 if the array does not contain the value.
+   * Returns the array index of the first occurrence of {@code value} within the provided array.
+   * Returns -1 if the array does not contain the value.
    *
    * @param array The array to search
    * @param value The value to search for
@@ -188,10 +182,9 @@ public class ArrayMethods {
   }
 
   /**
-   * Whether or not the provided array is null or has a zero length. The
-   * {@code array} argument is of type {@code Object} so we don't need to overload
-   * for primitive and non-primitive arrays. An {@link IllegalArgumentException}
-   * is thrown if the provided object is not in fact an array.
+   * Whether or not the provided array is null or has a zero length. The {@code array} argument is
+   * of type {@code Object} so we don't need to overload for primitive and non-primitive arrays. An
+   * {@link IllegalArgumentException} is thrown if the provided object is not in fact an array.
    *
    * @param array The array to check
    * @return Whether it is null or empty
@@ -206,14 +199,13 @@ public class ArrayMethods {
   }
 
   /**
-   * Whether or not the provided array is neither null nor has a zero length. The
-   * {@code array} argument is of type {@code Object} so we don't need to overload
-   * for primitive and non-primitive arrays. An {@link IllegalArgumentException}
-   * is thrown if the provided object is not in fact an array.
+   * Whether or not the provided array is neither null nor has a zero length. The {@code array}
+   * argument is of type {@code Object} so we don't need to overload for primitive and non-primitive
+   * arrays. An {@link IllegalArgumentException} is thrown if the provided object is not in fact an
+   * array.
    *
    * @param array The array to check
-   * @return Whether or not the provided array is neither null nor has a zero
-   *         length
+   * @return Whether or not the provided array is neither null nor has a zero length
    * @throws IllegalArgumentException if the provided object is not an array.
    */
   public static boolean isNotEmpty(Object array) {
@@ -221,9 +213,8 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns the provided array. Syntactic sugar avoiding code bloat. In stead of
-   * <code>new Object[] {obj1, obj2, obj3, etc}</code> write
-   * <code>pack(obj1, obj2, obj3)</code>.
+   * Returns the provided array. Syntactic sugar avoiding code bloat. In stead of <code>
+   * new Object[] {obj1, obj2, obj3, etc}</code> write <code>pack(obj1, obj2, obj3)</code>.
    *
    * @param <T>
    * @param objs
@@ -240,8 +231,7 @@ public class ArrayMethods {
    * @param <T> The type of the array elements and the object to be prefixed.
    * @param array The array to be prefixed.
    * @param obj The object to prefix.
-   * @return A new array containing the provided object and the elements of the
-   *         provided array.
+   * @return A new array containing the provided object and the elements of the provided array.
    */
   public static <T> T[] prefix(T[] array, T obj) {
     Check.notNull(array, "array");
@@ -272,5 +262,4 @@ public class ArrayMethods {
     arraycopy(array, 0, res, 2 + moreObjs.length, array.length);
     return res;
   }
-
 }

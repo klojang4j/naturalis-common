@@ -6,7 +6,11 @@ import static org.junit.Assert.assertEquals;
 public class EnumParserTest {
 
   private static enum TestEnum {
-    DAY_ONE, DAY_TWO, _THIRD, _FOURTH_, FIFTH_DAY_IN_A_ROW;
+    DAY_ONE,
+    DAY_TWO,
+    _THIRD,
+    _FOURTH_,
+    FIFTH_DAY_IN_A_ROW;
   }
 
   @Test
@@ -15,7 +19,8 @@ public class EnumParserTest {
     assertEquals("abcd", EnumParser.DEFAULT_NORMALIZER.apply("abcd"));
     assertEquals("abcdefg", EnumParser.DEFAULT_NORMALIZER.apply("abcd EFG"));
     assertEquals("abcdefg", EnumParser.DEFAULT_NORMALIZER.apply("ab-cd ef_G"));
-    assertEquals("abcdefg", EnumParser.DEFAULT_NORMALIZER.apply("ab-c           d ef____-----------G"));
+    assertEquals(
+        "abcdefg", EnumParser.DEFAULT_NORMALIZER.apply("ab-c           d ef____-----------G"));
   }
 
   @Test
@@ -33,11 +38,9 @@ public class EnumParserTest {
     assertEquals(TestEnum.FIFTH_DAY_IN_A_ROW, e);
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void parse02() {
     EnumParser<TestEnum> parser = new EnumParser<>(TestEnum.class);
     parser.parse("day*one");
   }
-  
-
 }

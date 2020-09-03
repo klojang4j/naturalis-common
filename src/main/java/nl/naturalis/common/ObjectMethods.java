@@ -17,20 +17,21 @@ public class ObjectMethods {
   private ObjectMethods() {}
 
   /**
-   * <p>
    * Returns whether or not the provided object is empty. Returns {@code true} if the argument is:
+   *
    * <p>
+   *
    * <ul>
-   * <li>{@code null}
-   * <li>an empty <code>String</code>
-   * <li>an empty <code>Collection</code>
-   * <li>an empty <code>Map</code>
-   * <li>a zero-length array
-   * <li>a zero-size {@link Sizeable}
-   * <li>an empty {@link Emptyable}
+   *   <li>{@code null}
+   *   <li>an empty <code>String</code>
+   *   <li>an empty <code>Collection</code>
+   *   <li>an empty <code>Map</code>
+   *   <li>a zero-length array
+   *   <li>a zero-size {@link Sizeable}
+   *   <li>an empty {@link Emptyable}
    * </ul>
-   * <p>
-   * Otherwise this method returns {@code false}.
+   *
+   * <p>Otherwise this method returns {@code false}.
    *
    * @param obj The object to be tested
    * @return Whether or not it is empty
@@ -57,23 +58,24 @@ public class ObjectMethods {
   }
 
   /**
+   * Returns whether or not the argument is recursively non-empty. Returns {@code true} in any of
+   * the following cases
+   *
    * <p>
-   * Returns whether or not the argument is recursively non-empty. Returns {@code true} in any of the
-   * following cases
-   * <p>
+   *
    * <ul>
-   * <li>{@code obj} is null
-   * <li>{@code obj} is a non-empty {@code String}
-   * <li>{@code obj} is a non-empty {@code Collection} with only {@code isDeepNotEmpty} elements
-   * <li>{@code obj} is a non-empty {@code Map}, with only {@code isDeepNotEmpty} values (map keys are
-   * not checked for empty-ness)
-   * <li>{@code obj} is a non-empty {@code Object} array with only {@code isDeepNotEmpty} elements
-   * <li>{@code obj} is a non-empty primitive array
-   * <li>{@code obj} is a non-empty {@link Emptyable}
-   * <li>{@code obj} is a non-zero-size {@link Sizeable}
+   *   <li>{@code obj} is null
+   *   <li>{@code obj} is a non-empty {@code String}
+   *   <li>{@code obj} is a non-empty {@code Collection} with only {@code isDeepNotEmpty} elements
+   *   <li>{@code obj} is a non-empty {@code Map}, with only {@code isDeepNotEmpty} values (map keys
+   *       are not checked for empty-ness)
+   *   <li>{@code obj} is a non-empty {@code Object} array with only {@code isDeepNotEmpty} elements
+   *   <li>{@code obj} is a non-empty primitive array
+   *   <li>{@code obj} is a non-empty {@link Emptyable}
+   *   <li>{@code obj} is a non-zero-size {@link Sizeable}
    * </ul>
-   * <p>
-   * Otherwise this method returns {@code false}.
+   *
+   * <p>Otherwise this method returns {@code false}.
    *
    * @param obj The object to be tested
    * @return Whether or not it is recursively non-empty
@@ -101,22 +103,22 @@ public class ObjectMethods {
     return obj.length > 0 && Arrays.stream(obj).allMatch(ObjectMethods::isDeepNotEmpty);
   }
 
-
   /**
-   * <p>
    * Returns whether or not the argument is recursively non-null. More specifically, this method
    * returns {@code true} if:
+   *
    * <p>
+   *
    * <ul>
-   * <li>{@code obj} is not null
-   * <li>{@code obj} is an empty array or a non-empty array with only non-null elements
-   * <li>{@code obj} is an empty {@code Collection} or a non-empty {@code Collection} with only
-   * non-null elements
-   * <li>{@code obj} is an empty {@code Map} non-empty {@code Map} with only non-null values (NB Map
-   * keys are not checked for empty-ness.)
+   *   <li>{@code obj} is not null
+   *   <li>{@code obj} is an empty array or a non-empty array with only non-null elements
+   *   <li>{@code obj} is an empty {@code Collection} or a non-empty {@code Collection} with only
+   *       non-null elements
+   *   <li>{@code obj} is an empty {@code Map} non-empty {@code Map} with only non-null values (NB
+   *       Map keys are not checked for empty-ness.)
    * </ul>
-   * <p>
-   * Otherwise this method returns {@code false}. Contrary to {@link #isDeepNotEmpty(Object)
+   *
+   * <p>Otherwise this method returns {@code false}. Contrary to {@link #isDeepNotEmpty(Object)
    * deepNotEmpty}, this method returns {@code true} for empty arrays, collections and maps. It only
    * checks that the values they do contain are non-null.
    *
@@ -137,8 +139,8 @@ public class ObjectMethods {
   }
 
   /**
-   * (empty-to-null) Returns {@code null} if the argument is {@link #isEmpty(Object) empty}, else the
-   * argument itself.
+   * (empty-to-null) Returns {@code null} if the argument is {@link #isEmpty(Object) empty}, else
+   * the argument itself.
    *
    * @param <T> The type of the argument
    * @param obj The argument
@@ -149,21 +151,21 @@ public class ObjectMethods {
   }
 
   /**
-   * <p>
    * Tests the provided arguments for equality using <i>empty-equals-null</i> semantics. This is
    * equivalent to {@code Objects.equals(e2n(obj1), e2n(obj2))}, except that empty instance of one
    * type (e.g. {@code String}) is <b>not</b> equal to an empty instance of another type (e.g.
    * {@code Set}). So:
-   * <p>
-   * <ol>
-   * <li>{@code null} equals an empty <code>String</code>
-   * <li>{@code null} equals an empty <code>Collection</code>
-   * <li>{@code null} equals an empty <code>Map</code>
-   * <li>{@code null} equals a zero-length array
-   * <li>{@code null} equals an empty {@link Emptyable}
-   * <li>{@code null} equals a zero-size {@link Sizeable}
-   * </ol>
    *
+   * <p>
+   *
+   * <ol>
+   *   <li>{@code null} equals an empty <code>String</code>
+   *   <li>{@code null} equals an empty <code>Collection</code>
+   *   <li>{@code null} equals an empty <code>Map</code>
+   *   <li>{@code null} equals a zero-length array
+   *   <li>{@code null} equals an empty {@link Emptyable}
+   *   <li>{@code null} equals a zero-size {@link Sizeable}
+   * </ol>
    *
    * @param obj1 The 1st of the pair of objects to compare
    * @param obj2 The 2nd of the pair of objects to compare
@@ -180,12 +182,13 @@ public class ObjectMethods {
 
   /**
    * Recursively tests the arguments for equality using <i>empty-equals-null</i> semantics. In other
-   * words, for arrays, collections and maps, elements c.q. values are also compared using
-   * {@code e2nDeepEquals}. Map keys are compared as usual.
+   * words, for arrays, collections and maps, elements c.q. values are also compared using {@code
+   * e2nDeepEquals}. Map keys are compared as usual.
    *
    * @param obj1 The 1st of the pair of objects to compare
    * @param obj2 The 2nd of the pair of objects to compare
-   * @return Whether or not the provided arguments are deeply equal using empty-equals-null semantics
+   * @return Whether or not the provided arguments are deeply equal using empty-equals-null
+   *     semantics
    */
   public static boolean e2nDeepEquals(Object obj1, Object obj2) {
     if (obj1 == obj2) {
@@ -200,8 +203,8 @@ public class ObjectMethods {
    * Generates a hash code for the provided object using using <i>empty-equals-null</i> semantics.
    * Consequently, null and {@link #isEmpty(Object) empty} objects all have the same hash code: 0
    * (zero). Therefore non-generic maps and sets relying on <i>empty-equals-null</i> semantics will
-   * likely have to fall back more often on {@link #e2nEquals(Object, Object) e2nEquals} or
-   * {@link #e2nDeepEquals(Object, Object) e2nDeepEquals}.
+   * likely have to fall back more often on {@link #e2nEquals(Object, Object) e2nEquals} or {@link
+   * #e2nDeepEquals(Object, Object) e2nDeepEquals}.
    *
    * @param obj The object to generate a hash code for
    * @return The hash code
@@ -211,8 +214,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Generates a hash code for the provided arguments using using <i>empty-equals-null</i> semantics.
-   * See {@link #hashCode()}.
+   * Generates a hash code for the provided arguments using using <i>empty-equals-null</i>
+   * semantics. See {@link #hashCode()}.
    *
    * @param objs The objects to generate a hash code for
    * @return The hash code
@@ -271,7 +274,6 @@ public class ObjectMethods {
   public static Double nvl(Double d) {
     return ifNull(d, 0D);
   }
-
 
   /**
    * Returns the default {@code long} value (0) if the argument is null, else the argument itself.
@@ -388,7 +390,6 @@ public class ObjectMethods {
     return condition ? then.apply(value) : value;
   }
 
-
   /**
    * Returns the result of the specified operation on {@code value} if the condition evaluates to
    * {@code false}, else {@code value} itself. For example:
@@ -416,7 +417,6 @@ public class ObjectMethods {
     return nullIf(Objects::equals, value, illegalValue);
   }
 
-
   /**
    * Returns null if the {@code comparison} function returns {@code true} for {@code arg0} and
    * {@code arg1}, else {@code arg0}.
@@ -424,7 +424,7 @@ public class ObjectMethods {
    * @param <T> The input and return type
    * @param <U> The type of the second argument to the comparison function
    * @param comparison A function that compares {@code value} and {@code mustBe} and returns a
-   *        {@code Boolean}
+   *     {@code Boolean}
    * @param arg0 The value to test
    * @param arg1 The value to compare it to
    * @return {@code value} or null
@@ -432,7 +432,6 @@ public class ObjectMethods {
   public static <T, U> T nullIf(BiFunction<T, U, Boolean> comparison, T arg0, U arg1) {
     return comparison.apply(arg0, arg1) ? null : arg0;
   }
-
 
   /**
    * Returns {@code value} only if it is equal to {@code requiredValue}, else null. Equivalent to
@@ -447,8 +446,6 @@ public class ObjectMethods {
     return nullUnless(Objects::equals, value, requiredValue);
   }
 
-
-
   /**
    * Returns null unless the {@code comparison} function returns {@code true} for {@code arg0} and
    * {@code arg1}, else {@code arg0}.
@@ -456,7 +453,7 @@ public class ObjectMethods {
    * @param <T> The input and return type
    * @param <U> The type of the second argument to the comparison function
    * @param comparison A function that compares {@code value} and {@code mustBe} and returns a
-   *        {@code Boolean}
+   *     {@code Boolean}
    * @param arg0 The value to test
    * @param arg1 The value to compare it to
    * @return {@code value} or null
@@ -464,7 +461,6 @@ public class ObjectMethods {
   public static <T, U> T nullUnless(BiFunction<T, U, Boolean> comparison, T arg0, U arg1) {
     return comparison.apply(arg0, arg1) ? arg0 : null;
   }
-
 
   /**
    * Returns the result of passing {@code value} to {@code then} if {@code value} is not null, else
@@ -533,7 +529,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Executes the {@code Runnable} if {@code condition} evaluates to {@code true}, else does nothing.
+   * Executes the {@code Runnable} if {@code condition} evaluates to {@code true}, else does
+   * nothing.
    *
    * @param condition The condition to evaluate
    * @param then The action to execute
@@ -656,5 +653,4 @@ public class ObjectMethods {
         || obj1 instanceof Map && obj2 instanceof Map
         || obj1 instanceof Object[] && obj2 instanceof Object[];
   }
-
 }

@@ -310,7 +310,6 @@ public class FuzzyDateParserTest {
     parser = new FuzzyDateParser(ps2, ps1, ps0);
     date = parser.parse("2018/08/14");
     assertEquals("05", ps2, date.getParseSpec());
-
   }
 
   private static FuzzyDateParser simpleParser(String pattern, TemporalQuery<?> parseInto) {
@@ -324,5 +323,4 @@ public class FuzzyDateParserTest {
   private static DateTimeFormatter formatter(String pattern) {
     return new DateTimeFormatterBuilder().appendPattern(pattern).toFormatter();
   }
-
 }

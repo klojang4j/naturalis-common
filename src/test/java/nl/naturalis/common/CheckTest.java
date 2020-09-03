@@ -136,5 +136,4 @@ public class CheckTest {
     Integer i = Check.that(Integer.valueOf(5), "numBirds").notNull().gte(2).lt(10).value();
     assertEquals(Integer.valueOf(5), i);
   }
-
 }

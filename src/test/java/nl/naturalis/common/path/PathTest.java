@@ -114,7 +114,8 @@ public class PathTest {
   @Test
   public void getPurePath() {
     Path path = new Path("identifications.0.scientificName.fullScientificName");
-    assertEquals("01", "identifications.scientificName.fullScientificName", path.getPurePath().toString());
+    assertEquals(
+        "01", "identifications.scientificName.fullScientificName", path.getPurePath().toString());
   }
 
   @Test
@@ -182,5 +183,4 @@ public class PathTest {
     assertEquals("04", Path.EMPTY_PATH, p.parent().parent().parent());
     assertEquals("05", null, p.parent().parent().parent().parent());
   }
-
 }

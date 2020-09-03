@@ -11,7 +11,7 @@ public class ClassMethodsTest {
   public void isA_01() {
     assertTrue(ClassMethods.isA(String.class, Object.class));
   }
-  
+
   @Test
   public void isA_02() {
     assertTrue(ClassMethods.isA(String.class, CharSequence.class));
@@ -31,5 +31,4 @@ public class ClassMethodsTest {
   public void isA_05() {
     assertTrue(ClassMethods.isA(String.class, String.class));
   }
-
 }

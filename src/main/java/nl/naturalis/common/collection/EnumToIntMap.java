@@ -13,11 +13,14 @@ import java.util.function.ToIntFunction;
 import nl.naturalis.common.Check;
 
 /**
- * A fast enum-to-int Map implementation. The map is backed by a simple int array with the same length as the number of constants in the
- * {@code enum} class. One integer needs to be designated as the NULL value. By default this is {@code Integer.MIN_VALUE}. If the array
- * element corresponding to an enum constant has this value, it means the enum constant is not in the map (see {@link #containsKey(Enum)
- * containsKey)}. The value designated to be the NULL value must never be {@link #put(Enum, int) put} into the map. It may not even be used
- * as the argument to {@link #containsValue(int) containsValue}. In both cases an {@code IllegalArgumentException} is thrown.
+ * A fast enum-to-int Map implementation. The map is backed by a simple int array with the same
+ * length as the number of constants in the {@code enum} class. One integer needs to be designated
+ * as the NULL value. By default this is {@code Integer.MIN_VALUE}. If the array element
+ * corresponding to an enum constant has this value, it means the enum constant is not in the map
+ * (see {@link #containsKey(Enum) containsKey)}. The value designated to be the NULL value must
+ * never be {@link #put(Enum, int) put} into the map. It may not even be used as the argument to
+ * {@link #containsValue(int) containsValue}. In both cases an {@code IllegalArgumentException} is
+ * thrown.
  *
  * @author Ayco Holleman
  */
@@ -30,9 +33,10 @@ public final class EnumToIntMap<T extends Enum<T>> {
   private final int nval;
 
   /**
-   * Creates a new empty {@code EnumToIntMap} for the specfied enum class using {@link Integer#MIN_VALUE Integer.MIN_VALUE} as the NULL
-   * value. All elements in the backing array will be initialized to this value (meaning that the map is empty).
-   * 
+   * Creates a new empty {@code EnumToIntMap} for the specfied enum class using {@link
+   * Integer#MIN_VALUE Integer.MIN_VALUE} as the NULL value. All elements in the backing array will
+   * be initialized to this value (meaning that the map is empty).
+   *
    * @param enumClass
    */
   public EnumToIntMap(Class<T> enumClass) {
@@ -40,9 +44,10 @@ public final class EnumToIntMap<T extends Enum<T>> {
   }
 
   /**
-   * Creates a new {@code EnumToIntMap} for the specfied enum class with the specified integer as the NULL value. All elements in the
-   * backing array will be initialized to this value (meaning that the map is empty).
-   * 
+   * Creates a new {@code EnumToIntMap} for the specfied enum class with the specified integer as
+   * the NULL value. All elements in the backing array will be initialized to this value (meaning
+   * that the map is empty).
+   *
    * @param enumClass
    * @param nullValue
    */
@@ -56,10 +61,12 @@ public final class EnumToIntMap<T extends Enum<T>> {
   }
 
   /**
-   * Creates a new {@code EnumToIntMap} using Integer.MIN_VALUE as the NULL value and with its keys initialized using the specified value
-   * initializer function. This allows for simple one-to-one mappings like {@code new EnumToIntMap(WeekDay.class, k -> k.ordinal() +1)}. It
-   * also allows you to initialize the map values to something else than the NULL value, e.g. {@code new EnumToIntMap(MyEnum.class, k -> 0}.
-   * 
+   * Creates a new {@code EnumToIntMap} using Integer.MIN_VALUE as the NULL value and with its keys
+   * initialized using the specified value initializer function. This allows for simple one-to-one
+   * mappings like {@code new EnumToIntMap(WeekDay.class, k -> k.ordinal() +1)}. It also allows you
+   * to initialize the map values to something else than the NULL value, e.g. {@code new
+   * EnumToIntMap(MyEnum.class, k -> 0}.
+   *
    * @param enumClass
    * @param initializer
    */
@@ -68,8 +75,9 @@ public final class EnumToIntMap<T extends Enum<T>> {
   }
 
   /**
-   * Creates a new {@code EnumToIntMap} with the specified NULL value and the specified value initializer function.
-   * 
+   * Creates a new {@code EnumToIntMap} with the specified NULL value and the specified value
+   * initializer function.
+   *
    * @param enumClass
    * @param nullValue
    * @param initializer
@@ -85,7 +93,7 @@ public final class EnumToIntMap<T extends Enum<T>> {
 
   /**
    * Copy constructor. The new map inherits the NULL value from the other map.
-   * 
+   *
    * @param other The {@code EnumToIntMap} whose key-value mappings to copy
    */
   public EnumToIntMap(EnumToIntMap<T> other) {
@@ -96,9 +104,9 @@ public final class EnumToIntMap<T extends Enum<T>> {
   }
 
   /**
-   * Instantiates a new {@code EnumToIntMap} with the key-value mappings of the provided {@code EnumToIntMap}, but (potentially) with a new
-   * NULL value.
-   * 
+   * Instantiates a new {@code EnumToIntMap} with the key-value mappings of the provided {@code
+   * EnumToIntMap}, but (potentially) with a new NULL value.
+   *
    * @param other
    * @param nullValue
    */
@@ -111,7 +119,7 @@ public final class EnumToIntMap<T extends Enum<T>> {
 
   /**
    * Wheter or not the map contains an entry for the specified enum constant.
-   * 
+   *
    * @param key
    * @return
    */
@@ -120,9 +128,10 @@ public final class EnumToIntMap<T extends Enum<T>> {
   }
 
   /**
-   * Whether or not the map contains the specified value. Note that you are not permitted to search for the value designated to be the NULL
-   * value. An {@code IllegalArgumentException} is thrown if you attempt to do so.
-   * 
+   * Whether or not the map contains the specified value. Note that you are not permitted to search
+   * for the value designated to be the NULL value. An {@code IllegalArgumentException} is thrown if
+   * you attempt to do so.
+   *
    * @param val
    * @return
    */
@@ -138,7 +147,7 @@ public final class EnumToIntMap<T extends Enum<T>> {
 
   /**
    * Returns the value associated with the specified enum constant.
-   * 
+   *
    * @param key
    * @return
    */
@@ -147,9 +156,9 @@ public final class EnumToIntMap<T extends Enum<T>> {
   }
 
   /**
-   * Returns the value associated with the specified enum constant or {@coded dfault} if the map did not contain an entry for the specified
-   * enum constant.
-   * 
+   * Returns the value associated with the specified enum constant or {@coded dfault} if the map did
+   * not contain an entry for the specified enum constant.
+   *
    * @param key
    * @param dfault
    * @return
@@ -159,13 +168,14 @@ public final class EnumToIntMap<T extends Enum<T>> {
   }
 
   /**
-   * Adds or overwrite the value for the specified enum constant. Note that you are not permitted to use the NULL value as the second
-   * argument. An {@code IllegalArgumentException} is thrown if you do so.
-   * 
+   * Adds or overwrite the value for the specified enum constant. Note that you are not permitted to
+   * use the NULL value as the second argument. An {@code IllegalArgumentException} is thrown if you
+   * do so.
+   *
    * @param key
    * @param val
-   * @return The previous value associated with the specified enum constant or the NULL value if the map did not contain an entry for the
-   *         enum constant yet.
+   * @return The previous value associated with the specified enum constant or the NULL value if the
+   *     map did not contain an entry for the enum constant yet.
    */
   public int put(T key, int val) {
     int i = get(key);
@@ -175,7 +185,7 @@ public final class EnumToIntMap<T extends Enum<T>> {
 
   /**
    * Much like {@code put}, but provides a fluent API for adding entries to the map.
-   * 
+   *
    * @param key
    * @param val
    * @return
@@ -187,35 +197,44 @@ public final class EnumToIntMap<T extends Enum<T>> {
   }
 
   /**
-   * Adds all entries of the specified map to this map, overwriting any previous values. The other map is allowed to have a different NULL
-   * value, but it must not contain <i>this</i> map's NULL value. An {@link IllegalArgumentException} is thrown if it does.
-   * 
+   * Adds all entries of the specified map to this map, overwriting any previous values. The other
+   * map is allowed to have a different NULL value, but it must not contain <i>this</i> map's NULL
+   * value. An {@link IllegalArgumentException} is thrown if it does.
+   *
    * @param other
    */
   public void putAll(EnumToIntMap<T> other) {
     for (int i = 0; i < other.data.length; ++i) {
       if (other.data[i] != other.nval) {
-        set(consts[i], other.data[i]); // Throw IllegalArgumentException if other.data[i] == this.nval
+        set(
+            consts[i],
+            other.data[i]); // Throw IllegalArgumentException if other.data[i] == this.nval
       }
     }
   }
 
   /**
-   * Adds all entries of the specified map to this map. This method acts as a bridge to fully-generic map implementations.
-   * 
+   * Adds all entries of the specified map to this map. This method acts as a bridge to
+   * fully-generic map implementations.
+   *
    * @param other
    */
   public void putAll(Map<T, ? extends Number> other) {
     for (T t : consts) {
       if (other.containsKey(t)) {
-        set(t, other.get(t).intValue()); // Throw IllegalArgumentException if other.get(t).intValue() == this.nval
+        set(
+            t,
+            other
+                .get(t)
+                .intValue()); // Throw IllegalArgumentException if other.get(t).intValue() ==
+                              // this.nval
       }
     }
   }
 
   /**
    * Returns a fully-generic version of this map.
-   * 
+   *
    * @return
    */
   public Map<T, Integer> toGenericMap() {
@@ -231,7 +250,7 @@ public final class EnumToIntMap<T extends Enum<T>> {
 
   /**
    * Removes the entry corresponding to the specified enum constant.
-   * 
+   *
    * @param key
    * @return
    */
@@ -243,7 +262,7 @@ public final class EnumToIntMap<T extends Enum<T>> {
 
   /**
    * Returns a Set view of the keys contained in this map.
-   * 
+   *
    * @return
    */
   public Set<T> keySet() {
@@ -259,7 +278,7 @@ public final class EnumToIntMap<T extends Enum<T>> {
 
   /**
    * Returns a {@code Collection} view of the values contained in this map.
-   * 
+   *
    * @return
    */
   public Set<Integer> values() {
@@ -274,7 +293,7 @@ public final class EnumToIntMap<T extends Enum<T>> {
 
   /**
    * Returns true if this map contains no key-value mappings, false otherwise.
-   * 
+   *
    * @return
    */
   public boolean isEmpty() {
@@ -282,8 +301,9 @@ public final class EnumToIntMap<T extends Enum<T>> {
   }
 
   /**
-   * Performs the given action for each entry in this map until all entries have been processed or the action throws an exception.
-   * 
+   * Performs the given action for each entry in this map until all entries have been processed or
+   * the action throws an exception.
+   *
    * @param consumer
    */
   public void forEach(ObjIntConsumer<T> consumer) {
@@ -292,16 +312,14 @@ public final class EnumToIntMap<T extends Enum<T>> {
     }
   }
 
-  /**
-   * Removes all of the mappings from this map.
-   */
+  /** Removes all of the mappings from this map. */
   public void clear() {
     Arrays.fill(data, nval);
   }
 
   /**
    * Returns the number of key-value mappings in this map.
-   * 
+   *
    * @return The number of key-value mappings in this map
    */
   public int size() {
@@ -310,7 +328,7 @@ public final class EnumToIntMap<T extends Enum<T>> {
 
   /**
    * Returns the integer that functions as the NULL value for this map.
-   * 
+   *
    * @return The integer that functions as the NULL value for this map
    */
   public int getNullValue() {
@@ -318,8 +336,8 @@ public final class EnumToIntMap<T extends Enum<T>> {
   }
 
   /**
-   * Returns true if the provided object is an instance of {@code EnumToIntMap} and if it contains the same NULL value and the same
-   * key-value mappings, {@code false} otherwise.
+   * Returns true if the provided object is an instance of {@code EnumToIntMap} and if it contains
+   * the same NULL value and the same key-value mappings, {@code false} otherwise.
    */
   @Override
   public boolean equals(Object obj) {
@@ -352,13 +370,9 @@ public final class EnumToIntMap<T extends Enum<T>> {
       if (sb.length() != 1) {
         sb.append("; ");
       }
-      sb.append('"')
-          .append(consts[i].toString())
-          .append("\": ")
-          .append(data[i]);
+      sb.append('"').append(consts[i].toString()).append("\": ").append(data[i]);
     }
     sb.append('}');
     return sb.toString();
   }
-
 }

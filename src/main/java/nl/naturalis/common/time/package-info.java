@@ -1,4 +1,2 @@
-/**
- * Date/time utility classes.
- */
+/** Date/time utility classes. */
 package nl.naturalis.common.time;

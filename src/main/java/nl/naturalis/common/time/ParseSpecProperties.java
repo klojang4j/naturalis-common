@@ -31,22 +31,25 @@ import static nl.naturalis.common.CollectionMethods.newLinkedHashMap;
 import static nl.naturalis.common.StringMethods.ifBlank;
 
 /**
- * An extension of {@link Properties} dedicated to reading configurations for the {@link FuzzyDateParser}.
+ * An extension of {@link Properties} dedicated to reading configurations for the {@link
+ * FuzzyDateParser}.
  *
  * @author Ayco Holleman
  */
 class ParseSpecProperties extends Properties {
 
   /**
-   * A map of all supported {@link Temporal} classes, mapped to the {@link TemporalQuery} used to instantiate them.
+   * A map of all supported {@link Temporal} classes, mapped to the {@link TemporalQuery} used to
+   * instantiate them.
    */
-  private static final Map<String, TemporalQuery<?>[]> supportedDateTypes = newLinkedHashMap(
-      Instant.class.getSimpleName(), new TemporalQuery[] {Instant::from},
-      OffsetDateTime.class.getSimpleName(), new TemporalQuery[] {OffsetDateTime::from},
-      LocalDateTime.class.getSimpleName(), new TemporalQuery[] {LocalDateTime::from},
-      LocalDate.class.getSimpleName(), new TemporalQuery[] {LocalDate::from},
-      YearMonth.class.getSimpleName(), new TemporalQuery[] {YearMonth::from},
-      Year.class.getSimpleName(), new TemporalQuery[] {Year::from});
+  private static final Map<String, TemporalQuery<?>[]> supportedDateTypes =
+      newLinkedHashMap(
+          Instant.class.getSimpleName(), new TemporalQuery[] {Instant::from},
+          OffsetDateTime.class.getSimpleName(), new TemporalQuery[] {OffsetDateTime::from},
+          LocalDateTime.class.getSimpleName(), new TemporalQuery[] {LocalDateTime::from},
+          LocalDate.class.getSimpleName(), new TemporalQuery[] {LocalDate::from},
+          YearMonth.class.getSimpleName(), new TemporalQuery[] {YearMonth::from},
+          Year.class.getSimpleName(), new TemporalQuery[] {Year::from});
 
   private final String globalResolverStyle;
   private final String globalCaseSensitive;
@@ -65,7 +68,7 @@ class ParseSpecProperties extends Properties {
 
   /**
    * Produces a list of {@code ParseSpec} instances from this {@code Properties instance}.
-   * 
+   *
    * @return
    * @throws FuzzyDateException
    */
@@ -79,7 +82,7 @@ class ParseSpecProperties extends Properties {
 
   private List<ParseInfo> createParseSpecs(String dateType) throws FuzzyDateException {
     List<ParseInfo> parseSpecs = new ArrayList<>();
-    for (int i = 0;; i++) {
+    for (int i = 0; ; i++) {
       String key = dateType + "." + i + ".name";
       String val = getProperty(key);
       if (val != null) {
@@ -148,7 +151,9 @@ class ParseSpecProperties extends Properties {
 
   private static TemporalQuery<?>[] getParseInto(String dateType) throws FuzzyDateException {
     TemporalQuery<?>[] parseInto = supportedDateTypes.get(dateType);
-    Check.that(parseInto != null, () -> new FuzzyDateException("Non-existent or unsupported date/time class: " + dateType));
+    Check.that(
+        parseInto != null,
+        () -> new FuzzyDateException("Non-existent or unsupported date/time class: " + dateType));
     return parseInto;
   }
 
@@ -163,12 +168,15 @@ class ParseSpecProperties extends Properties {
       field = DateTimeFormatter.class.getDeclaredField(name);
     } catch (NoSuchFieldException e0) {
       int i = name.lastIndexOf('.');
-      Check.that(i > 0 && name.length() > 3 && !name.endsWith("."), () -> cannotCreateFormatter(name));
+      Check.that(
+          i > 0 && name.length() > 3 && !name.endsWith("."), () -> cannotCreateFormatter(name));
       try {
         Class<?> clazz = Class.forName(name.substring(0, i));
         field = clazz.getDeclaredField(name.substring(i + 1));
         int m = field.getModifiers();
-        Check.that(isStatic(m) && isPublic(m), () -> cannotCreateFormatter(name, "not a public static field"));
+        Check.that(
+            isStatic(m) && isPublic(m),
+            () -> cannotCreateFormatter(name, "not a public static field"));
       } catch (Exception e1) {
         throw cannotCreateFormatter(name, e1.toString());
       }
@@ -184,11 +192,12 @@ class ParseSpecProperties extends Properties {
   }
 
   private static FuzzyDateException cannotCreateFormatter(String name) {
-    return new FuzzyDateException(String.format("Cannot create DateTimeFormatter for \"%s\"", name));
+    return new FuzzyDateException(
+        String.format("Cannot create DateTimeFormatter for \"%s\"", name));
   }
 
   private static FuzzyDateException cannotCreateFormatter(String name, String reason) {
-    return new FuzzyDateException(String.format("Cannot create DateTimeFormatter for \"%s\": %s", name, reason));
+    return new FuzzyDateException(
+        String.format("Cannot create DateTimeFormatter for \"%s\": %s", name, reason));
   }
-
 }

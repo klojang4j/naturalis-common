@@ -61,5 +61,4 @@ public class OptionalMethodsTest {
     String s = OptionalMethods.get(opt);
     assertTrue(s == opt.get());
   }
-
 }

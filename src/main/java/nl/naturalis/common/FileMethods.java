@@ -27,5 +27,4 @@ public class FileMethods {
     String[] elems = Arrays.stream(path).map(Object::toString).toArray(String[]::new);
     return Paths.get(directory.getAbsolutePath(), elems).toFile();
   }
-
 }

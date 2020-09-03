@@ -45,7 +45,7 @@ public class DevOps extends Department {
       return false;
     }
     DevOps other = (DevOps) obj;
-    return hipsterFriendly == other.hipsterFriendly && Arrays.deepEquals(reactiveBingoDates, other.reactiveBingoDates);
+    return hipsterFriendly == other.hipsterFriendly
+        && Arrays.deepEquals(reactiveBingoDates, other.reactiveBingoDates);
   }
-
 }

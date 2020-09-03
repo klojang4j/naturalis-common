@@ -35,13 +35,17 @@ public final class IntegerCheck<E extends Exception> extends ObjectCheck<Integer
 
   @Override
   public IntegerCheck<E> between(int minInclusive, int maxExclusive) throws E {
-    that(arg >= minInclusive && arg < maxExclusive, smash(ERR_BETWEEN, argName, minInclusive, maxExclusive));
+    that(
+        arg >= minInclusive && arg < maxExclusive,
+        smash(ERR_BETWEEN, argName, minInclusive, maxExclusive));
     return this;
   }
 
   @Override
   public IntegerCheck<E> inRange(int minInclusive, int maxInclusive) throws E {
-    that(arg >= minInclusive && arg <= maxInclusive, smash(ERR_IN_RANGE, argName, minInclusive, maxInclusive));
+    that(
+        arg >= minInclusive && arg <= maxInclusive,
+        smash(ERR_IN_RANGE, argName, minInclusive, maxInclusive));
     return this;
   }
 

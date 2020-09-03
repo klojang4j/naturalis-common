@@ -16,37 +16,35 @@ import static nl.naturalis.common.path.Path.isArrayIndex;
 import static nl.naturalis.common.path.PathWalkerException.illegalAccess;
 
 /**
+ * Reads or writes one or more values within a given Object using {@link Path} objects to specify
+ * which fields to read/write. No exceptions are thrown if a path could not be walked all the way to
+ * the last path segment due to:
+ *
  * <p>
- * Reads or writes one or more values within a given Object using {@link Path}
- * objects to specify which fields to read/write. No exceptions are thrown if a
- * path could not be walked all the way to the last path segment due to:
- * <p>
+ *
  * <ul>
- * <li>one of the intermediate path segments referenced a null value
- * <li>the path is invalid given the type of the object to read/write
- * <li>an array index was expected but not found in the path
- * <li>the array index was out of bounds
- * <li>the path continued after having reached a terminal value within the
- * object (a primitive)
+ *   <li>one of the intermediate path segments referenced a null value
+ *   <li>the path is invalid given the type of the object to read/write
+ *   <li>an array index was expected but not found in the path
+ *   <li>the array index was out of bounds
+ *   <li>the path continued after having reached a terminal value within the object (a primitive)
  * </ul>
- * <p>
- * In all of these cases the path's value is set to null or {@link #DEAD_END}
- * (depending on your choice), but no exception is thrown. Only if a segment
- * <i>did</i> correspond to a field, but accessing the field caused an
- * {@link IllegalAccessException}, a {@link PathWalkerException} wrapping the
- * {@code IllegalAccessException} is thrown.
+ *
+ * <p>In all of these cases the path's value is set to null or {@link #DEAD_END} (depending on your
+ * choice), but no exception is thrown. Only if a segment <i>did</i> correspond to a field, but
+ * accessing the field caused an {@link IllegalAccessException}, a {@link PathWalkerException}
+ * wrapping the {@code IllegalAccessException} is thrown.
  *
  * @author Ayco Holleman
- *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public final class PathWalker {
 
   /**
-   * A special value indicating that a path could not be walked all the way to the
-   * end for the object currently being read. Note that this can either mean that
-   * you really specified an invalid path given the <i>type</i> of object to walk,
-   * or that the object did not have the nested objects corresponding to the path.
+   * A special value indicating that a path could not be walked all the way to the end for the
+   * object currently being read. Note that this can either mean that you really specified an
+   * invalid path given the <i>type</i> of object to walk, or that the object did not have the
+   * nested objects corresponding to the path.
    */
   public static final Object DEAD_END = new Object();
 
@@ -55,8 +53,8 @@ public final class PathWalker {
   private final BiFunction<Map, String, Object> keyDeser;
 
   /**
-   * Creates a {@code MapReader} for the specified paths, setting the value for
-   * paths that code not be walked all the way to the end to null.
+   * Creates a {@code MapReader} for the specified paths, setting the value for paths that code not
+   * be walked all the way to the end to null.
    *
    * @param paths
    */
@@ -68,8 +66,8 @@ public final class PathWalker {
   }
 
   /**
-   * Creates a {@code MapReader} for the specified paths, setting the value for
-   * paths that code not be walked all the way to the end to null.
+   * Creates a {@code MapReader} for the specified paths, setting the value for paths that code not
+   * be walked all the way to the end to null.
    *
    * @param paths
    */
@@ -81,8 +79,8 @@ public final class PathWalker {
   }
 
   /**
-   * Creates a {@code MapReader} for the specified paths, setting the value for
-   * paths that code not be walked all the way to the end to null.
+   * Creates a {@code MapReader} for the specified paths, setting the value for paths that code not
+   * be walked all the way to the end to null.
    *
    * @param paths
    */
@@ -91,10 +89,9 @@ public final class PathWalker {
   }
 
   /**
-   * Creates a {@code MapReader} for the specified paths. If
-   * {@code useDeadEndValue} equals {@code true}, then the value for a path that
-   * could not be walked will be {@link #DEAD_END}, else null. If it is important
-   * to distinguish between "real" null values and dead ends, pass {@code true}.
+   * Creates a {@code MapReader} for the specified paths. If {@code useDeadEndValue} equals {@code
+   * true}, then the value for a path that could not be walked will be {@link #DEAD_END}, else null.
+   * If it is important to distinguish between "real" null values and dead ends, pass {@code true}.
    *
    * @param paths
    * @param useDeadEndValue
@@ -104,22 +101,21 @@ public final class PathWalker {
   }
 
   /**
-   * Creates a {@code MapReader} for the specified paths. If
-   * {@code useDeadEndValue} equals {@code true}, then the value for a path that
-   * could not be walked will be {@link #DEAD_END}, else {@code null}. If it is
-   * important to distinguish between "real" null values and dead ends, pass
-   * {@code true}. If you need to read from or write to maps with non-string keys,
-   * you must provide a function that converts path segments to map keys.
+   * Creates a {@code MapReader} for the specified paths. If {@code useDeadEndValue} equals {@code
+   * true}, then the value for a path that could not be walked will be {@link #DEAD_END}, else
+   * {@code null}. If it is important to distinguish between "real" null values and dead ends, pass
+   * {@code true}. If you need to read from or write to maps with non-string keys, you must provide
+   * a function that converts path segments to map keys.
    *
    * @param paths The paths to walk
-   * @param useDeadEndValue Whether to use {@link #DEAD_END} or null for paths
-   *        that could not be walked all the way to the end
-   * @param mapKeyDeserializer A function that converts strings to map keys (may
-   *        be null if no deserialization is required). The map being read is
-   *        passed as the 1st argument to the function; the path segment to be
-   *        deserialized as the 2nd argument.
+   * @param useDeadEndValue Whether to use {@link #DEAD_END} or null for paths that could not be
+   *     walked all the way to the end
+   * @param mapKeyDeserializer A function that converts strings to map keys (may be null if no
+   *     deserialization is required). The map being read is passed as the 1st argument to the
+   *     function; the path segment to be deserialized as the 2nd argument.
    */
-  public PathWalker(List<Path> paths,
+  public PathWalker(
+      List<Path> paths,
       boolean useDeadEndValue,
       BiFunction<Map, String, Object> mapKeyDeserializer) {
     Check.that(paths, "paths").notEmpty().noneNull();
@@ -129,8 +125,8 @@ public final class PathWalker {
   }
 
   /**
-   * Returns the values of all paths within the provided object in the same order
-   * as the paths specified through the constructor.
+   * Returns the values of all paths within the provided object in the same order as the paths
+   * specified through the constructor.
    *
    * @param host The object to read the path values from
    * @return
@@ -141,10 +137,9 @@ public final class PathWalker {
   }
 
   /**
-   * Reads the values of all paths within the provided object and places them in
-   * the provided output array. The values will be in the same order as the paths
-   * specified through the constructors. The output array need not have the same
-   * length as the path array.
+   * Reads the values of all paths within the provided object and places them in the provided output
+   * array. The values will be in the same order as the paths specified through the constructors.
+   * The output array need not have the same length as the path array.
    *
    * @param host
    * @param output
@@ -156,8 +151,8 @@ public final class PathWalker {
   }
 
   /**
-   * Reads the values of all paths within the provided object and places them in
-   * the provided path-to-value map.
+   * Reads the values of all paths within the provided object and places them in the provided
+   * path-to-value map.
    *
    * @param host
    * @param output
@@ -169,8 +164,8 @@ public final class PathWalker {
   }
 
   /**
-   * Returns the value of the first path. Useful if the {@code PathWalker} was
-   * created with just one path.
+   * Returns the value of the first path. Useful if the {@code PathWalker} was created with just one
+   * path.
    *
    * @param <T> The type of the object that the path points to
    * @param obj The object to read the path values from
@@ -182,29 +177,29 @@ public final class PathWalker {
   }
 
   /**
-   * Sets the values of all paths within the provided object to the specified
-   * values. The number of values must be greater than or equal to the length as
-   * the number of {@code Path} objects specified through the constructor.
+   * Sets the values of all paths within the provided object to the specified values. The number of
+   * values must be greater than or equal to the length as the number of {@code Path} objects
+   * specified through the constructor.
    *
    * @param host
    * @param values
    */
   public void writeValues(Object host, Object... values) {
     Check.notNull(values, "values");
-    Check.integer(values.length, x -> x == paths.length, "Invalid number of values: %d", values.length);
+    Check.integer(
+        values.length, x -> x == paths.length, "Invalid number of values: %d", values.length);
     for (int i = 0; i < paths.length; ++i) {
       write(host, paths[i], values[i]);
     }
   }
 
   /**
-   * Sets the value of the first path within the provided object to the specified
-   * value. Useful if the {@code PathWalker} was created for just one path. This
-   * method will not throw an exception if path's parent does not exist within the
-   * provided object, or if the value of the path's parent is null. It will also
-   * not throw an exception when trying to set a value at an index that is out of
-   * bounds for the provided host object. It may throw a
-   * {@link ClassCastException}, however.
+   * Sets the value of the first path within the provided object to the specified value. Useful if
+   * the {@code PathWalker} was created for just one path. This method will not throw an exception
+   * if path's parent does not exist within the provided object, or if the value of the path's
+   * parent is null. It will also not throw an exception when trying to set a value at an index that
+   * is out of bounds for the provided host object. It may throw a {@link ClassCastException},
+   * however.
    *
    * @param host
    * @param value
@@ -319,7 +314,8 @@ public final class PathWalker {
             throw illegalAccess(e, parval, target.toString());
           }
         } else {
-          throw new PathWalkerException("Null segment can only be used to write map value with key null");
+          throw new PathWalkerException(
+              "Null segment can only be used to write map value with key null");
         }
       }
     }
@@ -351,5 +347,4 @@ public final class PathWalker {
   private Object deadEnd() {
     return useDeadEnd ? DEAD_END : null;
   }
-
 }

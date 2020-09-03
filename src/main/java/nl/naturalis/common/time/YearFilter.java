@@ -5,10 +5,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A DateStringFilter implementation used as a very course, last ditch attempt to at least extract a year from date strings like "2007b" or
- * "1914 - 1918". If you are determined to at least extract a year from a piece of text using the {@link FuzzyDateParser}, you can
- * instantiate it with a {@link ParseInfo} that specifies this filter to be applied. The {@code YearFilter} is also used, as a last resort,
- * by the {@link FuzzyDateParser#DEFAULT default} {code FuzzyDateParser}.
+ * A DateStringFilter implementation used as a very course, last ditch attempt to at least extract a
+ * year from date strings like "2007b" or "1914 - 1918". If you are determined to at least extract a
+ * year from a piece of text using the {@link FuzzyDateParser}, you can instantiate it with a {@link
+ * ParseInfo} that specifies this filter to be applied. The {@code YearFilter} is also used, as a
+ * last resort, by the {@link FuzzyDateParser#DEFAULT default} {code FuzzyDateParser}.
  */
 public class YearFilter implements UnaryOperator<String> {
 
@@ -31,5 +32,4 @@ public class YearFilter implements UnaryOperator<String> {
     }
     return null;
   }
-
 }

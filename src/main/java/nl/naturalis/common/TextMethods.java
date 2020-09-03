@@ -7,9 +7,7 @@ import java.util.Map;
  * Basic methods for working with text.
  *
  * @deprecated
- *
  * @author Ayco Holleman
- *
  */
 @Deprecated
 public class TextMethods {
@@ -19,8 +17,8 @@ public class TextMethods {
   /**
    * Really basic method for creating the plural of a noun. Useful as a static import in the message
    * argument list of a log message, or within the argument list of <code>String.format</code>.
-   * Returns the unchanged noun if the map's size is 1, else the plural of the noun. See
-   * {@link #plural(String, int)}.
+   * Returns the unchanged noun if the map's size is 1, else the plural of the noun. See {@link
+   * #plural(String, int)}.
    *
    * @param noun
    * @param m
@@ -47,11 +45,12 @@ public class TextMethods {
   /**
    * Really basic method for creating the plural of a noun. Useful as a static import in the message
    * argument list of a log message, or within the argument list of <code>String.format</code>.
-   * Returns the unchanged noun if the provided integer is 1, else the plural of the noun. There is no
-   * linguistic sophistication in the generation of the plural and it's only useful for English
+   * Returns the unchanged noun if the provided integer is 1, else the plural of the noun. There is
+   * no linguistic sophistication in the generation of the plural and it's only useful for English
    * messages.
-   * <p>
-   * Examples:
+   *
+   * <p>Examples:
+   *
    * <table style="border:1px #000;">
    * <tr>
    * <td>countr<b>y</b></td>

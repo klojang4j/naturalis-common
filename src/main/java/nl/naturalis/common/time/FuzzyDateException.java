@@ -18,5 +18,4 @@ public class FuzzyDateException extends Exception {
   public FuzzyDateException(String message, Throwable cause) {
     super(message, cause);
   }
-
 }

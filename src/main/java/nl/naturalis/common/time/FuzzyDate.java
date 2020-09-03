@@ -17,12 +17,10 @@ import java.time.ZoneOffset;
 import java.time.temporal.TemporalAccessor;
 
 /**
- * A {@code FuzzyDate} represents a date of which at least the year is known.
- * You can retrieve regular {@code java.time} objects from it and it stores the
- * verbatim date string from which it was created as well as the
- * {@link ParseInfo} instance used to parse the verbatim date string. You obtain
- * an instance by calling {@link FuzzyDateParser#parse(String)
- * FuzzyDateParser.parse}.
+ * A {@code FuzzyDate} represents a date of which at least the year is known. You can retrieve
+ * regular {@code java.time} objects from it and it stores the verbatim date string from which it
+ * was created as well as the {@link ParseInfo} instance used to parse the verbatim date string. You
+ * obtain an instance by calling {@link FuzzyDateParser#parse(String) FuzzyDateParser.parse}.
  */
 public final class FuzzyDate {
 
@@ -37,9 +35,8 @@ public final class FuzzyDate {
   }
 
   /**
-   * Converts this {@code FuzzyDate} to an {@link Instant java.time.Instant}
-   * object.
-   * 
+   * Converts this {@code FuzzyDate} to an {@link Instant java.time.Instant} object.
+   *
    * @return
    */
   public Instant toInstant() {
@@ -53,10 +50,9 @@ public final class FuzzyDate {
   }
 
   /**
-   * Converts this {@code FuzzyDate} to a {@link LocalDateTime} object, setting
-   * month and day to 1 if unknown, and setting hour, minute and second to 0 if
-   * unknown.
-   * 
+   * Converts this {@code FuzzyDate} to a {@link LocalDateTime} object, setting month and day to 1
+   * if unknown, and setting hour, minute and second to 0 if unknown.
+   *
    * @return
    */
   public LocalDateTime toLocalDateTime() {
@@ -80,8 +76,8 @@ public final class FuzzyDate {
   }
 
   /**
-   * Converts this {@code FuzzyDate} to a {@link LocalDate} object, setting month
-   * and/or day to 1 if unknown.
+   * Converts this {@code FuzzyDate} to a {@link LocalDate} object, setting month and/or day to 1 if
+   * unknown.
    *
    * @return
    */
@@ -103,9 +99,8 @@ public final class FuzzyDate {
   }
 
   /**
-   * Returns the most granular date/time object that could be parsed out of the
-   * date string.
-   * 
+   * Returns the most granular date/time object that could be parsed out of the date string.
+   *
    * @return
    */
   public TemporalAccessor bestMatch() {
@@ -128,9 +123,8 @@ public final class FuzzyDate {
   }
 
   /**
-   * Returns the raw {@link TemporalAccessor} object that was created from the
-   * verbatim date string.
-   * 
+   * Returns the raw {@link TemporalAccessor} object that was created from the verbatim date string.
+   *
    * @return
    */
   public TemporalAccessor getTemporalAccessor() {
@@ -138,8 +132,7 @@ public final class FuzzyDate {
   }
 
   /**
-   * Returns the original date string from which this FuzzyDate instance was
-   * created.
+   * Returns the original date string from which this FuzzyDate instance was created.
    *
    * @return
    */
@@ -148,9 +141,9 @@ public final class FuzzyDate {
   }
 
   /**
-   * Returns the {@link ParseInfo} used to parse the date string into this
-   * {@code FuzzyDate} instance.
-   * 
+   * Returns the {@link ParseInfo} used to parse the date string into this {@code FuzzyDate}
+   * instance.
+   *
    * @return
    */
   public ParseInfo getParseSpec() {
@@ -163,31 +156,27 @@ public final class FuzzyDate {
    * @return
    */
   public boolean isFuzzyDate() {
-    return !(ta.isSupported(MONTH_OF_YEAR)
-        && ta.isSupported(DAY_OF_MONTH));
+    return !(ta.isSupported(MONTH_OF_YEAR) && ta.isSupported(DAY_OF_MONTH));
   }
 
   /**
-   * Returns true if either the hour or the minute is unknown, false if both are
-   * known. Seconds are ignored, so time is <i>not</i> regarded as fuzzy if hour
-   * and minute are known but the second is not. If seconds are important, use the
-   * <code>isSupported</code> method on the {@link TemporalAccessor} instance
-   * returned by {@link #getTemporalAccessor() getTemporalAccessor}.
+   * Returns true if either the hour or the minute is unknown, false if both are known. Seconds are
+   * ignored, so time is <i>not</i> regarded as fuzzy if hour and minute are known but the second is
+   * not. If seconds are important, use the <code>isSupported</code> method on the {@link
+   * TemporalAccessor} instance returned by {@link #getTemporalAccessor() getTemporalAccessor}.
    *
    * @return
    */
   public boolean isFuzzyTime() {
-    return !(ta.isSupported(HOUR_OF_DAY)
-        && ta.isSupported(MINUTE_OF_HOUR));
+    return !(ta.isSupported(HOUR_OF_DAY) && ta.isSupported(MINUTE_OF_HOUR));
   }
 
   /**
    * Equivalent to {@code isFuzzyDate() || isFuzzyTime()}.
-   * 
+   *
    * @return
    */
   public boolean isFuzzyDateTime() {
     return isFuzzyDate() || isFuzzyTime();
   }
-
 }

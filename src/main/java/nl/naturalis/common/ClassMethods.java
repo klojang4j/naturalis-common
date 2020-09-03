@@ -13,9 +13,9 @@ public class ClassMethods {
   private ClassMethods() {}
 
   /**
-   * Tests whether the 1st argument extends or implements the 2nd argument. In
-   * case you keep forgetting who should be the caller and who the callee with
-   * <code>Class.isAssignableFrom</code> method.
+   * Tests whether the 1st argument extends or implements the 2nd argument. In case you keep
+   * forgetting who should be the caller and who the callee with <code>Class.isAssignableFrom</code>
+   * method.
    *
    * @param classToTest
    * @param superOrInterface
@@ -41,26 +41,26 @@ public class ClassMethods {
   }
 
   /**
-   * Tests whether the provided object is an array of primitives without using
-   * reflection. Null-safe.
+   * Tests whether the provided object is an array of primitives without using reflection.
+   * Null-safe.
    *
    * @param obj
    * @return
    */
   public static boolean isPrimitiveArray(Object obj) {
-    return obj != null && (obj instanceof int[]
-        || obj instanceof double[]
-        || obj instanceof boolean[]
-        || obj instanceof byte[]
-        || obj instanceof long[]
-        || obj instanceof char[]
-        || obj instanceof float[]
-        || obj instanceof short[]);
+    return obj != null
+        && (obj instanceof int[]
+            || obj instanceof double[]
+            || obj instanceof boolean[]
+            || obj instanceof byte[]
+            || obj instanceof long[]
+            || obj instanceof char[]
+            || obj instanceof float[]
+            || obj instanceof short[]);
   }
 
   /**
-   * Returns a more friendlier description of an array than Java's innate
-   * toString().
+   * Returns a more friendlier description of an array than Java's innate toString().
    *
    * @param obj
    * @return
@@ -75,9 +75,8 @@ public class ClassMethods {
   private static final HashMap<Tuple<String, Class>, Field> fields = new HashMap<>();
 
   /**
-   * Returns a {@code Field} object corresponding to the provided field name
-   * within the provided object's type. The fields {@code accessible} flag will be
-   * set to {@code true}.
+   * Returns a {@code Field} object corresponding to the provided field name within the provided
+   * object's type. The fields {@code accessible} flag will be set to {@code true}.
    *
    * @param obj
    * @param fieldName
@@ -89,7 +88,8 @@ public class ClassMethods {
     Field field = fields.get(key);
     if (field == null) {
       if (!fields.containsKey(key)) {
-        LOOP: for (Class c = obj.getClass(); c != Object.class; c = c.getSuperclass()) {
+        LOOP:
+        for (Class c = obj.getClass(); c != Object.class; c = c.getSuperclass()) {
           for (Field f : c.getDeclaredFields()) {
             if (f.getName().equals(fieldName)) {
               f.setAccessible(true);
@@ -102,5 +102,4 @@ public class ClassMethods {
     }
     return field;
   }
-
 }

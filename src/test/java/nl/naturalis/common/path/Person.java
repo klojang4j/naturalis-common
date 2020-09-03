@@ -58,8 +58,9 @@ public class Person {
       return false;
     }
     Person other = (Person) obj;
-    return Objects.equals(address, other.address) && Objects.equals(firstName, other.firstName) && Objects.equals(lastName, other.lastName)
+    return Objects.equals(address, other.address)
+        && Objects.equals(firstName, other.firstName)
+        && Objects.equals(lastName, other.lastName)
         && Objects.equals(ssn, other.ssn);
   }
-
 }

@@ -11,49 +11,42 @@ import static java.util.Arrays.copyOfRange;
 import static java.util.function.Predicate.not;
 
 /**
- * Specifies a path to a value within an object. Path segments are spearated by
- * '.' (dot). For example: {@code employee.address.street} (the street name
- * within the Address object of an Employee object). Array indices are specified
- * as separate path segments. For example: {@code employees.3.address.street}
- * (the street that the 4th employee lives on). Non-numeric segments can be
- * either fields or map keys. Therefore the {@code Path} class imposes zero
- * constraints on what constitutes a valid path segment, since a map key can be
- * anything (including null or an empty string).
+ * Specifies a path to a value within an object. Path segments are spearated by '.' (dot). For
+ * example: {@code employee.address.street} (the street name within the Address object of an
+ * Employee object). Array indices are specified as separate path segments. For example: {@code
+ * employees.3.address.street} (the street that the 4th employee lives on). Non-numeric segments can
+ * be either fields or map keys. Therefore the {@code Path} class imposes zero constraints on what
+ * constitutes a valid path segment, since a map key can be anything (including null or an empty
+ * string).
  *
  * @author Ayco Holleman
- *
  */
 public final class Path implements Comparable<Path>, Iterable<String>, Sizeable, Emptyable {
 
-  /**
-   * The empty path (containing zero path segments).
-   */
+  /** The empty path (containing zero path segments). */
   public static Path EMPTY_PATH = new Path();
 
-  /**
-   * The segment separator within a path: &#39;&#46;&#39; (dot).
-   */
+  /** The segment separator within a path: &#39;&#46;&#39; (dot). */
   public static final char SEP = '.';
   /**
-   * The escape character: &#39;^&#39; (circumflex). If a path segment contains
-   * the segment separator, it must be escaped with this character. (Using the
-   * backslash character as an escape character would have made it needlessly
-   * cumbersome to write path strings in Java code.) The escape character itself
-   * must <i>not</i> be escaped. You can let the {@link #escape(String) escape}
-   * method do the escaping for you.
+   * The escape character: &#39;^&#39; (circumflex). If a path segment contains the segment
+   * separator, it must be escaped with this character. (Using the backslash character as an escape
+   * character would have made it needlessly cumbersome to write path strings in Java code.) The
+   * escape character itself must <i>not</i> be escaped. You can let the {@link #escape(String)
+   * escape} method do the escaping for you.
    */
   public static final char ESC = '^';
   /**
-   * The character sequence to use for {@code null} keys: "^0". So
-   * {@code lookups.^0.name} gets the object with key null in the {@code lookups}
-   * map and then returns the value of that object's {@code name} field.
+   * The character sequence to use for {@code null} keys: "^0". So {@code lookups.^0.name} gets the
+   * object with key null in the {@code lookups} map and then returns the value of that object's
+   * {@code name} field.
    */
   public static final String NULL_SEGMENT = "^0";
 
   /**
-   * Applies escaping to a path segment. Can be used to construct complete path
-   * strings. Do not use when passing individual path segments as a {@code String}
-   * array to the {@link #Path(String[]) constructor}.
+   * Applies escaping to a path segment. Can be used to construct complete path strings. Do not use
+   * when passing individual path segments as a {@code String} array to the {@link #Path(String[])
+   * constructor}.
    *
    * @param segment The path segment to escape
    * @return The escaped version of the segment
@@ -90,9 +83,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   // Caches hashCode()
   private int hash;
 
-  /**
-   * Creates a new empty {@code Path}.
-   */
+  /** Creates a new empty {@code Path}. */
   public Path() {
     elems = new String[0];
   }
@@ -130,8 +121,8 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns true if this {@code Path} consists of a single segment and that
-   * segment is an array index. Otherwise returns false.
+   * Returns true if this {@code Path} consists of a single segment and that segment is an array
+   * index. Otherwise returns false.
    *
    * @return
    */
@@ -143,9 +134,9 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns true if this {@code Path} consists of a single segment and that
-   * segment is null (meaning that this path can only possibly be valid for map
-   * objects that allow null keys). Otherwise returns false.
+   * Returns true if this {@code Path} consists of a single segment and that segment is null
+   * (meaning that this path can only possibly be valid for map objects that allow null keys).
+   * Otherwise returns false.
    *
    * @return
    */
@@ -154,9 +145,8 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns the path segment at the specified index. Specify a negative index to
-   * count back from the last segment of the {@code Path} (-1 is the index of the
-   * last path segment).
+   * Returns the path segment at the specified index. Specify a negative index to count back from
+   * the last segment of the {@code Path} (-1 is the index of the last path segment).
    *
    * @param index
    * @return
@@ -167,10 +157,9 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns a new {@code Path} consisting of all segments starting with the
-   * segment at the specified array index. The E.g.
-   * <code>myPath.subpath(-2)</code> returns a new {@code Path} consisting of the
-   * last two segments of {@code myPath}.
+   * Returns a new {@code Path} consisting of all segments starting with the segment at the
+   * specified array index. The E.g. <code>myPath.subpath(-2)</code> returns a new {@code Path}
+   * consisting of the last two segments of {@code myPath}.
    *
    * @param from
    * @return
@@ -182,9 +171,8 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns a new {@code Path} consisting of {@code len} starting with segment
-   * {@code from}. The 1st argument may be negative to indicate an offset from the
-   * last segment.
+   * Returns a new {@code Path} consisting of {@code len} starting with segment {@code from}. The
+   * 1st argument may be negative to indicate an offset from the last segment.
    *
    * @param from
    * @return
@@ -198,8 +186,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Return the parent of thie {@code Path} or null if this is an empty
-   * {@code Path}.
+   * Return the parent of thie {@code Path} or null if this is an empty {@code Path}.
    *
    * @return
    */
@@ -208,8 +195,8 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns a new {@code Path} containing only the segments of this {@code Path}
-   * that are not array indices.
+   * Returns a new {@code Path} containing only the segments of this {@code Path} that are not array
+   * indices.
    *
    * @return
    */
@@ -218,8 +205,8 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns a new {@code Path} consisting of the segments of this {@code Path}
-   * plus the segments of the specified {@code Path}.
+   * Returns a new {@code Path} consisting of the segments of this {@code Path} plus the segments of
+   * the specified {@code Path}.
    *
    * @param path
    * @return
@@ -230,8 +217,8 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns a new {@code Path} consisting of the segments of this {@code Path}
-   * plus the segments of the specified {@code Path}.
+   * Returns a new {@code Path} consisting of the segments of this {@code Path} plus the segments of
+   * the specified {@code Path}.
    *
    * @param other
    * @return
@@ -242,8 +229,8 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns a new {@code Path} with the path segment at the specified array index
-   * set to the new value.
+   * Returns a new {@code Path} with the path segment at the specified array index set to the new
+   * value.
    *
    * @param index
    * @param newValue
@@ -257,8 +244,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns a new {@code Path} with all segments of this {@code Path} except the
-   * first segment.
+   * Returns a new {@code Path} with all segments of this {@code Path} except the first segment.
    *
    * @return
    */
@@ -311,9 +297,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
     return elems.length;
   }
 
-  /**
-   * Returns whether or not this path contains any segments.
-   */
+  /** Returns whether or not this path contains any segments. */
   @Override
   public boolean isEmpty() {
     return elems.length == 0;
@@ -386,5 +370,4 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
     }
     return elems.toArray(new String[elems.size()]);
   }
-
 }

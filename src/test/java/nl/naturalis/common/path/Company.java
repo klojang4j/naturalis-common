@@ -74,9 +74,10 @@ public class Company {
       return false;
     }
     Company other = (Company) obj;
-    return Objects.equals(departments, other.departments) && Objects.equals(name, other.name)
-        && Float.floatToIntBits(profit) == Float.floatToIntBits(other.profit) && Arrays.deepEquals(quarterlySales, other.quarterlySales)
+    return Objects.equals(departments, other.departments)
+        && Objects.equals(name, other.name)
+        && Float.floatToIntBits(profit) == Float.floatToIntBits(other.profit)
+        && Arrays.deepEquals(quarterlySales, other.quarterlySales)
         && Objects.equals(sales, other.sales);
   }
-
 }

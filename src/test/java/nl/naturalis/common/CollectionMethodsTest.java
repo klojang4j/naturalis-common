@@ -25,5 +25,4 @@ public class CollectionMethodsTest {
   private static String concat(List<String> chars) {
     return chars.stream().collect(Collectors.joining());
   }
-
 }

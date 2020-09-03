@@ -3,11 +3,10 @@ package nl.naturalis.common.function;
 import java.util.function.Supplier;
 
 /**
- * An alternative to Java's {@link Supplier} interface where the {@code get}
- * method is allowed to throw a checked exception.
+ * An alternative to Java's {@link Supplier} interface where the {@code get} method is allowed to
+ * throw a checked exception.
  *
  * @author Ayco Holleman
- *
  * @param <T> The type of the return value
  * @param <E> The type of the exception potentially being thrown
  */
@@ -21,5 +20,4 @@ public interface ThrowingSupplier<T, E extends Exception> {
    * @throws An exception of type {@code E}.
    */
   T get() throws E;
-
 }

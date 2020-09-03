@@ -8,7 +8,6 @@ import java.util.Objects;
  * Generic, immutable Tuple class.
  *
  * @author Ayco Holleman
- *
  * @param <LEFT> The type of the first element (or key) of the tuple
  * @param <RIGHT> The type of the second element (or value) of the tuple
  */
@@ -113,5 +112,4 @@ public final class Tuple<LEFT, RIGHT> {
     Tuple other = (Tuple) obj;
     return Objects.equals(left, other.left) && Objects.equals(right, other.right);
   }
-
 }

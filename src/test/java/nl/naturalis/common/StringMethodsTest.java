@@ -85,7 +85,9 @@ public class StringMethodsTest {
   @Test
   public void rchop() {
     String s = "TheCatIsBothDeadAndAliveButMoreDeadThanAlive";
-    assertEquals("TheCatIsBoth", StringMethods.rchop(s, true, "dead", "and", "alive", "but", "more", "than"));
+    assertEquals(
+        "TheCatIsBoth",
+        StringMethods.rchop(s, true, "dead", "and", "alive", "but", "more", "than"));
   }
 
   @Test
@@ -129,11 +131,19 @@ public class StringMethodsTest {
   @Test
   public void lchop() {
     String s = "TheCatIsBothDeadAndAliveButMoreDeadThanAlive";
-    assertEquals("BothDeadAndAliveButMoreDeadThanAlive", StringMethods.lchop(s, true, "the", "cat", "is"));
-    assertEquals("BothDeadAndAliveButMoreDeadThanAlive", StringMethods.lchop(s, true, "dog", "is", "the", "cat"));
-    assertEquals("", StringMethods.lchop(s, true, "dog", "is", "the", "cat", "both", "dead", "and", "alive", "more", "BUT", "than"));
-    assertEquals("", StringMethods.lchop(s, true, "TheCatIsBothDeadAndAliveButMoreDeadThanAlive", ""));
-    assertEquals("TheCatIsBothDeadAndAliveButMoreDeadThanAlive", StringMethods.lchop(s, true, "", ""));
+    assertEquals(
+        "BothDeadAndAliveButMoreDeadThanAlive", StringMethods.lchop(s, true, "the", "cat", "is"));
+    assertEquals(
+        "BothDeadAndAliveButMoreDeadThanAlive",
+        StringMethods.lchop(s, true, "dog", "is", "the", "cat"));
+    assertEquals(
+        "",
+        StringMethods.lchop(
+            s, true, "dog", "is", "the", "cat", "both", "dead", "and", "alive", "more", "BUT",
+            "than"));
+    assertEquals(
+        "", StringMethods.lchop(s, true, "TheCatIsBothDeadAndAliveButMoreDeadThanAlive", ""));
+    assertEquals(
+        "TheCatIsBothDeadAndAliveButMoreDeadThanAlive", StringMethods.lchop(s, true, "", ""));
   }
-
 }

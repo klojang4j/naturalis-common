@@ -65,8 +65,9 @@ public class Address {
       return false;
     }
     Address other = (Address) obj;
-    return Objects.equals(city, other.city) && Objects.equals(street, other.street) && Objects.equals(streetNo, other.streetNo)
+    return Objects.equals(city, other.city)
+        && Objects.equals(street, other.street)
+        && Objects.equals(streetNo, other.streetNo)
         && Objects.equals(zip, other.zip);
   }
-
 }
