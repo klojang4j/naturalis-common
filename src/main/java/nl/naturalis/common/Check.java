@@ -10,7 +10,8 @@ import nl.naturalis.common.internal.IntegerCheck;
 import nl.naturalis.common.internal.ObjectCheck;
 import nl.naturalis.common.internal.StringCheck;
 import static nl.naturalis.common.ArrayMethods.prefix;
-import static nl.naturalis.common.ObjectMethods.isDeepNotEmpty;
+import static nl.naturalis.common.ObjectMethods.*;
+import static nl.naturalis.common.StringMethods.isNotBlank;
 
 /**
  * Methods for checking preconditions. If you want to check a single precondition for an argument,
@@ -20,11 +21,11 @@ import static nl.naturalis.common.ObjectMethods.isDeepNotEmpty;
  * <p>
  *
  * <pre>
- * int i = Check.that(numChairs, "numChairs").gte(2).lte(10).test(numChairs % 2 == 0, "must be even").value();
+ * int i = Check.that(numChairs, "numChairs").gte(2).lte(10).test(numChairs % 2 == 0, "must be even").intValue();
  * </pre>
  *
- * <p>To facilitate concise coding, some methods only take the argument to be tested and the name of
- * the argument, not a complete error message. For example:
+ * <p>Some methods only take the argument to be tested and the <i>name</i> of the argument, not a
+ * complete error message. For example:
  *
  * <p>
  *
@@ -32,8 +33,7 @@ import static nl.naturalis.common.ObjectMethods.isDeepNotEmpty;
  * Check.notNull(name, "name"); // -> error message: "name must not null"
  * </pre>
  *
- * <p>If you want to provide a custom message, choose the overloaded method that takes message
- * arguments:
+ * <p>To provide a custom message, choose the overloaded method that takes message arguments:
  *
  * <pre>
  * Check.notNull(name, "Please specify a name", null); // -> "Please specify a name"
@@ -217,7 +217,7 @@ public abstract class Check<T, E extends Exception> {
    * provided condition evaluates to false, else returns the result supplied by the result supplier.
    *
    * @param <U> The type of the argument
-   * @param <F> The type of exception thrown if {@code condition} evaluates to false
+   * @param <F> The type of the exception
    * @param condition The condition to evaluate
    * @param resultSupplier The result supplier
    * @param excSupplier The exception supplier
@@ -234,75 +234,31 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Does nothing if the provided condition evaluates to {@code true}, else throws an {@code
-   * IllegalArgumentException} with the provided message.
-   *
-   * @param condition The condition to be evaluated
-   * @param message The exception message
-   * @throws IllegalArgumentException If the condition evaluates to false
-   */
-  public static void argument(boolean condition, String message) {
-    that(condition, () -> badArgument(message, null));
-  }
-
-  /**
-   * Returns {@code arg} if it passes {@code test}, else throws an {@code IllegalArgumentException}
-   * with the provided message.
-   *
-   * @param <U> The type of the argument
-   * @param arg The argument
-   * @param test The test
-   * @param message The error message
-   * @return The argument
-   */
-  public static <U> U argument(U arg, Predicate<U> test, String message) {
-    return that(test.test(arg), arg, () -> badArgument(message, null));
-  }
-
-  /**
-   * Does nothing if the provided condition evaluates to {@code true}, else throws an {@code
    * IllegalArgumentException} with the provided message and message arguments.
    *
    * @param condition The condition to be evaluated
    * @param message The exception message
-   * @param msgArg0 The first message argument
-   * @param msgArgs The remaining message arguments
+   * @param msgArgs The message arguments
    * @throws IllegalArgumentException If the condition evaluates to false
    */
-  public static void argument(
-      boolean condition, String message, Object msgArg0, Object... msgArgs) {
-    that(condition, () -> badArgument(message, msgArg0, msgArgs));
+  public static void argument(boolean condition, String message, Object... msgArgs) {
+    that(condition, badArgument(message, msgArgs));
   }
 
   /**
    * Returns {@code arg} if it passes the provided {@code test}, else throws an {@code
    * IllegalArgumentException} with the provided message and message arguments.
    *
-   * @param <T>
+   * @param <T> The type of the argument
    * @param arg The argument
-   * @param test The test
-   * @param msgArg0 The first message argument
-   * @param msgArgs The remaining message arguments
+   * @param test The test to apply to the argument
+   * @param message The exception message
+   * @param msgArgs The message arguments
    * @return The argument
+   * @throws IllegalArgumentException If the {@code Predicate} evaluates to false
    */
-  public static <T> T argument(
-      T arg, Predicate<T> test, String message, Object msgArg0, Object... msgArgs) {
-    return that(test.test(arg), arg, () -> badArgument(message, msgArg0, msgArgs));
-  }
-
-  /**
-   * Returns {@code arg} if it passes {@code test}, else throws an {@code IllegalArgumentException}
-   * with the provided message.
-   *
-   * @param arg The argument
-   * @param test
-   * @param message
-   * @return
-   */
-  public static int integer(int arg, IntPredicate test, String message) {
-    if (test.test(arg)) {
-      return arg;
-    }
-    throw badArgument(message, null);
+  public static <T> T argument(T arg, Predicate<T> test, String message, Object... msgArgs) {
+    return that(test.test(arg), arg, badArgument(message, msgArgs));
   }
 
   /**
@@ -310,31 +266,31 @@ public abstract class Check<T, E extends Exception> {
    * IllegalArgumentException} with the provided message and message arguments.
    *
    * @param arg The argument
-   * @param test The test
-   * @param msgArg0 The first message argument
-   * @param msgArgs The remaining message arguments
+   * @param test The test to apply to the argument
+   * @param message The exception message
+   * @param msgArgs The message arguments
    * @return The argument
+   * @throws IllegalArgumentException If the {@code Predicate} evaluates to false
    */
-  public static int integer(
-      int arg, IntPredicate test, String message, Object msgArg0, Object... msgArgs) {
+  public static int integer(int arg, IntPredicate test, String message, Object... msgArgs) {
     if (test.test(arg)) {
       return arg;
     }
-    throw badArgument(message, msgArg0, msgArgs);
+    throw badArgument(message, msgArgs).get();
   }
 
   /**
    * Throws an {@code ArrayIndexOutOfBoundsException} if {@code arg} is less than zero or greater
    * than or equal to {@code maxExclusive}, else returns {@code arg}. This is especially useful to
-   * test "from" arguments (e.g. in {@code String.substring} or {@code List.sublist}.
+   * test "from" arguments, which generally should be <i>less than</i> the length or size of the
+   * object operated upon.
    *
    * @param arg The argument The argument to test
    * @param maxExclusive The maximum allowed value (exclusive)
    * @return The argument
    * @throws ArrayIndexOutOfBoundsException
    */
-  public static int index(int arg, int maxExclusive, String argName)
-      throws ArrayIndexOutOfBoundsException {
+  public static int index(int arg, int maxExclusive, String argName) {
     if (arg < maxExclusive) {
       return arg;
     }
@@ -344,8 +300,8 @@ public abstract class Check<T, E extends Exception> {
   /**
    * Throws an {@code ArrayIndexOutOfBoundsException} if {@code arg} is less than {@code min} or
    * greater than {@code max}, else returns {@code arg}. This is especially useful to test "to" or
-   * "until" arguments, which generally should be greater than or equal to the "from" argument, and
-   * less than <i>or equal to</i> to the length or size of the object operated upon.
+   * "until" arguments, which generally should be <i>less than or equal to</i> the length or size of
+   * the object operated upon.
    *
    * @param arg The argument The argument to test
    * @param minInclusive The minimum allowed value (inclusive)
@@ -353,8 +309,7 @@ public abstract class Check<T, E extends Exception> {
    * @return The argument
    * @throws ArrayIndexOutOfBoundsException
    */
-  public static int index(int arg, int minInclusive, int MaxInclusive, String argName)
-      throws ArrayIndexOutOfBoundsException {
+  public static int index(int arg, int minInclusive, int MaxInclusive, String argName) {
     if (arg >= minInclusive && arg <= MaxInclusive) {
       return arg;
     }
@@ -371,7 +326,7 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the argument is null
    */
   public static <T> T notNull(T arg, String argName) throws IllegalArgumentException {
-    return notNull(arg, ERR_NOT_NULL, argName);
+    return argument(arg, Objects::nonNull, ERR_NOT_NULL, argName);
   }
 
   /**
@@ -386,9 +341,8 @@ public abstract class Check<T, E extends Exception> {
    * @return The argument
    * @throws IllegalArgumentException If the argument is null
    */
-  public static <T> T notNull(T arg, String message, Object msgArg0, Object... msgArgs)
-      throws IllegalArgumentException {
-    return argument(arg, Objects::nonNull, message, msgArg0, msgArgs);
+  public static <T> T notNull(T arg, String message, Object msgArg0, Object... msgArgs) {
+    return that(arg != null, arg, badArg(message, msgArg0, msgArgs));
   }
 
   /**
@@ -396,29 +350,50 @@ public abstract class Check<T, E extends Exception> {
    *
    * @param arg The argument
    * @param argName The argument name
+   * @throws IllegalArgumentException If the argument is not null
    */
-  public static void isNull(Object arg, String argName) throws IllegalArgumentException {
-    argument(arg == null, "%s must be null", argName);
+  public static void isNull(Object arg, String argName) {
+    argument(arg == null, ERR_MUST_BE_NULL, argName);
   }
 
   /**
-   * Returns {@code arg} if it is not null and, in case of an array, {@code Collection} or {@code
-   * Map}, none of its elements c.q. values are null, else throws an {@code
-   * IllegalArgumentException}.
+   * Throws an {@code IllegalArgumentException} if the argument is null or contains null values. The
+   * latter is applicable if the argument is an array, {@code Collection} or {@code Map}. For {@code
+   * Map} arguments only the values are tested, not the keys.
    *
    * @see ObjectMethods#isDeepNotNull(Object)
    * @param <T> The type of the argument
    * @param arg The argument
    * @param argName The argument name
    * @return The argument
+   * @throws IllegalArgumentException If the argument is null or contains null values
    */
-  public static <T> T noneNull(T arg, String argName) throws IllegalArgumentException {
+  public static <T> T noneNull(T arg, String argName) {
     return argument(arg, ObjectMethods::isDeepNotNull, ERR_NONE_NULL, argName);
   }
 
   /**
-   * Returns {@code arg} if it is not empty, else throws an {@code IllegalArgumentException} with
-   * the message: <i>${argName} must not be empty</i>.
+   * Throws an {@code IllegalArgumentException} if the argument is null or contains null values. The
+   * latter is applicable if the argument is an array, {@code Collection} or {@code Map}. For {@code
+   * Map} arguments only the values are tested, not the keys.
+   *
+   * @see ObjectMethods#isDeepNotNull(Object)
+   * @param <T> The type of the argument
+   * @param arg The argument
+   * @param message The exception message
+   * @param msgArg0 The first message argument
+   * @param msgArgs The remaining message arguments
+   * @return The argument
+   * @throws IllegalArgumentException If the argument is null or contains null values
+   */
+  public static <T> T noneNull(T arg, String message, Object msgArg0, Object... msgArgs) {
+    return that(isDeepNotNull(arg), arg, badArg(message, msgArg0, msgArgs));
+  }
+
+  /**
+   * Throws an {@code IllegalArgumentException} if the argument is ObjectMethods#isEmpty(Object)
+   * empty} or contains empty values. The latter is applicable if the argument is an array, {@code
+   * Collection} or {@code Map}. For {@code Map} arguments only the values are tested, not the keys.
    *
    * @see ObjectMethods#isNotEmpty(Object)
    * @param arg The argument
@@ -426,8 +401,8 @@ public abstract class Check<T, E extends Exception> {
    * @return The argument
    * @throws IllegalArgumentException If the argument is empty
    */
-  public static <T> T notEmpty(T arg, String argName) throws IllegalArgumentException {
-    return notEmpty(arg, ERR_NOT_EMPTY, argName);
+  public static <T> T notEmpty(T arg, String argName) {
+    return argument(arg, ObjectMethods::isNotEmpty, ERR_NOT_EMPTY, argName);
   }
 
   /**
@@ -441,14 +416,14 @@ public abstract class Check<T, E extends Exception> {
    * @return The argument
    * @throws IllegalArgumentException If the argument is empty
    */
-  public static <T> T notEmpty(T arg, String message, Object msgArg0, Object... msgArgs)
-      throws IllegalArgumentException {
-    return argument(arg, ObjectMethods::isNotEmpty, message, msgArg0, msgArgs);
+  public static <T> T notEmpty(T arg, String message, Object msgArg0, Object... msgArgs) {
+    return that(isNotEmpty(arg), arg, badArg(message, msgArg0, msgArgs));
   }
 
   /**
-   * Returns {@code arg} if it is {@link ObjectMethods#isDeepNotEmpty(Object) deeply non-empty},
-   * else throws an {@code IllegalArgumentException}.
+   * Throws an {@code IllegalArgumentException} if the argument is empty or contains empty values.
+   * The latter is applicable if the argument is an array, {@code Collection} or {@code Map}. For
+   * {@code Map} arguments only the values are tested, not the keys.
    *
    * @see ObjectMethods#isDeepNotEmpty(Object)
    * @param <T> The type of the argument
@@ -461,9 +436,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is {@link ObjectMethods#isDeepNotEmpty(Object) deeply non-empty}
-   * Otherwise this method throws an {@code IllegalArgumentException} with the provided message and
-   * message arguments.
+   * Throws an {@code IllegalArgumentException} if the argument is empty or contains empty values.
+   * The latter is applicable if the argument is an array, {@code Collection} or {@code Map}. For
+   * {@code Map} arguments only the values are tested, not the keys.
    *
    * @param <T> The type of the argument
    * @param arg The argument
@@ -471,21 +446,22 @@ public abstract class Check<T, E extends Exception> {
    * @param msgArg0 The first message argument
    * @param msgArgs The remaining message arguments
    * @return The argument
+   * @throws IllegalArgumentException If the argument is empty or contains empty values
    */
-  public static <T> T noneEmpty(T arg, String message, Object msgArg0, Object... msgArgs)
-      throws IllegalArgumentException {
-    return argument(arg, ObjectMethods::isDeepNotEmpty, message, msgArg0, msgArgs);
+  public static <T> T noneEmpty(T arg, String message, Object msgArg0, Object... msgArgs) {
+    return that(isDeepNotEmpty(arg), arg, badArg(message, msgArg0, msgArgs));
   }
 
   /**
    * Returns {@code arg} if it is not blank, else throws an {@code IllegalArgumentException}.
    *
+   * @see StringMethods#isBlank(Object)
    * @param arg The argument
    * @param argName The argument name
    * @return The argument
    * @throws IllegalArgumentException If the argument is blank
    */
-  public static String notBlank(String arg, String argName) throws IllegalArgumentException {
+  public static String notBlank(String arg, String argName) {
     return argument(arg, StringMethods::isNotBlank, ERR_NOT_BLANK, argName);
   }
 
@@ -499,9 +475,8 @@ public abstract class Check<T, E extends Exception> {
    * @return The argument
    * @throws IllegalArgumentException If the argument is blank
    */
-  public static String notBlank(String arg, String message, Object msgArg0, Object... msgArgs)
-      throws IllegalArgumentException {
-    return argument(arg, StringMethods::isNotBlank, message, msgArg0, msgArgs);
+  public static String notBlank(String arg, String message, Object msgArg0, Object... msgArgs) {
+    return that(isNotBlank(arg), arg, badArg(message, msgArg0, msgArgs));
   }
 
   /**
@@ -512,8 +487,9 @@ public abstract class Check<T, E extends Exception> {
    * @param minVal The argument's lower bound (exclusive)
    * @param argName The argument name
    * @return The argument
+   * @throws IllegalArgumentException If the argument fails the test
    */
-  public static int gt(int arg, int minVal, String argName) throws IllegalArgumentException {
+  public static int gt(int arg, int minVal, String argName) {
     return integer(arg, x -> x > minVal, ERR_GREATER_THAN, argName, minVal);
   }
 
@@ -527,11 +503,13 @@ public abstract class Check<T, E extends Exception> {
    * @param msgArg0 The first message argument
    * @param msgArgs The remaining message arguments
    * @return The argument
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException If the argument fails the test
    */
-  public static int gt(int arg, int minVal, String message, Object msgArg0, Object... msgArgs)
-      throws IllegalArgumentException {
-    return integer(arg, x -> x > minVal, message, msgArg0, msgArgs);
+  public static int gt(int arg, int minVal, String message, Object msgArg0, Object... msgArgs) {
+    if (arg > minVal) {
+      return arg;
+    }
+    throw badArg(message, msgArg0, msgArgs).get();
   }
 
   /**
@@ -542,9 +520,9 @@ public abstract class Check<T, E extends Exception> {
    * @param minVal The argument's lower bound (inclusive)
    * @param argName The argument name
    * @return The argument
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException If the argument fails the test
    */
-  public static int gte(int arg, int minVal, String argName) throws IllegalArgumentException {
+  public static int gte(int arg, int minVal, String argName) {
     return integer(arg, x -> x >= minVal, ERR_GREATER_OR_EQUAL, argName, minVal);
   }
 
@@ -558,11 +536,13 @@ public abstract class Check<T, E extends Exception> {
    * @param msgArg0 The first message argument
    * @param msgArgs The remaining message arguments
    * @return The argument
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException If the argument fails the test
    */
-  public static int gte(int arg, int minVal, String message, Object msgArg0, Object... msgArgs)
-      throws IllegalArgumentException {
-    return integer(arg, x -> x >= minVal, message, msgArg0, msgArgs);
+  public static int gte(int arg, int minVal, String message, Object msgArg0, Object... msgArgs) {
+    if (arg >= minVal) {
+      return arg;
+    }
+    throw badArg(message, msgArg0, msgArgs).get();
   }
 
   /**
@@ -573,9 +553,9 @@ public abstract class Check<T, E extends Exception> {
    * @param maxVal The argument's upper bound (exclusive)
    * @param argName The argument name
    * @return The argument
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException If the argument fails the test
    */
-  public static int lt(int arg, int maxVal, String argName) throws IllegalArgumentException {
+  public static int lt(int arg, int maxVal, String argName) {
     return integer(arg, x -> x < maxVal, ERR_LESS_THAN, argName, maxVal);
   }
 
@@ -589,11 +569,13 @@ public abstract class Check<T, E extends Exception> {
    * @param msgArg0 The first message argument
    * @param msgArgs The remaining message arguments
    * @return The argument
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException If the argument fails the test
    */
-  public static int lt(int arg, int maxVal, String message, Object msgArg0, Object... msgArgs)
-      throws IllegalArgumentException {
-    return integer(arg, x -> x > maxVal, message, msgArg0, msgArgs);
+  public static int lt(int arg, int maxVal, String message, Object msgArg0, Object... msgArgs) {
+    if (arg < maxVal) {
+      return arg;
+    }
+    throw badArg(message, msgArg0, msgArgs).get();
   }
 
   /**
@@ -604,9 +586,9 @@ public abstract class Check<T, E extends Exception> {
    * @param maxVal The argument's upper bound (inclusive)
    * @param argName The argument name
    * @return The argument
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException If the argument fails the test
    */
-  public static int lte(int arg, int maxVal, String argName) throws IllegalArgumentException {
+  public static int lte(int arg, int maxVal, String argName) {
     return integer(arg, x -> x <= maxVal, ERR_LESS_OR_EQUAL, argName, maxVal);
   }
 
@@ -620,11 +602,13 @@ public abstract class Check<T, E extends Exception> {
    * @param msgArg0 The first message argument
    * @param msgArgs The remaining message arguments
    * @return The argument
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException If the argument fails the test
    */
-  public static int lte(int arg, int maxVal, String message, Object msgArg0, Object... msgArgs)
-      throws IllegalArgumentException {
-    return integer(arg, x -> x <= maxVal, message, msgArg0, msgArgs);
+  public static int lte(int arg, int maxVal, String message, Object msgArg0, Object... msgArgs) {
+    if (arg <= maxVal) {
+      return arg;
+    }
+    throw badArg(message, msgArg0, msgArgs).get();
   }
 
   /**
@@ -632,20 +616,17 @@ public abstract class Check<T, E extends Exception> {
    * an {@code IllegalArgumentException}.
    *
    * @param arg The argument
-   * @param minInclusive
-   * @param maxExclusive
+   * @param minInclusive The minimum allowed value (inclusive)
+   * @param maxExclusive The maximum allowed value (exclusive)
    * @param argName The argument name
    * @return The argument
+   * @throws IllegalArgumentException If the argument fails the test
    */
-  public static int between(int arg, int minInclusive, int maxExclusive, String argName)
-      throws IllegalArgumentException {
-    return integer(
-        arg,
-        x -> x >= minInclusive && x < maxExclusive,
-        ERR_BETWEEN,
-        argName,
-        minInclusive,
-        maxExclusive);
+  public static int between(int arg, int minInclusive, int maxExclusive, String argName) {
+    if (arg >= minInclusive && arg < maxExclusive) {
+      return arg;
+    }
+    throw badArgument(ERR_BETWEEN, argName, minInclusive, maxExclusive).get();
   }
 
   /**
@@ -653,19 +634,17 @@ public abstract class Check<T, E extends Exception> {
    * an {@code IllegalArgumentException}.
    *
    * @param arg The argument
-   * @param minInclusive
-   * @param maxInclusive
+   * @param minInclusive The minimum allowed value (inclusive)
+   * @param maxInclusive The maximum allowed value (inclusive)
    * @param argName The argument name
    * @return The argument
+   * @throws IllegalArgumentException If the argument fails the test
    */
   public static int inRange(int arg, int minInclusive, int maxInclusive, String argName) {
-    return integer(
-        arg,
-        x -> x >= minInclusive && x <= maxInclusive,
-        ERR_IN_RANGE,
-        argName,
-        minInclusive,
-        maxInclusive);
+    if (arg >= minInclusive && arg <= minInclusive) {
+      return arg;
+    }
+    throw badArgument(ERR_IN_RANGE, argName, minInclusive, minInclusive).get();
   }
 
   /**
@@ -682,14 +661,39 @@ public abstract class Check<T, E extends Exception> {
     that(condition, () -> badState(message, msgArgs));
   }
 
-  private static IllegalArgumentException badArgument(
+  /**
+   * Returns a {@code Supplier} of an {@code IllegalArgumentException} with the provided message and
+   * message arguments. Useful as static import:
+   *
+   * <p>
+   *
+   * <pre>
+   * Check.that(year % 13 != 0,i badArgument("Not a lucky year: %d", year));
+   * </pre>
+   *
+   * @param message The exception message
+   * @param msgArgs The message arguments
+   * @return A {@code Supplier} of an {@code IllegalArgumentException} with the provided message and
+   *     message arguments
+   */
+  public static Supplier<IllegalArgumentException> badArgument(String message, Object... msgArgs) {
+    if (message == null) { // Do not use Check.notNull! Causes stack overflow error
+      throw new IllegalArgumentException("message must not be null");
+    }
+    if (msgArgs == null) {
+      return () -> new IllegalArgumentException(message);
+    }
+    return () -> new IllegalArgumentException(String.format(message, msgArgs));
+  }
+
+  private static Supplier<IllegalArgumentException> badArg(
       String msg, Object msgArg0, Object... msgArgs) {
     if (StringMethods.isEmpty(msgArg0)) {
-      return new IllegalArgumentException(msg);
+      return () -> new IllegalArgumentException(msg);
     } else if (msgArgs == null) {
-      return new IllegalArgumentException(String.format(msg, msgArg0));
+      return () -> new IllegalArgumentException(String.format(msg, msgArg0));
     }
-    return new IllegalArgumentException(String.format(msg, prefix(msgArgs, msgArg0)));
+    return () -> new IllegalArgumentException(String.format(msg, prefix(msgArgs, msgArg0)));
   }
 
   private static IllegalStateException badState(String msg, Object... msgArgs) {

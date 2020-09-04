@@ -31,7 +31,7 @@ public final class ExceptionMethods {
   }
 
   /**
-   * Returns the stack trace of the root cause of {@code exc} as a string.
+   * Returns the stack trace of the root cause of {@code exc} as a {@code String}.
    *
    * @param exc The exception
    * @return The root stack trace as a string
@@ -58,8 +58,10 @@ public final class ExceptionMethods {
   }
 
   /**
-   * Returns a detailed exception message that traces the thrown exception back to a particular
-   * package or class in your own code.
+   * Returns a detailed exception message that traces the exception back to the point of origin
+   * within your own code (or any other code base of interest).
+   *
+   * <p>
    *
    * <pre>
    * try {
@@ -67,7 +69,7 @@ public final class ExceptionMethods {
    *   // stuff
    *
    * } catch (IOException e) {
-   *   throw ExceptionMethods.unckeck(getDetailedMessage(e), e);
+   *   throw ExceptionMethods.unckeck(getDetailedMessage(e, "nl.naturalis"), e);
    * }
    * </pre>
    *
@@ -76,8 +78,7 @@ public final class ExceptionMethods {
    * @return A detailed exception message
    */
   public static String getDetailedMessage(Throwable exc, String search) {
-    Check.notNull(exc, "exc");
-    return new ExceptionOrigin(exc, search).getDetailedMessage();
+    return new ExceptionOrigin(Check.notNull(exc, "exc"), search).getDetailedMessage();
   }
 
   /**
@@ -100,7 +101,7 @@ public final class ExceptionMethods {
    *
    * @param exc A checked or unchecked exception
    * @param customMessage A custom message to pass to the constructor of {@code UncheckedException}
-   * @return The provided throwable or an {@code UncheckedException} wrapping it
+   * @return The provided {@code Throwable} or an {@code UncheckedException} wrapping it
    */
   public static RuntimeException uncheck(Throwable exc, String customMessage) {
     if (Check.notNull(exc, "exc") instanceof RuntimeException) {
@@ -114,7 +115,7 @@ public final class ExceptionMethods {
    * UncheckedException} wrapping the throwable.
    *
    * @param exc A checked or unchecked exception
-   * @return The provided throwable or an {@code UncheckedException} wrapping it
+   * @return The provided {@code Throwable} or an {@code UncheckedException} wrapping it
    */
   public static RuntimeException uncheck(Throwable exc) {
     if (Check.notNull(exc, "exc") instanceof RuntimeException) {

@@ -4,6 +4,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Objects;
 import static java.lang.System.arraycopy;
+import static nl.naturalis.common.Check.badArgument;
 
 /** Methods for working with arrays. */
 public class ArrayMethods {
@@ -70,33 +71,31 @@ public class ArrayMethods {
    * Returns a new array containing all elements of the provided arrays.
    *
    * @param <T> The element type of the arrays.
-   * @param array1 The 1st array to go into the new array
-   * @param array2 The 2nd array to go into the new array
-   * @param array3 The 3rd array to go into the new array
+   * @param arr0 The 1st array to go into the new array
+   * @param arr1 The 2nd array to go into the new array
+   * @param arr2 The 3rd array to go into the new array
    * @param moreArrays More arrays to concatenate
    * @return A new array containing all elements of the provided arrays
    */
   @SafeVarargs
-  public static <T> T[] concat(T[] array1, T[] array2, T[] array3, T[]... moreArrays) {
-    long x =
-        Check.notNull(array1, "array1").length
-            + Check.notNull(array2, "array2").length
-            + Check.notNull(array3, "array3").length
-            + Arrays.stream(Check.noneNull(moreArrays, "moreArrays"))
-                .flatMap(Arrays::stream)
-                .count();
-    Check.that(
-        x <= Integer.MAX_VALUE, () -> new IllegalArgumentException("Concatenated array too large"));
-    int i = (int) x;
-    T[] all = fromTemplate(array1, i);
+  public static <T> T[] concat(T[] arr0, T[] arr1, T[] arr2, T[]... moreArrays) {
+    Check.notNull(arr0, "arr0");
+    Check.notNull(arr1, "arr1");
+    Check.notNull(arr2, "arr2");
+    Check.noneNull(moreArrays, "moreArrays");
+    long x = Arrays.stream(moreArrays).flatMap(Arrays::stream).count();
+    long y = arr0.length + arr1.length + arr2.length + x;
+    Check.that(y <= Integer.MAX_VALUE, badArgument("Concatenated array too large"));
+    int i = (int) y;
+    T[] all = fromTemplate(arr0, i);
     i = 0;
-    arraycopy(array1, 0, all, i, array1.length);
-    i += array1.length;
-    arraycopy(array2, 0, all, i, array2.length);
-    i += array2.length;
-    arraycopy(array3, 0, all, i, array3.length);
+    arraycopy(arr0, 0, all, i, arr0.length);
+    i += arr0.length;
+    arraycopy(arr1, 0, all, i, arr1.length);
+    i += arr1.length;
+    arraycopy(arr2, 0, all, i, arr2.length);
     if (moreArrays.length != 0) {
-      i += array3.length;
+      i += arr2.length;
       for (T[] arr : moreArrays) {
         arraycopy(arr, 0, all, i, arr.length);
         i += arr.length;
@@ -114,7 +113,6 @@ public class ArrayMethods {
    * @return Whether or not the array contans the value
    */
   public static boolean contains(int[] array, int value) {
-    Check.notNull(array, "array");
     return indexOf(array, value) != -1;
   }
 
@@ -194,7 +192,7 @@ public class ArrayMethods {
     if (array == null) {
       return true;
     }
-    Check.argument(array.getClass().isArray(), "Array type required");
+    Check.argument(array.getClass().isArray(), "Not an array: %s", array.getClass().getName());
     return Array.getLength(array) == 0;
   }
 
@@ -213,12 +211,18 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns the provided array. Syntactic sugar avoiding code bloat. In stead of <code>
-   * new Object[] {obj1, obj2, obj3, etc}</code> write <code>pack(obj1, obj2, obj3)</code>.
+   * Returns the provided array. Syntactic sugar avoiding code bloat.
    *
-   * @param <T>
-   * @param objs
-   * @return
+   * <p>
+   *
+   * <pre>
+   * String words0 = new String[] {"Hello", "world"};
+   * String words1 = pack("Hello", "world");
+   * </pre>
+   *
+   * @param <T> The type of the objects to pack
+   * @param objs The objects to pack
+   * @return The packed objects
    */
   @SafeVarargs
   public static <T> T[] pack(T... objs) {
@@ -228,10 +232,10 @@ public class ArrayMethods {
   /**
    * Prefixes the provided object to the provided array.
    *
-   * @param <T> The type of the array elements and the object to be prefixed.
-   * @param array The array to be prefixed.
-   * @param obj The object to prefix.
-   * @return A new array containing the provided object and the elements of the provided array.
+   * @param <T> The type of the array elements and the object to be prefixed
+   * @param array The array to be prefixed
+   * @param obj The object to prefix
+   * @return A new array containing the provided object and the elements of the provided array
    */
   public static <T> T[] prefix(T[] array, T obj) {
     Check.notNull(array, "array");
@@ -242,13 +246,14 @@ public class ArrayMethods {
   }
 
   /**
-   * Prefixes the provided objects to the provided array.
+   * Prefixes the provided object to the provided array.
    *
-   * @param array
-   * @param obj1
-   * @param obj2
-   * @param moreObjs
-   * @return
+   * @param <T> The type of the array elements and the object to be prefixed
+   * @param array The array to be prefixed
+   * @param obj1 The 1st object to prefix
+   * @param obj2 The 2nd object to prefix
+   * @param moreObjs More objects to prefix
+   * @return A new array containing the provided objects and the elements of the provided array
    */
   @SafeVarargs
   public static <T> T[] prefix(T[] array, T obj1, T obj2, T... moreObjs) {
