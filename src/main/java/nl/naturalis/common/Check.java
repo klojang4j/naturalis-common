@@ -346,7 +346,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Checks that the provided argument is null, else throws an {@code IllegalArgumentException}.
+   * Verifies that the provided argument is null, else throws an {@code IllegalArgumentException}.
    *
    * @param arg The argument
    * @param argName The argument name
@@ -579,7 +579,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} is less than or equal to {@code maxVal}, else throws an {@code
+   * Returns {@code arg} if it is less than or equal to {@code maxVal}, else throws an {@code
    * IllegalArgumentException}.
    *
    * @param arg The argument
@@ -593,7 +593,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} is less than or equal to {@code maxVal}, else throws an {@code
+   * Returns {@code arg} if it is less than or equal to {@code maxVal}, else throws an {@code
    * IllegalArgumentException}.
    *
    * @param arg The argument
@@ -734,8 +734,19 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the specified condition (supposedly related to the specified field within the
-   * argument) evaluates to true.
+   * Verifies that the specified condition (supposedly related to the specified property of the
+   * argument) evaluates to true. This allows you to check multiple properties of the same argument.
+   * For example:
+   *
+   * <p>
+   *
+   * <pre>
+   * this.car = Check.that(car, "car")
+   *    .notNull()
+   *    .test("color", car.getColor().equals("blue"), "must be blue") // -> "car.color must be blue"
+   *    .test("brand", car.getBrand().equals("BMW"), "must be BMW") // -> "car.brand must be BMW"
+   *    .value();
+   * </pre>
    *
    * @param condition The condition to evaluate
    * @param descr A description of the test

@@ -36,7 +36,7 @@ public class ArrayMethods {
    * Appends the provided objects to the provided array.
    *
    * @param array The array to append the objects to
-   * @param obj1 The 1st bject to append
+   * @param obj1 The 1st object to append
    * @param obj2 The 2nd object to append
    * @param moreObjs More objects to append
    * @return A concatenation of {@code array}, {@code obj1}, {@code obj2} and {@code moreObjs}
