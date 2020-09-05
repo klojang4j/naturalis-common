@@ -15,9 +15,9 @@ import static nl.naturalis.common.ObjectMethods.isNotEmpty;
 import static nl.naturalis.common.StringMethods.isNotBlank;
 
 /**
- * Methods for checking preconditions. If you need to check only a single precondition for an
- * argument, you can use the static methods. If you need to check multiple preconditions for the
- * same argument, you might prefer to use the instance methods instead. For example:
+ * Methods for checking preconditions. If you need to check just one precondition for an argument,
+ * you might one to use one of the static methods. If you need to check multiple preconditions for
+ * the same argument, you might prefer to use the instance methods instead. For example:
  *
  * <p>
  *
@@ -25,8 +25,10 @@ import static nl.naturalis.common.StringMethods.isNotBlank;
  * int i = Check.that(numChairs, "numChairs").gte(2).lte(10).value();
  * </pre>
  *
- * <p>Some methods only take the argument to be tested and the <i>name</i> of the argument, not a
- * complete error message. For example:
+ * <h3>Exception messages</h3>
+ *
+ * <p>Some static methods only take the argument to be tested and the <i>name</i> of the argument,
+ * not a complete error message. For example:
  *
  * <p>
  *
@@ -42,11 +44,14 @@ import static nl.naturalis.common.StringMethods.isNotBlank;
  * Check.notNull(name, "Please specify a %s", "toy"); // -> "Please specify a toy"
  * </pre>
  *
+ * <p>(If the first message argument is null or empty, it is ignored. Any remaining message
+ * arguments are ignored as well.)
+ *
  * <h3>Checking properties and changing the Exception type</h3>
  *
  * <p>When using the instance methods you can not just check the argument itself, but also its
  * properties. In addition, the instance methods also allow you the change the type of {@code
- * Exception} being thrown (defaults to {@link IllegalArgumentException}).For example:
+ * Exception} being thrown (defaults to {@link IllegalArgumentException}). For example:
  *
  * <p>
  *
@@ -291,7 +296,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is not null, else throws an {@code IllegalArgumentException}.
+   * Verifies that the provided argument is not null.
    *
    * @param <T> The type of the argument
    * @param arg The argument
@@ -304,7 +309,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is not null, else throws an {@code IllegalArgumentException}.
+   * Verifies that the provided argument is not null.
    *
    * @param <T> The type of the argument
    * @param arg The argument
@@ -319,7 +324,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the provided argument is null, else throws an {@code IllegalArgumentException}.
+   * Verifies that the provided argument is null.
    *
    * @param arg The argument
    * @param argName The argument name
@@ -330,9 +335,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Throws an {@code IllegalArgumentException} if the argument is null or contains null values. The
-   * latter is applicable if the argument is an array, {@code Collection} or {@code Map}. For {@code
-   * Map} arguments only the values are tested, not the keys.
+   * Verifies that the argument is not null or contains any null values. The latter is applicable if
+   * the argument is an array, {@code Collection} or {@code Map}. For {@code Map} arguments only the
+   * values are tested, not the keys.
    *
    * @see ObjectMethods#isDeepNotNull(Object)
    * @param <T> The type of the argument
@@ -346,9 +351,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Throws an {@code IllegalArgumentException} if the argument is null or contains null values. The
-   * latter is applicable if the argument is an array, {@code Collection} or {@code Map}. For {@code
-   * Map} arguments only the values are tested, not the keys.
+   * Verifies that the argument is not null or contains any null values. The latter is applicable if
+   * the argument is an array, {@code Collection} or {@code Map}. For {@code Map} arguments only the
+   * values are tested, not the keys.
    *
    * @see ObjectMethods#isDeepNotNull(Object)
    * @param <T> The type of the argument
@@ -364,9 +369,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Throws an {@code IllegalArgumentException} if the argument is ObjectMethods#isEmpty(Object)
-   * empty} or contains empty values. The latter is applicable if the argument is an array, {@code
-   * Collection} or {@code Map}. For {@code Map} arguments only the values are tested, not the keys.
+   * Verifies that the argument is not {@link ObjectMethods#isNotEmpty(Object) empty}.
    *
    * @see ObjectMethods#isNotEmpty(Object)
    * @param arg The argument
@@ -379,7 +382,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is not empty, else throws an {@code IllegalArgumentException}.
+   * Verifies that the argument is not {@link ObjectMethods#isNotEmpty(Object) empty}.
    *
    * @see ObjectMethods#isNotEmpty(Object)
    * @param arg The argument
@@ -393,9 +396,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Throws an {@code IllegalArgumentException} if the argument is empty or contains empty values.
-   * The latter is applicable if the argument is an array, {@code Collection} or {@code Map}. For
-   * {@code Map} arguments only the values are tested, not the keys.
+   * Verifies that the argument is not empty or contains any empty values. The latter is applicable
+   * if the argument is an array, {@code Collection} or {@code Map}. For {@code Map} arguments only
+   * the values are tested, not the keys.
    *
    * @see ObjectMethods#isDeepNotEmpty(Object)
    * @param <T> The type of the argument
@@ -408,9 +411,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Throws an {@code IllegalArgumentException} if the argument is empty or contains empty values.
-   * The latter is applicable if the argument is an array, {@code Collection} or {@code Map}. For
-   * {@code Map} arguments only the values are tested, not the keys.
+   * Verifies that the argument is not empty or contains any empty values. The latter is applicable
+   * if the argument is an array, {@code Collection} or {@code Map}. For {@code Map} arguments only
+   * the values are tested, not the keys.
    *
    * @param <T> The type of the argument
    * @param arg The argument
@@ -425,7 +428,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is not blank, else throws an {@code IllegalArgumentException}.
+   * Verifies that the argument is not {@link StringMethods#isNotBlank(Object) blank}.
    *
    * @see StringMethods#isBlank(Object)
    * @param arg The argument
@@ -438,7 +441,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is not blank, else throws an {@code IllegalArgumentException}.
+   * Verifies that the argument is not {@link StringMethods#isNotBlank(Object) blank}.
    *
    * @param arg The argument
    * @param message The exception message
@@ -452,8 +455,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is greater than {@code minVal}, else throws an {@code
-   * IllegalArgumentException}.
+   * Verifies that the argument is greater than {@code minVal}.
    *
    * @param arg The argument
    * @param minVal The argument's lower bound (exclusive)
@@ -466,8 +468,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is greater than {@code minVal}, else throws an {@code
-   * IllegalArgumentException}.
+   * Verifies that the argument is greater than {@code minVal}.
    *
    * @param arg The argument
    * @param minVal The argument's lower bound (exclusive)
@@ -485,8 +486,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is greater than or equal to {@code minVal}, else throws an {@code
-   * IllegalArgumentException}.
+   * Verifies that the argument is greater than or equal to {@code minVal}.
    *
    * @param arg The argument
    * @param minVal The argument's lower bound (inclusive)
@@ -499,8 +499,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is greater than or equal to {@code minVal}, else throws an {@code
-   * IllegalArgumentException}.
+   * Verifies that the argument is greater than or equal to {@code minVal}.
    *
    * @param arg The argument
    * @param minVal The argument's lower bound (inclusive)
@@ -518,8 +517,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is less than {@code maxVal}, else throws an {@code
-   * IllegalArgumentException}.
+   * Verifies that the argument is less than {@code maxVal}.
    *
    * @param arg The argument
    * @param maxVal The argument's upper bound (exclusive)
@@ -532,8 +530,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is less than {@code maxVal}, else throws an {@code
-   * IllegalArgumentException}.
+   * Verifies that the argument is less than {@code maxVal}.
    *
    * @param arg The argument
    * @param maxVal The argument's upper bound (exclusive)
@@ -551,8 +548,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is less than or equal to {@code maxVal}, else throws an {@code
-   * IllegalArgumentException}.
+   * Verifies that the argument is less than or equal to {@code maxVal}.
    *
    * @param arg The argument
    * @param maxVal The argument's upper bound (inclusive)
@@ -565,8 +561,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is less than or equal to {@code maxVal}, else throws an {@code
-   * IllegalArgumentException}.
+   * Verifies that the argument is less than or equal to {@code maxVal}.
    *
    * @param arg The argument
    * @param maxVal The argument's upper bound (inclusive)
@@ -584,8 +579,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is between {@code minInclusive} and {@code maxExclusive}, else throws
-   * an {@code IllegalArgumentException}.
+   * Verifies that the argument is between {@code minInclusive} and {@code maxExclusive}.
    *
    * @param arg The argument
    * @param minInclusive The minimum allowed value (inclusive)
@@ -602,8 +596,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is between {@code minInclusive} and {@code maxInclusive}, else throws
-   * an {@code IllegalArgumentException}.
+   * Verifies that the argument is between {@code minInclusive} and {@code maxInclusive}.
    *
    * @param arg The argument
    * @param minInclusive The minimum allowed value (inclusive)
@@ -830,7 +823,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is {@link ObjectMethods#isDeepNotNull(Object) deepNotNull}.
+   * Verifies that the argument is not null or contains any null values.
    *
    * @return This {@code Check} object
    * @throws E If the test fails
@@ -850,7 +843,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is {@link ObjectMethods#isDeepNotEmpty(Object) deepNotEmpty}.
+   * Verifies that the argument is not empty or contains any empty values.
    *
    * @return This {@code Check} object
    * @throws E If the test fails
@@ -890,7 +883,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is greater than the specified value.
+   * Verifies that the argument is greater than {@code minVal}.
    *
    * @param minVal The minimum allowed value (exclusive)
    * @return This {@code Check} object
@@ -901,7 +894,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is greater than or equal to the specified value.
+   * Verifies that the argument is greater than or equal to {@code minVal}.
    *
    * @param minVal The minimum allowed value (inclusive)
    * @return This {@code Check} object
@@ -912,7 +905,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is less than the specified value.
+   * Verifies that the argument is less than {@code maxVal}.
    *
    * @param maxVal The maximum allowed value (exclusive)
    * @return This {@code Check} object
@@ -923,7 +916,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is less than or equal to the specified value.
+   * Verifies that the argument is less than or equal to {@code maxVal}.
    *
    * @param maxVal The maximum allowed value (inclusive)
    * @return This {@code Check} object
@@ -934,8 +927,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is greater than or equal to the 1st argument and less than the 2nd
-   * argument.
+   * Verifies that the argument is between {@code minInclusive} and {@code maxExclusive}.
    *
    * @param minInclusive The minimum allowed value (inclusive)
    * @param maxExclusive The maximum allowed value (exclusive)
@@ -947,8 +939,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is greater than or equal to the 1st argument and less than or equal
-   * to the 2nd argument.
+   * Verifies that the argument is between {@code minInclusive} and {@code maxInclusive}.
    *
    * @param minInclusive The minimum allowed value (inclusive)
    * @param maxInclusive The maximum allowed value (inclusive)
