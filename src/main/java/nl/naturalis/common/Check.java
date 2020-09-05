@@ -1,16 +1,17 @@
 package nl.naturalis.common;
 
 import java.util.Objects;
-import java.util.function.Function;
-import java.util.function.IntPredicate;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
+import nl.naturalis.common.function.IntRelation;
+import nl.naturalis.common.function.Relation;
 import nl.naturalis.common.internal.IntCheck;
 import nl.naturalis.common.internal.IntegerCheck;
 import nl.naturalis.common.internal.ObjectCheck;
 import nl.naturalis.common.internal.StringCheck;
 import static nl.naturalis.common.ArrayMethods.prefix;
-import static nl.naturalis.common.ObjectMethods.*;
+import static nl.naturalis.common.ObjectMethods.isDeepNotEmpty;
+import static nl.naturalis.common.ObjectMethods.isDeepNotNull;
+import static nl.naturalis.common.ObjectMethods.isNotEmpty;
 import static nl.naturalis.common.StringMethods.isNotBlank;
 
 /**
@@ -721,91 +722,129 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the specified condition (supposedly related to the argument) evaluates to true.
-   *
-   * @param condition The condition to evaluate
-   * @param descr A description of the test
-   * @return This {@code Check} object
-   * @throws IllegalArgumentException If the condition evaluates to false
-   */
-  public Check<T, E> test(boolean condition, String descr) throws E {
-    that(condition, smash(ERR_FAILED_TEST, argName, descr));
-    return this;
-  }
-
-  /**
-   * Verifies that the specified condition (supposedly related to the specified property of the
-   * argument) evaluates to true. This allows you to check multiple properties of the same argument.
-   * For example:
+   * Checks the value of a property of the argument. This allows you to check multiple properties of
+   * the same argument. For example:
    *
    * <p>
    *
    * <pre>
-   * this.car = Check.that(car, "car")
+   * this.employee = Check.that(employee, "employee")
    *    .notNull()
-   *    .test("color", car.getColor().equals("blue"), "must be blue") // -> "car.color must be blue"
-   *    .test("brand", car.getBrand().equals("BMW"), "must be BMW") // -> "car.brand must be BMW"
+   *    .andInt(Employee::getId, x -> x > 0, "Id must be positive")
+   *    .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
+   *    .and(Employee::getHobbies, not(Collection::contains), "Partying", "Partying discouraged")
+   *    .and(Employee::getAge, GTE, 16, "Employee must be at least 16")
    *    .value();
    * </pre>
    *
+   * <p>You should do a {@link #notNull() notNull} check on the argument first, because this method
+   * doesn't and assumes the argument is not null.
+   *
+   * @see Relation
+   * @see IntRelation
+   * @param <U> The type of the property
+   * @param getter A function that has the argument as its input and returns the value of the
+   *     property
+   * @param test The test
+   * @param message The exception message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the test fails
+   */
+  public <U> Check<T, E> and(
+      Function<T, U> getter, Predicate<U> test, String message, Object... msgArgs) throws E {
+    throw notSupported("and");
+  }
+
+  /**
+   * Checks the value of a property of the argument. You should do a {@link #notNull() notNull}
+   * check on the argument first, because this method doesn't and assumes the argument is not null.
+   *
+   * @param getter A function that has the argument as its input and returns the value of the
+   *     property
+   * @param test The test
+   * @param message The exception message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the test fails
+   */
+  public Check<T, E> andInt(
+      ToIntFunction<T> getter, IntPredicate test, String message, Object... msgArgs) throws E {
+    throw notSupported("test");
+  }
+
+  /**
+   * Verifies that the provided {@code relation} exists between some property of the argument and
+   * the specified {@code value}. For example:
+   *
+   * <p>
+   *
+   * <pre>
+   * Check.that(employee, "employee").notNull().and(Employee::getFullName, String::contains, "Dicky", "Was expecting Dicky");
+   * </pre>
+   *
+   * <p>You should do a {@link #notNull() notNull} check on the argument first, because this method
+   * doesn't and assumes the argument is not null.
+   *
+   * @see Relation
+   * @param <U> The type of the property
+   * @param <V> The type of the object that the property must have some relation with
+   * @param getter A function that has the argument as its input and returns the value of the
+   *     property
+   * @param relation The relation to must exist between the property and the specified value
+   * @param value The value that the property must have the specified relation to
+   * @param message The exception message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the relation does not exist
+   */
+  public <U, V> Check<T, E> and(
+      Function<T, U> getter, Relation<U, V> relation, V value, String message, Object... msgArgs)
+      throws E {
+    throw notSupported("and");
+  }
+
+  /**
+   * Verifies that the provided {@code relation} exists between some integer property of the
+   * argument and the specified integer value {@code value}. For example:
+   *
+   * <p>
+   *
+   * <pre>
+   * Check.that(employee, "employee").notNull().and(Employee::getId, GT, 0, "Id must be positive");
+   * </pre>
+   *
+   * <p>You should do a {@link #notNull() notNull} check on the argument first, because this method
+   * doesn't and assumes the argument is not null.
+   *
+   * @see IntRelation
+   * @param getter A function that has the argument as its input and returns the value of the
+   *     property
+   * @param relation The relation to must exist between the property and the specified value
+   * @param value The value that the property must have the specified relation to
+   * @param message The exception message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the relation does not exist
+   */
+  public Check<T, E> and(
+      ToIntFunction<T> getter, IntRelation relation, int value, String message, Object... msgArgs)
+      throws E {
+    throw notSupported("and");
+  }
+
+  /**
+   * Verifies that the specified condition (supposedly related to the argument) evaluates to true.
+   *
    * @param condition The condition to evaluate
-   * @param descr A description of the test
+   * @param message The exception message
+   * @param msgArgs The message arguments
    * @return This {@code Check} object
-   * @throws IllegalArgumentException If the condition evaluates to false
+   * @throws E If the condition evaluates to {@code false}.
    */
-  public Check<T, E> test(String field, boolean condition, String descr) throws E {
-    that(condition, smash(ERR_FAILED_TEST, field(field), descr));
+  public Check<T, E> test(boolean condition, String message, Object... msgArgs) throws E {
+    that(condition, smash(message, msgArgs));
     return this;
-  }
-
-  /**
-   * Verifies that the argument passes the provided test.
-   *
-   * @param test The test to apply to the argument
-   * @param descr A description of the test
-   * @return This {@code Check} object
-   * @throws E If the test fails
-   */
-  public Check<T, E> test(Predicate<T> test, String descr) throws E {
-    throw notSupported("test");
-  }
-
-  /**
-   * Verifies that the specified field within the argument passes the provided test.
-   *
-   * @param field The name of the field
-   * @param test The test to apply to the field
-   * @param descr A description of the test
-   * @return This {@code Check} object
-   * @throws E If the test fails
-   */
-  public Check<T, E> test(String field, Predicate<T> test, String descr) throws E {
-    throw notSupported("test");
-  }
-
-  /**
-   * Verifies that the argument passes the provided test.
-   *
-   * @param test The condition to apply to the argument
-   * @param descr The test to apply to the field
-   * @return This {@code Check} object
-   * @throws E If {@code test} evaluates to false
-   */
-  public Check<T, E> testInt(IntPredicate test, String descr) throws E {
-    throw notSupported("testInt");
-  }
-
-  /**
-   * Verifies that the specified field within the argument passes the provided test.
-   *
-   * @param field The name of the field
-   * @param test The test to apply to the field
-   * @param descr A description of the test
-   * @return This {@code Check} object
-   * @throws E If the test fails
-   */
-  public Check<T, E> testInt(String field, IntPredicate test, String descr) throws E {
-    throw notSupported("testInt");
   }
 
   /**

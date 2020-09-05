@@ -1,7 +1,6 @@
 package nl.naturalis.common.internal;
 
 import java.util.function.Function;
-import java.util.function.IntPredicate;
 
 public final class IntegerCheck<E extends Exception> extends ObjectCheck<Integer, E> {
 
@@ -46,12 +45,6 @@ public final class IntegerCheck<E extends Exception> extends ObjectCheck<Integer
     that(
         arg >= minInclusive && arg <= maxInclusive,
         smash(ERR_IN_RANGE, argName, minInclusive, maxInclusive));
-    return this;
-  }
-
-  @Override
-  public IntegerCheck<E> testInt(IntPredicate test, String descr) throws E {
-    that(test.test(arg), smash(ERR_FAILED_TEST, argName, descr));
     return this;
   }
 

@@ -1,8 +1,6 @@
 package nl.naturalis.common.internal;
 
 import java.util.function.Function;
-import java.util.function.IntPredicate;
-import java.util.function.Predicate;
 import nl.naturalis.common.Check;
 
 public final class IntCheck<E extends Exception> extends Check<Integer, E> {
@@ -51,18 +49,6 @@ public final class IntCheck<E extends Exception> extends Check<Integer, E> {
     that(
         arg >= minInclusive && arg <= maxInclusive,
         smash(ERR_IN_RANGE, argName, minInclusive, maxInclusive));
-    return this;
-  }
-
-  @Override
-  public IntCheck<E> test(Predicate<Integer> test, String descr) throws E {
-    that(test.test(arg), smash(ERR_FAILED_TEST, argName, descr));
-    return this;
-  }
-
-  @Override
-  public IntCheck<E> testInt(IntPredicate test, String descr) throws E {
-    that(test.test(arg), smash(ERR_FAILED_TEST, argName, descr));
     return this;
   }
 

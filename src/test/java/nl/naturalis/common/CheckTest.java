@@ -1,10 +1,13 @@
 package nl.naturalis.common;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static nl.naturalis.common.function.IntRelation.GTE;
 
 public class CheckTest {
 
@@ -135,5 +138,96 @@ public class CheckTest {
   public void testCheckChaining() {
     Integer i = Check.that(Integer.valueOf(5), "numBirds").notNull().gte(2).lt(10).value();
     assertEquals(Integer.valueOf(5), i);
+  }
+
+  class Employee {
+    int id;
+    String fullName;
+    Integer age;
+    List<String> hobbies;
+
+    Employee(int id, String fullName, Integer age, String... hobbies) {
+      super();
+      this.id = id;
+      this.fullName = fullName;
+      this.age = age;
+      this.hobbies = List.of(hobbies);
+    }
+
+    int getId() {
+      return id;
+    }
+
+    String getFullName() {
+      return fullName;
+    }
+
+    Integer getAge() {
+      return age;
+    }
+
+    List<String> getHobbies() {
+      return hobbies;
+    }
+  }
+
+  @Test
+  public void and01() {
+    Employee employee = new Employee(3, "John Smith", 43, "Skating", "Scoccer");
+    Check.that(employee, "employee")
+        .notNull()
+        .andInt(Employee::getId, x -> x > 0, "Id must not be negative")
+        .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
+        .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
+        .and(Employee::getAge, GTE, 16, "Employee must be at least 16")
+        .value();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void and02() {
+    Employee employee = new Employee(3, "John Smith", 12, "Skating", "Scoccer");
+    Check.that(employee, "employee")
+        .notNull()
+        .andInt(Employee::getId, x -> x > 0, "Id must not be negative")
+        .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
+        .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
+        .and(Employee::getAge, GTE, 16, "Employee must be at least 16")
+        .value();
+  }
+
+  @Test(expected = IOException.class)
+  public void and03() throws IOException {
+    Employee employee = new Employee(3, "John Smith", 44, "Skating", "Scuba diving");
+    Check.that(employee, "employee", IOException::new)
+        .notNull()
+        .andInt(Employee::getId, x -> x > 0, "Id must not be negative")
+        .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
+        .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
+        .and(Employee::getAge, GTE, 16, "Employee must be at least 16")
+        .value();
+  }
+
+  @Test(expected = IOException.class)
+  public void and04() throws IOException {
+    Employee employee = new Employee(-23, "John Smith", 44, "Skating", "Scuba diving");
+    Check.that(employee, "employee", IOException::new)
+        .notNull()
+        .andInt(Employee::getId, x -> x > 0, "Id must not be negative")
+        .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
+        .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
+        .and(Employee::getAge, GTE, 16, "Employee must be at least 16")
+        .value();
+  }
+
+  @Test(expected = IOException.class)
+  public void and05() throws IOException {
+    Employee employee = new Employee(-23, "John Smith", 44, "Skating", "Scuba diving");
+    Check.that(employee, "employee", IOException::new)
+        .notNull()
+        .andInt(Employee::getId, x -> x > 0, "Id must not be negative")
+        .and(Employee::getFullName, s -> s.length() < 5, "Full name too large")
+        .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
+        .and(Employee::getAge, GTE, 16, "Employee must be at least 16")
+        .value();
   }
 }
