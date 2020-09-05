@@ -15,14 +15,14 @@ import static nl.naturalis.common.ObjectMethods.isNotEmpty;
 import static nl.naturalis.common.StringMethods.isNotBlank;
 
 /**
- * Methods for checking preconditions. If you want to check a single precondition for an argument,
- * you can use the static methods. If you need to check multiple preconditions for a single
- * argument, you might prefer to use the instance methods instead. For example:
+ * Methods for checking preconditions. If you need to check only a single precondition for an
+ * argument, you can use the static methods. If you need to check multiple preconditions for the
+ * same argument, you might prefer to use the instance methods instead. For example:
  *
  * <p>
  *
  * <pre>
- * int i = Check.that(numChairs, "numChairs").gte(2).lte(10).test(numChairs % 2 == 0, "must be even").intValue();
+ * int i = Check.that(numChairs, "numChairs").gte(2).lte(10).value();
  * </pre>
  *
  * <p>Some methods only take the argument to be tested and the <i>name</i> of the argument, not a
@@ -42,7 +42,30 @@ import static nl.naturalis.common.StringMethods.isNotBlank;
  * Check.notNull(name, "Please specify a %s", "toy"); // -> "Please specify a toy"
  * </pre>
  *
+ * <h3>Checking properties and changing the Exception type</h3>
+ *
+ * <p>When using the instance methods you can not just check the argument itself, but also its
+ * properties. In addition, the instance methods also allow you the change the type of {@code
+ * Exception} being thrown (defaults to {@link IllegalArgumentException}).For example:
+ *
+ * <p>
+ *
+ * <pre>
+ * this.query = Check.that(query, "query", InvalidQueryException::new)
+ *  .notNull()
+ *  .and(QuerySpec::getFrom, x -> nvl(from) == 0, "from must be null or zero")
+ *  .and(QuerySpec::getSize, GTE, MIN_BATCH_SIZE, "size must be >= %d", MIN_BATCH_SIZE)
+ *  .and(QuerySpec::getSize, LTE, MAX_BATCH_SIZE, "size must be <= %d", MAX_BATCH_SIZE)
+ *  .and(QuerySpec::getSortFields, CollectionMethods::isEmpty, "sortFields must be empty")
+ *  .value();
+ * </pre>
+ *
+ * <p>(See the {@link #and(Function, Relation, Object, String, Object...) and methods} and the
+ * {@link Relation} and {@link IntRelation} interfaces.)
+ *
  * @author Ayco Holleman
+ * @param <T> The type of the object being checked
+ * @param <E> The type of exception thrown if a test fails
  */
 public abstract class Check<T, E extends Exception> {
 
@@ -64,19 +87,19 @@ public abstract class Check<T, E extends Exception> {
   protected static final String ERR_MUST_BE_EMPTY = "%s must be empty";
 
   /**
-   * Returns a {@code Check} object for int arguments that will throw an {@code
+   * Returns a {@code Check} instance for {@code int} arguments, throwing an {@code
    * IllegalArgumentException} if the argument fails to pass a test.
    *
    * @param arg The argument
    * @param argName The argument name
-   * @return A new {@code Check} object
+   * @return A new {@code Check} instance
    */
   public static Check<Integer, IllegalArgumentException> that(int arg, String argName) {
     return new IntCheck<>(arg, argName, IllegalArgumentException::new);
   }
 
   /**
-   * Returns a {@code Check} object for int arguments that will throw a custom exception if the
+   * Returns a {@code Check} object for {@code int} arguments, throwing a custom exception if the
    * argument fails to pass a test.
    *
    * @param <F> The type of the exception being thrown
@@ -84,7 +107,7 @@ public abstract class Check<T, E extends Exception> {
    * @param argName The argument name
    * @param excProvider A function that takes a string (the error message) and returns an {@code
    *     Exception}
-   * @return A new {@code Check} object
+   * @return A new {@code Check} instance
    */
   public static <F extends Exception> Check<Integer, F> that(
       int arg, String argName, Function<String, F> excProvider) {
@@ -92,77 +115,21 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns a {@code Check} object for {@code String} arguments that will throw an {@code
-   * IllegalArgumentException} if the argument fails to pass a test.
-   *
-   * @param arg The argument
-   * @param argName The argument name
-   * @return A new {@code Check} object
-   */
-  public static Check<String, IllegalArgumentException> that(String arg, String argName) {
-    return new StringCheck<>(arg, argName, IllegalArgumentException::new);
-  }
-
-  /**
-   * Returns a {@code Check} object for {@code String} arguments that will throw a custom exception
-   * if the argument fails to pass a test.
-   *
-   * @param <F> The type of the exception being thrown
-   * @param arg The argument
-   * @param argName The argument name
-   * @param excProvider A function that takes a string (the error message) and returns an {@code
-   *     Exception}
-   * @return A new {@code Check} object
-   */
-  public static <F extends Exception> Check<String, F> that(
-      String arg, String argName, Function<String, F> excProvider) {
-    return new StringCheck<>(arg, argName, excProvider);
-  }
-
-  /**
-   * Returns a {@code Check} object for {@code Integer} arguments that will throw a custom exception
-   * if the argument fails to pass a test.
-   *
-   * @param arg The argument
-   * @param argName The argument name
-   * @return A new {@code Check} object
-   */
-  public static Check<Integer, IllegalArgumentException> that(Integer arg, String argName) {
-    return new IntegerCheck<>(arg, argName, IllegalArgumentException::new);
-  }
-
-  /**
-   * Returns a {@code Check} object for {@code Integer} arguments that will throw a custom exception
-   * if the argument fails to pass a test.
-   *
-   * @param <F> The type of the exception being thrown
-   * @param arg The argument
-   * @param argName The argument name
-   * @param excProvider A function that takes a string (the error message) and returns an {@code
-   *     Exception}
-   * @return A new {@code Check} object
-   */
-  public static <F extends Exception> Check<Integer, F> that(
-      Integer arg, String argName, Function<String, F> excProvider) {
-    return new IntegerCheck<>(arg, argName, excProvider);
-  }
-
-  /**
-   * Returns a {@code Check} object for a generic argument that will throw an {@code
-   * IllegalArgumentException} if the argument fails to pass a test.
+   * Returns a {@code Check} instance appropriate for the type of the specified argument, throwing
+   * an {@code IllegalArgumentException} if the argument fails to pass a test.
    *
    * @param <U> The type of the argument
    * @param arg The argument
    * @param argName The argument name
-   * @return
+   * @return A new {@code Check} instance
    */
   public static <U> Check<U, IllegalArgumentException> that(U arg, String argName) {
-    return new ObjectCheck<>(arg, argName, IllegalArgumentException::new);
+    return that(arg, argName, IllegalArgumentException::new);
   }
 
   /**
-   * Returns a {@code Check} object for a generic argument that will throw a custom exception if the
-   * argument fails to pass a test.
+   * Returns a {@code Check} instance appropriate for the type of the specified argument, throwing a
+   * custom exception if the argument fails to pass a test.
    *
    * @param <U> The type of the argument
    * @param <F> The type of the exception being thrown
@@ -172,8 +139,14 @@ public abstract class Check<T, E extends Exception> {
    *     Exception}
    * @return A new {@code Check} object
    */
+  @SuppressWarnings("unchecked")
   public static <U, F extends Exception> Check<U, F> that(
       U arg, String argName, Function<String, F> excProvider) {
+    if (arg instanceof String) {
+      return (Check<U, F>) new StringCheck<F>((String) arg, argName, excProvider);
+    } else if (arg instanceof Integer) {
+      return (Check<U, F>) new IntegerCheck<F>((Integer) arg, argName, excProvider);
+    }
     return new ObjectCheck<>(arg, argName, excProvider);
   }
 
@@ -235,7 +208,7 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Does nothing if the provided condition evaluates to {@code true}, else throws an {@code
-   * IllegalArgumentException} with the provided message and message arguments.
+   * IllegalArgumentException}.
    *
    * @param condition The condition to be evaluated
    * @param message The exception message
@@ -248,7 +221,7 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Returns {@code arg} if it passes the provided {@code test}, else throws an {@code
-   * IllegalArgumentException} with the provided message and message arguments.
+   * IllegalArgumentException}.
    *
    * @param <T> The type of the argument
    * @param arg The argument
@@ -264,7 +237,7 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Returns {@code arg} if it passes the provided {@code test}, else throws an {@code
-   * IllegalArgumentException} with the provided message and message arguments.
+   * IllegalArgumentException}.
    *
    * @param arg The argument
    * @param test The test to apply to the argument
@@ -331,8 +304,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is not null, else throws an {@code IllegalArgumentException} with the
-   * provided message and message arguments.
+   * Returns {@code arg} if it is not null, else throws an {@code IllegalArgumentException}.
    *
    * @param <T> The type of the argument
    * @param arg The argument
@@ -407,8 +379,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it is not empty, else throws an {@code IllegalArgumentException} with
-   * the provided message and message arguments.
+   * Returns {@code arg} if it is not empty, else throws an {@code IllegalArgumentException}.
    *
    * @see ObjectMethods#isNotEmpty(Object)
    * @param arg The argument
@@ -562,7 +533,7 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Returns {@code arg} if it is less than {@code maxVal}, else throws an {@code
-   * IllegalArgumentException} with the provided message and message arguments.
+   * IllegalArgumentException}.
    *
    * @param arg The argument
    * @param maxVal The argument's upper bound (exclusive)
@@ -650,7 +621,7 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Does nothing if the provided condition evaluates to {@code true}, else throws an {@link
-   * IllegalStateException} with the provided message and message arguments.
+   * IllegalStateException}.
    *
    * @param condition The condition to evaluate
    * @param message The exception message
@@ -663,13 +634,13 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns a {@code Supplier} of an {@code IllegalArgumentException} with the provided message and
-   * message arguments. Useful as static import:
+   * Utility method returning a {@code Supplier} of an {@code IllegalArgumentException} with the
+   * provided message and message arguments. Useful as static import:
    *
    * <p>
    *
    * <pre>
-   * Check.that(year % 13 != 0,i badArgument("Not a lucky year: %d", year));
+   * Check.that(year % 13 != 0, badArgument("Not a lucky year: %d", year));
    * </pre>
    *
    * @param message The exception message
@@ -730,15 +701,14 @@ public abstract class Check<T, E extends Exception> {
    * <pre>
    * this.employee = Check.that(employee, "employee")
    *    .notNull()
-   *    .andInt(Employee::getId, x -> x > 0, "Id must be positive")
    *    .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
    *    .and(Employee::getHobbies, not(Collection::contains), "Partying", "Partying discouraged")
    *    .and(Employee::getAge, GTE, 16, "Employee must be at least 16")
    *    .value();
    * </pre>
    *
-   * <p>You should do a {@link #notNull() notNull} check on the argument first, because this method
-   * doesn't and assumes the argument is not null.
+   * <p>You <i>should</i> do a {@link #notNull() notNull} check on the argument first, because this
+   * method doesn't and assumes the argument is not null.
    *
    * @see Relation
    * @see IntRelation
@@ -780,11 +750,12 @@ public abstract class Check<T, E extends Exception> {
    * <p>
    *
    * <pre>
-   * Check.that(employee, "employee").notNull().and(Employee::getFullName, String::contains, "Dicky", "Was expecting Dicky");
+   * Check.that(employee, "employee").notNull()
+   *    .and(Employee::getFullName, String::contains, "Dicky", "Was expecting Dicky");
    * </pre>
    *
-   * <p>You should do a {@link #notNull() notNull} check on the argument first, because this method
-   * doesn't and assumes the argument is not null.
+   * <p>You <i>should</i> do a {@link #notNull() notNull} check on the argument first, because this
+   * method doesn't and assumes the argument is not null.
    *
    * @see Relation
    * @param <U> The type of the property
@@ -811,11 +782,12 @@ public abstract class Check<T, E extends Exception> {
    * <p>
    *
    * <pre>
-   * Check.that(employee, "employee").notNull().and(Employee::getId, GT, 0, "Id must be positive");
+   * Check.that(employee, "employee").notNull()
+   *    .and(Employee::getId, GT, 0, "Id must be positive");
    * </pre>
    *
-   * <p>You should do a {@link #notNull() notNull} check on the argument first, because this method
-   * doesn't and assumes the argument is not null.
+   * <p>You <i>should</i> do a {@link #notNull() notNull} check on the argument first, because this
+   * method doesn't and assumes the argument is not null.
    *
    * @see IntRelation
    * @param getter A function that has the argument as its input and returns the value of the
