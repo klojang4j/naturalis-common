@@ -642,10 +642,10 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the argument fails the test
    */
   public static int inRange(int arg, int minInclusive, int maxInclusive, String argName) {
-    if (arg >= minInclusive && arg <= minInclusive) {
+    if (arg >= minInclusive && arg <= maxInclusive) {
       return arg;
     }
-    throw badArgument(ERR_IN_RANGE, argName, minInclusive, minInclusive).get();
+    throw badArgument(ERR_IN_RANGE, argName, minInclusive, maxInclusive).get();
   }
 
   /**
