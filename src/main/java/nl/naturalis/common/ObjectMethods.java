@@ -9,7 +9,7 @@ import java.util.function.UnaryOperator;
 import nl.naturalis.common.function.Relation;
 import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
-import static nl.naturalis.common.function.Relation.isEqualTo;
+import static nl.naturalis.common.function.Relation.*;
 
 /**
  * General methods applicable to objects of any type.
@@ -423,6 +423,19 @@ public class ObjectMethods {
   }
 
   /**
+   * Returns null unless {@code arg0} equa;s {@code arg1} {@code arg1}, else {@code arg0}.
+   * Equivalent to <code>nullUnless(arg0, Objects::equals, arg1)</code>.
+   *
+   * @param <T> The input and return type
+   * @param arg0 The value to test
+   * @param arg1 The value {@code arg0} must have in order to be returned
+   * @return {@code arg0} or null
+   */
+  public static <T> T nullUnless(T arg0, T arg1) {
+    return nullUnless(arg0, isEqualTo(), arg1);
+  }
+
+  /**
    * Returns null if {@code arg0} has the specified {@link Relation} to {@code arg1} {@code arg1},
    * else {@code arg0}.
    *
@@ -434,20 +447,7 @@ public class ObjectMethods {
    * @return {@code arg0} or null
    */
   public static <T, U> T nullIf(T arg0, Relation<T, U> relation, U arg1) {
-    return relation.exists(arg0, arg1) ? arg0 : null;
-  }
-
-  /**
-   * Returns null unless {@code arg0} equa;s {@code arg1} {@code arg1}, else {@code arg0}.
-   * Equivalent to <code>nullUnless(arg0, Objects::equals, arg1)</code>.
-   *
-   * @param <T> The input and return type
-   * @param arg0 The value to test
-   * @param arg1 The value {@code arg0} must have in order to be returned
-   * @return {@code arg0} or null
-   */
-  public static <T> T nullUnless(T arg0, T arg1) {
-    return nullUnless(arg0, isEqualTo(), arg1);
+    return relation.exists(arg0, arg1) ? null : arg0;
   }
 
   /**

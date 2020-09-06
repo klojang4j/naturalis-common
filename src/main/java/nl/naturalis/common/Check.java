@@ -58,7 +58,7 @@ import static nl.naturalis.common.StringMethods.isNotBlank;
  * <pre>
  * this.query = Check.that(query, "query", InvalidQueryException::new)
  *  .notNull()
- *  .and(QuerySpec::getFrom, x -> nvl(from) == 0, "from must be null or zero")
+ *  .and(QuerySpec::getFrom, x -> nvl(x) == 0, "from must be null or zero")
  *  .and(QuerySpec::getSize, GTE, MIN_BATCH_SIZE, "size must be >= %d", MIN_BATCH_SIZE)
  *  .and(QuerySpec::getSize, LTE, MAX_BATCH_SIZE, "size must be <= %d", MAX_BATCH_SIZE)
  *  .and(QuerySpec::getSortFields, CollectionMethods::isEmpty, "sortFields must be empty")
