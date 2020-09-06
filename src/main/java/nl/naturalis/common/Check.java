@@ -16,13 +16,13 @@ import static nl.naturalis.common.StringMethods.isNotBlank;
 
 /**
  * Methods for checking preconditions. If you need to check just one precondition for an argument,
- * you might one to use one of the static methods. If you need to check multiple preconditions for
- * the same argument, you might prefer to use the instance methods instead. For example:
+ * you can use one of the static methods. If you need to check multiple preconditions for the same
+ * argument, you might prefer to use the instance methods instead. For example:
  *
  * <p>
  *
  * <pre>
- * int i = Check.that(numChairs, "numChairs").gte(2).lte(10).value();
+ * int i = Check.that(numChairs, "numChairs").gte(2).lte(10).intValue();
  * </pre>
  *
  * <h3>Exception messages</h3>

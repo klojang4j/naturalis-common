@@ -44,7 +44,7 @@ public class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   public Check<T, E> and(
       ToIntFunction<T> getter, IntRelation relation, int value, String message, Object... msgArgs)
       throws E {
-    that(relation.exists(getter.applyAsInt(arg), value), smash(message, msgArgs));
+    that(relation.existsAsInt(getter.applyAsInt(arg), value), smash(message, msgArgs));
     return this;
   }
 

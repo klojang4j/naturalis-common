@@ -53,8 +53,8 @@ public final class PathWalker {
   private final BiFunction<Map, String, Object> keyDeser;
 
   /**
-   * Creates a {@code MapReader} for the specified paths, setting the value for paths that code not
-   * be walked all the way to the end to null.
+   * Creates a {@code PathWalker} for the specified paths, setting the value for paths that could
+   * not be walked all the way to the end to null.
    *
    * @param paths
    */
@@ -66,8 +66,8 @@ public final class PathWalker {
   }
 
   /**
-   * Creates a {@code MapReader} for the specified paths, setting the value for paths that code not
-   * be walked all the way to the end to null.
+   * Creates a {@code PathWalker} for the specified paths, setting the value for paths that could
+   * not be walked all the way to the end to null.
    *
    * @param paths
    */
@@ -79,7 +79,7 @@ public final class PathWalker {
   }
 
   /**
-   * Creates a {@code MapReader} for the specified paths, setting the value for paths that code not
+   * Creates a {@code PathWalker} for the specified paths, setting the value for paths that code not
    * be walked all the way to the end to null.
    *
    * @param paths
@@ -89,7 +89,7 @@ public final class PathWalker {
   }
 
   /**
-   * Creates a {@code MapReader} for the specified paths. If {@code useDeadEndValue} equals {@code
+   * Creates a {@code PathWalker} for the specified paths. If {@code useDeadEndValue} equals {@code
    * true}, then the value for a path that could not be walked will be {@link #DEAD_END}, else null.
    * If it is important to distinguish between "real" null values and dead ends, pass {@code true}.
    *
@@ -101,7 +101,7 @@ public final class PathWalker {
   }
 
   /**
-   * Creates a {@code MapReader} for the specified paths. If {@code useDeadEndValue} equals {@code
+   * Creates a {@code PathWalker} for the specified paths. If {@code useDeadEndValue} equals {@code
    * true}, then the value for a path that could not be walked will be {@link #DEAD_END}, else
    * {@code null}. If it is important to distinguish between "real" null values and dead ends, pass
    * {@code true}. If you need to read from or write to maps with non-string keys, you must provide

@@ -2,9 +2,14 @@ package nl.naturalis.common;
 
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
+import nl.naturalis.common.function.Relation;
 import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
+import static nl.naturalis.common.function.Relation.isEqualTo;
 
 /**
  * General methods applicable to objects of any type.
@@ -405,61 +410,59 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns {@code value} unless it is equal to {@code illegalValue}, else null. Equivalent to
-   * <code>nullIf(Objects::equals, value, requiredValue)</code>.
+   * Returns null if {@code arg0} is equal to {@code arg1}, else {@code arg0}. Equivalent to <code>
+   * nullIf(arg0, Objects::equals, arg1)</code>.
    *
    * @param <T> The input and return type
-   * @param value The value to test
-   * @param illegalValue The value it must not have
-   * @return {@code value} or null
-   */
-  public static <T> T nullIf(T value, T illegalValue) {
-    return nullIf(Objects::equals, value, illegalValue);
-  }
-
-  /**
-   * Returns null if the {@code comparison} function returns {@code true} for {@code arg0} and
-   * {@code arg1}, else {@code arg0}.
-   *
-   * @param <T> The input and return type
-   * @param <U> The type of the second argument to the comparison function
-   * @param comparison A function that compares {@code value} and {@code mustBe} and returns a
-   *     {@code Boolean}
    * @param arg0 The value to test
-   * @param arg1 The value to compare it to
+   * @param arg1 The value it must not have in order to be returned
    * @return {@code value} or null
    */
-  public static <T, U> T nullIf(BiFunction<T, U, Boolean> comparison, T arg0, U arg1) {
-    return comparison.apply(arg0, arg1) ? null : arg0;
+  public static <T> T nullIf(T arg0, T arg1) {
+    return nullIf(arg0, isEqualTo(), arg1);
   }
 
   /**
-   * Returns {@code value} only if it is equal to {@code requiredValue}, else null. Equivalent to
-   * <code>nullUnless(Objects::equals, value, requiredValue)</code>.
+   * Returns null if {@code arg0} has the specified {@link Relation} to {@code arg1} {@code arg1},
+   * else {@code arg0}.
    *
    * @param <T> The input and return type
-   * @param value The value to test
-   * @param requiredValue The value it must have
-   * @return {@code value} or null
+   * @param <U> The type of target of the relation
+   * @param arg0 The value to test and return
+   * @param relation The required {@code Relation} between {@code arg 0} and {@code arg1}
+   * @param arg1 The value to test {@code arg0} against
+   * @return {@code arg0} or null
    */
-  public static <T> T nullUnless(T value, T requiredValue) {
-    return nullUnless(Objects::equals, value, requiredValue);
+  public static <T, U> T nullIf(T arg0, Relation<T, U> relation, U arg1) {
+    return relation.exists(arg0, arg1) ? arg0 : null;
   }
 
   /**
-   * Returns null unless the {@code comparison} function returns {@code true} for {@code arg0} and
-   * {@code arg1}, else {@code arg0}.
+   * Returns null unless {@code arg0} equa;s {@code arg1} {@code arg1}, else {@code arg0}.
+   * Equivalent to <code>nullUnless(arg0, Objects::equals, arg1)</code>.
    *
    * @param <T> The input and return type
-   * @param <U> The type of the second argument to the comparison function
-   * @param comparison A function that compares {@code value} and {@code mustBe} and returns a
-   *     {@code Boolean}
    * @param arg0 The value to test
-   * @param arg1 The value to compare it to
+   * @param arg1 The value {@code arg0} must have in order to be returned
+   * @return {@code arg0} or null
+   */
+  public static <T> T nullUnless(T arg0, T arg1) {
+    return nullUnless(arg0, isEqualTo(), arg1);
+  }
+
+  /**
+   * Returns null unless {@code arg0} has the specified {@link Relation} to {@code arg1} {@code
+   * arg1}, else {@code arg0}.
+   *
+   * @param arg0 The value to test and return
+   * @param relation The required {@code Relation} between {@code arg 0} and {@code arg1}
+   * @param arg1 The target of the relationship
+   * @param <T> The input and return type
+   * @param <U> The type of target of the relation
    * @return {@code value} or null
    */
-  public static <T, U> T nullUnless(BiFunction<T, U, Boolean> comparison, T arg0, U arg1) {
-    return comparison.apply(arg0, arg1) ? arg0 : null;
+  public static <T, U> T nullUnless(T arg0, Relation<T, U> relation, U arg1) {
+    return relation.exists(arg0, arg1) ? arg0 : null;
   }
 
   /**

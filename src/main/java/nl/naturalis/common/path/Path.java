@@ -200,7 +200,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    *
    * @return
    */
-  public Path getPurePath() {
+  public Path getCanonicalPath() {
     return new Path(Arrays.stream(elems).filter(not(Path::isArrayIndex)).toArray(String[]::new));
   }
 

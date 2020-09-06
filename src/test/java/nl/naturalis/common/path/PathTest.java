@@ -115,7 +115,7 @@ public class PathTest {
   public void getPurePath() {
     Path path = new Path("identifications.0.scientificName.fullScientificName");
     assertEquals(
-        "01", "identifications.scientificName.fullScientificName", path.getPurePath().toString());
+        "01", "identifications.scientificName.fullScientificName", path.getCanonicalPath().toString());
   }
 
   @Test
