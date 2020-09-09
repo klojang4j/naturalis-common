@@ -2,7 +2,7 @@ package nl.naturalis.common;
 
 import java.util.Collection;
 import java.util.regex.Pattern;
-import static nl.naturalis.common.ObjectMethods.*;
+import static nl.naturalis.common.ObjectMethods.ifTrue;
 
 /**
  * Methods for working with strings. This class tries to avoid duplicating the functionality already
@@ -27,7 +27,6 @@ public final class StringMethods {
    *
    * @param subject
    * @param suffix
-   * @return
    */
   public static String appendIfAbsent(Object subject, String suffix) {
     if (subject == null) {
@@ -42,7 +41,6 @@ public final class StringMethods {
    *
    * @param subject
    * @param suffix
-   * @return
    */
   public static String appendIfAbsent(Object subject, char suffix) {
     return appendIfAbsent(subject, String.valueOf(suffix));
@@ -53,7 +51,6 @@ public final class StringMethods {
    *
    * @param subject
    * @param substr
-   * @return
    */
   public static int count(Object subject, String substr) {
     return count(subject, substr, false);
@@ -66,7 +63,6 @@ public final class StringMethods {
    * @param substr The substring to search for
    * @param ignoreCase Whether or not to ignore case while matching <code>substr</code> against
    *     {@code subject}
-   * @return
    */
   public static int count(Object subject, String substr, boolean ignoreCase) {
     Check.notNull(substr, "substr");
@@ -85,7 +81,6 @@ public final class StringMethods {
    * @param subject The string to test
    * @param ignoreCase Whether or not to ignore case
    * @param suffixes The suffixes to test
-   * @return
    */
   public static String endsWith(Object subject, boolean ignoreCase, Collection<String> suffixes) {
     Check.notNull(suffixes, "suffixes");
@@ -100,7 +95,6 @@ public final class StringMethods {
    * @param subject
    * @param ignoreCase
    * @param suffixes
-   * @return
    */
   public static String endsWith(Object subject, boolean ignoreCase, String... suffixes) {
     Check.notNull(suffixes, "suffixes");
@@ -161,7 +155,6 @@ public final class StringMethods {
    * @see ObjectMethods#ifNull(Object, Object)
    * @param subject
    * @param dfault
-   * @return
    */
   public static String ifBlank(Object subject, String dfault) {
     return isBlank(subject) ? dfault : subject.toString();
@@ -173,7 +166,6 @@ public final class StringMethods {
    * @see ObjectMethods#ifEmpty(Object, Object)
    * @param str
    * @param dfault
-   * @return
    */
   public static String ifEmpty(String str, String dfault) {
     return isEmpty(str) ? dfault : str;
@@ -186,7 +178,6 @@ public final class StringMethods {
    * @param subject
    * @param ignoreCase
    * @param prefixes
-   * @return
    */
   public static String lchop(Object subject, boolean ignoreCase, Collection<String> prefixes) {
     return lchop(subject, ignoreCase, prefixes.toArray(new String[prefixes.size()]));
@@ -199,7 +190,6 @@ public final class StringMethods {
    * @param subject
    * @param ignoreCase
    * @param prefixes
-   * @return
    */
   public static String lchop(Object subject, boolean ignoreCase, String... prefixes) {
     Check.noneNull(prefixes, "prefixes");
@@ -342,7 +332,6 @@ public final class StringMethods {
    * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
    *     treated as the empty string.
    * @param width
-   * @return
    */
   public static String pad(Object obj, int width) {
     return pad(obj, width, ' ', EMPTY);
@@ -404,7 +393,6 @@ public final class StringMethods {
    *
    * @param str
    * @param prefix
-   * @return
    */
   public static String prefixIfAbsent(String str, String prefix) {
     return str.startsWith(prefix) ? str : prefix + str;
@@ -415,7 +403,6 @@ public final class StringMethods {
    *
    * @param str
    * @param suffix
-   * @return
    */
   public static String prefixIfAbsent(String str, char suffix) {
     return appendIfAbsent(str, String.valueOf(suffix));
@@ -428,7 +415,6 @@ public final class StringMethods {
    * @param subject
    * @param ignoreCase
    * @param suffixes
-   * @return
    */
   public static String rchop(Object subject, boolean ignoreCase, Collection<String> suffixes) {
     return rchop(subject, ignoreCase, suffixes.toArray(new String[suffixes.size()]));
@@ -441,7 +427,6 @@ public final class StringMethods {
    * @param subject
    * @param ignoreCase
    * @param suffixes
-   * @return
    */
   public static String rchop(Object subject, boolean ignoreCase, String... suffixes) {
     Check.notNull(suffixes, "suffixes");

@@ -12,12 +12,26 @@ import static java.util.function.Predicate.not;
 
 /**
  * Specifies a path to a value within an object. Path segments are spearated by '.' (dot). For
- * example: {@code employee.address.street} (the street name within the Address object of an
- * Employee object). Array indices are specified as separate path segments. For example: {@code
- * employees.3.address.street} (the street that the 4th employee lives on). Non-numeric segments can
- * be either fields or map keys. Therefore the {@code Path} class imposes zero constraints on what
- * constitutes a valid path segment, since a map key can be anything (including null or an empty
- * string).
+ * example: {@code employee.address.street}. Array indices are specified as separate path segments.
+ * For example: {@code employees.3.address.street}. Non-numeric segments can be either field names
+ * or map keys. Therefore the {@code Path} class does not impose any constraints on what constitutes
+ * a valid path segment, since a map key can be anything (including null or an empty string).
+ *
+ * <h4>Escaping</h4>
+ *
+ * <p>If a path segment contains the segment separator, it must be escaped using the circumflex
+ * character ('^'). (Using the backslash character as an escape character would have made it
+ * needlessly cumbersome to write path strings in Java code.) The escape character itself <i>must
+ * not</i> be escaped. You can let the {@link #escape(String) escape} method do the escaping for
+ * you. Do not escape path segments when passing them individually, in a {@code String} array, to
+ * the constructor. Only escape them when passing a complete path string. So {@code
+ * "some.awk^.ward.path^string"} could also be passed in as: {@code new String[] {"some",
+ * "awk.ward", "path^string"}}.
+ *
+ * <p>In case you need to reference the {@code null} key of a {@code Map}, use {@code "^0"}. So
+ * {@code "lookups.^0.name"} references the {@code name} field of an object stored under key {@code
+ * null} in the {@code lookups} map. And you could also pass this in as: {@code new String[]
+ * {"lookups", null, "name"}}.
  *
  * @author Ayco Holleman
  */
@@ -28,19 +42,9 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
 
   /** The segment separator within a path: &#39;&#46;&#39; (dot). */
   public static final char SEP = '.';
-  /**
-   * The escape character: &#39;^&#39; (circumflex). If a path segment contains the segment
-   * separator, it must be escaped with this character. (Using the backslash character as an escape
-   * character would have made it needlessly cumbersome to write path strings in Java code.) The
-   * escape character itself must <i>not</i> be escaped. You can let the {@link #escape(String)
-   * escape} method do the escaping for you.
-   */
+  /** The escape character: &#39;^&#39; (circumflex). */
   public static final char ESC = '^';
-  /**
-   * The character sequence to use for {@code null} keys: "^0". So {@code lookups.^0.name} gets the
-   * object with key null in the {@code lookups} map and then returns the value of that object's
-   * {@code name} field.
-   */
+  /** The character sequence to use for {@code null} keys. */
   public static final String NULL_SEGMENT = "^0";
 
   /**
@@ -146,7 +150,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
 
   /**
    * Returns the path segment at the specified index. Specify a negative index to count back from
-   * the last segment of the {@code Path} (-1 is the index of the last path segment).
+   * the last segment of the {@code Path} (-1 returns the last path segment).
    *
    * @param index
    * @return
@@ -172,7 +176,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
 
   /**
    * Returns a new {@code Path} consisting of {@code len} starting with segment {@code from}. The
-   * 1st argument may be negative to indicate an offset from the last segment.
+   * 1st argument may be negative to indicate a left-offset from the last segment.
    *
    * @param from
    * @return
@@ -180,13 +184,13 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   public Path subpath(int from, int len) {
     int from0 = from < 0 ? elems.length + from : from;
     int to = from0 + len;
-    Check.index(from0, elems.length, "from0");
+    Check.index(from0, elems.length, "from");
     Check.index(to, from0, elems.length, "to");
     return new Path(copyOfRange(elems, from0, to));
   }
 
   /**
-   * Return the parent of thie {@code Path} or null if this is an empty {@code Path}.
+   * Return the parent of this {@code Path} or null if this is an empty {@code Path}.
    *
    * @return
    */
@@ -303,6 +307,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
     return elems.length == 0;
   }
 
+  /** Overrides {@link Object#equals(Object) Object.equals}. */
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {
@@ -314,6 +319,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
     return Arrays.deepEquals(this.elems, ((Path) obj).elems);
   }
 
+  /** Overrides {@link Object#hashCode() Object.hashCode}. */
   @Override
   public int hashCode() {
     if (hash == 0) {
@@ -322,13 +328,14 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
     return hash;
   }
 
+  /** Implements {@link Comparable#compareTo(Object) Comparable.comparaTo}. */
   @Override
   public int compareTo(Path other) {
     return toString().compareTo(other.toString());
   }
 
   /**
-   * Returns this {@code Path} as a string.
+   * Returns this {@code Path} as a string, properly escaped.
    *
    * @return
    */

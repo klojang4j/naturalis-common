@@ -11,7 +11,8 @@ import static nl.naturalis.common.ObjectMethods.*;
 
 public class ObjectMethodsTest {
 
-  @Test // ** Just to make sure we understand Java **
+  // Not real tests. Just to make sure we understand Java.
+  @Test
   @SuppressWarnings("unlikely-arg-type")
   public void foo() {
     int[] ints = new int[] {1, 2, 3, 4, 5};
@@ -30,6 +31,49 @@ public class ObjectMethodsTest {
     assertFalse("10", integers.equals(ints));
     assertFalse("11", objects.equals(integers));
     assertFalse("12", integers.equals(objects));
+  }
+
+  @Test
+  @SuppressWarnings("rawtypes")
+  public void notEmptyAndAllNull_01() {
+    assertTrue("01", notEmptyAndAllNull(null));
+    assertFalse("02", notEmptyAndAllNull(Collections.emptyList()));
+    assertFalse("03", notEmptyAndAllNull(Collections.emptySet()));
+    assertFalse("04", notEmptyAndAllNull(Collections.emptyMap()));
+    assertFalse("05", notEmptyAndAllNull(new String[0]));
+    assertTrue("06", notEmptyAndAllNull(new String[] {null}));
+    assertTrue("07", notEmptyAndAllNull(new String[] {null, null}));
+    assertTrue("08", notEmptyAndAllNull(new String[] {null, null, null}));
+    assertFalse("09", notEmptyAndAllNull(new String[] {null, "", null}));
+    assertTrue("10", notEmptyAndAllNull(Arrays.asList(null, null, null)));
+    assertFalse("11", notEmptyAndAllNull(Arrays.asList("Hello, world")));
+    Map map = CollectionMethods.newHashMap("KEY1", null, "KEY2", null, "KEY3", null);
+    assertTrue("12", notEmptyAndAllNull(map));
+    map = CollectionMethods.newHashMap(null, "VAL1", "KEY2", null, "KEY3", null);
+    assertFalse("13", notEmptyAndAllNull(map));
+  }
+
+  @Test
+  @SuppressWarnings("rawtypes")
+  public void notEmptyAndNotContainsNull_01() {
+    assertFalse("01", notEmptyAndNoneNull(null));
+    assertFalse("02", notEmptyAndNoneNull(Collections.emptyList()));
+    assertFalse("03", notEmptyAndNoneNull(Collections.emptySet()));
+    assertFalse("04", notEmptyAndNoneNull(Collections.emptyMap()));
+    assertFalse("05", notEmptyAndNoneNull(new String[0]));
+    assertFalse("06", notEmptyAndNoneNull(new String[] {null}));
+    assertFalse("07", notEmptyAndNoneNull(new String[] {null, null}));
+    assertFalse("08", notEmptyAndNoneNull(new String[] {null, null, null}));
+    assertFalse("09", notEmptyAndNoneNull(new String[] {null, "", null}));
+    assertFalse("10", notEmptyAndNoneNull(Arrays.asList(null, null, null)));
+    assertTrue("11", notEmptyAndNoneNull(Arrays.asList("Hello, world")));
+    Map map = CollectionMethods.newHashMap("KEY1", null, "KEY2", null, "KEY3", null);
+    assertFalse("12", notEmptyAndNoneNull(map));
+    map = CollectionMethods.newHashMap(null, "VAL1", "KEY2", null, "KEY3", null);
+    assertFalse("13", notEmptyAndNoneNull(map));
+    assertTrue("10", notEmptyAndNoneNull(Arrays.asList("hello", "World")));
+    map = CollectionMethods.newHashMap("KEY1", "VAL1", "KEY2", "VAL2", "KEY3", "VAL3");
+    assertTrue("10", notEmptyAndNoneNull(map));
   }
 
   @Test

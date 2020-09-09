@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 import nl.naturalis.common.Check;
 import nl.naturalis.common.ClassMethods;
@@ -16,24 +16,35 @@ import static nl.naturalis.common.path.Path.isArrayIndex;
 import static nl.naturalis.common.path.PathWalkerException.illegalAccess;
 
 /**
- * Reads or writes one or more values within a given Object using {@link Path} objects to specify
- * which fields to read/write. No exceptions are thrown if a path could not be walked all the way to
- * the last path segment due to:
+ * Reads/writes values within a given Object using {@link Path} objects. The {@code PathWalker}
+ * class is especially useful for reading large batches of sparsely populated objects or maps. It
+ * will simply return null if a path could not be walked all the way to the last path segment, due
+ * to any of the following reasons:
  *
  * <p>
  *
  * <ul>
  *   <li>one of the intermediate path segments referenced a null value
  *   <li>the path is invalid given the type of the object to read/write
- *   <li>an array index was expected but not found in the path
- *   <li>the array index was out of bounds
+ *   <li>an array index within the path was out of bounds
  *   <li>the path continued after having reached a terminal value within the object (a primitive)
  * </ul>
  *
- * <p>In all of these cases the path's value is set to null or {@link #DEAD_END} (depending on your
- * choice), but no exception is thrown. Only if a segment <i>did</i> correspond to a field, but
- * accessing the field caused an {@link IllegalAccessException}, a {@link PathWalkerException}
- * wrapping the {@code IllegalAccessException} is thrown.
+ * <p>If you need to distinguish between true null values and the "dead ends" described above, you
+ * can {@link #PathWalker(List, boolean) request} to return a special value, {@link #DEAD_END},
+ * instead.
+ *
+ * <p>If the {@code PathWalker} is on a segment that references a {@code Collection} or an array,
+ * the next path segment is supposed to be an array index (unless it is the {@code Collection} or
+ * array itself that you are interested in). If it is not, it will silently assume you want the
+ * first element of the {@code Collection} c.q. array.
+ *
+ * <p>If the {@code PathWalker} is on a segment that references a map key, and the map to be
+ * read/written uses non-{@code String} keys, you must instruct the {@code PathWalker} how to
+ * deserialize the path segment into an appropriately typed key. This is done by passing in a {@code
+ * Function} takes a {@code Path} and returns the key. The first path segment of the {@code Path} is
+ * the segment specifying the key. You still get the entire path following that segment so you know
+ * where you are within the object you are reading.
  *
  * @author Ayco Holleman
  */
@@ -42,15 +53,13 @@ public final class PathWalker {
 
   /**
    * A special value indicating that a path could not be walked all the way to the end for the
-   * object currently being read. Note that this can either mean that you really specified an
-   * invalid path given the <i>type</i> of object to walk, or that the object did not have the
-   * nested objects corresponding to the path.
+   * object currently being read.
    */
   public static final Object DEAD_END = new Object();
 
   private final Path[] paths;
   private final boolean useDeadEnd;
-  private final BiFunction<Map, String, Object> keyDeser;
+  private final Function<Path, Object> keyDeser;
 
   /**
    * Creates a {@code PathWalker} for the specified paths, setting the value for paths that could
@@ -111,13 +120,10 @@ public final class PathWalker {
    * @param useDeadEndValue Whether to use {@link #DEAD_END} or null for paths that could not be
    *     walked all the way to the end
    * @param mapKeyDeserializer A function that converts strings to map keys (may be null if no
-   *     deserialization is required). The map being read is passed as the 1st argument to the
-   *     function; the path segment to be deserialized as the 2nd argument.
+   *     deserialization is required)
    */
   public PathWalker(
-      List<Path> paths,
-      boolean useDeadEndValue,
-      BiFunction<Map, String, Object> mapKeyDeserializer) {
+      List<Path> paths, boolean useDeadEndValue, Function<Path, Object> mapKeyDeserializer) {
     Check.that(paths, "paths").notEmpty().noneNull();
     this.paths = paths.toArray(Path[]::new);
     this.useDeadEnd = useDeadEndValue;
@@ -139,15 +145,16 @@ public final class PathWalker {
   /**
    * Reads the values of all paths within the provided object and places them in the provided output
    * array. The values will be in the same order as the paths specified through the constructors.
-   * The output array need not have the same length as the path array.
+   * The length of the output array must be greater than or equal to the number of paths specified
+   * through the constructor.
    *
    * @param host
    * @param output
    * @throws PathWalkerException
    */
   public void readValues(Object host, Object[] output) throws PathWalkerException {
-    int x = Math.min(paths.length, Check.notNull(output, "output").length);
-    IntStream.range(0, x).forEach(i -> output[i] = readObj(host, paths[i]));
+    Check.that(output, "output").notNull().gte(paths.length);
+    IntStream.range(0, paths.length).forEach(i -> output[i] = readObj(host, paths[i]));
   }
 
   /**
@@ -226,7 +233,7 @@ public final class PathWalker {
 
   private Object readMap(Map map, Path path) {
     String segment = path.segment(0);
-    Object key = keyDeser == null ? segment : keyDeser.apply(map, segment);
+    Object key = keyDeser == null ? segment : keyDeser.apply(path);
     if (map.containsKey(key)) {
       return readObj(map.get(key), path.shift());
     }
@@ -281,6 +288,11 @@ public final class PathWalker {
     }
   }
 
+  /*
+   * NB setting the value of a path actually means setting a value in the object referenced
+   * by the parent of that path. E.g. if you want to set employee.name to "John", you actually
+   * invoke a setter of the Employee class.
+   */
   private void write(Object host, Path path, Object value) {
     Path parent = path.parent();
     Path target = path.subpath(-1);
@@ -300,12 +312,15 @@ public final class PathWalker {
       if (parval != null) {
         if (parval instanceof Map) {
           Map map = (Map) parval;
-          String key = target.isNullSegment() ? null : target.toString();
-          if (keyDeser == null) {
-            map.put(key, value);
+          Object key;
+          if (target.isNullSegment()) {
+            key = null;
+          } else if (keyDeser == null) {
+            key = target.toString();
           } else {
-            map.put(keyDeser.apply(map, key), value);
+            key = keyDeser.apply(target);
           }
+          map.put(key, value);
         } else if (!target.isNullSegment()) {
           try {
             Field f = ClassMethods.getField(parval, target.toString());

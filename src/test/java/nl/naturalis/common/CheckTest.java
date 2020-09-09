@@ -7,7 +7,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static nl.naturalis.common.function.IntRelation.GTE;
+import static nl.naturalis.common.function.IntRelation.*;
 
 public class CheckTest {
 
@@ -176,7 +176,7 @@ public class CheckTest {
     Employee employee = new Employee(3, "John Smith", 43, "Skating", "Scoccer");
     Check.that(employee, "employee")
         .notNull()
-        .andInt(Employee::getId, x -> x > 0, "Id must not be negative")
+        .and(Employee::getId, GT, 0, "Id must not be negative")
         .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
         .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
         .and(Employee::getAge, GTE, 16, "Employee must be at least 16")
@@ -188,7 +188,7 @@ public class CheckTest {
     Employee employee = new Employee(3, "John Smith", 12, "Skating", "Scoccer");
     Check.that(employee, "employee")
         .notNull()
-        .andInt(Employee::getId, x -> x > 0, "Id must not be negative")
+        .and(Employee::getId, GT, 0, "Id must not be negative")
         .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
         .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
         .and(Employee::getAge, GTE, 16, "Employee must be at least 16")
@@ -200,7 +200,7 @@ public class CheckTest {
     Employee employee = new Employee(3, "John Smith", 44, "Skating", "Scuba diving");
     Check.that(employee, "employee", IOException::new)
         .notNull()
-        .andInt(Employee::getId, x -> x > 0, "Id must not be negative")
+        .and(Employee::getId, GT, 0, "Id must not be negative")
         .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
         .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
         .and(Employee::getAge, GTE, 16, "Employee must be at least 16")
@@ -212,7 +212,7 @@ public class CheckTest {
     Employee employee = new Employee(-23, "John Smith", 44, "Skating", "Scuba diving");
     Check.that(employee, "employee", IOException::new)
         .notNull()
-        .andInt(Employee::getId, x -> x > 0, "Id must not be negative")
+        .and(Employee::getId, GT, 0, "Id must not be negative")
         .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
         .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
         .and(Employee::getAge, GTE, 16, "Employee must be at least 16")
@@ -224,7 +224,7 @@ public class CheckTest {
     Employee employee = new Employee(-23, "John Smith", 44, "Skating", "Scuba diving");
     Check.that(employee, "employee", IOException::new)
         .notNull()
-        .andInt(Employee::getId, x -> x > 0, "Id must not be negative")
+        .and(Employee::getId, GT, 0, "Id must not be negative")
         .and(Employee::getFullName, s -> s.length() < 5, "Full name too large")
         .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
         .and(Employee::getAge, GTE, 16, "Employee must be at least 16")

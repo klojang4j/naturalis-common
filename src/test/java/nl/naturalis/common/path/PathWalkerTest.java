@@ -124,9 +124,9 @@ public class PathWalkerTest {
         new PathWalker(
             paths,
             true,
-            (m, s) -> {
+            (p) -> {
               try {
-                return new URL(s);
+                return new URL(p.segment(0));
               } catch (MalformedURLException e) {
                 throw ExceptionMethods.uncheck(e);
               }
@@ -143,9 +143,9 @@ public class PathWalkerTest {
         new PathWalker(
             paths,
             true,
-            (m, s) -> {
+            (p) -> {
               try {
-                return new URL(s);
+                return new URL(p.segment(0));
               } catch (MalformedURLException e) {
                 throw ExceptionMethods.uncheck(e);
               }

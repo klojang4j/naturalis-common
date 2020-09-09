@@ -1,16 +1,13 @@
 package nl.naturalis.common;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.*;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.Relation;
-import nl.naturalis.common.internal.IntCheck;
-import nl.naturalis.common.internal.IntegerCheck;
-import nl.naturalis.common.internal.ObjectCheck;
-import nl.naturalis.common.internal.StringCheck;
-import static nl.naturalis.common.ArrayMethods.prefix;
+import nl.naturalis.common.internal.*;
 import static nl.naturalis.common.ObjectMethods.isDeepNotEmpty;
-import static nl.naturalis.common.ObjectMethods.isDeepNotNull;
 import static nl.naturalis.common.ObjectMethods.isNotEmpty;
 import static nl.naturalis.common.StringMethods.isNotBlank;
 
@@ -90,6 +87,7 @@ public abstract class Check<T, E extends Exception> {
   protected static final String ERR_FAILED_TEST = "Invalid value for %s: %s";
   protected static final String ERR_MUST_BE_NULL = "%s must be null";
   protected static final String ERR_MUST_BE_EMPTY = "%s must be empty";
+  protected static final String ERR_NOT_APPLICABLE = "%s check not applicable to %s";
 
   /**
    * Returns a {@code Check} instance for {@code int} arguments, throwing an {@code
@@ -144,13 +142,19 @@ public abstract class Check<T, E extends Exception> {
    *     Exception}
    * @return A new {@code Check} object
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static <U, F extends Exception> Check<U, F> that(
       U arg, String argName, Function<String, F> excProvider) {
     if (arg instanceof String) {
       return (Check<U, F>) new StringCheck<F>((String) arg, argName, excProvider);
     } else if (arg instanceof Integer) {
       return (Check<U, F>) new IntegerCheck<F>((Integer) arg, argName, excProvider);
+    } else if (arg instanceof Collection) {
+      return (Check<U, F>) new CollectionCheck<>((Collection) arg, argName, excProvider);
+    } else if (arg instanceof Map) {
+      return (Check<U, F>) new MapCheck<>((Map) arg, argName, excProvider);
+    } else if (arg instanceof Object[]) {
+      return (Check<U, F>) new ObjectArrayCheck<>((Object[]) arg, argName, excProvider);
     }
     return new ObjectCheck<>(arg, argName, excProvider);
   }
@@ -225,8 +229,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it passes the provided {@code test}, else throws an {@code
-   * IllegalArgumentException}.
+   * Verifies that the argument passes the specified test.
    *
    * @param <T> The type of the argument
    * @param arg The argument
@@ -241,8 +244,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns {@code arg} if it passes the provided {@code test}, else throws an {@code
-   * IllegalArgumentException}.
+   * Verifies that the argument passes the specified test.
    *
    * @param arg The argument
    * @param test The test to apply to the argument
@@ -259,10 +261,11 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Throws an {@code ArrayIndexOutOfBoundsException} if {@code arg} is less than zero or greater
-   * than or equal to {@code maxExclusive}, else returns {@code arg}. This is especially useful to
-   * test "from" arguments, which generally should be <i>less than</i> the length or size of the
-   * object operated upon.
+   * Verifies that the argument is a valid array index. Throws an {@code
+   * ArrayIndexOutOfBoundsException} if {@code arg} is less than zero or greater than or equal to
+   * {@code maxExclusive}, else returns {@code arg}. This is especially useful to test "from"
+   * arguments, which generally should be <i>less than</i> the length or size of the object operated
+   * upon.
    *
    * @param arg The argument The argument to test
    * @param maxExclusive The maximum allowed value (exclusive)
@@ -277,10 +280,11 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Throws an {@code ArrayIndexOutOfBoundsException} if {@code arg} is less than {@code min} or
-   * greater than {@code max}, else returns {@code arg}. This is especially useful to test "to" or
-   * "until" arguments, which generally should be <i>less than or equal to</i> the length or size of
-   * the object operated upon.
+   * Verifies that the argument is a valid array index. Throws an {@code
+   * ArrayIndexOutOfBoundsException} if {@code arg} is less than {@code min} or greater than {@code
+   * max}, else returns {@code arg}. This is especially useful to test "to" or "until" arguments,
+   * which generally should be <i>less than or equal to</i> the length or size of the object
+   * operated upon.
    *
    * @param arg The argument The argument to test
    * @param minInclusive The minimum allowed value (inclusive)
@@ -320,7 +324,7 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the argument is null
    */
   public static <T> T notNull(T arg, String message, Object msgArg0, Object... msgArgs) {
-    return that(arg != null, arg, badArg(message, msgArg0, msgArgs));
+    return argument(arg, Objects::nonNull, format(message, msgArg0, msgArgs));
   }
 
   /**
@@ -335,11 +339,11 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is not null or contains any null values. The latter is applicable if
-   * the argument is an array, {@code Collection} or {@code Map}. For {@code Map} arguments only the
-   * values are tested, not the keys.
+   * Verifies that the argument is not null and does not contain any null values. The argument must
+   * be an instance of {@link Collection}, {@link Map} or {@code Object[]}. For {@code Map}
+   * arguments only the values are tested, not the keys.
    *
-   * @see ObjectMethods#isDeepNotNull(Object)
+   * @see ObjectMethods#notEmptyAndNoneNull(Object)
    * @param <T> The type of the argument
    * @param arg The argument
    * @param argName The argument name
@@ -347,15 +351,15 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the argument is null or contains null values
    */
   public static <T> T noneNull(T arg, String argName) {
-    return argument(arg, ObjectMethods::isDeepNotNull, ERR_NONE_NULL, argName);
+    return argument(arg, ObjectMethods::noneNull, ERR_NONE_NULL, argName);
   }
 
   /**
-   * Verifies that the argument is not null or contains any null values. The latter is applicable if
-   * the argument is an array, {@code Collection} or {@code Map}. For {@code Map} arguments only the
-   * values are tested, not the keys.
+   * Verifies that the argument is not null and does not contain any null values. The argument must
+   * be an instance of {@link Collection}, {@link Map} or {@code Object[]}. For {@code Map}
+   * arguments only the values are tested, not the keys.
    *
-   * @see ObjectMethods#isDeepNotNull(Object)
+   * @see ObjectMethods#notEmptyAndNoneNull(Object)
    * @param <T> The type of the argument
    * @param arg The argument
    * @param message The exception message
@@ -365,7 +369,7 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the argument is null or contains null values
    */
   public static <T> T noneNull(T arg, String message, Object msgArg0, Object... msgArgs) {
-    return that(isDeepNotNull(arg), arg, badArg(message, msgArg0, msgArgs));
+    return argument(arg, ObjectMethods::noneNull, format(message, msgArg0, msgArgs));
   }
 
   /**
@@ -455,7 +459,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is greater than {@code minVal}.
+   * Verifies that the argument is greater than {@code minVal}. For {@code Collection}, {@code Map}
+   * and array arguments, this method doubles as a check on their size/length.
    *
    * @param arg The argument
    * @param minVal The argument's lower bound (exclusive)
@@ -468,7 +473,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is greater than {@code minVal}.
+   * Verifies that the argument is greater than {@code minVal}. For {@code Collection}, {@code Map}
+   * and array arguments, this method doubles as a check on their size/length.
    *
    * @param arg The argument
    * @param minVal The argument's lower bound (exclusive)
@@ -486,7 +492,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is greater than or equal to {@code minVal}.
+   * Verifies that the argument is greater than or equal to {@code minVal}. For {@code Collection},
+   * {@code Map} and array arguments, this method doubles as a check on their size/length.
    *
    * @param arg The argument
    * @param minVal The argument's lower bound (inclusive)
@@ -499,7 +506,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is greater than or equal to {@code minVal}.
+   * Verifies that the argument is greater than or equal to {@code minVal}. For {@code Collection},
+   * {@code Map} and array arguments, this method doubles as a check on their size/length.
    *
    * @param arg The argument
    * @param minVal The argument's lower bound (inclusive)
@@ -642,7 +650,7 @@ public abstract class Check<T, E extends Exception> {
    *     message arguments
    */
   public static Supplier<IllegalArgumentException> badArgument(String message, Object... msgArgs) {
-    if (message == null) { // Do not use Check.notNull! Causes stack overflow error
+    if (message == null) { // Do not use Check.notNull() - causes endless recursion.
       throw new IllegalArgumentException("message must not be null");
     }
     if (msgArgs == null) {
@@ -653,12 +661,16 @@ public abstract class Check<T, E extends Exception> {
 
   private static Supplier<IllegalArgumentException> badArg(
       String msg, Object msgArg0, Object... msgArgs) {
-    if (StringMethods.isEmpty(msgArg0)) {
-      return () -> new IllegalArgumentException(msg);
+    return () -> new IllegalArgumentException(format(msg, msgArg0, msgArgs));
+  }
+
+  private static String format(String message, Object msgArg0, Object[] msgArgs) {
+    if (ObjectMethods.isEmpty(msgArg0)) {
+      return message;
     } else if (msgArgs == null) {
-      return () -> new IllegalArgumentException(String.format(msg, msgArg0));
+      return String.format(message, msgArg0);
     }
-    return () -> new IllegalArgumentException(String.format(msg, prefix(msgArgs, msgArg0)));
+    return String.format(message, ArrayMethods.prefix(msgArgs, msgArg0));
   }
 
   private static IllegalStateException badState(String msg, Object... msgArgs) {
@@ -717,23 +729,6 @@ public abstract class Check<T, E extends Exception> {
   public <U> Check<T, E> and(
       Function<T, U> getter, Predicate<U> test, String message, Object... msgArgs) throws E {
     throw notSupported("and");
-  }
-
-  /**
-   * Checks the value of a property of the argument. You should do a {@link #notNull() notNull}
-   * check on the argument first, because this method doesn't and assumes the argument is not null.
-   *
-   * @param getter A function that has the argument as its input and returns the value of the
-   *     property
-   * @param test The test
-   * @param message The exception message
-   * @param msgArgs The message arguments
-   * @return This {@code Check} object
-   * @throws E If the test fails
-   */
-  public Check<T, E> andInt(
-      ToIntFunction<T> getter, IntPredicate test, String message, Object... msgArgs) throws E {
-    throw notSupported("test");
   }
 
   /**
@@ -883,7 +878,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is greater than {@code minVal}.
+   * Verifies that the argument is greater than {@code minVal}. For {@code Collection}, {@code Map}
+   * and array arguments, this method doubles as a check on their size/length.
    *
    * @param minVal The minimum allowed value (exclusive)
    * @return This {@code Check} object
@@ -894,7 +890,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is greater than or equal to {@code minVal}.
+   * Verifies that the argument is greater than or equal to {@code minVal}. For {@code Collection},
+   * {@code Map} and array arguments, this method doubles as a check on their size/length.
    *
    * @param minVal The minimum allowed value (inclusive)
    * @return This {@code Check} object
@@ -905,7 +902,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is less than {@code maxVal}.
+   * Verifies that the argument is less than {@code maxVal}. For {@code Collection}, {@code Map} and
+   * array arguments, this method doubles as a check on their size/length.
    *
    * @param maxVal The maximum allowed value (exclusive)
    * @return This {@code Check} object
@@ -916,7 +914,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is less than or equal to {@code maxVal}.
+   * Verifies that the argument is less than or equal to {@code maxVal}. For {@code Collection},
+   * {@code Map} and array arguments, this method doubles as a check on their size/length.
    *
    * @param maxVal The maximum allowed value (inclusive)
    * @return This {@code Check} object
@@ -978,12 +977,7 @@ public abstract class Check<T, E extends Exception> {
     return () -> excProvider.apply(String.format(msg, msgArgs));
   }
 
-  protected String field(String name) {
-    return argName + "." + name;
-  }
-
   private UnsupportedOperationException notSupported(String check) {
-    return new UnsupportedOperationException(
-        String.format("%s method not supported for %s", check, argName));
+    return new UnsupportedOperationException(String.format(ERR_NOT_APPLICABLE, check, argName));
   }
 }

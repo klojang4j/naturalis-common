@@ -14,10 +14,10 @@ import java.util.function.Supplier;
 public interface ThrowingSupplier<T, E extends Exception> {
 
   /**
-   * Produces a value while potentially throwing an exception of type {@code E}.
+   * Produces a value while potentially throwing an exception.
    *
-   * @return A value of type {@code T}.
-   * @throws An exception of type {@code E}.
+   * @return The value
+   * @throws E If an exception occurred while producing the object
    */
   T get() throws E;
 }

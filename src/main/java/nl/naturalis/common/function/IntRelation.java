@@ -33,7 +33,7 @@ public interface IntRelation {
    *
    * @param subject The integer from which the relationship extends
    * @param object The target of the relationship
-   * @return
+   * @return {@code true} if the relation exists, {@code false} otherwise.
    */
   boolean existsAsInt(int subject, int object);
 }

@@ -2,14 +2,13 @@ package nl.naturalis.common;
 
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
+import java.util.function.*;
 import nl.naturalis.common.function.Relation;
 import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
-import static nl.naturalis.common.function.Relation.*;
+import static nl.naturalis.common.function.Predicates.isNotNull;
+import static nl.naturalis.common.function.Predicates.isNull;
+import static nl.naturalis.common.function.Relation.isEqualTo;
 
 /**
  * General methods applicable to objects of any type.
@@ -22,18 +21,19 @@ public class ObjectMethods {
   private ObjectMethods() {}
 
   /**
-   * Returns whether or not the provided object is empty. Returns {@code true} if the argument is:
+   * Returns whether or not the provided object is empty. Returns {@code true} if <i>any</i> of the
+   * following applies:
    *
    * <p>
    *
    * <ul>
-   *   <li>{@code null}
-   *   <li>an empty <code>String</code>
-   *   <li>an empty <code>Collection</code>
-   *   <li>an empty <code>Map</code>
-   *   <li>a zero-length array
-   *   <li>a zero-size {@link Sizeable}
-   *   <li>an empty {@link Emptyable}
+   *   <li>{@code obj} is {@code null}
+   *   <li>{@code obj} is an empty {@code String}
+   *   <li>{@code obj} is an empty {@code Collection}
+   *   <li>{@code obj} is an empty {@code Map}
+   *   <li>{@code obj} is a zero-length array
+   *   <li>{@code obj} is a zero-size {@link Sizeable}
+   *   <li>{@code obj} is an empty {@link Emptyable}
    * </ul>
    *
    * <p>Otherwise this method returns {@code false}.
@@ -53,34 +53,46 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the inverse of {@link #isEmpty(Object) isEmpty}.
+   * Verifies that the argument is not empty. Returns {@code true} if <i>all</i> of the following
+   * applies:
+   *
+   * <p>
+   *
+   * <ul>
+   *   <li>{@code obj} is not {@code null}
+   *   <li>{@code obj} is not an empty {@code String}
+   *   <li>{@code obj} is not an empty {@code Collection}
+   *   <li>{@code obj} is not an empty {@code Map}
+   *   <li>{@code obj} is not a zero-length array
+   *   <li>{@code obj} is not a zero-size {@link Sizeable}
+   *   <li>{@code obj} is not an empty {@link Emptyable}
+   * </ul>
    *
    * @param obj The object to be tested
-   * @return Whether or not it is non-empty
+   * @return Whether or not it is empty
    */
   public static boolean isNotEmpty(Object obj) {
     return !isEmpty(obj);
   }
 
   /**
-   * Returns whether or not the argument is recursively non-empty. Returns {@code true} in any of
-   * the following cases
+   * Verifies that the argument is recursively non-empty. Returns {@code true} if <i>any</i> of the
+   * following applies:
    *
    * <p>
    *
    * <ul>
-   *   <li>{@code obj} is null
    *   <li>{@code obj} is a non-empty {@code String}
    *   <li>{@code obj} is a non-empty {@code Collection} with only {@code isDeepNotEmpty} elements
    *   <li>{@code obj} is a non-empty {@code Map}, with only {@code isDeepNotEmpty} values (map keys
    *       are not checked for empty-ness)
-   *   <li>{@code obj} is a non-empty {@code Object} array with only {@code isDeepNotEmpty} elements
+   *   <li>{@code obj} is a non-empty {@code Object[]} array with only {@code isDeepNotEmpty}
+   *       elements
    *   <li>{@code obj} is a non-empty primitive array
    *   <li>{@code obj} is a non-empty {@link Emptyable}
    *   <li>{@code obj} is a non-zero-size {@link Sizeable}
+   *   <li>{@code obj} is a non-null of any other type
    * </ul>
-   *
-   * <p>Otherwise this method returns {@code false}.
    *
    * @param obj The object to be tested
    * @return Whether or not it is recursively non-empty
@@ -88,70 +100,125 @@ public class ObjectMethods {
   public static boolean isDeepNotEmpty(Object obj) {
     return obj != null
         && (!(obj instanceof String) || !((String) obj).isEmpty())
-        && (!(obj instanceof Collection) || noneEmpty((Collection) obj))
-        && (!(obj instanceof Map) || noneEmpty((Map) obj))
-        && (!(obj instanceof Object[]) || noneEmpty((Object[]) obj))
+        && (!(obj instanceof Collection) || dne((Collection) obj))
+        && (!(obj instanceof Map) || dne((Map) obj))
+        && (!(obj instanceof Object[]) || dne((Object[]) obj))
         && (!isPrimitiveArray(obj) || Array.getLength(obj) > 0)
         && (!(obj instanceof Sizeable) || ((Sizeable) obj).size() > 0)
         && (!(obj instanceof Emptyable) || !((Emptyable) obj).isEmpty());
   }
 
-  private static boolean noneEmpty(Collection c) {
-    return !c.isEmpty() && c.stream().allMatch(ObjectMethods::isDeepNotEmpty);
+  private static boolean dne(Collection coll) {
+    return !coll.isEmpty() && coll.stream().allMatch(ObjectMethods::isDeepNotEmpty);
   }
 
-  private static boolean noneEmpty(Map m) {
-    return !m.isEmpty() && m.values().stream().allMatch(ObjectMethods::isDeepNotEmpty);
+  private static boolean dne(Map map) {
+    return !map.isEmpty() && map.values().stream().allMatch(ObjectMethods::isDeepNotEmpty);
   }
 
-  private static boolean noneEmpty(Object[] obj) {
-    return obj.length > 0 && Arrays.stream(obj).allMatch(ObjectMethods::isDeepNotEmpty);
+  private static boolean dne(Object[] arr) {
+    return arr.length > 0 && Arrays.stream(arr).allMatch(ObjectMethods::isDeepNotEmpty);
   }
 
   /**
-   * Returns whether or not the argument is recursively non-null. More specifically, this method
-   * returns {@code true} if:
+   * Verifies that the specified container object is not null and does not contain any null values.
+   * It may still be an empty container, however. In other words, you can safely iterate over the
+   * container without risking a {@code NullPointerException}, but the container may or may not have
+   * any elements.
    *
-   * <p>
-   *
-   * <ul>
-   *   <li>{@code obj} is not null
-   *   <li>{@code obj} is an empty array or a non-empty array with only non-null elements
-   *   <li>{@code obj} is an empty {@code Collection} or a non-empty {@code Collection} with only
-   *       non-null elements
-   *   <li>{@code obj} is an empty {@code Map} non-empty {@code Map} with only non-null values (NB
-   *       Map keys are not checked for empty-ness.)
-   * </ul>
-   *
-   * <p>Otherwise this method returns {@code false}. Contrary to {@link #isDeepNotEmpty(Object)
-   * deepNotEmpty}, this method returns {@code true} for empty arrays, collections and maps. It only
-   * checks that the values they do contain are non-null.
-   *
-   * @param obj The object to be tested
-   * @return Whether or not it is recursively non-null
+   * @param container The object to be tested. Must be a {@code Collection}, {@code Map} or {@code
+   *     Object[]}
+   * @return Whether or not it not null and does not contain any null values
    */
-  public static boolean isDeepNotNull(Object obj) {
-    if (obj == null) {
+  public static boolean noneNull(Object container) {
+    Object x = container;
+    if (x == null) {
       return false;
-    } else if (obj instanceof Object[]) {
-      return Arrays.stream((Object[]) obj).allMatch(ObjectMethods::isDeepNotNull);
-    } else if (obj instanceof Collection) {
-      return ((Collection) obj).stream().allMatch(ObjectMethods::isDeepNotNull);
-    } else if (obj instanceof Map) {
-      return ((Map) obj).values().stream().allMatch(ObjectMethods::isDeepNotNull);
+    } else if (x instanceof Collection) {
+      return ((Collection) x).stream().allMatch(isNotNull());
+    } else if (x instanceof Map) {
+      return ((Map) x).values().stream().allMatch(isNotNull());
+    } else if (x instanceof Object[]) {
+      return Arrays.stream((Object[]) x).allMatch(isNotNull());
     }
-    return true;
+    throw notAContainerObject(x);
   }
 
   /**
-   * (empty-to-null) Returns {@code null} if the argument is {@link #isEmpty(Object) empty}, else
-   * the argument itself.
+   * Verifies that the specified container object is not null, not empty, and does not contain any
+   * null values. In other words, you can safely iterate over the container without risking a {@code
+   * NullPointerException} and you are guaranteed to encounter at least one element.
+   *
+   * @param container The object to be tested. Must be a {@code Collection}, {@code Map} or {@code
+   *     Object[]}
+   * @return Whether or not it ies not null, not empty, and does not contain any null values
+   */
+  public static boolean notEmptyAndNoneNull(Object container) {
+    Object x = container;
+    if (x == null) {
+      return false;
+    } else if (x instanceof Collection) {
+      return !((Collection) x).isEmpty() && ((Collection) x).stream().allMatch(isNotNull());
+    } else if (x instanceof Map) {
+      return !((Map) x).isEmpty() && ((Map) x).values().stream().allMatch(isNotNull());
+    } else if (x instanceof Object[]) {
+      return ((Object[]) x).length != 0 && Arrays.stream((Object[]) x).allMatch(isNotNull());
+    }
+    throw notAContainerObject(x);
+  }
+
+  /**
+   * Verifies that the specified container object is not null and does not contain any non-null
+   * values. It may still be an empty container, however.
+   *
+   * @param container The object to be tested. Must be a {@code Collection}, {@code Map} or {@code
+   *     Object[]}
+   * @return Whether or not it is not null and does not contain any non-null values
+   */
+  public static boolean allNull(Object container) {
+    Object x = container;
+    if (x == null) {
+      return false;
+    } else if (x instanceof Collection) {
+      return ((Collection) x).stream().allMatch(isNull());
+    } else if (x instanceof Map) {
+      return ((Map) x).values().stream().allMatch(isNull());
+    } else if (x instanceof Object[]) {
+      return Arrays.stream((Object[]) x).allMatch(isNull());
+    }
+    throw notAContainerObject(x);
+  }
+
+  /**
+   * Verifies that the specified container object is not null, not empty and does not contain any
+   * non-null values.
+   *
+   * @param container The object to be tested. Must be a {@code Collection}, {@code Map} or {@code
+   *     Object[]}
+   * @return Whether or not it not null, not empty and does not contain any non-null values
+   */
+  public static boolean notEmptyAndAllNull(Object container) {
+    Object x = container;
+    if (x == null) {
+      return true;
+    } else if (x instanceof Collection) {
+      return !((Collection) x).isEmpty() && ((Collection) x).stream().allMatch(isNull());
+    } else if (x instanceof Map) {
+      return !((Map) x).isEmpty() && ((Map) x).values().stream().allMatch(isNull());
+    } else if (x instanceof Object[]) {
+      return ((Object[]) x).length != 0 && Arrays.stream((Object[]) x).allMatch(isNull());
+    }
+    throw notAContainerObject(x);
+  }
+  /**
+   * Returns {@code null} if the argument is {@link #isEmpty(Object) empty}, else the argument
+   * itself.
    *
    * @param <T> The type of the argument
    * @param obj The argument
    * @return The argument itself or {@code null}
    */
-  public static <T> T e2n(T obj) {
+  public static <T> T emptyToNull(T obj) {
     return isEmpty(obj) ? null : obj;
   }
 
@@ -164,9 +231,9 @@ public class ObjectMethods {
    * <p>
    *
    * <ol>
-   *   <li>{@code null} equals an empty <code>String</code>
-   *   <li>{@code null} equals an empty <code>Collection</code>
-   *   <li>{@code null} equals an empty <code>Map</code>
+   *   <li>{@code null} equals an empty {@code String}
+   *   <li>{@code null} equals an empty {@code Collection}
+   *   <li>{@code null} equals an empty {@code Map}
    *   <li>{@code null} equals a zero-length array
    *   <li>{@code null} equals an empty {@link Emptyable}
    *   <li>{@code null} equals a zero-size {@link Sizeable}
@@ -410,8 +477,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns null if {@code arg0} is equal to {@code arg1}, else {@code arg0}. Equivalent to <code>
-   * nullIf(arg0, Objects::equals, arg1)</code>.
+   * Returns null if {@code arg0} is equal to {@code arg1}, else {@code arg0}. Equivalent to {@code
+   * nullIf(arg0, Objects::equals, arg1)}.
    *
    * @param <T> The input and return type
    * @param arg0 The value to test
@@ -424,7 +491,7 @@ public class ObjectMethods {
 
   /**
    * Returns null unless {@code arg0} equa;s {@code arg1} {@code arg1}, else {@code arg0}.
-   * Equivalent to <code>nullUnless(arg0, Objects::equals, arg1)</code>.
+   * Equivalent to {@code nullUnless(arg0, Objects::equals, arg1)}.
    *
    * @param <T> The input and return type
    * @param arg0 The value to test
@@ -477,7 +544,7 @@ public class ObjectMethods {
    * @param <U> The return type
    * @param value The value to test
    * @param then The transformation to apply to the value if it is not null
-   * @return
+   * @return {@code value} or null
    */
   public static <T, U> U ifNotNull(T value, Function<T, U> then) {
     return value != null ? then.apply(value) : null;
@@ -496,7 +563,6 @@ public class ObjectMethods {
    * @param value The value to test
    * @param then The transformation to apply to the value if it is not null
    * @param otherwise A supplier providing the default value
-   * @return
    */
   public static <T, U> U ifNotNull(T value, Function<T, U> then, Supplier<U> otherwise) {
     return value != null ? then.apply(value) : otherwise.get();
@@ -510,7 +576,6 @@ public class ObjectMethods {
    * @param <U> The return type
    * @param value The value to test
    * @param then The transformation to apply to the value if it is not null
-   * @return
    */
   public static <T, U> U ifNotEmpty(T value, Function<T, U> then) {
     return isNotEmpty(value) ? then.apply(value) : null;
@@ -525,7 +590,6 @@ public class ObjectMethods {
    * @param value The value to test
    * @param then The transformation to apply to the value if it is not null
    * @param otherwise A supplier providing the default value
-   * @return
    */
   public static <T, U> U ifNotEmpty(T value, Function<T, U> then, Supplier<U> otherwise) {
     return isNotEmpty(value) ? then.apply(value) : otherwise.get();
@@ -612,8 +676,8 @@ public class ObjectMethods {
   }
 
   private static boolean setsEqual(Set set1, Set set2) {
-    Set s1 = (Set) set1.stream().map(ObjectMethods::e2n).collect(toSet());
-    Set s2 = (Set) set2.stream().map(ObjectMethods::e2n).collect(toSet());
+    Set s1 = (Set) set1.stream().map(ObjectMethods::emptyToNull).collect(toSet());
+    Set s2 = (Set) set2.stream().map(ObjectMethods::emptyToNull).collect(toSet());
     if (s1.size() != s2.size()) {
       return false;
     } else if (s1.equals(s2)) {
@@ -655,5 +719,10 @@ public class ObjectMethods {
         || obj1 instanceof Set && obj2 instanceof Set
         || obj1 instanceof Map && obj2 instanceof Map
         || obj1 instanceof Object[] && obj2 instanceof Object[];
+  }
+
+  private static IllegalArgumentException notAContainerObject(Object obj) {
+    String s = "Not a container object: %s. Expected Collection, Map or Object[]";
+    return new IllegalArgumentException(String.format(s, obj.getClass().getName()));
   }
 }

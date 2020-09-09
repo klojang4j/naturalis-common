@@ -64,7 +64,7 @@ public class ArrayMethods {
    */
   @SuppressWarnings("unchecked")
   public static <T> T[] concat(T[] array1, T[] array2) {
-    return (T[]) concat(array1, array2, EMPTY_OBJECT_ARRAY);
+    return (T[]) concat(array1, array2, new Object[0][0]);
   }
 
   /**

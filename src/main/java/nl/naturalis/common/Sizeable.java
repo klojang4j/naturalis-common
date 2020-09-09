@@ -10,7 +10,7 @@ public interface Sizeable {
   /**
    * Returns the size of the object.
    *
-   * @return
+   * @return The size of the object
    */
   int size();
 }
