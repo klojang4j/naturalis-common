@@ -21,7 +21,7 @@ import static nl.naturalis.common.function.Relation.isEqualTo;
  * object is an array or an instance of {@link Collection} or {@link Map}. For {@code Map} objects
  * the logic will <i>only</i> be applied to their values, not their keys. Also, the logic may by
  * definition not be applicable to primitive arrays, only to instances of {@code Object[]} (e.g.
- * {@link #isDeepNotNull(Object) isDeepNotNull}.
+ * {@link #isDeepNotNull(Object) isDeepNotNull}).
  *
  * @author Ayco Holleman
  */
@@ -176,9 +176,9 @@ public class ObjectMethods {
 
   /**
    * Tests the provided arguments for equality using <i>empty-equals-null</i> semantics. This is
-   * equivalent to {@code Objects.equals(e2n(obj1), e2n(obj2))}, except that empty instance of one
-   * type (e.g. {@code String}) is <b>not</b> equal to an empty instance of another type (e.g.
-   * {@code Set}). So:
+   * roughly equivalent to {@code Objects.equals(emptyToNull(obj1), emptyToNull(obj2))}, except that
+   * empty instance of one type (e.g. {@code String}) is <b>not</b> equal to an empty instance of
+   * another type (e.g. {@code Set}). So:
    *
    * <p>
    *
@@ -189,6 +189,7 @@ public class ObjectMethods {
    *   <li>{@code null} equals a zero-length array
    *   <li>{@code null} equals an empty {@link Emptyable}
    *   <li>{@code null} equals a zero-size {@link Sizeable}
+   *   <li>An empty intance of one type <i>does not equal</i> an empty instance of another type
    * </ol>
    *
    * @param obj1 The 1st of the pair of objects to compare
@@ -206,8 +207,8 @@ public class ObjectMethods {
 
   /**
    * Recursively tests the arguments for equality using <i>empty-equals-null</i> semantics. In other
-   * words, for arrays, collections and maps, elements c.q. values are also compared using {@code
-   * e2nDeepEquals}. Map keys are compared as usual.
+   * words, for container objects elements c.q. values are also compared using {@code
+   * e2nDeepEquals}.
    *
    * @param obj1 The 1st of the pair of objects to compare
    * @param obj2 The 2nd of the pair of objects to compare
@@ -442,8 +443,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns null unless {@code arg0} equa;s {@code arg1} {@code arg1}, else {@code arg0}.
-   * Equivalent to {@code nullUnless(arg0, Objects::equals, arg1)}.
+   * Returns null unless {@code arg0} equals {@code arg1}, else {@code arg0}. Equivalent to {@code
+   * nullUnless(arg0, Objects::equals, arg1)}.
    *
    * @param <T> The input and return type
    * @param arg0 The value to test
@@ -455,8 +456,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns null if {@code arg0} has the specified {@link Relation} to {@code arg1} {@code arg1},
-   * else {@code arg0}.
+   * Returns null if {@code arg0} has the specified {@link Relation} to {@code arg1}, else {@code
+   * arg0}.
    *
    * @param <T> The input and return type
    * @param <U> The type of target of the relation
@@ -485,8 +486,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the result of passing {@code value} to {@code then} if {@code value} is not null, else
-   * the value supplied by {@code otherwise}. For example:
+   * Returns the result of passing the specified argument to the specified {@code Funtion} if the
+   * argument is not null, else returns null. For example:
    *
    * <pre>
    * String[] strs = ifNotNull("Hello World", s -> s.split(" "));
@@ -494,17 +495,18 @@ public class ObjectMethods {
    *
    * @param <T> The type of the first argument
    * @param <U> The return type
-   * @param value The value to test
+   * @param arg The value to test
    * @param then The transformation to apply to the value if it is not null
    * @return {@code value} or null
    */
-  public static <T, U> U ifNotNull(T value, Function<T, U> then) {
-    return value != null ? then.apply(value) : null;
+  public static <T, U> U ifNotNull(T arg, Function<T, U> then) {
+    return arg != null ? then.apply(arg) : null;
   }
 
   /**
-   * Returns the result of passing {@code value} to {@code then} if {@code value} is not null, else
-   * the value supplied by {@code otherwise}. For example:
+   * Returns the result of passing the specified argument to the specified {@code Funtion} if the
+   * argument is not null, else returns the result provided by the specified {@code Supplier}. For
+   * example:
    *
    * <pre>
    * String[] strs = ifNotNull("Hello World", s -> s.split(" "), () -> new String[0]);
@@ -512,12 +514,12 @@ public class ObjectMethods {
    *
    * @param <T> The type of the first argument
    * @param <U> The return type
-   * @param value The value to test
+   * @param arg The value to test
    * @param then The transformation to apply to the value if it is not null
    * @param otherwise A supplier providing the default value
    */
-  public static <T, U> U ifNotNull(T value, Function<T, U> then, Supplier<U> otherwise) {
-    return value != null ? then.apply(value) : otherwise.get();
+  public static <T, U> U ifNotNull(T arg, Function<T, U> then, Supplier<U> otherwise) {
+    return arg != null ? then.apply(arg) : otherwise.get();
   }
 
   /**
@@ -526,30 +528,30 @@ public class ObjectMethods {
    *
    * @param <T> The type of the first argument
    * @param <U> The return type
-   * @param value The value to test
+   * @param arg The value to test
    * @param then The transformation to apply to the value if it is not null
    */
-  public static <T, U> U ifNotEmpty(T value, Function<T, U> then) {
-    return isNotEmpty(value) ? then.apply(value) : null;
+  public static <T, U> U ifNotEmpty(T arg, Function<T, U> then) {
+    return isNotEmpty(arg) ? then.apply(arg) : null;
   }
 
   /**
-   * Returns the result of passing {@code value} to {@code then} if {@code value} is not empty, else
-   * the value supplied by {@code otherwise}.
+   * Returns the result of passing the specified argument to the specified {@code Funtion} if the
+   * argument is not null, else returns the result provided by the specified {@code Supplier}.
    *
    * @param <T> The type of the first argument
    * @param <U> The return type
-   * @param value The value to test
+   * @param arg The value to test
    * @param then The transformation to apply to the value if it is not null
    * @param otherwise A supplier providing the default value
    */
-  public static <T, U> U ifNotEmpty(T value, Function<T, U> then, Supplier<U> otherwise) {
-    return isNotEmpty(value) ? then.apply(value) : otherwise.get();
+  public static <T, U> U ifNotEmpty(T arg, Function<T, U> then, Supplier<U> otherwise) {
+    return isNotEmpty(arg) ? then.apply(arg) : otherwise.get();
   }
 
   /**
-   * Executes the {@code Runnable} if {@code condition} evaluates to {@code true}, else does
-   * nothing.
+   * Executes the specified {@code Runnable} if the specified condition evaluates to {@code true},
+   * else does nothing.
    *
    * @param condition The condition to evaluate
    * @param then The action to execute
@@ -561,7 +563,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Executes {@code then} if {@code condition} evaluates to {@code true}, else {@code otherwise}.
+   * Executes the first {@code Runnable} if the specified condition evaluates to {@code true}, else
+   * the second.
    *
    * @param condition The condition to evaluate
    * @param then The action to execute if the condition to evaluates to {@code true}
@@ -576,15 +579,15 @@ public class ObjectMethods {
   }
 
   /**
-   * Passes {@code value} to {@code consumer} if not null, else does nothing.
+   * Passes the specified argument to the specified {@code consumer} if not null, else does nothing.
    *
    * @param <T> The type of the object to test
-   * @param value The value to test
+   * @param arg The value to test
    * @param consumer The {@code Consumer} whose {@code accewpt} method to call
    */
-  public static <T> void whenNotNull(T value, Consumer<T> consumer) {
-    if (value != null) {
-      consumer.accept(value);
+  public static <T> void whenNotNull(T arg, Consumer<T> consumer) {
+    if (arg != null) {
+      consumer.accept(arg);
     }
   }
 
