@@ -35,84 +35,61 @@ public class ObjectMethodsTest {
 
   @Test
   @SuppressWarnings("rawtypes")
-  public void notEmptyAndAllNull_01() {
-    assertTrue("01", notEmptyAndAllNull(null));
-    assertFalse("02", notEmptyAndAllNull(Collections.emptyList()));
-    assertFalse("03", notEmptyAndAllNull(Collections.emptySet()));
-    assertFalse("04", notEmptyAndAllNull(Collections.emptyMap()));
-    assertFalse("05", notEmptyAndAllNull(new String[0]));
-    assertTrue("06", notEmptyAndAllNull(new String[] {null}));
-    assertTrue("07", notEmptyAndAllNull(new String[] {null, null}));
-    assertTrue("08", notEmptyAndAllNull(new String[] {null, null, null}));
-    assertFalse("09", notEmptyAndAllNull(new String[] {null, "", null}));
-    assertTrue("10", notEmptyAndAllNull(Arrays.asList(null, null, null)));
-    assertFalse("11", notEmptyAndAllNull(Arrays.asList("Hello, world")));
+  public void isDeepNotNull01() {
+    assertFalse("01", isDeepNotNull(null));
+    assertFalse("02", isDeepNotNull(Collections.emptyList()));
+    assertFalse("03", isDeepNotNull(Collections.emptySet()));
+    assertFalse("04", isDeepNotNull(Collections.emptyMap()));
+    assertFalse("05", isDeepNotNull(new String[0]));
+    assertFalse("06", isDeepNotNull(new String[] {null}));
+    assertFalse("07", isDeepNotNull(new String[] {null, null}));
+    assertFalse("08", isDeepNotNull(new String[] {null, null, null}));
+    assertFalse("09", isDeepNotNull(new String[] {null, "", null}));
+    assertFalse("10", isDeepNotNull(Arrays.asList(null, null, null)));
+    assertTrue("11", isDeepNotNull(Arrays.asList("Hello, world")));
     Map map = CollectionMethods.newHashMap("KEY1", null, "KEY2", null, "KEY3", null);
-    assertTrue("12", notEmptyAndAllNull(map));
+    assertFalse("12", isDeepNotNull(map));
     map = CollectionMethods.newHashMap(null, "VAL1", "KEY2", null, "KEY3", null);
-    assertFalse("13", notEmptyAndAllNull(map));
-  }
-
-  @Test
-  @SuppressWarnings("rawtypes")
-  public void notEmptyAndNotContainsNull_01() {
-    assertFalse("01", notEmptyAndNoneNull(null));
-    assertFalse("02", notEmptyAndNoneNull(Collections.emptyList()));
-    assertFalse("03", notEmptyAndNoneNull(Collections.emptySet()));
-    assertFalse("04", notEmptyAndNoneNull(Collections.emptyMap()));
-    assertFalse("05", notEmptyAndNoneNull(new String[0]));
-    assertFalse("06", notEmptyAndNoneNull(new String[] {null}));
-    assertFalse("07", notEmptyAndNoneNull(new String[] {null, null}));
-    assertFalse("08", notEmptyAndNoneNull(new String[] {null, null, null}));
-    assertFalse("09", notEmptyAndNoneNull(new String[] {null, "", null}));
-    assertFalse("10", notEmptyAndNoneNull(Arrays.asList(null, null, null)));
-    assertTrue("11", notEmptyAndNoneNull(Arrays.asList("Hello, world")));
-    Map map = CollectionMethods.newHashMap("KEY1", null, "KEY2", null, "KEY3", null);
-    assertFalse("12", notEmptyAndNoneNull(map));
-    map = CollectionMethods.newHashMap(null, "VAL1", "KEY2", null, "KEY3", null);
-    assertFalse("13", notEmptyAndNoneNull(map));
-    assertTrue("10", notEmptyAndNoneNull(Arrays.asList("hello", "World")));
+    assertFalse("13", isDeepNotNull(map));
+    assertTrue("10", isDeepNotNull(Arrays.asList("hello", "World")));
     map = CollectionMethods.newHashMap("KEY1", "VAL1", "KEY2", "VAL2", "KEY3", "VAL3");
-    assertTrue("10", notEmptyAndNoneNull(map));
+    assertTrue("10", isDeepNotNull(map));
   }
 
+  @SuppressWarnings("rawtypes")
   @Test
-  public void deepNotEmpty_01() {
+  public void isDeepNotEmpty01() {
     assertTrue("01", isDeepNotEmpty(List.of("Hi", new String[] {"Hi", "There"})));
     assertFalse("02", isDeepNotEmpty(List.of("Hi", new String[0])));
     assertTrue("03", isDeepNotEmpty(List.of("Hi", Collections.singletonMap("a", "b"))));
     assertFalse("04", isDeepNotEmpty(List.of("Hi", Collections.emptyMap())));
-    assertFalse(
-        "05",
-        isDeepNotEmpty(
-            List.of(
-                "Hi",
-                Collections.singletonMap(
-                    "a", Collections.singletonMap("b", Collections.emptyMap())))));
-    assertTrue("06", isDeepNotEmpty(List.of("Hi", Set.of(new Object(), new Object()))));
+    Map map0 = Collections.emptyMap();
+    Map map1 = Collections.singletonMap("b", map0);
+    Map map2 = Collections.singletonMap("a", map1);
+    List list0 = List.of("hi", map2);
+    assertFalse("05", isDeepNotEmpty(list0));
     assertFalse("07", isDeepNotEmpty(List.of("Hi", Collections.emptySet())));
   }
 
+  @SuppressWarnings("rawtypes")
   @Test
-  public void ifEmpty_01() {
+  public void ifEmpty01() {
     assertEquals("01", "Hi There", ifEmpty("", "Hi There"));
     assertEquals("02", "Hi There", ifEmpty("", () -> "Hi There"));
     assertEquals("03", "World", ifEmpty("World", () -> "Hi There"));
-    assertEquals(
-        "04",
-        List.of("Hi There"),
-        ifEmpty(Collections.emptyList(), () -> Arrays.asList("Hi There")));
+    List list0 = List.of("Hi There");
+    assertEquals("04", list0, ifEmpty(Collections.emptyList(), () -> Arrays.asList("Hi There")));
   }
 
   @Test
-  public void ifNull_01() {
+  public void ifNull01() {
     assertEquals("01", "13", ifNull("13", "14"));
     assertEquals("02", "14", ifNull(null, "14"));
     assertEquals("03", "14", ifNull(null, () -> "14"));
   }
 
   @Test
-  public void ifNotNull_01() {
+  public void ifNotNull01() {
     String s = "7";
     Integer i = ifNotNull(s, Integer::valueOf);
     assertEquals("01", 7, i.intValue());
@@ -126,7 +103,7 @@ public class ObjectMethodsTest {
   }
 
   @Test
-  public void ifTrue_01() {
+  public void ifTrue01() {
     boolean ignoreCase = true;
     assertEquals("01", "hello, world!", ifTrue(ignoreCase, "Hello, World!", String::toLowerCase));
     ignoreCase = false;
@@ -134,7 +111,7 @@ public class ObjectMethodsTest {
   }
 
   @Test
-  public void ifFalse_01() {
+  public void ifFalse01() {
     boolean keepCapitals = true;
     assertEquals(
         "01", "Hello, World!", ifFalse(keepCapitals, "Hello, World!", String::toLowerCase));
@@ -144,7 +121,7 @@ public class ObjectMethodsTest {
   }
 
   @Test
-  public void e2nDeepEquals_01() {
+  public void e2nDeepEquals01() {
     assertTrue("01", e2nDeepEquals(null, ""));
     assertTrue("02", e2nDeepEquals(null, null));
     assertTrue("03", e2nDeepEquals(null, new Enum[0]));
@@ -169,7 +146,7 @@ public class ObjectMethodsTest {
 
   @Test // behaviour with sets (pretty extreme edge cases)
   @SuppressWarnings("rawtypes")
-  public void e2nDeepEquals_02() {
+  public void e2nDeepEquals02() {
 
     Set subsubset1 = setOf("John");
     Set subsubset2 = setOf("John", null);

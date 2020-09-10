@@ -3,7 +3,7 @@ package nl.naturalis.common.internal;
 import java.util.Collection;
 import java.util.function.Function;
 import static nl.naturalis.common.ObjectMethods.isDeepNotEmpty;
-import static nl.naturalis.common.ObjectMethods.notEmptyAndNoneNull;
+import static nl.naturalis.common.ObjectMethods.isDeepNotNull;
 
 @SuppressWarnings("rawtypes")
 public class CollectionCheck<E extends Exception> extends ObjectCheck<Collection, E> {
@@ -14,7 +14,7 @@ public class CollectionCheck<E extends Exception> extends ObjectCheck<Collection
 
   @Override
   public CollectionCheck<E> noneNull() throws E {
-    that(notEmptyAndNoneNull(arg), smash(ERR_NONE_NULL, argName));
+    that(isDeepNotNull(arg), smash(ERR_NONE_NULL, argName));
     return this;
   }
 

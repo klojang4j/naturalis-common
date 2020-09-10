@@ -2,7 +2,7 @@ package nl.naturalis.common.internal;
 
 import java.util.function.Function;
 import static nl.naturalis.common.ObjectMethods.isDeepNotEmpty;
-import static nl.naturalis.common.ObjectMethods.notEmptyAndNoneNull;
+import static nl.naturalis.common.ObjectMethods.isDeepNotNull;
 
 public class ObjectArrayCheck<E extends Exception> extends ObjectCheck<Object[], E> {
 
@@ -12,7 +12,7 @@ public class ObjectArrayCheck<E extends Exception> extends ObjectCheck<Object[],
 
   @Override
   public ObjectArrayCheck<E> noneNull() throws E {
-    that(notEmptyAndNoneNull(arg), smash(ERR_NONE_NULL, argName));
+    that(isDeepNotNull(arg), smash(ERR_NONE_NULL, argName));
     return this;
   }
 

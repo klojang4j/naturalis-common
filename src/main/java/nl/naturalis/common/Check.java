@@ -2,7 +2,6 @@ package nl.naturalis.common;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.*;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.Relation;
@@ -10,6 +9,10 @@ import nl.naturalis.common.internal.*;
 import static nl.naturalis.common.ObjectMethods.isDeepNotEmpty;
 import static nl.naturalis.common.ObjectMethods.isNotEmpty;
 import static nl.naturalis.common.StringMethods.isNotBlank;
+import static nl.naturalis.common.function.Predicates.isDeepNotEmpty;
+import static nl.naturalis.common.function.Predicates.isNoneNull;
+import static nl.naturalis.common.function.Predicates.isNotEmpty;
+import static nl.naturalis.common.function.Predicates.isNotNull;
 
 /**
  * Methods for checking preconditions. If you need to check just one precondition for an argument,
@@ -41,8 +44,7 @@ import static nl.naturalis.common.StringMethods.isNotBlank;
  * Check.notNull(name, "Please specify a %s", "toy"); // -> "Please specify a toy"
  * </pre>
  *
- * <p>(If the first message argument is null or empty, it is ignored. Any remaining message
- * arguments are ignored as well.)
+ * <p>(If the first message argument is null or empty, it is ignored.)
  *
  * <h3>Checking properties and changing the Exception type</h3>
  *
@@ -225,7 +227,7 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the condition evaluates to false
    */
   public static void argument(boolean condition, String message, Object... msgArgs) {
-    that(condition, badArgument(message, msgArgs));
+    that(condition, badArg0(message, msgArgs));
   }
 
   /**
@@ -240,7 +242,7 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the {@code Predicate} evaluates to false
    */
   public static <T> T argument(T arg, Predicate<T> test, String message, Object... msgArgs) {
-    return that(test.test(arg), arg, badArgument(message, msgArgs));
+    return that(test.test(arg), arg, badArg0(message, msgArgs));
   }
 
   /**
@@ -257,7 +259,7 @@ public abstract class Check<T, E extends Exception> {
     if (test.test(arg)) {
       return arg;
     }
-    throw badArgument(message, msgArgs).get();
+    throw badArg0(message, msgArgs).get();
   }
 
   /**
@@ -309,7 +311,7 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the argument is null
    */
   public static <T> T notNull(T arg, String argName) throws IllegalArgumentException {
-    return argument(arg, Objects::nonNull, ERR_NOT_NULL, argName);
+    return argument(arg, isNotNull(), ERR_NOT_NULL, argName);
   }
 
   /**
@@ -324,7 +326,7 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the argument is null
    */
   public static <T> T notNull(T arg, String message, Object msgArg0, Object... msgArgs) {
-    return argument(arg, Objects::nonNull, format(message, msgArg0, msgArgs));
+    return argument(arg, isNotNull(), format(message, msgArg0, msgArgs));
   }
 
   /**
@@ -343,7 +345,7 @@ public abstract class Check<T, E extends Exception> {
    * be an instance of {@link Collection}, {@link Map} or {@code Object[]}. For {@code Map}
    * arguments only the values are tested, not the keys.
    *
-   * @see ObjectMethods#notEmptyAndNoneNull(Object)
+   * @see ObjectMethods#isDeepNotNull(Object)
    * @param <T> The type of the argument
    * @param arg The argument
    * @param argName The argument name
@@ -351,7 +353,7 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the argument is null or contains null values
    */
   public static <T> T noneNull(T arg, String argName) {
-    return argument(arg, ObjectMethods::noneNull, ERR_NONE_NULL, argName);
+    return argument(arg, isNoneNull(), ERR_NONE_NULL, argName);
   }
 
   /**
@@ -359,7 +361,7 @@ public abstract class Check<T, E extends Exception> {
    * be an instance of {@link Collection}, {@link Map} or {@code Object[]}. For {@code Map}
    * arguments only the values are tested, not the keys.
    *
-   * @see ObjectMethods#notEmptyAndNoneNull(Object)
+   * @see ObjectMethods#isDeepNotNull(Object)
    * @param <T> The type of the argument
    * @param arg The argument
    * @param message The exception message
@@ -369,7 +371,7 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the argument is null or contains null values
    */
   public static <T> T noneNull(T arg, String message, Object msgArg0, Object... msgArgs) {
-    return argument(arg, ObjectMethods::noneNull, format(message, msgArg0, msgArgs));
+    return argument(arg, isNoneNull(), format(message, msgArg0, msgArgs));
   }
 
   /**
@@ -382,7 +384,7 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the argument is empty
    */
   public static <T> T notEmpty(T arg, String argName) {
-    return argument(arg, ObjectMethods::isNotEmpty, ERR_NOT_EMPTY, argName);
+    return argument(arg, isNotEmpty(), ERR_NOT_EMPTY, argName);
   }
 
   /**
@@ -396,7 +398,7 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the argument is empty
    */
   public static <T> T notEmpty(T arg, String message, Object msgArg0, Object... msgArgs) {
-    return that(isNotEmpty(arg), arg, badArg(message, msgArg0, msgArgs));
+    return that(isNotEmpty(arg), arg, badArg1(message, msgArg0, msgArgs));
   }
 
   /**
@@ -411,7 +413,7 @@ public abstract class Check<T, E extends Exception> {
    * @return The argument
    */
   public static <T> T noneEmpty(T arg, String argName) {
-    return argument(arg, ObjectMethods::isDeepNotEmpty, ERR_NONE_EMPTY, argName);
+    return argument(arg, isDeepNotEmpty(), ERR_NONE_EMPTY, argName);
   }
 
   /**
@@ -428,7 +430,7 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the argument is empty or contains empty values
    */
   public static <T> T noneEmpty(T arg, String message, Object msgArg0, Object... msgArgs) {
-    return that(isDeepNotEmpty(arg), arg, badArg(message, msgArg0, msgArgs));
+    return that(isDeepNotEmpty(arg), arg, badArg1(message, msgArg0, msgArgs));
   }
 
   /**
@@ -455,12 +457,11 @@ public abstract class Check<T, E extends Exception> {
    * @throws IllegalArgumentException If the argument is blank
    */
   public static String notBlank(String arg, String message, Object msgArg0, Object... msgArgs) {
-    return that(isNotBlank(arg), arg, badArg(message, msgArg0, msgArgs));
+    return that(isNotBlank(arg), arg, badArg1(message, msgArg0, msgArgs));
   }
 
   /**
-   * Verifies that the argument is greater than {@code minVal}. For {@code Collection}, {@code Map}
-   * and array arguments, this method doubles as a check on their size/length.
+   * Verifies that the argument is greater than {@code minVal}.
    *
    * @param arg The argument
    * @param minVal The argument's lower bound (exclusive)
@@ -473,8 +474,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is greater than {@code minVal}. For {@code Collection}, {@code Map}
-   * and array arguments, this method doubles as a check on their size/length.
+   * Verifies that the argument is greater than {@code minVal}.
    *
    * @param arg The argument
    * @param minVal The argument's lower bound (exclusive)
@@ -488,12 +488,11 @@ public abstract class Check<T, E extends Exception> {
     if (arg > minVal) {
       return arg;
     }
-    throw badArg(message, msgArg0, msgArgs).get();
+    throw new IllegalArgumentException(format(message, msgArg0, msgArgs));
   }
 
   /**
-   * Verifies that the argument is greater than or equal to {@code minVal}. For {@code Collection},
-   * {@code Map} and array arguments, this method doubles as a check on their size/length.
+   * Verifies that the argument is greater than or equal to {@code minVal}.
    *
    * @param arg The argument
    * @param minVal The argument's lower bound (inclusive)
@@ -506,8 +505,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument is greater than or equal to {@code minVal}. For {@code Collection},
-   * {@code Map} and array arguments, this method doubles as a check on their size/length.
+   * Verifies that the argument is greater than or equal to {@code minVal}.
    *
    * @param arg The argument
    * @param minVal The argument's lower bound (inclusive)
@@ -521,7 +519,7 @@ public abstract class Check<T, E extends Exception> {
     if (arg >= minVal) {
       return arg;
     }
-    throw badArg(message, msgArg0, msgArgs).get();
+    throw new IllegalArgumentException(format(message, msgArg0, msgArgs));
   }
 
   /**
@@ -552,7 +550,7 @@ public abstract class Check<T, E extends Exception> {
     if (arg < maxVal) {
       return arg;
     }
-    throw badArg(message, msgArg0, msgArgs).get();
+    throw new IllegalArgumentException(format(message, msgArg0, msgArgs));
   }
 
   /**
@@ -583,7 +581,7 @@ public abstract class Check<T, E extends Exception> {
     if (arg <= maxVal) {
       return arg;
     }
-    throw badArg(message, msgArg0, msgArgs).get();
+    throw new IllegalArgumentException(format(message, msgArg0, msgArgs));
   }
 
   /**
@@ -600,7 +598,7 @@ public abstract class Check<T, E extends Exception> {
     if (arg >= minInclusive && arg < maxExclusive) {
       return arg;
     }
-    throw badArgument(ERR_BETWEEN, argName, minInclusive, maxExclusive).get();
+    throw badArg0(ERR_BETWEEN, argName, minInclusive, maxExclusive).get();
   }
 
   /**
@@ -617,7 +615,7 @@ public abstract class Check<T, E extends Exception> {
     if (arg >= minInclusive && arg <= maxInclusive) {
       return arg;
     }
-    throw badArgument(ERR_IN_RANGE, argName, minInclusive, maxInclusive).get();
+    throw badArg0(ERR_IN_RANGE, argName, minInclusive, maxInclusive).get();
   }
 
   /**
@@ -634,32 +632,16 @@ public abstract class Check<T, E extends Exception> {
     that(condition, () -> badState(message, msgArgs));
   }
 
-  /**
-   * Utility method returning a {@code Supplier} of an {@code IllegalArgumentException} with the
-   * provided message and message arguments. Useful as static import:
-   *
-   * <p>
-   *
-   * <pre>
-   * Check.that(year % 13 != 0, badArgument("Not a lucky year: %d", year));
-   * </pre>
-   *
-   * @param message The exception message
-   * @param msgArgs The message arguments
-   * @return A {@code Supplier} of an {@code IllegalArgumentException} with the provided message and
-   *     message arguments
-   */
-  public static Supplier<IllegalArgumentException> badArgument(String message, Object... msgArgs) {
-    if (message == null) { // Do not use Check.notNull() - causes endless recursion.
+  private static Supplier<IllegalArgumentException> badArg0(String message, Object... msgArgs) {
+    if (message == null) { // Do not use Check.notNull() - causes endless recursion!
       throw new IllegalArgumentException("message must not be null");
-    }
-    if (msgArgs == null) {
-      return () -> new IllegalArgumentException(message);
+    } else if (msgArgs == null) {
+      throw new IllegalArgumentException("msgArgs must not be null");
     }
     return () -> new IllegalArgumentException(String.format(message, msgArgs));
   }
 
-  private static Supplier<IllegalArgumentException> badArg(
+  private static Supplier<IllegalArgumentException> badArg1(
       String msg, Object msgArg0, Object... msgArgs) {
     return () -> new IllegalArgumentException(format(msg, msgArg0, msgArgs));
   }
@@ -699,21 +681,8 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Checks the value of a property of the argument. This allows you to check multiple properties of
-   * the same argument. For example:
-   *
-   * <p>
-   *
-   * <pre>
-   * this.employee = Check.that(employee, "employee")
-   *    .notNull()
-   *    .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
-   *    .and(Employee::getHobbies, not(Collection::contains), "Partying", "Partying discouraged")
-   *    .and(Employee::getAge, GTE, 16, "Employee must be at least 16")
-   *    .value();
-   * </pre>
-   *
-   * <p>You <i>should</i> do a {@link #notNull() notNull} check on the argument first, because this
-   * method doesn't and assumes the argument is not null.
+   * the same argument. You <i>should</i> do a {@link #notNull() notNull} check on the argument
+   * first, because this method doesn't and assumes the argument is not null.
    *
    * @see Relation
    * @see IntRelation

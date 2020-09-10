@@ -56,6 +56,28 @@ public class Predicates {
   }
 
   /**
+   * Same as {@link ObjectMethods#isNoneNull(Object) ObjectMethods::isNoneNull} but more concise as
+   * static import.
+   *
+   * @param <T> The type of the object being tested
+   * @return An instance of {@code Predicate}
+   */
+  public static <T> Predicate<T> isNoneNull() {
+    return ObjectMethods::isNoneNull;
+  }
+
+  /**
+   * Same as {@link ObjectMethods#isDeepNotNull(Object) ObjectMethods::isDeepNotNull} but more
+   * concise as static import.
+   *
+   * @param <T> The type of the object being tested
+   * @return An instance of {@code Predicate}
+   */
+  public static <T> Predicate<T> isDeepNotNull() {
+    return ObjectMethods::isDeepNotNull;
+  }
+
+  /**
    * Same as {@link ObjectMethods#isDeepNotEmpty(Object) ObjectMethods::isDeepNotEmpty} but more
    * concise as static import.
    *
@@ -64,16 +86,5 @@ public class Predicates {
    */
   public static <T> Predicate<T> isDeepNotEmpty() {
     return ObjectMethods::isDeepNotEmpty;
-  }
-
-  /**
-   * Same as {@link ObjectMethods#noneNull(Object) ObjectMethods::noneNull} but more concise as
-   * static import.
-   *
-   * @param <T> The type of the object being tested
-   * @return An instance of {@code Predicate}
-   */
-  public static <T> Predicate<T> noneNull() {
-    return ObjectMethods::noneNull;
   }
 }

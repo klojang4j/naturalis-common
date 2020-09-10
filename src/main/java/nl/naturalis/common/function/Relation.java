@@ -2,6 +2,7 @@ package nl.naturalis.common.function;
 
 import java.util.Collection;
 import java.util.Objects;
+import nl.naturalis.common.ClassMethods;
 
 /**
  * Verifies that two objects have a certain relationship to each other. For example, if object A is
@@ -72,6 +73,18 @@ public interface Relation<T, U> {
    */
   public static <X> Relation<X, X> isEqualTo() {
     return Objects::equals;
+  }
+
+  /**
+   * Returns the <i>instance-of</i> relationship. Same as {@link ClassMethods#isA(Object, Class)
+   * ClassMethods::isA}, but more concise as a static import.
+   *
+   * @param <X> The type of the subject of the relationship
+   * @param <Y> TYhe type of the object of the relationship
+   * @return The <i>instance-o</i> relationship
+   */
+  public static <X, Y extends Class<?>> Relation<X, Y> instanceOf() {
+    return ClassMethods::isA;
   }
 
   /**

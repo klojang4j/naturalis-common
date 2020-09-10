@@ -3,8 +3,8 @@ package nl.naturalis.common;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Supplier;
 import static java.lang.System.arraycopy;
-import static nl.naturalis.common.Check.badArgument;
 
 /** Methods for working with arrays. */
 public class ArrayMethods {
@@ -85,7 +85,7 @@ public class ArrayMethods {
     Check.noneNull(moreArrays, "moreArrays");
     long x = Arrays.stream(moreArrays).flatMap(Arrays::stream).count();
     long y = arr0.length + arr1.length + arr2.length + x;
-    Check.that(y <= Integer.MAX_VALUE, badArgument("Concatenated array too large"));
+    Check.that(y <= Integer.MAX_VALUE, illegalArgument("Concatenated array too large"));
     int i = (int) y;
     T[] all = fromTemplate(arr0, i);
     i = 0;
@@ -266,5 +266,9 @@ public class ArrayMethods {
     arraycopy(moreObjs, 0, res, 2, moreObjs.length);
     arraycopy(array, 0, res, 2 + moreObjs.length, array.length);
     return res;
+  }
+
+  private static Supplier<IllegalArgumentException> illegalArgument(String msg, Object... msgArgs) {
+    return () -> new IllegalArgumentException(String.format(msg, msgArgs));
   }
 }

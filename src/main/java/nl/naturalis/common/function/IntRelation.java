@@ -23,7 +23,7 @@ public interface IntRelation {
   public static final IntRelation LT = (arg0, arg1) -> arg0 < arg1;
   /** The <i>less-than-or-equal-to</i> relationship */
   public static final IntRelation LTE = (arg0, arg1) -> arg0 <= arg1;
-  /** The <i>divisible-by</i> relationship */
+  /** The <i>multiple-of</i> relationship */
   public static final IntRelation MULTIPLE_OF = (arg0, arg1) -> arg0 % arg1 == 0;
   /** The <i>divisor-of</i> relationship */
   public static final IntRelation DIVISOR_OF = (arg0, arg1) -> arg1 % arg0 == 0;
@@ -35,5 +35,5 @@ public interface IntRelation {
    * @param object The target of the relationship
    * @return {@code true} if the relation exists, {@code false} otherwise.
    */
-  boolean existsAsInt(int subject, int object);
+  boolean exists(int subject, int object);
 }
