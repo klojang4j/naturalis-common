@@ -19,11 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.UnaryOperator;
-
-import nl.naturalis.common.Check;
 import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.ExceptionMethods;
-
+import nl.naturalis.common.check.Check;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 

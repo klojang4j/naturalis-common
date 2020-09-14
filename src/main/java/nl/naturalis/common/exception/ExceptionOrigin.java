@@ -1,7 +1,7 @@
 package nl.naturalis.common.exception;
 
-import nl.naturalis.common.Check;
 import nl.naturalis.common.ExceptionMethods;
+import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ArrayMethods.isEmpty;
 import static nl.naturalis.common.ArrayMethods.isNotEmpty;
 import static nl.naturalis.common.StringMethods.rtrim;
@@ -57,7 +57,7 @@ public class ExceptionOrigin {
    *     exception to be traced back to. May be null.
    */
   public ExceptionOrigin(Throwable exc, String search) {
-    this.exc = Check.notNull(exc, "exc");
+    this.exc = Check.notNull(exc, "exc").ok();
     this.search = search;
     if (isEmpty(exc.getStackTrace())) {
       this.ste = null;

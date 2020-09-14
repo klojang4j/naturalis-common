@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.IntStream;
-import nl.naturalis.common.Check;
 import nl.naturalis.common.ClassMethods;
-import static nl.naturalis.common.ClassMethods.getArrayType;
+import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.ClassMethods.getArrayTypeSimpleName;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
 import static nl.naturalis.common.path.Path.isArrayIndex;
 import static nl.naturalis.common.path.PathWalkerException.illegalAccess;
+import static nl.naturalis.common.check.Checks.*;
+import static nl.naturalis.common.check.Check.*;
 
 /**
  * Reads/writes values within a given Object using {@link Path} objects. The {@code PathWalker}
@@ -68,7 +70,7 @@ public final class PathWalker {
    * @param paths
    */
   public PathWalker(Path... paths) {
-    Check.that(paths, "paths").notEmpty().noneNull();
+    Check.that(paths, "paths", notEmpty()).and(noneNull());
     this.paths = Arrays.copyOf(paths, paths.length);
     this.useDeadEnd = false;
     this.keyDeser = null;
@@ -81,7 +83,7 @@ public final class PathWalker {
    * @param paths
    */
   public PathWalker(String... paths) {
-    Check.that(paths, "paths").notEmpty().noneNull();
+    Check.that(paths, "paths", notEmpty()).and(noneNull());
     this.paths = Arrays.stream(paths).map(Path::new).toArray(Path[]::new);
     this.useDeadEnd = false;
     this.keyDeser = null;
@@ -124,7 +126,7 @@ public final class PathWalker {
    */
   public PathWalker(
       List<Path> paths, boolean useDeadEndValue, Function<Path, Object> mapKeyDeserializer) {
-    Check.that(paths, "paths").notEmpty().noneNull();
+    Check.that(paths, "paths", notEmpty()).and(noneNull());
     this.paths = paths.toArray(Path[]::new);
     this.useDeadEnd = useDeadEndValue;
     this.keyDeser = mapKeyDeserializer;
@@ -153,7 +155,7 @@ public final class PathWalker {
    * @throws PathWalkerException
    */
   public void readValues(Object host, Object[] output) throws PathWalkerException {
-    Check.that(output, "output").notNull().gte(paths.length);
+    Check.that(output, "output", notNull()).and(objGreaterThan(), paths.length);
     IntStream.range(0, paths.length).forEach(i -> output[i] = readObj(host, paths[i]));
   }
 
@@ -192,9 +194,7 @@ public final class PathWalker {
    * @param values
    */
   public void writeValues(Object host, Object... values) {
-    Check.notNull(values, "values");
-    Check.integer(
-        values.length, x -> x == paths.length, "Invalid number of values: %d", values.length);
+    Check.notNull(values, "values").and(hasSize(), paths.length);
     for (int i = 0; i < paths.length; ++i) {
       write(host, paths[i], values[i]);
     }
@@ -348,7 +348,9 @@ public final class PathWalker {
         arr[idx] = value;
       }
     } else if (isPrimitiveArray(parval)) {
-      Check.notNull(value, "Cannot assign null to element of %s[]", getArrayType(parval));
+      Check.that(
+          value != null,
+          badArgument("Cannot assign null to element of %s[]", getArrayTypeSimpleName(parval)));
       if (idx < Array.getLength(parval)) {
         Array.set(parval, idx, value);
       }

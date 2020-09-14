@@ -2,6 +2,8 @@ package nl.naturalis.common;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.check.Checks.*;
 
 /**
  * Methods for inspecting types.
@@ -60,15 +62,29 @@ public class ClassMethods {
   }
 
   /**
-   * Returns a more friendlier description of an array than Java's innate toString().
+   * Returns a description of the type of the specified array, including the fully-qualified name of
+   * the array's component type. Meant to be a bit less harsh than the description produced by
+   * {@code array.toString()}
    *
-   * @param obj
-   * @return
+   * @param array The array
+   * @return The simple name of the array type
    */
-  public static String getArrayType(Object obj) {
-    Check.notNull(obj, "obj");
-    Check.argument(obj.getClass().isArray(), "obj must be an array");
-    return obj.getClass().getComponentType().getSimpleName() + "[]";
+  public static String getArrayTypeName(Object array) {
+    Check.notNull(array, "obj").and(isArray());
+    return array.getClass().getComponentType().getName() + "[]";
+  }
+
+  /**
+   * Returns a description of the type of the specified array, including the simple name of the
+   * array's component type. Meant to be a bit less harsh than the description produced by {@code
+   * array.toString()}
+   *
+   * @param array The array
+   * @return The simple name of the array type
+   */
+  public static String getArrayTypeSimpleName(Object array) {
+    Check.notNull(array, "obj").and(isArray());
+    return array.getClass().getComponentType().getSimpleName() + "[]";
   }
 
   @SuppressWarnings("rawtypes")

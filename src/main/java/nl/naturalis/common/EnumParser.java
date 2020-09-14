@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
-import static nl.naturalis.common.Check.notNull;
+import nl.naturalis.common.check.Check;
 
 /**
  * Parses strings into enum constants. Parsing is done via an string-to-enum map where the keys are
@@ -26,7 +26,6 @@ import static nl.naturalis.common.Check.notNull;
  */
 public class EnumParser<T extends Enum<T>> {
 
-  private static final String ERR_NULL_VALUE = "Cannot parse null into enum constant";
   private static final String ERR_INVALID_VALUE = "Invalid value for %s: \"%s\"";
 
   /**
@@ -34,7 +33,7 @@ public class EnumParser<T extends Enum<T>> {
    * string.
    */
   public static final UnaryOperator<String> DEFAULT_NORMALIZER =
-      s -> notNull(s, ERR_NULL_VALUE, "").replaceAll("[-_ ]", "").toLowerCase();
+      s -> Check.notNull(s, "s").ok().replaceAll("[-_ ]", "").toLowerCase();
 
   private final Class<T> enumClass;
   private final UnaryOperator<String> normalizer;
@@ -58,8 +57,8 @@ public class EnumParser<T extends Enum<T>> {
    * @param normalizer The normalization function
    */
   public EnumParser(Class<T> enumClass, UnaryOperator<String> normalizer) {
-    this.enumClass = Check.notNull(enumClass, "enumClass");
-    this.normalizer = Check.notNull(normalizer, "normalizer");
+    this.enumClass = Check.notNull(enumClass, "enumClass").ok();
+    this.normalizer = Check.notNull(normalizer, "normalizer").ok();
     HashMap<String, T> tmp = new HashMap<>(enumClass.getEnumConstants().length * 2);
     Arrays.stream(enumClass.getEnumConstants())
         .forEach(

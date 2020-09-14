@@ -7,10 +7,8 @@ import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import nl.naturalis.common.Check;
 import nl.naturalis.common.ExceptionMethods;
-
+import nl.naturalis.common.check.Check;
 import static java.time.temporal.ChronoField.YEAR;
 
 /**

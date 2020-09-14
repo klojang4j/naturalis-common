@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.naturalis.common.*;
+import nl.naturalis.common.check.Check;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
 import static java.util.function.Predicate.not;

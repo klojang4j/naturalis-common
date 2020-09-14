@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import org.junit.Test;
+import nl.naturalis.common.check.Check;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -136,7 +137,7 @@ public class CheckTest {
 
   @Test
   public void testCheckChaining() {
-    Integer i = Check.that(Integer.valueOf(5), "numBirds").notNull().gte(2).lt(10).value();
+    Integer i = Check.that(Integer.valueOf(5), "numBirds").notNull().gte(2).lt(10).ok();
     assertEquals(Integer.valueOf(5), i);
   }
 
@@ -180,7 +181,7 @@ public class CheckTest {
         .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
         .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
         .and(Employee::getAge, GTE, 16, "Employee must be at least 16")
-        .value();
+        .ok();
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -192,7 +193,7 @@ public class CheckTest {
         .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
         .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
         .and(Employee::getAge, GTE, 16, "Employee must be at least 16")
-        .value();
+        .ok();
   }
 
   @Test(expected = IOException.class)
@@ -204,7 +205,7 @@ public class CheckTest {
         .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
         .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
         .and(Employee::getAge, GTE, 16, "Employee must be at least 16")
-        .value();
+        .ok();
   }
 
   @Test(expected = IOException.class)
@@ -216,7 +217,7 @@ public class CheckTest {
         .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
         .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
         .and(Employee::getAge, GTE, 16, "Employee must be at least 16")
-        .value();
+        .ok();
   }
 
   @Test(expected = IOException.class)
@@ -228,6 +229,6 @@ public class CheckTest {
         .and(Employee::getFullName, s -> s.length() < 5, "Full name too large")
         .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
         .and(Employee::getAge, GTE, 16, "Employee must be at least 16")
-        .value();
+        .ok();
   }
 }

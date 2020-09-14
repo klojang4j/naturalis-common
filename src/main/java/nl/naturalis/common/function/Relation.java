@@ -1,9 +1,5 @@
 package nl.naturalis.common.function;
 
-import java.util.Collection;
-import java.util.Objects;
-import nl.naturalis.common.ClassMethods;
-
 /**
  * Verifies that two objects have a certain relationship to each other. For example, if object A is
  * a {@code Collection} and object B is an element of it, then the relationship <i>X contains Y</i>
@@ -39,52 +35,6 @@ public interface Relation<T, U> {
    */
   public static <X, Y> Relation<X, Y> not(Relation<X, Y> relation) {
     return (x, y) -> !relation.exists(x, y);
-  }
-
-  /**
-   * Returns the <i>contains</i> relationship for {@code Collection} objects. Same as {@link
-   * Collection#contains(Object) Collection::contains}, but more concise as a static import.
-   *
-   * @param <E> The type of the elements in the {@code Collection}
-   * @param <C> The type of the {@code Collection}
-   * @return The <i>contains</i> relationship
-   */
-  public static <E, C extends Collection<E>> Relation<C, E> contains() {
-    return Collection::contains;
-  }
-
-  /**
-   * Returns the <i>element-of</i> relationship for {@code Collection} objects.
-   *
-   * @param <E> The type of the elements in the {@code Collection}
-   * @param <C> The type of the {@code Collection}
-   * @return The <i>element-of</i> relationship
-   */
-  public static <E, C extends Collection<E>> Relation<E, C> elementOf() {
-    return reverse(contains());
-  }
-
-  /**
-   * Returns the <i>equal-to</i> relationship. Same as {@link Objects#equals(Object, Object)
-   * Objects::equals}, but more concise as a static import.
-   *
-   * @param <X> The type of the subject and the object of the relation
-   * @return The <i>equal-to</i> relationship
-   */
-  public static <X> Relation<X, X> isEqualTo() {
-    return Objects::equals;
-  }
-
-  /**
-   * Returns the <i>instance-of</i> relationship. Same as {@link ClassMethods#isA(Object, Class)
-   * ClassMethods::isA}, but more concise as a static import.
-   *
-   * @param <X> The type of the subject of the relationship
-   * @param <Y> TYhe type of the object of the relationship
-   * @return The <i>instance-o</i> relationship
-   */
-  public static <X, Y extends Class<?>> Relation<X, Y> instanceOf() {
-    return ClassMethods::isA;
   }
 
   /**

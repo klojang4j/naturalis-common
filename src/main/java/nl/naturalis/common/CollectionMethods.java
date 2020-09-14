@@ -1,6 +1,8 @@
 package nl.naturalis.common;
 
 import java.util.*;
+import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.check.Checks.*;
 
 /** Methods extending the Java Collection framework. */
 public class CollectionMethods {
@@ -110,8 +112,7 @@ public class CollectionMethods {
   @SuppressWarnings("unchecked")
   public static <K, V> HashMap<K, V> newHashMap(Object... kvPairs) {
     Check.notNull(kvPairs, "kvPairs");
-    Check.integer(
-        kvPairs.length, x -> x % 2 == 0, "kvPairs array must contain even number of elements");
+    Check.that(kvPairs.length, "Number of key-value pairs", isEven());
     HashMap<K, V> map = new HashMap<>(kvPairs.length);
     for (int i = 0; i < kvPairs.length; i += 2) {
       map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
@@ -144,8 +145,7 @@ public class CollectionMethods {
   @SuppressWarnings("unchecked")
   public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(Object... kvPairs) {
     Check.notNull(kvPairs, "kvPairs");
-    Check.integer(
-        kvPairs.length, x -> x % 2 == 0, "kvPairs array must contain even number of elements");
+    Check.that(kvPairs.length, "Number of key-value pairs", isEven());
     LinkedHashMap<K, V> map = new LinkedHashMap<>(kvPairs.length);
     for (int i = 0; i < kvPairs.length; i += 2) {
       map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
@@ -187,8 +187,8 @@ public class CollectionMethods {
    * @return A sublist containing all but the last {@code by} elements of the provided list
    */
   public static <T> List<T> shrink(List<T> list, int by) {
-    Check.notEmpty(list, "list");
-    Check.inRange(by, 0, list.size(), "by");
+    Check.that(list, "list", notEmpty());
+    Check.that(by, "by", greaterThan(), 0).and(atMost(), list.size());
     int sz = list.size();
     return sz == by ? Collections.emptyList() : list.subList(0, sz - by);
   }
@@ -213,8 +213,8 @@ public class CollectionMethods {
    * @return
    */
   public static <T> List<T> shift(List<T> list, int by) {
-    Check.notEmpty(list, "list");
-    Check.inRange(by, 0, list.size(), "by");
+    Check.that(list, "list", notEmpty());
+    Check.that(by, "by", greaterThan(), 0).and(atMost(), list.size());
     int sz = list.size();
     return sz == by ? Collections.emptyList() : list.subList(by, sz);
   }

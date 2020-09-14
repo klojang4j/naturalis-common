@@ -12,6 +12,7 @@
 module nl.naturalis.common {
 
   exports nl.naturalis.common;
+  exports nl.naturalis.common.check;
   exports nl.naturalis.common.collection;
   exports nl.naturalis.common.exception;
   exports nl.naturalis.common.function;

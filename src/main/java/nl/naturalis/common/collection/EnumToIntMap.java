@@ -9,8 +9,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.ObjIntConsumer;
 import java.util.function.ToIntFunction;
-
-import nl.naturalis.common.Check;
+import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.check.Checks.*;
 
 /**
  * A fast enum-to-int Map implementation. The map is backed by a simple int array with the same
@@ -136,7 +136,7 @@ public final class EnumToIntMap<T extends Enum<T>> {
    * @return
    */
   public boolean containsValue(int val) {
-    Check.argument(val != nval, ERR_NULL_NOT_ALLOWED);
+    Check.that(val, "val", valid()).and(notEquals(), nval, ERR_NULL_NOT_ALLOWED);
     for (int v : data) {
       if (v == val) {
         return true;
@@ -191,7 +191,7 @@ public final class EnumToIntMap<T extends Enum<T>> {
    * @return
    */
   public EnumToIntMap<T> set(T key, int val) {
-    Check.argument(val != nval, ERR_NULL_NOT_ALLOWED);
+    Check.that(val, "val", valid()).and(notEquals(), nval, ERR_NULL_NOT_ALLOWED);
     data[key.ordinal()] = val;
     return this;
   }
@@ -227,7 +227,7 @@ public final class EnumToIntMap<T extends Enum<T>> {
             other
                 .get(t)
                 .intValue()); // Throw IllegalArgumentException if other.get(t).intValue() ==
-                              // this.nval
+        // this.nval
       }
     }
   }

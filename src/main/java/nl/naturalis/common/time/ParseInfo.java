@@ -8,7 +8,7 @@ import java.time.temporal.TemporalQuery;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
-import nl.naturalis.common.Check;
+import nl.naturalis.common.check.Check;
 
 /**
  * A {@code ParseInfo} specifies how to parse a date string. It minimally consists of a date/time

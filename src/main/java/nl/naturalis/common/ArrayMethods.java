@@ -4,7 +4,9 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Supplier;
+import nl.naturalis.common.check.Check;
 import static java.lang.System.arraycopy;
+import static nl.naturalis.common.check.Checks.*;
 
 /** Methods for working with arrays. */
 public class ArrayMethods {
@@ -25,7 +27,8 @@ public class ArrayMethods {
    * @return A concatenation of {@code array} and {@code obj}
    */
   public static <T> T[] append(T[] array, T obj) {
-    Check.notNull(array, "array");
+    // Check.that(num, "num", isNotNull()).and(atLeast(), 10).and(atMost(),20);
+    Check.that(array, "array", notNull());
     T[] res = fromTemplate(array, array.length + 1);
     arraycopy(array, 0, res, 0, array.length);
     res[array.length] = obj;
@@ -43,8 +46,8 @@ public class ArrayMethods {
    */
   @SafeVarargs
   public static <T> T[] append(T[] array, T obj1, T obj2, T... moreObjs) {
-    Check.notNull(array, "array");
-    Check.notNull(moreObjs, "moreObjs");
+    Check.that(array, "array", notNull());
+    Check.that(moreObjs, "moreObjs", notNull());
     int sz = array.length + 2 + moreObjs.length;
     T[] res = fromTemplate(array, sz);
     arraycopy(array, 0, res, 0, array.length);
@@ -79,10 +82,10 @@ public class ArrayMethods {
    */
   @SafeVarargs
   public static <T> T[] concat(T[] arr0, T[] arr1, T[] arr2, T[]... moreArrays) {
-    Check.notNull(arr0, "arr0");
+    Check.that(arr0, "arr0", notNull());
     Check.notNull(arr1, "arr1");
     Check.notNull(arr2, "arr2");
-    Check.noneNull(moreArrays, "moreArrays");
+    Check.that(moreArrays, "moreArrays", noneNull());
     long x = Arrays.stream(moreArrays).flatMap(Arrays::stream).count();
     long y = arr0.length + arr1.length + arr2.length + x;
     Check.that(y <= Integer.MAX_VALUE, illegalArgument("Concatenated array too large"));
@@ -138,8 +141,8 @@ public class ArrayMethods {
    */
   @SuppressWarnings("unchecked")
   public static <T> T[] fromTemplate(T[] template, int length) {
-    Check.notNull(template, "template");
-    Check.gte(length, 0, "length");
+    Check.that(template, "template", notNull());
+    Check.that(length, "length", notEquals(), 0);
     return (T[]) Array.newInstance(template.getClass().getComponentType(), length);
   }
 
@@ -192,7 +195,7 @@ public class ArrayMethods {
     if (array == null) {
       return true;
     }
-    Check.argument(array.getClass().isArray(), "Not an array: %s", array.getClass().getName());
+    Check.that(array, "array", isArray());
     return Array.getLength(array) == 0;
   }
 

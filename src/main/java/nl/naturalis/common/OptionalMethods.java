@@ -1,6 +1,7 @@
 package nl.naturalis.common;
 
 import java.util.Optional;
+import nl.naturalis.common.check.Check;
 
 /** Methods for working with {@code java.util.Optional} objects. */
 public class OptionalMethods {
@@ -24,7 +25,7 @@ public class OptionalMethods {
    */
   @SuppressWarnings("unchecked")
   public static <T, U extends T> U get(Optional<T> optional) {
-    return (U) Check.notNull(optional, "optional").get();
+    return (U) Check.notNull(optional, "optional").ok().get();
   }
 
   /**
@@ -75,6 +76,6 @@ public class OptionalMethods {
    */
   @SuppressWarnings("unchecked")
   public static <T, U extends T> Optional<T> widen(Optional<U> optional) {
-    return (Optional<T>) Check.notNull(optional, "optional");
+    return (Optional<T>) Check.notNull(optional, "optional").ok();
   }
 }

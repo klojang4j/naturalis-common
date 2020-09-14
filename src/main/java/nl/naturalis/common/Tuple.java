@@ -68,32 +68,13 @@ public final class Tuple<LEFT, RIGHT> {
   }
 
   /**
-   * Converts the tuple to a map entry.
+   * Inserts this tuple into the specified {@code Map}.
    *
-   * @return
+   * @param map The {@code Map} to insert the tuple into.
+   * @return The previous value associated with key, or null if there was no mapping for key
    */
-  public Map.Entry<LEFT, RIGHT> toEntry() {
-    return new Map.Entry<LEFT, RIGHT>() {
-      private LEFT k = Tuple.this.left;
-      private RIGHT v = Tuple.this.right;
-
-      @Override
-      public LEFT getKey() {
-        return k;
-      }
-
-      @Override
-      public RIGHT getValue() {
-        return v;
-      }
-
-      @Override
-      public RIGHT setValue(RIGHT value) {
-        RIGHT old = this.v;
-        this.v = value;
-        return old;
-      }
-    };
+  public RIGHT addTo(Map<LEFT, RIGHT> map) {
+    return map.put(left, right);
   }
 
   @Override

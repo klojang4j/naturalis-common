@@ -3,7 +3,7 @@ package nl.naturalis.common;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-
+import nl.naturalis.common.check.Check;
 import nl.naturalis.common.exception.ExceptionOrigin;
 import nl.naturalis.common.exception.UncheckedException;
 
@@ -78,7 +78,7 @@ public final class ExceptionMethods {
    * @return A detailed exception message
    */
   public static String getDetailedMessage(Throwable exc, String search) {
-    return new ExceptionOrigin(Check.notNull(exc, "exc"), search).getDetailedMessage();
+    return new ExceptionOrigin(Check.notNull(exc, "exc").ok(), search).getDetailedMessage();
   }
 
   /**
@@ -89,7 +89,7 @@ public final class ExceptionMethods {
    * @return The provided throwable or a {@code RuntimeException} wrapping it
    */
   public static RuntimeException wrap(Throwable exc) {
-    if (Check.notNull(exc, "exc") instanceof RuntimeException) {
+    if (Check.notNull(exc, "exc").ok() instanceof RuntimeException) {
       return (RuntimeException) exc;
     }
     return new RuntimeException(exc);
@@ -104,7 +104,7 @@ public final class ExceptionMethods {
    * @return The provided {@code Throwable} or an {@code UncheckedException} wrapping it
    */
   public static RuntimeException uncheck(Throwable exc, String customMessage) {
-    if (Check.notNull(exc, "exc") instanceof RuntimeException) {
+    if (Check.notNull(exc, "exc").ok() instanceof RuntimeException) {
       return (RuntimeException) exc;
     }
     return new UncheckedException(customMessage, exc);
@@ -118,7 +118,7 @@ public final class ExceptionMethods {
    * @return The provided {@code Throwable} or an {@code UncheckedException} wrapping it
    */
   public static RuntimeException uncheck(Throwable exc) {
-    if (Check.notNull(exc, "exc") instanceof RuntimeException) {
+    if (Check.notNull(exc, "exc").ok() instanceof RuntimeException) {
       return (RuntimeException) exc;
     }
     return new UncheckedException(exc);

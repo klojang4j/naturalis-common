@@ -9,8 +9,9 @@ import java.util.function.UnaryOperator;
 import nl.naturalis.common.function.Relation;
 import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
+import static nl.naturalis.common.check.Checks.objEquals;
+import static nl.naturalis.common.check.Checks.objNotEquals;
 import static nl.naturalis.common.function.Predicates.isNotNull;
-import static nl.naturalis.common.function.Relation.isEqualTo;
 
 /**
  * General methods applicable to objects of any type.
@@ -176,7 +177,7 @@ public class ObjectMethods {
 
   /**
    * Tests the provided arguments for equality using <i>empty-equals-null</i> semantics. This is
-   * roughly equivalent to {@code Objects.equals(emptyToNull(obj1), emptyToNull(obj2))}, except that
+   * equivalent to {@code Objects.equals(emptyToNull(obj1), emptyToNull(obj2))}, except that an
    * empty instance of one type (e.g. {@code String}) is <b>not</b> equal to an empty instance of
    * another type (e.g. {@code Set}). So:
    *
@@ -439,7 +440,7 @@ public class ObjectMethods {
    * @return {@code value} or null
    */
   public static <T> T nullIf(T arg0, T arg1) {
-    return nullIf(arg0, isEqualTo(), arg1);
+    return nullIf(arg0, objEquals(), arg1);
   }
 
   /**
@@ -452,7 +453,7 @@ public class ObjectMethods {
    * @return {@code arg0} or null
    */
   public static <T> T nullUnless(T arg0, T arg1) {
-    return nullUnless(arg0, isEqualTo(), arg1);
+    return nullUnless(arg0, objNotEquals(), arg1);
   }
 
   /**

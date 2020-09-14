@@ -2,7 +2,9 @@ package nl.naturalis.common;
 
 import java.util.Collection;
 import java.util.regex.Pattern;
+import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ObjectMethods.ifTrue;
+import static nl.naturalis.common.check.Checks.*;
 
 /**
  * Methods for working with strings. This class tries to avoid duplicating the functionality already
@@ -192,7 +194,7 @@ public final class StringMethods {
    * @param prefixes
    */
   public static String lchop(Object subject, boolean ignoreCase, String... prefixes) {
-    Check.noneNull(prefixes, "prefixes");
+    Check.that(prefixes, "prefixes", noneNull());
     if (subject == null) {
       return EMPTY;
     }
@@ -308,7 +310,7 @@ public final class StringMethods {
    *     specified characters
    */
   public static String ltrim(Object subject, String chars) {
-    Check.notEmpty(chars, "chars");
+    Check.that(chars, "chars", notEmpty());
     if (subject == null) {
       return EMPTY;
     }
@@ -548,7 +550,7 @@ public final class StringMethods {
    *     specified characters
    */
   public static String rtrim(Object subject, String chars) {
-    Check.notEmpty(chars, "chars");
+    Check.that(chars, "chars", notEmpty());
     if (subject == null) {
       return EMPTY;
     }
