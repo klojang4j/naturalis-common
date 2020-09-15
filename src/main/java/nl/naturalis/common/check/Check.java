@@ -414,7 +414,7 @@ public abstract class Check<T, E extends Exception> {
    * <p>
    *
    * <pre>
-   * Check.that(foo.equals(bar), ()-> new IllegalArgumentException(String.format("%s must equal %s", foo, bar)));
+   * Check.that(foo.equals(bar), () -> new IllegalArgumentException(String.format("%s must equal %s", foo, bar)));
    *    // versus:
    * Check.that(foo.equals(bar), badArgument("%s must equal %s", foo, bar));
    *

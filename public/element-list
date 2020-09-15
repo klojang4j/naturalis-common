@@ -1,8 +1,8 @@
 module:nl.naturalis.common
 nl.naturalis.common
+nl.naturalis.common.check
 nl.naturalis.common.collection
 nl.naturalis.common.exception
 nl.naturalis.common.function
-nl.naturalis.common.internal
 nl.naturalis.common.path
 nl.naturalis.common.time
