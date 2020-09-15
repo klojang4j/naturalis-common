@@ -44,53 +44,55 @@ class Messages {
 
     List<Tuple<Object, Function<Object[], String>>> tmp = new ArrayList<>();
 
-    tmp.add(tuple(isNull(), (x) -> format("%s must be null (was %s)", x[1], x[0])));
-    tmp.add(tuple(notNull(), (x) -> format("%s must not be null", x[1])));
-    tmp.add(tuple(isEmpty(), (x) -> format("%s must be empty (was %s)", x[1], x[0])));
-    tmp.add(tuple(notEmpty(), (x) -> format("%s must not be empty", x[1])));
-    tmp.add(tuple(noneNull(), (x) -> format("%s must not contain null values", x[1])));
+    tmp.add(tuple(isNull(), x -> format("%s must be null (was %s)", x[1], x[0])));
+    tmp.add(tuple(notNull(), x -> format("%s must not be null", x[1])));
+    tmp.add(tuple(isEmpty(), x -> format("%s must be empty (was %s)", x[1], x[0])));
+    tmp.add(tuple(notEmpty(), x -> format("%s must not be empty", x[1])));
+    tmp.add(tuple(noneNull(), x -> format("%s must not contain null values", x[1])));
+    tmp.add(tuple(isArray(), x -> format("%s must be an array (was %s)", x[1], cname(x[0]))));
+    tmp.add(tuple(isEven(), x -> format("%s must be even (was %d)", x[1], x[0])));
+    tmp.add(tuple(isOdd(), x -> format("%s must be odd (was %d)", x[1], x[0])));
+    tmp.add(tuple(positive(), x -> format("%s must be positive (was %d)", x[1], x[0])));
+    tmp.add(tuple(notPositive(), x -> format("%s must be zero or negative (was %d)", x[1], x[0])));
+    tmp.add(tuple(negative(), x -> format("%s must be negative (was %d)", x[1], x[0])));
+    tmp.add(tuple(notNegative(), x -> format("%s must be zero or positive (was %d)", x[1], x[0])));
     tmp.add(
-        tuple(
-            deepNotNull(),
-            (x) -> format("%s must not be null, empty, or contain null values", x[1])));
-    tmp.add(
-        tuple(
-            deepNotEmpty(),
-            (x) -> format("%s must not be null, empty, or contain empty values", x[1])));
-    tmp.add(
-        tuple(
-            isArray(),
-            (x) -> format("%s must be an array (was %s)", x[1], x[0].getClass().getName())));
-    tmp.add(tuple(isEven(), (x) -> format("%s must be even (was %d)", x[1], x[0])));
-    tmp.add(tuple(isOdd(), (x) -> format("%s must be odd (was %d)", x[1], x[0])));
-    tmp.add(tuple(contains(), (x) -> format("Missing element in %s: %s", x[1], x[2])));
-    tmp.add(
-        tuple(
-            elementOf(),
-            (x) -> format("%s not found in %s", x[1], x[2].getClass().getSimpleName())));
-    tmp.add(tuple(objEquals(), (x) -> format("%s must be equal to %s (was %s)", x[1], x[2], x[0])));
-    tmp.add(tuple(objNotEquals(), (x) -> format("%s must be not be equal to %s", x[1], x[2])));
+        tuple(contains(), x -> format("%s %s must contain element %s", sname(x[0]), x[1], x[2])));
+    tmp.add(tuple(elementOf(), x -> format("Element %s not found in %s", x[1], sname(x[2]))));
+    tmp.add(tuple(objEquals(), x -> format("%s must be equal to %s (was %s)", x[1], x[2], x[0])));
+    tmp.add(tuple(objNotEquals(), x -> format("%s must be not be equal to %s", x[1], x[2])));
+    tmp.add(tuple(objGreaterThan(), x -> format("%s must be > %s (was %s)", x[1], x[2], x[0])));
+    tmp.add(tuple(objAtLeast(), x -> format("%s must be >= %s (was %s)", x[1], x[2], x[0])));
+    tmp.add(tuple(objLessThan(), x -> format("%s must be < %s (was %s)", x[1], x[2], x[0])));
+    tmp.add(tuple(objAtMost(), x -> format("%s must be <= %s (was %s)", x[1], x[2], x[0])));
     tmp.add(
         tuple(
             instanceOf(),
-            (x) -> {
-              if (x[2].getClass().isInterface()) {
-                return format("%s must implement %s", x[1], x[2].getClass().getName());
-              }
-              return format("%s must be instance of %s", x[1], x[2].getClass().getName());
-            }));
+            x ->
+                format(
+                    "%s must be instance of %s (was %s)",
+                    x[1], ((Class<?>) x[2]).getName(), cname(x[0]))));
+    tmp.add(tuple(equalTo(), x -> format("%s must not be equal to %d (was %d)", x[1], x[2], x[0])));
+    tmp.add(tuple(notEqualTo(), x -> format("%s must not be equal to %d", x[1], x[2])));
+    tmp.add(tuple(greaterThan(), x -> format("%s must be > %d (was %d)", x[1], x[2], x[0])));
+    tmp.add(tuple(atLeast(), x -> format("%s must be >= %d (was %d)", x[1], x[2], x[0])));
+    tmp.add(tuple(lessThan(), x -> format("%s must be < %d (was %d)", x[1], x[2], x[0])));
+    tmp.add(tuple(atMost(), x -> format("%s must be <= %d (was %d)", x[1], x[2], x[0])));
     tmp.add(
-        tuple(equalTo(), (x) -> format("%s must not be equal to %d (was %d)", x[1], x[2], x[0])));
-    tmp.add(tuple(notEqualTo(), (x) -> format("%s must not be equal to %d", x[1], x[2])));
-    tmp.add(tuple(greaterThan(), (x) -> format("%s must be > %d (was %d)", x[1], x[2], x[0])));
-    tmp.add(tuple(atLeast(), (x) -> format("%s must be >= %d (was %d)", x[1], x[2], x[0])));
-    tmp.add(tuple(lessThan(), (x) -> format("%s must be < %d (was %d)", x[1], x[2], x[0])));
-    tmp.add(tuple(atMost(), (x) -> format("%s must be <= %d (was %d)", x[1], x[2], x[0])));
+        tuple(multipleOf(), x -> format("%s must be multiple of %d (was %d)", x[1], x[2], x[0])));
 
     IdentityHashMap<Object, Function<Object[], String>> map = new IdentityHashMap<>(tmp.size());
 
     tmp.forEach(t -> t.addTo(map));
 
     return map;
+  }
+
+  private static String cname(Object obj) {
+    return obj.getClass().getName();
+  }
+
+  private static String sname(Object obj) {
+    return obj.getClass().getSimpleName();
   }
 }

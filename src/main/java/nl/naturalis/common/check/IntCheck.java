@@ -4,11 +4,11 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import nl.naturalis.common.function.IntRelation;
 
-public final class IntCheck<E extends Exception> extends Check<Integer, E> {
+final class IntCheck<E extends Exception> extends Check<Integer, E> {
 
   private final int arg;
 
-  public IntCheck(int arg, String argName, Function<String, E> excFactory) {
+  IntCheck(int arg, String argName, Function<String, E> excFactory) {
     super(argName, excFactory);
     this.arg = arg;
   }

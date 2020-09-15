@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
-import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.ObjectMethods;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.Relation;
@@ -154,16 +153,6 @@ public class Checks {
   }
 
   /**
-   * Same as {@link ObjectMethods#isDeepNotNull(Object) ObjectMethods::isDeepNotNull}.
-   *
-   * @param <T> The type of the argument
-   * @return A {@code Predicate}
-   */
-  public static <T> Predicate<T> deepNotNull() {
-    return ObjectMethods::isDeepNotNull;
-  }
-
-  /**
    * Same as {@link ObjectMethods#isDeepNotEmpty(Object) ObjectMethods::isDeepNotEmpty}.
    *
    * @param <T> The type of the argument
@@ -199,6 +188,42 @@ public class Checks {
    */
   public static IntPredicate isOdd() {
     return x -> x % 2 == 1;
+  }
+
+  /**
+   * Verifies that the argument is positive.
+   *
+   * @return A {@code Predicate}
+   */
+  public static IntPredicate positive() {
+    return x -> x > 0;
+  }
+
+  /**
+   * Verifies that the argument is zero or negative.
+   *
+   * @return A {@code Predicate}
+   */
+  public static IntPredicate notPositive() {
+    return x -> x <= 0;
+  }
+
+  /**
+   * Verifies that the argument is negative.
+   *
+   * @return A {@code Predicate}
+   */
+  public static IntPredicate negative() {
+    return x -> x < 0;
+  }
+
+  /**
+   * Verifies that the argument is zero or positive.
+   *
+   * @return A {@code Predicate}
+   */
+  public static IntPredicate notNegative() {
+    return x -> x >= 0;
   }
 
   /**
@@ -318,18 +343,19 @@ public class Checks {
   }
 
   /**
-   * Same as {@link ClassMethods#isA(Object, Class) ClassMethods::isA}.
+   * Reverse of {@link Class#isInstance(Object) Class::isInstance} (Y is on the left-hand side of
+   * the relation).
    *
    * @param <X> The type of the argument
    * @param <Y> The type of the object of the relationship
    * @return A {@code Relation}
    */
   public static <X, Y extends Class<?>> Relation<X, Y> instanceOf() {
-    return ClassMethods::isA;
+    return (x, y) -> y.isInstance(x);
   }
 
   /**
-   * The {@code x == y} relation.
+   * Returns the <i>X == Y</i> relation.
    *
    * @return An {@code IntRelation}
    */
@@ -338,7 +364,7 @@ public class Checks {
   }
 
   /**
-   * The {@code x != y} relation.
+   * Returns the <i>X != Y</i> relation.
    *
    * @return An {@code IntRelation}
    */
@@ -347,7 +373,7 @@ public class Checks {
   }
 
   /**
-   * The {@code x > y} relation.
+   * Returns the <i>X &lt; Y</i> relation.
    *
    * @return An {@code IntRelation}
    */
@@ -356,7 +382,7 @@ public class Checks {
   }
 
   /**
-   * The {@code x >= y} relation.
+   * Returns the <i>X &gt;= Y</i> relation.
    *
    * @return An {@code IntRelation}
    */
@@ -365,7 +391,7 @@ public class Checks {
   }
 
   /**
-   * The {@code x < y} relation.
+   * Returns the <i>X &lt; Y</i> relation.
    *
    * @return An {@code IntRelation}
    */
@@ -374,11 +400,20 @@ public class Checks {
   }
 
   /**
-   * The {@code x <= y} relation.
+   * Returns the <i>X &lt;= Y</i> relation.
    *
    * @return An {@code IntRelation}
    */
   public static IntRelation atMost() {
     return (x, y) -> x <= y;
+  }
+
+  /**
+   * Returns the <i>X multiple-of Y</i> relation.
+   *
+   * @return
+   */
+  public static IntRelation multipleOf() {
+    return (x, y) -> x % y == 0;
   }
 }

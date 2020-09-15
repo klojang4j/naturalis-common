@@ -1,10 +1,9 @@
-package nl.naturalis.common;
+package nl.naturalis.common.check;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import org.junit.Test;
-import nl.naturalis.common.check.Check;
 import static org.junit.Assert.assertEquals;
 import static nl.naturalis.common.check.Checks.atLeast;
 import static nl.naturalis.common.check.Checks.greaterThan;
