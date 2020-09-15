@@ -27,7 +27,6 @@ public class ArrayMethods {
    * @return A concatenation of {@code array} and {@code obj}
    */
   public static <T> T[] append(T[] array, T obj) {
-    // Check.that(num, "num", isNotNull()).and(atLeast(), 10).and(atMost(),20);
     Check.that(array, "array", notNull());
     T[] res = fromTemplate(array, array.length + 1);
     arraycopy(array, 0, res, 0, array.length);
@@ -142,7 +141,7 @@ public class ArrayMethods {
   @SuppressWarnings("unchecked")
   public static <T> T[] fromTemplate(T[] template, int length) {
     Check.that(template, "template", notNull());
-    Check.that(length, "length", notEquals(), 0);
+    Check.that(length, "length", notEqualTo(), 0);
     return (T[]) Array.newInstance(template.getClass().getComponentType(), length);
   }
 

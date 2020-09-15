@@ -61,8 +61,8 @@ class Messages {
         tuple(
             isArray(),
             (x) -> format("%s must be an array (was %s)", x[1], x[0].getClass().getName())));
-    tmp.add(tuple(isEven(), (x) -> format("%s must be even", x[1])));
-    tmp.add(tuple(isOdd(), (x) -> format("%s must be odd", x[1])));
+    tmp.add(tuple(isEven(), (x) -> format("%s must be even (was %d)", x[1], x[0])));
+    tmp.add(tuple(isOdd(), (x) -> format("%s must be odd (was %d)", x[1], x[0])));
     tmp.add(tuple(contains(), (x) -> format("Missing element in %s: %s", x[1], x[2])));
     tmp.add(
         tuple(
@@ -77,11 +77,11 @@ class Messages {
               if (x[2].getClass().isInterface()) {
                 return format("%s must implement %s", x[1], x[2].getClass().getName());
               }
-              return format("%s be instance of %s", x[1], x[2].getClass().getName());
+              return format("%s must be instance of %s", x[1], x[2].getClass().getName());
             }));
     tmp.add(
         tuple(equalTo(), (x) -> format("%s must not be equal to %d (was %d)", x[1], x[2], x[0])));
-    tmp.add(tuple(notEquals(), (x) -> format("%s must not be equal to %d", x[1], x[2])));
+    tmp.add(tuple(notEqualTo(), (x) -> format("%s must not be equal to %d", x[1], x[2])));
     tmp.add(tuple(greaterThan(), (x) -> format("%s must be > %d (was %d)", x[1], x[2], x[0])));
     tmp.add(tuple(atLeast(), (x) -> format("%s must be >= %d (was %d)", x[1], x[2], x[0])));
     tmp.add(tuple(lessThan(), (x) -> format("%s must be < %d (was %d)", x[1], x[2], x[0])));

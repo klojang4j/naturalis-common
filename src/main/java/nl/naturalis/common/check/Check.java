@@ -5,43 +5,81 @@ import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.Relation;
 
 /**
- * Facilitates checking preconditions and array indices. One {@code Check} object can be used to
- * check multiple preconditions for the same argument, and for multiple properties of the argument.
+ * Facilitates the validation of object state, arguments, variables and array indices. Validating
+ * object state and array indices happens through straightforward static methods. The validation of
+ * arguments and variables happens by means of an actual instance of the {@code Check} class. You
+ * obtain an instance through one of the static factory methods. These take the argument, the
+ * argument name and a test, which can be a {@link Predicate}, an {@link IntPredicate}, a {@link
+ * Relation} or an {@link IntRelation} (depending on the type of the argument and the type of test
+ * you want to execute). If the argument passes the test, a {@code Check} object is returned that
+ * allows you to chain multiple subsequent tests on the same argument through a fluent interface.
  * For example:
  *
  * <p>
  *
  * <pre>
- * int i = Check.that(numChairs, "numChairs", greaterThan(), 2).and(lessThan(), 10).intValue();
- * int i = Check.that(numChairs, "numChairs", gt(), 2).and(lt(), 10).intValue();
+ * this.numChairs = Check.that(numChairs, "numChairs", atLeast(), 2).and(atMost(), 10).and(isEven()).ok();
  * </pre>
  *
- * <h3>Exception messages</h3>
+ * <h3>Standard checks</h3>
  *
- * <p>Some static methods only take the argument to be tested and the <i>name</i> of the argument,
- * not a complete error message. For example:
+ * <p>The {@link Checks} class contains quite a few standard checks for arguments and variables. In
+ * addition, these are already associated with short but informative error messages, so you don't
+ * have to invent them yourself. For example:
  *
  * <p>
  *
  * <pre>
- * Check.notNull(name, "name"); // -> error message: "name must not null"
+ * Check.that(numChairs, "numChairs", atLeast(), 2);
+ *      // -> "numChairs must be >= 2 (was 0)"
  * </pre>
  *
- * <p>To provide a custom message, choose the overloaded method that takes message arguments:
+ * <h3>Null checks</h3>
+ *
+ * <p>Most tests in the {@link Checks} class are plain, unadorned method references. You should not
+ * assume the referenced methods to have their own null checks. (Even if they do, letting them trap
+ * a null reference defies the purpose of doing our own argument check in the first place). Some
+ * tests do contain custom code and these certainly don't do null checks as they rely on being
+ * embedded within a chain of checks on a {@code Check} object. Therefore, unless it is clear that
+ * the argument cannot possibly be null, the first check in a chain of checks should always be the
+ * {@link Checks#notNull() notNull()} check. There are two static factory methods that have this
+ * check baked into them. For example:
+ *
+ * <p>
  *
  * <pre>
- * Check.notNull(name, "Please specify a name", null); // -> "Please specify a name"
- * Check.notNull(name, "Please specify a name", ""); // -> "Please specify a name"
- * Check.notNull(name, "Please specify a %s", "toy"); // -> "Please specify a toy"
+ * Check.notNull(name, "name").and(String::startsWith, "John");
  * </pre>
  *
- * <p>(If the first message argument and null or empty, it and ignored.)
+ * <p>(NB there are some tests in the {code Checks} class that implicitly do a null check, like
+ * {@link Checks#notEmpty() Checks.notEmpty()}. These can therefore also be used as the first
+ * check.)
  *
- * <h3>Checking properties and changing the Exception type</h3>
+ * <h3>Checking argument properties</h3>
  *
- * <p>When using the instance methods you can not just check the argument itself, but also its
- * properties. In addition, the instance methods also allow you the change the type of {@code
- * Exception} being thrown (defaults to {@link IllegalArgumentException}). For example:
+ * <p>The {@code Check} class you check not just arguments but also argument properties. For
+ * example:
+ *
+ * <p>
+ *
+ * <pre>
+ * Check.notNull(employee, "employee").and(Employee::getAge, "age", lessThan(), 50);
+ *      // -> "employee.age must be < 50 (was 56)"
+ * Check.notNull(intArray, "intArray").and(Array::getLength, "length", isEven());
+ *      // -> "intArray.length must be even (was 33)"
+ * Check.notNull(employees, "employees").and(Collection::size, "size", lessThan(), 100);
+ *      // -> "employees.size must be < 100 (was 28459)"
+ * </pre>
+ *
+ * <h3>Changing the Exception type</h3>
+ *
+ * <p>By default an {@code IllegalArgumentException} is thrown if an argument fails to pass a test.
+ * This can be customized through the static factory methods. For example:
+ *
+ * <p>
+ *
+ * <p>One {@code Check} object can be used to check multiple preconditions for the same argument,
+ * and for multiple properties of the argument. For example:
  *
  * <p>
  *
@@ -49,14 +87,11 @@ import nl.naturalis.common.function.Relation;
  * this.query = Check.that(query, "query", InvalidQueryException::new)
  *  .notNull()
  *  .and(QuerySpec::getFrom, x -> nvl(x) == 0, "from must be null or zero")
- *  .and(QuerySpec::getSize, GTE, MIN_BATCH_SIZE, "size must be >= %d", MIN_BATCH_SIZE)
- *  .and(QuerySpec::getSize, LTE, MAX_BATCH_SIZE, "size must be <= %d", MAX_BATCH_SIZE)
- *  .and(QuerySpec::getSortFields, CollectionMethods::isEmpty, "sortFields must be empty")
- *  .value();
+ *  .and(QuerySpec::getSize, "size", atLeast(), MIN_BATCH_SIZE)
+ *  .and(QuerySpec::getSize, "size", atMost(), MAX_BATCH_SIZE)
+ *  .and(QuerySpec::getSortFields, "sortFields", isEmpty())
+ *  .ok();
  * </pre>
- *
- * <p>(See the {@link #and(Function, Relation, Object, String, Object...) and methods} and the
- * {@link Relation} and {@link IntRelation} interfaces.)
  *
  * @author Ayco Holleman
  * @param <T> The type of the object being checked
@@ -540,11 +575,12 @@ public abstract class Check<T, E extends Exception> {
    * @param <U> The type of the property
    * @param getter A {@code Function} with the argument as input and the value to be tested as
    *     output. Usually a getter like {@code Employee::getName}.
+   * @param propName The name of the property
    * @param test The test
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public <U> Check<T, E> and(Function<T, U> getter, Predicate<U> test) throws E {
+  public <U> Check<T, E> and(Function<T, U> getter, String propName, Predicate<U> test) throws E {
     throw notApplicable();
   }
 
@@ -570,11 +606,12 @@ public abstract class Check<T, E extends Exception> {
    *
    * @param getter A {@code Function} with the argument as input and the value to be tested as
    *     output. Usually a getter like {@code Employee::getAge}.
+   * @param propName The name of the property
    * @param test The test
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> and(ToIntFunction<T> getter, IntPredicate test) throws E {
+  public Check<T, E> and(ToIntFunction<T> getter, String propName, IntPredicate test) throws E {
     throw notApplicable();
   }
 
@@ -601,13 +638,15 @@ public abstract class Check<T, E extends Exception> {
    * @param <V> The type of the object at the other end of the specified {@code Relation}
    * @param getter A {@code Function} with the argument as input and the value to be tested as
    *     output. Usually a getter like {@code Employee::getName}.
+   * @param propName The name of the property
    * @param test The relation to verify between the argument and the specified object ({@code
    *     target})
    * @param target The object at the other end of the specified {@code Relation}
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public <U, V> Check<T, E> and(Function<T, U> getter, Relation<U, V> test, V target) throws E {
+  public <U, V> Check<T, E> and(
+      Function<T, U> getter, String propName, Relation<U, V> test, V target) throws E {
     throw notApplicable();
   }
 
@@ -637,13 +676,15 @@ public abstract class Check<T, E extends Exception> {
    *
    * @param getter A {@code Function} with the argument as input and the value to be tested as
    *     output. Usually a getter like {@code Employee::getName}.
+   * @param propName The name of the property
    * @param test The relation to verify between the argument and the specified integer ({@code
    *     target})
    * @param target The integer at the other end of the specified {@code Relation}
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> and(ToIntFunction<T> getter, IntRelation test, int target) throws E {
+  public Check<T, E> and(ToIntFunction<T> getter, String propName, IntRelation test, int target)
+      throws E {
     throw notApplicable();
   }
 
@@ -671,7 +712,7 @@ public abstract class Check<T, E extends Exception> {
    * example:
    *
    * <pre>
-   * Integer i = Check.that(counter, "counter").notNull().ok();
+   * int age = Check.notNull(employee, "employee").and(Employee::getAge, "age", lessThan(), 50).ok().getAge();
    * </pre>
    *
    * @return The argument
@@ -679,10 +720,9 @@ public abstract class Check<T, E extends Exception> {
   public abstract T ok();
 
   /**
-   * Returns the argument being tested as an {@code int}. If the argument being tested actually and
-   * an {@code int} rather than an {@code Integer}, this method saves the cost of unboxing incurred
-   * by {@link #ok()}. If the argument neither and {@code int} nor an {@code Integer} this method
-   * throws a {@code ClassCastException}.
+   * Returns the argument being tested as an {@code int}. If the argument being tested actually is
+   * an {@code int} rather than an {@code Integer}, this method saves the cost of boxing-unboxing
+   * round trip incured by {@link #ok()}.
    *
    * @return The argument cast or converted to an {@code int}
    */

@@ -26,7 +26,8 @@ import static nl.naturalis.common.check.Checks.*;
  */
 public final class EnumToIntMap<T extends Enum<T>> {
 
-  private static final String ERR_NULL_NOT_ALLOWED = "Illegal attempt to put or find NULL value";
+  private static final String ERR_NULL_NOT_ALLOWED =
+      "Illegal attempt to insert/retrieve NULL value";
 
   private final T[] consts;
   private final int[] data;
@@ -136,7 +137,7 @@ public final class EnumToIntMap<T extends Enum<T>> {
    * @return
    */
   public boolean containsValue(int val) {
-    Check.that(val, "val", valid()).and(notEquals(), nval, ERR_NULL_NOT_ALLOWED);
+    Check.that(val, "val", intValid()).and(notEqualTo(), nval, ERR_NULL_NOT_ALLOWED);
     for (int v : data) {
       if (v == val) {
         return true;
@@ -191,7 +192,7 @@ public final class EnumToIntMap<T extends Enum<T>> {
    * @return
    */
   public EnumToIntMap<T> set(T key, int val) {
-    Check.that(val, "val", valid()).and(notEquals(), nval, ERR_NULL_NOT_ALLOWED);
+    Check.that(val, "val", intValid()).and(notEqualTo(), nval, ERR_NULL_NOT_ALLOWED);
     data[key.ordinal()] = val;
     return this;
   }
@@ -206,9 +207,7 @@ public final class EnumToIntMap<T extends Enum<T>> {
   public void putAll(EnumToIntMap<T> other) {
     for (int i = 0; i < other.data.length; ++i) {
       if (other.data[i] != other.nval) {
-        set(
-            consts[i],
-            other.data[i]); // Throw IllegalArgumentException if other.data[i] == this.nval
+        set(consts[i], other.data[i]);
       }
     }
   }

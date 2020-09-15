@@ -19,10 +19,8 @@ import static nl.naturalis.common.function.Predicates.isNotNull;
  * <h3>Container objects</h3>
  *
  * <p>Some methods in this class apply special logic when passed a container object. A container
- * object is an array or an instance of {@link Collection} or {@link Map}. For {@code Map} objects
- * the logic will <i>only</i> be applied to their values, not their keys. Also, the logic may by
- * definition not be applicable to primitive arrays, only to instances of {@code Object[]} (e.g.
- * {@link #isDeepNotNull(Object) isDeepNotNull}).
+ * object is an array, a {@code Collection} or a {@code Map}. For {@code Map} objects the logic is
+ * only applied to their values, not their keys.
  *
  * @author Ayco Holleman
  */
@@ -92,7 +90,7 @@ public class ObjectMethods {
    *   <li>{@code obj} is a non-empty primitive array
    *   <li>{@code obj} is a non-empty {@link Emptyable}
    *   <li>{@code obj} is a non-zero-size {@link Sizeable}
-   *   <li>{@code obj} is a non-null of any other type
+   *   <li>{@code obj} is a non-null of any other type than listed above
    * </ul>
    *
    * @param obj The object to be tested
@@ -122,10 +120,7 @@ public class ObjectMethods {
   }
 
   /**
-   * Verifies that the argument is not null, not empty, and does not contain any null values. In
-   * other words, if the argument is a container object, you can safely iterate over it without
-   * risking a {@code NullPointerException}, and you are guaranteed to encounter at least one
-   * element.
+   * Verifies that the argument is not null, not empty, and does not contain any null values.
    *
    * @param container The object to be tested
    * @return Whether or not it is not null, not empty, and does not contain any null values

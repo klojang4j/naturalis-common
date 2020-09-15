@@ -80,17 +80,17 @@ public final class ParseInfo {
 
   public ParseInfo(UnaryOperator<String> filter, String pattern, TemporalQuery<?>... parseInto) {
     this.filter = filter;
-    this.pattern = Check.notNull(pattern, "pattern");
+    this.pattern = Check.notNull(pattern, "pattern").ok();
     this.formatter = DateTimeFormatter.ofPattern(pattern);
-    this.parseInto = Check.notNull(parseInto, "parseInto");
+    this.parseInto = Check.notNull(parseInto, "parseInto").ok();
   }
 
   public ParseInfo(
       UnaryOperator<String> filter, DateTimeFormatter formatter, TemporalQuery<?>... parseInto) {
     this.filter = filter;
     this.pattern = null;
-    this.formatter = Check.notNull(formatter, "formatter");
-    this.parseInto = Check.notNull(parseInto, "parseInto");
+    this.formatter = Check.notNull(formatter, "formatter").ok();
+    this.parseInto = Check.notNull(parseInto, "parseInto").ok();
   }
 
   /**
@@ -144,9 +144,15 @@ public final class ParseInfo {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
     ParseInfo other = (ParseInfo) obj;
     return Objects.equals(filter, other.filter)
         && Objects.equals(formatter, other.formatter)

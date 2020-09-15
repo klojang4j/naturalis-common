@@ -1,14 +1,11 @@
 package nl.naturalis.common.check;
 
-import java.lang.reflect.Array;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.ObjectMethods;
-import nl.naturalis.common.Sizeable;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.Relation;
 
@@ -20,6 +17,28 @@ import nl.naturalis.common.function.Relation;
 public class Checks {
 
   private Checks() {}
+
+  /**
+   * Returns a test that always succeeds. Can be used as argument for the static factory methods of
+   * {@link Check}, in case the very first test needs the functionality of the {@code and(...)}
+   * methods.
+   *
+   * @return A {@code Predicate} that always returns {@code true}.
+   */
+  public static <T> Predicate<T> objValid() {
+    return x -> true;
+  }
+
+  /**
+   * Returns an integer test that always succeeds. Can be used as argument for the static factory
+   * methods of {@link Check}, in case the very first test needs the functionality of the {@code
+   * and(...)} methods.
+   *
+   * @return An {@code IntPredicate} that always returns {@code true}.
+   */
+  public static IntPredicate intValid() {
+    return x -> true;
+  }
 
   /**
    * Equivalent to {@link Predicate#not(Predicate) Predicate.not(test)}.
@@ -82,17 +101,6 @@ public class Checks {
    */
   public static IntRelation reverse(IntRelation relation) {
     return IntRelation.not(relation);
-  }
-
-  /**
-   * Returns a test that always succeeds. Can be used as constructor argument for the {@link Check}
-   * class if the first test you need to execute needs to be accompanied by a custom error message.
-   * In that case you will have to use the {@code and(...)} methods of {@code Check}.
-   *
-   * @return
-   */
-  public static <T> Predicate<T> valid() {
-    return x -> true;
   }
 
   /**
@@ -238,30 +246,19 @@ public class Checks {
   }
 
   /**
-   * A heavily overloaded <i>greater-than</i> test applicable to multiple types of objects.
+   * Implements the <i>greater-than</i> relation for {@code Number} instances, forcing the
+   * right-hand side of the relation to be type-compatible with the left-hand side. For example:
    *
    * <p>
    *
-   * <ul>
-   *   <li>If the argument is an instance of {@code Number}, it checks that it is greater than the
-   *       {@code Number} to compare it against. For example like so: {@code ((Short)
-   *       obj).shortValue() > number.shortValue()}
-   *   <li>If the argument is an instance of {@link CharSequence}, it checks that the length of the
-   *       {@code CharSequence} is greater than the {@code Number} to compare it against
-   *   <li>If the argument is an instance of {@link Collection}, it checks that the size of the
-   *       {@code Collection} is greater than the {@code Number} to compare it against
-   *   <li>If the argument is an instance of {@link Map}, it checks that the size of the {@code Map}
-   *       is greater than the {@code Number} to compare it against
-   *   <li>If the argument is an array, it checks that its length is greater than the {@code Number}
-   *       to compare it against
-   *   <li>If the argument is an instance of {@link Sizeable}, it checks that the size of the {@code
-   *       Sizeable} is greater than the {@code Number} to compare it against
-   * </ul>
+   * <pre>
+   *    // If x instance of Short
+   * return ((Short) x).shortValue() > y.shortValue();
+   * </pre>
    *
    * @return A {@code Relation}
    */
-  @SuppressWarnings("rawtypes")
-  public static <X, Y extends Number> Relation<X, Y> objGreaterThan() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> objGreaterThan() {
     return (x, y) -> {
       if (x.getClass() == Integer.class) {
         return ((Integer) x).intValue() > y.intValue();
@@ -275,29 +272,17 @@ public class Checks {
         return ((Short) x).shortValue() > y.shortValue();
       } else if (x.getClass() == Byte.class) {
         return ((Byte) x).byteValue() > y.byteValue();
-      } else if (x instanceof CharSequence) {
-        return ((CharSequence) x).length() > y.intValue();
-      } else if (x instanceof Collection) {
-        return ((Collection) x).size() > y.intValue();
-      } else if (x instanceof Map) {
-        return ((Map) x).size() > y.intValue();
-      } else if (x.getClass().isArray()) {
-        return Array.getLength(x) > y.intValue();
-      } else if (x instanceof Sizeable) {
-        return ((Sizeable) x).size() > y.intValue();
       }
       throw new UnsupportedOperationException();
     };
   }
 
   /**
-   * A heavily overloaded <i>greater-than-or-equal-to</i> test applicable to multiple types of
-   * objects. See {@link #greaterThan()}.
+   * Implements the <i>less-than</i> relation for {@code Number} instances.
    *
    * @return A {@code Relation}
    */
-  @SuppressWarnings("rawtypes")
-  public static <X, Y extends Number> Relation<X, Y> objAtLeast() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> objAtLeast() {
     return (x, y) -> {
       if (x.getClass() == Integer.class) {
         return ((Integer) x).intValue() >= y.intValue();
@@ -309,68 +294,27 @@ public class Checks {
         return ((Float) x).floatValue() >= y.floatValue();
       } else if (x.getClass() == Short.class) {
         return ((Short) x).shortValue() >= y.shortValue();
-      } else if (x.getClass() == Byte.class) {
-        return ((Byte) x).byteValue() >= y.byteValue();
-      } else if (x instanceof CharSequence) {
-        return ((CharSequence) x).length() >= y.intValue();
-      } else if (x instanceof Collection) {
-        return ((Collection) x).size() >= y.intValue();
-      } else if (x instanceof Map) {
-        return ((Map) x).size() >= y.intValue();
-      } else if (x.getClass().isArray()) {
-        return Array.getLength(x) >= y.intValue();
-      } else if (x instanceof Sizeable) {
-        return ((Sizeable) x).size() >= y.intValue();
       }
-      throw new UnsupportedOperationException();
+      return ((Byte) x).byteValue() >= y.byteValue();
     };
   }
 
   /**
-   * A heavily overloaded <i>less-than</i> test applicable to multiple types of objects. See {@link
-   * #greaterThan()}.
+   * Implements the <i>less-than</i> relation for {@code Number} instances.
    *
    * @return A {@code Relation}
    */
-  public static <X, Y extends Number> Relation<X, Y> objLessThan() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> objLessThan() {
     return not(objAtLeast());
   }
 
   /**
-   * A heavily overloaded <i>less-than-or-equal</i> test applicable to multiple types of objects.
-   * See {@link #greaterThan()}.
+   * Implements the <i>less-than-or-equal-to</i> relation for {@code Number} instances.
    *
    * @return A {@code Relation}
    */
-  public static <X, Y extends Number> Relation<X, Y> objAtMost() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> objAtMost() {
     return not(objGreaterThan());
-  }
-
-  /**
-   * Verifies that a {@code CharSequence}, {@code Collection}, {@code Map}, array or {@code
-   * Sizeable} has a certain length c.q. size. For any other type of object an {@link
-   * UnsupportedOperationException} will be thrown.
-   *
-   * @param <X> The type of the argument
-   * @param <Y> A {@code Number} type
-   * @return A {@code Relation}
-   */
-  @SuppressWarnings("rawtypes")
-  public static <X, Y extends Number> Relation<X, Y> hasSize() {
-    return (x, y) -> {
-      if (x instanceof CharSequence) {
-        return ((CharSequence) x).length() == y.intValue();
-      } else if (x instanceof Collection) {
-        return ((Collection) x).size() == y.intValue();
-      } else if (x instanceof Map) {
-        return ((Map) x).size() == y.intValue();
-      } else if (x.getClass().isArray()) {
-        return Array.getLength(x) == y.intValue();
-      } else if (x instanceof Sizeable) {
-        return ((Sizeable) x).size() == y.intValue();
-      }
-      throw new UnsupportedOperationException();
-    };
   }
 
   /**
@@ -398,7 +342,7 @@ public class Checks {
    *
    * @return An {@code IntRelation}
    */
-  public static IntRelation notEquals() {
+  public static IntRelation notEqualTo() {
     return (x, y) -> x != y;
   }
 
