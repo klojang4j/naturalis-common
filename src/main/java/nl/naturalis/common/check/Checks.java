@@ -19,8 +19,7 @@ public class Checks {
 
   /**
    * Returns a test that always succeeds. Can be used as argument for the static factory methods of
-   * {@link Check}, in case the very first test needs the functionality of the {@code and(...)}
-   * methods.
+   * {@link Check}, in case the very first test needs the functionality of the instance methods.
    *
    * @return A {@code Predicate} that always returns {@code true}.
    */
@@ -30,8 +29,8 @@ public class Checks {
 
   /**
    * Returns an integer test that always succeeds. Can be used as argument for the static factory
-   * methods of {@link Check}, in case the very first test needs the functionality of the {@code
-   * and(...)} methods.
+   * methods of {@link Check}, in case the very first test needs the functionality of the instance
+   * methods.
    *
    * @return An {@code IntPredicate} that always returns {@code true}.
    */
@@ -103,17 +102,18 @@ public class Checks {
   }
 
   /**
-   * Same as {@link Objects#isNull(Object) Objects::isNull}.
+   * Verifies that the argument is null. Same as {@link Objects#isNull(Object) Objects::isNull}.
    *
    * @param <T> The type of the argument
    * @return A {@code Predicate}
    */
-  public static Predicate<Object> isNull() {
+  public static <T> Predicate<T> isNull() {
     return Objects::isNull;
   }
 
   /**
-   * Same as {@link Objects#nonNull(Object) Objects::nonNull}.
+   * Verifies that the argument is not null. Same as {@link Objects#nonNull(Object)
+   * Objects::nonNull}.
    *
    * @param <T> The type of the argument
    * @return A {@code Predicate}
@@ -123,17 +123,19 @@ public class Checks {
   }
 
   /**
-   * Same as {@link ObjectMethods#isEmpty(Object) ObjectMethods::isEmpty}.
+   * Verifies that the argument is empty as per {@link ObjectMethods#isEmpty(Object)
+   * ObjectMethods::isEmpty}.
    *
    * @param <T> The type of the argument
    * @return A {@code Predicate}
    */
-  public static Predicate<Object> isEmpty() {
+  public static <T> Predicate<T> isEmpty() {
     return ObjectMethods::isEmpty;
   }
 
   /**
-   * Same as {@link ObjectMethods#isNotEmpty(Object) ObjectMethods::isNotEmpty}.
+   * Verifies that the argument is not empty as per {@link ObjectMethods#isNotEmpty(Object)
+   * ObjectMethods::isNotEmpty}.
    *
    * @param <T> The type of the argument
    * @return A {@code Predicate}
@@ -143,7 +145,8 @@ public class Checks {
   }
 
   /**
-   * Same as {@link ObjectMethods#isNoneNull(Object) ObjectMethods::isNoneNull}
+   * Verifies the argument is not null and does not contain any null values. Same as {@link
+   * ObjectMethods#isNoneNull(Object) ObjectMethods::isNoneNull}
    *
    * @param <T> The type of the argument
    * @return A {@code Predicate}
@@ -153,7 +156,8 @@ public class Checks {
   }
 
   /**
-   * Same as {@link ObjectMethods#isDeepNotEmpty(Object) ObjectMethods::isDeepNotEmpty}.
+   * Verifies that the argument is recursively non-empty as per {@link
+   * ObjectMethods#isDeepNotEmpty(Object) ObjectMethods::isDeepNotEmpty}.
    *
    * @param <T> The type of the argument
    * @return A {@code Predicate}
@@ -227,7 +231,8 @@ public class Checks {
   }
 
   /**
-   * Same as {@link Collection#contains(Object) Collection::contains}.
+   * Verifies that a {@code Collection} argument contains a particular value. Same as {@link
+   * Collection#contains(Object) Collection::contains}.
    *
    * @param <E> The type of the elements in the {@code Collection}
    * @param <C> The type of the argument
@@ -249,9 +254,10 @@ public class Checks {
   }
 
   /**
-   * Same as {@link Objects#equals(Object, Object) Objects::equals}. (NB the name <i>objEquals</i>
-   * allows the method to be statically imported while avoiding a name clash with the ever-present
-   * {@link Object#equals(Object) Object.equals} method.)
+   * Verifies that the argument is equal to a particular value. Same as {@link
+   * Objects#equals(Object, Object) Objects::equals}. (NB the name <i>objEquals</i> allows the
+   * method to be statically imported while avoiding a name clash with the ever-present {@link
+   * Object#equals(Object) Object.equals} method.)
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -261,7 +267,8 @@ public class Checks {
   }
 
   /**
-   * Same as {@code not(objEquals())}.
+   * Verifies that the argument is not equal to a particular value. Same as {@code
+   * not(objEquals())}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -271,61 +278,54 @@ public class Checks {
   }
 
   /**
-   * Implements the <i>greater-than</i> relation for {@code Number} instances, forcing the
-   * right-hand side of the relation to be type-compatible with the left-hand side. For example:
-   *
-   * <p>
-   *
-   * <pre>
-   *    // If x instance of Short
-   * return ((Short) x).shortValue() > y.shortValue();
-   * </pre>
+   * Verifies that the argument is greater than a particular value, widening or narrowing the type
+   * of the argument to the type of that value.
    *
    * @return A {@code Relation}
    */
   public static <X extends Number, Y extends Number> Relation<X, Y> objGreaterThan() {
     return (x, y) -> {
-      if (x.getClass() == Integer.class) {
-        return ((Integer) x).intValue() > y.intValue();
-      } else if (x.getClass() == Long.class) {
-        return ((Long) x).longValue() > y.longValue();
-      } else if (x.getClass() == Double.class) {
-        return ((Double) x).doubleValue() > y.doubleValue();
-      } else if (x.getClass() == Float.class) {
-        return ((Float) x).floatValue() > y.floatValue();
-      } else if (x.getClass() == Short.class) {
-        return ((Short) x).shortValue() > y.shortValue();
-      } else if (x.getClass() == Byte.class) {
-        return ((Byte) x).byteValue() > y.byteValue();
+      if (y.getClass() == Integer.class) {
+        return x.intValue() > y.intValue();
+      } else if (y.getClass() == Long.class) {
+        return x.longValue() > y.longValue();
+      } else if (y.getClass() == Double.class) {
+        return x.doubleValue() > y.doubleValue();
+      } else if (y.getClass() == Float.class) {
+        return x.floatValue() > y.floatValue();
+      } else if (y.getClass() == Short.class) {
+        return x.shortValue() > y.shortValue();
       }
-      throw new UnsupportedOperationException();
+      return x.byteValue() > y.byteValue();
     };
   }
 
   /**
-   * Implements the <i>less-than</i> relation for {@code Number} instances.
+   * Verifies that the argument is greater than or equal to a particular value, widening or
+   * narrowing the type of the argument to the type of that value.
    *
    * @return A {@code Relation}
    */
   public static <X extends Number, Y extends Number> Relation<X, Y> objAtLeast() {
     return (x, y) -> {
-      if (x.getClass() == Integer.class) {
-        return ((Integer) x).intValue() >= y.intValue();
-      } else if (x.getClass() == Long.class) {
-        return ((Long) x).longValue() >= y.longValue();
-      } else if (x.getClass() == Double.class) {
-        return ((Double) x).doubleValue() >= y.doubleValue();
-      } else if (x.getClass() == Float.class) {
-        return ((Float) x).floatValue() >= y.floatValue();
-      } else if (x.getClass() == Short.class) {
-        return ((Short) x).shortValue() >= y.shortValue();
+      if (y.getClass() == Integer.class) {
+        return x.intValue() >= y.intValue();
+      } else if (y.getClass() == Long.class) {
+        return x.longValue() >= y.longValue();
+      } else if (y.getClass() == Double.class) {
+        return x.doubleValue() >= y.doubleValue();
+      } else if (y.getClass() == Float.class) {
+        return x.floatValue() >= y.floatValue();
+      } else if (y.getClass() == Short.class) {
+        return x.shortValue() >= y.shortValue();
       }
-      return ((Byte) x).byteValue() >= y.byteValue();
+      return x.byteValue() >= y.byteValue();
     };
   }
 
   /**
-   * Implements the <i>less-than</i> relation for {@code Number} instances.
+   * Verifies that the argument is less than a particular value, widening or narrowing the type of
+   * the argument to the type of that value.
    *
    * @return A {@code Relation}
    */
@@ -334,7 +334,8 @@ public class Checks {
   }
 
   /**
-   * Implements the <i>less-than-or-equal-to</i> relation for {@code Number} instances.
+   * Verifies that the argument is less than or equal to a particular value, widening or narrowing
+   * the type of the argument to the type of that value.
    *
    * @return A {@code Relation}
    */
@@ -343,8 +344,7 @@ public class Checks {
   }
 
   /**
-   * Reverse of {@link Class#isInstance(Object) Class::isInstance} (Y is on the left-hand side of
-   * the relation).
+   * Verifies that the argument is an intance of a particular class or interface.
    *
    * @param <X> The type of the argument
    * @param <Y> The type of the object of the relationship
@@ -355,7 +355,7 @@ public class Checks {
   }
 
   /**
-   * Returns the <i>X == Y</i> relation.
+   * Verifies that the argument is equal to a particular value.
    *
    * @return An {@code IntRelation}
    */
@@ -364,7 +364,7 @@ public class Checks {
   }
 
   /**
-   * Returns the <i>X != Y</i> relation.
+   * Verifies that the argument is not equal to a particular value.
    *
    * @return An {@code IntRelation}
    */
@@ -373,7 +373,7 @@ public class Checks {
   }
 
   /**
-   * Returns the <i>X &lt; Y</i> relation.
+   * Verifies that the argument is greater than a particular value.
    *
    * @return An {@code IntRelation}
    */
@@ -382,7 +382,7 @@ public class Checks {
   }
 
   /**
-   * Returns the <i>X &gt;= Y</i> relation.
+   * Verifies that the argument is greater than or equal to a particular value.
    *
    * @return An {@code IntRelation}
    */
@@ -391,7 +391,7 @@ public class Checks {
   }
 
   /**
-   * Returns the <i>X &lt; Y</i> relation.
+   * Verifies that the argument is less than a particular value.
    *
    * @return An {@code IntRelation}
    */
@@ -400,7 +400,7 @@ public class Checks {
   }
 
   /**
-   * Returns the <i>X &lt;= Y</i> relation.
+   * Verifies that the argument is less than or equal to a particular value.
    *
    * @return An {@code IntRelation}
    */
@@ -409,9 +409,9 @@ public class Checks {
   }
 
   /**
-   * Returns the <i>X multiple-of Y</i> relation.
+   * Verifies that the argument is a whole mulitple of a particular integer.
    *
-   * @return
+   * @return An {@code IntRelation}
    */
   public static IntRelation multipleOf() {
     return (x, y) -> x % y == 0;

@@ -2,7 +2,7 @@ package nl.naturalis.common.function;
 
 /**
  * Verifies that two objects have a certain relationship to each other. For example, if object A is
- * a {@code Collection} and object B is an element of it, then the relationship <i>X contains Y</i>
+ * a {@code Collection} and object B is an element of it, then the relationship <i>x contains y</i>
  * exists between these objects.
  *
  * @author Ayco Holleman
@@ -13,8 +13,8 @@ package nl.naturalis.common.function;
 public interface Relation<T, U> {
 
   /**
-   * Returns the reverse of the specified relation. For example, the reverse of <i>X contains Y</i>
-   * is <i>X element-of Y</i> (or <i>Y contains X</i>).
+   * Returns the reverse of the specified relation, swapping subject ans object in the relation. For
+   * example, the reverse of <i>X contains Y</i> is <i>y contains y</i> (or <i>X element-of Y</i> )
    *
    * @param <X> The type of the subject of the original relation
    * @param <Y> The type of the object of the original relation
