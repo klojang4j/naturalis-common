@@ -19,7 +19,7 @@ public class Checks {
 
   /**
    * Returns a test that always succeeds. Can be used as argument for the static factory methods of
-   * {@link Check}, in case the very first test needs the functionality of the instance methods.
+   * {@link Check} in case the very first test needs the functionality of the instance methods.
    *
    * @return A {@code Predicate} that always returns {@code true}.
    */
@@ -29,7 +29,7 @@ public class Checks {
 
   /**
    * Returns an integer test that always succeeds. Can be used as argument for the static factory
-   * methods of {@link Check}, in case the very first test needs the functionality of the instance
+   * methods of {@link Check} in case the very first test needs the functionality of the instance
    * methods.
    *
    * @return An {@code IntPredicate} that always returns {@code true}.
@@ -250,7 +250,7 @@ public class Checks {
    * @return A {@code Relation}
    */
   public static <E, C extends Collection<E>> Relation<E, C> elementOf() {
-    return reverse(contains());
+    return (x, y) -> y.contains(x);
   }
 
   /**
@@ -274,7 +274,9 @@ public class Checks {
    * @return A {@code Relation}
    */
   public static <X> Relation<X, X> objNotEquals() {
-    return not(objEquals());
+    // NB we can't use not(Objects::equals) ourselves because that won't always
+    // return the same reference, which is required for the Messages class
+    return (x, y) -> !Objects.equals(x, y);
   }
 
   /**
@@ -330,7 +332,7 @@ public class Checks {
    * @return A {@code Relation}
    */
   public static <X extends Number, Y extends Number> Relation<X, Y> objLessThan() {
-    return not(objAtLeast());
+    return (x, y) -> !objAtLeast().exists(x, y);
   }
 
   /**
@@ -340,7 +342,7 @@ public class Checks {
    * @return A {@code Relation}
    */
   public static <X extends Number, Y extends Number> Relation<X, Y> objAtMost() {
-    return not(objGreaterThan());
+    return (x, y) -> !objGreaterThan().exists(x, y);
   }
 
   /**

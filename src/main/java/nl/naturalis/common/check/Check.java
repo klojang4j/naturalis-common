@@ -6,14 +6,11 @@ import nl.naturalis.common.function.Relation;
 
 /**
  * Facilitates the validation of object state, arguments, variables and array indices. Validating
- * object state and array indices happens through straightforward static methods. The validation of
- * arguments and variables happens by means of an actual instance of the {@code Check} class. You
- * obtain an instance through one of the static factory methods. These take the argument, the
- * argument name and a test, which can be a {@link Predicate}, an {@link IntPredicate}, a {@link
- * Relation} or an {@link IntRelation} (depending on the type of the argument and the type of test
- * you want to execute). If the argument passes the test, a {@code Check} object is returned that
- * allows you to chain multiple subsequent tests on the same argument through a fluent interface.
- * For example:
+ * object state and array indices happens through static methods. The validation of arguments and
+ * variables happens by means of an actual instance of the {@code Check} class. You obtain an
+ * instance through one of the static factory methods. These take the argument, the argument name
+ * and a test. If the argument passes the test, a {@code Check} object is returned that allows you
+ * to chain multiple subsequent tests on the same argument through a fluent interface. For example:
  *
  * <p>
  *
@@ -23,9 +20,9 @@ import nl.naturalis.common.function.Relation;
  *
  * <h3>Standard checks</h3>
  *
- * <p>The {@link Checks} class contains quite a few standard checks for arguments and variables. In
- * addition, these are already associated with short but informative error messages, so you don't
- * have to invent them yourself. For example:
+ * <p>The {@link Checks} class contains a number of common checks for arguments and variables. These
+ * are already associated with short, informative error messages, so you don't have to invent them
+ * yourself. For example:
  *
  * <p>
  *
@@ -36,14 +33,13 @@ import nl.naturalis.common.function.Relation;
  *
  * <h3>Null checks</h3>
  *
- * <p>Most tests in the {@link Checks} class are plain, unadorned method references. You should not
- * assume the referenced methods to have their own null checks. (Even if they do, letting them trap
- * a null reference defies the purpose of doing our own argument check in the first place). Some
- * tests do contain custom code and these certainly don't do null checks as they rely on being
- * embedded within a chain of checks on a {@code Check} object. Therefore, unless it is clear that
- * the argument cannot possibly be null, the first check in a chain of checks should always be the
- * {@link Checks#notNull() notNull()} check. There are two static factory methods that have this
- * check baked into them. For example:
+ * <p>Most tests in the {@link Checks} class are plain method references. You should not assume the
+ * referenced methods to have their own null checks. (Even if they do, letting them trap a null
+ * reference defies the purpose of writing your own argument check). Some tests contain custom code
+ * and these certainly don't do null checks as they rely on being part of a chain of checks on a
+ * {@code Check} object. Therefore, unless it is clear that the argument cannot possibly be null,
+ * the first check in a chain of checks should always be the {@link Checks#notNull() notNull()}
+ * check. There are two static factory methods that have this check baked into them. For example:
  *
  * <p>
  *
@@ -51,13 +47,13 @@ import nl.naturalis.common.function.Relation;
  * Check.notNull(name, "name").and(String::startsWith, "John");
  * </pre>
  *
- * <p>(NB there are some tests in the {code Checks} class that implicitly do a null check, like
+ * <p>(NB there are some tests in the {@code Checks} class that implicitly do a null check, like
  * {@link Checks#notEmpty() Checks.notEmpty()}. These can therefore also be used as the first
  * check.)
  *
  * <h3>Checking argument properties</h3>
  *
- * <p>The {@code Check} class you check not just arguments but also argument properties. For
+ * <p>A {@code Check} object lets you check not just arguments but also argument properties. For
  * example:
  *
  * <p>
@@ -67,8 +63,8 @@ import nl.naturalis.common.function.Relation;
  *      // -> "employee.age must be < 50 (was 56)"
  * Check.notNull(intArray, "intArray").and(Array::getLength, "length", isEven());
  *      // -> "intArray.length must be even (was 33)"
- * Check.notNull(employees, "employees").and(Collection::size, "size", lessThan(), 100);
- *      // -> "employees.size must be < 100 (was 28459)"
+ * Check.notNull(employees, "employees").and(Collection::size, "size", atLeast(), 100);
+ *      // -> "employees.size must be >= 100 (was 28)"
  * </pre>
  *
  * <h3>Changing the Exception type</h3>
@@ -78,14 +74,8 @@ import nl.naturalis.common.function.Relation;
  *
  * <p>
  *
- * <p>One {@code Check} object can be used to check multiple preconditions for the same argument,
- * and for multiple properties of the argument. For example:
- *
- * <p>
- *
  * <pre>
- * this.query = Check.that(query, "query", InvalidQueryException::new)
- *  .notNull()
+ * this.query = Check.notNull(query, "query", InvalidQueryException::new)
  *  .and(QuerySpec::getFrom, x -> nvl(x) == 0, "from must be null or zero")
  *  .and(QuerySpec::getSize, "size", atLeast(), MIN_BATCH_SIZE)
  *  .and(QuerySpec::getSize, "size", atMost(), MAX_BATCH_SIZE)
@@ -720,9 +710,9 @@ public abstract class Check<T, E extends Exception> {
   public abstract T ok();
 
   /**
-   * Returns the argument being tested as an {@code int}. If the argument being tested actually is
-   * an {@code int} rather than an {@code Integer}, this method saves the cost of boxing-unboxing
-   * round trip incured by {@link #ok()}.
+   * Returns the argument being tested as an {@code int} To be used as the last call after a chain
+   * of checks. If the argument being tested actually is an {@code int} rather than an {@code
+   * Integer}, this method saves the cost of a boxing-unboxing round trip incurred by {@link #ok()}.
    *
    * @return The argument cast or converted to an {@code int}
    */

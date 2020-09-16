@@ -588,8 +588,10 @@ public final class StringMethods {
   }
 
   /**
-   * Substring method that allows for substring retrieval relative to the end of a string.<br>
-   * <br>
+   * Substring method that allows for substring retrieval relative to the end of a string. The
+   * {@code length} argument will be clamped to remain with the bounds of the string.
+   *
+   * <p>
    *
    * <table>
    * <tr>
@@ -636,8 +638,11 @@ public final class StringMethods {
    * @return The substring
    */
   public static String substr(Object subject, int from, int length) {
-    String str;
-    if (subject == null || from > (str = subject.toString()).length() || length < 1) {
+    if (subject == null) {
+      return EMPTY;
+    }
+    String str = subject.toString();
+    if (from > str.length() || length < 1) {
       return EMPTY;
     }
     if (from < 0) {
