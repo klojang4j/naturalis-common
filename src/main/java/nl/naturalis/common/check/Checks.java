@@ -8,6 +8,7 @@ import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import nl.naturalis.common.ObjectMethods;
 import nl.naturalis.common.Sizeable;
+import nl.naturalis.common.StringMethods;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.Relation;
 
@@ -167,6 +168,15 @@ public class Checks {
    */
   public static <T> Predicate<T> deepNotEmpty() {
     return ObjectMethods::isDeepNotEmpty;
+  }
+
+  /**
+   * Verifies that a {@code String} argument is not blank.
+   *
+   * @return A {@code Predicate}
+   */
+  public static Predicate<String> notBlank() {
+    return StringMethods::isNotBlank;
   }
 
   /**

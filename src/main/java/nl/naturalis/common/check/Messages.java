@@ -52,6 +52,7 @@ class Messages {
     tmp.add(tuple(isEmpty(), x -> format("%s must be empty (was %s)", x[1], str(x[0]))));
     tmp.add(tuple(notEmpty(), x -> format("%s must not be empty", x[1])));
     tmp.add(tuple(noneNull(), x -> format("%s must not contain null values", x[1])));
+    tmp.add(tuple(notBlank(), x -> format("%s must not be blank", x[1])));
 
     tmp.add(tuple(isEven(), x -> format("%s must be even (was %d)", x[1], x[0])));
     tmp.add(tuple(isOdd(), x -> format("%s must be odd (was %d)", x[1], x[0])));
