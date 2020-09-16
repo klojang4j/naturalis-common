@@ -35,11 +35,12 @@ import nl.naturalis.common.function.Relation;
  *
  * <p>Most tests in the {@link Checks} class are plain method references. You should not assume the
  * referenced methods to have their own null checks. (Even if they do, letting them trap a null
- * reference defies the purpose of writing your own argument check). Some tests contain custom code
- * and these certainly don't do null checks as they rely on being part of a chain of checks on a
- * {@code Check} object. Therefore, unless it is clear that the argument cannot possibly be null,
- * the first check in a chain of checks should always be the {@link Checks#notNull() notNull()}
- * check. There are two static factory methods that have this check baked into them. For example:
+ * reference defies the purpose of writing your own argument check). Some tests in the {@link
+ * Checks} class contain custom code. These tests <i>certainly do not perform preliminary null
+ * checks</i> as they rely on being part of a chain of checks on a {@code Check} object. Therefore,
+ * unless it is clear that the argument cannot possibly be null, the first check in a chain of
+ * checks should always be the {@link Checks#notNull() notNull()} check. There are two static
+ * factory methods that have this check baked into them. For example:
  *
  * <p>
  *
