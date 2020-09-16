@@ -1,12 +1,15 @@
 package nl.naturalis.common.check;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static nl.naturalis.common.check.Checks.atLeast;
 import static nl.naturalis.common.check.Checks.greaterThan;
+import static nl.naturalis.common.check.Checks.isArray;
+import static nl.naturalis.common.check.Checks.lessThan;
 
 public class CheckTest {
 
@@ -26,37 +29,6 @@ public class CheckTest {
     assertEquals("Hello, World", s);
   }
 
-  class Employee {
-    int id;
-    String fullName;
-    Integer age;
-    List<String> hobbies;
-
-    Employee(int id, String fullName, Integer age, String... hobbies) {
-      super();
-      this.id = id;
-      this.fullName = fullName;
-      this.age = age;
-      this.hobbies = List.of(hobbies);
-    }
-
-    int getId() {
-      return id;
-    }
-
-    String getFullName() {
-      return fullName;
-    }
-
-    Integer getAge() {
-      return age;
-    }
-
-    List<String> getHobbies() {
-      return hobbies;
-    }
-  }
-
   @Test
   public void and01() {
     Employee employee = new Employee(3, "John Smith", 43, "Skating", "Scoccer");
@@ -70,34 +42,47 @@ public class CheckTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void and02() {
-    Employee employee = new Employee(3, "John Smith", 12, "Skating", "Scoccer");
-    Check.notNull(employee, "employee")
-        .and(Employee::getId, greaterThan(), 0, "Id must not be negative")
-        .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
-        .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
-        .and(Employee::getAge, "age", atLeast(), 16)
-        .ok();
+    Employee employee = new Employee();
+    employee.setAge(12);
+    Check.notNull(employee, "employee").and(Employee::getAge, "age", atLeast(), 16).ok();
   }
 
   @Test(expected = IOException.class)
   public void and03() throws IOException {
-    Employee employee = new Employee(3, "John Smith", 44, "Skating", "Scuba diving");
+    Employee employee = new Employee();
+    employee.setHobbies(List.of("Skating", "Scuba diving"));
     Check.notNull(employee, "employee", IOException::new)
-        .and(Employee::getId, greaterThan(), 0, "Id must not be negative")
-        .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
         .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
-        .and(Employee::getAge, atLeast(), 16, "Employee must be at least 16")
         .ok();
   }
 
   @Test(expected = IOException.class)
   public void and04() throws IOException {
-    Employee employee = new Employee(-23, "John Smith", 44, "Skating", "Scuba diving");
+    Employee employee = new Employee();
+    employee.setId(-23);
     Check.notNull(employee, "employee", IOException::new)
         .and(Employee::getId, greaterThan(), 0, "Id must not be negative")
-        .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
-        .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
-        .and(Employee::getAge, atLeast(), 16, "Employee must be at least 16")
         .ok();
+  }
+
+  @Test
+  public void and05() {
+    Employee employee = new Employee();
+    employee.setJustSomeNumbers(new float[] {3.2F, 103.2F, 0.8F});
+    Check.notNull(employee, "employee")
+        .and(Employee::getJustSomeNumbers, "justSomeLuckyNumbers", isArray());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void and06() {
+    Employee employee = new Employee();
+    employee.setId(7);
+    Check.notNull(employee, "employee").and(Employee::getId, "id", isArray());
+  }
+
+  @Test
+  public void and07() {
+    Employee[] employees = new Employee[10];
+    Check.notNull(employees, "employees").and(Array::getLength, "length", lessThan(), 100);
   }
 }

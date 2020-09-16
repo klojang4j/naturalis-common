@@ -1,10 +1,13 @@
 package nl.naturalis.common.check;
 
+import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import nl.naturalis.common.ObjectMethods;
+import nl.naturalis.common.Sizeable;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.Relation;
 
@@ -167,16 +170,6 @@ public class Checks {
   }
 
   /**
-   * Verifies that the argument is an array.
-   *
-   * @param <T> The type of the argument
-   * @return A {@code Predicate}
-   */
-  public static <T> Predicate<T> isArray() {
-    return x -> x.getClass().isArray();
-  }
-
-  /**
    * Verifies that the argument is an even number.
    *
    * @return A {@code Predicate}
@@ -283,9 +276,11 @@ public class Checks {
    * Verifies that the argument is greater than a particular value, widening or narrowing the type
    * of the argument to the type of that value.
    *
+   * @param <X> The type of the argument
+   * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> objGreaterThan() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> numGreaterThan() {
     return (x, y) -> {
       if (y.getClass() == Integer.class) {
         return x.intValue() > y.intValue();
@@ -306,9 +301,11 @@ public class Checks {
    * Verifies that the argument is greater than or equal to a particular value, widening or
    * narrowing the type of the argument to the type of that value.
    *
+   * @param <X> The type of the argument
+   * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> objAtLeast() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> numAtLeast() {
     return (x, y) -> {
       if (y.getClass() == Integer.class) {
         return x.intValue() >= y.intValue();
@@ -331,18 +328,136 @@ public class Checks {
    *
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> objLessThan() {
-    return (x, y) -> !objAtLeast().exists(x, y);
+  public static <X extends Number, Y extends Number> Relation<X, Y> numLessThan() {
+    return (x, y) -> !numAtLeast().exists(x, y);
   }
 
   /**
    * Verifies that the argument is less than or equal to a particular value, widening or narrowing
    * the type of the argument to the type of that value.
    *
+   * @param <X> The type of the argument
+   * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> objAtMost() {
-    return (x, y) -> !objGreaterThan().exists(x, y);
+  public static <X extends Number, Y extends Number> Relation<X, Y> numAtMost() {
+    return (x, y) -> !numGreaterThan().exists(x, y);
+  }
+
+  /**
+   * Verifies that the argument's length or size is equal to a particular value. This method behaves
+   * sensibly if the argument is a {@code CharSequence}, {@code Collection}, {@code Map}, {@link
+   * Sizeable} or array. For any other type of argument this method always returns false.
+   *
+   * @param <X> The type of the argument
+   * @return A {@code Relation}
+   */
+  @SuppressWarnings("rawtypes")
+  public static <X> Relation<X, Integer> szEquals() {
+    return (x, y) -> {
+      if (x instanceof CharSequence) {
+        return ((CharSequence) x).length() == y;
+      } else if (x instanceof Collection) {
+        return ((Collection) x).size() == y;
+      } else if (x instanceof Map) {
+        return ((Map) x).size() == y;
+      } else if (x.getClass().isArray()) {
+        return Array.getLength(x) == y;
+      } else if (x instanceof Sizeable) {
+        return ((Sizeable) x).size() == y;
+      }
+      return false;
+    };
+  }
+
+  /**
+   * Verifies that the argument's length or size is not equal to a particular value. This method
+   * behaves sensibly if the argument is a {@code CharSequence}, {@code Collection}, {@code Map},
+   * {@link Sizeable} or array. For any other type of argument this method always returns false.
+   *
+   * @param <X> The type of the argument
+   * @return A {@code Relation}
+   */
+  public static <X> Relation<X, Integer> szNotEquals() {
+    return (x, y) -> !szEquals().exists(x, y);
+  }
+
+  /**
+   * Verifies that the argument's length or size is greater than a particular value. This method
+   * behaves sensibly if the argument is a {@code CharSequence}, {@code Collection}, {@code Map},
+   * {@link Sizeable} or array. For any other type of argument this method always returns false.
+   *
+   * @param <X> The type of the argument
+   * @return A {@code Relation}
+   */
+  @SuppressWarnings("rawtypes")
+  public static <X> Relation<X, Integer> szGreaterThan() {
+    return (x, y) -> {
+      if (x instanceof CharSequence) {
+        return ((CharSequence) x).length() > y;
+      } else if (x instanceof Collection) {
+        return ((Collection) x).size() > y;
+      } else if (x instanceof Map) {
+        return ((Map) x).size() > y;
+      } else if (x.getClass().isArray()) {
+        return Array.getLength(x) > y;
+      } else if (x instanceof Sizeable) {
+        return ((Sizeable) x).size() > y;
+      }
+      return false;
+    };
+  }
+
+  /**
+   * Verifies that the argument's length or size is greater than or equal to a particular value.
+   * This method behaves sensibly if the argument is a {@code CharSequence}, {@code Collection},
+   * {@code Map}, {@link Sizeable} or array. For any other type of argument this method always
+   * returns false.
+   *
+   * @param <X> The type of the argument
+   * @return A {@code Relation}
+   */
+  @SuppressWarnings("rawtypes")
+  public static <X> Relation<X, Integer> szAtLeast() {
+    return (x, y) -> {
+      if (x instanceof CharSequence) {
+        return ((CharSequence) x).length() >= y;
+      } else if (x instanceof Collection) {
+        return ((Collection) x).size() >= y;
+      } else if (x instanceof Map) {
+        return ((Map) x).size() >= y;
+      } else if (x.getClass().isArray()) {
+        return Array.getLength(x) >= y;
+      } else if (x instanceof Sizeable) {
+        return ((Sizeable) x).size() >= y;
+      }
+      return false;
+    };
+  }
+
+  /**
+   * Verifies that the argument's length or size is less than to a particular value. This method
+   * behaves sensibly if the argument is a {@code CharSequence}, {@code Collection}, {@code Map},
+   * {@link Sizeable} or array. For any other type of argument this method always returns false.
+   *
+   * @param <X> The type of the argument
+   * @return A {@code Relation}
+   */
+  public static <X> Relation<X, Integer> szLessThan() {
+    return (x, y) -> !szAtLeast().exists(x, y);
+  }
+
+  /**
+   * Verifies that the argument's length or size is less than or equal to a particular value. This
+   * method behaves sensibly if the argument is a {@code CharSequence}, {@code Collection}, {@code
+   * Map}, {@link Sizeable} or array. For any other type of argument this method always returns
+   * false.
+   *
+   * @param <X> The type of the argument
+   * @return A {@code Relation}
+   */
+  public static <X> Relation<X, Integer> szAtMost() {
+    return (x, y) -> !szGreaterThan().exists(x, y);
   }
 
   /**
@@ -354,6 +469,16 @@ public class Checks {
    */
   public static <X, Y extends Class<?>> Relation<X, Y> instanceOf() {
     return (x, y) -> y.isInstance(x);
+  }
+
+  /**
+   * Verifies that the argument is an array.
+   *
+   * @param <T> The type of the argument
+   * @return A {@code Predicate}
+   */
+  public static <T> Predicate<T> isArray() {
+    return x -> x.getClass().isArray();
   }
 
   /**

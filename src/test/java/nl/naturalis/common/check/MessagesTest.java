@@ -31,7 +31,7 @@ public class MessagesTest {
     Short target = 5;
     String expected = "foo must be >= 5 (was 2.0)";
     // System.out.println(expected);
-    String actual = Messages.get(objAtLeast(), argument, argName, target);
+    String actual = Messages.get(numAtLeast(), argument, argName, target);
     // System.out.println(actual);
     assertEquals(expected, actual);
   }
@@ -43,7 +43,7 @@ public class MessagesTest {
     Float target = 5F;
     String expected = "foo must be > 5.0 (was 7)";
     // System.out.println(expected);
-    String actual = Messages.get(objGreaterThan(), argument, argName, target);
+    String actual = Messages.get(numGreaterThan(), argument, argName, target);
     // System.out.println(actual);
     assertEquals(expected, actual);
   }
