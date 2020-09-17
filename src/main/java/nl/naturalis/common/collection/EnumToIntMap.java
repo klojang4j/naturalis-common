@@ -137,7 +137,7 @@ public final class EnumToIntMap<T extends Enum<T>> {
    * @return
    */
   public boolean containsValue(int val) {
-    Check.that(val, "val", intValid()).and(notEqualTo(), nval, ERR_NULL_NOT_ALLOWED);
+    Check.argument(val, "val").and(notEqualTo(), nval, ERR_NULL_NOT_ALLOWED);
     for (int v : data) {
       if (v == val) {
         return true;
@@ -192,7 +192,7 @@ public final class EnumToIntMap<T extends Enum<T>> {
    * @return
    */
   public EnumToIntMap<T> set(T key, int val) {
-    Check.that(val, "val", intValid()).and(notEqualTo(), nval, ERR_NULL_NOT_ALLOWED);
+    Check.argument(val, "val").and(notEqualTo(), nval, ERR_NULL_NOT_ALLOWED);
     data[key.ordinal()] = val;
     return this;
   }

@@ -4,8 +4,10 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 import nl.naturalis.common.ObjectMethods;
 import nl.naturalis.common.Sizeable;
 import nl.naturalis.common.StringMethods;
@@ -22,24 +24,75 @@ public class Checks {
   private Checks() {}
 
   /**
-   * Returns a test that always succeeds. Can be used as argument for the static factory methods of
-   * {@link Check} in case the very first test needs the functionality of the instance methods.
+   * Returns the specified {@code Predicate}. Can be used when the compiler runs into ambiguities
+   * when interpreting a lambda. Use when the compiler generates an error like: <i>The method [...]
+   * is ambiguous for the type [...]</i>. For example:
    *
-   * @return A {@code Predicate} that always returns {@code true}.
+   * <p>
+   *
+   * <pre>
+   * // Assume QuerySpec.getFrom() returns an Integer
+   * // nvl() method is specifically for Integer, not int!
+   * Check.argument(this, "query", InvalidQueryException::new)
+   *    .and(QuerySpec::getFrom, forInteger(x -> nvl(x) == 0), "from must be null or zero")
+   * </pre>
+   *
+   * <p>(See {@link ObjectMethods#nvl ObjectMethods.nvl})
+   *
+   * @param predicate A {@code Predicate&lt;Integer&gt;}
+   * @return The specified {@code Predicate}
    */
-  public static <T> Predicate<T> objValid() {
-    return x -> true;
+  public static Predicate<Integer> forInteger(Predicate<Integer> predicate) {
+    return predicate;
   }
 
   /**
-   * Returns an integer test that always succeeds. Can be used as argument for the static factory
-   * methods of {@link Check} in case the very first test needs the functionality of the instance
-   * methods.
+   * Returns the {@code IntPredicate} counterpart of the specified {@code Predicate}. This will
+   * disambiguate situations in which the compiler cannot determine the type of a lamba. Use when
+   * the compiler generates an error like: <i>The method [...] is ambiguous for the type [...]</i>.
    *
-   * @return An {@code IntPredicate} that always returns {@code true}.
+   * @param predicate A {@code Predicate<Integer>}
+   * @return An {@code IntPredicate}
    */
-  public static IntPredicate intValid() {
-    return x -> true;
+  public static IntPredicate forInt(Predicate<Integer> predicate) {
+    return i -> predicate.test(Integer.valueOf(i));
+  }
+
+  /**
+   * Returns the specified {@code Function}. This will disambiguate situations in which the compiler
+   * cannot determine the type of a lamba. Use when the compiler generates an error like: <i>The
+   * method [...] is ambiguous for the type [...]</i>. You can use either {@link #forInteger} or
+   * {@code asInteger}, to taste. Using both is valid, but not necessary.
+   *
+   * @param <T> The type of the argument
+   * @param getter An {@code Integer} property of the argument
+   * @return The specified {@code Function}
+   */
+  public static <T> Function<T, Integer> asInteger(Function<T, Integer> getter) {
+    return getter;
+  }
+
+  /**
+   * Returns the {@code ToIntFunction} counterpart of the specified {@code Function}. This will
+   * disambiguate situations in which the compiler cannot determine the type of a lamba. Use when
+   * the compiler generates an error like: <i>The method [...] is ambiguous for the type [...]</i>.
+   * You can use either {@link #forInt} or {@code asInt}, to taste. Using both is valid, but not
+   * necessary. For example :
+   *
+   * <p>
+   *
+   * <pre>
+   * // Assume QuerySpec.getSize() returns an Integer
+   * // atMost() is an IntRelation!
+   * Check.argument(this, "query").and(asInt(QuerySpec::getSize), atMost(), 1024)
+   * </pre>
+   *
+   * @param <T> The type of the argument
+   * @param getter An {@code Integer} property of the argument
+   * @return A {@code ToIntFunction}
+   */
+  public static <T> ToIntFunction<T> asInt(Function<T, Integer> getter) {
+    return arg -> getter.apply(arg).intValue();
   }
 
   /**

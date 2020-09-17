@@ -5,7 +5,6 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
 import static nl.naturalis.common.check.Checks.atLeast;
 import static nl.naturalis.common.check.Checks.greaterThan;
 import static nl.naturalis.common.check.Checks.isArray;
@@ -21,12 +20,6 @@ public class CheckTest {
   @Test
   public void that02() throws IOException {
     Check.that(5 > 3, () -> new IOException());
-  }
-
-  @Test
-  public void that03() throws IOException {
-    String s = Check.that(5 > 3, () -> "Hello, World", () -> new IOException());
-    assertEquals("Hello, World", s);
   }
 
   @Test

@@ -8,9 +8,7 @@ import nl.naturalis.common.function.Relation;
  * Facilitates the validation of object state, arguments, variables and array indices. Validating
  * object state and array indices happens through static methods. The validation of arguments and
  * variables happens by means of an actual instance of the {@code Check} class. You obtain an
- * instance through one of the static factory methods. These take the argument, the argument name
- * and a test. If the argument passes the test, a {@code Check} object is returned that allows you
- * to chain multiple subsequent tests on the same argument through a fluent interface. For example:
+ * instance through one of the static factory methods. For example:
  *
  * <p>
  *
@@ -33,14 +31,12 @@ import nl.naturalis.common.function.Relation;
  *
  * <h3>Null checks</h3>
  *
- * <p>Most tests in the {@link Checks} class are plain method references. You should not assume the
- * referenced methods to have their own null checks. (Even if they do, letting them trap a null
- * reference defies the purpose of writing your own argument check). Some tests in the {@link
- * Checks} class contain custom code. These tests <i>certainly do not perform preliminary null
- * checks</i> as they rely on being part of a chain of checks on a {@code Check} object. Therefore,
- * unless it is clear that the argument cannot possibly be null, the first check in a chain of
- * checks should always be the {@link Checks#notNull() notNull()} check. There are two static
- * factory methods that have this check baked into them. For example:
+ * <p>Some tests in the {@link Checks} class contain custom code, geared towards being used in
+ * combination with the {@code Check} class. <i>These tests do not perform preliminary null
+ * checks.</i> They rely on being embedded in a chain of checks on a {@code Check} object.
+ * Therefore, unless it is clear that the argument cannot possibly be null, the first check in a
+ * chain of checks should always be the {@link Checks#notNull() notNull()} check. There are two
+ * static factory methods that have this check baked into them. For example:
  *
  * <p>
  *
@@ -48,9 +44,9 @@ import nl.naturalis.common.function.Relation;
  * Check.notNull(name, "name").and(String::startsWith, "John");
  * </pre>
  *
- * <p>(NB there are some tests in the {@code Checks} class that implicitly do a null check, like
- * {@link Checks#notEmpty() Checks.notEmpty()}. These can therefore also be used as the first
- * check.)
+ * <p>(NB Some tests in the {@code Checks} class that implicitly do a null check, like {@link
+ * Checks#notEmpty() Checks.notEmpty()} and {@link Checks#noneNull() Checks.noneNull()}. These can
+ * therefore also be used as the first check.)
  *
  * <h3>Checking argument properties</h3>
  *
@@ -76,10 +72,10 @@ import nl.naturalis.common.function.Relation;
  * <p>
  *
  * <pre>
- * this.query = Check.notNull(query, "query", InvalidQueryException::new)
- *  .and(QuerySpec::getFrom, x -> nvl(x) == 0, "from must be null or zero")
- *  .and(QuerySpec::getSize, "size", atLeast(), MIN_BATCH_SIZE)
- *  .and(QuerySpec::getSize, "size", atMost(), MAX_BATCH_SIZE)
+ * this.query = Check.argument(this, "query", InvalidQueryException::new)
+ *  .and(asInteger(QuerySpec::getFrom), x -> nvl(x) == 0, "from must be null or zero")
+ *  .and(asInt(QuerySpec::getSize), "size", atLeast(), MIN_BATCH_SIZE)
+ *  .and(asInt(QuerySpec::getSize), "size", atMost(), MAX_BATCH_SIZE)
  *  .and(QuerySpec::getSortFields, "sortFields", isEmpty())
  *  .ok();
  * </pre>
@@ -91,15 +87,70 @@ import nl.naturalis.common.function.Relation;
 public abstract class Check<T, E extends Exception> {
 
   /**
-   * Returns a new {@code Check} object suitable for testing the provided argument. The argument
-   * will have already passed the {@link Checks#notNull() notNull} test.
+   * Static factory method. Returns a new {@code Check} object suitable for testing integers.
+   *
+   * @param arg The argument
+   * @param argName The name of the argument
+   * @return A new {@code Check} object
+   */
+  public static Check<Integer, IllegalArgumentException> argument(int arg, String argName) {
+    return new IntCheck<>(arg, argName, IllegalArgumentException::new);
+  }
+
+  /**
+   * Static factory method. Returns a new {@code Check} object suitable for testing integers.
+   *
+   * @param <F> The type of {@code Exception} thrown if the argument fails to pass the {@code
+   *     notNull} test, or any subsequent tests executed on the returned {@code Check} object
+   * @param arg The argument
+   * @param argName The name of the argument
+   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
+   *     returns an {@code Exception}
+   * @return A new {@code Check} object
+   */
+  public static <F extends Exception> Check<Integer, F> argument(
+      int arg, String argName, Function<String, F> excFactory) {
+    return new IntCheck<>(arg, argName, excFactory);
+  }
+
+  /**
+   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * argument.
+   *
+   * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
+   * @param arg The argument
+   * @param argName The name of the argument
+   * @return A new {@code Check} object
+   */
+  public static <U> Check<U, IllegalArgumentException> argument(U arg, String argName) {
+    return new ObjectCheck<>(arg, argName, IllegalArgumentException::new);
+  }
+
+  /**
+   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * argument.
+   *
+   * @param <U> The type of the argument
+   * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
+   * @param arg The argument
+   * @param argName The name of the argument
+   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
+   *     returns an {@code Exception}
+   * @return A new {@code Check} object
+   */
+  public static <U, F extends Exception> Check<U, F> argument(
+      U arg, String argName, Function<String, F> excFactory) {
+    return new ObjectCheck<>(arg, argName, excFactory);
+  }
+
+  /**
+   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * argument. The argument will have already passed the {@link Checks#notNull() notNull} test.
    *
    * @param <U> The type of the argument
    * @param arg The argument
    * @param argName The name of the argument
    * @return A new {@code Check} object
-   * @throws IllegalArgumentException If the argument fails to pass the {@code notNull} test or any
-   *     subsequent tests called on the returned {@code Check} object
    */
   public static <U> Check<U, IllegalArgumentException> notNull(U arg, String argName)
       throws IllegalArgumentException {
@@ -107,8 +158,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns a new {@code Check} object suitable for testing the provided argument. The argument
-   * will have already passed the {@link Checks#notNull() notNull} test.
+   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * argument. The argument will have already passed the {@link Checks#notNull() notNull} test.
    *
    * @param <U> The type of the argument
    * @param <F> The type of {@code Exception} thrown if the argument fails to pass the {@code
@@ -127,8 +178,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns a new {@code Check} object suitable for testing integers if the argument passes the
-   * specified (first) test, else throws an {@code IllegalArgumentException}.
+   * Static factory method. Returns a new {@code Check} object suitable for testing integers if the
+   * argument passes the specified (first) test, else throws an {@code IllegalArgumentException}.
    *
    * @param arg The argument
    * @param argName The name of the argument
@@ -143,9 +194,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns a new {@code Check} object suitable for testing integers if the argument passes the
-   * specified (first) test, else throws the {@code Exception} produced by the specified {@code
-   * Exception} factory.
+   * Static factory method. Returns a new {@code Check} object suitable for testing integers if the
+   * argument passes the specified (first) test, else throws the {@code Exception} produced by the
+   * specified {@code Exception} factory.
    *
    * @param <F> The type of {@code Exception} thrown if the argument fails to pass the specified
    *     test, or any subsequent tests executed on the returned {@code Check} object
@@ -164,8 +215,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns a new {@code Check} object suitable for testing the provided argument if the argument
-   * passes the specified (first) test, else throws an {@code IllegalArgumentException}.
+   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * argument if the argument passes the specified (first) test, else throws an {@code
+   * IllegalArgumentException}.
    *
    * @param <U> The type of the argument
    * @param arg The argument
@@ -183,9 +235,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns a new {@code Check} object suitable for testing the provided argument if the argument
-   * passes the specified (first) test, else throws the {@code Exception} produced by the specified
-   * {@code Exception} factory.
+   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * argument if the argument passes the specified (first) test, else throws the {@code Exception}
+   * produced by the specified {@code Exception} factory.
    *
    * @param <U> The type of the argument
    * @param <F> The type of {@code Exception} thrown if the argument fails to pass the specified
@@ -205,8 +257,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns a new {@code Check} object suitable for testing {@code int} arguments if it passes an
-   * the specified test, else throws an {@code IllegalArgumentException}.
+   * Static factory method. Returns a new {@code Check} object suitable for testing {@code int}
+   * arguments if it passes an the specified test, else throws an {@code IllegalArgumentException}.
    *
    * @param arg The argument
    * @param argName The argument name
@@ -222,8 +274,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns a new {@code Check} object suitable for testing integers if the argument passes the
-   * specified (first) test, else throws an {@code IllegalArgumentException}.
+   * Static factory method. Returns a new {@code Check} object suitable for testing integers if the
+   * argument passes the specified (first) test, else throws an {@code IllegalArgumentException}.
    *
    * @param <F> The type of {@code Exception} thrown if the argument fails to pass the specified
    *     test, or any subsequent tests executed on the returned {@code Check} object
@@ -245,8 +297,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns a new {@code Check} object suitable for testing the provided argument if it passes an
-   * initial test, else throws an {@code IllegalArgumentException}.
+   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * argument if it passes an initial test, else throws an {@code IllegalArgumentException}.
    *
    * @param <U> The type of the argument
    * @param <V> The type of the object at the other end of the specified {@code Relation}
@@ -265,9 +317,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns a new {@code Check} object suitable for testing the provided argument if the argument
-   * passes the specified (first) test, else throws the {@code Exception} produced by the specified
-   * {@code Exception} factory.
+   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * argument if the argument passes the specified (first) test, else throws the {@code Exception}
+   * produced by the specified {@code Exception} factory.
    *
    * @param <U> The type of the argument
    * @param <V> The type of the object at the other end of the specified {@code Relation}
@@ -302,46 +354,6 @@ public abstract class Check<T, E extends Exception> {
     if (!condition) {
       throw excSupplier.get();
     }
-  }
-
-  /**
-   * Generic check method. Throws the exception supplied by the provided exception supplier if the
-   * provided condition evaluates to false, else returns {@code result}.
-   *
-   * @param <U> The type of the argument
-   * @param <F> The type of exception thrown if {@code condition} evaluates to false
-   * @param condition The condition to evaluate
-   * @param result The value returned if {@code condition} evaluates to true
-   * @param excSupplier The exception supplier
-   * @return The value supplied by the resultSupplier
-   * @throws F The exception thrown if {@code condition} evaluates to false
-   */
-  public static <U, F extends Exception> U that(
-      boolean condition, U result, Supplier<F> excSupplier) throws F {
-    if (condition) {
-      return result;
-    }
-    throw excSupplier.get();
-  }
-
-  /**
-   * Generic check method. Throws the exception supplied by the provided exception supplier if the
-   * provided condition evaluates to false, else returns the result supplied by the result supplier.
-   *
-   * @param <U> The type of the argument
-   * @param <F> The type of the exception
-   * @param condition The condition to evaluate
-   * @param resultSupplier The result supplier
-   * @param excSupplier The exception supplier
-   * @return The object supplied by the resultSupplier
-   * @throws F The exception thrown If {@code condition} evaluates to false
-   */
-  public static <U, F extends Exception> U that(
-      boolean condition, Supplier<U> resultSupplier, Supplier<F> excSupplier) throws F {
-    if (condition) {
-      return resultSupplier.get();
-    }
-    throw excSupplier.get();
   }
 
   /**
