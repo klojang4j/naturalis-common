@@ -5,10 +5,10 @@ import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.Relation;
 
 /**
- * Facilitates the validation of object state, arguments, variables and array indices. Validating
- * object state and array indices happens through static methods. The validation of arguments and
- * variables happens by means of an actual instance of the {@code Check} class. You obtain an
- * instance through one of the static factory methods. For example:
+ * Facilitates the validation of object state, arguments and array indices. Validating object state
+ * and array indices happens through static methods. Validation of arguments happens by means of an
+ * actual instance of the {@code Check} class. You obtain an instance through one of the static
+ * factory methods. For example:
  *
  * <p>
  *
@@ -26,17 +26,17 @@ import nl.naturalis.common.function.Relation;
  *
  * <pre>
  * Check.that(numChairs, "numChairs", atLeast(), 2);
- *      // -> "numChairs must be >= 2 (was 0)"
+ * // -> "numChairs must be >= 2 (was 0)"
  * </pre>
  *
  * <h3>Null checks</h3>
  *
- * <p>Some tests in the {@link Checks} class contain custom code, geared towards being used in
- * combination with the {@code Check} class. <i>These tests do not perform preliminary null
- * checks.</i> They rely on being embedded in a chain of checks on a {@code Check} object.
- * Therefore, unless it is clear that the argument cannot possibly be null, the first check in a
- * chain of checks should always be the {@link Checks#notNull() notNull()} check. There are two
- * static factory methods that have this check baked into them. For example:
+ * <p>Some tests in the {@link Checks} class contain custom code, intended to be used in combination
+ * with the {@code Check} class. These tests do not perform preliminary null checks. They rely on
+ * being embedded in a chain of checks on a {@code Check} object. Therefore, unless it is clear that
+ * the argument cannot possibly be null, the first check in a chain of checks should always be the
+ * {@link Checks#notNull() notNull()} check. There are two static factory methods that have this
+ * check baked into them. For example:
  *
  * <p>
  *
@@ -44,7 +44,7 @@ import nl.naturalis.common.function.Relation;
  * Check.notNull(name, "name").and(String::startsWith, "John");
  * </pre>
  *
- * <p>(NB Some tests in the {@code Checks} class that implicitly do a null check, like {@link
+ * <p>(NB Some tests in the {@code Checks} class implicitly do a null check, like {@link
  * Checks#notEmpty() Checks.notEmpty()} and {@link Checks#noneNull() Checks.noneNull()}. These can
  * therefore also be used as the first check.)
  *
@@ -57,11 +57,8 @@ import nl.naturalis.common.function.Relation;
  *
  * <pre>
  * Check.notNull(employee, "employee").and(Employee::getAge, "age", lessThan(), 50);
- *      // -> "employee.age must be < 50 (was 56)"
  * Check.notNull(intArray, "intArray").and(Array::getLength, "length", isEven());
- *      // -> "intArray.length must be even (was 33)"
  * Check.notNull(employees, "employees").and(Collection::size, "size", atLeast(), 100);
- *      // -> "employees.size must be >= 100 (was 28)"
  * </pre>
  *
  * <h3>Changing the Exception type</h3>
@@ -72,10 +69,10 @@ import nl.naturalis.common.function.Relation;
  * <p>
  *
  * <pre>
- * this.query = Check.argument(this, "query", InvalidQueryException::new)
- *  .and(asInteger(QuerySpec::getFrom), x -> nvl(x) == 0, "from must be null or zero")
- *  .and(asInt(QuerySpec::getSize), "size", atLeast(), MIN_BATCH_SIZE)
- *  .and(asInt(QuerySpec::getSize), "size", atMost(), MAX_BATCH_SIZE)
+ * this.query = Check.argument(query, "query", InvalidQueryException::new)
+ *  .and(QuerySpec::getFrom, x -> nvl(x) == 0, "from must be null or zero")
+ *  .and(QuerySpec::getSize, "size", atLeast(), MIN_BATCH_SIZE)
+ *  .and(QuerySpec::getSize, "size", atMost(), MAX_BATCH_SIZE)
  *  .and(QuerySpec::getSortFields, "sortFields", isEmpty())
  *  .ok();
  * </pre>
@@ -466,9 +463,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> and(Predicate<T> test) throws E {
-    throw notApplicable();
-  }
+  public abstract Check<T, E> and(Predicate<T> test) throws E;
 
   /**
    * Submits the argument to the specified test. Allows you to provide a custom error message.
@@ -479,9 +474,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> and(Predicate<T> test, String message, Object... msgArgs) throws E {
-    throw notApplicable();
-  }
+  public abstract Check<T, E> and(Predicate<T> test, String message, Object... msgArgs) throws E;
 
   /**
    * Submits the argument to the specified test. This method is especially useful when using the
@@ -492,9 +485,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> and(IntPredicate test) throws E {
-    throw notApplicable();
-  }
+  public abstract Check<T, E> and(IntPredicate test) throws E;
 
   /**
    * Submits the argument to the specified test. Allows you to provide a custom error message.
@@ -505,9 +496,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> and(IntPredicate test, String message, Object... msgArgs) throws E {
-    throw notApplicable();
-  }
+  public abstract Check<T, E> and(IntPredicate test, String message, Object... msgArgs) throws E;
 
   /**
    * Submits the argument to the specified test. This method is especially useful when using the
@@ -521,9 +510,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public <U> Check<T, E> and(Relation<T, U> test, U target) throws E {
-    throw notApplicable();
-  }
+  public abstract <U> Check<T, E> and(Relation<T, U> test, U target) throws E;
 
   /**
    * Submits the argument to the specified test. Allows you to provide a custom error message.
@@ -537,10 +524,8 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public <U> Check<T, E> and(Relation<T, U> test, U target, String message, Object... msgArgs)
-      throws E {
-    throw notApplicable();
-  }
+  public abstract <U> Check<T, E> and(
+      Relation<T, U> test, U target, String message, Object... msgArgs) throws E;
 
   /**
    * Submits the argument to the specified test. This method is especially useful when using the
@@ -553,9 +538,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> and(IntRelation test, int target) throws E {
-    throw notApplicable();
-  }
+  public abstract Check<T, E> and(IntRelation test, int target) throws E;
 
   /**
    * Submits the argument to the specified test. Allows you to provide a custom error message.
@@ -568,9 +551,8 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> and(IntRelation test, int target, String message, Object... msgArgs) throws E {
-    throw notApplicable();
-  }
+  public abstract Check<T, E> and(IntRelation test, int target, String message, Object... msgArgs)
+      throws E;
 
   /**
    * Submits a property of the argument to the specified test.
@@ -583,9 +565,8 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public <U> Check<T, E> and(Function<T, U> getter, String propName, Predicate<U> test) throws E {
-    throw notApplicable();
-  }
+  public abstract <U> Check<T, E> and(Function<T, U> getter, String propName, Predicate<U> test)
+      throws E;
 
   /**
    * Submits a property of the argument to the specified test.
@@ -599,10 +580,8 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public <U> Check<T, E> and(
-      Function<T, U> getter, Predicate<U> test, String message, Object... msgArgs) throws E {
-    throw notApplicable();
-  }
+  public abstract <U> Check<T, E> and(
+      Function<T, U> getter, Predicate<U> test, String message, Object... msgArgs) throws E;
 
   /**
    * Submits an integer property of the argument to the specified test.
@@ -614,12 +593,11 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> and(ToIntFunction<T> getter, String propName, IntPredicate test) throws E {
-    throw notApplicable();
-  }
+  public abstract Check<T, E> and(ToIntFunction<T> getter, String propName, IntPredicate test)
+      throws E;
 
   /**
-   * Submits an integer property of the argument to the specified test.
+   * Submits an {@code int} property of the argument to the specified test.
    *
    * @param getter A {@code Function} with the argument as input and the value to be tested as
    *     output. Usually a getter like {@code Employee::getAge}.
@@ -629,10 +607,8 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> and(
-      ToIntFunction<T> getter, IntPredicate test, String message, Object... msgArgs) throws E {
-    throw notApplicable();
-  }
+  public abstract Check<T, E> andAsInt(
+      ToIntFunction<T> getter, IntPredicate test, String message, Object... msgArgs) throws E;
 
   /**
    * Submits a property of the argument to the specified test.
@@ -648,10 +624,8 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public <U, V> Check<T, E> and(
-      Function<T, U> getter, String propName, Relation<U, V> test, V target) throws E {
-    throw notApplicable();
-  }
+  public abstract <U, V> Check<T, E> and(
+      Function<T, U> getter, String propName, Relation<U, V> test, V target) throws E;
 
   /**
    * Submits a property of the argument to the specified test.
@@ -668,11 +642,9 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public <U, V> Check<T, E> and(
+  public abstract <U, V> Check<T, E> and(
       Function<T, U> getter, Relation<U, V> test, V target, String message, Object... msgArgs)
-      throws E {
-    throw notApplicable();
-  }
+      throws E;
 
   /**
    * Submits a property of the argument to the specified test.
@@ -686,10 +658,8 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> and(ToIntFunction<T> getter, String propName, IntRelation test, int target)
-      throws E {
-    throw notApplicable();
-  }
+  public abstract Check<T, E> and(
+      ToIntFunction<T> getter, String propName, IntRelation test, int target) throws E;
 
   /**
    * Submits a property of the argument to the specified test.
@@ -704,11 +674,9 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> and(
+  public abstract Check<T, E> and(
       ToIntFunction<T> getter, IntRelation test, int target, String message, Object... msgArgs)
-      throws E {
-    throw notApplicable();
-  }
+      throws E;
 
   /**
    * Returns the argument being tested. To be used as the last call after a chain of checks. For
@@ -723,21 +691,13 @@ public abstract class Check<T, E extends Exception> {
   public abstract T ok();
 
   /**
-   * Returns the argument being tested as an {@code int} To be used as the last call after a chain
-   * of checks. If the argument being tested actually is an {@code int} rather than an {@code
-   * Integer}, this method saves the cost of a boxing-unboxing round trip incurred by {@link #ok()}.
+   * Returns the argument being tested as an {@code int}. To be used as the last call after a chain
+   * of checks. If the argument being tested actually is an {@code int} (rather than an {@code
+   * Integer}), this method saves the cost of a boxing-unboxing round trip incurred by {@link
+   * #ok()}. If the argument was not an instance of {@link Number}, this method will throw an {@link
+   * UnsupportedOperationException}.
    *
    * @return The argument cast or converted to an {@code int}
    */
-  public int intValue() {
-    String fmt = "Argument %s (%s) cannot be cast to int";
-    String msg = String.format(fmt, getClass().getName(), argName);
-    throw new ClassCastException(msg);
-  }
-
-  protected UnsupportedOperationException notApplicable() {
-    String fmt = "Cannot apply %s to %s";
-    String msg = String.format(fmt, getClass().getSimpleName(), argName);
-    return new UnsupportedOperationException(msg);
-  }
+  public abstract int intValue();
 }

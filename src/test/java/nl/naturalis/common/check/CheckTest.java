@@ -8,8 +8,10 @@ import org.junit.Test;
 import static nl.naturalis.common.check.Checks.atLeast;
 import static nl.naturalis.common.check.Checks.greaterThan;
 import static nl.naturalis.common.check.Checks.isArray;
-import static nl.naturalis.common.check.Checks.lessThan;
+import static nl.naturalis.common.check.Checks.*;
+import static org.junit.Assert.*;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class CheckTest {
 
   @Test(expected = IOException.class)
@@ -20,6 +22,52 @@ public class CheckTest {
   @Test
   public void that02() throws IOException {
     Check.that(5 > 3, () -> new IOException());
+  }
+
+  @Test // notNull() forces ObjectCheck
+  public void test01() {
+    Check check = Check.that(3, "fooArg", notNull());
+    assertEquals(ObjectCheck.class, check.getClass());
+  }
+
+  @Test // two ints silently converted to Integer
+  public void test02() {
+    Check check = Check.that(5, "fooArg", numGreaterThan(), 4);
+    assertEquals(ObjectCheck.class, check.getClass());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void test03() {
+    Check.argument(2, "fooArg").and(numGreaterThan(), 4);
+  }
+
+  @Test
+  public void test04() {
+    Check.that(Integer.valueOf(5), "fooArg", numGreaterThan(), 3);
+  }
+
+  @Test
+  public void test05() {
+    IntCheck<IllegalArgumentException> check = (IntCheck) Check.argument(9, "fooArg");
+    check.and(numGreaterThan(), 4);
+  }
+
+  @Test
+  public void test06() {
+    IntCheck<IllegalArgumentException> check = (IntCheck) Check.argument(9, "fooArg");
+    check.and(numGreaterThan(), Integer.valueOf(4));
+  }
+
+  @Test
+  public void test07() {
+    IntCheck<IllegalArgumentException> check = (IntCheck) Check.argument(9, "fooArg");
+    check.and(greaterThan(), Integer.valueOf(4));
+  }
+
+  @Test // Gotcha
+  public void test08() {
+    IntCheck<IllegalArgumentException> check = (IntCheck) Check.argument(9, "fooArg");
+    check.and(instanceOf(), Integer.class);
   }
 
   @Test
