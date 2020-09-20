@@ -23,7 +23,7 @@ public interface IntRelation {
 
   /**
    * Returns the negation of the specified relation. For example, the negation of <i>X &gt; Y</i> is
-   * <i>X &lt=; Y</i>.
+   * <i>X &lt;= Y</i>.
    *
    * @param relation The {@code Relation} to return the negation of
    * @return The negated {@code Relation}

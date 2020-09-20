@@ -115,7 +115,7 @@ public abstract class Check<T, E extends Exception> {
    * Static factory method. Returns a new {@code Check} object suitable for testing the provided
    * argument.
    *
-   * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
+   * @param <U> The type of the argument
    * @param arg The argument
    * @param argName The name of the argument
    * @return A new {@code Check} object
@@ -221,8 +221,6 @@ public abstract class Check<T, E extends Exception> {
    * @param arg The argument
    * @param argName The name of the argument
    * @param test The test
-   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
-   *     returns an {@code Exception}
    * @return A new {@code Check} object
    * @throws IllegalArgumentException If the argument fails to pass the specified test or any
    *     subsequent tests called on the returned {@code Check} object
@@ -255,46 +253,6 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing {@code int}
-   * arguments if it passes an the specified test, else throws an {@code IllegalArgumentException}.
-   *
-   * @param arg The argument
-   * @param argName The argument name
-   * @param test
-   * @param relateTo
-   * @return
-   * @throws IllegalArgumentException If the argument fails to pass the specified test or any
-   *     subsequent tests called on the returned {@code Check} object
-   */
-  public static Check<Integer, IllegalArgumentException> that(
-      int arg, String argName, IntRelation test, int relateTo) throws IllegalArgumentException {
-    return new IntCheck<>(arg, argName, IllegalArgumentException::new).and(test, relateTo);
-  }
-
-  /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing integers if the
-   * argument passes the specified (first) test, else throws an {@code IllegalArgumentException}.
-   *
-   * @param <F> The type of {@code Exception} thrown if the argument fails to pass the specified
-   *     test, or any subsequent tests executed on the returned {@code Check} object
-   * @param arg The argument
-   * @param argName The argument name
-   * @param test The relation to verify between the argument and the specified integer ({@code
-   *     relateTo})
-   * @param relateTo The integer at the other end of the relationship
-   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
-   *     returns an {@code Exception}
-   * @return A new {@code Check} instance
-   * @throws F If the argument fails to pass the specified test or any subsequent tests called on
-   *     the returned {@code Check} object
-   */
-  public static <F extends Exception> Check<Integer, F> that(
-      int arg, String argName, IntRelation test, int relateTo, Function<String, F> excFactory)
-      throws F {
-    return new IntCheck<>(arg, argName, excFactory).and(test, relateTo);
-  }
-
-  /**
    * Static factory method. Returns a new {@code Check} object suitable for testing the provided
    * argument if it passes an initial test, else throws an {@code IllegalArgumentException}.
    *
@@ -302,16 +260,16 @@ public abstract class Check<T, E extends Exception> {
    * @param <V> The type of the object of the relationship
    * @param arg The argument
    * @param argName The name of the argument
-   * @param test The relation to verify between the argument and the specified object ({@code
+   * @param relation The relation to verify between the argument and the specified value ({@code
    *     relateTo})
-   * @param relateTo The integer at the other end of the relationship
+   * @param relateTo The object of the relationship
    * @return A new {@code Check} object
    * @throws IllegalArgumentException If the argument fails to pass the specified test or any
    *     subsequent tests called on the returned {@code Check} object
    */
   public static <U, V> Check<U, IllegalArgumentException> that(
-      U arg, String argName, Relation<U, V> test, V relateTo) throws IllegalArgumentException {
-    return that(arg, argName, test, relateTo, IllegalArgumentException::new);
+      U arg, String argName, Relation<U, V> relation, V relateTo) throws IllegalArgumentException {
+    return that(arg, argName, relation, relateTo, IllegalArgumentException::new);
   }
 
   /**
@@ -325,9 +283,9 @@ public abstract class Check<T, E extends Exception> {
    *     test, or any subsequent tests executed on the returned {@code Check} object
    * @param arg The argument
    * @param argName The name of the argument
-   * @param test A test verifying that some relation exists between the argument and the specified
-   *     value.
-   * @param relateTo
+   * @param relation The relation to verify between the argument and the specified value ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
    * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
    *     returns an {@code Exception}
    * @return A new {@code Check} object
@@ -335,9 +293,99 @@ public abstract class Check<T, E extends Exception> {
    *     the returned {@code Check} object
    */
   public static <U, V, F extends Exception> Check<U, F> that(
-      U arg, String argName, Relation<U, V> test, V relateTo, Function<String, F> excFactory)
+      U arg, String argName, Relation<U, V> relation, V relateTo, Function<String, F> excFactory)
       throws F {
-    return new ObjectCheck<>(arg, argName, excFactory).and(test, relateTo);
+    return new ObjectCheck<>(arg, argName, excFactory).and(relation, relateTo);
+  }
+
+  /**
+   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * argument if it passes an initial test, else throws an {@code IllegalArgumentException}.
+   *
+   * @param <U> The type of the argument
+   * @param arg The argument
+   * @param argName The name of the argument
+   * @param relation The relation to verify between the argument and the specified value ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
+   * @return A new {@code Check} object
+   * @throws IllegalArgumentException If the argument fails to pass the specified test or any
+   *     subsequent tests called on the returned {@code Check} object
+   */
+  public static <U> Check<U, IllegalArgumentException> that(
+      U arg, String argName, ObjIntRelation<U> relation, int relateTo)
+      throws IllegalArgumentException {
+    return that(arg, argName, relation, relateTo, IllegalArgumentException::new);
+  }
+
+  /**
+   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * argument if the argument passes the specified test, else throws the {@code Exception} produced
+   * by the specified {@code Exception} factory.
+   *
+   * @param <U> The type of the argument
+   * @param <F> The type of {@code Exception} thrown if the argument fails to pass the specified
+   *     test, or any subsequent tests executed on the returned {@code Check} object
+   * @param arg The argument
+   * @param argName The name of the argument
+   * @param relation The relation to verify between the argument and the specified value ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
+   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
+   *     returns an {@code Exception}
+   * @return A new {@code Check} object
+   * @throws F If the argument fails to pass the specified test or any subsequent tests called on
+   *     the returned {@code Check} object
+   */
+  public static <U, F extends Exception> Check<U, F> that(
+      U arg,
+      String argName,
+      ObjIntRelation<U> relation,
+      int relateTo,
+      Function<String, F> excFactory)
+      throws F {
+    return new ObjectCheck<>(arg, argName, excFactory).and(relation, relateTo);
+  }
+
+  /**
+   * Static factory method. Returns a new {@code Check} object suitable for testing {@code int}
+   * arguments if it passes an the specified test, else throws an {@code IllegalArgumentException}.
+   *
+   * @param arg The argument
+   * @param argName The argument name
+   * @param relation The relation to verify between the argument and the specified value ({@code
+   *     relateTo})
+   * @param relateTo
+   * @return
+   * @throws IllegalArgumentException If the argument fails to pass the specified test or any
+   *     subsequent tests called on the returned {@code Check} object
+   */
+  public static Check<Integer, IllegalArgumentException> that(
+      int arg, String argName, IntRelation relation, int relateTo) throws IllegalArgumentException {
+    return new IntCheck<>(arg, argName, IllegalArgumentException::new).and(relation, relateTo);
+  }
+
+  /**
+   * Static factory method. Returns a new {@code Check} object suitable for testing integers if the
+   * argument passes the specified (first) test, else throws an {@code IllegalArgumentException}.
+   *
+   * @param <F> The type of {@code Exception} thrown if the argument fails to pass the specified
+   *     test, or any subsequent tests executed on the returned {@code Check} object
+   * @param arg The argument
+   * @param argName The argument name
+   * @param relation The relation to verify between the argument and the specified integer ({@code
+   *     relateTo})
+   * @param relateTo The integer at the other end of the relationship
+   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
+   *     returns an {@code Exception}
+   * @return A new {@code Check} instance
+   * @throws F If the argument fails to pass the specified test or any subsequent tests called on
+   *     the returned {@code Check} object
+   */
+  public static <F extends Exception> Check<Integer, F> that(
+      int arg, String argName, IntRelation relation, int relateTo, Function<String, F> excFactory)
+      throws F {
+    return new IntCheck<>(arg, argName, excFactory).and(relation, relateTo);
   }
 
   /**
@@ -507,7 +555,7 @@ public abstract class Check<T, E extends Exception> {
    * error messages associated with them.
    *
    * @param <U> The type of the object of the relationship
-   * @param test The relation to verify between the argument and the specified object ({@code
+   * @param relation The relation to verify between the argument and the specified value ({@code
    *     relateTo})
    * @param relateTo The object of the relationship
    * @return This {@code Check} object
@@ -519,7 +567,7 @@ public abstract class Check<T, E extends Exception> {
    * Submits the argument to the specified relation. Allows you to provide a custom error message.
    *
    * @param <U> The type of the object of the relationship
-   * @param relation The relation to verify between the argument and the specified object ({@code
+   * @param relation The relation to verify between the argument and the specified value ({@code
    *     relateTo})
    * @param relateTo The object of the relationship
    * @param message The error message
@@ -535,8 +583,7 @@ public abstract class Check<T, E extends Exception> {
    * (statically imported) tests in thw {@link Checks} class, as they have predefined, informative
    * error messages associated with them.
    *
-   * @param <U> The type of the object of the relationship
-   * @param relation The relation to verify between the argument and the specified object ({@code
+   * @param relation The relation to verify between the argument and the specified value ({@code
    *     relateTo})
    * @param relateTo The object of the relationship
    * @return This {@code Check} object
@@ -547,8 +594,7 @@ public abstract class Check<T, E extends Exception> {
   /**
    * Submits the argument to the specified relation. Allows you to provide a custom error message.
    *
-   * @param <U> The type of the object of the relationship
-   * @param relation The relation to verify between the argument and the specified object ({@code
+   * @param relation The relation to verify between the argument and the specified value ({@code
    *     relateTo})
    * @param relateTo The object of the relationship
    * @param message The error message
@@ -649,7 +695,7 @@ public abstract class Check<T, E extends Exception> {
    * @param <V> The type of the object of the relationship
    * @param getter A {@code Function} returning the subject of the relationship
    * @param propName The name of the property
-   * @param relation The relation to verify between the argument and the specified object ({@code
+   * @param relation The relation to verify between the argument and the specified value ({@code
    *     relateTo})
    * @param relateTo The object of the relationship
    * @return This {@code Check} object
@@ -664,7 +710,7 @@ public abstract class Check<T, E extends Exception> {
    * @param <U> The type of the property
    * @param <V> The type of the object of the relationship
    * @param getter A {@code Function} returning the subject of the relationship
-   * @param relation The relation to verify between the argument and the specified object ({@code
+   * @param relation The relation to verify between the argument and the specified value ({@code
    *     relateTo})
    * @param relateTo The object of the relationship
    * @param message The error message
@@ -682,7 +728,7 @@ public abstract class Check<T, E extends Exception> {
    * @param <U> The type of the property
    * @param getter A {@code Function} returning the subject of the relationship
    * @param propName The name of the property
-   * @param relation The relation to verify between the argument and the specified object ({@code
+   * @param relation The relation to verify between the argument and the specified value ({@code
    *     relateTo})
    * @param relateTo The object of the relationship
    * @return This {@code Check} object
@@ -696,7 +742,7 @@ public abstract class Check<T, E extends Exception> {
    *
    * @param <U> The type of the property
    * @param getter A {@code Function} returning the subject of the relationship
-   * @param relation The relation to verify between the argument and the specified object ({@code
+   * @param relation The relation to verify between the argument and the specified value ({@code
    *     relateTo})
    * @param relateTo The object of the relationship
    * @param message The error message

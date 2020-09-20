@@ -106,6 +106,16 @@ public class CheckTest {
   }
 
   @Test
+  public void test16() {
+    Check.that("Hello, World!", "fooArg", sizeAtLeast(), 3);
+  }
+
+  @Test
+  public void test17() {
+    Check.that("Hello, World!", "fooArg", (x, y) -> x.length() > y, 3);
+  }
+
+  @Test
   public void and01() {
     Employee employee = new Employee(3, "John Smith", 43, "Skating", "Scoccer");
     Check.notNull(employee, "employee")

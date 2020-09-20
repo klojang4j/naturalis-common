@@ -122,7 +122,7 @@ public class ObjectMethods {
   /**
    * Verifies that the argument is not null, not empty, and does not contain any null values.
    *
-   * @param container The object to be tested
+   * @param obj The object to be tested
    * @return Whether or not it is not null, not empty, and does not contain any null values
    */
   public static boolean isDeepNotNull(Object obj) {

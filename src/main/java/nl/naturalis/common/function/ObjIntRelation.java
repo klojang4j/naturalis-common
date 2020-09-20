@@ -2,8 +2,8 @@ package nl.naturalis.common.function;
 
 /**
  * Verifies that an object has a certain relationship to an integer. For example, if object A is a
- * {@code Collection} and object B is an element of it, then the relationship <i>x contains y</i>
- * exists between these objects.
+ * {@code Collection} with 6 elements, and y is the number 3, then the relation <i>x.size() &gt;
+ * y</i> exists between these two values.
  *
  * @author Ayco Holleman
  * @param <T> The type of the subject of the relation
