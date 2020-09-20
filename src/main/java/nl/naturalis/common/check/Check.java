@@ -2,6 +2,7 @@ package nl.naturalis.common.check;
 
 import java.util.function.*;
 import nl.naturalis.common.function.IntRelation;
+import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
 
 /**
@@ -260,14 +261,14 @@ public abstract class Check<T, E extends Exception> {
    * @param arg The argument
    * @param argName The argument name
    * @param test
-   * @param target
+   * @param relateTo
    * @return
    * @throws IllegalArgumentException If the argument fails to pass the specified test or any
    *     subsequent tests called on the returned {@code Check} object
    */
   public static Check<Integer, IllegalArgumentException> that(
-      int arg, String argName, IntRelation test, int target) throws IllegalArgumentException {
-    return new IntCheck<>(arg, argName, IllegalArgumentException::new).and(test, target);
+      int arg, String argName, IntRelation test, int relateTo) throws IllegalArgumentException {
+    return new IntCheck<>(arg, argName, IllegalArgumentException::new).and(test, relateTo);
   }
 
   /**
@@ -279,8 +280,8 @@ public abstract class Check<T, E extends Exception> {
    * @param arg The argument
    * @param argName The argument name
    * @param test The relation to verify between the argument and the specified integer ({@code
-   *     target})
-   * @param target The integer at the other end of the relationship
+   *     relateTo})
+   * @param relateTo The integer at the other end of the relationship
    * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
    *     returns an {@code Exception}
    * @return A new {@code Check} instance
@@ -288,9 +289,9 @@ public abstract class Check<T, E extends Exception> {
    *     the returned {@code Check} object
    */
   public static <F extends Exception> Check<Integer, F> that(
-      int arg, String argName, IntRelation test, int target, Function<String, F> excFactory)
+      int arg, String argName, IntRelation test, int relateTo, Function<String, F> excFactory)
       throws F {
-    return new IntCheck<>(arg, argName, excFactory).and(test, target);
+    return new IntCheck<>(arg, argName, excFactory).and(test, relateTo);
   }
 
   /**
@@ -298,19 +299,19 @@ public abstract class Check<T, E extends Exception> {
    * argument if it passes an initial test, else throws an {@code IllegalArgumentException}.
    *
    * @param <U> The type of the argument
-   * @param <V> The type of the object at the other end of the specified {@code Relation}
+   * @param <V> The type of the object of the relationship
    * @param arg The argument
    * @param argName The name of the argument
    * @param test The relation to verify between the argument and the specified object ({@code
-   *     target})
-   * @param target The integer at the other end of the relationship
+   *     relateTo})
+   * @param relateTo The integer at the other end of the relationship
    * @return A new {@code Check} object
    * @throws IllegalArgumentException If the argument fails to pass the specified test or any
    *     subsequent tests called on the returned {@code Check} object
    */
   public static <U, V> Check<U, IllegalArgumentException> that(
-      U arg, String argName, Relation<U, V> test, V target) throws IllegalArgumentException {
-    return that(arg, argName, test, target, IllegalArgumentException::new);
+      U arg, String argName, Relation<U, V> test, V relateTo) throws IllegalArgumentException {
+    return that(arg, argName, test, relateTo, IllegalArgumentException::new);
   }
 
   /**
@@ -319,14 +320,14 @@ public abstract class Check<T, E extends Exception> {
    * by the specified {@code Exception} factory.
    *
    * @param <U> The type of the argument
-   * @param <V> The type of the object at the other end of the specified {@code Relation}
+   * @param <V> The type of the object of the relationship
    * @param <F> The type of {@code Exception} thrown if the argument fails to pass the specified
    *     test, or any subsequent tests executed on the returned {@code Check} object
    * @param arg The argument
    * @param argName The name of the argument
    * @param test A test verifying that some relation exists between the argument and the specified
    *     value.
-   * @param target
+   * @param relateTo
    * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
    *     returns an {@code Exception}
    * @return A new {@code Check} object
@@ -334,9 +335,9 @@ public abstract class Check<T, E extends Exception> {
    *     the returned {@code Check} object
    */
   public static <U, V, F extends Exception> Check<U, F> that(
-      U arg, String argName, Relation<U, V> test, V target, Function<String, F> excFactory)
+      U arg, String argName, Relation<U, V> test, V relateTo, Function<String, F> excFactory)
       throws F {
-    return new ObjectCheck<>(arg, argName, excFactory).and(test, target);
+    return new ObjectCheck<>(arg, argName, excFactory).and(test, relateTo);
   }
 
   /**
@@ -505,56 +506,85 @@ public abstract class Check<T, E extends Exception> {
    * (statically imported) tests in thw {@link Checks} class, as they have predefined, informative
    * error messages associated with them.
    *
-   * @param <U> The type of the object at the other end of the specified {@code Relation}
+   * @param <U> The type of the object of the relationship
    * @param test The relation to verify between the argument and the specified object ({@code
-   *     target})
-   * @param target The object at the other end of the specified {@code Relation}
+   *     relateTo})
+   * @param relateTo The object of the relationship
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract <U> Check<T, E> and(Relation<T, U> test, U target) throws E;
+  public abstract <U> Check<T, E> and(Relation<T, U> relation, U relateTo) throws E;
 
   /**
-   * Submits the argument to the specified test. Allows you to provide a custom error message.
+   * Submits the argument to the specified relation. Allows you to provide a custom error message.
    *
-   * @param <U> The type of the object at the other end of the specified {@code Relation}
-   * @param test The relation to verify between the argument and the specified object ({@code
-   *     target})
-   * @param target The object at the other end of the specified {@code Relation}
+   * @param <U> The type of the object of the relationship
+   * @param relation The relation to verify between the argument and the specified object ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
-   * @throws E If the test fails
+   * @throws E If the relation fails
    */
   public abstract <U> Check<T, E> and(
-      Relation<T, U> test, U target, String message, Object... msgArgs) throws E;
+      Relation<T, U> relation, U relateTo, String message, Object... msgArgs) throws E;
 
   /**
-   * Submits the argument to the specified test. This method is especially useful when using the
+   * Submits the argument to the specified relation. This method is especially useful when using the
    * (statically imported) tests in thw {@link Checks} class, as they have predefined, informative
    * error messages associated with them.
    *
-   * @param test The relation to verify between the argument and the specified integer ({@code
-   *     target})
-   * @param target The integer at the other end of the specified {@code Relation}
+   * @param <U> The type of the object of the relationship
+   * @param relation The relation to verify between the argument and the specified object ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
    * @return This {@code Check} object
-   * @throws E If the test fails
+   * @throws E If the relation fails
    */
-  public abstract Check<T, E> and(IntRelation test, int target) throws E;
+  public abstract Check<T, E> and(ObjIntRelation<T> relation, int relateTo) throws E;
 
   /**
-   * Submits the argument to the specified test. Allows you to provide a custom error message.
+   * Submits the argument to the specified relation. Allows you to provide a custom error message.
    *
-   * @param test The relation to verify between the argument and the specified integer ({@code
-   *     target})
-   * @param target The integer at the other end of the specified {@code Relation}
+   * @param <U> The type of the object of the relationship
+   * @param relation The relation to verify between the argument and the specified object ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
-   * @throws E If the test fails
+   * @throws E If the relation fails
    */
-  public abstract Check<T, E> and(IntRelation test, int target, String message, Object... msgArgs)
-      throws E;
+  public abstract Check<T, E> and(
+      ObjIntRelation<T> relation, int relateTo, String message, Object... msgArgs) throws E;
+
+  /**
+   * Submits the argument to the specified relation. This method is especially useful when using the
+   * (statically imported) tests in thw {@link Checks} class, as they have predefined, informative
+   * error messages associated with them.
+   *
+   * @param relation The relation to verify between the argument and the specified integer ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the relation fails
+   */
+  public abstract Check<T, E> and(IntRelation relation, int relateTo) throws E;
+
+  /**
+   * Submits the argument to the specified relation. Allows you to provide a custom error message.
+   *
+   * @param relation The relation to verify between the argument and the specified integer ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the relation fails
+   */
+  public abstract Check<T, E> and(
+      IntRelation relation, int relateTo, String message, Object... msgArgs) throws E;
 
   /**
    * Submits a property of the argument to the specified test.
@@ -595,7 +625,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract Check<T, E> and(ToIntFunction<T> getter, String propName, IntPredicate test)
+  public abstract Check<T, E> andAsInt(ToIntFunction<T> getter, String propName, IntPredicate test)
       throws E;
 
   /**
@@ -613,71 +643,107 @@ public abstract class Check<T, E extends Exception> {
       ToIntFunction<T> getter, IntPredicate test, String message, Object... msgArgs) throws E;
 
   /**
-   * Submits a property of the argument to the specified test.
+   * Submits a property of the argument to the specified relation.
    *
    * @param <U> The type of the property
-   * @param <V> The type of the object at the other end of the specified {@code Relation}
-   * @param getter A {@code Function} with the argument as input and the value to be tested as
-   *     output. Usually a getter like {@code Employee::getName}.
+   * @param <V> The type of the object of the relationship
+   * @param getter A {@code Function} returning the subject of the relationship
    * @param propName The name of the property
-   * @param test The relation to verify between the argument and the specified object ({@code
-   *     target})
-   * @param target The object at the other end of the specified {@code Relation}
+   * @param relation The relation to verify between the argument and the specified object ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
    * @return This {@code Check} object
-   * @throws E If the test fails
+   * @throws E If the relation fails
    */
   public abstract <U, V> Check<T, E> and(
-      Function<T, U> getter, String propName, Relation<U, V> test, V target) throws E;
+      Function<T, U> getter, String propName, Relation<U, V> relation, V relateTo) throws E;
 
   /**
-   * Submits a property of the argument to the specified test.
+   * Submits a property of the argument to the specified relation.
    *
    * @param <U> The type of the property
-   * @param <V> The type of the object at the other end of the specified {@code Relation}
-   * @param getter A {@code Function} with the argument as input and the value to be tested as
-   *     output. Usually a getter like {@code Employee::getName}.
-   * @param test The relation to verify between the argument and the specified object ({@code
-   *     target})
-   * @param target The object at the other end of the specified {@code Relation}
+   * @param <V> The type of the object of the relationship
+   * @param getter A {@code Function} returning the subject of the relationship
+   * @param relation The relation to verify between the argument and the specified object ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
-   * @throws E If the test fails
+   * @throws E If the relation fails
    */
   public abstract <U, V> Check<T, E> and(
-      Function<T, U> getter, Relation<U, V> test, V target, String message, Object... msgArgs)
+      Function<T, U> getter, Relation<U, V> relation, V relateTo, String message, Object... msgArgs)
       throws E;
 
   /**
-   * Submits a property of the argument to the specified test.
+   * Submits a property of the argument to the specified relation.
    *
-   * @param getter A {@code Function} with the argument as input and the value to be tested as
-   *     output. Usually a getter like {@code Employee::getName}.
+   * @param <U> The type of the property
+   * @param getter A {@code Function} returning the subject of the relationship
    * @param propName The name of the property
-   * @param test The relation to verify between the argument and the specified integer ({@code
-   *     target})
-   * @param target The integer at the other end of the specified {@code Relation}
+   * @param relation The relation to verify between the argument and the specified object ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
    * @return This {@code Check} object
-   * @throws E If the test fails
+   * @throws E If the relation fails
    */
-  public abstract Check<T, E> and(
-      ToIntFunction<T> getter, String propName, IntRelation test, int target) throws E;
+  public abstract <U> Check<T, E> and(
+      Function<T, U> getter, String propName, ObjIntRelation<U> relation, int relateTo) throws E;
 
   /**
-   * Submits a property of the argument to the specified test.
+   * Submits a property of the argument to the specified relation.
    *
-   * @param getter A {@code Function} with the argument as input and the value to be tested as
-   *     output. Usually a getter like {@code Employee::getName}.
-   * @param test The relation to verify between the argument and the specified integer ({@code
-   *     target})
-   * @param target The integer at the other end of the specified {@code Relation}
+   * @param <U> The type of the property
+   * @param getter A {@code Function} returning the subject of the relationship
+   * @param relation The relation to verify between the argument and the specified object ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
-   * @throws E If the test fails
+   * @throws E If the relation fails
+   */
+  public abstract <U> Check<T, E> and(
+      Function<T, U> getter,
+      ObjIntRelation<U> relation,
+      int relateTo,
+      String message,
+      Object... msgArgs)
+      throws E;
+
+  /**
+   * Submits a property of the argument to the specified relation.
+   *
+   * @param getter A {@code Function} returning the subject of the relationship
+   * @param propName The name of the property
+   * @param relation The relation to verify between the argument and the specified integer ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the relation fails
    */
   public abstract Check<T, E> and(
-      ToIntFunction<T> getter, IntRelation test, int target, String message, Object... msgArgs)
+      ToIntFunction<T> getter, String propName, IntRelation relation, int relateTo) throws E;
+
+  /**
+   * Submits a property of the argument to the specified relation.
+   *
+   * @param getter A {@code Function} returning the subject of the relationship
+   * @param relation The relation to verify between the argument and the specified integer ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the relation fails
+   */
+  public abstract Check<T, E> and(
+      ToIntFunction<T> getter,
+      IntRelation relation,
+      int relateTo,
+      String message,
+      Object... msgArgs)
       throws E;
 
   /**

@@ -5,6 +5,7 @@ import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import nl.naturalis.common.function.IntRelation;
+import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
 
 final class IntCheck<E extends Exception> extends Check<Integer, E> {
@@ -25,11 +26,12 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
   }
 
   @Override
-  public Check<Integer, E> and(Predicate<Integer> test, String msg, Object... msgArgs) throws E {
+  public Check<Integer, E> and(Predicate<Integer> test, String message, Object... msgArgs)
+      throws E {
     if (test.test(arg)) {
       return this;
     }
-    throw excFactory.apply(String.format(msg, msgArgs));
+    throw excFactory.apply(String.format(message, msgArgs));
   }
 
   @Override
@@ -41,44 +43,62 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
   }
 
   @Override
-  public IntCheck<E> and(IntPredicate test, String msg, Object... msgArgs) throws E {
+  public IntCheck<E> and(IntPredicate test, String message, Object... msgArgs) throws E {
     if (test.test(arg)) {
       return this;
     }
-    throw excFactory.apply(String.format(msg, msgArgs));
+    throw excFactory.apply(String.format(message, msgArgs));
   }
 
   @Override
-  public <U> Check<Integer, E> and(Relation<Integer, U> test, U target) throws E {
-    if (test.exists(arg, target)) {
+  public <U> Check<Integer, E> and(Relation<Integer, U> relation, U relateTo) throws E {
+    if (relation.exists(arg, relateTo)) {
       return this;
     }
-    throw excFactory.apply(Messages.get(test, arg, argName, target));
+    throw excFactory.apply(Messages.get(relation, arg, argName, relateTo));
   }
 
   @Override
   public <U> Check<Integer, E> and(
-      Relation<Integer, U> test, U target, String msg, Object... msgArgs) throws E {
-    if (test.exists(arg, target)) {
+      Relation<Integer, U> relation, U relateTo, String message, Object... msgArgs) throws E {
+    if (relation.exists(arg, relateTo)) {
       return this;
     }
-    throw excFactory.apply(String.format(msg, msgArgs));
+    throw excFactory.apply(String.format(message, msgArgs));
   }
 
   @Override
-  public IntCheck<E> and(IntRelation test, int target) throws E {
-    if (test.exists(arg, target)) {
+  public Check<Integer, E> and(ObjIntRelation<Integer> relation, int relateTo) throws E {
+    if (relation.exists(arg, relateTo)) {
       return this;
     }
-    throw excFactory.apply(Messages.get(test, arg, argName, target));
+    throw excFactory.apply(Messages.get(relation, arg, argName, relateTo));
   }
 
   @Override
-  public IntCheck<E> and(IntRelation test, int target, String msg, Object... msgArgs) throws E {
-    if (test.exists(arg, target)) {
+  public Check<Integer, E> and(
+      ObjIntRelation<Integer> relation, int relateTo, String message, Object... msgArgs) throws E {
+    if (relation.exists(arg, relateTo)) {
       return this;
     }
-    throw excFactory.apply(String.format(msg, msgArgs));
+    throw excFactory.apply(String.format(message, msgArgs));
+  }
+
+  @Override
+  public IntCheck<E> and(IntRelation relation, int relateTo) throws E {
+    if (relation.exists(arg, relateTo)) {
+      return this;
+    }
+    throw excFactory.apply(Messages.get(relation, arg, argName, relateTo));
+  }
+
+  @Override
+  public IntCheck<E> and(IntRelation relation, int relateTo, String message, Object... msgArgs)
+      throws E {
+    if (relation.exists(arg, relateTo)) {
+      return this;
+    }
+    throw excFactory.apply(String.format(message, msgArgs));
   }
 
   @Override
@@ -94,8 +114,8 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
   }
 
   @Override
-  public Check<Integer, E> and(ToIntFunction<Integer> getter, String propName, IntPredicate test)
-      throws E {
+  public Check<Integer, E> andAsInt(
+      ToIntFunction<Integer> getter, String propName, IntPredicate test) throws E {
     throw notAnObject();
   }
 
@@ -108,28 +128,50 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
 
   @Override
   public <U, V> Check<Integer, E> and(
-      Function<Integer, U> getter, String propName, Relation<U, V> test, V target) throws E {
+      Function<Integer, U> getter, String propName, Relation<U, V> relation, V relateTo) throws E {
     throw notAnObject();
   }
 
   @Override
   public <U, V> Check<Integer, E> and(
-      Function<Integer, U> getter, Relation<U, V> test, V target, String message, Object... msgArgs)
+      Function<Integer, U> getter,
+      Relation<U, V> relation,
+      V relateTo,
+      String message,
+      Object... msgArgs)
+      throws E {
+    throw notAnObject();
+  }
+
+  @Override
+  public <U> Check<Integer, E> and(
+      Function<Integer, U> getter, String propName, ObjIntRelation<U> relation, int relateTo)
+      throws E {
+    throw notAnObject();
+  }
+
+  @Override
+  public <U> Check<Integer, E> and(
+      Function<Integer, U> getter,
+      ObjIntRelation<U> relation,
+      int relateTo,
+      String message,
+      Object... msgArgs)
       throws E {
     throw notAnObject();
   }
 
   @Override
   public Check<Integer, E> and(
-      ToIntFunction<Integer> getter, String propName, IntRelation test, int target) throws E {
+      ToIntFunction<Integer> getter, String propName, IntRelation relation, int relateTo) throws E {
     throw notAnObject();
   }
 
   @Override
   public Check<Integer, E> and(
       ToIntFunction<Integer> getter,
-      IntRelation test,
-      int target,
+      IntRelation relation,
+      int relateTo,
       String message,
       Object... msgArgs)
       throws E {
@@ -147,7 +189,7 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
   }
 
   private UnsupportedOperationException notAnObject() {
-    String fmt = "Cannot check properties for %s (type is int)";
+    String fmt = "Cannot check properties for non-object %s (int)";
     return new UnsupportedOperationException(String.format(fmt, argName));
   }
 }

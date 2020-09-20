@@ -10,6 +10,7 @@ import nl.naturalis.common.ObjectMethods;
 import nl.naturalis.common.Sizeable;
 import nl.naturalis.common.StringMethods;
 import nl.naturalis.common.function.IntRelation;
+import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
 
 /**
@@ -264,7 +265,7 @@ public class Checks {
 
   /**
    * Verifies that the argument is greater than a particular value, widening or narrowing the type
-   * of the argument to the type of that value.
+   * of the argument to the type of the specified value.
    *
    * @param <X> The type of the argument
    * @param <Y> The type of the value to compare the argument to
@@ -289,7 +290,7 @@ public class Checks {
 
   /**
    * Verifies that the argument is greater than or equal to a particular value, widening or
-   * narrowing the type of the argument to the type of that value.
+   * narrowing the type of the argument to the type of the specified value.
    *
    * @param <X> The type of the argument
    * @param <Y> The type of the value to compare the argument to
@@ -314,7 +315,7 @@ public class Checks {
 
   /**
    * Verifies that the argument is less than a particular value, widening or narrowing the type of
-   * the argument to the type of that value.
+   * the argument to the type of the specified value.
    *
    * @return A {@code Relation}
    */
@@ -324,7 +325,7 @@ public class Checks {
 
   /**
    * Verifies that the argument is less than or equal to a particular value, widening or narrowing
-   * the type of the argument to the type of that value.
+   * the type of the argument to the type of the specified value.
    *
    * @param <X> The type of the argument
    * @param <Y> The type of the value to compare the argument to
@@ -335,15 +336,16 @@ public class Checks {
   }
 
   /**
-   * Verifies that the argument's length or size is equal to a particular value. This method behaves
-   * sensibly if the argument is a {@code CharSequence}, {@code Collection}, {@code Map}, {@link
-   * Sizeable} or array. For any other type of argument this method always returns false.
+   * Verifies that the argument's length or size is equal to a particular value. This method is
+   * well-behaved if the argument is a {@code CharSequence}, {@code Collection}, {@code Map}, {@link
+   * Sizeable} or array. For any other type of argument this method throws an {@code
+   * IllegalArgumentException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
    */
   @SuppressWarnings("rawtypes")
-  public static <X> Relation<X, Integer> szEquals() {
+  public static <X> ObjIntRelation<X> sizeEquals() {
     return (x, y) -> {
       if (x instanceof CharSequence) {
         return ((CharSequence) x).length() == y;
@@ -356,32 +358,48 @@ public class Checks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() == y;
       }
-      return false;
+      throw sizeNotApplicable(x, "sizeEquals");
     };
   }
 
   /**
-   * Verifies that the argument's length or size is not equal to a particular value. This method
-   * behaves sensibly if the argument is a {@code CharSequence}, {@code Collection}, {@code Map},
-   * {@link Sizeable} or array. For any other type of argument this method always returns false.
-   *
-   * @param <X> The type of the argument
-   * @return A {@code Relation}
-   */
-  public static <X> Relation<X, Integer> szNotEquals() {
-    return (x, y) -> !szEquals().exists(x, y);
-  }
-
-  /**
-   * Verifies that the argument's length or size is greater than a particular value. This method
-   * behaves sensibly if the argument is a {@code CharSequence}, {@code Collection}, {@code Map},
-   * {@link Sizeable} or array. For any other type of argument this method always returns false.
+   * Verifies that the argument's length or size is not equal to a particular value. This method is
+   * well-behaved if the argument is a {@code CharSequence}, {@code Collection}, {@code Map}, {@link
+   * Sizeable} or array. For any other type of argument this method throws an {@code
+   * IllegalArgumentException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
    */
   @SuppressWarnings("rawtypes")
-  public static <X> Relation<X, Integer> szGreaterThan() {
+  public static <X> ObjIntRelation<X> sizeNotEquals() {
+    return (x, y) -> {
+      if (x instanceof CharSequence) {
+        return ((CharSequence) x).length() != y;
+      } else if (x instanceof Collection) {
+        return ((Collection) x).size() != y;
+      } else if (x instanceof Map) {
+        return ((Map) x).size() != y;
+      } else if (x.getClass().isArray()) {
+        return Array.getLength(x) != y;
+      } else if (x instanceof Sizeable) {
+        return ((Sizeable) x).size() != y;
+      }
+      throw sizeNotApplicable(x, "sizeNotEquals");
+    };
+  }
+
+  /**
+   * Verifies that the argument's length or size is greater than a particular value. This method is
+   * well-behaved if the argument is a {@code CharSequence}, {@code Collection}, {@code Map}, {@link
+   * Sizeable} or array. For any other type of argument this method throws an {@code
+   * IllegalArgumentException}.
+   *
+   * @param <X> The type of the argument
+   * @return A {@code Relation}
+   */
+  @SuppressWarnings("rawtypes")
+  public static <X> ObjIntRelation<X> sizeGreaterThan() {
     return (x, y) -> {
       if (x instanceof CharSequence) {
         return ((CharSequence) x).length() > y;
@@ -394,13 +412,13 @@ public class Checks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() > y;
       }
-      return false;
+      throw sizeNotApplicable(x, "sizeGreaterThan");
     };
   }
 
   /**
    * Verifies that the argument's length or size is greater than or equal to a particular value.
-   * This method behaves sensibly if the argument is a {@code CharSequence}, {@code Collection},
+   * This method is well-behaved if the argument is a {@code CharSequence}, {@code Collection},
    * {@code Map}, {@link Sizeable} or array. For any other type of argument this method always
    * returns false.
    *
@@ -408,7 +426,7 @@ public class Checks {
    * @return A {@code Relation}
    */
   @SuppressWarnings("rawtypes")
-  public static <X> Relation<X, Integer> szAtLeast() {
+  public static <X> Relation<X, Integer> sizeAtLeast() {
     return (x, y) -> {
       if (x instanceof CharSequence) {
         return ((CharSequence) x).length() >= y;
@@ -421,33 +439,62 @@ public class Checks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() >= y;
       }
-      return false;
+      throw sizeNotApplicable(x, "sizeAtLeast");
     };
   }
 
   /**
-   * Verifies that the argument's length or size is less than to a particular value. This method
-   * behaves sensibly if the argument is a {@code CharSequence}, {@code Collection}, {@code Map},
-   * {@link Sizeable} or array. For any other type of argument this method always returns false.
+   * Verifies that the argument's length or size is less than a particular value. This method is
+   * well-behaved if the argument is a {@code CharSequence}, {@code Collection}, {@code Map}, {@link
+   * Sizeable} or array. For any other type of argument this method throws an {@code
+   * IllegalArgumentException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
    */
-  public static <X> Relation<X, Integer> szLessThan() {
-    return (x, y) -> !szAtLeast().exists(x, y);
+  @SuppressWarnings("rawtypes")
+  public static <X> ObjIntRelation<X> sizeLessThan() {
+    return (x, y) -> {
+      if (x instanceof CharSequence) {
+        return ((CharSequence) x).length() < y;
+      } else if (x instanceof Collection) {
+        return ((Collection) x).size() < y;
+      } else if (x instanceof Map) {
+        return ((Map) x).size() < y;
+      } else if (x.getClass().isArray()) {
+        return Array.getLength(x) < y;
+      } else if (x instanceof Sizeable) {
+        return ((Sizeable) x).size() < y;
+      }
+      throw sizeNotApplicable(x, "sizeLessThan");
+    };
   }
 
   /**
    * Verifies that the argument's length or size is less than or equal to a particular value. This
-   * method behaves sensibly if the argument is a {@code CharSequence}, {@code Collection}, {@code
+   * method is well-behaved if the argument is a {@code CharSequence}, {@code Collection}, {@code
    * Map}, {@link Sizeable} or array. For any other type of argument this method always returns
    * false.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
    */
-  public static <X> Relation<X, Integer> szAtMost() {
-    return (x, y) -> !szGreaterThan().exists(x, y);
+  @SuppressWarnings("rawtypes")
+  public static <X> ObjIntRelation<X> sizeAtMost() {
+    return (x, y) -> {
+      if (x instanceof CharSequence) {
+        return ((CharSequence) x).length() <= y;
+      } else if (x instanceof Collection) {
+        return ((Collection) x).size() <= y;
+      } else if (x instanceof Map) {
+        return ((Map) x).size() <= y;
+      } else if (x.getClass().isArray()) {
+        return Array.getLength(x) <= y;
+      } else if (x instanceof Sizeable) {
+        return ((Sizeable) x).size() <= y;
+      }
+      throw sizeNotApplicable(x, "sizeLessThan");
+    };
   }
 
   /**
@@ -532,5 +579,11 @@ public class Checks {
    */
   public static IntRelation multipleOf() {
     return (x, y) -> x % y == 0;
+  }
+
+  private static IllegalArgumentException sizeNotApplicable(Object obj, String relation) {
+    String fmt = "%s not applicable to objects of type %s";
+    String msg = String.format(fmt, relation, obj.getClass().getName());
+    return new IllegalArgumentException(msg);
   }
 }

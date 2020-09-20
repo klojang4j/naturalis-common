@@ -8,6 +8,12 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static nl.naturalis.common.check.Checks.*;
 
+/**
+ * NB A lot of these tests don't make any assertion, but just verify that we can code them as we do
+ * in the first place without the compiler warning about ambiguities. The "that" static factory
+ * methods and the "and" instance methods are so heavily overloaded that we had to help the compiler
+ * determining the type of the lambdas. (E.g. That's why we have the "andAsInt" methods.)
+ */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class CheckTest {
 
@@ -27,44 +33,76 @@ public class CheckTest {
     assertEquals(ObjectCheck.class, check.getClass());
   }
 
-  @Test // two ints silently converted to Integer
+  @Test // numGreaterThan() forces ObjectCheck
   public void test02() {
     Check check = Check.that(5, "fooArg", numGreaterThan(), 4);
     assertEquals(ObjectCheck.class, check.getClass());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void test03() {
-    Check.argument(2, "fooArg").and(numGreaterThan(), 4);
+    Check<Integer, IllegalArgumentException> check = Check.argument(9, "fooArg");
+    assertEquals(IntCheck.class, check.getClass());
   }
 
   @Test
   public void test04() {
+    Check<Integer, IllegalArgumentException> check = Check.argument(Integer.valueOf(9), "fooArg");
+    assertEquals(ObjectCheck.class, check.getClass());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void test06() {
+    Check.argument(2, "fooArg").and(numGreaterThan(), 4);
+  }
+
+  @Test
+  public void test07() {
     Check.that(Integer.valueOf(5), "fooArg", numGreaterThan(), 3);
   }
 
   @Test
-  public void test05() {
+  public void test08() {
     IntCheck<IllegalArgumentException> check = (IntCheck) Check.argument(9, "fooArg");
     check.and(numGreaterThan(), 4);
   }
 
   @Test
-  public void test06() {
-    IntCheck<IllegalArgumentException> check = (IntCheck) Check.argument(9, "fooArg");
-    check.and(numGreaterThan(), Integer.valueOf(4));
-  }
-
-  @Test
-  public void test07() {
+  public void test09() {
     IntCheck<IllegalArgumentException> check = (IntCheck) Check.argument(9, "fooArg");
     check.and(greaterThan(), Integer.valueOf(4));
   }
 
-  @Test // Gotcha: intstanceOf() takes an object so force the int argument to be boxed.
-  public void test09() {
+  @Test // Gotcha: intstanceOf() takes an object so forces the int argument to be boxed.
+  public void test10() {
     IntCheck<IllegalArgumentException> check = (IntCheck) Check.argument(9, "fooArg");
     check.and(instanceOf(), Integer.class);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void test11() {
+    IntCheck<IllegalArgumentException> check = (IntCheck) Check.argument(9, "fooArg");
+    check.and(sizeGreaterThan(), Integer.valueOf(4));
+  }
+
+  @Test
+  public void test12() {
+    Check.argument("Hello, World!", "fooArg").and(sizeGreaterThan(), 6);
+  }
+
+  @Test
+  public void test13() {
+    Check.argument("Hello, World!", "fooArg").and(sizeGreaterThan(), Integer.valueOf(6));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void test14() {
+    Check.argument("Hello, World!", "fooArg").and(sizeGreaterThan(), 100);
+  }
+
+  @Test
+  public void test15() {
+    Check.argument(List.of("a", "b", "c", "d", "e"), "fooArg").and(sizeAtLeast(), 3);
   }
 
   @Test
@@ -122,5 +160,25 @@ public class CheckTest {
   public void and07() {
     Employee[] employees = new Employee[10];
     Check.notNull(employees, "employees").and(Array::getLength, "length", lessThan(), 100);
+  }
+
+  @Test
+  public void and08() {
+    Employee employee = new Employee();
+    employee.setJustSomeNumbers(new float[] {3.2F, 103.2F, 0.8F});
+    Check.notNull(employee, "employee")
+        .and(Employee::getJustSomeNumbers, "justSomeLuckyNumbers", sizeLessThan(), 100);
+  }
+
+  @Test
+  public void asInt01() {
+    Employee employee = new Employee(3, "John Smith", 43, "Skating", "Scoccer");
+    Check.notNull(employee, "employee").andAsInt(Employee::getId, "id", x -> x != 2);
+  }
+
+  @Test
+  public void asInt02() {
+    Employee employee = new Employee(3, "John Smith", 43, "Skating", "Scoccer");
+    Check.notNull(employee, "employee").andAsInt(Employee::getId, x -> x != 2, "Id must not be 2");
   }
 }

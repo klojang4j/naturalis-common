@@ -72,12 +72,12 @@ class Messages {
     tmp.add(tuple(numLessThan(), x -> format("%s must be < %s (was %s)", x[1], x[2], x[0])));
     tmp.add(tuple(numAtMost(), x -> format("%s must be <= %s (was %s)", x[1], x[2], x[0])));
 
-    tmp.add(tuple(szEquals(), x -> format("%s must be equal to %s (was %s)", sz(x), x[2], x[0])));
-    tmp.add(tuple(szNotEquals(), x -> format("%s must be not be equal to %s", sz(x), x[2])));
-    tmp.add(tuple(szGreaterThan(), x -> format("%s must be > %s (was %s)", sz(x), x[2], x[0])));
-    tmp.add(tuple(szAtLeast(), x -> format("%s must be >= %s (was %s)", sz(x), x[2], x[0])));
-    tmp.add(tuple(szLessThan(), x -> format("%s must be < %s (was %s)", sz(x), x[2], x[0])));
-    tmp.add(tuple(szAtMost(), x -> format("%s must be <= %s (was %s)", sz(x), x[2], x[0])));
+    tmp.add(tuple(sizeEquals(), x -> format("%s must be equal to %s (was %s)", sz(x), x[2], x[0])));
+    tmp.add(tuple(sizeNotEquals(), x -> format("%s must be not be equal to %s", sz(x), x[2])));
+    tmp.add(tuple(sizeGreaterThan(), x -> format("%s must be > %s (was %s)", sz(x), x[2], x[0])));
+    tmp.add(tuple(sizeAtLeast(), x -> format("%s must be >= %s (was %s)", sz(x), x[2], x[0])));
+    tmp.add(tuple(sizeLessThan(), x -> format("%s must be < %s (was %s)", sz(x), x[2], x[0])));
+    tmp.add(tuple(sizeAtMost(), x -> format("%s must be <= %s (was %s)", sz(x), x[2], x[0])));
 
     tmp.add(tuple(instanceOf(), x -> msgInstanceOf(x)));
     tmp.add(tuple(isArray(), x -> format("%s must be an array (was %s)", x[1], cname(x[0]))));
