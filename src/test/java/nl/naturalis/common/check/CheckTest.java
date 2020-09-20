@@ -5,11 +5,8 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
 import org.junit.Test;
-import static nl.naturalis.common.check.Checks.atLeast;
-import static nl.naturalis.common.check.Checks.greaterThan;
-import static nl.naturalis.common.check.Checks.isArray;
+import static org.junit.Assert.assertEquals;
 import static nl.naturalis.common.check.Checks.*;
-import static org.junit.Assert.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class CheckTest {
@@ -64,8 +61,8 @@ public class CheckTest {
     check.and(greaterThan(), Integer.valueOf(4));
   }
 
-  @Test // Gotcha
-  public void test08() {
+  @Test // Gotcha: intstanceOf() takes an object so force the int argument to be boxed.
+  public void test09() {
     IntCheck<IllegalArgumentException> check = (IntCheck) Check.argument(9, "fooArg");
     check.and(instanceOf(), Integer.class);
   }

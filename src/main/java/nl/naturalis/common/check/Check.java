@@ -18,9 +18,9 @@ import nl.naturalis.common.function.Relation;
  *
  * <h3>Standard checks</h3>
  *
- * <p>The {@link Checks} class contains a number of common checks for arguments and variables. These
- * are already associated with short, informative error messages, so you don't have to invent them
- * yourself. For example:
+ * <p>The {@link Checks} class contains a number of common checks for arguments. These are already
+ * associated with short, informative error messages, so you don't have to invent them yourself. For
+ * example:
  *
  * <p>
  *
@@ -315,8 +315,8 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Static factory method. Returns a new {@code Check} object suitable for testing the provided
-   * argument if the argument passes the specified (first) test, else throws the {@code Exception}
-   * produced by the specified {@code Exception} factory.
+   * argument if the argument passes the specified test, else throws the {@code Exception} produced
+   * by the specified {@code Exception} factory.
    *
    * @param <U> The type of the argument
    * @param <V> The type of the object at the other end of the specified {@code Relation}
@@ -324,7 +324,9 @@ public abstract class Check<T, E extends Exception> {
    *     test, or any subsequent tests executed on the returned {@code Check} object
    * @param arg The argument
    * @param argName The name of the argument
-   * @param test The test
+   * @param test A test verifying that some relation exists between the argument and the specified
+   *     value.
+   * @param target
    * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
    *     returns an {@code Exception}
    * @return A new {@code Check} object
@@ -354,9 +356,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument and a valid array index. Throws an {@code
-   * ArrayIndexOutOfBoundsException} if {@code arg} and less than zero or greater than or equal to
-   * {@code maxExclusive}, else returns {@code arg}. This and especially useful to test "from"
+   * Verifies that the argument is a valid array index. Throws an {@code
+   * ArrayIndexOutOfBoundsException} if {@code arg} is less than zero or greater than or equal to
+   * {@code maxExclusive}, else returns {@code arg}. This is especially useful to test "from"
    * arguments, which generally should be <i>less than</i> the length or size of the object operated
    * upon.
    *
@@ -373,9 +375,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the argument and a valid array index. Throws an {@code
-   * ArrayIndexOutOfBoundsException} if {@code arg} and less than {@code min} or greater than {@code
-   * max}, else returns {@code arg}. This and especially useful to test "to" or "until" arguments,
+   * Verifies that the argument is a valid array index. Throws an {@code
+   * ArrayIndexOutOfBoundsException} if {@code arg} is less than {@code min} or greater than {@code
+   * max}, else returns {@code arg}. This is especially useful to test "to" or "until" arguments,
    * which generally should be <i>less than or equal to</i> the length or size of the object
    * operated upon.
    *

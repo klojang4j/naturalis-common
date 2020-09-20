@@ -13,7 +13,7 @@ import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.Relation;
 
 /**
- * Defines various common tests for arguments and variables.
+ * Defines various common tests for arguments.
  *
  * @author Ayco Holleman
  */
@@ -85,7 +85,8 @@ public class Checks {
   }
 
   /**
-   * Verifies that the argument is null. Same as {@link Objects#isNull(Object) Objects::isNull}.
+   * Verifies that the argument is null. Equivalent to {@link Objects#isNull(Object)
+   * Objects::isNull}.
    *
    * @param <T> The type of the argument
    * @return A {@code Predicate}
@@ -95,7 +96,7 @@ public class Checks {
   }
 
   /**
-   * Verifies that the argument is not null. Same as {@link Objects#nonNull(Object)
+   * Verifies that the argument is not null. Equivalent to {@link Objects#nonNull(Object)
    * Objects::nonNull}.
    *
    * @param <T> The type of the argument
@@ -128,8 +129,8 @@ public class Checks {
   }
 
   /**
-   * Verifies the argument is not null and does not contain any null values. Same as {@link
-   * ObjectMethods#isNoneNull(Object) ObjectMethods::isNoneNull}
+   * Verifies the argument is not null and does not contain any null values. Equivalent to {@link
+   * ObjectMethods#isNoneNull(Object) ObjectMethods::isNoneNull}.
    *
    * @param <T> The type of the argument
    * @return A {@code Predicate}
@@ -150,7 +151,7 @@ public class Checks {
   }
 
   /**
-   * Verifies that a {@code String} argument is not blank.
+   * Verifies that a {@code String} argument is not null and not blank.
    *
    * @return A {@code Predicate}
    */
@@ -213,7 +214,7 @@ public class Checks {
   }
 
   /**
-   * Verifies that a {@code Collection} argument contains a particular value. Same as {@link
+   * Verifies that a {@code Collection} argument contains a particular value. Equivalent to {@link
    * Collection#contains(Object) Collection::contains}.
    *
    * @param <E> The type of the elements in the {@code Collection}
@@ -236,7 +237,7 @@ public class Checks {
   }
 
   /**
-   * Verifies that the argument is equal to a particular value. Same as {@link
+   * Verifies that the argument is equal to a particular value. Equivalent to {@link
    * Objects#equals(Object, Object) Objects::equals}. (NB the name <i>objEquals</i> allows the
    * method to be statically imported while avoiding a name clash with the ever-present {@link
    * Object#equals(Object) Object.equals} method.)
@@ -249,7 +250,7 @@ public class Checks {
   }
 
   /**
-   * Verifies that the argument is not equal to a particular value. Same as {@code
+   * Verifies that the argument is not equal to a particular value. Equivalent to {@code
    * not(objEquals())}.
    *
    * @param <X> The type of the argument
