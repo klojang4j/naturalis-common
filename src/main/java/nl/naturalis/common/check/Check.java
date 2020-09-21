@@ -848,8 +848,8 @@ public abstract class Check<T, E extends Exception> {
    *       integer without loss of precision, {@link Number#intValue() Number.intValue()} will be
    *       returned
    *   <li>If the argument is a {@link CharSequence} <i>and</i> it can be parsed into an integer
-   *       without loss of precision, UnsupportedOperationException}, the value of {@link
-   *       Integer#parseInt(String) Integer.parseInt()} will be returned.
+   *       without loss of precision, the value of {@link Integer#parseInt(String)
+   *       Integer.parseInt()} will be returned.
    *   <li>Otherwise, an {@code UnsupportedOperationException} is thrown.
    * </ul>
    *
