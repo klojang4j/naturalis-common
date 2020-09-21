@@ -110,11 +110,24 @@ public class ArrayMethods {
    * Returns {@code true} if the provided array contains the specfied value, {@code false}
    * otherwise.
    *
-   * @param array The array to search
    * @param value The value to search for
+   * @param array The array to search
    * @return Whether or not the array contans the value
    */
-  public static boolean contains(int[] array, int value) {
+  public static boolean isOneOf(int value, int... array) {
+    return indexOf(array, value) != -1;
+  }
+
+  /**
+   * Returns {@code true} if the provided array contains the specfied value, {@code false}
+   * otherwise.
+   *
+   * @param value The value to search for
+   * @param array The array to search
+   * @return Whether or not the array contans the value
+   */
+  @SafeVarargs
+  public static <T> boolean isOneOf(T value, T... array) {
     return indexOf(array, value) != -1;
   }
 
@@ -167,11 +180,12 @@ public class ArrayMethods {
    * Returns the array index of the first occurrence of {@code value} within the provided array.
    * Returns -1 if the array does not contain the value.
    *
+   * @param <T> The type of the elements within the array
    * @param array The array to search
    * @param value The value to search for
    * @return The array index of the value
    */
-  public static int indexOf(Object[] array, Object value) {
+  public static <T> int indexOf(T[] array, T value) {
     Check.notNull(array, "array");
     for (int i = 0; i < array.length; ++i) {
       if (Objects.deepEquals(array[i], value)) {

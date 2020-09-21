@@ -14,7 +14,10 @@ import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
 
 /**
- * Defines various common tests for arguments.
+ * Defines various common tests for arguments. These tests have short, informative error messages
+ * associated with them. So even though some of them are plain, unadorned method references, you
+ * might still want to use them, as it saves you the trouble of having to invent the error messages
+ * yourself.
  *
  * @author Ayco Holleman
  */

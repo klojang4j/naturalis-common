@@ -1,9 +1,8 @@
 package nl.naturalis.common.function;
 
 /**
- * Verifies that two integers have a certain relationship to each other. For example, if A equals 5
- * B equals 3, then the relationship <i>X greater than Y</i> exists between these integers. (An
- * equally appropriate name would be {@code IntBiPredicate}.)
+ * Defines some kind of relationship between two integers. For example, if x equals 5 and y equals
+ * 3, then the relation <i>X greater than Y</i> exists between these integers.
  *
  * @author Ayco Holleman
  */
@@ -11,8 +10,8 @@ package nl.naturalis.common.function;
 public interface IntRelation {
 
   /**
-   * Returns the reverse of the specified relation. For example, the reverse of <i>X &gt; Y</i> is
-   * <i>Y &gt; X</i> (or <i>X &lt; Y</i>).
+   * Returns the reverse of the specified relation, swapping subject and object in the relationship.
+   * For example, the reverse of <i>X &gt; Y</i> is <i>Y &gt; X</i> (or <i>X &lt;= Y</i>).
    *
    * @param relation The {@code Relation} to return the reverse of
    * @return The reverse {@code Relation}

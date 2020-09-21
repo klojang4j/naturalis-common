@@ -18,23 +18,6 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
   }
 
   @Override
-  public Check<Integer, E> and(Predicate<Integer> test) throws E {
-    if (test.test(arg)) {
-      return this;
-    }
-    throw excFactory.apply(Messages.get(test, arg, argName));
-  }
-
-  @Override
-  public Check<Integer, E> and(Predicate<Integer> test, String message, Object... msgArgs)
-      throws E {
-    if (test.test(arg)) {
-      return this;
-    }
-    throw excFactory.apply(String.format(message, msgArgs));
-  }
-
-  @Override
   public IntCheck<E> and(IntPredicate test) throws E {
     if (test.test(arg)) {
       return this;
@@ -45,40 +28,6 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
   @Override
   public IntCheck<E> and(IntPredicate test, String message, Object... msgArgs) throws E {
     if (test.test(arg)) {
-      return this;
-    }
-    throw excFactory.apply(String.format(message, msgArgs));
-  }
-
-  @Override
-  public <U> Check<Integer, E> and(Relation<Integer, U> relation, U relateTo) throws E {
-    if (relation.exists(arg, relateTo)) {
-      return this;
-    }
-    throw excFactory.apply(Messages.get(relation, arg, argName, relateTo));
-  }
-
-  @Override
-  public <U> Check<Integer, E> and(
-      Relation<Integer, U> relation, U relateTo, String message, Object... msgArgs) throws E {
-    if (relation.exists(arg, relateTo)) {
-      return this;
-    }
-    throw excFactory.apply(String.format(message, msgArgs));
-  }
-
-  @Override
-  public Check<Integer, E> and(ObjIntRelation<Integer> relation, int relateTo) throws E {
-    if (relation.exists(arg, relateTo)) {
-      return this;
-    }
-    throw excFactory.apply(Messages.get(relation, arg, argName, relateTo));
-  }
-
-  @Override
-  public Check<Integer, E> and(
-      ObjIntRelation<Integer> relation, int relateTo, String message, Object... msgArgs) throws E {
-    if (relation.exists(arg, relateTo)) {
       return this;
     }
     throw excFactory.apply(String.format(message, msgArgs));

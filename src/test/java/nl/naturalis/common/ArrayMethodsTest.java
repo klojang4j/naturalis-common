@@ -9,7 +9,7 @@ import static org.junit.Assert.assertTrue;
 
 import static nl.naturalis.common.ArrayMethods.append;
 import static nl.naturalis.common.ArrayMethods.concat;
-import static nl.naturalis.common.ArrayMethods.contains;
+import static nl.naturalis.common.ArrayMethods.isOneOf;
 import static nl.naturalis.common.ArrayMethods.fromTemplate;
 import static nl.naturalis.common.ArrayMethods.indexOf;
 import static nl.naturalis.common.ArrayMethods.prefix;
@@ -65,9 +65,9 @@ public class ArrayMethodsTest {
   @Test
   public void contains1() {
     int[] array = {1, 2, 4, 8, 16};
-    assertTrue(contains(array, 1));
-    assertTrue(contains(array, 16));
-    assertFalse(contains(array, 23));
+    assertTrue(isOneOf(1, array));
+    assertTrue(isOneOf(16, array));
+    assertFalse(isOneOf(23, array));
   }
 
   @Test

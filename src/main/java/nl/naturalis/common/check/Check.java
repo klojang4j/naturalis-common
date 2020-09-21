@@ -355,8 +355,8 @@ public abstract class Check<T, E extends Exception> {
    * @param argName The argument name
    * @param relation The relation to verify between the argument and the specified value ({@code
    *     relateTo})
-   * @param relateTo
-   * @return
+   * @param relateTo The object of the relationship
+   * @return A new {@code Check} object
    * @throws IllegalArgumentException If the argument fails to pass the specified test or any
    *     subsequent tests called on the returned {@code Check} object
    */
@@ -514,7 +514,12 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract Check<T, E> and(Predicate<T> test) throws E;
+  public Check<T, E> and(Predicate<T> test) throws E {
+    if (test.test(ok())) {
+      return this;
+    }
+    throw excFactory.apply(Messages.get(test, ok(), argName));
+  }
 
   /**
    * Submits the argument to the specified test. Allows you to provide a custom error message.
@@ -525,7 +530,12 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract Check<T, E> and(Predicate<T> test, String message, Object... msgArgs) throws E;
+  public Check<T, E> and(Predicate<T> test, String message, Object... msgArgs) throws E {
+    if (test.test(ok())) {
+      return this;
+    }
+    throw excFactory.apply(String.format(message, msgArgs));
+  }
 
   /**
    * Submits the argument to the specified test. This method is especially useful when using the
@@ -561,7 +571,12 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract <U> Check<T, E> and(Relation<T, U> relation, U relateTo) throws E;
+  public <U> Check<T, E> and(Relation<T, U> relation, U relateTo) throws E {
+    if (relation.exists(ok(), relateTo)) {
+      return this;
+    }
+    throw excFactory.apply(Messages.get(relation, ok(), argName, relateTo));
+  }
 
   /**
    * Submits the argument to the specified relation. Allows you to provide a custom error message.
@@ -575,8 +590,13 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the relation fails
    */
-  public abstract <U> Check<T, E> and(
-      Relation<T, U> relation, U relateTo, String message, Object... msgArgs) throws E;
+  public <U> Check<T, E> and(Relation<T, U> relation, U relateTo, String message, Object... msgArgs)
+      throws E {
+    if (relation.exists(ok(), relateTo)) {
+      return this;
+    }
+    throw excFactory.apply(String.format(message, msgArgs));
+  }
 
   /**
    * Submits the argument to the specified relation. This method is especially useful when using the
@@ -589,7 +609,12 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the relation fails
    */
-  public abstract Check<T, E> and(ObjIntRelation<T> relation, int relateTo) throws E;
+  public Check<T, E> and(ObjIntRelation<T> relation, int relateTo) throws E {
+    if (relation.exists(ok(), relateTo)) {
+      return this;
+    }
+    throw excFactory.apply(Messages.get(relation, ok(), argName, relateTo));
+  }
 
   /**
    * Submits the argument to the specified relation. Allows you to provide a custom error message.
@@ -602,8 +627,13 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the relation fails
    */
-  public abstract Check<T, E> and(
-      ObjIntRelation<T> relation, int relateTo, String message, Object... msgArgs) throws E;
+  public Check<T, E> and(
+      ObjIntRelation<T> relation, int relateTo, String message, Object... msgArgs) throws E {
+    if (relation.exists(ok(), relateTo)) {
+      return this;
+    }
+    throw excFactory.apply(String.format(message, msgArgs));
+  }
 
   /**
    * Submits the argument to the specified relation. This method is especially useful when using the
@@ -806,10 +836,22 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Returns the argument being tested as an {@code int}. To be used as the last call after a chain
-   * of checks. If the argument being tested actually is an {@code int} (rather than an {@code
+   * of checks .If the argument being tested actually is an {@code int} (rather than an {@code
    * Integer}), this method saves the cost of a boxing-unboxing round trip incurred by {@link
-   * #ok()}. If the argument was not an instance of {@link Number}, this method will throw an {@link
-   * UnsupportedOperationException}.
+   * #ok()}. The following applies:
+   *
+   * <p>
+   *
+   * <ul>
+   *   <li>If the argument is null, an {@code UnsupportedOperationException} is thrown.
+   *   <li>If the argument is a {@link Number} <i>and</i> the {@code Number} can be converted to an
+   *       integer without loss of precision, {@link Number#intValue() Number.intValue()} will be
+   *       returned
+   *   <li>If the argument is a {@link CharSequence} <i>and</i> it can be parsed into an integer
+   *       without loss of precision, UnsupportedOperationException}, the value of {@link
+   *       Integer#parseInt(String) Integer.parseInt()} will be returned.
+   *   <li>Otherwise, an {@code UnsupportedOperationException} is thrown.
+   * </ul>
    *
    * @return The argument cast or converted to an {@code int}
    */

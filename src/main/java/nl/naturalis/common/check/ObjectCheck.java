@@ -4,13 +4,18 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
+import nl.naturalis.common.NumberMethods;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
 
 class ObjectCheck<T, E extends Exception> extends Check<T, E> {
 
-  private static final String ERR_NO_INT_VALUE = "Cannot return int value for %s (%s)";
+  private static final String ERR_INT_VALUE = "Cannot return int value for %s";
+  private static final String ERR_NULL_TO_INT = ERR_INT_VALUE + " (was null)";
+  private static final String ERR_NUMBER_TO_INT = ERR_INT_VALUE + " (was %s)";
+  private static final String ERR_STRING_TO_INT = ERR_INT_VALUE + " (was \"%s\")";
+  private static final String ERR_OBJECT_TO_INT = ERR_INT_VALUE + " (%s)";
   private static final String ERR_NOT_APPLICABLE = "Test not applicable to %s (%s)";
 
   final T arg;
@@ -18,14 +23,6 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   ObjectCheck(T arg, String argName, Function<String, E> excFactory) {
     super(argName, excFactory);
     this.arg = arg;
-  }
-
-  @Override
-  public Check<T, E> and(Predicate<T> test) throws E {
-    if (test.test(arg)) {
-      return this;
-    }
-    throw excFactory.apply(Messages.get(test, arg, argName));
   }
 
   @Override
@@ -56,40 +53,6 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
       throw excFactory.apply(String.format(message, msgArgs));
     }
     throw notApplicable();
-  }
-
-  @Override
-  public <U> Check<T, E> and(Relation<T, U> test, U relateTo) throws E {
-    if (test.exists(arg, relateTo)) {
-      return this;
-    }
-    throw excFactory.apply(Messages.get(test, arg, argName, relateTo));
-  }
-
-  @Override
-  public <U> Check<T, E> and(Relation<T, U> test, U relateTo, String message, Object... msgArgs)
-      throws E {
-    if (test.exists(arg, relateTo)) {
-      return this;
-    }
-    throw excFactory.apply(String.format(message, msgArgs));
-  }
-
-  @Override
-  public Check<T, E> and(ObjIntRelation<T> test, int relateTo) throws E {
-    if (test.exists(arg, relateTo)) {
-      return this;
-    }
-    throw excFactory.apply(Messages.get(test, arg, argName, relateTo));
-  }
-
-  @Override
-  public Check<T, E> and(ObjIntRelation<T> test, int relateTo, String message, Object... msgArgs)
-      throws E {
-    if (test.exists(arg, relateTo)) {
-      return this;
-    }
-    throw excFactory.apply(String.format(message, msgArgs));
   }
 
   @Override
@@ -219,12 +182,29 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   @Override
   public int intValue() {
     if (arg == null) {
-      String message = String.format(ERR_NO_INT_VALUE, argName, "was null");
+      String message = String.format(ERR_NULL_TO_INT, argName);
       throw new UnsupportedOperationException(message);
     } else if (arg instanceof Number) {
-      return ((Number) arg).intValue();
+      Number n = (Number) arg;
+      if (NumberMethods.isLossless(n, Integer.class)) {
+        return n.intValue();
+      }
+      String message = String.format(ERR_NUMBER_TO_INT, argName, n);
+      throw new UnsupportedOperationException(message);
+    } else if (arg instanceof CharSequence) {
+      try {
+        Double d = Double.valueOf(arg.toString());
+        if (NumberMethods.isLossless(d, Integer.class)) {
+          return d.intValue();
+        }
+        String message = String.format(ERR_STRING_TO_INT, argName, arg);
+        throw new UnsupportedOperationException(message);
+      } catch (NumberFormatException e) {
+        String message = String.format(ERR_STRING_TO_INT, argName, arg);
+        throw new UnsupportedOperationException(message);
+      }
     }
-    String message = String.format(ERR_NO_INT_VALUE, argName, arg.getClass().getName());
+    String message = String.format(ERR_OBJECT_TO_INT, argName, arg.getClass().getName());
     throw new UnsupportedOperationException(message);
   }
 

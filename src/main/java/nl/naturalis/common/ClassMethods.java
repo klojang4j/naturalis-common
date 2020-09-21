@@ -63,8 +63,9 @@ public class ClassMethods {
 
   /**
    * Returns a description of the type of the specified array, including the fully-qualified name of
-   * the array's component type. Meant to be a bit less harsh than the description produced by
-   * {@code array.toString()}
+   * the array's component type. For example <code>getArrayTypeName(myStringArray)</code> will
+   * return "java.lang.String[]", which is a bit less harsh than the description produced by <code>
+   * myStringArray.toString()</code>
    *
    * @param array The array
    * @return The simple name of the array type
@@ -76,8 +77,9 @@ public class ClassMethods {
 
   /**
    * Returns a description of the type of the specified array, including the simple name of the
-   * array's component type. Meant to be a bit less harsh than the description produced by {@code
-   * array.toString()}
+   * array's component type. For example <code>getArrayTypeSimpleName(myStringArray)</code> will
+   * return "String[]", which is a bit less harsh than the description produced by <code>
+   * myStringArray.toString()</code>
    *
    * @param array The array
    * @return The simple name of the array type
