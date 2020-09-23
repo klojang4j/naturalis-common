@@ -1,6 +1,7 @@
 package nl.naturalis.common.check;
 
 import java.util.function.*;
+import nl.naturalis.common.NumberMethods;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
@@ -91,7 +92,7 @@ public abstract class Check<T, E extends Exception> {
    * @param argName The name of the argument
    * @return A new {@code Check} object
    */
-  public static Check<Integer, IllegalArgumentException> argument(int arg, String argName) {
+  public static Check<Integer, IllegalArgumentException> value(int arg, String argName) {
     return new IntCheck<>(arg, argName, IllegalArgumentException::new);
   }
 
@@ -106,7 +107,7 @@ public abstract class Check<T, E extends Exception> {
    *     returns an {@code Exception}
    * @return A new {@code Check} object
    */
-  public static <F extends Exception> Check<Integer, F> argument(
+  public static <F extends Exception> Check<Integer, F> value(
       int arg, String argName, Function<String, F> excFactory) {
     return new IntCheck<>(arg, argName, excFactory);
   }
@@ -120,7 +121,7 @@ public abstract class Check<T, E extends Exception> {
    * @param argName The name of the argument
    * @return A new {@code Check} object
    */
-  public static <U> Check<U, IllegalArgumentException> argument(U arg, String argName) {
+  public static <U> Check<U, IllegalArgumentException> value(U arg, String argName) {
     return new ObjectCheck<>(arg, argName, IllegalArgumentException::new);
   }
 
@@ -136,7 +137,7 @@ public abstract class Check<T, E extends Exception> {
    *     returns an {@code Exception}
    * @return A new {@code Check} object
    */
-  public static <U, F extends Exception> Check<U, F> argument(
+  public static <U, F extends Exception> Check<U, F> value(
       U arg, String argName, Function<String, F> excFactory) {
     return new ObjectCheck<>(arg, argName, excFactory);
   }
@@ -386,6 +387,22 @@ public abstract class Check<T, E extends Exception> {
       int arg, String argName, IntRelation relation, int relateTo, Function<String, F> excFactory)
       throws F {
     return new IntCheck<>(arg, argName, excFactory).and(relation, relateTo);
+  }
+
+  /**
+   * Generic check method. Throws an {@code IllegalArgumentException} if the provided condition
+   * evaluates to false, else does nothing.
+   *
+   * @param condition The condition to evaluate
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @throws IllegalArgumentException If the condition to evaluate
+   */
+  public static void that(boolean condition, String message, Object... msgArgs)
+      throws IllegalArgumentException {
+    if (!condition) {
+      throw new IllegalArgumentException(String.format(message, msgArgs));
+    }
   }
 
   /**
@@ -835,25 +852,47 @@ public abstract class Check<T, E extends Exception> {
   public abstract T ok();
 
   /**
+   * Passes the argument to a {@code Consumer} to be properly processed. To be used as the last call
+   * after a chain of checks.
+   *
+   * @param consumer The {@code Consumer}
+   */
+  public void ok(Consumer<T> consumer) {
+    consumer.accept(ok());
+  }
+
+  /**
    * Returns the argument being tested as an {@code int}. To be used as the last call after a chain
-   * of checks .If the argument being tested actually is an {@code int} (rather than an {@code
-   * Integer}), this method saves the cost of a boxing-unboxing round trip incurred by {@link
-   * #ok()}. The following applies:
+   * of checks. Using this method if the argument being tested actually is an {@code int} (rather
+   * than an {@code Integer}), this method saves the cost of a boxing-unboxing round trip incurred
+   * by {@link #ok()}. Otherwise the following applies:
    *
    * <p>
    *
    * <ul>
    *   <li>If the argument is null, an {@code UnsupportedOperationException} is thrown.
    *   <li>If the argument is a {@link Number} <i>and</i> the {@code Number} can be converted to an
-   *       integer without loss of precision, {@link Number#intValue() Number.intValue()} will be
-   *       returned
+   *       integer without loss of precision (it has no fractional part and is not too wide), {@link
+   *       Number#intValue() Number.intValue()} will be returned
    *   <li>If the argument is a {@link CharSequence} <i>and</i> it can be parsed into an integer
-   *       without loss of precision, the value of {@link Integer#parseInt(String)
-   *       Integer.parseInt()} will be returned.
-   *   <li>Otherwise, an {@code UnsupportedOperationException} is thrown.
+   *       without loss of precision (it has no fractional part and is not too wide), the value of
+   *       {@link Integer#parseInt(String) Integer.parseInt()} will be returned
+   *   <li>If the argument is anything else (including null) an {@code Exception} is thrown, the
+   *       type of which is determined by the &lt;E&gt; type parameter
    * </ul>
    *
+   * @see NumberMethods#isLossless(Number, Class)
    * @return The argument cast or converted to an {@code int}
    */
-  public abstract int intValue();
+  public abstract int intValue() throws E;
+
+  /**
+   * Passes the argument to a {@code Consumer} to be properly processed. To be used as the last call
+   * after a chain of checks.
+   *
+   * @param consumer The {@code Consumer}
+   */
+  public void intValue(IntConsumer consumer) throws E {
+    consumer.accept(intValue());
+  }
 }

@@ -552,7 +552,7 @@ public class ObjectMethods {
    * @param condition The condition to evaluate
    * @param then The action to execute
    */
-  public static void when(boolean condition, Runnable then) {
+  public static void doIf(boolean condition, Runnable then) {
     if (condition) {
       then.run();
     }
@@ -566,7 +566,7 @@ public class ObjectMethods {
    * @param then The action to execute if the condition to evaluates to {@code true}
    * @param otherwise The action to execute if the condition to evaluates to {@code false}
    */
-  public static void when(boolean condition, Runnable then, Runnable otherwise) {
+  public static void doIf(boolean condition, Runnable then, Runnable otherwise) {
     if (condition) {
       then.run();
     } else {
@@ -581,7 +581,7 @@ public class ObjectMethods {
    * @param arg The value to test
    * @param consumer The {@code Consumer} whose {@code accewpt} method to call
    */
-  public static <T> void whenNotNull(T arg, Consumer<T> consumer) {
+  public static <T> void doIfNotNull(T arg, Consumer<T> consumer) {
     if (arg != null) {
       consumer.accept(arg);
     }

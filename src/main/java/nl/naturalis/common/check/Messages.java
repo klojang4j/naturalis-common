@@ -1,23 +1,24 @@
 package nl.naturalis.common.check;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.function.Function;
 import nl.naturalis.common.Tuple;
 import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
 import static nl.naturalis.common.ArrayMethods.pack;
+import static nl.naturalis.common.ClassMethods.getArrayTypeName;
+import static nl.naturalis.common.ClassMethods.getArrayTypeSimpleName;
+import static nl.naturalis.common.StringMethods.substr;
 import static nl.naturalis.common.Tuple.tuple;
 import static nl.naturalis.common.check.Checks.*;
-import static nl.naturalis.common.StringMethods.*;
 
 class Messages {
 
   private static final String ERR_INVALID_VALUE = "Invalid value for %s: %s";
 
-  /* Returns messages associated with predefined Predicate and IntPredicate instances. */
+  /* Returns messages associated with predefined Predicate instances. */
   static String get(Object test, Object arg, String argName) {
     Function<Object[], String> fnc = msgs.get(test);
     if (fnc != null) {
@@ -26,7 +27,7 @@ class Messages {
     return String.format(ERR_INVALID_VALUE, argName, str(arg));
   }
 
-  /* Returns messages associated with predefined Relation and IntRelation instances. */
+  /* Returns messages associated with predefined Relation instances. */
   static String get(Object test, Object arg, String argName, Object target) {
     Function<Object[], String> fnc = msgs.get(test);
     if (fnc != null) {
@@ -47,30 +48,50 @@ class Messages {
 
     List<Tuple<Object, Function<Object[], String>>> tmp = new ArrayList<>();
 
-    tmp.add(tuple(isNull(), x -> format("%s must be null (was %s)", x[1], str(x[0]))));
-    tmp.add(tuple(notNull(), x -> format("%s must not be null", x[1])));
-    tmp.add(tuple(isEmpty(), x -> format("%s must be empty (was %s)", x[1], str(x[0]))));
-    tmp.add(tuple(notEmpty(), x -> format("%s must not be empty", x[1])));
-    tmp.add(tuple(noneNull(), x -> format("%s must not contain null values", x[1])));
-    tmp.add(tuple(notBlank(), x -> format("%s must not be blank", x[1])));
+    /* NULL & EMPTY */
+    tmp.add(tuple(isNull(), x -> format("%s must be null (was %s)", arg(x), str(x[0]))));
+    tmp.add(tuple(notNull(), x -> format("%s must not be null", arg(x))));
+    tmp.add(tuple(isEmpty(), x -> format("%s must be empty (was %s)", arg(x), str(x[0]))));
+    tmp.add(tuple(notEmpty(), x -> format("%s must not be empty", arg(x))));
+    tmp.add(tuple(noneNull(), x -> format("%s must not contain null values", arg(x))));
 
-    tmp.add(tuple(isEven(), x -> format("%s must be even (was %d)", x[1], x[0])));
-    tmp.add(tuple(isOdd(), x -> format("%s must be odd (was %d)", x[1], x[0])));
-    tmp.add(tuple(positive(), x -> format("%s must be positive (was %d)", x[1], x[0])));
-    tmp.add(tuple(notPositive(), x -> format("%s must be zero or negative (was %d)", x[1], x[0])));
-    tmp.add(tuple(negative(), x -> format("%s must be negative (was %d)", x[1], x[0])));
-    tmp.add(tuple(notNegative(), x -> format("%s must be zero or positive (was %d)", x[1], x[0])));
+    /* STRING PREDICATES */
+    tmp.add(tuple(notBlank(), x -> format("%s must not be blank", arg(x))));
 
-    tmp.add(tuple(contains(), x -> format("%s %s must contain %s", sname(x[0]), x[1], str(x[2]))));
+    /* FILE PREDICATES */
+    tmp.add(tuple(isFile(), x -> msgIsFile(x)));
+    tmp.add(tuple(isDirectory(), x -> msgIsDirectory(x)));
+    tmp.add(tuple(fileNotExists(), x -> msgFileNotExists(x)));
+    tmp.add(tuple(readable(), x -> msgReadable(x)));
+    tmp.add(tuple(writable(), x -> msgWritable(x)));
+
+    /* INT PREDICATES */
+    tmp.add(tuple(isEven(), x -> format("%s must be even (was %d)", arg(x), x[0])));
+    tmp.add(tuple(isOdd(), x -> format("%s must be odd (was %d)", arg(x), x[0])));
+    tmp.add(tuple(positive(), x -> format("%s must be positive (was %d)", arg(x), x[0])));
+    tmp.add(
+        tuple(notPositive(), x -> format("%s must be zero or negative (was %d)", arg(x), x[0])));
+    tmp.add(tuple(negative(), x -> format("%s must be negative (was %d)", arg(x), x[0])));
+    tmp.add(
+        tuple(notNegative(), x -> format("%s must be zero or positive (was %d)", arg(x), x[0])));
+
+    /* COLLECTION RELATIONS */
+    tmp.add(tuple(contains(), x -> msgContains(x)));
+    tmp.add(tuple(notContains(), x -> msgNotContains(x)));
     tmp.add(tuple(elementOf(), x -> msgElementOf(x)));
+    tmp.add(tuple(notElementOf(), x -> msgNotElementOf(x)));
+    tmp.add(tuple(containsKey(), x -> msgContainsKey(x)));
+    tmp.add(tuple(notContainsKey(), x -> msgNotContainsKey(x)));
+    tmp.add(tuple(containsValue(), x -> msgContainsValue(x)));
+    tmp.add(tuple(notContainsValue(), x -> msgNotContainsValue(x)));
 
-    tmp.add(tuple(objEquals(), x -> format("%s must be equal to %s (was %s)", x[1], x[2], x[0])));
-    tmp.add(tuple(objNotEquals(), x -> format("%s must be not be equal to %s", x[1], x[2])));
+    tmp.add(tuple(objEquals(), x -> format("%s must be equal to %s (was %s)", arg(x), x[2], x[0])));
+    tmp.add(tuple(objNotEquals(), x -> format("%s must be not be equal to %s", arg(x), x[2])));
 
-    tmp.add(tuple(numGreaterThan(), x -> format("%s must be > %s (was %s)", x[1], x[2], x[0])));
-    tmp.add(tuple(numAtLeast(), x -> format("%s must be >= %s (was %s)", x[1], x[2], x[0])));
-    tmp.add(tuple(numLessThan(), x -> format("%s must be < %s (was %s)", x[1], x[2], x[0])));
-    tmp.add(tuple(numAtMost(), x -> format("%s must be <= %s (was %s)", x[1], x[2], x[0])));
+    tmp.add(tuple(numGreaterThan(), x -> format("%s must be > %s (was %s)", arg(x), x[2], x[0])));
+    tmp.add(tuple(numAtLeast(), x -> format("%s must be >= %s (was %s)", arg(x), x[2], x[0])));
+    tmp.add(tuple(numLessThan(), x -> format("%s must be < %s (was %s)", arg(x), x[2], x[0])));
+    tmp.add(tuple(numAtMost(), x -> format("%s must be <= %s (was %s)", arg(x), x[2], x[0])));
 
     tmp.add(tuple(sizeEquals(), x -> format("%s must be equal to %s (was %s)", sz(x), x[2], x[0])));
     tmp.add(tuple(sizeNotEquals(), x -> format("%s must be not be equal to %s", sz(x), x[2])));
@@ -80,14 +101,16 @@ class Messages {
     tmp.add(tuple(sizeAtMost(), x -> format("%s must be <= %s (was %s)", sz(x), x[2], x[0])));
 
     tmp.add(tuple(instanceOf(), x -> msgInstanceOf(x)));
-    tmp.add(tuple(isArray(), x -> format("%s must be an array (was %s)", x[1], cname(x[0]))));
+    tmp.add(tuple(isArray(), x -> format("%s must be an array (was %s)", arg(x), cname(x[0]))));
 
-    tmp.add(tuple(equalTo(), x -> format("%s must not be equal to %d (was %d)", x[1], x[2], x[0])));
-    tmp.add(tuple(notEqualTo(), x -> format("%s must not be equal to %d", x[1], x[2])));
-    tmp.add(tuple(greaterThan(), x -> format("%s must be > %d (was %d)", x[1], x[2], x[0])));
-    tmp.add(tuple(atLeast(), x -> format("%s must be >= %s (was %s)", x[1], x[2], x[0])));
-    tmp.add(tuple(lessThan(), x -> format("%s must be < %s (was %s)", x[1], x[2], x[0])));
-    tmp.add(tuple(atMost(), x -> format("%s must be <= %s (was %s)", x[1], x[2], x[0])));
+    /* INT RELATIONS */
+    tmp.add(
+        tuple(equalTo(), x -> format("%s must not be equal to %d (was %d)", arg(x), x[2], x[0])));
+    tmp.add(tuple(notEqualTo(), x -> format("%s must not be equal to %d", arg(x), x[2])));
+    tmp.add(tuple(greaterThan(), x -> format("%s must be > %d (was %d)", arg(x), x[2], x[0])));
+    tmp.add(tuple(atLeast(), x -> format("%s must be >= %s (was %s)", arg(x), x[2], x[0])));
+    tmp.add(tuple(lessThan(), x -> format("%s must be < %s (was %s)", arg(x), x[2], x[0])));
+    tmp.add(tuple(atMost(), x -> format("%s must be <= %s (was %s)", arg(x), x[2], x[0])));
     tmp.add(tuple(multipleOf(), x -> msgMultipleOf(x)));
 
     IdentityHashMap<Object, Function<Object[], String>> map = new IdentityHashMap<>(tmp.size());
@@ -97,56 +120,113 @@ class Messages {
     return map;
   }
 
+  private static String msgIsFile(Object[] x) {
+    return format("No such file (%s): %s", x[1], ((File) x[0]).getAbsolutePath());
+  }
+
+  private static String msgIsDirectory(Object[] x) {
+    return format("No such directory (%s): %s", x[1], ((File) x[0]).getAbsolutePath());
+  }
+
+  private static String msgFileNotExists(Object[] x) {
+    return format("File/directory already exists (%s): %s", x[1], ((File) x[0]).getAbsolutePath());
+  }
+
+  private static String msgReadable(Object[] x) {
+    return format("File/directory (%s) not reable: %s", x[1], ((File) x[0]).getAbsolutePath());
+  }
+
+  private static String msgWritable(Object[] x) {
+    return format("File/directory (%s) not writable: %s", x[1], ((File) x[0]).getAbsolutePath());
+  }
+
+  private static String msgContains(Object[] x) {
+    return format("%s must contain %s", arg(x), str(x[2]));
+  }
+
+  private static String msgNotContains(Object[] x) {
+    return format("%s must not contain %s", arg(x), str(x[2]));
+  }
+
   private static String msgElementOf(Object[] x) {
-    return format("%s (%s) must be element of %s", x[1], str(x[0]), str(x[2]));
+    return format("%s must be element of %s (was %s)", arg(x), str(x[2]), str(x[0]));
+  }
+
+  private static String msgNotElementOf(Object[] x) {
+    return format("%s must be not element of %s (was %s)", arg(x), str(x[2]), str(x[0]));
+  }
+
+  private static String msgContainsKey(Object[] x) {
+    return format("%s must contain key %s", arg(x), str(x[2]));
+  }
+
+  private static String msgNotContainsKey(Object[] x) {
+    return format("%s must not contain key %s", arg(x), str(x[2]));
+  }
+
+  private static String msgContainsValue(Object[] x) {
+    return format("%s must not contain value %s", arg(x), str(x[2]));
+  }
+
+  private static String msgNotContainsValue(Object[] x) {
+    return format("%s must not contain value %s", arg(x), str(x[2]));
   }
 
   private static String msgInstanceOf(Object[] x) {
     String fmt = "%s must be instance of %s (was %s)";
-    return format(fmt, x[1], ((Class<?>) x[2]).getName(), cname(x[0]));
+    return format(fmt, arg(x), ((Class<?>) x[2]).getName(), cname(x[0]));
   }
 
   private static String msgMultipleOf(Object[] x) {
-    return format("%s must be multiple of %d (was %d)", x[1], x[2], x[0]);
-  }
-
-  private static String cname(Object obj) {
-    return obj.getClass().getName();
-  }
-
-  private static String sname(Object obj) {
-    return obj.getClass().getSimpleName();
+    return format("%s must be multiple of %d (was %d)", arg(x), x[2], x[0]);
   }
 
   private static String sz(Object[] x) {
     if (x[0] instanceof CharSequence) {
-      return x[1] + ".length()";
+      return "(" + arg(x) + ").length()";
     } else if (x[0].getClass().isArray()) {
-      return x[1] + ".length";
+      return "(" + arg(x) + ").length";
     }
-    return x[1] + ".size()";
+    return "(" + arg(x) + ").size()";
   }
 
-  @SuppressWarnings("rawtypes")
-  private static String str(Object msgArg) {
-    if (msgArg == null) {
-      return null;
-    } else if (msgArg instanceof CharSequence) {
-      String s = msgArg.toString();
+  private static String arg(Object[] x) {
+    if (x[0] == null) {
+      return x[1].toString();
+    }
+    return "(" + sname(x[0]) + ") " + x[1];
+  }
+
+  private static String str(Object arg) {
+    if (arg == null) {
+      return "null";
+    } else if (arg instanceof Number) {
+      return arg.toString();
+    } else if (arg instanceof Enum) {
+      return arg.toString();
+    } else if (arg instanceof CharSequence) {
+      String s = arg.toString();
       if (s.length() > 20) {
         return '"' + substr(s, 0, 20) + "[...]\"";
       }
       return '"' + s + '"';
-    } else if (msgArg instanceof Collection) {
-      Collection c = (Collection) msgArg;
-      if (c.size() == 0) {
-        return sname(msgArg) + " (was empty)";
-      } else if (c.size() > 3) {
-        String elems = (String) c.stream().map(e -> str(e)).collect(joining(", "));
-        return sname(msgArg) + "[" + elems + " ...]";
-      }
-      return sname(msgArg) + " " + msgArg;
+    } else if (arg.getClass().isArray()) {
+      return getArrayTypeSimpleName(arg) + '@' + System.identityHashCode(arg);
     }
-    return sname(msgArg) + "@" + System.identityHashCode(msgArg);
+    return sname(arg) + '@' + System.identityHashCode(arg);
+  }
+
+  private static String cname(Object obj) {
+    if (obj.getClass().isArray()) {
+      return getArrayTypeName(obj);
+    }
+    return obj.getClass().getName();
+  }
+
+  private static String sname(Object obj) {
+    if (obj.getClass().isArray()) {
+      return getArrayTypeSimpleName(obj);
+    }
+    return obj.getClass().getSimpleName();
   }
 }

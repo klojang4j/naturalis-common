@@ -180,32 +180,32 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public int intValue() {
+  public int intValue() throws E {
     if (arg == null) {
-      String message = String.format(ERR_NULL_TO_INT, argName);
-      throw new UnsupportedOperationException(message);
+      String msg = String.format(ERR_NULL_TO_INT, argName);
+      throw excFactory.apply(msg);
     } else if (arg instanceof Number) {
       Number n = (Number) arg;
       if (NumberMethods.isLossless(n, Integer.class)) {
         return n.intValue();
       }
-      String message = String.format(ERR_NUMBER_TO_INT, argName, n);
-      throw new UnsupportedOperationException(message);
+      String msg = String.format(ERR_NUMBER_TO_INT, argName, n);
+      throw excFactory.apply(msg);
     } else if (arg instanceof CharSequence) {
       try {
         Double d = Double.valueOf(arg.toString());
         if (NumberMethods.isLossless(d, Integer.class)) {
           return d.intValue();
         }
-        String message = String.format(ERR_STRING_TO_INT, argName, arg);
-        throw new UnsupportedOperationException(message);
+        String msg = String.format(ERR_STRING_TO_INT, argName, arg);
+        throw excFactory.apply(msg);
       } catch (NumberFormatException e) {
-        String message = String.format(ERR_STRING_TO_INT, argName, arg);
-        throw new UnsupportedOperationException(message);
+        String msg = String.format(ERR_STRING_TO_INT, argName, arg);
+        throw excFactory.apply(msg);
       }
     }
-    String message = String.format(ERR_OBJECT_TO_INT, argName, arg.getClass().getName());
-    throw new UnsupportedOperationException(message);
+    String msg = String.format(ERR_OBJECT_TO_INT, argName, arg.getClass().getName());
+    throw excFactory.apply(msg);
   }
 
   private String prop(String name) {

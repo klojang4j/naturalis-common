@@ -1,5 +1,6 @@
 package nl.naturalis.common.check;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Map;
@@ -164,6 +165,51 @@ public class Checks {
   }
 
   /**
+   * Verifies that a {@code File} object represents a normal file.
+   *
+   * @returnn A {@code Predicate}
+   */
+  public static Predicate<File> isFile() {
+    return File::isFile;
+  }
+
+  /**
+   * Verifies that a {@code File} object represents a directory.
+   *
+   * @returnn A {@code Predicate}
+   */
+  public static Predicate<File> isDirectory() {
+    return File::isDirectory;
+  }
+
+  /**
+   * Verifies that a {@code File} object does not represent any type of file.
+   *
+   * @returnn A {@code Predicate}
+   */
+  public static Predicate<File> fileNotExists() {
+    return f -> !f.exists();
+  }
+
+  /**
+   * Verifies that a {@code File} object represents a readable file (implies that the file exists).
+   *
+   * @returnn A {@code Predicate}
+   */
+  public static Predicate<File> readable() {
+    return File::canRead;
+  }
+
+  /**
+   * Verifies that a {@code File} object represents a writable file (implies that the file exists).
+   *
+   * @return
+   */
+  public static Predicate<File> writable() {
+    return File::canWrite;
+  }
+
+  /**
    * Verifies that the argument is an even number.
    *
    * @return A {@code Predicate}
@@ -218,7 +264,7 @@ public class Checks {
   }
 
   /**
-   * Verifies that a {@code Collection} argument contains a particular value. Equivalent to {@link
+   * Verifies that a {@code Collection} contains a particular value. Equivalent to {@link
    * Collection#contains(Object) Collection::contains}.
    *
    * @param <E> The type of the elements in the {@code Collection}
@@ -230,7 +276,18 @@ public class Checks {
   }
 
   /**
-   * Returns the {@link Relation#reverse(Relation) reverse} of {@link #contains()}.
+   * Verifies that a {@code Collection} does not contain a particular value.
+   *
+   * @param <E> The type of the elements in the {@code Collection}
+   * @param <C> The type of the argument
+   * @return A {@code Relation}
+   */
+  public static <E, C extends Collection<E>> Relation<C, E> notContains() {
+    return (x, y) -> !x.contains(y);
+  }
+
+  /**
+   * Verifies that the argument is in a {@code Collection}.
    *
    * @param <E> The type of the argument
    * @param <C> The type of the {@code Collection}
@@ -238,6 +295,61 @@ public class Checks {
    */
   public static <E, C extends Collection<E>> Relation<E, C> elementOf() {
     return (x, y) -> y.contains(x);
+  }
+
+  /**
+   * Verifies that the argument is not in a {@code Collection}.
+   *
+   * @param <E> The type of the argument
+   * @param <C> The type of the {@code Collection}
+   * @return A {@code Relation}
+   */
+  public static <E, C extends Collection<E>> Relation<E, C> notElementOf() {
+    return (x, y) -> !y.contains(x);
+  }
+
+  /**
+   * Verifies that a {@code Map} contains a key.
+   *
+   * @param <K> The type of the keys within the map
+   * @param <M> The Type of the {@code Map}
+   * @return A {@code Relation}
+   */
+  public static <K, M extends Map<K, ?>> Relation<M, K> containsKey() {
+    return Map::containsKey;
+  }
+
+  /**
+   * Verifies that a {@code Map} does not contain a key.
+   *
+   * @param <K> The type of the keys within the map
+   * @param <M> The Type of the {@code Map}
+   * @return A {@code Relation}
+   */
+  public static <K, M extends Map<K, ?>> Relation<M, K> notContainsKey() {
+    return (x, y) -> !x.containsValue(y);
+  }
+
+  /**
+   * Verifies that a {@code Map} contains a value.
+   *
+   * @param <V> The type of the values within the map
+   * @param <M> The Type of the {@code Map}
+   * @return A {@code Relation}
+   */
+  public static <V, M extends Map<?, V>> Relation<M, V> containsValue() {
+    return Map::containsValue;
+  }
+
+  /**
+   * Verifies that a {@code Map} does not contain a value.
+   *
+   * @param <V> The type of the values within the map
+   * @param <M> The Type of the {@code Map}
+   * @return A {@code Relation}
+   */
+  public static <V, M extends Map<?, V>> Relation<M, V> notContainsValue() {
+    return (x, y) -> !x.containsValue(y);
   }
 
   /**
@@ -582,6 +694,17 @@ public class Checks {
    */
   public static IntRelation multipleOf() {
     return (x, y) -> x % y == 0;
+  }
+
+  /**
+   * Returns an {@code IntPredicate} verifying that the integer to be tested is not equal to the
+   * specified integer. This {@code IntPredicate} is not associated with a standard message.
+   *
+   * @param i The integer to compare some other integer with
+   * @return An {@code IntPredicate}
+   */
+  public static IntPredicate intNotEquals(int i) {
+    return x -> x != i;
   }
 
   private static IllegalArgumentException sizeNotApplicable(Object obj, String relation) {

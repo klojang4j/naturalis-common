@@ -77,6 +77,35 @@ public final class Tuple<LEFT, RIGHT> {
     return map.put(left, right);
   }
 
+  /**
+   * Converts the tuple to a map entry.
+   *
+   * @return
+   */
+  public Map.Entry<LEFT, RIGHT> toEntry() {
+    return new Map.Entry<LEFT, RIGHT>() {
+      private final LEFT k = Tuple.this.left;
+      private RIGHT v = Tuple.this.right;
+
+      @Override
+      public LEFT getKey() {
+        return k;
+      }
+
+      @Override
+      public RIGHT getValue() {
+        return v;
+      }
+
+      @Override
+      public RIGHT setValue(RIGHT value) {
+        RIGHT old = this.v;
+        this.v = value;
+        return old;
+      }
+    };
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(left, right);

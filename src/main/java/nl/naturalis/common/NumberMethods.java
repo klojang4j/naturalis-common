@@ -46,7 +46,7 @@ public class NumberMethods {
       if (fc == Double.class) {
         return (int) from.doubleValue() == from.doubleValue();
       } else if (fc == Long.class) {
-        return (int) from.longValue() == from.longValue();
+        return from.longValue() <= Integer.MAX_VALUE && from.longValue() >= Integer.MIN_VALUE;
       } else if (fc == Float.class) {
         return (int) from.floatValue() == from.floatValue();
       }
@@ -55,24 +55,24 @@ public class NumberMethods {
       if (fc == Double.class) {
         return (short) from.doubleValue() == from.doubleValue();
       } else if (fc == Long.class) {
-        return (short) from.longValue() == from.longValue();
+        return from.longValue() <= Short.MAX_VALUE && from.longValue() >= Short.MIN_VALUE;
       } else if (fc == Float.class) {
         return (short) from.floatValue() == from.floatValue();
       } else if (fc == Integer.class) {
-        return (short) from.intValue() == from.intValue();
+        return from.intValue() <= Short.MAX_VALUE && from.intValue() >= Short.MIN_VALUE;
       }
       return true;
     } else /* Byte.class */ {
       if (fc == Double.class) {
         return (byte) from.doubleValue() == from.doubleValue();
       } else if (fc == Long.class) {
-        return (byte) from.longValue() == from.longValue();
+        return from.longValue() <= Byte.MAX_VALUE && from.longValue() >= Byte.MIN_VALUE;
       } else if (fc == Float.class) {
         return (byte) from.floatValue() == from.floatValue();
       } else if (fc == Integer.class) {
-        return (byte) from.intValue() == from.intValue();
+        return from.intValue() <= Byte.MAX_VALUE && from.intValue() >= Byte.MIN_VALUE;
       } else if (fc == Short.class) {
-        return (byte) from.shortValue() == from.shortValue();
+        return from.shortValue() <= Byte.MAX_VALUE && from.shortValue() >= Byte.MIN_VALUE;
       }
       return true;
     }

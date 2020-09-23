@@ -120,7 +120,7 @@ public class EnumToIntMapTest {
     EnumToIntMap<TestEnum> map2 = new EnumToIntMap<>(TestEnum.class, 6);
     map1.put(RED, 7);
     map2.putAll(map1);
-    assertEquals(1, map2.size());
+    assertEquals(map1, map2);
   }
 
   @Test

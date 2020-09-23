@@ -1,234 +1,232 @@
 package nl.naturalis.common.collection;
 
 import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.ObjIntConsumer;
 import java.util.function.ToIntFunction;
+import java.util.stream.Stream;
+import nl.naturalis.common.Tuple;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.Checks.*;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
+import static nl.naturalis.common.ObjectMethods.doIf;
+import static nl.naturalis.common.StringMethods.append;
+import static nl.naturalis.common.Tuple.tuple;
+import static nl.naturalis.common.check.Checks.notContainsKey;
+import static nl.naturalis.common.check.Checks.notContainsValue;
+import static nl.naturalis.common.check.Checks.notEmpty;
+import static nl.naturalis.common.check.Checks.notEqualTo;
 
 /**
  * A fast enum-to-int Map implementation. The map is backed by a simple int array with the same
- * length as the number of constants in the {@code enum} class. One integer needs to be designated
- * as the NULL value. By default this is {@code Integer.MIN_VALUE}. If the array element
- * corresponding to an enum constant has this value, it means the enum constant is not in the map
- * (see {@link #containsKey(Enum) containsKey)}. The value designated to be the NULL value must
- * never be {@link #put(Enum, int) put} into the map. It may not even be used as the argument to
- * {@link #containsValue(int) containsValue}. In both cases an {@code IllegalArgumentException} is
- * thrown.
+ * length as the number of constants in the {@code enum} class. One integer must be designated to
+ * signify the absence of a key (i.e. an enum constant). By default this is {@link Integer#MIN_VALUE
+ * Integer.MIN_VALUE}. If an element in the int array has this value, it means there is no entry for
+ * the corresponding enum constant in the {@code EnumToIntMap}. It is not allowed to add a key with
+ * this value to the map, as is would in effect amount to <i>removing</i> that key from the map. It
+ * is also not allowed to pass this value to {@link #containsValue(int) containsValue}. In both
+ * cases an {@code IllegalArgumentException} is thrown.
  *
  * @author Ayco Holleman
+ * @param <K> The type of the enum class
  */
-public final class EnumToIntMap<T extends Enum<T>> {
+public final class EnumToIntMap<K extends Enum<K>> {
 
-  private static final String ERR_NULL_NOT_ALLOWED =
-      "Illegal attempt to insert/retrieve NULL value";
-
-  private final T[] consts;
+  private final K[] keys;
   private final int[] data;
-  private final int nval;
+  private final int kav;
 
   /**
    * Creates a new empty {@code EnumToIntMap} for the specfied enum class using {@link
-   * Integer#MIN_VALUE Integer.MIN_VALUE} as the NULL value. All elements in the backing array will
-   * be initialized to this value (meaning that the map is empty).
+   * Integer#MIN_VALUE Integer.MIN_VALUE} as the <i>key-absent-value</i> value. All elements in the
+   * backing array will be initialized to this value (meaning that the map is empty).
    *
-   * @param enumClass
+   * @param enumClass The type of the enum class
    */
-  public EnumToIntMap(Class<T> enumClass) {
+  public EnumToIntMap(Class<K> enumClass) {
     this(enumClass, Integer.MIN_VALUE);
   }
 
   /**
    * Creates a new {@code EnumToIntMap} for the specfied enum class with the specified integer as
-   * the NULL value. All elements in the backing array will be initialized to this value (meaning
-   * that the map is empty).
+   * the <i>key-absent-value</i> value. All elements in the backing array will be initialized to
+   * this value (meaning that the map is empty).
    *
-   * @param enumClass
-   * @param nullValue
+   * @param enumClass The type of the enum class
+   * @param keyAbsentValue The value used to signify the absence of a key
    */
-  public EnumToIntMap(Class<T> enumClass, int nullValue) {
-    this.consts = enumClass.getEnumConstants();
-    this.data = new int[consts.length];
-    this.nval = nullValue;
-    if (nullValue != 0) {
-      clear();
-    }
+  public EnumToIntMap(Class<K> enumClass, int keyAbsentValue) {
+    this(enumClass, keyAbsentValue, k -> keyAbsentValue);
   }
 
   /**
-   * Creates a new {@code EnumToIntMap} using Integer.MIN_VALUE as the NULL value and with its keys
-   * initialized using the specified value initializer function. This allows for simple one-to-one
-   * mappings like {@code new EnumToIntMap(WeekDay.class, k -> k.ordinal() +1)}. It also allows you
-   * to initialize the map values to something else than the NULL value, e.g. {@code new
-   * EnumToIntMap(MyEnum.class, k -> 0}.
+   * Creates a new {@code EnumToIntMap} using Integer.MIN_VALUE as the <i>key-absent-value</i> value
+   * and with its keys initialized using the specified initializer function. This allows for simple
+   * initializations like {@code new EnumToIntMap(WeekDay.class, k -> k.ordinal() +1)}. It also
+   * allows you to initialize the map values to something else than the <i>key-absent-value</i>
+   * value, e.g. {@code new EnumToIntMap(MyEnum.class, k -> 0}.
    *
-   * @param enumClass
-   * @param initializer
+   * @param enumClass The type of the enum class
+   * @param initializer A function called to initialize the array elements
    */
-  public EnumToIntMap(Class<T> enumClass, ToIntFunction<T> initializer) {
+  public EnumToIntMap(Class<K> enumClass, ToIntFunction<K> initializer) {
     this(enumClass, Integer.MIN_VALUE, initializer);
   }
 
   /**
-   * Creates a new {@code EnumToIntMap} with the specified NULL value and the specified value
-   * initializer function.
+   * Creates a new {@code EnumToIntMap} with the specified <i>key-absent-value</i> value and the
+   * specified initializer function.
    *
-   * @param enumClass
-   * @param nullValue
-   * @param initializer
+   * @param enumClass The type of the enum class
+   * @param keyAbsentValue The value used to signify the absence of a key
+   * @param initializer A function called to initialize the array elements
    */
-  public EnumToIntMap(Class<T> enumClass, int nullValue, ToIntFunction<T> initializer) {
-    this.consts = enumClass.getEnumConstants();
-    this.data = new int[consts.length];
-    this.nval = nullValue;
-    for (T c : consts) {
-      set(c, initializer.applyAsInt(c));
-    }
+  public EnumToIntMap(Class<K> enumClass, int keyAbsentValue, ToIntFunction<K> initializer) {
+    Check.notNull(enumClass, "enumClass")
+        .and(Class::getEnumConstants, notEmpty(), "Empty enum not supported");
+    this.keys = enumClass.getEnumConstants();
+    this.data = new int[keys.length];
+    this.kav = keyAbsentValue;
+    Arrays.stream(keys).forEach(k -> assign(k, initializer.applyAsInt(k)));
   }
 
   /**
-   * Copy constructor. The new map inherits the NULL value from the other map.
+   * Instantiates a new {@code EnumToIntMap} with the same key-value mappings as the specifed {@code
+   * EnumToIntMap} and with the same <i>key-absent-value</i> value.
    *
    * @param other The {@code EnumToIntMap} whose key-value mappings to copy
    */
-  public EnumToIntMap(EnumToIntMap<T> other) {
-    this.consts = other.consts;
-    this.data = new int[consts.length];
-    this.nval = other.nval;
-    System.arraycopy(other.data, 0, this.data, 0, consts.length);
+  public EnumToIntMap(EnumToIntMap<K> other) {
+    Check.notNull(other, "other");
+    this.keys = other.keys;
+    this.data = new int[keys.length];
+    this.kav = other.kav;
+    System.arraycopy(other.data, 0, this.data, 0, keys.length);
   }
 
   /**
-   * Instantiates a new {@code EnumToIntMap} with the key-value mappings of the provided {@code
-   * EnumToIntMap}, but (potentially) with a new NULL value.
+   * Instantiates a new {@code EnumToIntMap} with the same key-value mappings as the specifed {@code
+   * EnumToIntMap}, but (potentially) with a new <i>key-absent-value</i> value.
    *
-   * @param other
-   * @param nullValue
+   * @param other The {@code EnumToIntMap} whose key-value mappings to copy
+   * @param keyAbsentValue The value used to signify the absence of a key
    */
-  public EnumToIntMap(EnumToIntMap<T> other, int nullValue) {
-    this.consts = other.consts;
-    this.data = new int[consts.length];
-    this.nval = nullValue;
-    putAll(other);
+  public EnumToIntMap(EnumToIntMap<K> other, int keyAbsentValue) {
+    Check.notNull(other, "other");
+    this.keys = other.keys;
+    this.data = new int[keys.length];
+    this.kav = keyAbsentValue;
+    copyEntries(other);
   }
 
   /**
    * Wheter or not the map contains an entry for the specified enum constant.
    *
-   * @param key
-   * @return
+   * @param key The enum constant
+   * @return Whether or not the map contains an entry for the enum constant
    */
-  public boolean containsKey(T key) {
-    return get(key) != nval;
+  public boolean containsKey(K key) {
+    Check.notNull(key, "key");
+    return isPresent(key);
   }
 
   /**
-   * Whether or not the map contains the specified value. Note that you are not permitted to search
-   * for the value designated to be the NULL value. An {@code IllegalArgumentException} is thrown if
-   * you attempt to do so.
+   * Whether or not the map contains the specified value. It is not permitted to search for the
+   * <i>key-absent-value</i> value. An {@code IllegalArgumentException} is thrown if you attempt to
+   * do so.
    *
-   * @param val
-   * @return
+   * @param val The value
+   * @return Whether or not the map contains the value
    */
   public boolean containsValue(int val) {
-    Check.argument(val, "val").and(notEqualTo(), nval, ERR_NULL_NOT_ALLOWED);
-    for (int v : data) {
-      if (v == val) {
-        return true;
-      }
-    }
-    return false;
+    Check.that(val, "val", notEqualTo(), kav);
+    return Arrays.stream(data).filter(x -> x == val).findFirst().isPresent();
   }
 
   /**
-   * Returns the value associated with the specified enum constant.
+   * Returns the value to which the specified key is mapped, or the <i>key-absent-value</i> if this
+   * map contains no mapping for the key. NB a regular {@code Map} would return {@code null} in the
+   * latter case.
    *
-   * @param key
-   * @return
+   * @param key The key whose associated value is to be returned
+   * @return The value to which the specified key is mapped, or the <i>key-absent-value</i> if this
+   *     map contains no mapping for the key
    */
-  public int get(T key) {
-    return data[key.ordinal()];
+  public int get(K key) {
+    Check.notNull(key, "key");
+    return valueOf(key);
   }
 
   /**
    * Returns the value associated with the specified enum constant or {@coded dfault} if the map did
    * not contain an entry for the specified enum constant.
    *
-   * @param key
-   * @param dfault
-   * @return
+   * @param key The key to retrieve the value of.
+   * @param dfault The integer to return if the map did not contain the key
+   * @return The value associated with the key or {@code dfault}
    */
-  public int getOrDefault(T key, int dfault) {
-    return containsKey(key) ? data[key.ordinal()] : dfault;
+  public int getOrDefault(K key, int dfault) {
+    return containsKey(key) ? valueOf(key) : dfault;
   }
 
   /**
-   * Adds or overwrite the value for the specified enum constant. Note that you are not permitted to
-   * use the NULL value as the second argument. An {@code IllegalArgumentException} is thrown if you
-   * do so.
+   * Associates the specified value with the specified key in this map.
    *
-   * @param key
-   * @param val
-   * @return The previous value associated with the specified enum constant or the NULL value if the
-   *     map did not contain an entry for the enum constant yet.
+   * @param key The key
+   * @param val The value
+   * @return The previous value associated with the specified enum constant or the
+   *     <i>key-absent-value</i> value if the map did not contain an entry for the enum constant
+   *     yet.
    */
-  public int put(T key, int val) {
-    int i = get(key);
-    set(key, val);
-    return i;
+  public int put(K key, int val) {
+    Check.notNull(key, "key");
+    Check.that(val, "val", notEqualTo(), kav);
+    int orig = valueOf(key);
+    assign(key, val);
+    return orig;
   }
 
   /**
    * Much like {@code put}, but provides a fluent API for adding entries to the map.
    *
-   * @param key
-   * @param val
-   * @return
+   * @param key The key
+   * @param val The value
+   * @return This instance
    */
-  public EnumToIntMap<T> set(T key, int val) {
-    Check.argument(val, "val").and(notEqualTo(), nval, ERR_NULL_NOT_ALLOWED);
-    data[key.ordinal()] = val;
+  public EnumToIntMap<K> set(K key, int val) {
+    Check.notNull(key, "key");
+    Check.that(val, "val", notEqualTo(), kav);
+    assign(key, val);
     return this;
   }
 
   /**
    * Adds all entries of the specified map to this map, overwriting any previous values. The other
-   * map is allowed to have a different NULL value, but it must not contain <i>this</i> map's NULL
-   * value. An {@link IllegalArgumentException} is thrown if it does.
+   * map is allowed to have a different <i>key-absent-value</i> value, but it must not contain
+   * <i>this</i> map's NULL value. An {@link IllegalArgumentException} is thrown if it does.
    *
-   * @param other
+   * @param other The {@code EnumToIntMap} whose key-value mappings to copy
    */
-  public void putAll(EnumToIntMap<T> other) {
-    for (int i = 0; i < other.data.length; ++i) {
-      if (other.data[i] != other.nval) {
-        set(consts[i], other.data[i]);
-      }
-    }
+  public void putAll(EnumToIntMap<K> other) {
+    Check.notNull(other, "other");
+    copyEntries(other);
   }
 
   /**
    * Adds all entries of the specified map to this map. This method acts as a bridge to
    * fully-generic map implementations.
    *
-   * @param other
+   * @param other The {@code Map} whose key-value mappings to copy
    */
-  public void putAll(Map<T, ? extends Number> other) {
-    for (T t : consts) {
-      if (other.containsKey(t)) {
-        set(
-            t,
-            other
-                .get(t)
-                .intValue()); // Throw IllegalArgumentException if other.get(t).intValue() ==
-        // this.nval
-      }
-    }
+  public void putAll(Map<K, Integer> other) {
+    Check.notNull(other, "other")
+        .and(notContainsKey(), null)
+        .and(notContainsValue(), kav)
+        .ok()
+        .entrySet()
+        .forEach(e -> assign(e.getKey(), e.getValue()));
   }
 
   /**
@@ -236,58 +234,49 @@ public final class EnumToIntMap<T extends Enum<T>> {
    *
    * @return
    */
-  public Map<T, Integer> toGenericMap() {
-    @SuppressWarnings("unchecked")
-    EnumMap<T, Integer> map = new EnumMap<>((Class<T>) consts[0].getClass());
-    for (T t : consts) {
-      if (containsKey(t)) {
-        map.put(t, Integer.valueOf(data[t.ordinal()]));
-      }
-    }
-    return map;
+  public Map<K, Integer> toGenericMap() {
+    return streamKeys().collect(toMap(e -> e, Enum::ordinal));
   }
 
   /**
-   * Removes the entry corresponding to the specified enum constant.
+   * Removes the mapping for a key from this map if it is present.
    *
-   * @param key
-   * @return
+   * @param key The key
+   * @return The previous value associated with key, or the <i>key-absent-value</i> value if there
+   *     was no mapping for key.
    */
-  public int remove(T key) {
-    int v = get(key);
-    data[key.ordinal()] = nval;
+  public int remove(K key) {
+    Check.notNull(key, "key");
+    int v = valueOf(key);
+    assign(key, kav);
     return v;
   }
 
   /**
    * Returns a Set view of the keys contained in this map.
    *
-   * @return
+   * @return A Set view of the keys contained in this map
    */
-  public Set<T> keySet() {
-    @SuppressWarnings("unchecked")
-    EnumSet<T> keys = EnumSet.noneOf(consts[0].getClass());
-    for (int i = 0; i < data.length; ++i) {
-      if (data[i] != nval) {
-        keys.add(consts[i]);
-      }
-    }
-    return keys;
+  public Set<K> keySet() {
+    return streamKeys().collect(toSet());
   }
 
   /**
    * Returns a {@code Collection} view of the values contained in this map.
    *
-   * @return
+   * @return A {@code Collection} view of the values contained in this map
    */
   public Set<Integer> values() {
-    Set<Integer> keys = new HashSet<>(size());
-    for (int val : data) {
-      if (val != nval) {
-        keys.add(Integer.valueOf(val));
-      }
-    }
-    return keys;
+    return streamKeys().map(this::valueOf).collect(toSet());
+  }
+
+  /**
+   * Returns a Set view of the mappings contained in this map.
+   *
+   * @return A set view of the mappings contained in this map
+   */
+  public Set<Map.Entry<K, Integer>> entrySet() {
+    return streamKeys().map(k -> tuple(k, valueOf(k))).map(Tuple::toEntry).collect(toSet());
   }
 
   /**
@@ -305,15 +294,13 @@ public final class EnumToIntMap<T extends Enum<T>> {
    *
    * @param consumer
    */
-  public void forEach(ObjIntConsumer<T> consumer) {
-    for (int i = 0; i < data.length; ++i) {
-      consumer.accept(consts[i], data[i]);
-    }
+  public void forEach(ObjIntConsumer<K> consumer) {
+    streamKeys().forEach(k -> consumer.accept(k, valueOf(k)));
   }
 
   /** Removes all of the mappings from this map. */
   public void clear() {
-    Arrays.fill(data, nval);
+    Arrays.fill(data, kav);
   }
 
   /**
@@ -322,56 +309,95 @@ public final class EnumToIntMap<T extends Enum<T>> {
    * @return The number of key-value mappings in this map
    */
   public int size() {
-    return (int) Arrays.stream(data).filter(v -> v != nval).count();
+    return (int) streamKeys().count();
   }
 
   /**
-   * Returns the integer that functions as the NULL value for this map.
+   * Returns the type of the enum keys.
    *
-   * @return The integer that functions as the NULL value for this map
+   * @return The type of the enum keys
    */
-  public int getNullValue() {
-    return nval;
+  @SuppressWarnings("unchecked")
+  public Class<K> keyType() {
+    return (Class<K>) keys[0].getClass();
   }
 
   /**
-   * Returns true if the provided object is an instance of {@code EnumToIntMap} and if it contains
-   * the same NULL value and the same key-value mappings, {@code false} otherwise.
+   * Returns the integer used to signify the absence of a key within this map.
+   *
+   * @return The integer used to signify the absence of a key
+   */
+  public int keyAbsentValue() {
+    return kav;
+  }
+
+  /**
+   * Returns {@code true} if the argument is an {@code EnumToIntMap} for the same {@code enum} class
+   * and if it contains the same key-value mappings, {@code false} otherwise. The two maps need not
+   * have the same <i>key-absent-value</i> value.
    */
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;
-    }
-    if (obj == null || obj.getClass() != EnumToIntMap.class) {
+    } else if (obj == null || obj.getClass() != EnumToIntMap.class) {
       return false;
     }
     EnumToIntMap<?> other = (EnumToIntMap<?>) obj;
-    if (consts[0].getClass() != other.consts[0].getClass()) {
+    if (keyType() != other.keyType()) {
       return false;
     }
-    return Objects.equals(this.nval, other.nval) && Arrays.equals(this.data, other.data);
+    for (int i = 0; i < keys.length; i++) {
+      if (data[i] == kav) {
+        if (other.data[i] != other.kav) {
+          return false;
+        }
+      } else if (data[i] == other.kav || data[i] != other.data[i]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(nval, data);
+    return Objects.hash(data, kav);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append('{');
-    for (int i = 0; i < data.length; ++i) {
-      if (data[i] == nval) {
-        continue;
-      }
-      if (sb.length() != 1) {
-        sb.append("; ");
-      }
-      sb.append('"').append(consts[i].toString()).append("\": ").append(data[i]);
-    }
+    streamKeys()
+        .forEach(
+            k -> {
+              doIf(sb.length() != 1, () -> sb.append(";"));
+              append(sb, '"', k, "\":", valueOf(k));
+            });
     sb.append('}');
     return sb.toString();
+  }
+
+  private void copyEntries(EnumToIntMap<K> other) {
+    if (kav != other.kav && other.containsValue(kav)) {
+      throw new IllegalArgumentException("EnumToIntMap other must not contain value " + kav);
+    }
+    other.streamKeys().forEach(k -> assign(k, other.valueOf(k)));
+  }
+
+  private Stream<K> streamKeys() {
+    return Arrays.stream(keys).filter(this::isPresent);
+  }
+
+  private boolean isPresent(K key) {
+    return valueOf(key) != kav;
+  }
+
+  private void assign(K key, int val) {
+    data[key.ordinal()] = val;
+  }
+
+  private int valueOf(K key) {
+    return data[key.ordinal()];
   }
 }

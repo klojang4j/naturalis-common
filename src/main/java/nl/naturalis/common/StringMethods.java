@@ -24,6 +24,20 @@ public final class StringMethods {
   private StringMethods() {}
 
   /**
+   * Appends data to the specified {@code StringBuilder}.
+   *
+   * @param sb The {@code StringBuilder}
+   * @param data The data
+   * @return The {@code StringBuilder}
+   */
+  public static StringBuilder append(StringBuilder sb, Object... data) {
+    for (Object obj : data) {
+      sb.append(obj);
+    }
+    return sb;
+  }
+
+  /**
    * Appends to provided suffix to {@code subject} if it did not already have that suffix. If {@code
    * subject} is null, <code>suffix</code> is returned.
    *

@@ -41,19 +41,19 @@ public class CheckTest {
 
   @Test
   public void test03() {
-    Check<Integer, IllegalArgumentException> check = Check.argument(9, "fooArg");
+    Check<Integer, IllegalArgumentException> check = Check.value(9, "fooArg");
     assertEquals(IntCheck.class, check.getClass());
   }
 
   @Test
   public void test04() {
-    Check<Integer, IllegalArgumentException> check = Check.argument(Integer.valueOf(9), "fooArg");
+    Check<Integer, IllegalArgumentException> check = Check.value(Integer.valueOf(9), "fooArg");
     assertEquals(ObjectCheck.class, check.getClass());
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void test06() {
-    Check.argument(2, "fooArg").and(numGreaterThan(), 4);
+    Check.value(2, "fooArg").and(numGreaterThan(), 4);
   }
 
   @Test
@@ -63,46 +63,46 @@ public class CheckTest {
 
   @Test
   public void test08() {
-    IntCheck<IllegalArgumentException> check = (IntCheck) Check.argument(9, "fooArg");
+    IntCheck<IllegalArgumentException> check = (IntCheck) Check.value(9, "fooArg");
     check.and(numGreaterThan(), 4);
   }
 
   @Test
   public void test09() {
-    IntCheck<IllegalArgumentException> check = (IntCheck) Check.argument(9, "fooArg");
+    IntCheck<IllegalArgumentException> check = (IntCheck) Check.value(9, "fooArg");
     check.and(greaterThan(), Integer.valueOf(4));
   }
 
   @Test // Gotcha: intstanceOf() takes an object so forces the int argument to be boxed.
   public void test10() {
-    IntCheck<IllegalArgumentException> check = (IntCheck) Check.argument(9, "fooArg");
+    IntCheck<IllegalArgumentException> check = (IntCheck) Check.value(9, "fooArg");
     check.and(instanceOf(), Integer.class);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void test11() {
-    IntCheck<IllegalArgumentException> check = (IntCheck) Check.argument(9, "fooArg");
+    IntCheck<IllegalArgumentException> check = (IntCheck) Check.value(9, "fooArg");
     check.and(sizeGreaterThan(), Integer.valueOf(4));
   }
 
   @Test
   public void test12() {
-    Check.argument("Hello, World!", "fooArg").and(sizeGreaterThan(), 6);
+    Check.value("Hello, World!", "fooArg").and(sizeGreaterThan(), 6);
   }
 
   @Test
   public void test13() {
-    Check.argument("Hello, World!", "fooArg").and(sizeGreaterThan(), Integer.valueOf(6));
+    Check.value("Hello, World!", "fooArg").and(sizeGreaterThan(), Integer.valueOf(6));
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void test14() {
-    Check.argument("Hello, World!", "fooArg").and(sizeGreaterThan(), 100);
+    Check.value("Hello, World!", "fooArg").and(sizeGreaterThan(), 100);
   }
 
   @Test
   public void test15() {
-    Check.argument(List.of("a", "b", "c", "d", "e"), "fooArg").and(sizeAtLeast(), 3);
+    Check.value(List.of("a", "b", "c", "d", "e"), "fooArg").and(sizeAtLeast(), 3);
   }
 
   @Test
