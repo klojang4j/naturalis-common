@@ -28,101 +28,113 @@ public class CheckTest {
   }
 
   @Test // notNull() forces ObjectCheck
-  public void test01() {
+  public void that03() {
     Check check = Check.that(3, "fooArg", notNull());
     assertEquals(ObjectCheck.class, check.getClass());
   }
 
   @Test // numGreaterThan() forces ObjectCheck
-  public void test02() {
+  public void that04() {
     Check check = Check.that(5, "fooArg", numGreaterThan(), 4);
     assertEquals(ObjectCheck.class, check.getClass());
   }
 
   @Test
-  public void test03() {
-    Check<Integer, IllegalArgumentException> check = Check.value(9, "fooArg");
+  public void that05() {
+    Check<Integer, IllegalArgumentException> check = Check.that(9, "fooArg");
     assertEquals(IntCheck.class, check.getClass());
   }
 
   @Test
-  public void test04() {
-    Check<Integer, IllegalArgumentException> check = Check.value(Integer.valueOf(9), "fooArg");
+  public void that06() {
+    Check<Integer, IllegalArgumentException> check = Check.that(Integer.valueOf(9), "fooArg");
     assertEquals(ObjectCheck.class, check.getClass());
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void test06() {
-    Check.value(2, "fooArg").and(numGreaterThan(), 4);
+  public void that07() {
+    Check.that(2, "fooArg").and(numGreaterThan(), 4);
   }
 
   @Test
-  public void test07() {
+  public void that08() {
     Check.that(Integer.valueOf(5), "fooArg", numGreaterThan(), 3);
   }
 
   @Test
-  public void test08() {
-    IntCheck<IllegalArgumentException> check = (IntCheck) Check.value(9, "fooArg");
+  public void that09() {
+    IntCheck<IllegalArgumentException> check = (IntCheck) Check.that(9, "fooArg");
     check.and(numGreaterThan(), 4);
   }
 
   @Test
-  public void test09() {
-    IntCheck<IllegalArgumentException> check = (IntCheck) Check.value(9, "fooArg");
+  public void that10() {
+    IntCheck<IllegalArgumentException> check = (IntCheck) Check.that(9, "fooArg");
     check.and(greaterThan(), Integer.valueOf(4));
   }
 
-  @Test // Gotcha: intstanceOf() takes an object so forces the int argument to be boxed.
-  public void test10() {
-    IntCheck<IllegalArgumentException> check = (IntCheck) Check.value(9, "fooArg");
+  @Test
+  public void that11() {
+    // Gotcha here : intstanceOf() takes an object so forces the int argument to be boxed.
+    IntCheck<IllegalArgumentException> check = (IntCheck) Check.that(9, "fooArg");
     check.and(instanceOf(), Integer.class);
   }
 
+  @Test
+  public void that12() {
+    // numGreaterThan() works with Number instances, not ints, but the compiler
+    // can make sense of it
+    Check.that(9, "fooArg", numGreaterThan(), 8);
+  }
+
   @Test(expected = IllegalArgumentException.class)
-  public void test11() {
-    IntCheck<IllegalArgumentException> check = (IntCheck) Check.value(9, "fooArg");
+  public void size01() {
+    IntCheck<IllegalArgumentException> check = (IntCheck) Check.that(9, "fooArg");
     check.and(sizeGreaterThan(), Integer.valueOf(4));
   }
 
   @Test
-  public void test12() {
-    Check.value("Hello, World!", "fooArg").and(sizeGreaterThan(), 6);
+  public void size02() {
+    Check.that("Hello, World!", "fooArg").and(sizeGreaterThan(), 6);
   }
 
   @Test
-  public void test13() {
-    Check.value("Hello, World!", "fooArg").and(sizeGreaterThan(), Integer.valueOf(6));
+  public void size03() {
+    Check.that("Hello, World!", "fooArg").and(sizeGreaterThan(), Integer.valueOf(6));
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void test14() {
-    Check.value("Hello, World!", "fooArg").and(sizeGreaterThan(), 100);
+  public void size04() {
+    Check.that("Hello, World!", "fooArg").and(sizeGreaterThan(), 100);
   }
 
   @Test
-  public void test15() {
-    Check.value(List.of("a", "b", "c", "d", "e"), "fooArg").and(sizeAtLeast(), 3);
+  public void size05() {
+    Check.that(List.of("a", "b", "c", "d", "e"), "fooArg").and(sizeAtLeast(), 3);
   }
 
   @Test
-  public void test16() {
+  public void size06() {
     Check.that("Hello, World!", "fooArg", sizeAtLeast(), 3);
   }
 
   @Test
-  public void test17() {
+  public void size07() {
     Check.that("Hello, World!", "fooArg", (x, y) -> x.length() > y, 3);
   }
 
-  @Test
+  @Test // Does this all "work"? (i.e. no compile errors)
   public void and01() {
     Employee employee = new Employee(3, "John Smith", 43, "Skating", "Scoccer");
     Check.notNull(employee, "employee")
-        .and(Employee::getId, "id", atLeast(), 0)
-        .and(Employee::getFullName, s -> s.length() < 200, "Full name too large")
-        .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
-        .and(Employee::getAge, atLeast(), 16, "Employee must be at least 16")
+        .hasAsInt(Employee::getId, "id", atLeast(), 0)
+        .hasAsInt(Employee::getId, "id", (x, y) -> x > y, 0)
+        .has(Employee::getHobbies, "hobbies", (x, y) -> x.contains(y), "Skating")
+        .has(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
+        .has(Employee::getHobbies, (x, y) -> x.contains(y), "Skating", "Skating is not optional")
+        .and(Employee::getFullName, "fullName", s -> s.length() < 200)
+        .hasAsInt(Employee::getAge, atLeast(), 16, "Employee must be at least %d", 16)
+        .has(Employee::getAge, numAtLeast(), 16, "Employee must be at least %d", 16)
         .ok();
   }
 
@@ -130,15 +142,15 @@ public class CheckTest {
   public void and02() {
     Employee employee = new Employee();
     employee.setAge(12);
-    Check.notNull(employee, "employee").and(Employee::getAge, "age", atLeast(), 16).ok();
+    Check.notNull(employee, "employee").hasAsInt(Employee::getAge, "age", atLeast(), 16).ok();
   }
 
   @Test(expected = IOException.class)
   public void and03() throws IOException {
     Employee employee = new Employee();
     employee.setHobbies(List.of("Skating", "Scuba diving"));
-    Check.notNull(employee, "employee", IOException::new)
-        .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
+    Check.notNull(IOException::new, employee, "employee")
+        .has(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
         .ok();
   }
 
@@ -146,8 +158,8 @@ public class CheckTest {
   public void and04() throws IOException {
     Employee employee = new Employee();
     employee.setId(-23);
-    Check.notNull(employee, "employee", IOException::new)
-        .and(Employee::getId, greaterThan(), 0, "Id must not be negative")
+    Check.notNull(IOException::new, employee, "employee")
+        .hasAsInt(Employee::getId, greaterThan(), 0, "Id must not be negative")
         .ok();
   }
 
@@ -169,7 +181,7 @@ public class CheckTest {
   @Test
   public void and07() {
     Employee[] employees = new Employee[10];
-    Check.notNull(employees, "employees").and(Array::getLength, "length", lessThan(), 100);
+    Check.notNull(employees, "employees").hasAsInt(Array::getLength, "length", lessThan(), 100);
   }
 
   @Test
@@ -177,7 +189,7 @@ public class CheckTest {
     Employee employee = new Employee();
     employee.setJustSomeNumbers(new float[] {3.2F, 103.2F, 0.8F});
     Check.notNull(employee, "employee")
-        .and(Employee::getJustSomeNumbers, "justSomeLuckyNumbers", sizeLessThan(), 100);
+        .has(Employee::getJustSomeNumbers, "justSomeLuckyNumbers", sizeLessThan(), 100);
   }
 
   @Test

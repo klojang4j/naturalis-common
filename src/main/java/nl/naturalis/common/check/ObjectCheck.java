@@ -79,11 +79,12 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public <U> Check<T, E> and(Function<T, U> getter, String propName, Predicate<U> test) throws E {
-    if (test.test(getter.apply(arg))) {
+  public <U> Check<T, E> and(Function<T, U> getter, String property, Predicate<U> test) throws E {
+    U propVal = getter.apply(arg);
+    if (test.test(propVal)) {
       return this;
     }
-    throw excFactory.apply(Messages.get(test, arg, prop(propName)));
+    throw excFactory.apply(Messages.get(test, propVal, propName(property)));
   }
 
   @Override
@@ -96,12 +97,13 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> andAsInt(ToIntFunction<T> getter, String propName, IntPredicate test)
+  public Check<T, E> andAsInt(ToIntFunction<T> getter, String property, IntPredicate test)
       throws E {
-    if (test.test(getter.applyAsInt(arg))) {
+    int propVal = getter.applyAsInt(arg);
+    if (test.test(propVal)) {
       return this;
     }
-    throw excFactory.apply(Messages.get(test, arg, prop(propName)));
+    throw excFactory.apply(Messages.get(test, propVal, propName(property)));
   }
 
   @Override
@@ -114,16 +116,17 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public <U, V> Check<T, E> and(
-      Function<T, U> getter, String propName, Relation<U, V> relation, V relateTo) throws E {
-    if (relation.exists(getter.apply(arg), relateTo)) {
+  public <U, V> Check<T, E> has(
+      Function<T, U> getter, String property, Relation<U, V> relation, V relateTo) throws E {
+    U propVal = getter.apply(arg);
+    if (relation.exists(propVal, relateTo)) {
       return this;
     }
-    throw excFactory.apply(Messages.get(relation, arg, prop(propName), relateTo));
+    throw excFactory.apply(Messages.get(relation, propVal, propName(property), relateTo));
   }
 
   @Override
-  public <U, V> Check<T, E> and(
+  public <U, V> Check<T, E> has(
       Function<T, U> getter, Relation<U, V> relation, V relateTo, String message, Object... msgArgs)
       throws E {
     if (relation.exists(getter.apply(arg), relateTo)) {
@@ -133,16 +136,17 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public <U> Check<T, E> and(
-      Function<T, U> getter, String propName, ObjIntRelation<U> relation, int relateTo) throws E {
-    if (relation.exists(getter.apply(arg), relateTo)) {
+  public <U> Check<T, E> has(
+      Function<T, U> getter, String property, ObjIntRelation<U> relation, int relateTo) throws E {
+    U propVal = getter.apply(arg);
+    if (relation.exists(propVal, relateTo)) {
       return this;
     }
-    throw excFactory.apply(Messages.get(relation, arg, prop(propName), relateTo));
+    throw excFactory.apply(Messages.get(relation, propVal, propName(property), relateTo));
   }
 
   @Override
-  public <U> Check<T, E> and(
+  public <U> Check<T, E> has(
       Function<T, U> getter,
       ObjIntRelation<U> relation,
       int relateTo,
@@ -156,16 +160,17 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> and(ToIntFunction<T> getter, String propName, IntRelation test, int relateTo)
-      throws E {
-    if (test.exists(getter.applyAsInt(arg), relateTo)) {
+  public Check<T, E> hasAsInt(
+      ToIntFunction<T> getter, String property, IntRelation test, int relateTo) throws E {
+    int propVal = getter.applyAsInt(arg);
+    if (test.exists(propVal, relateTo)) {
       return this;
     }
-    throw excFactory.apply(Messages.get(test, arg, prop(propName), relateTo));
+    throw excFactory.apply(Messages.get(test, propVal, propName(property), relateTo));
   }
 
   @Override
-  public Check<T, E> and(
+  public Check<T, E> hasAsInt(
       ToIntFunction<T> getter, IntRelation test, int relateTo, String message, Object... msgArgs)
       throws E {
     if (test.exists(getter.applyAsInt(arg), relateTo)) {
@@ -186,7 +191,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
       throw excFactory.apply(msg);
     } else if (arg instanceof Number) {
       Number n = (Number) arg;
-      if (NumberMethods.isLossless(n, Integer.class)) {
+      if (NumberMethods.fitsInto(n, Integer.class)) {
         return n.intValue();
       }
       String msg = String.format(ERR_NUMBER_TO_INT, argName, n);
@@ -194,7 +199,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
     } else if (arg instanceof CharSequence) {
       try {
         Double d = Double.valueOf(arg.toString());
-        if (NumberMethods.isLossless(d, Integer.class)) {
+        if (NumberMethods.fitsInto(d, Integer.class)) {
           return d.intValue();
         }
         String msg = String.format(ERR_STRING_TO_INT, argName, arg);
@@ -208,7 +213,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
     throw excFactory.apply(msg);
   }
 
-  private String prop(String name) {
+  private String propName(String name) {
     return argName + "." + name;
   }
 

@@ -12,67 +12,68 @@ public class NumberMethods {
   private NumberMethods() {}
 
   /**
-   * Returns whether or not the specified {@code Number} can be converted to the specified target
-   * {@code Number} type without actual loss of precision.
+   * Returns whether or not the specified {@code Number} can be converted an instance of the {@code
+   * Number} type without losing of information.
    *
    * @param <T> The type of {@code Number} to convert to
-   * @param from The {@code Number} to convert
+   * @param n The {@code Number} to convert
    * @param to The type of {@code Number} to convert to
    * @return Whether or not conversion will be lossless
    */
-  public static <T extends Number> boolean isLossless(Number from, Class<T> to) {
-    Check.notNull(from, "from");
-    Check.notNull(to, "to");
-    Class<?> fc = from.getClass();
-    if (to == Double.class) {
+  public static <T extends Number> boolean fitsInto(Number n, Class<T> targetType) {
+    Class<T> to;
+    Check.notNull(n, "from");
+    Check.notNull(to = targetType, "targetType");
+    Class<?> fc = n.getClass();
+    if (n.getClass() == to || to == Double.class) {
       return true;
     } else if (to == Long.class) {
       if (fc == Double.class) {
-        return (long) from.doubleValue() == from.doubleValue();
+        return (long) n.doubleValue() == n.doubleValue();
       } else if (fc == Float.class) {
-        return (long) from.floatValue() == from.floatValue();
+        return (long) n.floatValue() == n.floatValue();
       }
       return true;
     } else if (to == Float.class) {
       if (fc == Double.class) {
-        return (float) from.doubleValue() == from.doubleValue();
+        return (float) n.doubleValue() == n.doubleValue();
       } else if (fc == Long.class) {
-        return (float) from.longValue() == from.longValue();
+        return (float) n.longValue() == n.longValue();
       } else if (fc == Integer.class) { // Is this necessary?
-        return (float) from.intValue() == from.intValue();
+        return (float) n.intValue() == n.intValue();
       }
       return true;
     } else if (to == Integer.class) {
       if (fc == Double.class) {
-        return (int) from.doubleValue() == from.doubleValue();
+        return (int) n.doubleValue() == n.doubleValue();
       } else if (fc == Long.class) {
-        return from.longValue() <= Integer.MAX_VALUE && from.longValue() >= Integer.MIN_VALUE;
+        return n.longValue() <= Integer.MAX_VALUE && n.longValue() >= Integer.MIN_VALUE;
       } else if (fc == Float.class) {
-        return (int) from.floatValue() == from.floatValue();
+        return (int) n.floatValue() == n.floatValue();
       }
       return true;
     } else if (to == Short.class) {
       if (fc == Double.class) {
-        return (short) from.doubleValue() == from.doubleValue();
+        return (short) n.doubleValue() == n.doubleValue();
       } else if (fc == Long.class) {
-        return from.longValue() <= Short.MAX_VALUE && from.longValue() >= Short.MIN_VALUE;
+        return n.longValue() <= Short.MAX_VALUE && n.longValue() >= Short.MIN_VALUE;
       } else if (fc == Float.class) {
-        return (short) from.floatValue() == from.floatValue();
+        return (short) n.floatValue() == n.floatValue();
       } else if (fc == Integer.class) {
-        return from.intValue() <= Short.MAX_VALUE && from.intValue() >= Short.MIN_VALUE;
+        return n.intValue() <= Short.MAX_VALUE && n.intValue() >= Short.MIN_VALUE;
       }
       return true;
     } else /* Byte.class */ {
       if (fc == Double.class) {
-        return (byte) from.doubleValue() == from.doubleValue();
+        return (byte) n.doubleValue() == n.doubleValue();
       } else if (fc == Long.class) {
-        return from.longValue() <= Byte.MAX_VALUE && from.longValue() >= Byte.MIN_VALUE;
+        return n.longValue() <= Byte.MAX_VALUE && n.longValue() >= Byte.MIN_VALUE;
       } else if (fc == Float.class) {
-        return (byte) from.floatValue() == from.floatValue();
+        return (byte) n.floatValue() == n.floatValue();
       } else if (fc == Integer.class) {
-        return from.intValue() <= Byte.MAX_VALUE && from.intValue() >= Byte.MIN_VALUE;
+        return n.intValue() <= Byte.MAX_VALUE && n.intValue() >= Byte.MIN_VALUE;
       } else if (fc == Short.class) {
-        return from.shortValue() <= Byte.MAX_VALUE && from.shortValue() >= Byte.MIN_VALUE;
+        return n.shortValue() <= Byte.MAX_VALUE && n.shortValue() >= Byte.MIN_VALUE;
       }
       return true;
     }

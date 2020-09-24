@@ -48,34 +48,32 @@ class Messages {
 
     List<Tuple<Object, Function<Object[], String>>> tmp = new ArrayList<>();
 
-    /* NULL & EMPTY */
+    /* NULL & EMPTY PREDICATES */
     tmp.add(tuple(isNull(), x -> format("%s must be null (was %s)", arg(x), str(x[0]))));
     tmp.add(tuple(notNull(), x -> format("%s must not be null", arg(x))));
     tmp.add(tuple(isEmpty(), x -> format("%s must be empty (was %s)", arg(x), str(x[0]))));
     tmp.add(tuple(notEmpty(), x -> format("%s must not be empty", arg(x))));
     tmp.add(tuple(noneNull(), x -> format("%s must not contain null values", arg(x))));
 
-    /* STRING PREDICATES */
+    /* STRING-RELATED PREDICATES */
     tmp.add(tuple(notBlank(), x -> format("%s must not be blank", arg(x))));
 
-    /* FILE PREDICATES */
+    /* FILE-RELATED PREDICATES */
     tmp.add(tuple(isFile(), x -> msgIsFile(x)));
     tmp.add(tuple(isDirectory(), x -> msgIsDirectory(x)));
     tmp.add(tuple(fileNotExists(), x -> msgFileNotExists(x)));
     tmp.add(tuple(readable(), x -> msgReadable(x)));
     tmp.add(tuple(writable(), x -> msgWritable(x)));
 
-    /* INT PREDICATES */
+    /* INT-RELATED PREDICATES */
     tmp.add(tuple(isEven(), x -> format("%s must be even (was %d)", arg(x), x[0])));
     tmp.add(tuple(isOdd(), x -> format("%s must be odd (was %d)", arg(x), x[0])));
-    tmp.add(tuple(positive(), x -> format("%s must be positive (was %d)", arg(x), x[0])));
-    tmp.add(
-        tuple(notPositive(), x -> format("%s must be zero or negative (was %d)", arg(x), x[0])));
-    tmp.add(tuple(negative(), x -> format("%s must be negative (was %d)", arg(x), x[0])));
-    tmp.add(
-        tuple(notNegative(), x -> format("%s must be zero or positive (was %d)", arg(x), x[0])));
+    tmp.add(tuple(positive(), x -> msgPositive(x)));
+    tmp.add(tuple(notPositive(), x -> msgNotPositive(x)));
+    tmp.add(tuple(negative(), x -> msgNegative(x)));
+    tmp.add(tuple(notNegative(), x -> msgNotNegative(x)));
 
-    /* COLLECTION RELATIONS */
+    /* COLLECTION-RELATED RELATIONS */
     tmp.add(tuple(contains(), x -> msgContains(x)));
     tmp.add(tuple(notContains(), x -> msgNotContains(x)));
     tmp.add(tuple(elementOf(), x -> msgElementOf(x)));
@@ -85,14 +83,20 @@ class Messages {
     tmp.add(tuple(containsValue(), x -> msgContainsValue(x)));
     tmp.add(tuple(notContainsValue(), x -> msgNotContainsValue(x)));
 
-    tmp.add(tuple(objEquals(), x -> format("%s must be equal to %s (was %s)", arg(x), x[2], x[0])));
-    tmp.add(tuple(objNotEquals(), x -> format("%s must be not be equal to %s", arg(x), x[2])));
+    /* EQUALS-RELATED RELATIONS */
+    tmp.add(tuple(objEquals(), x -> msgObjEquals(x)));
+    tmp.add(tuple(objNotEquals(), x -> msgObjNotEquals(x)));
 
+    /* NULL & EMPTY RELATIONS */
+    tmp.add(tuple(nullOr(), x -> msgNullOr(x)));
+
+    /* NUMBER RELATIONS */
     tmp.add(tuple(numGreaterThan(), x -> format("%s must be > %s (was %s)", arg(x), x[2], x[0])));
     tmp.add(tuple(numAtLeast(), x -> format("%s must be >= %s (was %s)", arg(x), x[2], x[0])));
     tmp.add(tuple(numLessThan(), x -> format("%s must be < %s (was %s)", arg(x), x[2], x[0])));
     tmp.add(tuple(numAtMost(), x -> format("%s must be <= %s (was %s)", arg(x), x[2], x[0])));
 
+    /* SIZE-RELATED RELATIONS */
     tmp.add(tuple(sizeEquals(), x -> format("%s must be equal to %s (was %s)", sz(x), x[2], x[0])));
     tmp.add(tuple(sizeNotEquals(), x -> format("%s must be not be equal to %s", sz(x), x[2])));
     tmp.add(tuple(sizeGreaterThan(), x -> format("%s must be > %s (was %s)", sz(x), x[2], x[0])));
@@ -100,12 +104,12 @@ class Messages {
     tmp.add(tuple(sizeLessThan(), x -> format("%s must be < %s (was %s)", sz(x), x[2], x[0])));
     tmp.add(tuple(sizeAtMost(), x -> format("%s must be <= %s (was %s)", sz(x), x[2], x[0])));
 
+    /* TYPE-RELATED RELATIONS*/
     tmp.add(tuple(instanceOf(), x -> msgInstanceOf(x)));
-    tmp.add(tuple(isArray(), x -> format("%s must be an array (was %s)", arg(x), cname(x[0]))));
+    tmp.add(tuple(isArray(), x -> msgIsArray(x)));
 
     /* INT RELATIONS */
-    tmp.add(
-        tuple(equalTo(), x -> format("%s must not be equal to %d (was %d)", arg(x), x[2], x[0])));
+    tmp.add(tuple(equalTo(), x -> msgEqualTo(x)));
     tmp.add(tuple(notEqualTo(), x -> format("%s must not be equal to %d", arg(x), x[2])));
     tmp.add(tuple(greaterThan(), x -> format("%s must be > %d (was %d)", arg(x), x[2], x[0])));
     tmp.add(tuple(atLeast(), x -> format("%s must be >= %s (was %s)", arg(x), x[2], x[0])));
@@ -140,6 +144,26 @@ class Messages {
     return format("File/directory (%s) not writable: %s", x[1], ((File) x[0]).getAbsolutePath());
   }
 
+  private static String msgPositive(Object[] x) {
+    return format("%s must be positive (was %d)", arg(x), x[0]);
+  }
+
+  private static String msgNotNegative(Object[] x) {
+    return format("%s must be zero or positive (was %d)", arg(x), x[0]);
+  }
+
+  private static String msgNegative(Object[] x) {
+    return format("%s must be negative (was %d)", arg(x), x[0]);
+  }
+
+  private static String msgNotPositive(Object[] x) {
+    return format("%s must be zero or negative (was %d)", arg(x), x[0]);
+  }
+
+  private static String msgNullOr(Object[] x) {
+    return format("%s must be null or %s (was (%s)", arg(x), str(x[2]), str(x[0]));
+  }
+
   private static String msgContains(Object[] x) {
     return format("%s must contain %s", arg(x), str(x[2]));
   }
@@ -172,9 +196,25 @@ class Messages {
     return format("%s must not contain value %s", arg(x), str(x[2]));
   }
 
+  private static String msgObjEquals(Object[] x) {
+    return format("%s must be equal to %s (was %s)", arg(x), str(x[2]), str(x[0]));
+  }
+
+  private static String msgObjNotEquals(Object[] x) {
+    return format("%s must be not be equal to %s", arg(x), x[2]);
+  }
+
   private static String msgInstanceOf(Object[] x) {
     String fmt = "%s must be instance of %s (was %s)";
     return format(fmt, arg(x), ((Class<?>) x[2]).getName(), cname(x[0]));
+  }
+
+  private static String msgIsArray(Object[] x) {
+    return format("%s must be an array (was %s)", arg(x), cname(x[0]));
+  }
+
+  private static String msgEqualTo(Object[] x) {
+    return format("%s must not be equal to %d (was %d)", arg(x), x[2], x[0]);
   }
 
   private static String msgMultipleOf(Object[] x) {

@@ -373,9 +373,17 @@ public class Checks {
    * @return A {@code Relation}
    */
   public static <X> Relation<X, X> objNotEquals() {
-    // NB we can't use not(Objects::equals) ourselves because that won't always
-    // return the same reference, which is required for the Messages class
     return (x, y) -> !Objects.equals(x, y);
+  }
+
+  /**
+   * Verifies that the argument is either null or has a particular value.
+   *
+   * @param <X> The type of the argument
+   * @return A {@code Relation}
+   */
+  public static <X> Relation<X, X> nullOr() {
+    return (x, y) -> x == null || x.equals(y);
   }
 
   /**
@@ -694,17 +702,6 @@ public class Checks {
    */
   public static IntRelation multipleOf() {
     return (x, y) -> x % y == 0;
-  }
-
-  /**
-   * Returns an {@code IntPredicate} verifying that the integer to be tested is not equal to the
-   * specified integer. This {@code IntPredicate} is not associated with a standard message.
-   *
-   * @param i The integer to compare some other integer with
-   * @return An {@code IntPredicate}
-   */
-  public static IntPredicate intNotEquals(int i) {
-    return x -> x != i;
   }
 
   private static IllegalArgumentException sizeNotApplicable(Object obj, String relation) {
