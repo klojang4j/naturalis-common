@@ -577,9 +577,9 @@ public abstract class Check<T, E extends Exception> {
   public abstract Check<T, E> and(IntPredicate test, String message, Object... msgArgs) throws E;
 
   /**
-   * Submits the argument to the specified test. This method is especially useful when using the
-   * (statically imported) tests in thw {@link Checks} class, as they have predefined, informative
-   * error messages associated with them.
+   * Verifies that there is some relation between the argument and some other value. This method is
+   * especially useful when using the (statically imported) tests in thw {@link Checks} class, as
+   * they have predefined, informative error messages associated with them.
    *
    * @param <U> The type of the object of the relationship
    * @param relation The relation to verify between the argument and the specified value ({@code
@@ -596,7 +596,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Submits the argument to the specified relation. Allows you to provide a custom error message.
+   * Verifies that there is some relation between the argument and some other value. Allows you to
+   * provide a custom error message.
    *
    * @param <U> The type of the object of the relationship
    * @param relation The relation to verify between the argument and the specified value ({@code
@@ -616,9 +617,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Submits the argument to the specified relation. This method is especially useful when using the
-   * (statically imported) tests in thw {@link Checks} class, as they have predefined, informative
-   * error messages associated with them.
+   * Verifies that there is some relation between the argument and some other value. This method is
+   * especially useful when using the (statically imported) tests in thw {@link Checks} class, as
+   * they have predefined, informative error messages associated with them.
    *
    * @param relation The relation to verify between the argument and the specified value ({@code
    *     relateTo})
@@ -634,7 +635,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Submits the argument to the specified relation. Allows you to provide a custom error message.
+   * Verifies that there is some relation between the argument and some other value. Allows you to
+   * provide a custom error message.
    *
    * @param relation The relation to verify between the argument and the specified value ({@code
    *     relateTo})
@@ -653,9 +655,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Submits the argument to the specified relation. This method is especially useful when using the
-   * (statically imported) tests in thw {@link Checks} class, as they have predefined, informative
-   * error messages associated with them.
+   * Verifies that there is some relation between the argument and some other value. This method is
+   * especially useful when using the (statically imported) tests in thw {@link Checks} class, as
+   * they have predefined, informative error messages associated with them.
    *
    * @param relation The relation to verify between the argument and the specified integer ({@code
    *     relateTo})
@@ -666,7 +668,8 @@ public abstract class Check<T, E extends Exception> {
   public abstract Check<T, E> and(IntRelation relation, int relateTo) throws E;
 
   /**
-   * Submits the argument to the specified relation. Allows you to provide a custom error message.
+   * Verifies that there is some relation between the argument and some other value. Allows you to
+   * provide a custom error message.
    *
    * @param relation The relation to verify between the argument and the specified integer ({@code
    *     relateTo})
