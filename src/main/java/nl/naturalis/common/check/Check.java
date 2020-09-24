@@ -58,9 +58,9 @@ import nl.naturalis.common.function.Relation;
  * <p>
  *
  * <pre>
- * Check.notNull(employee, "employee").and(Employee::getAge, "age", lessThan(), 50);
+ * Check.notNull(employee, "employee").has(Employee::getAge, "age", lessThan(), 50);
  * Check.notNull(intArray, "intArray").and(Array::getLength, "length", isEven());
- * Check.notNull(employees, "employees").and(Collection::size, "size", atLeast(), 100);
+ * Check.notNull(employees, "employees").has(Collection::size, "size", atLeast(), 100);
  * </pre>
  *
  * <h3>Changing the Exception type</h3>
@@ -72,9 +72,9 @@ import nl.naturalis.common.function.Relation;
  *
  * <pre>
  * this.query = Check.with(InvalidQueryException::new, query, "query")
- *  .and(QuerySpec::getFrom, x -> nvl(x) == 0, "from must be null or zero")
- *  .and(QuerySpec::getSize, "size", atLeast(), MIN_BATCH_SIZE)
- *  .and(QuerySpec::getSize, "size", atMost(), MAX_BATCH_SIZE)
+ *  .has(QuerySpec::getFrom, x -> nvl(x) == 0, "from must be null or zero")
+ *  .has(QuerySpec::getSize, "size", atLeast(), MIN_BATCH_SIZE)
+ *  .has(QuerySpec::getSize, "size", atMost(), MAX_BATCH_SIZE)
  *  .and(QuerySpec::getSortFields, "sortFields", isEmpty())
  *  .ok();
  * </pre>
