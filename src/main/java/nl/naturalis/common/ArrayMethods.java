@@ -154,7 +154,7 @@ public class ArrayMethods {
   @SuppressWarnings("unchecked")
   public static <T> T[] fromTemplate(T[] template, int length) {
     Check.that(template, "template", notNull());
-    Check.that(length, "length", notEqualTo(), 0);
+    Check.that(length, "length", notEquals(), 0);
     return (T[]) Array.newInstance(template.getClass().getComponentType(), length);
   }
 

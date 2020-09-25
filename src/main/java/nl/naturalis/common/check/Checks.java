@@ -655,7 +655,7 @@ public class Checks {
    *
    * @return An {@code IntRelation}
    */
-  public static IntRelation notEqualTo() {
+  public static IntRelation notEquals() {
     return (x, y) -> x != y;
   }
 

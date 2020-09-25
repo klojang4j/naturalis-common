@@ -110,7 +110,7 @@ class Messages {
 
     /* INT RELATIONS */
     tmp.add(tuple(equalTo(), x -> msgEqualTo(x)));
-    tmp.add(tuple(notEqualTo(), x -> format("%s must not be equal to %d", arg(x), x[2])));
+    tmp.add(tuple(notEquals(), x -> format("%s must not be equal to %d", arg(x), x[2])));
     tmp.add(tuple(greaterThan(), x -> format("%s must be > %d (was %d)", arg(x), x[2], x[0])));
     tmp.add(tuple(atLeast(), x -> format("%s must be >= %s (was %s)", arg(x), x[2], x[0])));
     tmp.add(tuple(lessThan(), x -> format("%s must be < %s (was %s)", arg(x), x[2], x[0])));
@@ -137,11 +137,11 @@ class Messages {
   }
 
   private static String msgReadable(Object[] x) {
-    return format("File/directory (%s) not reable: %s", x[1], ((File) x[0]).getAbsolutePath());
+    return format("File not reable (%s): %s", x[1], ((File) x[0]).getAbsolutePath());
   }
 
   private static String msgWritable(Object[] x) {
-    return format("File/directory (%s) not writable: %s", x[1], ((File) x[0]).getAbsolutePath());
+    return format("File (%s) not writable (%s): %s", x[1], ((File) x[0]).getAbsolutePath());
   }
 
   private static String msgPositive(Object[] x) {

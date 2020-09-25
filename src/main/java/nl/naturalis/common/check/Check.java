@@ -18,7 +18,7 @@ import nl.naturalis.common.function.Relation;
  * this.numChairs = Check.that(numChairs, "numChairs", atLeast(), 2).and(atMost(), 10).and(isEven()).ok();
  * </pre>
  *
- * <h3>Standard checks</h3>
+ * <h4>Standard checks</h4>
  *
  * <p>The {@link Checks} class contains a number of common checks for arguments. These are already
  * associated with short, informative error messages, so you don't have to invent them yourself. For
@@ -27,30 +27,10 @@ import nl.naturalis.common.function.Relation;
  * <p>
  *
  * <pre>
- * Check.that(numChairs, "numChairs", atLeast(), 2);
- * // -> "numChairs must be >= 2 (was 0)"
+ * Check.that(numChairs, "numChairs", atLeast(), 2); // "numChairs must be >= 2 (was 0)"
  * </pre>
  *
- * <h3>Null checks</h3>
- *
- * <p>Some tests in the {@link Checks} class contain custom code, intended to be used in combination
- * with the {@code Check} class. These tests do not perform preliminary null checks. They rely on
- * being embedded in a chain of checks on a {@code Check} object. Therefore, unless it is clear that
- * the argument cannot possibly be null, the first check in a chain of checks should always be the
- * {@link Checks#notNull() notNull()} check. There are two static factory methods that have this
- * check baked into them. For example:
- *
- * <p>
- *
- * <pre>
- * Check.notNull(name, "name").and(String::startsWith, "John");
- * </pre>
- *
- * <p>(NB Some tests in the {@code Checks} class implicitly do a null check, like {@link
- * Checks#notEmpty() Checks.notEmpty()} and {@link Checks#noneNull() Checks.noneNull()}. These can
- * therefore also be used as the first check.)
- *
- * <h3>Checking argument properties</h3>
+ * <h4>Checking argument properties</h4>
  *
  * <p>A {@code Check} object lets you check not just arguments but also argument properties. For
  * example:
@@ -58,12 +38,21 @@ import nl.naturalis.common.function.Relation;
  * <p>
  *
  * <pre>
+ * Check.notNull(name, "name").has(String::length, "length", atLeast(), 10);
  * Check.notNull(employee, "employee").has(Employee::getAge, "age", lessThan(), 50);
- * Check.notNull(intArray, "intArray").and(Array::getLength, "length", isEven());
  * Check.notNull(employees, "employees").has(Collection::size, "size", atLeast(), 100);
+ * Check.notNull(intArray, "intArray").and(Array::getLength, "length", isEven());
  * </pre>
  *
- * <h3>Changing the Exception type</h3>
+ * <p>The {@link Getters} class defines some common getters that you can optionally use for
+ * increased conciceness. For example the last two statements could also have been written as:
+ *
+ * <pre>
+ * Check.notNull(employees, "employees").has(size(), "size", atLeast(), 100);
+ * Check.notNull(intArray, "intArray").and(length(), "length", isEven());
+ * </pre>
+ *
+ * <h4>Changing the Exception type</h4>
  *
  * <p>By default an {@code IllegalArgumentException} is thrown if an argument fails to pass a test.
  * This can be customized through the static factory methods. For example:

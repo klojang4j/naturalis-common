@@ -17,7 +17,8 @@ import static nl.naturalis.common.Tuple.tuple;
 import static nl.naturalis.common.check.Checks.notContainsKey;
 import static nl.naturalis.common.check.Checks.notContainsValue;
 import static nl.naturalis.common.check.Checks.notEmpty;
-import static nl.naturalis.common.check.Checks.notEqualTo;
+import static nl.naturalis.common.check.Checks.notEquals;
+import static nl.naturalis.common.check.Getters.*;
 
 /**
  * A fast enum-to-int Map implementation. The map is backed by a simple int array with the same
@@ -64,9 +65,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
   /**
    * Creates a new {@code EnumToIntMap} using Integer.MIN_VALUE as the <i>key-absent-value</i> value
    * and with its keys initialized using the specified initializer function. This allows for simple
-   * initializations like {@code new EnumToIntMap(WeekDay.class, k -> k.ordinal() +1)}. It also
-   * allows you to initialize the map values to something else than the <i>key-absent-value</i>
-   * value, e.g. {@code new EnumToIntMap(MyEnum.class, k -> 0}.
+   * initializations like {@code new EnumToIntMap(WeekDay.class, k -> k.ordinal() +1)}.
    *
    * @param enumClass The type of the enum class
    * @param initializer A function called to initialize the array elements
@@ -85,7 +84,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
    */
   public EnumToIntMap(Class<K> enumClass, int keyAbsentValue, ToIntFunction<K> initializer) {
     Check.notNull(enumClass, "enumClass")
-        .and(Class::getEnumConstants, notEmpty(), "Empty enum not supported");
+        .and(enumConstants(), notEmpty(), "Empty enum not supported");
     this.keys = enumClass.getEnumConstants();
     this.data = new int[keys.length];
     this.kav = keyAbsentValue;
@@ -141,7 +140,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
    * @return Whether or not the map contains the value
    */
   public boolean containsValue(int val) {
-    Check.that(val, "val", notEqualTo(), kav);
+    Check.that(val, "val", notEquals(), kav);
     return Arrays.stream(data).filter(x -> x == val).findFirst().isPresent();
   }
 
@@ -182,7 +181,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
    */
   public int put(K key, int val) {
     Check.notNull(key, "key");
-    Check.that(val, "val", notEqualTo(), kav);
+    Check.that(val, "val", notEquals(), kav);
     int orig = valueOf(key);
     assign(key, val);
     return orig;
@@ -197,7 +196,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
    */
   public EnumToIntMap<K> set(K key, int val) {
     Check.notNull(key, "key");
-    Check.that(val, "val", notEqualTo(), kav);
+    Check.that(val, "val", notEquals(), kav);
     assign(key, val);
     return this;
   }
@@ -380,7 +379,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
 
   private void copyEntries(EnumToIntMap<K> other) {
     if (kav != other.kav && other.containsValue(kav)) {
-      throw new IllegalArgumentException("EnumToIntMap other must not contain value " + kav);
+      throw new IllegalArgumentException("Source map must not contain value " + kav);
     }
     other.streamKeys().forEach(k -> assign(k, other.valueOf(k)));
   }
