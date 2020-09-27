@@ -189,19 +189,25 @@ public class CheckTest {
     Employee employee = new Employee();
     employee.setJustSomeNumbers(new float[] {3.2F, 103.2F, 0.8F});
     Check.notNull(employee, "employee")
-        .and(Employee::getJustSomeNumbers, "justSomeLuckyNumbers", sizeLessThan(), 100);
+        .and(Employee::getJustSomeNumbers, "justSomeLuckyNumbers", sizeLessThan(), 100)
+        .and(Employee::getJustSomeNumbers, "justSomeLuckyNumbers", x -> x.length != 100);
   }
 
   @Test
   public void asInt01() {
     Employee employee = new Employee(3, "John Smith", 43, "Skating", "Scoccer");
-    Check.notNull(employee, "employee").and(Employee::getId, "id", (Integer x) -> x != 2);
+    Check.notNull(employee, "employee")
+        .and(Employee::getId, "id", (Integer x) -> x != 2)
+        .and(Employee::getId, (Integer x) -> x != 2, "id must not be 2")
+        .and(Employee::getId, objNotEquals(), 2, "id must not be 2")
+        .and(Employee::getId, "id", objNotEquals(), 2);
   }
 
   @Test
   public void asInt02() {
     Employee employee = new Employee(3, "John Smith", 43, "Skating", "Scoccer");
     Check.notNull(employee, "employee")
-        .and(Employee::getId, (int x) -> x > 0, "Id must be positive");
+        .and(Employee::getId, (int x) -> x > 0, "Id must be positive")
+        .and(Employee::getId, "id", positive());
   }
 }
