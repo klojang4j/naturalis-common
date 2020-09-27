@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
+import nl.naturalis.common.Sizeable;
 
 /**
  * Lists some commonly used getter-type (no-arg) methods in the form of method references. When used
@@ -40,33 +41,53 @@ public class Getters {
     return x -> (T[]) x.getClass().getEnumConstants();
   }
 
+  @SuppressWarnings("unchecked")
+  public static <T> Function<T, Class<T>> type() {
+    return x -> (Class<T>) x.getClass();
+  }
+
   /**
-   * Returns the size of a {@code Collection}.
+   * Returns the length of a {@link CharSequence} or array argument. For any other type of argument
+   * this method throws an {@link UnsupportedOperationException}.
+   *
+   * @param <T> The type of the argument (must be either a {@code CharSequence} or an array)
+   * @return Its length
+   */
+  public static <T> ToIntFunction<T> length() {
+    return x -> {
+      if (x instanceof CharSequence) {
+        return ((CharSequence) x).length();
+      } else if (x.getClass().isArray()) {
+        return Array.getLength(x);
+      }
+      throw notApplicable("length", x);
+    };
+  }
+
+  /**
+   * Returns the size of a {@link Collection} ,{@link Map} or {@link Sizeable} argument. For any
+   * other type of argument this method throws an {@link UnsupportedOperationException}.
    *
    * @param <T> The type of the {@code Collection}
    * @return Its size
    */
-  public static <T extends Collection<?>> ToIntFunction<T> size() {
-    return Collection::size;
+  @SuppressWarnings("rawtypes")
+  public static <T> ToIntFunction<T> size() {
+    return x -> {
+      if (x instanceof Collection) {
+        return ((Collection) x).size();
+      } else if (x instanceof Map) {
+        return ((Map) x).size();
+      } else if (x instanceof Sizeable) {
+        return ((Sizeable) x).size();
+      }
+      throw notApplicable("size", x);
+    };
   }
 
-  /**
-   * Returns the size of a {@code Map}.
-   *
-   * @param <T> The type of the {@code Map}
-   * @return Its size
-   */
-  public static <T extends Map<?, ?>> ToIntFunction<T> mapSize() {
-    return Map::size;
-  }
-
-  /**
-   * Returns the size of a {@code String}.
-   *
-   * @param <T> The type of the {@code String}
-   * @return Its length
-   */
-  public static ToIntFunction<Object> length() {
-    return Array::getLength;
+  private static UnsupportedOperationException notApplicable(String getter, Object obj) {
+    String fmt = "%s() not applicable to %s";
+    String msg = String.format(fmt, getter, obj.getClass().getName());
+    return new UnsupportedOperationException(msg);
   }
 }

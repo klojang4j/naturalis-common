@@ -35,7 +35,7 @@ public class CheckTest {
 
   @Test // numGreaterThan() forces ObjectCheck
   public void that04() {
-    Check check = Check.that(5, "fooArg", numGreaterThan(), 4);
+    Check check = Check.that(5, "fooArg", nGreaterThan(), 4);
     assertEquals(ObjectCheck.class, check.getClass());
   }
 
@@ -53,18 +53,18 @@ public class CheckTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void that07() {
-    Check.that(2, "fooArg").and(numGreaterThan(), 4);
+    Check.that(2, "fooArg").and(nGreaterThan(), 4);
   }
 
   @Test
   public void that08() {
-    Check.that(Integer.valueOf(5), "fooArg", numGreaterThan(), 3);
+    Check.that(Integer.valueOf(5), "fooArg", nGreaterThan(), 3);
   }
 
   @Test
   public void that09() {
     IntCheck<IllegalArgumentException> check = (IntCheck) Check.that(9, "fooArg");
-    check.and(numGreaterThan(), 4);
+    check.and(nGreaterThan(), 4);
   }
 
   @Test
@@ -84,7 +84,7 @@ public class CheckTest {
   public void that12() {
     // numGreaterThan() works with Number instances, not ints, but the compiler
     // can make sense of it
-    Check.that(9, "fooArg", numGreaterThan(), 8);
+    Check.that(9, "fooArg", nGreaterThan(), 8);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -127,14 +127,14 @@ public class CheckTest {
   public void and01() {
     Employee employee = new Employee(3, "John Smith", 43, "Skating", "Scoccer");
     Check.notNull(employee, "employee")
-        .hasAsInt(Employee::getId, "id", atLeast(), 0)
-        .hasAsInt(Employee::getId, "id", (x, y) -> x > y, 0)
+        .hasInt(Employee::getId, "id", atLeast(), 0)
+        .hasInt(Employee::getId, "id", (x, y) -> x > y, 0)
         .has(Employee::getHobbies, "hobbies", (x, y) -> x.contains(y), "Skating")
         .has(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
         .has(Employee::getHobbies, (x, y) -> x.contains(y), "Skating", "Skating is not optional")
         .and(Employee::getFullName, "fullName", s -> s.length() < 200)
-        .hasAsInt(Employee::getAge, atLeast(), 16, "Employee must be at least %d", 16)
-        .has(Employee::getAge, numAtLeast(), 16, "Employee must be at least %d", 16)
+        .hasInt(Employee::getAge, atLeast(), 16, "Employee must be at least %d", 16)
+        .has(Employee::getAge, nAtLeast(), 16, "Employee must be at least %d", 16)
         .ok();
   }
 
@@ -142,7 +142,7 @@ public class CheckTest {
   public void and02() {
     Employee employee = new Employee();
     employee.setAge(12);
-    Check.notNull(employee, "employee").hasAsInt(Employee::getAge, "age", atLeast(), 16).ok();
+    Check.notNull(employee, "employee").hasInt(Employee::getAge, "age", atLeast(), 16).ok();
   }
 
   @Test(expected = IOException.class)
@@ -159,7 +159,7 @@ public class CheckTest {
     Employee employee = new Employee();
     employee.setId(-23);
     Check.notNull(IOException::new, employee, "employee")
-        .hasAsInt(Employee::getId, greaterThan(), 0, "Id must not be negative")
+        .hasInt(Employee::getId, greaterThan(), 0, "Id must not be negative")
         .ok();
   }
 
@@ -181,7 +181,7 @@ public class CheckTest {
   @Test
   public void and07() {
     Employee[] employees = new Employee[10];
-    Check.notNull(employees, "employees").hasAsInt(Array::getLength, "length", lessThan(), 100);
+    Check.notNull(employees, "employees").hasInt(Array::getLength, "length", lessThan(), 100);
   }
 
   @Test
@@ -195,12 +195,12 @@ public class CheckTest {
   @Test
   public void asInt01() {
     Employee employee = new Employee(3, "John Smith", 43, "Skating", "Scoccer");
-    Check.notNull(employee, "employee").andAsInt(Employee::getId, "id", x -> x != 2);
+    Check.notNull(employee, "employee").andInt(Employee::getId, "id", x -> x != 2);
   }
 
   @Test
   public void asInt02() {
     Employee employee = new Employee(3, "John Smith", 43, "Skating", "Scoccer");
-    Check.notNull(employee, "employee").andAsInt(Employee::getId, x -> x != 2, "Id must not be 2");
+    Check.notNull(employee, "employee").andInt(Employee::getId, x -> x != 2, "Id must not be 2");
   }
 }

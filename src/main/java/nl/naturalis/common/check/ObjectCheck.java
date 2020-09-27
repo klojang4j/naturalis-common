@@ -97,7 +97,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> andAsInt(ToIntFunction<T> getter, String property, IntPredicate test)
+  public Check<T, E> andInt(ToIntFunction<T> getter, String property, IntPredicate test)
       throws E {
     int propVal = getter.applyAsInt(arg);
     if (test.test(propVal)) {
@@ -107,7 +107,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> andAsInt(
+  public Check<T, E> andInt(
       ToIntFunction<T> getter, IntPredicate test, String message, Object... msgArgs) throws E {
     if (test.test(getter.applyAsInt(arg))) {
       return this;
@@ -160,7 +160,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> hasAsInt(
+  public Check<T, E> hasInt(
       ToIntFunction<T> getter, String property, IntRelation test, int relateTo) throws E {
     int propVal = getter.applyAsInt(arg);
     if (test.exists(propVal, relateTo)) {
@@ -170,7 +170,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> hasAsInt(
+  public Check<T, E> hasInt(
       ToIntFunction<T> getter, IntRelation test, int relateTo, String message, Object... msgArgs)
       throws E {
     if (test.exists(getter.applyAsInt(arg), relateTo)) {

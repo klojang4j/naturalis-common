@@ -18,7 +18,7 @@ import static nl.naturalis.common.check.Checks.notContainsKey;
 import static nl.naturalis.common.check.Checks.notContainsValue;
 import static nl.naturalis.common.check.Checks.notEmpty;
 import static nl.naturalis.common.check.Checks.notEquals;
-import static nl.naturalis.common.check.Getters.*;
+import static nl.naturalis.common.check.Getters.enumConstants;
 
 /**
  * A fast enum-to-int Map implementation. The map is backed by a simple int array with the same
@@ -146,8 +146,8 @@ public final class EnumToIntMap<K extends Enum<K>> {
 
   /**
    * Returns the value to which the specified key is mapped, or the <i>key-absent-value</i> if this
-   * map contains no mapping for the key. NB a regular {@code Map} would return {@code null} in the
-   * latter case.
+   * map contains no mapping for the key. (A regular {@code Map} would return {@code null} in the
+   * latter case.)
    *
    * @param key The key whose associated value is to be returned
    * @return The value to which the specified key is mapped, or the <i>key-absent-value</i> if this

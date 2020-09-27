@@ -91,10 +91,10 @@ class Messages {
     tmp.add(tuple(nullOr(), x -> msgNullOr(x)));
 
     /* NUMBER RELATIONS */
-    tmp.add(tuple(numGreaterThan(), x -> format("%s must be > %s (was %s)", arg(x), x[2], x[0])));
-    tmp.add(tuple(numAtLeast(), x -> format("%s must be >= %s (was %s)", arg(x), x[2], x[0])));
-    tmp.add(tuple(numLessThan(), x -> format("%s must be < %s (was %s)", arg(x), x[2], x[0])));
-    tmp.add(tuple(numAtMost(), x -> format("%s must be <= %s (was %s)", arg(x), x[2], x[0])));
+    tmp.add(tuple(nGreaterThan(), x -> format("%s must be > %s (was %s)", arg(x), x[2], x[0])));
+    tmp.add(tuple(nAtLeast(), x -> format("%s must be >= %s (was %s)", arg(x), x[2], x[0])));
+    tmp.add(tuple(nLessThan(), x -> format("%s must be < %s (was %s)", arg(x), x[2], x[0])));
+    tmp.add(tuple(nAtMost(), x -> format("%s must be <= %s (was %s)", arg(x), x[2], x[0])));
 
     /* SIZE-RELATED RELATIONS */
     tmp.add(tuple(sizeEquals(), x -> format("%s must be equal to %s (was %s)", sz(x), x[2], x[0])));

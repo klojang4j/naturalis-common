@@ -16,9 +16,13 @@ import nl.naturalis.common.function.Relation;
 
 /**
  * Defines various common tests for arguments. These tests have short, informative error messages
- * associated with them. So even though some of them are plain, unadorned method references, you
- * might still want to use them, as it saves you the trouble of having to invent the error messages
- * yourself.
+ * associated with them in case the argument does not pass the test. Many of them are plain,
+ * unadorned, method references and <i>none</i> of them do anything else than what they advertise
+ * themselves to be doing. In other words: <i>none of them do a preliminary null-check on the
+ * argument</i> (except of course those dedicated to this task, like {@link #notNull()} or {@link
+ * #notEmpty()}). They rely upon being embedded within in chain of checks on a {@link Check} object,
+ * the first of which should be a <i>not-null</i> check, or you risk getting a {@code
+ * NullPointerException} while checking an argument.
  *
  * @author Ayco Holleman
  */
@@ -27,7 +31,8 @@ public class Checks {
   private Checks() {}
 
   /**
-   * Equivalent to {@link Predicate#not(Predicate) Predicate.not(test)}.
+   * Equivalent to {@link Predicate#not(Predicate) Predicate.not(test)}. Not associated with an
+   * error message.
    *
    * @param <X> The type of the argument
    * @param test The test
@@ -39,7 +44,7 @@ public class Checks {
 
   /**
    * Returns the negation of the specified {@code Relation}. Equivalent to {@link
-   * Relation#not(Relation) Relation.not(relation)}.
+   * Relation#not(Relation) Relation.not(relation)}. Not associated with an error message.
    *
    * @see Relation#not(Relation)
    * @param <X> The type of the subject of the original relation
@@ -53,7 +58,7 @@ public class Checks {
 
   /**
    * Returns the negation of the specified {@code IntRelation}. Equivalent to {@link
-   * IntRelation#not(Relation) IntRelation.not(relation)}.
+   * IntRelation#not(Relation) IntRelation.not(relation)}. Not associated with an error message.
    *
    * @see IntRelation#not(Relation)
    * @param relation The {@code IntRelation} to return the negation of
@@ -65,7 +70,8 @@ public class Checks {
 
   /**
    * Returns the reverse of the specified {@code Relation}, swapping subject and object of the
-   * relation. Equivalent to {@link Relation#reverse(Relation) Relation.reverse(relation)}.
+   * relation. Equivalent to {@link Relation#reverse(Relation) Relation.reverse(relation)}. Not
+   * associated with an error message.
    *
    * @see Relation#reverse(Relation)
    * @param <X> The type of the subject of the original relation
@@ -80,6 +86,7 @@ public class Checks {
   /**
    * Returns the reverse of the specified {@code IntRelation}, swapping subject and object of the
    * relation. Equivalent to {@link IntRelation#reverse(Relation) IntRelation.reverse(relation)}.
+   * Not associated with an error message.
    *
    * @see IntRelation#not(Relation)
    * @param relation The {@code IntRelation} to return the negation of
@@ -165,7 +172,7 @@ public class Checks {
   }
 
   /**
-   * Verifies that a {@code File} object represents a normal file.
+   * Verifies that the argument is an existing, regular file.
    *
    * @returnn A {@code Predicate}
    */
@@ -174,7 +181,7 @@ public class Checks {
   }
 
   /**
-   * Verifies that a {@code File} object represents a directory.
+   * Verifies that the argument is an existing directory.
    *
    * @returnn A {@code Predicate}
    */
@@ -183,7 +190,7 @@ public class Checks {
   }
 
   /**
-   * Verifies that a {@code File} object does not represent any type of file.
+   * Verifies that the argument is not a file of any type.
    *
    * @returnn A {@code Predicate}
    */
@@ -192,7 +199,7 @@ public class Checks {
   }
 
   /**
-   * Verifies that a {@code File} object represents a readable file (implies that the file exists).
+   * Verifies that the argument is a readable file (implies that the file exists).
    *
    * @returnn A {@code Predicate}
    */
@@ -201,7 +208,7 @@ public class Checks {
   }
 
   /**
-   * Verifies that a {@code File} object represents a writable file (implies that the file exists).
+   * Verifies that the argument is a writable file (implies that the file exists).
    *
    * @return
    */
@@ -287,7 +294,7 @@ public class Checks {
   }
 
   /**
-   * Verifies that the argument is in a {@code Collection}.
+   * Verifies that the argument is an element of a {@code Collection}.
    *
    * @param <E> The type of the argument
    * @param <C> The type of the {@code Collection}
@@ -298,7 +305,7 @@ public class Checks {
   }
 
   /**
-   * Verifies that the argument is not in a {@code Collection}.
+   * Verifies that the argument is not an element of a {@code Collection}.
    *
    * @param <E> The type of the argument
    * @param <C> The type of the {@code Collection}
@@ -354,9 +361,7 @@ public class Checks {
 
   /**
    * Verifies that the argument is equal to a particular value. Equivalent to {@link
-   * Objects#equals(Object, Object) Objects::equals}. (NB the name <i>objEquals</i> allows the
-   * method to be statically imported while avoiding a name clash with the ever-present {@link
-   * Object#equals(Object) Object.equals} method.)
+   * Objects#equals(Object, Object) Objects::equals}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -366,8 +371,7 @@ public class Checks {
   }
 
   /**
-   * Verifies that the argument is not equal to a particular value. Equivalent to {@code
-   * not(objEquals())}.
+   * Verifies that the argument is not equal to a particular value.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -394,7 +398,7 @@ public class Checks {
    * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> numGreaterThan() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> nGreaterThan() {
     return (x, y) -> {
       if (y.getClass() == Integer.class) {
         return x.intValue() > y.intValue();
@@ -419,7 +423,7 @@ public class Checks {
    * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> numAtLeast() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> nAtLeast() {
     return (x, y) -> {
       if (y.getClass() == Integer.class) {
         return x.intValue() >= y.intValue();
@@ -442,8 +446,8 @@ public class Checks {
    *
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> numLessThan() {
-    return (x, y) -> !numAtLeast().exists(x, y);
+  public static <X extends Number, Y extends Number> Relation<X, Y> nLessThan() {
+    return (x, y) -> !nAtLeast().exists(x, y);
   }
 
   /**
@@ -454,8 +458,8 @@ public class Checks {
    * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> numAtMost() {
-    return (x, y) -> !numGreaterThan().exists(x, y);
+  public static <X extends Number, Y extends Number> Relation<X, Y> nAtMost() {
+    return (x, y) -> !nGreaterThan().exists(x, y);
   }
 
   /**
@@ -481,7 +485,7 @@ public class Checks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() == y;
       }
-      throw sizeNotApplicable(x, "sizeEquals");
+      throw notApplicable("sizeEquals", x);
     };
   }
 
@@ -508,7 +512,7 @@ public class Checks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() != y;
       }
-      throw sizeNotApplicable(x, "sizeNotEquals");
+      throw notApplicable("sizeNotEquals", x);
     };
   }
 
@@ -535,7 +539,7 @@ public class Checks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() > y;
       }
-      throw sizeNotApplicable(x, "sizeGreaterThan");
+      throw notApplicable("sizeGreaterThan", x);
     };
   }
 
@@ -562,7 +566,7 @@ public class Checks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() >= y;
       }
-      throw sizeNotApplicable(x, "sizeAtLeast");
+      throw notApplicable("sizeAtLeast", x);
     };
   }
 
@@ -589,7 +593,7 @@ public class Checks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() < y;
       }
-      throw sizeNotApplicable(x, "sizeLessThan");
+      throw notApplicable("sizeLessThan", x);
     };
   }
 
@@ -616,7 +620,7 @@ public class Checks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() <= y;
       }
-      throw sizeNotApplicable(x, "sizeLessThan");
+      throw notApplicable("sizeLessThan", x);
     };
   }
 
@@ -704,9 +708,9 @@ public class Checks {
     return (x, y) -> x % y == 0;
   }
 
-  private static IllegalArgumentException sizeNotApplicable(Object obj, String relation) {
-    String fmt = "%s not applicable to objects of type %s";
-    String msg = String.format(fmt, relation, obj.getClass().getName());
+  private static IllegalArgumentException notApplicable(String test, Object obj) {
+    String fmt = "Test \"%s\" not applicable to %s";
+    String msg = String.format(fmt, test, obj.getClass().getName());
     return new IllegalArgumentException(msg);
   }
 }

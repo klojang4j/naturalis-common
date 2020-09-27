@@ -707,7 +707,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract Check<T, E> andAsInt(ToIntFunction<T> getter, String property, IntPredicate test)
+  public abstract Check<T, E> andInt(ToIntFunction<T> getter, String property, IntPredicate test)
       throws E;
 
   /**
@@ -720,7 +720,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract Check<T, E> andAsInt(
+  public abstract Check<T, E> andInt(
       ToIntFunction<T> getter, IntPredicate test, String message, Object... msgArgs) throws E;
 
   /**
@@ -809,7 +809,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the relation fails
    */
-  public abstract Check<T, E> hasAsInt(
+  public abstract Check<T, E> hasInt(
       ToIntFunction<T> getter, String property, IntRelation relation, int relateTo) throws E;
 
   /**
@@ -825,7 +825,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the relation fails
    */
-  public abstract Check<T, E> hasAsInt(
+  public abstract Check<T, E> hasInt(
       ToIntFunction<T> getter,
       IntRelation relation,
       int relateTo,
