@@ -97,7 +97,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> andInt(ToIntFunction<T> getter, String property, IntPredicate test)
+  public Check<T, E> and(ToIntFunction<T> getter, String property, IntPredicate test)
       throws E {
     int propVal = getter.applyAsInt(arg);
     if (test.test(propVal)) {
@@ -107,7 +107,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> andInt(
+  public Check<T, E> and(
       ToIntFunction<T> getter, IntPredicate test, String message, Object... msgArgs) throws E {
     if (test.test(getter.applyAsInt(arg))) {
       return this;
@@ -116,7 +116,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public <U, V> Check<T, E> has(
+  public <U, V> Check<T, E> and(
       Function<T, U> getter, String property, Relation<U, V> relation, V relateTo) throws E {
     U propVal = getter.apply(arg);
     if (relation.exists(propVal, relateTo)) {
@@ -126,7 +126,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public <U, V> Check<T, E> has(
+  public <U, V> Check<T, E> and(
       Function<T, U> getter, Relation<U, V> relation, V relateTo, String message, Object... msgArgs)
       throws E {
     if (relation.exists(getter.apply(arg), relateTo)) {
@@ -136,7 +136,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public <U> Check<T, E> has(
+  public <U> Check<T, E> and(
       Function<T, U> getter, String property, ObjIntRelation<U> relation, int relateTo) throws E {
     U propVal = getter.apply(arg);
     if (relation.exists(propVal, relateTo)) {
@@ -146,7 +146,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public <U> Check<T, E> has(
+  public <U> Check<T, E> and(
       Function<T, U> getter,
       ObjIntRelation<U> relation,
       int relateTo,
@@ -160,7 +160,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> hasInt(
+  public Check<T, E> and(
       ToIntFunction<T> getter, String property, IntRelation test, int relateTo) throws E {
     int propVal = getter.applyAsInt(arg);
     if (test.exists(propVal, relateTo)) {
@@ -170,7 +170,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> hasInt(
+  public Check<T, E> and(
       ToIntFunction<T> getter, IntRelation test, int relateTo, String message, Object... msgArgs)
       throws E {
     if (test.exists(getter.applyAsInt(arg), relateTo)) {

@@ -38,9 +38,9 @@ import nl.naturalis.common.function.Relation;
  * <p>
  *
  * <pre>
- * Check.notNull(name, "name").has(String::length, "length", atLeast(), 10);
- * Check.notNull(employee, "employee").has(Employee::getAge, "age", lessThan(), 50);
- * Check.notNull(employees, "employees").has(Collection::size, "size", atLeast(), 100);
+ * Check.notNull(name, "name").and(String::length, "length", atLeast(), 10);
+ * Check.notNull(employee, "employee").and(Employee::getAge, "age", lessThan(), 50);
+ * Check.notNull(employees, "employees").and(Collection::size, "size", atLeast(), 100);
  * Check.notNull(intArray, "intArray").and(Array::getLength, "length", isEven());
  * </pre>
  *
@@ -48,8 +48,26 @@ import nl.naturalis.common.function.Relation;
  * increased conciceness. For example the last two statements could also have been written as:
  *
  * <pre>
- * Check.notNull(employees, "employees").has(size(), "size", atLeast(), 100);
+ * Check.notNull(employees, "employees").and(size(), "size", atLeast(), 100);
  * Check.notNull(intArray, "intArray").and(length(), "length", isEven());
+ * </pre>
+ *
+ * <h4>Lambdas</h4>
+ *
+ * <p>Most checks are done via the various {@code and()} methods. Generally, the compiler has no
+ * problem deciding which {@code and()} method is targeted. When using lambdas, however, the
+ * compiler may run into ambiguities. This will result in a compiler error like: <b>The method and
+ * [...] is ambigious for type Check [...]</b>. To resolve this, simply type the parameters in the
+ * lambda:
+ *
+ * <p>
+ *
+ * <pre>
+ * // WON'T COMPILE:
+ * Check.notNull(employee, "employee").and(Employee::getId, x -> x > 0, "Id must be positive");
+ * // WILL COMPILE:
+ * Check.notNull(employee, "employee").and(Employee::getId, (int x) -> x > 0, "Id must be positive");
+ * Check.notNull(employee, "employee").and(Employee::getId, (Integer x) -> x > 0, "Id must be positive");
  * </pre>
  *
  * <h4>Changing the Exception type</h4>
@@ -61,9 +79,9 @@ import nl.naturalis.common.function.Relation;
  *
  * <pre>
  * this.query = Check.with(InvalidQueryException::new, query, "query")
- *  .has(QuerySpec::getFrom, x -> nvl(x) == 0, "from must be null or zero")
- *  .has(QuerySpec::getSize, "size", atLeast(), MIN_BATCH_SIZE)
- *  .has(QuerySpec::getSize, "size", atMost(), MAX_BATCH_SIZE)
+ *  .and(QuerySpec::getFrom, x -> nvl(x) == 0, "from must be null or zero")
+ *  .and(QuerySpec::getSize, "size", atLeast(), MIN_BATCH_SIZE)
+ *  .and(QuerySpec::getSize, "size", atMost(), MAX_BATCH_SIZE)
  *  .and(QuerySpec::getSortFields, "sortFields", isEmpty())
  *  .ok();
  * </pre>
@@ -707,7 +725,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract Check<T, E> andInt(ToIntFunction<T> getter, String property, IntPredicate test)
+  public abstract Check<T, E> and(ToIntFunction<T> getter, String property, IntPredicate test)
       throws E;
 
   /**
@@ -720,7 +738,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract Check<T, E> andInt(
+  public abstract Check<T, E> and(
       ToIntFunction<T> getter, IntPredicate test, String message, Object... msgArgs) throws E;
 
   /**
@@ -737,7 +755,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the relation fails
    */
-  public abstract <U, V> Check<T, E> has(
+  public abstract <U, V> Check<T, E> and(
       Function<T, U> getter, String property, Relation<U, V> relation, V relateTo) throws E;
 
   /**
@@ -755,7 +773,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the relation fails
    */
-  public abstract <U, V> Check<T, E> has(
+  public abstract <U, V> Check<T, E> and(
       Function<T, U> getter, Relation<U, V> relation, V relateTo, String message, Object... msgArgs)
       throws E;
 
@@ -772,7 +790,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the relation fails
    */
-  public abstract <U> Check<T, E> has(
+  public abstract <U> Check<T, E> and(
       Function<T, U> getter, String property, ObjIntRelation<U> relation, int relateTo) throws E;
 
   /**
@@ -789,7 +807,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the relation fails
    */
-  public abstract <U> Check<T, E> has(
+  public abstract <U> Check<T, E> and(
       Function<T, U> getter,
       ObjIntRelation<U> relation,
       int relateTo,
@@ -809,7 +827,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the relation fails
    */
-  public abstract Check<T, E> hasInt(
+  public abstract Check<T, E> and(
       ToIntFunction<T> getter, String property, IntRelation relation, int relateTo) throws E;
 
   /**
@@ -825,7 +843,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the relation fails
    */
-  public abstract Check<T, E> hasInt(
+  public abstract Check<T, E> and(
       ToIntFunction<T> getter,
       IntRelation relation,
       int relateTo,

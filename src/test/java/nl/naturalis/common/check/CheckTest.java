@@ -127,14 +127,14 @@ public class CheckTest {
   public void and01() {
     Employee employee = new Employee(3, "John Smith", 43, "Skating", "Scoccer");
     Check.notNull(employee, "employee")
-        .hasInt(Employee::getId, "id", atLeast(), 0)
-        .hasInt(Employee::getId, "id", (x, y) -> x > y, 0)
-        .has(Employee::getHobbies, "hobbies", (x, y) -> x.contains(y), "Skating")
-        .has(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
-        .has(Employee::getHobbies, (x, y) -> x.contains(y), "Skating", "Skating is not optional")
+        .and(Employee::getId, "id", atLeast(), 0)
+        .and(Employee::getId, "id", (int x, int y) -> x > y, 0)
+        .and(Employee::getHobbies, "hobbies", (x, y) -> x.contains(y), "Skating")
+        .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
+        .and(Employee::getHobbies, (x, y) -> x.contains(y), "Skating", "Skating is not optional")
         .and(Employee::getFullName, "fullName", s -> s.length() < 200)
-        .hasInt(Employee::getAge, atLeast(), 16, "Employee must be at least %d", 16)
-        .has(Employee::getAge, nAtLeast(), 16, "Employee must be at least %d", 16)
+        .and(Employee::getAge, atLeast(), 16, "Employee must be at least %d", 16)
+        .and(Employee::getAge, nAtLeast(), 16, "Employee must be at least %d", 16)
         .ok();
   }
 
@@ -142,7 +142,7 @@ public class CheckTest {
   public void and02() {
     Employee employee = new Employee();
     employee.setAge(12);
-    Check.notNull(employee, "employee").hasInt(Employee::getAge, "age", atLeast(), 16).ok();
+    Check.notNull(employee, "employee").and(Employee::getAge, "age", atLeast(), 16).ok();
   }
 
   @Test(expected = IOException.class)
@@ -150,7 +150,7 @@ public class CheckTest {
     Employee employee = new Employee();
     employee.setHobbies(List.of("Skating", "Scuba diving"));
     Check.notNull(IOException::new, employee, "employee")
-        .has(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
+        .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
         .ok();
   }
 
@@ -159,7 +159,7 @@ public class CheckTest {
     Employee employee = new Employee();
     employee.setId(-23);
     Check.notNull(IOException::new, employee, "employee")
-        .hasInt(Employee::getId, greaterThan(), 0, "Id must not be negative")
+        .and(Employee::getId, greaterThan(), 0, "Id must not be negative")
         .ok();
   }
 
@@ -181,7 +181,7 @@ public class CheckTest {
   @Test
   public void and07() {
     Employee[] employees = new Employee[10];
-    Check.notNull(employees, "employees").hasInt(Array::getLength, "length", lessThan(), 100);
+    Check.notNull(employees, "employees").and(Array::getLength, "length", lessThan(), 100);
   }
 
   @Test
@@ -189,18 +189,19 @@ public class CheckTest {
     Employee employee = new Employee();
     employee.setJustSomeNumbers(new float[] {3.2F, 103.2F, 0.8F});
     Check.notNull(employee, "employee")
-        .has(Employee::getJustSomeNumbers, "justSomeLuckyNumbers", sizeLessThan(), 100);
+        .and(Employee::getJustSomeNumbers, "justSomeLuckyNumbers", sizeLessThan(), 100);
   }
 
   @Test
   public void asInt01() {
     Employee employee = new Employee(3, "John Smith", 43, "Skating", "Scoccer");
-    Check.notNull(employee, "employee").andInt(Employee::getId, "id", x -> x != 2);
+    Check.notNull(employee, "employee").and(Employee::getId, "id", (Integer x) -> x != 2);
   }
 
   @Test
   public void asInt02() {
     Employee employee = new Employee(3, "John Smith", 43, "Skating", "Scoccer");
-    Check.notNull(employee, "employee").andInt(Employee::getId, x -> x != 2, "Id must not be 2");
+    Check.notNull(employee, "employee")
+        .and(Employee::getId, (int x) -> x > 0, "Id must be positive");
   }
 }

@@ -63,26 +63,26 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
   }
 
   @Override
-  public Check<Integer, E> andInt(
+  public Check<Integer, E> and(
       ToIntFunction<Integer> getter, String propName, IntPredicate test) throws E {
     throw notAnObject();
   }
 
   @Override
-  public Check<Integer, E> andInt(
+  public Check<Integer, E> and(
       ToIntFunction<Integer> getter, IntPredicate test, String message, Object... msgArgs)
       throws E {
     throw notAnObject();
   }
 
   @Override
-  public <U, V> Check<Integer, E> has(
+  public <U, V> Check<Integer, E> and(
       Function<Integer, U> getter, String propName, Relation<U, V> relation, V relateTo) throws E {
     throw notAnObject();
   }
 
   @Override
-  public <U, V> Check<Integer, E> has(
+  public <U, V> Check<Integer, E> and(
       Function<Integer, U> getter,
       Relation<U, V> relation,
       V relateTo,
@@ -93,14 +93,14 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
   }
 
   @Override
-  public <U> Check<Integer, E> has(
+  public <U> Check<Integer, E> and(
       Function<Integer, U> getter, String propName, ObjIntRelation<U> relation, int relateTo)
       throws E {
     throw notAnObject();
   }
 
   @Override
-  public <U> Check<Integer, E> has(
+  public <U> Check<Integer, E> and(
       Function<Integer, U> getter,
       ObjIntRelation<U> relation,
       int relateTo,
@@ -111,13 +111,13 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
   }
 
   @Override
-  public Check<Integer, E> hasInt(
+  public Check<Integer, E> and(
       ToIntFunction<Integer> getter, String propName, IntRelation relation, int relateTo) throws E {
     throw notAnObject();
   }
 
   @Override
-  public Check<Integer, E> hasInt(
+  public Check<Integer, E> and(
       ToIntFunction<Integer> getter,
       IntRelation relation,
       int relateTo,

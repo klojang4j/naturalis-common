@@ -31,16 +31,11 @@ public class Getters {
   }
 
   /**
-   * Returns all siblings of an enum constant, including that constant itself
+   * Returns the {@code Class} of an object.
    *
-   * @param <T> The enum class
-   * @return Its constants
+   * @param <T> The type of the object
+   * @return Its class
    */
-  @SuppressWarnings("unchecked")
-  public static <T extends Enum<T>> Function<T, T[]> enumSiblings() {
-    return x -> (T[]) x.getClass().getEnumConstants();
-  }
-
   @SuppressWarnings("unchecked")
   public static <T> Function<T, Class<T>> type() {
     return x -> (Class<T>) x.getClass();
