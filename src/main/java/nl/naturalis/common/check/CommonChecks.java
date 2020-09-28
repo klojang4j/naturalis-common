@@ -18,7 +18,7 @@ import nl.naturalis.common.function.Relation;
  * Defines various common tests for arguments. These tests have short, informative error messages
  * associated with them in case the argument does not pass the test. Many of them are plain,
  * unadorned, method references and they <i>only</i> check what they advertise to be checking.
- * <i>None of them do a preliminary null-check on the argument</i> (except of course those dedicated
+ * <b>None of them do a preliminary null-check on the argument</b> (except of course those dedicated
  * to this task, like {@link #notNull()}). They rely upon being embedded within in chain of checks
  * on a {@link Check} object, the first of which should be a <i>not-null</i> check.
  *
@@ -94,6 +94,8 @@ public class CommonChecks {
     return IntRelation.not(relation);
   }
 
+  /* ++++++++++++++ Predicate ++++++++++++++ */
+
   /**
    * Verifies that the argument is null. Equivalent to {@link Objects#isNull(Object)
    * Objects::isNull}.
@@ -151,7 +153,7 @@ public class CommonChecks {
 
   /**
    * Verifies that the argument is recursively non-empty as per {@link
-   * ObjectMethods#isDeepNotEmpty(Object) ObjectMethods::isDeepNotEmpty}.
+   * ObjectMethods#isDeepNotEmpty(Object) ObjectMethods.isDeepNotEmpty}.
    *
    * @param <T> The type of the argument
    * @return A {@code Predicate}
@@ -215,9 +217,32 @@ public class CommonChecks {
   }
 
   /**
+   * Verifies that the argument is an intance of a particular class or interface.
+   *
+   * @param <X> The type of the argument
+   * @param <Y> The type of the object of the relationship
+   * @return A {@code Relation}
+   */
+  public static <X, Y extends Class<?>> Relation<X, Y> instanceOf() {
+    return (x, y) -> y.isInstance(x);
+  }
+
+  /**
+   * Verifies that the argument is an array.
+   *
+   * @param <T> The type of the argument
+   * @return A {@code Predicate}
+   */
+  public static <T> Predicate<T> isArray() {
+    return x -> x.getClass().isArray();
+  }
+
+  /* ++++++++++++++ IntPredicate ++++++++++++++ */
+
+  /**
    * Verifies that the argument is an even number.
    *
-   * @return A {@code Predicate}
+   * @return An {@code IntPredicate}
    */
   public static IntPredicate isEven() {
     return x -> x % 2 == 0;
@@ -226,7 +251,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is an odd number.
    *
-   * @return A {@code Predicate}
+   * @return An {@code IntPredicate}
    */
   public static IntPredicate isOdd() {
     return x -> x % 2 == 1;
@@ -235,7 +260,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is positive.
    *
-   * @return A {@code Predicate}
+   * @return An {@code IntPredicate}
    */
   public static IntPredicate positive() {
     return x -> x > 0;
@@ -244,7 +269,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is zero or negative.
    *
-   * @return A {@code Predicate}
+   * @return An {@code IntPredicate}
    */
   public static IntPredicate notPositive() {
     return x -> x <= 0;
@@ -253,7 +278,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is negative.
    *
-   * @return A {@code Predicate}
+   * @return An {@code IntPredicate}
    */
   public static IntPredicate negative() {
     return x -> x < 0;
@@ -262,11 +287,13 @@ public class CommonChecks {
   /**
    * Verifies that the argument is zero or positive.
    *
-   * @return A {@code Predicate}
+   * @return An {@code IntPredicate}
    */
   public static IntPredicate notNegative() {
     return x -> x >= 0;
   }
+
+  /* ++++++++++++++ Relation ++++++++++++++ */
 
   /**
    * Verifies that a {@code Collection} contains a particular value. Equivalent to {@link
@@ -460,11 +487,13 @@ public class CommonChecks {
     return (x, y) -> !nGreaterThan().exists(x, y);
   }
 
+  /* ++++++++++++++ ObjIntRelation ++++++++++++++ */
+
   /**
    * Verifies that the argument's length or size is equal to a particular value. This method is
    * well-behaved if the argument is a {@code CharSequence}, {@code Collection}, {@code Map}, {@link
    * Sizeable} or array. For any other type of argument this method throws an {@code
-   * IllegalArgumentException}.
+   * UnsupportedOperationException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -491,7 +520,7 @@ public class CommonChecks {
    * Verifies that the argument's length or size is not equal to a particular value. This method is
    * well-behaved if the argument is a {@code CharSequence}, {@code Collection}, {@code Map}, {@link
    * Sizeable} or array. For any other type of argument this method throws an {@code
-   * IllegalArgumentException}.
+   * UnsupportedOperationException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -518,7 +547,7 @@ public class CommonChecks {
    * Verifies that the argument's length or size is greater than a particular value. This method is
    * well-behaved if the argument is a {@code CharSequence}, {@code Collection}, {@code Map}, {@link
    * Sizeable} or array. For any other type of argument this method throws an {@code
-   * IllegalArgumentException}.
+   * UnsupportedOperationException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -544,14 +573,14 @@ public class CommonChecks {
   /**
    * Verifies that the argument's length or size is greater than or equal to a particular value.
    * This method is well-behaved if the argument is a {@code CharSequence}, {@code Collection},
-   * {@code Map}, {@link Sizeable} or array. For any other type of argument this method always
-   * returns false.
+   * {@code Map}, {@link Sizeable} or array. For any other type of argument this method throws an
+   * {@code UnsupportedOperationException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
    */
   @SuppressWarnings("rawtypes")
-  public static <X> Relation<X, Integer> sizeAtLeast() {
+  public static <X> ObjIntRelation<X> sizeAtLeast() {
     return (x, y) -> {
       if (x instanceof CharSequence) {
         return ((CharSequence) x).length() >= y;
@@ -622,26 +651,7 @@ public class CommonChecks {
     };
   }
 
-  /**
-   * Verifies that the argument is an intance of a particular class or interface.
-   *
-   * @param <X> The type of the argument
-   * @param <Y> The type of the object of the relationship
-   * @return A {@code Relation}
-   */
-  public static <X, Y extends Class<?>> Relation<X, Y> instanceOf() {
-    return (x, y) -> y.isInstance(x);
-  }
-
-  /**
-   * Verifies that the argument is an array.
-   *
-   * @param <T> The type of the argument
-   * @return A {@code Predicate}
-   */
-  public static <T> Predicate<T> isArray() {
-    return x -> x.getClass().isArray();
-  }
+  /* ++++++++++++++ ObjIntRelation ++++++++++++++ */
 
   /**
    * Verifies that the argument is equal to a particular value.
@@ -706,9 +716,9 @@ public class CommonChecks {
     return (x, y) -> x % y == 0;
   }
 
-  private static IllegalArgumentException notApplicable(String test, Object obj) {
+  private static UnsupportedOperationException notApplicable(String test, Object obj) {
     String fmt = "Test \"%s\" not applicable to %s";
     String msg = String.format(fmt, test, obj.getClass().getName());
-    return new IllegalArgumentException(msg);
+    return new UnsupportedOperationException(msg);
   }
 }

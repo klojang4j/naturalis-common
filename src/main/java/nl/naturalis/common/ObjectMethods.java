@@ -11,7 +11,7 @@ import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
 import static nl.naturalis.common.check.CommonChecks.objEquals;
 import static nl.naturalis.common.check.CommonChecks.objNotEquals;
-import static nl.naturalis.common.function.Predicates.isNotNull;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * General methods applicable to objects of any type.
@@ -129,11 +129,11 @@ public class ObjectMethods {
     if (obj == null) {
       return false;
     } else if (obj instanceof Collection) {
-      return !((Collection) obj).isEmpty() && ((Collection) obj).stream().allMatch(isNotNull());
+      return !((Collection) obj).isEmpty() && ((Collection) obj).stream().allMatch(notNull());
     } else if (obj instanceof Map) {
-      return !((Map) obj).isEmpty() && ((Map) obj).values().stream().allMatch(isNotNull());
+      return !((Map) obj).isEmpty() && ((Map) obj).values().stream().allMatch(notNull());
     } else if (obj instanceof Object[]) {
-      return ((Object[]) obj).length != 0 && Arrays.stream((Object[]) obj).allMatch(isNotNull());
+      return ((Object[]) obj).length != 0 && Arrays.stream((Object[]) obj).allMatch(notNull());
     }
     return true;
   }
@@ -149,11 +149,11 @@ public class ObjectMethods {
     if (obj == null) {
       return false;
     } else if (obj instanceof Collection) {
-      return ((Collection) obj).stream().allMatch(isNotNull());
+      return ((Collection) obj).stream().allMatch(notNull());
     } else if (obj instanceof Map) {
-      return ((Map) obj).values().stream().allMatch(isNotNull());
+      return ((Map) obj).values().stream().allMatch(notNull());
     } else if (obj instanceof Object[]) {
-      return Arrays.stream((Object[]) obj).allMatch(isNotNull());
+      return Arrays.stream((Object[]) obj).allMatch(notNull());
     }
     return true;
   }

@@ -17,7 +17,7 @@ public class NumberMethods {
    *
    * @param <T> The type of {@code Number} to convert to
    * @param n The {@code Number} to convert
-   * @param to The type of {@code Number} to convert to
+   * @param targetType The type of {@code Number} to convert to
    * @return Whether or not conversion will be lossless
    */
   public static <T extends Number> boolean fitsInto(Number n, Class<T> targetType) {

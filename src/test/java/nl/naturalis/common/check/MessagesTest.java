@@ -3,10 +3,13 @@ package nl.naturalis.common.check;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
+import org.junit.Assert;
 import org.junit.Test;
 import nl.naturalis.common.ClassMethods;
 import static org.junit.Assert.assertEquals;
 import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonGetters.*;
 
 /*
  * These tests are especially meant to verify that the IdentityHashMap in Messages works as intended
@@ -102,5 +105,39 @@ public class MessagesTest {
     String actual = Messages.get(instanceOf(), argument, argName, target);
     // System.out.println(actual);
     assertEquals(expected, actual);
+  }
+
+  @Test
+  public void size01() {
+    Collection<Object> argument = new ArrayList<>();
+    String expected = "(Integer) list.size must be equal to 3 (was 0)";
+    // System.out.println(expected);
+    try {
+      Check.notNull(argument, "list").and(size(), equalTo(), 3);
+    } catch (IllegalArgumentException e) {
+      String actual = e.getMessage();
+      // System.out.println(actual);
+      assertEquals(expected, actual);
+      return;
+    }
+    Assert.fail();
+  }
+
+  @Test
+  public void testWithNonRegisteredGetter() {
+    Object argument = new Object();
+    int hash = argument.hashCode();
+    String expected = String.format("(Integer) foo.? must be equal to 3 (was %d)", hash);
+    // System.out.println(expected);
+    try {
+      // No getter for Object::hashCode in CommonGetters class
+      Check.notNull(argument, "foo").and(Object::hashCode, equalTo(), 3);
+    } catch (IllegalArgumentException e) {
+      String actual = e.getMessage();
+      // System.out.println(actual);
+      assertEquals(expected, actual);
+      return;
+    }
+    Assert.fail();
   }
 }

@@ -65,10 +65,10 @@ import nl.naturalis.common.function.Relation;
  *
  * <pre>
  * // WON'T COMPILE:
- * Check.notNull(employee, "employee").and(Employee::getId, x -> x > 0, "Id must be positive");
+ * Check.notNull(employee, "employee").and(Employee::getId, "id", x -> x > 0);
  * // WILL COMPILE:
- * Check.notNull(employee, "employee").and(Employee::getId, (int x) -> x > 0, "Id must be positive");
- * Check.notNull(employee, "employee").and(Employee::getId, (Integer x) -> x > 0, "Id must be positive");
+ * Check.notNull(employee, "employee").and(Employee::getId, "id", (int x) -> x > 0); // and(IntPredicate)
+ * Check.notNull(employee, "employee").and(Employee::getId, "id", (Integer x) -> x > 0); // and(Predicate<Integer>)
  * </pre>
  *
  * <h4>Changing the Exception type</h4>

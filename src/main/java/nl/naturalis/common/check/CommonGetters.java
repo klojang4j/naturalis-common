@@ -5,11 +5,21 @@ import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
 /**
- * Lists some commonly used getter-type (no-arg) methods. When used in combination with the {@link
- * Check} class these would be called on the argument in order to check the value of one of its
- * properties. Most of the getters defined here are plain, unadorned method references and <i>none
- * do a null-check on the argument.</i> This is supposed to have already been done (e.g. using
- * {@link CommonChecks#notNull() Checks.notNull}).
+ * Defines various commonly used getter-type (no-arg) methods. They can be passed as the first
+ * argument to the appropriate {@code and(...)} methods in the {@link Check} class. Each getter is
+ * associated with the name of the property it exposes, so you can choose the leanest of {@code
+ * and()} methods (those that don't let you specify a property name yourself). For example:
+ *
+ * <p>
+ *
+ * <pre>
+ * Check.notNull(stampCollection, "stampCollection").and(size(), greaterThan(), 100);
+ * // "stampCollection.size must be > 100 (was 22)"
+ * </pre>
+ *
+ * <p>Most of the getters defined here are plain, unadorned method references. <b>None of them do a
+ * null-check on the argument.</b> They rely upon being embedded within in chain of checks on a
+ * {@link Check} object, the first of which should be a <i>not-null</i> check.
  *
  * @author Ayco Holleman
  */
@@ -95,7 +105,8 @@ public class CommonGetters {
   /**
    * A {@code Function} that returns the size of a {@code Map}. Equivalent to {@code Map::size}.
    *
-   * @param <T> The type of the elements in the {@code Map}
+   * @param <K> The key type
+   * @param <V> The value typr
    * @return A {@code Function} that returns the size of a {@code Map}
    */
   public static <K, V> ToIntFunction<Map<K, V>> mapSize() {
@@ -108,7 +119,7 @@ public class CommonGetters {
 
   /**
    * A {@code Function} that returns the size of a {@code List}. Equivalent to {@code List::size}.
-   * Can be used in case using the {@link #size()} causes a name clash.
+   * Can be used in case using {@link #size()} would cause a name clash.
    *
    * @param <T> The type of the elements in the {@code List}
    * @return A {@code Function} that returns the size of a {@code List}
@@ -123,7 +134,7 @@ public class CommonGetters {
 
   /**
    * A {@code Function} that returns the size of a {@code Set}. Equivalent to {@code Set::size}. Can
-   * be used in case using the {@link #size()} causes a name clash.
+   * be used in case using {@link #size()} would cause a name clash.
    *
    * @param <T> The type of the elements in the {@code Set}
    * @return A {@code Function} that returns the size of a {@code Set}
@@ -132,12 +143,12 @@ public class CommonGetters {
     return Set::size;
   }
 
-  static String getGetterName(Object getter) {
-    return names.getOrDefault(getter, getter.toString());
-  }
-
   static {
     tmp.put(setSize(), "size");
+  }
+
+  static String getGetterName(Object getter) {
+    return names.getOrDefault(getter, "?");
   }
 
   static {

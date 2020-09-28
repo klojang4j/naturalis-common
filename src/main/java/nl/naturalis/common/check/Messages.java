@@ -214,7 +214,7 @@ class Messages {
   }
 
   private static String msgEqualTo(Object[] x) {
-    return format("%s must not be equal to %d (was %d)", arg(x), x[2], x[0]);
+    return format("%s must be equal to %d (was %d)", arg(x), x[2], x[0]);
   }
 
   private static String msgMultipleOf(Object[] x) {
