@@ -14,8 +14,9 @@ import static nl.naturalis.common.ClassMethods.getArrayTypeSimpleName;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
 import static nl.naturalis.common.path.Path.isArrayIndex;
 import static nl.naturalis.common.path.PathWalkerException.illegalAccess;
-import static nl.naturalis.common.check.Checks.*;
+import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.Check.*;
+import static nl.naturalis.common.check.CommonGetters.*;
 
 /**
  * Reads/writes values within a given Object using {@link Path} objects. The {@code PathWalker}
@@ -155,7 +156,7 @@ public final class PathWalker {
    * @throws PathWalkerException
    */
   public void readValues(Object host, Object[] values) throws PathWalkerException {
-    Check.notNull(values, "output").and(Array::getLength, "length", atLeast(), paths.length);
+    Check.notNull(values, "output").and(arrayLength(), atLeast(), paths.length);
     IntStream.range(0, paths.length).forEach(i -> values[i] = readObj(host, paths[i]));
   }
 
@@ -194,7 +195,7 @@ public final class PathWalker {
    * @param values
    */
   public void writeValues(Object host, Object... values) {
-    Check.notNull(values, "values").and(Array::getLength, "length", atLeast(), paths.length);
+    Check.notNull(values, "values").and(arrayLength(), atLeast(), paths.length);
     for (int i = 0; i < paths.length; ++i) {
       write(host, paths[i], values[i]);
     }

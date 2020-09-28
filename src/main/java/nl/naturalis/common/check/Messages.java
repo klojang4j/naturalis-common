@@ -12,7 +12,7 @@ import static nl.naturalis.common.ClassMethods.getArrayTypeName;
 import static nl.naturalis.common.ClassMethods.getArrayTypeSimpleName;
 import static nl.naturalis.common.StringMethods.substr;
 import static nl.naturalis.common.Tuple.tuple;
-import static nl.naturalis.common.check.Checks.*;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 class Messages {
 

@@ -3,7 +3,7 @@ package nl.naturalis.common;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.Checks.*;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * Methods for inspecting types.

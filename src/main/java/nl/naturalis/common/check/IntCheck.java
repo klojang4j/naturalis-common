@@ -57,14 +57,24 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
   }
 
   @Override
+  public <U> Check<Integer, E> and(Function<Integer, U> getter, Predicate<U> test) throws E {
+    throw notAnObject();
+  }
+
+  @Override
   public <U> Check<Integer, E> and(
       Function<Integer, U> getter, Predicate<U> test, String message, Object... msgArgs) throws E {
     throw notAnObject();
   }
 
   @Override
-  public Check<Integer, E> and(
-      ToIntFunction<Integer> getter, String propName, IntPredicate test) throws E {
+  public Check<Integer, E> and(ToIntFunction<Integer> getter, String propName, IntPredicate test)
+      throws E {
+    throw notAnObject();
+  }
+
+  @Override
+  public Check<Integer, E> and(ToIntFunction<Integer> getter, IntPredicate test) throws E {
     throw notAnObject();
   }
 
@@ -78,6 +88,12 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
   @Override
   public <U, V> Check<Integer, E> and(
       Function<Integer, U> getter, String propName, Relation<U, V> relation, V relateTo) throws E {
+    throw notAnObject();
+  }
+
+  @Override
+  public <U, V> Check<Integer, E> and(
+      Function<Integer, U> getter, Relation<U, V> relation, V relateTo) throws E {
     throw notAnObject();
   }
 
@@ -101,6 +117,12 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
 
   @Override
   public <U> Check<Integer, E> and(
+      Function<Integer, U> getter, ObjIntRelation<U> relation, int relateTo) throws E {
+    throw notAnObject();
+  }
+
+  @Override
+  public <U> Check<Integer, E> and(
       Function<Integer, U> getter,
       ObjIntRelation<U> relation,
       int relateTo,
@@ -113,6 +135,12 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
   @Override
   public Check<Integer, E> and(
       ToIntFunction<Integer> getter, String propName, IntRelation relation, int relateTo) throws E {
+    throw notAnObject();
+  }
+
+  @Override
+  public Check<Integer, E> and(ToIntFunction<Integer> getter, IntRelation relation, int relateTo)
+      throws E {
     throw notAnObject();
   }
 
@@ -138,7 +166,7 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
   }
 
   private UnsupportedOperationException notAnObject() {
-    String fmt = "Cannot check properties for non-object %s (int)";
+    String fmt = "Cannot check properties for non-object (int %s )";
     return new UnsupportedOperationException(String.format(fmt, argName));
   }
 }

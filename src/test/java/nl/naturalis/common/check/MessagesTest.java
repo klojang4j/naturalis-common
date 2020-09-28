@@ -6,7 +6,7 @@ import java.util.LinkedHashSet;
 import org.junit.Test;
 import nl.naturalis.common.ClassMethods;
 import static org.junit.Assert.assertEquals;
-import static nl.naturalis.common.check.Checks.*;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /*
  * These tests are especially meant to verify that the IdentityHashMap in Messages works as intended

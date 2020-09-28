@@ -9,8 +9,8 @@ import java.util.function.UnaryOperator;
 import nl.naturalis.common.function.Relation;
 import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
-import static nl.naturalis.common.check.Checks.objEquals;
-import static nl.naturalis.common.check.Checks.objNotEquals;
+import static nl.naturalis.common.check.CommonChecks.objEquals;
+import static nl.naturalis.common.check.CommonChecks.objNotEquals;
 import static nl.naturalis.common.function.Predicates.isNotNull;
 
 /**

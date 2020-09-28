@@ -14,11 +14,11 @@ import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ObjectMethods.doIf;
 import static nl.naturalis.common.StringMethods.append;
 import static nl.naturalis.common.Tuple.tuple;
-import static nl.naturalis.common.check.Checks.notContainsKey;
-import static nl.naturalis.common.check.Checks.notContainsValue;
-import static nl.naturalis.common.check.Checks.notEmpty;
-import static nl.naturalis.common.check.Checks.notEquals;
-import static nl.naturalis.common.check.Getters.enumConstants;
+import static nl.naturalis.common.check.CommonChecks.notContainsKey;
+import static nl.naturalis.common.check.CommonChecks.notContainsValue;
+import static nl.naturalis.common.check.CommonChecks.notEmpty;
+import static nl.naturalis.common.check.CommonChecks.notEquals;
+import static nl.naturalis.common.check.CommonGetters.enumConstants;
 
 /**
  * A fast enum-to-int Map implementation. The map is backed by a simple int array with the same

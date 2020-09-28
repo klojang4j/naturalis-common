@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
-import static nl.naturalis.common.check.Checks.*;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * NB A lot of these tests don't make any assertion, but just verify that we can code them as we do

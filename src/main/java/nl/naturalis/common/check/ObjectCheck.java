@@ -8,6 +8,7 @@ import nl.naturalis.common.NumberMethods;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
+import static nl.naturalis.common.check.CommonGetters.getGetterName;
 
 class ObjectCheck<T, E extends Exception> extends Check<T, E> {
 
@@ -88,6 +89,11 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
+  public <U> Check<T, E> and(Function<T, U> getter, Predicate<U> test) throws E {
+    return and(getter, getGetterName(getter), test);
+  }
+
+  @Override
   public <U> Check<T, E> and(
       Function<T, U> getter, Predicate<U> test, String message, Object... msgArgs) throws E {
     if (test.test(getter.apply(arg))) {
@@ -97,13 +103,17 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> and(ToIntFunction<T> getter, String property, IntPredicate test)
-      throws E {
+  public Check<T, E> and(ToIntFunction<T> getter, String property, IntPredicate test) throws E {
     int propVal = getter.applyAsInt(arg);
     if (test.test(propVal)) {
       return this;
     }
     throw excFactory.apply(Messages.get(test, propVal, propName(property)));
+  }
+
+  @Override
+  public Check<T, E> and(ToIntFunction<T> getter, IntPredicate test) throws E {
+    return and(getter, getGetterName(getter), test);
   }
 
   @Override
@@ -123,6 +133,12 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
       return this;
     }
     throw excFactory.apply(Messages.get(relation, propVal, propName(property), relateTo));
+  }
+
+  @Override
+  public <U, V> Check<T, E> and(Function<T, U> getter, Relation<U, V> relation, V relateTo)
+      throws E {
+    return and(getter, getGetterName(getter), relation, relateTo);
   }
 
   @Override
@@ -146,6 +162,12 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
+  public <U> Check<T, E> and(Function<T, U> getter, ObjIntRelation<U> relation, int relateTo)
+      throws E {
+    return and(getter, getGetterName(getter), relation, relateTo);
+  }
+
+  @Override
   public <U> Check<T, E> and(
       Function<T, U> getter,
       ObjIntRelation<U> relation,
@@ -160,13 +182,18 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> and(
-      ToIntFunction<T> getter, String property, IntRelation test, int relateTo) throws E {
+  public Check<T, E> and(ToIntFunction<T> getter, String property, IntRelation test, int relateTo)
+      throws E {
     int propVal = getter.applyAsInt(arg);
     if (test.exists(propVal, relateTo)) {
       return this;
     }
     throw excFactory.apply(Messages.get(test, propVal, propName(property), relateTo));
+  }
+
+  @Override
+  public Check<T, E> and(ToIntFunction<T> getter, IntRelation relation, int relateTo) throws E {
+    return and(getter, getGetterName(getter), relation, relateTo);
   }
 
   @Override

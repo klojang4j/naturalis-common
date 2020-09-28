@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import nl.naturalis.common.check.Check;
 import static java.lang.System.arraycopy;
-import static nl.naturalis.common.check.Checks.*;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /** Methods for working with arrays. */
 public class ArrayMethods {

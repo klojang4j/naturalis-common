@@ -6,7 +6,7 @@
 
     <groupId>nl.naturalis.common</groupId>
     <artifactId>naturalis-common</artifactId>
-    <version>2.3</version>
+    <version>2.4</version>
 
     <name>Naturalis Java Utility Library</name>
     <description>Naturalis Java Utility Library</description>

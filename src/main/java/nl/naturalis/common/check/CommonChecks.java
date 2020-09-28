@@ -17,18 +17,16 @@ import nl.naturalis.common.function.Relation;
 /**
  * Defines various common tests for arguments. These tests have short, informative error messages
  * associated with them in case the argument does not pass the test. Many of them are plain,
- * unadorned, method references and <i>none</i> of them do anything else than what they advertise
- * themselves to be doing. In other words: <i>none of them do a preliminary null-check on the
- * argument</i> (except of course those dedicated to this task, like {@link #notNull()} or {@link
- * #notEmpty()}). They rely upon being embedded within in chain of checks on a {@link Check} object,
- * the first of which should be a <i>not-null</i> check, or you risk getting a {@code
- * NullPointerException} while checking an argument.
+ * unadorned, method references and they <i>only</i> check what they advertise to be checking.
+ * <i>None of them do a preliminary null-check on the argument</i> (except of course those dedicated
+ * to this task, like {@link #notNull()}). They rely upon being embedded within in chain of checks
+ * on a {@link Check} object, the first of which should be a <i>not-null</i> check.
  *
  * @author Ayco Holleman
  */
-public class Checks {
+public class CommonChecks {
 
-  private Checks() {}
+  private CommonChecks() {}
 
   /**
    * Equivalent to {@link Predicate#not(Predicate) Predicate.not(test)}. Not associated with an

@@ -20,14 +20,15 @@ import nl.naturalis.common.function.Relation;
  *
  * <h4>Standard checks</h4>
  *
- * <p>The {@link Checks} class contains a number of common checks for arguments. These are already
- * associated with short, informative error messages, so you don't have to invent them yourself. For
- * example:
+ * <p>The {@link CommonChecks} class contains a number of common checks for arguments. These are
+ * already associated with short, informative error messages, so you don't have to invent them
+ * yourself. For example:
  *
  * <p>
  *
  * <pre>
- * Check.that(numChairs, "numChairs", atLeast(), 2); // "numChairs must be >= 2 (was 0)"
+ * Check.that(numChairs, "numChairs", atLeast(), 2);
+ * // "numChairs must be >= 2 (was 0)"
  * </pre>
  *
  * <h4>Checking argument properties</h4>
@@ -40,16 +41,16 @@ import nl.naturalis.common.function.Relation;
  * <pre>
  * Check.notNull(name, "name").and(String::length, "length", atLeast(), 10);
  * Check.notNull(employee, "employee").and(Employee::getAge, "age", lessThan(), 50);
- * Check.notNull(employees, "employees").and(Collection::size, "size", atLeast(), 100);
  * Check.notNull(intArray, "intArray").and(Array::getLength, "length", isEven());
+ * Check.notNull(employees, "employees").and(Collection::size, "size", atLeast(), 100);
  * </pre>
  *
- * <p>The {@link Getters} class defines some common getters that you can optionally use for
- * increased conciceness. For example the last two statements could also have been written as:
+ * <p>The {@link CommonGetters} class defines some common getters that you can optionally use for
+ * increased conciceness. For example the last statement could also have been written as:
  *
  * <pre>
- * Check.notNull(employees, "employees").and(size(), "size", atLeast(), 100);
- * Check.notNull(intArray, "intArray").and(length(), "length", isEven());
+ * Check.notNull(employees, "employees").and(size(), atLeast(), 100);
+ * // "employees.size must be >= 100 (was 36)"
  * </pre>
  *
  * <h4>Lambdas</h4>
@@ -118,7 +119,8 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Static factory method. Returns a new {@code Check} object suitable for testing the provided
-   * argument. The argument will have already passed the {@link Checks#notNull() notNull} test.
+   * argument. The argument will have already passed the {@link CommonChecks#notNull() notNull}
+   * test.
    *
    * @param <U> The type of the argument
    * @param arg The argument
@@ -127,12 +129,13 @@ public abstract class Check<T, E extends Exception> {
    */
   public static <U> Check<U, IllegalArgumentException> notNull(U arg, String argName)
       throws IllegalArgumentException {
-    return with(IllegalArgumentException::new, arg, argName, Checks.notNull());
+    return with(IllegalArgumentException::new, arg, argName, CommonChecks.notNull());
   }
 
   /**
    * Static factory method. Returns a new {@code Check} object suitable for testing the provided
-   * argument. The argument will have already passed the {@link Checks#notNull() notNull} test.
+   * argument. The argument will have already passed the {@link CommonChecks#notNull() notNull}
+   * test.
    *
    * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
    *     returns an {@code Exception}
@@ -147,7 +150,7 @@ public abstract class Check<T, E extends Exception> {
    */
   public static <U, F extends Exception> Check<U, F> notNull(
       Function<String, F> excFactory, U arg, String argName) throws F {
-    return with(excFactory, arg, argName, Checks.notNull());
+    return with(excFactory, arg, argName, CommonChecks.notNull());
   }
 
   /**
@@ -531,8 +534,8 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Submits the argument to the specified test. This method is especially useful when using the
-   * (statically imported) tests in thw {@link Checks} class, as they have predefined, informative
-   * error messages associated with them.
+   * (statically imported) tests in thw {@link CommonChecks} class, as they have predefined,
+   * informative error messages associated with them.
    *
    * @param test The test
    * @return This {@code Check} object
@@ -563,8 +566,8 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Submits the argument to the specified test. This method is especially useful when using the
-   * (statically imported) tests in thw {@link Checks} class, as they have predefined, informative
-   * error messages associated with them.
+   * (statically imported) tests in thw {@link CommonChecks} class, as they have predefined,
+   * informative error messages associated with them.
    *
    * @param test The test
    * @return This {@code Check} object
@@ -585,8 +588,8 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Verifies that there is some relation between the argument and some other value. This method is
-   * especially useful when using the (statically imported) tests in thw {@link Checks} class, as
-   * they have predefined, informative error messages associated with them.
+   * especially useful when using the (statically imported) tests in thw {@link CommonChecks} class,
+   * as they have predefined, informative error messages associated with them.
    *
    * @param <U> The type of the object of the relationship
    * @param relation The relation to verify between the argument and the specified value ({@code
@@ -625,8 +628,8 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Verifies that there is some relation between the argument and some other value. This method is
-   * especially useful when using the (statically imported) tests in thw {@link Checks} class, as
-   * they have predefined, informative error messages associated with them.
+   * especially useful when using the (statically imported) tests in thw {@link CommonChecks} class,
+   * as they have predefined, informative error messages associated with them.
    *
    * @param relation The relation to verify between the argument and the specified value ({@code
    *     relateTo})
@@ -663,8 +666,8 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Verifies that there is some relation between the argument and some other value. This method is
-   * especially useful when using the (statically imported) tests in thw {@link Checks} class, as
-   * they have predefined, informative error messages associated with them.
+   * especially useful when using the (statically imported) tests in thw {@link CommonChecks} class,
+   * as they have predefined, informative error messages associated with them.
    *
    * @param relation The relation to verify between the argument and the specified integer ({@code
    *     relateTo})
@@ -703,6 +706,18 @@ public abstract class Check<T, E extends Exception> {
       throws E;
 
   /**
+   * Submits a property of the argument to the specified test. Can be used if you pass one of the
+   * getters defined in {@link CommonGetters} as these are already associated with a property name.
+   *
+   * @param <U> The type of the property
+   * @param getter A no-arg method, called on the argument, returning the value to be tested
+   * @param test The test
+   * @return This {@code Check} object
+   * @throws E If the test fails
+   */
+  public abstract <U> Check<T, E> and(Function<T, U> getter, Predicate<U> test) throws E;
+
+  /**
    * Submits a property of the argument to the specified test.
    *
    * @param <U> The type of the property
@@ -727,6 +742,18 @@ public abstract class Check<T, E extends Exception> {
    */
   public abstract Check<T, E> and(ToIntFunction<T> getter, String property, IntPredicate test)
       throws E;
+
+  /**
+   * Submits an integer property of the argument to the specified test. Can be used if you pass one
+   * of the getters defined in {@link CommonGetters} as these are already associated with a property
+   * name.
+   *
+   * @param getter A no-arg method, called on the argument, returning the value to be tested
+   * @param test The test
+   * @return This {@code Check} object
+   * @throws E If the test fails
+   */
+  public abstract Check<T, E> and(ToIntFunction<T> getter, IntPredicate test) throws E;
 
   /**
    * Submits an {@code int} property of the argument to the specified test.
@@ -757,6 +784,24 @@ public abstract class Check<T, E extends Exception> {
    */
   public abstract <U, V> Check<T, E> and(
       Function<T, U> getter, String property, Relation<U, V> relation, V relateTo) throws E;
+
+  /**
+   * Verifies that there is some relation between a property of the argument and some other value.
+   * Can be used if you pass one of the getters defined in {@link CommonGetters} as these are
+   * already associated with a property name.
+   *
+   * @param <U> The type of the property
+   * @param <V> The type of the object of the relationship
+   * @param getter A no-arg method, called on the argument, returning the subject of the
+   *     relationship
+   * @param relation The relation to verify between the argument and the specified value ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the relation fails
+   */
+  public abstract <U, V> Check<T, E> and(Function<T, U> getter, Relation<U, V> relation, V relateTo)
+      throws E;
 
   /**
    * Verifies that there is some relation between a property of the argument and some other value.
@@ -795,6 +840,23 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Verifies that there is some relation between a property of the argument and some other value.
+   * Can be used if you pass one of the getters defined in {@link CommonGetters} as these are
+   * already associated with a property name.
+   *
+   * @param <U> The type of the property
+   * @param getter A no-arg method, called on the argument, returning the subject of the
+   *     relationship
+   * @param relation The relation to verify between the argument and the specified value ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the relation fails
+   */
+  public abstract <U> Check<T, E> and(
+      Function<T, U> getter, ObjIntRelation<U> relation, int relateTo) throws E;
+
+  /**
+   * Verifies that there is some relation between a property of the argument and some other value.
    *
    * @param <U> The type of the property
    * @param getter A no-arg method, called on the argument, returning the subject of the
@@ -829,6 +891,22 @@ public abstract class Check<T, E extends Exception> {
    */
   public abstract Check<T, E> and(
       ToIntFunction<T> getter, String property, IntRelation relation, int relateTo) throws E;
+
+  /**
+   * Verifies that there is some relation between a property of the argument and some other value.
+   * Can be used if you pass one of the getters defined in {@link CommonGetters} as these are
+   * already associated with a property name.
+   *
+   * @param getter A no-arg method, called on the argument, returning the subject of the
+   *     relationship
+   * @param relation The relation to verify between the argument and the specified integer ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the relation fails
+   */
+  public abstract Check<T, E> and(ToIntFunction<T> getter, IntRelation relation, int relateTo)
+      throws E;
 
   /**
    * Verifies that there is some relation between a property of the argument and some other value.
