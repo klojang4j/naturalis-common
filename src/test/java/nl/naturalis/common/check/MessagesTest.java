@@ -3,7 +3,6 @@ package nl.naturalis.common.check;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import nl.naturalis.common.ClassMethods;
