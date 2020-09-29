@@ -1,5 +1,6 @@
 package nl.naturalis.common.check;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -7,6 +8,7 @@ import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonGetters.*;
 
 /**
  * NB A lot of these tests don't make any assertion, but just verify that we can code them as we do
@@ -87,10 +89,9 @@ public class CheckTest {
     Check.that(9, "fooArg", nGreaterThan(), 8);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = UnsupportedOperationException.class)
   public void size01() {
-    IntCheck<IllegalArgumentException> check = (IntCheck) Check.that(9, "fooArg");
-    check.and(sizeGreaterThan(), Integer.valueOf(4));
+    Check.that(new File("bla"), "fooArg").and(sizeGreaterThan(), 5);
   }
 
   @Test
@@ -121,6 +122,17 @@ public class CheckTest {
   @Test
   public void size07() {
     Check.that("Hello, World!", "fooArg", (x, y) -> x.length() > y, 3);
+  }
+
+  @Test
+  public void size08() {
+    Check.that(List.of("a", "b", "c", "d", "e"), "fooArg").and(listSize(), atMost(), 10);
+  }
+
+  @Test
+  public void size09() {
+    Collection<String> c = List.of("a", "b", "c", "d", "e");
+    Check.that(c, "fooArg").and(size(), atMost(), 10);
   }
 
   @Test // Does this all "work"? (i.e. no compile errors)

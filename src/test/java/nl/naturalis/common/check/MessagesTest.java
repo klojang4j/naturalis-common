@@ -20,10 +20,10 @@ public class MessagesTest {
     int argument = 2;
     String argName = "foo";
     int target = 5;
-    String expected = "(Integer) foo must be >= 5 (was 2)";
-    // System.out.println(expected);
+    String expected = "foo must be >= 5 (was 2)";
+    System.out.println(expected);
     String actual = Messages.get(atLeast(), argument, argName, target);
-    // System.out.println(actual);
+    System.out.println(actual);
     assertEquals(expected, actual);
   }
 
@@ -32,10 +32,10 @@ public class MessagesTest {
     Double argument = 2.0;
     String argName = "foo";
     Short target = 5;
-    String expected = "(Double) foo must be >= 5 (was 2.0)";
-    // System.out.println(expected);
+    String expected = "foo must be >= 5 (was 2.0)";
+    System.out.println(expected);
     String actual = Messages.get(nAtLeast(), argument, argName, target);
-    // System.out.println(actual);
+    System.out.println(actual);
     assertEquals(expected, actual);
   }
 
@@ -44,10 +44,10 @@ public class MessagesTest {
     Long argument = 4L;
     String argName = "foo";
     Float target = 5F;
-    String expected = "(Long) foo must be > 5.0 (was 4)";
-    // System.out.println(expected);
+    String expected = "foo must be > 5.0 (was 4)";
+    System.out.println(expected);
     String actual = Messages.get(nGreaterThan(), argument, argName, target);
-    // System.out.println(actual);
+    System.out.println(actual);
     assertEquals(expected, actual);
   }
 
@@ -57,10 +57,10 @@ public class MessagesTest {
     String argName = "foo";
     Object target = new Object();
     String s = target.getClass().getSimpleName() + "@" + System.identityHashCode(target);
-    String expected = "(ArrayList) foo must contain " + s;
-    // System.out.println(expected);
+    String expected = "foo must contain " + s;
+    System.out.println(expected);
     String actual = Messages.get(contains(), argument, argName, target);
-    // System.out.println(actual);
+    System.out.println(actual);
     assertEquals(expected, actual);
   }
 
@@ -71,10 +71,10 @@ public class MessagesTest {
     LinkedHashSet<?> target = new LinkedHashSet<>();
     String s = target.getClass().getSimpleName() + "@" + System.identityHashCode(target);
     String expected =
-        String.format("(String) foo must be element of %s (was \"Hello world, how are[...]\")", s);
-    // System.out.println(expected);
+        String.format("foo must be element of %s (was \"Hello world, how are[...]\")", s);
+    System.out.println(expected);
     String actual = Messages.get(elementOf(), argument, argName, target);
-    // System.out.println(actual);
+    System.out.println(actual);
     assertEquals(expected, actual);
   }
 
@@ -86,10 +86,10 @@ public class MessagesTest {
     String s0 =
         ClassMethods.getArrayTypeSimpleName(argument) + "@" + System.identityHashCode(argument);
     String s1 = target.getClass().getSimpleName() + "@" + System.identityHashCode(target);
-    String expected = String.format("(float[]) foo must be element of %s (was %s)", s1, s0);
-    // System.out.println(expected);
+    String expected = String.format("foo must be element of %s (was %s)", s1, s0);
+    System.out.println(expected);
     String actual = Messages.get(elementOf(), argument, argName, target);
-    // System.out.println(actual);
+    System.out.println(actual);
     assertEquals(expected, actual);
   }
 
@@ -98,24 +98,23 @@ public class MessagesTest {
     Collection<Object> argument = new ArrayList<>();
     String argName = "foo";
     Object target = AutoCloseable.class;
-    String expected =
-        "(ArrayList) foo must be instance of java.lang.AutoCloseable (was java.util.ArrayList)";
-    // System.out.println(expected);
+    String expected = "foo must be instance of java.lang.AutoCloseable (was java.util.ArrayList)";
+    System.out.println(expected);
     String actual = Messages.get(instanceOf(), argument, argName, target);
-    // System.out.println(actual);
+    System.out.println(actual);
     assertEquals(expected, actual);
   }
 
   @Test
   public void size01() {
     Collection<Object> argument = new ArrayList<>();
-    String expected = "(Integer) list.size must be equal to 3 (was 0)";
-    // System.out.println(expected);
+    String expected = "list.size must be equal to 3 (was 0)";
+    System.out.println(expected);
     try {
       Check.notNull(argument, "list").and(size(), equalTo(), 3);
     } catch (IllegalArgumentException e) {
       String actual = e.getMessage();
-      // System.out.println(actual);
+      System.out.println(actual);
       assertEquals(expected, actual);
       return;
     }
@@ -126,14 +125,14 @@ public class MessagesTest {
   public void testWithNonRegisteredGetter() {
     Object argument = new Object();
     int hash = argument.hashCode();
-    String expected = String.format("(Integer) foo.? must be equal to 3 (was %d)", hash);
-    // System.out.println(expected);
+    String expected = String.format("foo.? must be equal to 3 (was %d)", hash);
+    System.out.println(expected);
     try {
       // No getter for Object::hashCode in CommonGetters class
       Check.notNull(argument, "foo").and(Object::hashCode, equalTo(), 3);
     } catch (IllegalArgumentException e) {
       String actual = e.getMessage();
-      // System.out.println(actual);
+      System.out.println(actual);
       assertEquals(expected, actual);
       return;
     }

@@ -71,7 +71,7 @@ public class ClassMethods {
    * @return The simple name of the array type
    */
   public static String getArrayTypeName(Object array) {
-    Check.notNull(array, "obj").and(isArray());
+    Check.notNull(array, "array").and(isArray());
     return array.getClass().getComponentType().getName() + "[]";
   }
 
@@ -85,7 +85,7 @@ public class ClassMethods {
    * @return The simple name of the array type
    */
   public static String getArrayTypeSimpleName(Object array) {
-    Check.notNull(array, "obj").and(isArray());
+    Check.notNull(array, "array").and(isArray());
     return array.getClass().getComponentType().getSimpleName() + "[]";
   }
 

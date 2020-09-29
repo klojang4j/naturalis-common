@@ -68,7 +68,7 @@ import nl.naturalis.common.function.Relation;
  * Check.notNull(employee, "employee").and(Employee::getId, "id", x -> x > 0);
  * // WILL COMPILE:
  * Check.notNull(employee, "employee").and(Employee::getId, "id", (int x) -> x > 0); // and(IntPredicate)
- * Check.notNull(employee, "employee").and(Employee::getId, "id", (Integer x) -> x > 0); // and(Predicate<Integer>)
+ * Check.notNull(employee, "employee").and(Employee::getId, "id", (Integer x) -> x > 0); // and(Predicate&lt;Integer&gt;)
  * </pre>
  *
  * <h4>Changing the Exception type</h4>

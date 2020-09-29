@@ -39,8 +39,6 @@ public class NumberMethods {
         return (float) n.doubleValue() == n.doubleValue();
       } else if (fc == Long.class) {
         return (float) n.longValue() == n.longValue();
-      } else if (fc == Integer.class) { // Is this necessary?
-        return (float) n.intValue() == n.intValue();
       }
       return true;
     } else if (to == Integer.class) {

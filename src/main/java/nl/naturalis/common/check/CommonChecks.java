@@ -2,17 +2,18 @@ package nl.naturalis.common.check;
 
 import java.io.File;
 import java.lang.reflect.Array;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import nl.naturalis.common.ObjectMethods;
 import nl.naturalis.common.Sizeable;
 import nl.naturalis.common.StringMethods;
+import nl.naturalis.common.Tuple;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
+import static nl.naturalis.common.check.Messages.*;
 
 /**
  * Defines various common tests for arguments. These tests have short, informative error messages
@@ -25,6 +26,10 @@ import nl.naturalis.common.function.Relation;
  * @author Ayco Holleman
  */
 public class CommonChecks {
+
+  static final IdentityHashMap<Object, Function<Object[], String>> messages;
+
+  private static ArrayList<Tuple<Object, Function<Object[], String>>> temp = new ArrayList<>();
 
   private CommonChecks() {}
 
@@ -107,6 +112,10 @@ public class CommonChecks {
     return Objects::isNull;
   }
 
+  static {
+    add(isNull(), msgIsNull());
+  }
+
   /**
    * Verifies that the argument is not null. Equivalent to {@link Objects#nonNull(Object)
    * Objects::nonNull}.
@@ -116,6 +125,10 @@ public class CommonChecks {
    */
   public static <T> Predicate<T> notNull() {
     return Objects::nonNull;
+  }
+
+  static {
+    add(notNull(), msgNotNull());
   }
 
   /**
@@ -129,6 +142,10 @@ public class CommonChecks {
     return ObjectMethods::isEmpty;
   }
 
+  static {
+    add(isEmpty(), msgIsEmpty());
+  }
+
   /**
    * Verifies that the argument is not empty as per {@link ObjectMethods#isNotEmpty(Object)
    * ObjectMethods::isNotEmpty}.
@@ -138,6 +155,10 @@ public class CommonChecks {
    */
   public static <T> Predicate<T> notEmpty() {
     return ObjectMethods::isNotEmpty;
+  }
+
+  static {
+    add(notEmpty(), msgNotEmpty());
   }
 
   /**
@@ -151,6 +172,10 @@ public class CommonChecks {
     return ObjectMethods::isNoneNull;
   }
 
+  static {
+    add(noneNull(), msgNoneNull());
+  }
+
   /**
    * Verifies that the argument is recursively non-empty as per {@link
    * ObjectMethods#isDeepNotEmpty(Object) ObjectMethods.isDeepNotEmpty}.
@@ -162,6 +187,10 @@ public class CommonChecks {
     return ObjectMethods::isDeepNotEmpty;
   }
 
+  static {
+    add(deepNotEmpty(), msgDeepNotEmpty());
+  }
+
   /**
    * Verifies that a {@code String} argument is not null and not blank.
    *
@@ -169,6 +198,10 @@ public class CommonChecks {
    */
   public static Predicate<String> notBlank() {
     return StringMethods::isNotBlank;
+  }
+
+  static {
+    add(notBlank(), msgNotBlank());
   }
 
   /**
@@ -180,6 +213,10 @@ public class CommonChecks {
     return File::isFile;
   }
 
+  static {
+    add(isFile(), msgIsFile());
+  }
+
   /**
    * Verifies that the argument is an existing directory.
    *
@@ -187,6 +224,10 @@ public class CommonChecks {
    */
   public static Predicate<File> isDirectory() {
     return File::isDirectory;
+  }
+
+  static {
+    add(isDirectory(), msgIsDirectory());
   }
 
   /**
@@ -198,6 +239,10 @@ public class CommonChecks {
     return f -> !f.exists();
   }
 
+  static {
+    add(fileNotExists(), msgFileNotExists());
+  }
+
   /**
    * Verifies that the argument is a readable file (implies that the file exists).
    *
@@ -207,6 +252,10 @@ public class CommonChecks {
     return File::canRead;
   }
 
+  static {
+    add(readable(), msgReadable());
+  }
+
   /**
    * Verifies that the argument is a writable file (implies that the file exists).
    *
@@ -214,6 +263,10 @@ public class CommonChecks {
    */
   public static Predicate<File> writable() {
     return File::canWrite;
+  }
+
+  static {
+    add(writable(), msgWritable());
   }
 
   /**
@@ -227,6 +280,10 @@ public class CommonChecks {
     return (x, y) -> y.isInstance(x);
   }
 
+  static {
+    add(instanceOf(), msgInstanceOf());
+  }
+
   /**
    * Verifies that the argument is an array.
    *
@@ -235,6 +292,10 @@ public class CommonChecks {
    */
   public static <T> Predicate<T> isArray() {
     return x -> x.getClass().isArray();
+  }
+
+  static {
+    add(isArray(), msgIsArray());
   }
 
   /* ++++++++++++++ IntPredicate ++++++++++++++ */
@@ -248,6 +309,10 @@ public class CommonChecks {
     return x -> x % 2 == 0;
   }
 
+  static {
+    add(isEven(), msgIsEven());
+  }
+
   /**
    * Verifies that the argument is an odd number.
    *
@@ -255,6 +320,10 @@ public class CommonChecks {
    */
   public static IntPredicate isOdd() {
     return x -> x % 2 == 1;
+  }
+
+  static {
+    add(isOdd(), msgIsOdd());
   }
 
   /**
@@ -266,6 +335,10 @@ public class CommonChecks {
     return x -> x > 0;
   }
 
+  static {
+    add(positive(), msgPositive());
+  }
+
   /**
    * Verifies that the argument is zero or negative.
    *
@@ -273,6 +346,10 @@ public class CommonChecks {
    */
   public static IntPredicate notPositive() {
     return x -> x <= 0;
+  }
+
+  static {
+    add(notPositive(), msgNotPositive());
   }
 
   /**
@@ -284,6 +361,10 @@ public class CommonChecks {
     return x -> x < 0;
   }
 
+  static {
+    add(negative(), msgNegative());
+  }
+
   /**
    * Verifies that the argument is zero or positive.
    *
@@ -291,6 +372,10 @@ public class CommonChecks {
    */
   public static IntPredicate notNegative() {
     return x -> x >= 0;
+  }
+
+  static {
+    add(notNegative(), msgNotNegative());
   }
 
   /* ++++++++++++++ Relation ++++++++++++++ */
@@ -307,6 +392,10 @@ public class CommonChecks {
     return Collection::contains;
   }
 
+  static {
+    add(contains(), msgContains());
+  }
+
   /**
    * Verifies that a {@code Collection} does not contain a particular value.
    *
@@ -316,6 +405,10 @@ public class CommonChecks {
    */
   public static <E, C extends Collection<E>> Relation<C, E> notContains() {
     return (x, y) -> !x.contains(y);
+  }
+
+  static {
+    add(notContains(), msgNotContains());
   }
 
   /**
@@ -329,6 +422,10 @@ public class CommonChecks {
     return (x, y) -> y.contains(x);
   }
 
+  static {
+    add(elementOf(), msgElementOf());
+  }
+
   /**
    * Verifies that the argument is not an element of a {@code Collection}.
    *
@@ -338,6 +435,10 @@ public class CommonChecks {
    */
   public static <E, C extends Collection<E>> Relation<E, C> notElementOf() {
     return (x, y) -> !y.contains(x);
+  }
+
+  static {
+    add(notElementOf(), msgNotElementOf());
   }
 
   /**
@@ -351,6 +452,10 @@ public class CommonChecks {
     return Map::containsKey;
   }
 
+  static {
+    add(containsKey(), msgContainsKey());
+  }
+
   /**
    * Verifies that a {@code Map} does not contain a key.
    *
@@ -360,6 +465,10 @@ public class CommonChecks {
    */
   public static <K, M extends Map<K, ?>> Relation<M, K> notContainsKey() {
     return (x, y) -> !x.containsValue(y);
+  }
+
+  static {
+    add(notContainsKey(), msgNotContainsKey());
   }
 
   /**
@@ -373,6 +482,10 @@ public class CommonChecks {
     return Map::containsValue;
   }
 
+  static {
+    add(containsValue(), msgContainsValue());
+  }
+
   /**
    * Verifies that a {@code Map} does not contain a value.
    *
@@ -382,6 +495,10 @@ public class CommonChecks {
    */
   public static <V, M extends Map<?, V>> Relation<M, V> notContainsValue() {
     return (x, y) -> !x.containsValue(y);
+  }
+
+  static {
+    add(notContainsValue(), msgNotContainsValue());
   }
 
   /**
@@ -395,6 +512,10 @@ public class CommonChecks {
     return Objects::equals;
   }
 
+  static {
+    add(objEquals(), msgObjEquals());
+  }
+
   /**
    * Verifies that the argument is not equal to a particular value.
    *
@@ -403,6 +524,10 @@ public class CommonChecks {
    */
   public static <X> Relation<X, X> objNotEquals() {
     return (x, y) -> !Objects.equals(x, y);
+  }
+
+  static {
+    add(objNotEquals(), msgObjNotEquals());
   }
 
   /**
@@ -415,76 +540,70 @@ public class CommonChecks {
     return (x, y) -> x == null || x.equals(y);
   }
 
+  static {
+    add(nullOr(), msgNullOr());
+  }
+
   /**
-   * Verifies that the argument is greater than a particular value, widening or narrowing the type
-   * of the argument to the type of the specified value.
+   * Verifies that the argument is greater than a particular value, widening both to {@code double}
+   * before comparing them.
    *
    * @param <X> The type of the argument
    * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
   public static <X extends Number, Y extends Number> Relation<X, Y> nGreaterThan() {
-    return (x, y) -> {
-      if (y.getClass() == Integer.class) {
-        return x.intValue() > y.intValue();
-      } else if (y.getClass() == Long.class) {
-        return x.longValue() > y.longValue();
-      } else if (y.getClass() == Double.class) {
-        return x.doubleValue() > y.doubleValue();
-      } else if (y.getClass() == Float.class) {
-        return x.floatValue() > y.floatValue();
-      } else if (y.getClass() == Short.class) {
-        return x.shortValue() > y.shortValue();
-      }
-      return x.byteValue() > y.byteValue();
-    };
+    return (x, y) -> x.doubleValue() > y.doubleValue();
+  }
+
+  static {
+    add(nGreaterThan(), msgGreaterThan());
   }
 
   /**
-   * Verifies that the argument is greater than or equal to a particular value, widening or
-   * narrowing the type of the argument to the type of the specified value.
+   * Verifies that the argument is greater than or equal to a particular value, widening both to
+   * {@code double} before comparing them.
    *
    * @param <X> The type of the argument
    * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
   public static <X extends Number, Y extends Number> Relation<X, Y> nAtLeast() {
-    return (x, y) -> {
-      if (y.getClass() == Integer.class) {
-        return x.intValue() >= y.intValue();
-      } else if (y.getClass() == Long.class) {
-        return x.longValue() >= y.longValue();
-      } else if (y.getClass() == Double.class) {
-        return x.doubleValue() >= y.doubleValue();
-      } else if (y.getClass() == Float.class) {
-        return x.floatValue() >= y.floatValue();
-      } else if (y.getClass() == Short.class) {
-        return x.shortValue() >= y.shortValue();
-      }
-      return x.byteValue() >= y.byteValue();
-    };
+    return (x, y) -> x.doubleValue() >= y.doubleValue();
+  }
+
+  static {
+    add(nAtLeast(), msgAtLeast());
   }
 
   /**
-   * Verifies that the argument is less than a particular value, widening or narrowing the type of
-   * the argument to the type of the specified value.
+   * Verifies that the argument is less than a particular value, widening both to {@code double}
+   * before comparing them.
    *
    * @return A {@code Relation}
    */
   public static <X extends Number, Y extends Number> Relation<X, Y> nLessThan() {
-    return (x, y) -> !nAtLeast().exists(x, y);
+    return (x, y) -> x.doubleValue() < y.doubleValue();
+  }
+
+  static {
+    add(nLessThan(), msgLessThan());
   }
 
   /**
-   * Verifies that the argument is less than or equal to a particular value, widening or narrowing
-   * the type of the argument to the type of the specified value.
+   * Verifies that the argument is less than or equal to a particular value, widening both to {@code
+   * double} before comparing them.
    *
    * @param <X> The type of the argument
    * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
   public static <X extends Number, Y extends Number> Relation<X, Y> nAtMost() {
-    return (x, y) -> !nGreaterThan().exists(x, y);
+    return (x, y) -> x.doubleValue() <= y.doubleValue();
+  }
+
+  static {
+    add(nAtMost(), msgAtMost());
   }
 
   /* ++++++++++++++ ObjIntRelation ++++++++++++++ */
@@ -512,8 +631,12 @@ public class CommonChecks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() == y;
       }
-      throw notApplicable("sizeEquals", x);
+      throw notSupported("sizeEquals", x);
     };
+  }
+
+  static {
+    add(sizeEquals(), msgSizeEquals());
   }
 
   /**
@@ -539,8 +662,12 @@ public class CommonChecks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() != y;
       }
-      throw notApplicable("sizeNotEquals", x);
+      throw notSupported("sizeNotEquals", x);
     };
+  }
+
+  static {
+    add(sizeNotEquals(), msgSizeNotEquals());
   }
 
   /**
@@ -566,8 +693,12 @@ public class CommonChecks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() > y;
       }
-      throw notApplicable("sizeGreaterThan", x);
+      throw notSupported("sizeGreaterThan", x);
     };
+  }
+
+  static {
+    add(sizeGreaterThan(), msgSizeGreaterThan());
   }
 
   /**
@@ -593,8 +724,12 @@ public class CommonChecks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() >= y;
       }
-      throw notApplicable("sizeAtLeast", x);
+      throw notSupported("sizeAtLeast", x);
     };
+  }
+
+  static {
+    add(sizeAtLeast(), msgSizeAtLeast());
   }
 
   /**
@@ -620,8 +755,12 @@ public class CommonChecks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() < y;
       }
-      throw notApplicable("sizeLessThan", x);
+      throw notSupported("sizeLessThan", x);
     };
+  }
+
+  static {
+    add(sizeLessThan(), msgSizeLessThan());
   }
 
   /**
@@ -647,11 +786,15 @@ public class CommonChecks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() <= y;
       }
-      throw notApplicable("sizeLessThan", x);
+      throw notSupported("sizeAtMost", x);
     };
   }
 
-  /* ++++++++++++++ ObjIntRelation ++++++++++++++ */
+  static {
+    add(sizeAtMost(), msgSizeAtMost());
+  }
+
+  /* ++++++++++++++ IntRelation ++++++++++++++ */
 
   /**
    * Verifies that the argument is equal to a particular value.
@@ -660,6 +803,10 @@ public class CommonChecks {
    */
   public static IntRelation equalTo() {
     return (x, y) -> x == y;
+  }
+
+  static {
+    add(equalTo(), msgEqualTo());
   }
 
   /**
@@ -671,6 +818,10 @@ public class CommonChecks {
     return (x, y) -> x != y;
   }
 
+  static {
+    add(notEquals(), msgNotEquals());
+  }
+
   /**
    * Verifies that the argument is greater than a particular value.
    *
@@ -678,6 +829,10 @@ public class CommonChecks {
    */
   public static IntRelation greaterThan() {
     return (x, y) -> x > y;
+  }
+
+  static {
+    add(greaterThan(), msgGreaterThan());
   }
 
   /**
@@ -689,6 +844,10 @@ public class CommonChecks {
     return (x, y) -> x >= y;
   }
 
+  static {
+    add(atLeast(), msgAtLeast());
+  }
+
   /**
    * Verifies that the argument is less than a particular value.
    *
@@ -696,6 +855,10 @@ public class CommonChecks {
    */
   public static IntRelation lessThan() {
     return (x, y) -> x < y;
+  }
+
+  static {
+    add(lessThan(), msgLessThan());
   }
 
   /**
@@ -707,6 +870,10 @@ public class CommonChecks {
     return (x, y) -> x <= y;
   }
 
+  static {
+    add(atMost(), msgAtMost());
+  }
+
   /**
    * Verifies that the argument is a whole mulitple of a particular integer.
    *
@@ -716,9 +883,23 @@ public class CommonChecks {
     return (x, y) -> x % y == 0;
   }
 
-  private static UnsupportedOperationException notApplicable(String test, Object obj) {
+  static {
+    add(multipleOf(), msgMultipleOf());
+  }
+
+  static {
+    messages = new IdentityHashMap<>(temp.size());
+    temp.forEach(t -> t.addTo(messages));
+    temp = null;
+  }
+
+  private static UnsupportedOperationException notSupported(String test, Object obj) {
     String fmt = "Test \"%s\" not applicable to %s";
     String msg = String.format(fmt, test, obj.getClass().getName());
     return new UnsupportedOperationException(msg);
+  }
+
+  private static void add(Object test, Function<Object[], String> message) {
+    temp.add(new Tuple<>(test, message));
   }
 }
