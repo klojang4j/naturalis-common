@@ -277,66 +277,6 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the default {@code int} value (0) if the argument is null, else the argument itself.
-   *
-   * @param i The primitive wrapper
-   * @return The argument or the default value of the corresponding primitive type
-   */
-  public static Integer nvl(Integer i) {
-    return ifNull(i, 0);
-  }
-
-  /**
-   * Returns the default {@code double} value (0) if the argument is null, else the argument itself.
-   *
-   * @param d The primitive wrapper
-   * @return The argument or the default value of the corresponding primitive type
-   */
-  public static Double nvl(Double d) {
-    return ifNull(d, 0D);
-  }
-
-  /**
-   * Returns the default {@code long} value (0) if the argument is null, else the argument itself.
-   *
-   * @param l The primitive wrapper
-   * @return The argument or the default value of the corresponding primitive type
-   */
-  public static Long nvl(Long l) {
-    return ifNull(l, 0L);
-  }
-
-  /**
-   * Returns the default {@code float} value (0) if the argument is null, else the argument itself.
-   *
-   * @param f The primitive wrapper
-   * @return The argument or the default value of the corresponding primitive type
-   */
-  public static Float nvl(Float f) {
-    return ifNull(f, 0F);
-  }
-
-  /**
-   * Returns the default {@code short} value (0) if the argument is null, else the argument itself.
-   *
-   * @param s The primitive wrapper
-   * @return The argument or the default value of the corresponding primitive type
-   */
-  public static Short nvl(Short s) {
-    return ifNull(s, (short) 0);
-  }
-
-  /**
-   * Returns the default {@code byte} value (0) if the argument is null, else the argument itself.
-   *
-   * @param b The primitive wrapper
-   * @return The argument or the default value of the corresponding primitive type
-   */
-  public static Byte nvl(Byte b) {
-    return ifNull(b, (byte) 0);
-  }
-
-  /**
    * Returns the default {@code boolean} value ({@code false}) if the argument is null, else the
    * argument itself.
    *
@@ -354,7 +294,7 @@ public class ObjectMethods {
    * @param c The primitive wrapper
    * @return The argument or the default value of the corresponding primitive type
    */
-  public static char nvl(Character c) {
+  public static Character nvl(Character c) {
     return ifNull(c, '\u0000');
   }
 
@@ -510,39 +450,12 @@ public class ObjectMethods {
    *
    * @param <T> The type of the first argument
    * @param <U> The return type
-   * @param arg The value to test
+   * @param arg The value to testdoIfNotNull
    * @param then The transformation to apply to the value if it is not null
    * @param otherwise A supplier providing the default value
    */
   public static <T, U> U ifNotNull(T arg, Function<T, U> then, Supplier<U> otherwise) {
     return arg != null ? then.apply(arg) : otherwise.get();
-  }
-
-  /**
-   * Returns the result of passing {@code value} to {@code then} if {@code value} is not empty, else
-   * null.
-   *
-   * @param <T> The type of the first argument
-   * @param <U> The return type
-   * @param arg The value to test
-   * @param then The transformation to apply to the value if it is not null
-   */
-  public static <T, U> U ifNotEmpty(T arg, Function<T, U> then) {
-    return isNotEmpty(arg) ? then.apply(arg) : null;
-  }
-
-  /**
-   * Returns the result of passing the specified argument to the specified {@code Funtion} if the
-   * argument is not null, else returns the result provided by the specified {@code Supplier}.
-   *
-   * @param <T> The type of the first argument
-   * @param <U> The return type
-   * @param arg The value to test
-   * @param then The transformation to apply to the value if it is not null
-   * @param otherwise A supplier providing the default value
-   */
-  public static <T, U> U ifNotEmpty(T arg, Function<T, U> then, Supplier<U> otherwise) {
-    return isNotEmpty(arg) ? then.apply(arg) : otherwise.get();
   }
 
   /**

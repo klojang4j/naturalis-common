@@ -9,7 +9,18 @@ import nl.naturalis.common.check.Check;
  */
 public class NumberMethods {
 
-  private NumberMethods() {}
+  /** Zero as Integer */
+  public static final Integer ZERO = 0;
+  /** Zero as Double */
+  public static final Double ZERO_D = 0D;
+  /** Zero as Long */
+  public static final Long ZERO_L = 0L;
+  /** Zero as Float */
+  public static final Float ZERO_F = 0F;
+  /** Zero as Short */
+  public static final Short ZERO_S = 0;
+  /** Zero as Byte */
+  public static final Byte ZERO_B = 0;
 
   /**
    * Returns whether or not the specified {@code Number} can be converted an instance of the {@code
@@ -76,4 +87,66 @@ public class NumberMethods {
       return true;
     }
   }
+
+  /**
+   * Returns the default {@code int} value (0) if the argument is null, else the argument itself.
+   *
+   * @param i The primitive wrapper
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static Integer nvl(Integer i) {
+    return ObjectMethods.ifNull(i, ZERO);
+  }
+
+  /**
+   * Returns the default {@code double} value (0) if the argument is null, else the argument itself.
+   *
+   * @param d The primitive wrapper
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static Double nvl(Double d) {
+    return ObjectMethods.ifNull(d, ZERO_D);
+  }
+
+  /**
+   * Returns the default {@code long} value (0) if the argument is null, else the argument itself.
+   *
+   * @param l The primitive wrapper
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static Long nvl(Long l) {
+    return ObjectMethods.ifNull(l, ZERO_L);
+  }
+
+  /**
+   * Returns the default {@code float} value (0) if the argument is null, else the argument itself.
+   *
+   * @param f The primitive wrapper
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static Float nvl(Float f) {
+    return ObjectMethods.ifNull(f, ZERO_F);
+  }
+
+  /**
+   * Returns the default {@code short} value (0) if the argument is null, else the argument itself.
+   *
+   * @param s The primitive wrapper
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static Short nvl(Short s) {
+    return ObjectMethods.ifNull(s, ZERO_S);
+  }
+
+  /**
+   * Returns the default {@code byte} value (0) if the argument is null, else the argument itself.
+   *
+   * @param b The primitive wrapper
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static Byte nvl(Byte b) {
+    return ObjectMethods.ifNull(b, ZERO_B);
+  }
+
+  private NumberMethods() {}
 }
