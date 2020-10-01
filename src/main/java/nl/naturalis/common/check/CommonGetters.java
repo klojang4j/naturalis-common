@@ -65,12 +65,12 @@ public class CommonGetters {
    *
    * @return A {@code Function} that returns the length of a {@code String}
    */
-  public static ToIntFunction<String> length() {
+  public static ToIntFunction<String> strlen() {
     return String::length;
   }
 
   static {
-    tmp.put(length(), "length");
+    tmp.put(strlen(), "length");
   }
 
   /**
@@ -79,22 +79,22 @@ public class CommonGetters {
    * @param <T> The type of the elements in the array
    * @return A {@code Function} that returns the length of an array
    */
-  public static <T> ToIntFunction<T[]> arrayLength() {
+  public static <T> ToIntFunction<T[]> length() {
     return x -> x.length;
   }
 
   static {
-    tmp.put(arrayLength(), "length");
+    tmp.put(length(), "length");
   }
 
   /**
    * A {@code Function} that returns the size of a {@code Collection}. Equivalent to {@code
    * Collection::size}. See also {@link #listSize()} and {@link #setSize()}.
    *
-   * @param <T> The type of the elements in the {@code Collection}
+   * @param <E> The type of the elements in the {@code Collection}
    * @return A {@code Function} that returns the size of a {@code Collection}
    */
-  public static <T> ToIntFunction<Collection<T>> size() {
+  public static <E, C extends Collection<? super E>> ToIntFunction<C> size() {
     return Collection::size;
   }
 
@@ -109,7 +109,7 @@ public class CommonGetters {
    * @param <V> The value typr
    * @return A {@code Function} that returns the size of a {@code Map}
    */
-  public static <K, V> ToIntFunction<Map<K, V>> mapSize() {
+  public static <K, V, M extends Map<? super K, ? super V>> ToIntFunction<M> mapSize() {
     return Map::size;
   }
 
@@ -119,22 +119,12 @@ public class CommonGetters {
 
   /**
    * A {@code Function} that returns the size of a {@code List}. Equivalent to {@code List::size}.
-   * Note that the compiler will force you to match the declared type of the argument to the
-   * argument of the getter function:
-   *
-   * <p>
-   *
-   * <pre>
-   * Collection&lt;String&gt; c = List.of("Hello", "World");
-   * Check.notNull(c, "c").and(size(), atMost(), 2);
-   * List&lt;String&gt; l = List.of("Hello", "World");
-   * Check.notNull(l, "l").and(listSize(), atMost(), 2); // size() wouldn't work here!
-   * </pre>
+   * Can be in case using the {@link #size()} method would cause a name clash.
    *
    * @param <T> The type of the elements in the {@code List}
    * @return A {@code Function} that returns the size of a {@code List}
    */
-  public static <T> ToIntFunction<List<T>> listSize() {
+  public static <E, L extends List<? super E>> ToIntFunction<L> listSize() {
     return List::size;
   }
 
@@ -143,23 +133,13 @@ public class CommonGetters {
   }
 
   /**
-   * A {@code Function} that returns the size of a {@code Set}. Equivalent to {@code Set::size}.
-   * Note that the compiler will force you to match the declared type of the argument to the
-   * argument of the getter function:
-   *
-   * <p>
-   *
-   * <pre>
-   * Collection&lt;String&gt; c = List.of("Hello", "World");
-   * Check.notNull(c, "c").and(size(), atMost(), 2);
-   * Set&lt;String&gt; s = Set.of("Hello", "World");
-   * Check.notNull(s, "s").and(listSize(), atMost(), 2); // size() wouldn't work here!
-   * </pre>
+   * A {@code Function} that returns the size of a {@code Set}. Equivalent to {@code Set::size}. Can
+   * be in case using the {@link #size()} method would cause a name clash.
    *
    * @param <T> The type of the elements in the {@code Set}
    * @return A {@code Function} that returns the size of a {@code Set}
    */
-  public static <T> ToIntFunction<Set<T>> setSize() {
+  public static <E, S extends Set<? super E>> ToIntFunction<S> setSize() {
     return Set::size;
   }
 

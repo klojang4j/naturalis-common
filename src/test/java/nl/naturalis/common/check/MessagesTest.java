@@ -65,30 +65,29 @@ public class MessagesTest {
   }
 
   @Test
-  public void elementOf01() {
+  public void in01() {
     Object argument = "Hello world, how are you?";
     String argName = "foo";
     LinkedHashSet<?> target = new LinkedHashSet<>();
     String s = target.getClass().getSimpleName() + "@" + System.identityHashCode(target);
-    String expected =
-        String.format("foo must be element of %s (was \"Hello world, how are[...]\")", s);
+    String expected = String.format("foo must be in %s (was \"Hello world, how are[...]\")", s);
     System.out.println(expected);
-    String actual = Messages.get(elementOf(), argument, argName, target);
+    String actual = Messages.get(in(), argument, argName, target);
     System.out.println(actual);
     assertEquals(expected, actual);
   }
 
   @Test
-  public void elementOf02() {
+  public void in02() {
     Object argument = new float[7];
     String argName = "foo";
     LinkedHashSet<?> target = new LinkedHashSet<>();
     String s0 =
         ClassMethods.getArrayTypeSimpleName(argument) + "@" + System.identityHashCode(argument);
     String s1 = target.getClass().getSimpleName() + "@" + System.identityHashCode(target);
-    String expected = String.format("foo must be element of %s (was %s)", s1, s0);
+    String expected = String.format("foo must be in %s (was %s)", s1, s0);
     System.out.println(expected);
-    String actual = Messages.get(elementOf(), argument, argName, target);
+    String actual = Messages.get(in(), argument, argName, target);
     System.out.println(actual);
     assertEquals(expected, actual);
   }

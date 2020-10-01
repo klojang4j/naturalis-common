@@ -2,7 +2,11 @@ package nl.naturalis.common;
 
 import java.util.*;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonChecks.atMost;
+import static nl.naturalis.common.check.CommonChecks.isEven;
+import static nl.naturalis.common.check.CommonChecks.notEmpty;
+import static nl.naturalis.common.check.CommonChecks.notNegative;
+import static nl.naturalis.common.check.CommonGetters.length;
 
 /** Methods extending the Java Collection framework. */
 public class CollectionMethods {
@@ -111,8 +115,7 @@ public class CollectionMethods {
    */
   @SuppressWarnings("unchecked")
   public static <K, V> HashMap<K, V> newHashMap(Object... kvPairs) {
-    Check.notNull(kvPairs, "kvPairs");
-    Check.that(kvPairs.length, "Number of key-value pairs", isEven());
+    Check.notNull(kvPairs, "kvPairs").and(length(), isEven());
     HashMap<K, V> map = new HashMap<>(kvPairs.length);
     for (int i = 0; i < kvPairs.length; i += 2) {
       map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
@@ -129,6 +132,7 @@ public class CollectionMethods {
    */
   @SafeVarargs
   public static <T> HashSet<T> newHashSet(T... elems) {
+    Check.notNull(elems, "elems");
     HashSet<T> set = new HashSet<>(elems.length);
     Arrays.stream(elems).forEach(set::add);
     return set;
@@ -144,8 +148,7 @@ public class CollectionMethods {
    */
   @SuppressWarnings("unchecked")
   public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(Object... kvPairs) {
-    Check.notNull(kvPairs, "kvPairs");
-    Check.that(kvPairs.length, "Number of key-value pairs", isEven());
+    Check.notNull(kvPairs, "kvPairs").and(length(), isEven());
     LinkedHashMap<K, V> map = new LinkedHashMap<>(kvPairs.length);
     for (int i = 0; i < kvPairs.length; i += 2) {
       map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
@@ -162,13 +165,15 @@ public class CollectionMethods {
    */
   @SafeVarargs
   public static <T> LinkedHashSet<T> newLinkedHashSet(T... elems) {
+    Check.notNull(elems, "elems");
     LinkedHashSet<T> set = new LinkedHashSet<>(elems.length);
     Arrays.stream(elems).forEach(set::add);
     return set;
   }
 
   /**
-   * Shrinks the provided list by one element.
+   * Returns a sublist containing all but the last element of the provided list. The returned list
+   * is backed the original list, so changing its elements will affect the original list as well.
    *
    * @param <T> The type of the elements in the list
    * @param list The list to shrink
@@ -179,7 +184,9 @@ public class CollectionMethods {
   }
 
   /**
-   * Shrinks the provided list by the specified number of elements.
+   * Returns a sublist containing all but the last {@code by} elements of the provided list. The
+   * returned list is backed the original list, so changing its elements will affect the original
+   * list as well.
    *
    * @param <T> The type of the elements in the list
    * @param list The list to shrink
@@ -188,13 +195,14 @@ public class CollectionMethods {
    */
   public static <T> List<T> shrink(List<T> list, int by) {
     Check.that(list, "list", notEmpty());
-    Check.that(by, "by", greaterThan(), 0).and(atMost(), list.size());
+    Check.that(by, "by", notNegative()).and(atMost(), list.size());
     int sz = list.size();
     return sz == by ? Collections.emptyList() : list.subList(0, sz - by);
   }
 
   /**
-   * Left-shifts the provided list by one element.
+   * Left-shifts the provided list by one element. The returned list is backed the original list, so
+   * changing its elements will affect the original list as well.
    *
    * @param <T>
    * @param list
@@ -205,7 +213,8 @@ public class CollectionMethods {
   }
 
   /**
-   * Left-shifts the provided list by the specified number of elements.
+   * Left-shifts the provided list by the specified number of elements. The returned list is backed
+   * the original list, so changing its elements will affect the original list as well.
    *
    * @param <T>
    * @param list
@@ -214,45 +223,45 @@ public class CollectionMethods {
    */
   public static <T> List<T> shift(List<T> list, int by) {
     Check.that(list, "list", notEmpty());
-    Check.that(by, "by", greaterThan(), 0).and(atMost(), list.size());
+    Check.that(by, "by", notNegative()).and(atMost(), list.size());
     int sz = list.size();
     return sz == by ? Collections.emptyList() : list.subList(by, sz);
   }
 
   /**
    * Returns a sublist of the provided list starting with starting with element {@code from} and
-   * containing at most {@code length} elements.
+   * containing at most {@code length} elements. The returned list is backed the original list, so
+   * changing its elements will affect the original list as well.
+   *
+   * <p>
    *
    * <ol>
-   *   <li>If {@code from} is negative, it is relative to the end of the list.
+   *   <li>If the list is empty, it is returned as-is.
+   *   <li>If {@code from} is negative, it is taken relative to the end of the list.
    *   <li>If {@code length} is negative, the sublist is taken to the left of {@code from}
-   *       (inclusive).
-   *   <li>Both {@code from} and {@code length} are clamped to their minimum and maximum values. In
+   *       (exclusive). So {@code from} in effect becomes the standard <i>to-exclusive</i> argument.
+   *   <li>Both {@code from} and {@code length} are clamped to the start and/or end of the list. In
    *       other words you will never get an {@link ArrayIndexOutOfBoundsException}.
    * </ol>
    *
    * @param list The {@code List} to extract a sublist from
-   * @param from The start index
-   * @param length The length of the substr
-   * @return
+   * @param from The start index (however, see above)
+   * @param length The length of the sublist
+   * @return A sublist of the provided list
    */
   public static <T> List<T> sublist(List<T> list, int from, int length) {
     Check.notNull(list, "list");
-    if (length == 0) {
-      return Collections.emptyList();
+    if (list.isEmpty()) {
+      return list;
     }
     if (from < 0) {
       from = Math.max(0, list.size() + from);
     }
     if (length < 0) {
-      /*
-       * e.g. if from == 4 and length == -2, then the 5th element will be the last element of the sublist
-       * and the 4th element will be the first.
-       */
-      length = Math.min(from + 1, Math.abs(length));
-      from = from - length + 1;
+      length = Math.min(from, -length);
+      from -= length;
     } else {
-      from = Math.min(list.size() - 1, from);
+      from = Math.min(list.size(), from);
     }
     int to = Math.min(list.size(), from + length);
     return list.subList(from, to);

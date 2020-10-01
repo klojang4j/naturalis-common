@@ -143,7 +143,7 @@ public class CommonChecks {
   }
 
   static {
-    add(isEmpty(), msgIsEmpty());
+    add(isEmpty(), msgEmpty());
   }
 
   /**
@@ -269,35 +269,6 @@ public class CommonChecks {
     add(writable(), msgWritable());
   }
 
-  /**
-   * Verifies that the argument is an intance of a particular class or interface.
-   *
-   * @param <X> The type of the argument
-   * @param <Y> The type of the object of the relationship
-   * @return A {@code Relation}
-   */
-  public static <X, Y extends Class<?>> Relation<X, Y> instanceOf() {
-    return (x, y) -> y.isInstance(x);
-  }
-
-  static {
-    add(instanceOf(), msgInstanceOf());
-  }
-
-  /**
-   * Verifies that the argument is an array.
-   *
-   * @param <T> The type of the argument
-   * @return A {@code Predicate}
-   */
-  public static <T> Predicate<T> isArray() {
-    return x -> x.getClass().isArray();
-  }
-
-  static {
-    add(isArray(), msgIsArray());
-  }
-
   /* ++++++++++++++ IntPredicate ++++++++++++++ */
 
   /**
@@ -381,6 +352,35 @@ public class CommonChecks {
   /* ++++++++++++++ Relation ++++++++++++++ */
 
   /**
+   * Verifies that the argument is an intance of a particular class or interface.
+   *
+   * @param <X> The type of the argument
+   * @param <Y> The type of the object of the relationship
+   * @return A {@code Relation}
+   */
+  public static <X, Y extends Class<?>> Relation<X, Y> instanceOf() {
+    return (x, y) -> y.isInstance(x);
+  }
+
+  static {
+    add(instanceOf(), msgInstanceOf());
+  }
+
+  /**
+   * Verifies that the argument is an array.
+   *
+   * @param <T> The type of the argument
+   * @return A {@code Predicate}
+   */
+  public static <T> Predicate<T> isArray() {
+    return x -> x.getClass().isArray();
+  }
+
+  static {
+    add(isArray(), msgIsArray());
+  }
+
+  /**
    * Verifies that a {@code Collection} contains a particular value. Equivalent to {@link
    * Collection#contains(Object) Collection::contains}.
    *
@@ -388,7 +388,7 @@ public class CommonChecks {
    * @param <C> The type of the argument
    * @return A {@code Relation}
    */
-  public static <E, C extends Collection<E>> Relation<C, E> contains() {
+  public static <E, C extends Collection<? super E>> Relation<C, E> contains() {
     return Collection::contains;
   }
 
@@ -403,7 +403,7 @@ public class CommonChecks {
    * @param <C> The type of the argument
    * @return A {@code Relation}
    */
-  public static <E, C extends Collection<E>> Relation<C, E> notContains() {
+  public static <E, C extends Collection<? super E>> Relation<C, E> notContains() {
     return (x, y) -> !x.contains(y);
   }
 
@@ -418,12 +418,12 @@ public class CommonChecks {
    * @param <C> The type of the {@code Collection}
    * @return A {@code Relation}
    */
-  public static <E, C extends Collection<E>> Relation<E, C> elementOf() {
+  public static <E, C extends Collection<? super E>> Relation<E, C> in() {
     return (x, y) -> y.contains(x);
   }
 
   static {
-    add(elementOf(), msgElementOf());
+    add(in(), msgIn());
   }
 
   /**
@@ -433,12 +433,12 @@ public class CommonChecks {
    * @param <C> The type of the {@code Collection}
    * @return A {@code Relation}
    */
-  public static <E, C extends Collection<E>> Relation<E, C> notElementOf() {
+  public static <E, C extends Collection<? super E>> Relation<E, C> notIn() {
     return (x, y) -> !y.contains(x);
   }
 
   static {
-    add(notElementOf(), msgNotElementOf());
+    add(notIn(), msgNotIn());
   }
 
   /**
@@ -448,7 +448,7 @@ public class CommonChecks {
    * @param <M> The Type of the {@code Map}
    * @return A {@code Relation}
    */
-  public static <K, M extends Map<K, ?>> Relation<M, K> containsKey() {
+  public static <K, M extends Map<? super K, ?>> Relation<M, K> containsKey() {
     return Map::containsKey;
   }
 
@@ -463,7 +463,7 @@ public class CommonChecks {
    * @param <M> The Type of the {@code Map}
    * @return A {@code Relation}
    */
-  public static <K, M extends Map<K, ?>> Relation<M, K> notContainsKey() {
+  public static <K, M extends Map<? super K, ?>> Relation<M, K> notContainsKey() {
     return (x, y) -> !x.containsValue(y);
   }
 
@@ -478,7 +478,7 @@ public class CommonChecks {
    * @param <M> The Type of the {@code Map}
    * @return A {@code Relation}
    */
-  public static <V, M extends Map<?, V>> Relation<M, V> containsValue() {
+  public static <V, M extends Map<?, ? super V>> Relation<M, V> containsValue() {
     return Map::containsValue;
   }
 
@@ -493,7 +493,7 @@ public class CommonChecks {
    * @param <M> The Type of the {@code Map}
    * @return A {@code Relation}
    */
-  public static <V, M extends Map<?, V>> Relation<M, V> notContainsValue() {
+  public static <V, M extends Map<?, ? super V>> Relation<M, V> notContainsValue() {
     return (x, y) -> !x.containsValue(y);
   }
 

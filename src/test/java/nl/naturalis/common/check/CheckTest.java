@@ -126,7 +126,7 @@ public class CheckTest {
 
   @Test
   public void size08() {
-    Check.that(List.of("a", "b", "c", "d", "e"), "fooArg").and(listSize(), atMost(), 10);
+    Check.that(List.of("a", "b", "c", "d", "e"), "fooArg").and(size(), atMost(), 10);
   }
 
   @Test

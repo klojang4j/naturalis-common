@@ -100,6 +100,30 @@ public abstract class Check<T, E extends Exception> {
    * @param argName The name of the argument
    * @return A new {@code Check} object
    */
+  public static Check<Integer, IllegalArgumentException> that(int arg) {
+    return new IntCheck<>(arg, "argument", IllegalArgumentException::new);
+  }
+
+  /**
+   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * argument.
+   *
+   * @param <U> The type of the argument
+   * @param arg The argument
+   * @param argName The name of the argument
+   * @return A new {@code Check} object
+   */
+  public static <U> Check<U, IllegalArgumentException> that(U arg) {
+    return new ObjectCheck<>(arg, "argument", IllegalArgumentException::new);
+  }
+
+  /**
+   * Static factory method. Returns a new {@code Check} object suitable for testing integers.
+   *
+   * @param arg The argument
+   * @param argName The name of the argument
+   * @return A new {@code Check} object
+   */
   public static Check<Integer, IllegalArgumentException> that(int arg, String argName) {
     return new IntCheck<>(arg, argName, IllegalArgumentException::new);
   }
@@ -534,7 +558,7 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Submits the argument to the specified test. This method is especially useful when using the
-   * (statically imported) tests in thw {@link CommonChecks} class, as they have predefined,
+   * (statically imported) tests in the {@link CommonChecks} class, as they have predefined,
    * informative error messages associated with them.
    *
    * @param test The test
@@ -546,6 +570,17 @@ public abstract class Check<T, E extends Exception> {
       return this;
     }
     throw excFactory.apply(Messages.get(test, ok(), argName));
+  }
+
+  /**
+   * Same as {@link #and(Predicate) and(test)}.
+   *
+   * @param test The test
+   * @return This {@code Check} object
+   * @throws E If the test fails
+   */
+  public Check<T, E> is(Predicate<T> test) throws E {
+    return and(test);
   }
 
   /**
@@ -565,6 +600,19 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
+   * Same as {@link #and(Predicate, String, Object...) and(test, message, msgArgs)}.
+   *
+   * @param test The test
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the test fails
+   */
+  public Check<T, E> is(Predicate<T> test, String message, Object... msgArgs) throws E {
+    return and(test, message, msgArgs);
+  }
+
+  /**
    * Submits the argument to the specified test. This method is especially useful when using the
    * (statically imported) tests in thw {@link CommonChecks} class, as they have predefined,
    * informative error messages associated with them.
@@ -576,6 +624,17 @@ public abstract class Check<T, E extends Exception> {
   public abstract Check<T, E> and(IntPredicate test) throws E;
 
   /**
+   * Same as {@link #and(IntPredicate) and(test)}.
+   *
+   * @param test The test
+   * @return This {@code Check} object
+   * @throws E If the test fails
+   */
+  public Check<T, E> is(IntPredicate test) throws E {
+    return and(test);
+  }
+
+  /**
    * Submits the argument to the specified test. Allows you to provide a custom error message.
    *
    * @param test The test
@@ -585,6 +644,19 @@ public abstract class Check<T, E extends Exception> {
    * @throws E If the test fails
    */
   public abstract Check<T, E> and(IntPredicate test, String message, Object... msgArgs) throws E;
+
+  /**
+   * Same as {@link #and(IntPredicate, String, Object...) and(test, message, msgArgs)}.
+   *
+   * @param test The test
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the test fails
+   */
+  public Check<T, E> is(IntPredicate test, String message, Object... msgArgs) throws E {
+    return and(test, message, msgArgs);
+  }
 
   /**
    * Verifies that there is some relation between the argument and some other value. This method is
@@ -606,6 +678,20 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
+   * Same as {@link #and(Relation, Object) and(relation, relateTo)}.
+   *
+   * @param <U> The type of the object of the relationship
+   * @param relation The relation to verify between the argument and the specified value ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the test fails
+   */
+  public <U> Check<T, E> is(Relation<T, U> relation, U relateTo) throws E {
+    return and(relation, relateTo);
+  }
+
+  /**
    * Verifies that there is some relation between the argument and some other value. Allows you to
    * provide a custom error message.
    *
@@ -624,6 +710,24 @@ public abstract class Check<T, E extends Exception> {
       return this;
     }
     throw excFactory.apply(String.format(message, msgArgs));
+  }
+
+  /**
+   * Same as {@link #and(Relation, Object, String, Object...) and(relation, relateTo, message,
+   * msgArgs)}.
+   *
+   * @param <U> The type of the object of the relationship
+   * @param relation The relation to verify between the argument and the specified value ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the relation fails
+   */
+  public <U> Check<T, E> is(Relation<T, U> relation, U relateTo, String message, Object... msgArgs)
+      throws E {
+    return and(relation, relateTo, message, msgArgs);
   }
 
   /**

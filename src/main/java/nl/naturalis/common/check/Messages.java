@@ -46,7 +46,7 @@ class Messages {
     return x -> format("%s must not be empty or contain empty values", argName(x));
   }
 
-  static Function<Object[], String> msgIsEmpty() {
+  static Function<Object[], String> msgEmpty() {
     return x -> format("%s must be empty (was %s)", argName(x), argVal(x[0]));
   }
 
@@ -147,13 +147,12 @@ class Messages {
     return x -> format("%s must not contain %s", argName(x), argVal(x[2]));
   }
 
-  static Function<Object[], String> msgElementOf() {
-    return x -> format("%s must be element of %s (was %s)", argName(x), argVal(x[2]), argVal(x[0]));
+  static Function<Object[], String> msgIn() {
+    return x -> format("%s must be in %s (was %s)", argName(x), argVal(x[2]), argVal(x[0]));
   }
 
-  static Function<Object[], String> msgNotElementOf() {
-    return x ->
-        format("%s must be not element of %s (was %s)", argName(x), argVal(x[2]), argVal(x[0]));
+  static Function<Object[], String> msgNotIn() {
+    return x -> format("%s must not be in %s (was %s)", argName(x), argVal(x[2]), argVal(x[0]));
   }
 
   static Function<Object[], String> msgContainsKey() {
