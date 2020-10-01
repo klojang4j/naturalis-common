@@ -709,7 +709,6 @@ public final class StringMethods {
    *
    * @param subject The string to take a substring from
    * @param until The string up until which to take the substring
-   * @param firstOccurrence Whether to use the first of last occurrence of {@code until}
    * @return The substring
    */
   public static String substringUpTo(Object subject, String until) {
@@ -740,7 +739,6 @@ public final class StringMethods {
    *
    * @param subject The string to take a substring from
    * @param until The string up until which to take the substring
-   * @param firstOccurrence Whether to use the first of last occurrence of {@code until}
    * @return The substring
    */
   public static String substringUpTo(Object subject, char until) {

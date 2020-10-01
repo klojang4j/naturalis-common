@@ -17,13 +17,16 @@ import java.util.function.ToIntFunction;
  * // "stampCollection.size must be > 100 (was 22)"
  * </pre>
  *
- * <p>Most of the getters defined here are plain, unadorned method references. <b>None of them do a
- * null-check on the argument.</b> They rely upon being embedded within in chain of checks on a
+ * <p>Most of the getters defined here are plain, unadorned method references. <i>None of them do a
+ * null-check on the argument.</i> They rely upon being embedded within in chain of checks on a
  * {@link Check} object, the first of which should be a <i>not-null</i> check.
  *
  * @author Ayco Holleman
  */
 public class CommonGetters {
+
+  static final String LENGTH = "length";
+  static final String SIZE = "size";
 
   private CommonGetters() {}
 
@@ -65,12 +68,12 @@ public class CommonGetters {
    *
    * @return A {@code Function} that returns the length of a {@code String}
    */
-  public static ToIntFunction<String> strlen() {
+  public static ToIntFunction<String> stringLength() {
     return String::length;
   }
 
   static {
-    tmp.put(strlen(), "length");
+    tmp.put(stringLength(), LENGTH);
   }
 
   /**
@@ -84,7 +87,20 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(length(), "length");
+    tmp.put(length(), LENGTH);
+  }
+
+  /**
+   * A {@code Function} that returns the length of an {@code int} array.
+   *
+   * @return A {@code Function} that returns the length of an array
+   */
+  public static ToIntFunction<int[]> intLength() {
+    return x -> x.length;
+  }
+
+  static {
+    tmp.put(intLength(), LENGTH);
   }
 
   /**
@@ -94,12 +110,12 @@ public class CommonGetters {
    * @param <E> The type of the elements in the {@code Collection}
    * @return A {@code Function} that returns the size of a {@code Collection}
    */
-  public static <E, C extends Collection<? super E>> ToIntFunction<C> size() {
+  public static <C extends Collection<?>> ToIntFunction<C> size() {
     return Collection::size;
   }
 
   static {
-    tmp.put(size(), "size");
+    tmp.put(size(), SIZE);
   }
 
   /**
@@ -109,12 +125,12 @@ public class CommonGetters {
    * @param <V> The value typr
    * @return A {@code Function} that returns the size of a {@code Map}
    */
-  public static <K, V, M extends Map<? super K, ? super V>> ToIntFunction<M> mapSize() {
+  public static <M extends Map<?, ?>> ToIntFunction<M> mapSize() {
     return Map::size;
   }
 
   static {
-    tmp.put(mapSize(), "size");
+    tmp.put(mapSize(), SIZE);
   }
 
   /**
@@ -124,12 +140,12 @@ public class CommonGetters {
    * @param <T> The type of the elements in the {@code List}
    * @return A {@code Function} that returns the size of a {@code List}
    */
-  public static <E, L extends List<? super E>> ToIntFunction<L> listSize() {
+  public static <L extends List<?>> ToIntFunction<L> listSize() {
     return List::size;
   }
 
   static {
-    tmp.put(listSize(), "size");
+    tmp.put(listSize(), SIZE);
   }
 
   /**
@@ -139,12 +155,12 @@ public class CommonGetters {
    * @param <T> The type of the elements in the {@code Set}
    * @return A {@code Function} that returns the size of a {@code Set}
    */
-  public static <E, S extends Set<? super E>> ToIntFunction<S> setSize() {
+  public static <S extends Set<?>> ToIntFunction<S> setSize() {
     return Set::size;
   }
 
   static {
-    tmp.put(setSize(), "size");
+    tmp.put(setSize(), SIZE);
   }
 
   static String getGetterName(Object getter) {

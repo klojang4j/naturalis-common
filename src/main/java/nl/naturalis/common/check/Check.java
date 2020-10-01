@@ -97,7 +97,7 @@ public abstract class Check<T, E extends Exception> {
    * Static factory method. Returns a new {@code Check} object suitable for testing integers.
    *
    * @param arg The argument
-   * @param argName The name of the argument
+   * @param arg The name of the argument
    * @return A new {@code Check} object
    */
   public static Check<Integer, IllegalArgumentException> that(int arg) {
@@ -110,7 +110,6 @@ public abstract class Check<T, E extends Exception> {
    *
    * @param <U> The type of the argument
    * @param arg The argument
-   * @param argName The name of the argument
    * @return A new {@code Check} object
    */
   public static <U> Check<U, IllegalArgumentException> that(U arg) {

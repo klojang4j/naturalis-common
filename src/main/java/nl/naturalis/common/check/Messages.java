@@ -91,24 +91,28 @@ class Messages {
   }
 
   static Function<Object[], String> msgIsFile() {
-    return x -> format("No such file (%s): %s", x[1], ((File) x[0]).getAbsolutePath());
+    String fmt = "%s (%s) must be an existing file";
+    return x -> format(fmt, argName(x), ((File) x[0]).getAbsolutePath());
   }
 
   static Function<Object[], String> msgIsDirectory() {
-    return x -> format("No such directory (%s): %s", x[1], ((File) x[0]).getAbsolutePath());
+    String fmt = "%s (%s) must be an existing directory";
+    return x -> format(fmt, argName(x), ((File) x[0]).getAbsolutePath());
   }
 
   static Function<Object[], String> msgFileNotExists() {
-    return x ->
-        format("File/directory already exists (%s): %s", x[1], ((File) x[0]).getAbsolutePath());
+    String fmt = "%s (%s) must not exist";
+    return x -> format(fmt, argName(x), ((File) x[0]).getAbsolutePath());
   }
 
   static Function<Object[], String> msgReadable() {
-    return x -> format("File not reable (%s): %s", x[1], ((File) x[0]).getAbsolutePath());
+    String fmt = "%s (%s) must be readable";
+    return x -> format(fmt, argName(x), ((File) x[0]).getAbsolutePath());
   }
 
   static Function<Object[], String> msgWritable() {
-    return x -> format("File (%s) not writable (%s): %s", x[1], ((File) x[0]).getAbsolutePath());
+    String fmt = "%s (%s) must be writable";
+    return x -> format(fmt, argName(x), ((File) x[0]).getAbsolutePath());
   }
 
   static Function<Object[], String> msgIsEven() {
@@ -210,11 +214,11 @@ class Messages {
 
   private static String argSize(Object[] x) {
     if (x[0] instanceof CharSequence) {
-      return argName(x) + ".length()";
+      return argName(x) + '.' + CommonGetters.LENGTH;
     } else if (x[0].getClass().isArray()) {
-      return argName(x) + ".length";
+      return argName(x) + '.' + CommonGetters.LENGTH;
     }
-    return argName(x) + ".size()";
+    return argName(x) + '.' + CommonGetters.SIZE;
   }
 
   private static String argName(Object[] x) {
