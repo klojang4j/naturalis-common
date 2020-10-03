@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ObjectMethods.ifTrue;
-import static nl.naturalis.common.check.CommonChecks.deepNotEmpty;
+import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonChecks.noneNull;
 import static nl.naturalis.common.check.CommonChecks.notEmpty;
 
@@ -646,38 +646,46 @@ public final class StringMethods {
   }
 
   /**
-   * Substring method that allows substring retrieval relative to the end of a string. See {@link
-   * #substring(Object, int, int)}.
+   * Substring method that facilitates substring retrieval relative to the end of a string.
+   *
+   * <p>
+   *
+   * <ol>
+   *   <li>If the input string is null or empty, an empty string is returned and the {@code from}
+   *       argument is not considered.
+   *   <li>In any other case, both {@code from} is submitted to a boundary check.
+   *   <li>If {@code from} is negative, it is taken relative to the end of the string.
+   * </ol>
    *
    * @param subject The {@code String} to extract a substring from
    * @param from The start index within {@code string} (may be negative)
    * @return The substring
    */
   public static String substring(Object subject, int from) {
-    String str;
-    if (subject == null || from > (str = subject.toString()).length()) {
+    final String str;
+    if (subject == null || (str = subject.toString()).isEmpty()) {
       return EMPTY;
     }
     if (from < 0) {
       from = Math.max(0, str.length() + from);
     }
+    Check.that(from, "from", notNegative()).and(lessThan(), str.length());
     return str.substring(from);
   }
 
   /**
-   * Substring method that allows for substring retrieval relative to the end of a string. The
-   * {@code length} argument will be clamped to remain with the bounds of the string.
+   * Substring method that facilitates substring retrieval relative to the end of a string as well
+   * as substring retrieval in the opposite direction.
    *
    * <p>
    *
    * <ol>
-   *   <li>If the input string is null or empty, or if {@code length} is 0, en empty string is
-   *       returned.
+   *   <li>If the input string is null or empty, or if {@code length} equals zero, an empty string
+   *       is returned and the {@code from} argument is not considered.
+   *   <li>In any other case, both {@code from} and {@length} are submitted to boundary checks.
    *   <li>If {@code from} is negative, it is taken relative to the end of the string.
-   *   <li>If {@code length} is negative, the substring is taken to the left of {@code from}
-   *       (exclusive). So {@code from} in effect becomes the standard <i>to-exclusive</i> argument.
-   *   <li>Both {@code from} and {@code length} are clamped to the start and/or end of the string.
-   *       In other words you will never get an {@link ArrayIndexOutOfBoundsException}.
+   *   <li>If {@code length} is negative, the substring is taken in the opposite direction, with
+   *       {@code from} now becoming the <i>last</i> character of the substring
    * </ol>
    *
    * @param subject The {@code String} to extract a substring from
@@ -686,20 +694,23 @@ public final class StringMethods {
    * @return The substring
    */
   public static String substring(Object subject, int from, int length) {
-    String str;
-    if (subject == null || length == 0 || (str = subject.toString()).isEmpty()) {
+    final String str;
+    if (subject == null || (str = subject.toString()).isEmpty() || length == 0) {
       return EMPTY;
     }
     if (from < 0) {
-      from = Math.max(0, str.length() + from);
+      from = str.length() + from;
     }
-    if (length < 0) {
-      length = Math.min(from, -length);
-      from -= length;
+    Check.that(from, "from", notNegative()).and(lessThan(), str.length());
+    final int to;
+    if (length > 0) {
+      to = from + length;
+      Check.that(to, "from+length", atMost(), str.length());
     } else {
-      from = Math.min(str.length(), from);
+      to = from + 1;
+      from = to + length;
+      Check.that(from, "from", notNegative());
     }
-    int to = Math.min(str.length(), from + length);
     return str.substring(from, to);
   }
 
@@ -708,11 +719,11 @@ public final class StringMethods {
    * or the entire string if it does not contain {@code until}.
    *
    * @param subject The string to take a substring from
-   * @param until The string up until which to take the substring
+   * @param to The string up until which to take the substring
    * @return The substring
    */
-  public static String substringUpTo(Object subject, String until) {
-    return substringUpTo(subject, until, false);
+  public static String substringUpTo(Object subject, String to) {
+    return substringUpTo(subject, to, false);
   }
 
   /**
@@ -720,16 +731,16 @@ public final class StringMethods {
    * the string, or the entire string if it does not contain {@code until}.
    *
    * @param subject The string to take a substring from
-   * @param until The string up until which to take the substring
+   * @param to The string up until which to take the substring
    * @param firstOccurrence Whether to use the first of last occurrence of {@code until}
    * @return The substring
    */
-  public static String substringUpTo(Object subject, String until, boolean firstOccurrence) {
+  public static String substringUpTo(Object subject, String to, boolean firstOccurrence) {
     if (subject == null) {
       return EMPTY;
     }
     String str = subject.toString();
-    int i = firstOccurrence ? str.indexOf(until) : str.lastIndexOf(until);
+    int i = firstOccurrence ? str.indexOf(to) : str.lastIndexOf(to);
     return i == -1 ? str : str.substring(0, i);
   }
 

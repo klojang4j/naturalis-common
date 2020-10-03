@@ -26,21 +26,50 @@ public class StringMethodsTest {
   }
 
   @Test
-  public void substr_3args() {
+  public void substr_3args01() {
     assertEquals("01", "", substring(null, 0, 5));
-    assertEquals("02", "", substring("", 0, -1));
-    assertEquals("03", "", substring("whatever", 0, -1));
-    assertEquals("04", "", substring("whatever", 1, 0));
-    assertEquals("05", "", substring("whatever", 250, 3));
-    assertEquals("06", "what", substring("whatever", 0, 4));
-    assertEquals("07", "ever", substring("whatever", -4, 4));
-    assertEquals("08", "ever", substring("whatever", -4, 250));
-    assertEquals("09", "", substring("whatever", 200, 250));
-    assertEquals("10", "eve", substring("whatever", -4, 3));
-    assertEquals("11", "e", substring("whatever", -4, 1));
-    assertEquals("12", "e", substring("whatever", 4, 1));
-    assertEquals("13", "what", substring("whatever", -250, 4));
-    assertEquals("14", "whatever", substring("whatever", -250, 1000));
+    assertEquals("02", "", substring("", 0, 0));
+    assertEquals("03", "", substring("whatever", 1, 0));
+    assertEquals("04", "", substring("whatever", 250, 0));
+    assertEquals("05", "what", substring("whatever", 0, 4));
+    assertEquals("06", "ever", substring("whatever", -4, 4));
+    assertEquals("07", "eve", substring("whatever", -4, 3));
+    assertEquals("08", "e", substring("whatever", -4, 1));
+    assertEquals("09", "e", substring("whatever", 4, 1));
+    assertEquals("10", "", substring("whatever", 7, 0));
+    assertEquals("11", "r", substring("whatever", 7, 1));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void substr_3args02() {
+    substring("whatever", 250, 3);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void substr_3args03() {
+    substring("whatever", -4, 250);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void substr_3args04() {
+    substring("whatever", -250, 4);
+  }
+
+  @Test
+  public void substr_3args05() {
+    assertEquals("01", "w", substring("whatever", 0, -1));
+    assertEquals("02", "h", substring("whatever", 1, -1));
+    assertEquals("03", "ha", substring("whatever", 2, -2));
+    assertEquals("04", "hate", substring("whatever", 4, -4));
+    assertEquals("05", "r", substring("whatever", 7, -1));
+    assertEquals("06", "r", substring("whatever", -1, -1));
+    assertEquals("07", "er", substring("whatever", -1, -2));
+    assertEquals("08", "eve", substring("whatever", -2, -3));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void substr_3args06() {
+    substring("whatever", 2, -100);
   }
 
   @Test
@@ -53,7 +82,6 @@ public class StringMethodsTest {
     assertEquals("05", "ever", substring("whatever", 4));
     assertEquals("06", "tever", substring("whatever", -5));
     assertEquals("07", "ver", substring("whatever", 5));
-    assertEquals("08", "", substring("what", 4));
   }
 
   @Test

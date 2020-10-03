@@ -2,10 +2,7 @@ package nl.naturalis.common;
 
 import java.util.*;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.atMost;
-import static nl.naturalis.common.check.CommonChecks.isEven;
-import static nl.naturalis.common.check.CommonChecks.notEmpty;
-import static nl.naturalis.common.check.CommonChecks.notNegative;
+import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.length;
 
 /** Methods extending the Java Collection framework. */
@@ -238,10 +235,8 @@ public class CollectionMethods {
    * <ol>
    *   <li>If the list is empty, it is returned as-is.
    *   <li>If {@code from} is negative, it is taken relative to the end of the list.
-   *   <li>If {@code length} is negative, the sublist is taken to the left of {@code from}
-   *       (exclusive). So {@code from} in effect becomes the standard <i>to-exclusive</i> argument.
-   *   <li>Both {@code from} and {@code length} are clamped to the start and/or end of the list. In
-   *       other words you will never get an {@link ArrayIndexOutOfBoundsException}.
+   *   <li>If {@code length} is negative, the sublist is taken in the opposite direction, with
+   *       {@code from} now becoming the <i>last</i> element of the sublist
    * </ol>
    *
    * @param list The {@code List} to extract a sublist from
@@ -253,17 +248,22 @@ public class CollectionMethods {
     Check.notNull(list, "list");
     if (list.isEmpty()) {
       return list;
+    } else if (length == 0) {
+      return list.subList(0, 0);
     }
     if (from < 0) {
-      from = Math.max(0, list.size() + from);
+      from = list.size() + from;
     }
-    if (length < 0) {
-      length = Math.min(from, -length);
-      from -= length;
+    Check.that(from, "from", notNegative()).and(lessThan(), list.size());
+    final int to;
+    if (length > 0) {
+      to = from + length;
+      Check.that(to, "from+length", atMost(), list.size());
     } else {
-      from = Math.min(list.size(), from);
+      to = from + 1;
+      from = to + length;
+      Check.that(from, "from", notNegative());
     }
-    int to = Math.min(list.size(), from + length);
     return list.subList(from, to);
   }
 }
