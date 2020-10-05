@@ -3,10 +3,10 @@ package nl.naturalis.common;
 import java.util.Arrays;
 import java.util.Collection;
 import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.ArrayMethods.END_INDEX;
+import static nl.naturalis.common.ArrayMethods.START_INDEX;
 import static nl.naturalis.common.ObjectMethods.ifTrue;
 import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.check.CommonChecks.noneNull;
-import static nl.naturalis.common.check.CommonChecks.notEmpty;
 
 /**
  * Methods for working with strings. Most methods are friendly towards batch-wise print jobs, trying
@@ -651,25 +651,22 @@ public final class StringMethods {
    * <p>
    *
    * <ol>
-   *   <li>If the input string is null or empty, an empty string is returned and the {@code from}
-   *       argument is not considered.
-   *   <li>In any other case, both {@code from} is submitted to a boundary check.
+   *   <li>If the input string is empty and the {@code from} equals zero, an empty string is
+   *       returned.
    *   <li>If {@code from} is negative, it is taken relative to the end of the string.
    * </ol>
    *
-   * @param subject The {@code String} to extract a substring from
+   * @param str The {@code String} to extract a substring from
    * @param from The start index within {@code string} (may be negative)
    * @return The substring
    */
-  public static String substring(Object subject, int from) {
-    final String str;
-    if (subject == null || (str = subject.toString()).isEmpty()) {
-      return EMPTY;
-    }
+  public static String substring(String str, int from) {
+    Check.notNull(str, "str");
+    int sz = str.length();
     if (from < 0) {
-      from = Math.max(0, str.length() + from);
+      from = sz + from;
     }
-    Check.that(from, "from", notNegative()).and(lessThan(), str.length());
+    Check.that(from, "from", notNegative()).and(atMost(), sz);
     return str.substring(from);
   }
 
@@ -680,46 +677,40 @@ public final class StringMethods {
    * <p>
    *
    * <ol>
-   *   <li>If the input string is null or empty, or if {@code length} equals zero, an empty string
-   *       is returned and the {@code from} argument is not considered.
-   *   <li>In any other case, both {@code from} and {@length} are submitted to boundary checks.
    *   <li>If {@code from} is negative, it is taken relative to the end of the string.
    *   <li>If {@code length} is negative, the substring is taken in the opposite direction, with
    *       {@code from} now becoming the <i>last</i> character of the substring
    * </ol>
    *
-   * @param subject The {@code String} to extract a substring from
+   * @param str The {@code String} to extract a substring from
    * @param from The start index within {@code string} (may be negative)
    * @param length The length the substring
    * @return The substring
    */
-  public static String substring(Object subject, int from, int length) {
-    final String str;
-    if (subject == null || (str = subject.toString()).isEmpty() || length == 0) {
-      return EMPTY;
-    }
+  public static String substring(String str, int from, int length) {
+    Check.notNull(str, "str");
+    int sz = str.length();
     if (from < 0) {
-      from = str.length() + from;
-    }
-    Check.that(from, "from", notNegative()).and(lessThan(), str.length());
-    final int to;
-    if (length > 0) {
-      to = from + length;
-      Check.that(to, "from+length", atMost(), str.length());
+      from = Check.that(sz + from, START_INDEX, notNegative()).intValue();
     } else {
-      to = from + 1;
-      from = to + length;
-      Check.that(from, "from", notNegative());
+      Check.that(from, START_INDEX, atMost(), sz);
+    }
+    int to;
+    if (length >= 0) {
+      to = Check.that(from + length, END_INDEX, atMost(), sz).intValue();
+    } else {
+      to = Check.that(from + 1, END_INDEX, atMost(), sz).intValue();
+      from = Check.that(to + length, START_INDEX, notNegative()).intValue();
     }
     return str.substring(from, to);
   }
 
   /**
-   * Returns everything up to (not including) the last occurence of {@code until} within the string,
-   * or the entire string if it does not contain {@code until}.
+   * Returns the substring up to the last occurrence of the specified character sequence, or the
+   * entire string if it does not contain that character sequence.
    *
    * @param subject The string to take a substring from
-   * @param to The string up until which to take the substring
+   * @param to The character sequence up until which to take the substring
    * @return The substring
    */
   public static String substringUpTo(Object subject, String to) {
@@ -727,12 +718,12 @@ public final class StringMethods {
   }
 
   /**
-   * Returns everything up to (not including) the first or last occurence of {@code until} within
-   * the string, or the entire string if it does not contain {@code until}.
+   * Returns the substring up to the first or last occurrence of the specified character sequence,
+   * or the entire string if it does not contain that character sequence.
    *
    * @param subject The string to take a substring from
-   * @param to The string up until which to take the substring
-   * @param firstOccurrence Whether to use the first of last occurrence of {@code until}
+   * @param to The character sequence up to which to take the substring
+   * @param firstOccurrence Whether to use the first of last occurrence of {@code to}
    * @return The substring
    */
   public static String substringUpTo(Object subject, String to, boolean firstOccurrence) {
@@ -745,32 +736,32 @@ public final class StringMethods {
   }
 
   /**
-   * Returns everything up to (not including) the first or last occurence of {@code until} within
-   * the string, or the entire string if it does not contain {@code until}.
+   * Returns everything up to the first or last occurrence of the specified character, or the entire
+   * string if it does not contain that character.
    *
    * @param subject The string to take a substring from
-   * @param until The string up until which to take the substring
+   * @param to The character up to which to take the substring
    * @return The substring
    */
-  public static String substringUpTo(Object subject, char until) {
-    return substringUpTo(subject, until, false);
+  public static String substringUpTo(Object subject, char to) {
+    return substringUpTo(subject, to, false);
   }
 
   /**
-   * Returns everything up to (not including) the first or last occurence of {@code until} within
-   * the string, or the entire string if it does not contain {@code until}.
+   * Returns everything up to the first or last occurrence of the specified character within the
+   * string, or the entire string if it does not contain that character.
    *
    * @param subject The string to take a substring from
-   * @param until The string up until which to take the substring
-   * @param firstOccurrence Whether to use the first of last occurrence of {@code until}
+   * @param to The character up to which to take the substring
+   * @param firstOccurrence Whether to use the first of last occurrence of {@code to}
    * @return The substring
    */
-  public static String substringUpTo(Object subject, char until, boolean firstOccurrence) {
+  public static String substringUpTo(Object subject, char to, boolean firstOccurrence) {
     if (subject == null) {
       return EMPTY;
     }
     String str = subject.toString();
-    int i = firstOccurrence ? str.indexOf(until) : str.lastIndexOf(until);
+    int i = firstOccurrence ? str.indexOf(to) : str.lastIndexOf(to);
     return i == -1 ? str : str.substring(0, i);
   }
 }

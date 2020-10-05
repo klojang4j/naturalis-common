@@ -2,6 +2,8 @@ package nl.naturalis.common;
 
 import java.util.*;
 import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.ArrayMethods.END_INDEX;
+import static nl.naturalis.common.ArrayMethods.START_INDEX;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.length;
 
@@ -233,7 +235,6 @@ public class CollectionMethods {
    * <p>
    *
    * <ol>
-   *   <li>If the list is empty, it is returned as-is.
    *   <li>If {@code from} is negative, it is taken relative to the end of the list.
    *   <li>If {@code length} is negative, the sublist is taken in the opposite direction, with
    *       {@code from} now becoming the <i>last</i> element of the sublist
@@ -246,23 +247,18 @@ public class CollectionMethods {
    */
   public static <T> List<T> sublist(List<T> list, int from, int length) {
     Check.notNull(list, "list");
-    if (list.isEmpty()) {
-      return list;
-    } else if (length == 0) {
-      return list.subList(0, 0);
-    }
+    int sz = list.size();
     if (from < 0) {
-      from = list.size() + from;
-    }
-    Check.that(from, "from", notNegative()).and(lessThan(), list.size());
-    final int to;
-    if (length > 0) {
-      to = from + length;
-      Check.that(to, "from+length", atMost(), list.size());
+      from = Check.that(sz + from, START_INDEX, notNegative()).intValue();
     } else {
-      to = from + 1;
-      from = to + length;
-      Check.that(from, "from", notNegative());
+      Check.that(from, START_INDEX, atMost(), sz);
+    }
+    int to;
+    if (length >= 0) {
+      to = Check.that(from + length, END_INDEX, atMost(), sz).intValue();
+    } else {
+      to = Check.that(from + 1, END_INDEX, atMost(), sz).intValue();
+      from = Check.that(to + length, START_INDEX, notNegative()).intValue();
     }
     return list.subList(from, to);
   }

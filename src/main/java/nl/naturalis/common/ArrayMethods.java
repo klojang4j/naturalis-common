@@ -3,7 +3,6 @@ package nl.naturalis.common;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.function.Supplier;
 import nl.naturalis.common.check.Check;
 import static java.lang.System.arraycopy;
 import static nl.naturalis.common.check.CommonChecks.*;
@@ -18,6 +17,9 @@ public class ArrayMethods {
 
   /** A zero-length String array */
   public static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+  static final String START_INDEX = "Start index";
+  static final String END_INDEX = "End index";
 
   /**
    * Appends the provided object to the provided array.
@@ -87,7 +89,7 @@ public class ArrayMethods {
     Check.that(moreArrays, "moreArrays", noneNull());
     long x = Arrays.stream(moreArrays).flatMap(Arrays::stream).count();
     long y = arr0.length + arr1.length + arr2.length + x;
-    Check.that(y <= Integer.MAX_VALUE, illegalArgument("Concatenated array too large"));
+    Check.that(y).is(nAtMost(), Integer.MAX_VALUE, "Concatenated array too large");
     int i = (int) y;
     T[] all = fromTemplate(arr0, i);
     i = 0;
@@ -282,9 +284,5 @@ public class ArrayMethods {
     arraycopy(moreObjs, 0, res, 2, moreObjs.length);
     arraycopy(array, 0, res, 2 + moreObjs.length, array.length);
     return res;
-  }
-
-  private static Supplier<IllegalArgumentException> illegalArgument(String msg, Object... msgArgs) {
-    return () -> new IllegalArgumentException(String.format(msg, msgArgs));
   }
 }

@@ -105,9 +105,9 @@ public class CommonGetters {
 
   /**
    * A {@code Function} that returns the size of a {@code Collection}. Equivalent to {@code
-   * Collection::size}. See also {@link #listSize()} and {@link #setSize()}.
+   * Collection::size}.
    *
-   * @param <E> The type of the elements in the {@code Collection}
+   * @param <C> The type of the {@code Collection}
    * @return A {@code Function} that returns the size of a {@code Collection}
    */
   public static <C extends Collection<?>> ToIntFunction<C> size() {
@@ -121,8 +121,7 @@ public class CommonGetters {
   /**
    * A {@code Function} that returns the size of a {@code Map}. Equivalent to {@code Map::size}.
    *
-   * @param <K> The key type
-   * @param <V> The value typr
+   * @param <M> The type of the {@code Map}
    * @return A {@code Function} that returns the size of a {@code Map}
    */
   public static <M extends Map<?, ?>> ToIntFunction<M> mapSize() {
@@ -135,9 +134,8 @@ public class CommonGetters {
 
   /**
    * A {@code Function} that returns the size of a {@code List}. Equivalent to {@code List::size}.
-   * Can be in case using the {@link #size()} method would cause a name clash.
    *
-   * @param <T> The type of the elements in the {@code List}
+   * @param <L> The type of the {@code List}
    * @return A {@code Function} that returns the size of a {@code List}
    */
   public static <L extends List<?>> ToIntFunction<L> listSize() {
@@ -149,10 +147,9 @@ public class CommonGetters {
   }
 
   /**
-   * A {@code Function} that returns the size of a {@code Set}. Equivalent to {@code Set::size}. Can
-   * be in case using the {@link #size()} method would cause a name clash.
+   * A {@code Function} that returns the size of a {@code Set}. Equivalent to {@code Set::size}.
    *
-   * @param <T> The type of the elements in the {@code Set}
+   * @param <S> The type of the {@code Set}.
    * @return A {@code Function} that returns the size of a {@code Set}
    */
   public static <S extends Set<?>> ToIntFunction<S> setSize() {
