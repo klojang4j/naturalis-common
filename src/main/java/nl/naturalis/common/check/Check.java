@@ -64,8 +64,8 @@ import nl.naturalis.common.function.Relation;
  * <p>
  *
  * <pre>
- * // WON'T COMPILE:
- * Check.notNull(employee, "employee").and(Employee::getId, "id", x -> x > 0);
+ * // WILL NOT COMPILE:
+ * // Check.notNull(employee, "employee").and(Employee::getId, "id", x -> x > 0);
  * // WILL COMPILE:
  * Check.notNull(employee, "employee").and(Employee::getId, "id", (int x) -> x > 0); // and(IntPredicate)
  * Check.notNull(employee, "employee").and(Employee::getId, "id", (Integer x) -> x > 0); // and(Predicate&lt;Integer&gt;)
@@ -83,7 +83,7 @@ import nl.naturalis.common.function.Relation;
  *  .and(QuerySpec::getFrom, nullOr(), 0)
  *  .and(QuerySpec::getSize, "size", atLeast(), MIN_BATCH_SIZE)
  *  .and(QuerySpec::getSize, "size", atMost(), MAX_BATCH_SIZE)
- *  .and(QuerySpec::getSortFields, "sortFields", isEmpty())
+ *  .and(QuerySpec::getSortFields, "sortFields", empty())
  *  .ok();
  * </pre>
  *
