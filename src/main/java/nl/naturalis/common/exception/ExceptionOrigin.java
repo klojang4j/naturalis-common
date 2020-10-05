@@ -2,8 +2,8 @@ package nl.naturalis.common.exception;
 
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.ArrayMethods.isEmpty;
-import static nl.naturalis.common.ArrayMethods.isNotEmpty;
+import static nl.naturalis.common.ObjectMethods.isEmpty;
+import static nl.naturalis.common.ObjectMethods.isNotEmpty;
 import static nl.naturalis.common.StringMethods.rtrim;
 
 /**

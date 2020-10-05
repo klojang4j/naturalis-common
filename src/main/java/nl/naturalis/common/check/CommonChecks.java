@@ -138,12 +138,12 @@ public class CommonChecks {
    * @param <T> The type of the argument
    * @return A {@code Predicate}
    */
-  public static <T> Predicate<T> isEmpty() {
+  public static <T> Predicate<T> empty() {
     return ObjectMethods::isEmpty;
   }
 
   static {
-    add(isEmpty(), msgEmpty());
+    add(empty(), msgEmpty());
   }
 
   /**
@@ -209,12 +209,12 @@ public class CommonChecks {
    *
    * @returnn A {@code Predicate}
    */
-  public static Predicate<File> isFile() {
+  public static Predicate<File> file() {
     return File::isFile;
   }
 
   static {
-    add(isFile(), msgIsFile());
+    add(file(), msgIsFile());
   }
 
   /**
@@ -222,12 +222,12 @@ public class CommonChecks {
    *
    * @returnn A {@code Predicate}
    */
-  public static Predicate<File> isDirectory() {
+  public static Predicate<File> directory() {
     return File::isDirectory;
   }
 
   static {
-    add(isDirectory(), msgIsDirectory());
+    add(directory(), msgIsDirectory());
   }
 
   /**
@@ -276,12 +276,12 @@ public class CommonChecks {
    *
    * @return An {@code IntPredicate}
    */
-  public static IntPredicate isEven() {
+  public static IntPredicate even() {
     return x -> x % 2 == 0;
   }
 
   static {
-    add(isEven(), msgIsEven());
+    add(even(), msgIsEven());
   }
 
   /**
@@ -289,12 +289,12 @@ public class CommonChecks {
    *
    * @return An {@code IntPredicate}
    */
-  public static IntPredicate isOdd() {
+  public static IntPredicate odd() {
     return x -> x % 2 == 1;
   }
 
   static {
-    add(isOdd(), msgIsOdd());
+    add(odd(), msgIsOdd());
   }
 
   /**
@@ -372,12 +372,12 @@ public class CommonChecks {
    * @param <T> The type of the argument
    * @return A {@code Predicate}
    */
-  public static <T> Predicate<T> isArray() {
+  public static <T> Predicate<T> array() {
     return x -> x.getClass().isArray();
   }
 
   static {
-    add(isArray(), msgIsArray());
+    add(array(), msgIsArray());
   }
 
   /**
@@ -814,12 +814,12 @@ public class CommonChecks {
    *
    * @return An {@code IntRelation}
    */
-  public static IntRelation notEquals() {
+  public static IntRelation notEqualTo() {
     return (x, y) -> x != y;
   }
 
   static {
-    add(notEquals(), msgNotEquals());
+    add(notEqualTo(), msgNotEquals());
   }
 
   /**

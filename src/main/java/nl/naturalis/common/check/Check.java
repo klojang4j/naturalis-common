@@ -18,7 +18,7 @@ import nl.naturalis.common.function.Relation;
  * this.numChairs = Check.that(numChairs, "numChairs", atLeast(), 2).and(atMost(), 10).and(isEven()).ok();
  * </pre>
  *
- * <h4>Standard checks</h4>
+ * <h4>Common checks</h4>
  *
  * <p>The {@link CommonChecks} class contains a number of common checks for arguments. These are
  * already associated with short, informative error messages, so you don't have to invent them
@@ -27,7 +27,7 @@ import nl.naturalis.common.function.Relation;
  * <p>
  *
  * <pre>
- * Check.that(numChairs, "numChairs", atLeast(), 2);
+ * Check.that(numChairs, "numChairs").is(atLeast(), 2);
  * // "numChairs must be >= 2 (was 0)"
  * </pre>
  *
@@ -79,8 +79,8 @@ import nl.naturalis.common.function.Relation;
  * <p>
  *
  * <pre>
- * this.query = Check.with(InvalidQueryException::new, query, "query")
- *  .and(QuerySpec::getFrom, x -> nvl(x) == 0, "from must be null or zero")
+ * this.query = Check.that(query, "query",InvalidQueryException::new)
+ *  .and(QuerySpec::getFrom, nullOr(), 0)
  *  .and(QuerySpec::getSize, "size", atLeast(), MIN_BATCH_SIZE)
  *  .and(QuerySpec::getSize, "size", atMost(), MAX_BATCH_SIZE)
  *  .and(QuerySpec::getSortFields, "sortFields", isEmpty())
@@ -93,14 +93,29 @@ import nl.naturalis.common.function.Relation;
  */
 public abstract class Check<T, E extends Exception> {
 
+  private static final String DEFAULT_ARG_NAME = "argument";
+
   /**
    * Static factory method. Returns a new {@code Check} object suitable for testing integers.
    *
-   * @param arg The name of the argument
+   * @param arg The argument
    * @return A new {@code Check} object
    */
   public static Check<Integer, IllegalArgumentException> that(int arg) {
-    return new IntCheck<>(arg, "argument", IllegalArgumentException::new);
+    return new IntCheck<>(arg, DEFAULT_ARG_NAME, IllegalArgumentException::new);
+  }
+
+  /**
+   * Static factory method. Returns a new {@code Check} object suitable for testing integers.
+   *
+   * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
+   * @param arg The argument
+   * @param excFactory
+   * @return
+   */
+  public static <F extends Exception> Check<Integer, F> that(
+      int arg, Function<String, F> excFactory) {
+    return new IntCheck<>(arg, DEFAULT_ARG_NAME, excFactory);
   }
 
   /**
@@ -112,7 +127,22 @@ public abstract class Check<T, E extends Exception> {
    * @return A new {@code Check} object
    */
   public static <U> Check<U, IllegalArgumentException> that(U arg) {
-    return new ObjectCheck<>(arg, "argument", IllegalArgumentException::new);
+    return new ObjectCheck<>(arg, DEFAULT_ARG_NAME, IllegalArgumentException::new);
+  }
+
+  /**
+   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * argument.
+   *
+   * @param <U> The type of the argument
+   * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
+   * @param arg The argument
+   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
+   *     returns an {@code Exception}
+   * @return A new {@code Check} object
+   */
+  public static <U, F extends Exception> Check<U, F> that(U arg, Function<String, F> excFactory) {
+    return new ObjectCheck<>(arg, DEFAULT_ARG_NAME, excFactory);
   }
 
   /**
@@ -151,7 +181,7 @@ public abstract class Check<T, E extends Exception> {
    */
   public static <U> Check<U, IllegalArgumentException> notNull(U arg, String argName)
       throws IllegalArgumentException {
-    return with(IllegalArgumentException::new, arg, argName, CommonChecks.notNull());
+    return that(arg, argName, IllegalArgumentException::new).is(CommonChecks.notNull());
   }
 
   /**
@@ -159,127 +189,33 @@ public abstract class Check<T, E extends Exception> {
    * argument. The argument will have already passed the {@link CommonChecks#notNull() notNull}
    * test.
    *
-   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
-   *     returns an {@code Exception}
+   * @param <U> The type of the argument
+   * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
    * @param arg The argument
    * @param argName The name of the argument
-   * @param <U> The type of the argument
-   * @param <F> The type of {@code Exception} thrown if the argument fails to pass the {@code
-   *     notNull} test, or any subsequent tests executed on the returned {@code Check} object
+   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
+   *     returns an {@code Exception}
    * @return A new {@code Check} object
-   * @throws F If the argument fails to pass the {2code notNull} test or any subsequent tests called
+   * @throws F If the argument fails to pass the {@code notNull} test or any subsequent tests called
    *     on the returned {@code Check} object
    */
   public static <U, F extends Exception> Check<U, F> notNull(
-      Function<String, F> excFactory, U arg, String argName) throws F {
-    return with(excFactory, arg, argName, CommonChecks.notNull());
-  }
-
-  /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing integers if the
-   * argument passes the specified (first) test, else throws an {@code IllegalArgumentException}.
-   *
-   * @param arg The argument
-   * @param argName The name of the argument
-   * @param test The test
-   * @return A new {@code Check} object
-   * @throws IllegalArgumentException If the argument fails to pass the specified test or any
-   *     subsequent tests called on the returned {@code Check} object
-   */
-  public static Check<Integer, IllegalArgumentException> that(
-      int arg, String argName, IntPredicate test) throws IllegalArgumentException {
-    return with(IllegalArgumentException::new, arg, argName, test);
-  }
-
-  /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
-   * argument if the argument passes the specified (first) test, else throws an {@code
-   * IllegalArgumentException}.
-   *
-   * @param <U> The type of the argument
-   * @param arg The argument
-   * @param argName The name of the argument
-   * @param test The test
-   * @return A new {@code Check} object
-   * @throws IllegalArgumentException If the argument fails to pass the specified test or any
-   *     subsequent tests called on the returned {@code Check} object
-   */
-  public static <U> Check<U, IllegalArgumentException> that(
-      U arg, String argName, Predicate<U> test) throws IllegalArgumentException {
-    return with(IllegalArgumentException::new, arg, argName, test);
-  }
-
-  /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
-   * argument if it passes an initial test, else throws an {@code IllegalArgumentException}.
-   *
-   * @param <U> The type of the argument
-   * @param <V> The type of the object of the relationship
-   * @param arg The argument
-   * @param argName The name of the argument
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @return A new {@code Check} object
-   * @throws IllegalArgumentException If the argument fails to pass the specified test or any
-   *     subsequent tests called on the returned {@code Check} object
-   */
-  public static <U, V> Check<U, IllegalArgumentException> that(
-      U arg, String argName, Relation<U, V> relation, V relateTo) throws IllegalArgumentException {
-    return with(IllegalArgumentException::new, arg, argName, relation, relateTo);
-  }
-
-  /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
-   * argument if it passes an initial test, else throws an {@code IllegalArgumentException}.
-   *
-   * @param <U> The type of the argument
-   * @param arg The argument
-   * @param argName The name of the argument
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @return A new {@code Check} object
-   * @throws IllegalArgumentException If the argument fails to pass the specified test or any
-   *     subsequent tests called on the returned {@code Check} object
-   */
-  public static <U> Check<U, IllegalArgumentException> that(
-      U arg, String argName, ObjIntRelation<U> relation, int relateTo)
-      throws IllegalArgumentException {
-    return with(IllegalArgumentException::new, arg, argName, relation, relateTo);
-  }
-
-  /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing {@code int}
-   * arguments if it passes an the specified test, else throws an {@code IllegalArgumentException}.
-   *
-   * @param arg The argument
-   * @param argName The argument name
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @return A new {@code Check} object
-   * @throws IllegalArgumentException If the argument fails to pass the specified test or any
-   *     subsequent tests called on the returned {@code Check} object
-   */
-  public static Check<Integer, IllegalArgumentException> that(
-      int arg, String argName, IntRelation relation, int relateTo) throws IllegalArgumentException {
-    return new IntCheck<>(arg, argName, IllegalArgumentException::new).and(relation, relateTo);
+      U arg, String argName, Function<String, F> excFactory) throws F {
+    return that(arg, argName, excFactory).is(CommonChecks.notNull());
   }
 
   /**
    * Static factory method. Returns a new {@code Check} object suitable for testing integers.
    *
-   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
-   *     returns an {@code Exception}
+   * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
    * @param arg The argument
    * @param argName The name of the argument
-   * @param <F> The type of {@code Exception} thrown if the argument fails to pass the {@code
-   *     notNull} test, or any subsequent tests executed on the returned {@code Check} object
+   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
+   *     returns an {@code Exception}
    * @return A new {@code Check} object
    */
-  public static <F extends Exception> Check<Integer, F> with(
-      Function<String, F> excFactory, int arg, String argName) {
+  public static <F extends Exception> Check<Integer, F> that(
+      int arg, String argName, Function<String, F> excFactory) {
     return new IntCheck<>(arg, argName, excFactory);
   }
 
@@ -287,138 +223,17 @@ public abstract class Check<T, E extends Exception> {
    * Static factory method. Returns a new {@code Check} object suitable for testing the provided
    * argument.
    *
-   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
-   *     returns an {@code Exception}
    * @param arg The argument
    * @param argName The name of the argument
+   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
+   *     returns an {@code Exception}
    * @param <U> The type of the argument
    * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
    * @return A new {@code Check} object
    */
-  public static <U, F extends Exception> Check<U, F> with(
-      Function<String, F> excFactory, U arg, String argName) {
+  public static <U, F extends Exception> Check<U, F> that(
+      U arg, String argName, Function<String, F> excFactory) {
     return new ObjectCheck<>(arg, argName, excFactory);
-  }
-
-  /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing integers if the
-   * argument passes the specified (first) test, else throws the {@code Exception} produced by the
-   * specified {@code Exception} factory.
-   *
-   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
-   *     returns an {@code Exception}
-   * @param arg The argument
-   * @param argName The name of the argument
-   * @param test The test
-   * @param <F> The type of {@code Exception} thrown if the argument fails to pass the specified
-   *     test, or any subsequent tests executed on the returned {@code Check} object
-   * @return A new {@code Check} object
-   * @throws F If the argument fails to pass the specified test or any subsequent tests called on
-   *     the returned {@code Check} object
-   */
-  public static <F extends Exception> Check<Integer, F> with(
-      Function<String, F> excFactory, int arg, String argName, IntPredicate test) throws F {
-    return new IntCheck<>(arg, argName, excFactory).and(test);
-  }
-
-  /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
-   * argument if the argument passes the specified (first) test, else throws the {@code Exception}
-   * produced by the specified {@code Exception} factory.
-   *
-   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
-   *     returns an {@code Exception}
-   * @param arg The argument
-   * @param argName The name of the argument
-   * @param test The first test to submit the argument to
-   * @param <U> The type of the argument
-   * @param <F> The type of {@code Exception} thrown if the argument fails to pass the specified
-   *     test, or any subsequent tests executed on the returned {@code Check} object
-   * @return A new {@code Check} object
-   * @throws F If the argument fails to pass the specified test or any subsequent tests called on
-   *     the returned {@code Check} object
-   */
-  public static <U, F extends Exception> Check<U, F> with(
-      Function<String, F> excFactory, U arg, String argName, Predicate<U> test) throws F {
-    return new ObjectCheck<>(arg, argName, excFactory).and(test);
-  }
-
-  /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
-   * argument if the argument passes the specified test, else throws the {@code Exception} produced
-   * by the specified {@code Exception} factory.
-   *
-   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
-   *     returns an {@code Exception}
-   * @param arg The argument
-   * @param argName The name of the argument
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @param <U> The type of the argument
-   * @param <V> The type of the object of the relationship
-   * @param <F> The type of {@code Exception} thrown if the argument fails to pass the specified
-   *     test, or any subsequent tests executed on the returned {@code Check} object
-   * @return A new {@code Check} object
-   * @throws F If the argument fails to pass the specified test or any subsequent tests called on
-   *     the returned {@code Check} object
-   */
-  public static <U, V, F extends Exception> Check<U, F> with(
-      Function<String, F> excFactory, U arg, String argName, Relation<U, V> relation, V relateTo)
-      throws F {
-    return new ObjectCheck<>(arg, argName, excFactory).and(relation, relateTo);
-  }
-
-  /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
-   * argument if the argument passes the specified test, else throws the {@code Exception} produced
-   * by the specified {@code Exception} factory.
-   *
-   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
-   *     returns an {@code Exception}
-   * @param arg The argument
-   * @param argName The name of the argument
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @param <U> The type of the argument
-   * @param <F> The type of {@code Exception} thrown if the argument fails to pass the specified
-   *     test, or any subsequent tests executed on the returned {@code Check} object
-   * @return A new {@code Check} object
-   * @throws F If the argument fails to pass the specified test or any subsequent tests called on
-   *     the returned {@code Check} object
-   */
-  public static <U, F extends Exception> Check<U, F> with(
-      Function<String, F> excFactory,
-      U arg,
-      String argName,
-      ObjIntRelation<U> relation,
-      int relateTo)
-      throws F {
-    return new ObjectCheck<>(arg, argName, excFactory).and(relation, relateTo);
-  }
-
-  /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing integers if the
-   * argument passes the specified (first) test, else throws an {@code IllegalArgumentException}.
-   *
-   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
-   *     returns an {@code Exception}
-   * @param arg The argument
-   * @param argName The argument name
-   * @param relation The relation to verify between the argument and the specified integer ({@code
-   *     relateTo})
-   * @param relateTo The integer at the other end of the relationship
-   * @param <F> The type of {@code Exception} thrown if the argument fails to pass the specified
-   *     test, or any subsequent tests executed on the returned {@code Check} object
-   * @return A new {@code Check} instance
-   * @throws F If the argument fails to pass the specified test or any subsequent tests called on
-   *     the returned {@code Check} object
-   */
-  public static <F extends Exception> Check<Integer, F> with(
-      Function<String, F> excFactory, int arg, String argName, IntRelation relation, int relateTo)
-      throws F {
-    return new IntCheck<>(arg, argName, excFactory).and(relation, relateTo);
   }
 
   /**
@@ -747,6 +562,19 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
+   * Same as {@link #and(ObjIntRelation, int) and(relation, relateTo)}.
+   *
+   * @param relation The relation to verify between the argument and the specified value ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified relation does not exist between subject and object
+   */
+  public Check<T, E> is(ObjIntRelation<T> relation, int relateTo) throws E {
+    return and(relation, relateTo);
+  }
+
+  /**
    * Verifies that there is some relation between the argument and some other value. Allows you to
    * provide a custom error message.
    *
@@ -1056,6 +884,21 @@ public abstract class Check<T, E extends Exception> {
    */
   public abstract Check<T, E> and(ToIntFunction<T> getter, IntRelation relation, int relateTo)
       throws E;
+
+  /**
+   * Same as {@link #and(ToIntFunction, IntRelation, int) and(getter, relation, relateTo)}.
+   *
+   * @param getter A no-arg method, called on the argument, returning the subject of the
+   *     relationship
+   * @param relation The relation to verify between the argument and the specified integer ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified relation does not exist between subject and object
+   */
+  public Check<T, E> has(ToIntFunction<T> getter, IntRelation relation, int relateTo) throws E {
+    return and(getter, relation, relateTo);
+  }
 
   /**
    * Verifies that there is some relation between a property of the argument and some other value.

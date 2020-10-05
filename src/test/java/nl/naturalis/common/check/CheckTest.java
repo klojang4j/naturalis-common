@@ -29,16 +29,16 @@ public class CheckTest {
     Check.that(5 > 3, () -> new IOException());
   }
 
-  @Test // notNull() forces ObjectCheck
+  @Test
   public void that03() {
-    Check check = Check.that(3, "fooArg", notNull());
-    assertEquals(ObjectCheck.class, check.getClass());
+    Check check = Check.that(3, "fooArg").is(notNull());
+    assertEquals(IntCheck.class, check.getClass());
   }
 
   @Test // numGreaterThan() forces ObjectCheck
   public void that04() {
-    Check check = Check.that(5, "fooArg", nGreaterThan(), 4);
-    assertEquals(ObjectCheck.class, check.getClass());
+    Check check = Check.that(5, "fooArg").is(nGreaterThan(), 4);
+    assertEquals(IntCheck.class, check.getClass());
   }
 
   @Test
@@ -60,7 +60,7 @@ public class CheckTest {
 
   @Test
   public void that08() {
-    Check.that(Integer.valueOf(5), "fooArg", nGreaterThan(), 3);
+    Check.that(Integer.valueOf(5), "fooArg").is(nGreaterThan(), 3);
   }
 
   @Test
@@ -86,7 +86,7 @@ public class CheckTest {
   public void that12() {
     // numGreaterThan() works with Number instances, not ints, but the compiler
     // can make sense of it
-    Check.that(9, "fooArg", nGreaterThan(), 8);
+    Check.that(9, "fooArg").is(nGreaterThan(), 8);
   }
 
   @Test(expected = UnsupportedOperationException.class)
@@ -116,12 +116,12 @@ public class CheckTest {
 
   @Test
   public void size06() {
-    Check.that("Hello, World!", "fooArg", sizeAtLeast(), 3);
+    Check.that("Hello, World!", "fooArg").is(sizeAtLeast(), 3);
   }
 
   @Test
   public void size07() {
-    Check.that("Hello, World!", "fooArg", (x, y) -> x.length() > y, 3);
+    Check.that("Hello, World!", "fooArg").has(stringLength(), greaterThan(), 3);
   }
 
   @Test
@@ -161,7 +161,7 @@ public class CheckTest {
   public void and03() throws IOException {
     Employee employee = new Employee();
     employee.setHobbies(List.of("Skating", "Scuba diving"));
-    Check.notNull(IOException::new, employee, "employee")
+    Check.notNull(employee, "employee", IOException::new)
         .and(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
         .ok();
   }
@@ -170,7 +170,7 @@ public class CheckTest {
   public void and04() throws IOException {
     Employee employee = new Employee();
     employee.setId(-23);
-    Check.notNull(IOException::new, employee, "employee")
+    Check.notNull(employee, "employee", IOException::new)
         .and(Employee::getId, greaterThan(), 0, "Id must not be negative")
         .ok();
   }
@@ -180,14 +180,14 @@ public class CheckTest {
     Employee employee = new Employee();
     employee.setJustSomeNumbers(new float[] {3.2F, 103.2F, 0.8F});
     Check.notNull(employee, "employee")
-        .and(Employee::getJustSomeNumbers, "justSomeLuckyNumbers", isArray());
+        .and(Employee::getJustSomeNumbers, "justSomeLuckyNumbers", array());
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void and06() {
     Employee employee = new Employee();
     employee.setId(7);
-    Check.notNull(employee, "employee").and(Employee::getId, "id", isArray());
+    Check.notNull(employee, "employee").and(Employee::getId, "id", array());
   }
 
   @Test

@@ -29,7 +29,7 @@ public class ArrayMethods {
    * @return A concatenation of {@code array} and {@code obj}
    */
   public static <T> T[] append(T[] array, T obj) {
-    Check.that(array, "array", notNull());
+    Check.notNull(array, "array");
     T[] res = fromTemplate(array, array.length + 1);
     arraycopy(array, 0, res, 0, array.length);
     res[array.length] = obj;
@@ -47,8 +47,8 @@ public class ArrayMethods {
    */
   @SafeVarargs
   public static <T> T[] append(T[] array, T obj1, T obj2, T... moreObjs) {
-    Check.that(array, "array", notNull());
-    Check.that(moreObjs, "moreObjs", notNull());
+    Check.notNull(array, "array");
+    Check.notNull(moreObjs, "moreObjs");
     int sz = array.length + 2 + moreObjs.length;
     T[] res = fromTemplate(array, sz);
     arraycopy(array, 0, res, 0, array.length);
@@ -83,10 +83,10 @@ public class ArrayMethods {
    */
   @SafeVarargs
   public static <T> T[] concat(T[] arr0, T[] arr1, T[] arr2, T[]... moreArrays) {
-    Check.that(arr0, "arr0", notNull());
+    Check.notNull(arr0, "arr0");
     Check.notNull(arr1, "arr1");
     Check.notNull(arr2, "arr2");
-    Check.that(moreArrays, "moreArrays", noneNull());
+    Check.that(moreArrays, "moreArrays").is(noneNull());
     long x = Arrays.stream(moreArrays).flatMap(Arrays::stream).count();
     long y = arr0.length + arr1.length + arr2.length + x;
     Check.that(y).is(nAtMost(), Integer.MAX_VALUE, "Concatenated array too large");
@@ -155,8 +155,8 @@ public class ArrayMethods {
    */
   @SuppressWarnings("unchecked")
   public static <T> T[] fromTemplate(T[] template, int length) {
-    Check.that(template, "template", notNull());
-    Check.that(length, "length", notEquals(), 0);
+    Check.notNull(template, "template");
+    Check.that(length, "length").is(notNegative());
     return (T[]) Array.newInstance(template.getClass().getComponentType(), length);
   }
 
@@ -195,37 +195,6 @@ public class ArrayMethods {
       }
     }
     return -1;
-  }
-
-  /**
-   * Whether or not the provided array is null or has a zero length. The {@code array} argument is
-   * of type {@code Object} so we don't need to overload for primitive and non-primitive arrays. An
-   * {@link IllegalArgumentException} is thrown if the provided object is not in fact an array.
-   *
-   * @param array The array to check
-   * @return Whether it is null or empty
-   * @throws IllegalArgumentException if the provided object is not an array.
-   */
-  public static boolean isEmpty(Object array) {
-    if (array == null) {
-      return true;
-    }
-    Check.that(array, "array", isArray());
-    return Array.getLength(array) == 0;
-  }
-
-  /**
-   * Whether or not the provided array is neither null nor has a zero length. The {@code array}
-   * argument is of type {@code Object} so we don't need to overload for primitive and non-primitive
-   * arrays. An {@link IllegalArgumentException} is thrown if the provided object is not in fact an
-   * array.
-   *
-   * @param array The array to check
-   * @return Whether or not the provided array is neither null nor has a zero length
-   * @throws IllegalArgumentException if the provided object is not an array.
-   */
-  public static boolean isNotEmpty(Object array) {
-    return !isEmpty(array);
   }
 
   /**

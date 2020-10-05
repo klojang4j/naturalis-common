@@ -52,7 +52,8 @@ public class ObjectMethods {
         || obj instanceof String && ((String) obj).isEmpty()
         || obj instanceof Collection && ((Collection) obj).isEmpty()
         || obj instanceof Map && ((Map) obj).isEmpty()
-        || obj.getClass().isArray() && Array.getLength(obj) == 0
+        || obj instanceof Object[] && ((Object[]) obj).length == 0
+        || isPrimitiveArray(obj) && Array.getLength(obj) == 0
         || obj instanceof Sizeable && ((Sizeable) obj).size() == 0
         || obj instanceof Emptyable && ((Emptyable) obj).isEmpty();
   }

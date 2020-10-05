@@ -114,7 +114,7 @@ public class CollectionMethods {
    */
   @SuppressWarnings("unchecked")
   public static <K, V> HashMap<K, V> newHashMap(Object... kvPairs) {
-    Check.notNull(kvPairs, "kvPairs").and(length(), isEven());
+    Check.notNull(kvPairs, "kvPairs").and(length(), even());
     HashMap<K, V> map = new HashMap<>(kvPairs.length);
     for (int i = 0; i < kvPairs.length; i += 2) {
       map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
@@ -147,7 +147,7 @@ public class CollectionMethods {
    */
   @SuppressWarnings("unchecked")
   public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(Object... kvPairs) {
-    Check.notNull(kvPairs, "kvPairs").and(length(), isEven());
+    Check.notNull(kvPairs, "kvPairs").and(length(), even());
     LinkedHashMap<K, V> map = new LinkedHashMap<>(kvPairs.length);
     for (int i = 0; i < kvPairs.length; i += 2) {
       map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
@@ -193,8 +193,8 @@ public class CollectionMethods {
    * @return A sublist containing all but the last {@code by} elements of the provided list
    */
   public static <T> List<T> shrink(List<T> list, int by) {
-    Check.that(list, "list", notEmpty());
-    Check.that(by, "by", notNegative()).and(atMost(), list.size());
+    Check.that(list, "list").is(notEmpty());
+    Check.that(by, "by").is(notNegative()).and(atMost(), list.size());
     int sz = list.size();
     return sz == by ? Collections.emptyList() : list.subList(0, sz - by);
   }
@@ -221,8 +221,8 @@ public class CollectionMethods {
    * @return
    */
   public static <T> List<T> shift(List<T> list, int by) {
-    Check.that(list, "list", notEmpty());
-    Check.that(by, "by", notNegative()).and(atMost(), list.size());
+    Check.that(list, "list").is(notEmpty());
+    Check.that(by, "by").is(notNegative()).and(atMost(), list.size());
     int sz = list.size();
     return sz == by ? Collections.emptyList() : list.subList(by, sz);
   }
@@ -249,16 +249,16 @@ public class CollectionMethods {
     Check.notNull(list, "list");
     int sz = list.size();
     if (from < 0) {
-      from = Check.that(sz + from, START_INDEX, notNegative()).intValue();
+      from = Check.that(sz + from, START_INDEX).is(notNegative()).intValue();
     } else {
-      Check.that(from, START_INDEX, atMost(), sz);
+      Check.that(from, START_INDEX).is(atMost(), sz);
     }
     int to;
     if (length >= 0) {
-      to = Check.that(from + length, END_INDEX, atMost(), sz).intValue();
+      to = Check.that(from + length, END_INDEX).is(atMost(), sz).intValue();
     } else {
-      to = Check.that(from + 1, END_INDEX, atMost(), sz).intValue();
-      from = Check.that(to + length, START_INDEX, notNegative()).intValue();
+      to = Check.that(from + 1, END_INDEX).is(atMost(), sz).intValue();
+      from = Check.that(to + length, START_INDEX).is(notNegative()).intValue();
     }
     return list.subList(from, to);
   }

@@ -58,7 +58,7 @@ public final class StringMethods {
    * @return The number of occurrences of {@code substr} within {@code subject}
    */
   public static int count(Object subject, String substr, boolean ignoreCase) {
-    Check.that(substr, "substr", notEmpty());
+    Check.that(substr, "substr").is(notEmpty());
     if (subject == null) {
       return 0;
     }
@@ -96,7 +96,7 @@ public final class StringMethods {
    * @return The number of non-overlapping occurrences of {@code substr} within {@code subject}
    */
   public static int countDiscrete(Object subject, String substr, boolean ignoreCase) {
-    Check.that(substr, "substr", notEmpty());
+    Check.that(substr, "substr").is(notEmpty());
     if (subject == null) {
       return 0;
     }
@@ -138,7 +138,7 @@ public final class StringMethods {
    *     ended in none of the provided suffixes
    */
   public static String endsWith(Object subject, boolean ignoreCase, String... suffixes) {
-    Check.that(suffixes, "suffixes", deepNotEmpty());
+    Check.that(suffixes, "suffixes").is(deepNotEmpty());
     if (subject != null) {
       String str = subject.toString();
       for (String suf : suffixes) {
@@ -291,7 +291,7 @@ public final class StringMethods {
    * @param prefixes The prefixes to remove
    */
   public static String lchop(Object subject, boolean ignoreCase, String... prefixes) {
-    Check.that(prefixes, "prefixes", noneNull());
+    Check.that(prefixes, "prefixes").is(noneNull());
     if (subject == null) {
       return EMPTY;
     }
@@ -407,7 +407,7 @@ public final class StringMethods {
    *     specified characters
    */
   public static String ltrim(Object subject, String chars) {
-    Check.that(chars, "chars", notEmpty());
+    Check.that(chars, "chars").is(notEmpty());
     if (subject == null) {
       return EMPTY;
     }
@@ -627,7 +627,7 @@ public final class StringMethods {
    *     specified characters
    */
   public static String rtrim(Object subject, String chars) {
-    Check.that(chars, "chars", notEmpty());
+    Check.that(chars, "chars").is(notEmpty());
     if (subject == null) {
       return EMPTY;
     }
@@ -666,7 +666,7 @@ public final class StringMethods {
     if (from < 0) {
       from = sz + from;
     }
-    Check.that(from, "from", notNegative()).and(atMost(), sz);
+    Check.that(from, "from").is(notNegative()).and(atMost(), sz);
     return str.substring(from);
   }
 
@@ -691,16 +691,16 @@ public final class StringMethods {
     Check.notNull(str, "str");
     int sz = str.length();
     if (from < 0) {
-      from = Check.that(sz + from, START_INDEX, notNegative()).intValue();
+      from = Check.that(sz + from, START_INDEX).is(notNegative()).intValue();
     } else {
-      Check.that(from, START_INDEX, atMost(), sz);
+      Check.that(from, START_INDEX).is(atMost(), sz);
     }
     int to;
     if (length >= 0) {
-      to = Check.that(from + length, END_INDEX, atMost(), sz).intValue();
+      to = Check.that(from + length, END_INDEX).is(atMost(), sz).intValue();
     } else {
-      to = Check.that(from + 1, END_INDEX, atMost(), sz).intValue();
-      from = Check.that(to + length, START_INDEX, notNegative()).intValue();
+      to = Check.that(from + 1, END_INDEX).is(atMost(), sz).intValue();
+      from = Check.that(to + length, START_INDEX).is(notNegative()).intValue();
     }
     return str.substring(from, to);
   }

@@ -52,12 +52,12 @@ public class ClassMethods {
   public static boolean isPrimitiveArray(Object obj) {
     return obj != null
         && (obj instanceof int[]
-            || obj instanceof double[]
-            || obj instanceof boolean[]
             || obj instanceof byte[]
-            || obj instanceof long[]
+            || obj instanceof double[]
             || obj instanceof char[]
+            || obj instanceof long[]
             || obj instanceof float[]
+            || obj instanceof boolean[]
             || obj instanceof short[]);
   }
 
@@ -71,7 +71,7 @@ public class ClassMethods {
    * @return The simple name of the array type
    */
   public static String getArrayTypeName(Object array) {
-    Check.notNull(array, "array").and(isArray());
+    Check.notNull(array, "array").and(array());
     return array.getClass().getComponentType().getName() + "[]";
   }
 
@@ -85,7 +85,7 @@ public class ClassMethods {
    * @return The simple name of the array type
    */
   public static String getArrayTypeSimpleName(Object array) {
-    Check.notNull(array, "array").and(isArray());
+    Check.notNull(array, "array").and(array());
     return array.getClass().getComponentType().getSimpleName() + "[]";
   }
 

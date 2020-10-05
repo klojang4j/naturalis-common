@@ -17,7 +17,7 @@ import static nl.naturalis.common.Tuple.tuple;
 import static nl.naturalis.common.check.CommonChecks.notContainsKey;
 import static nl.naturalis.common.check.CommonChecks.notContainsValue;
 import static nl.naturalis.common.check.CommonChecks.notEmpty;
-import static nl.naturalis.common.check.CommonChecks.notEquals;
+import static nl.naturalis.common.check.CommonChecks.notEqualTo;
 import static nl.naturalis.common.check.CommonGetters.enumConstants;
 
 /**
@@ -140,7 +140,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
    * @return Whether or not the map contains the value
    */
   public boolean containsValue(int val) {
-    Check.that(val, "val", notEquals(), kav);
+    Check.that(val, "val").is(notEqualTo(), kav);
     return Arrays.stream(data).filter(x -> x == val).findFirst().isPresent();
   }
 
@@ -181,7 +181,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
    */
   public int put(K key, int val) {
     Check.notNull(key, "key");
-    Check.that(val, "val", notEquals(), kav);
+    Check.that(val, "val").is(notEqualTo(), kav);
     int orig = valueOf(key);
     assign(key, val);
     return orig;
@@ -196,7 +196,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
    */
   public EnumToIntMap<K> set(K key, int val) {
     Check.notNull(key, "key");
-    Check.that(val, "val", notEquals(), kav);
+    Check.that(val, "val").is(notEqualTo(), kav);
     assign(key, val);
     return this;
   }
