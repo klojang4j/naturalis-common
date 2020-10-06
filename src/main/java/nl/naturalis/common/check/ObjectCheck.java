@@ -5,6 +5,7 @@ import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import nl.naturalis.common.NumberMethods;
+import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
@@ -15,9 +16,8 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   private static final String ERR_INT_VALUE = "Cannot return int value for %s";
   private static final String ERR_NULL_TO_INT = ERR_INT_VALUE + " (was null)";
   private static final String ERR_NUMBER_TO_INT = ERR_INT_VALUE + " (was %s)";
-  private static final String ERR_STRING_TO_INT = ERR_INT_VALUE + " (was \"%s\")";
   private static final String ERR_OBJECT_TO_INT = ERR_INT_VALUE + " (%s)";
-  private static final String ERR_NOT_APPLICABLE = "Test not applicable to %s (%s)";
+  private static final String ERR_NOT_APPLICABLE = "Test not applicable to argument %s (%s)";
 
   final T arg;
 
@@ -37,7 +37,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   @Override
   public Check<T, E> and(IntPredicate test) throws E {
     if (arg.getClass() == Integer.class) {
-      if (test.test((Integer) arg)) {
+      if (test.test(((Integer) arg).intValue())) {
         return this;
       }
       throw excFactory.apply(Messages.get(test, arg, argName));
@@ -48,7 +48,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   @Override
   public Check<T, E> and(IntPredicate test, String message, Object... msgArgs) throws E {
     if (arg.getClass() == Integer.class) {
-      if (test.test((Integer) arg)) {
+      if (test.test(((Integer) arg).intValue())) {
         return this;
       }
       throw excFactory.apply(String.format(message, msgArgs));
@@ -57,21 +57,43 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> and(IntRelation test, int relateTo) throws E {
+  public <U> Check<T, E> and(IntObjRelation<U> relation, U relateTo) throws E {
     if (arg.getClass() == Integer.class) {
-      if (test.exists((Integer) arg, relateTo)) {
+      if (relation.exists(((Integer) arg).intValue(), relateTo)) {
         return this;
       }
-      throw excFactory.apply(Messages.get(test, arg, argName, relateTo));
+    }
+    throw excFactory.apply(Messages.get(relation, arg, argName, relateTo));
+  }
+
+  @Override
+  public <U> Check<T, E> and(
+      IntObjRelation<U> relation, U relateTo, String message, Object... msgArgs) throws E {
+    if (arg.getClass() == Integer.class) {
+      if (relation.exists(((Integer) arg).intValue(), relateTo)) {
+        return this;
+      }
+      throw excFactory.apply(String.format(message, msgArgs));
     }
     throw notApplicable();
   }
 
   @Override
-  public Check<T, E> and(IntRelation test, int relateTo, String message, Object... msgArgs)
+  public Check<T, E> and(IntRelation relation, int relateTo) throws E {
+    if (arg.getClass() == Integer.class) {
+      if (relation.exists(((Integer) arg).intValue(), relateTo)) {
+        return this;
+      }
+      throw excFactory.apply(Messages.get(relation, arg, argName, relateTo));
+    }
+    throw notApplicable();
+  }
+
+  @Override
+  public Check<T, E> and(IntRelation relation, int relateTo, String message, Object... msgArgs)
       throws E {
     if (arg.getClass() == Integer.class) {
-      if (test.exists((Integer) arg, relateTo)) {
+      if (relation.exists(((Integer) arg).intValue(), relateTo)) {
         return this;
       }
       throw excFactory.apply(String.format(message, msgArgs));
@@ -223,18 +245,6 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
       }
       String msg = String.format(ERR_NUMBER_TO_INT, argName, n);
       throw excFactory.apply(msg);
-    } else if (arg instanceof CharSequence) {
-      try {
-        Double d = Double.valueOf(arg.toString());
-        if (NumberMethods.fitsInto(d, Integer.class)) {
-          return d.intValue();
-        }
-        String msg = String.format(ERR_STRING_TO_INT, argName, arg);
-        throw excFactory.apply(msg);
-      } catch (NumberFormatException e) {
-        String msg = String.format(ERR_STRING_TO_INT, argName, arg);
-        throw excFactory.apply(msg);
-      }
     }
     String msg = String.format(ERR_OBJECT_TO_INT, argName, arg.getClass().getName());
     throw excFactory.apply(msg);

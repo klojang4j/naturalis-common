@@ -17,8 +17,10 @@ public interface Relation<T, U> {
    * For example, the reverse of <i>X contains Y</i> is <i>Y contains X</i> (or <i>X element-of
    * Y</i>).
    *
-   * @param <X> The type of the subject of the original relation
-   * @param <Y> The type of the object of the original relation
+   * @param <X> The type of the subject of the original relation (and the object of the returned
+   *     {@code Relation})
+   * @param <Y> The type of the object of the original relation (and the subject of the returned
+   *     {@code Relation})
    * @param relation The {@code Relation} to return the reverse of
    * @return The reverse {@code Relation}
    */
@@ -29,7 +31,7 @@ public interface Relation<T, U> {
   /**
    * Returns the negation of the specified relation.
    *
-   * @param <X> The type of the subject of the original relation
+   * @param <X> The type of the subject of the specified {@code Relation}
    * @param <Y> The type of the object of the original relation
    * @param relation The {@code Relation} to return the negation of
    * @return The negated {@code Relation}
@@ -41,8 +43,8 @@ public interface Relation<T, U> {
   /**
    * Whether or not the relationship between {@code subject} and {@code object} exists.
    *
-   * @param subject The object from which the relationship extends
-   * @param object The target of the relationship
+   * @param subject The subject of the relation (the entity from which the relationship extends)
+   * @param object The object of the relation (the entity to which the relationship extends)
    * @return {@code true} if the relation exists, {@code false} otherwise.
    */
   boolean exists(T subject, U object);

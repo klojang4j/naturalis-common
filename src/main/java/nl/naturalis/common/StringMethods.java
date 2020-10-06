@@ -205,7 +205,11 @@ public final class StringMethods {
    * @param suffix The suffix
    */
   public static String ensureSuffix(Object subject, char suffix) {
-    return subject == null ? String.valueOf(suffix) : subject.toString() + suffix;
+    if (subject == null) {
+      return String.valueOf(suffix);
+    }
+    String str = subject.toString();
+    return str.charAt(str.length() - 1) == suffix ? str : str + suffix;
   }
 
   /**

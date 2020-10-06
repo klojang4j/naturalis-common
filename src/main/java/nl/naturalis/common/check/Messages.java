@@ -1,6 +1,7 @@
 package nl.naturalis.common.check;
 
 import java.io.File;
+import java.util.List;
 import java.util.function.Function;
 import static java.lang.String.format;
 import static nl.naturalis.common.ArrayMethods.pack;
@@ -88,6 +89,13 @@ class Messages {
 
   static Function<Object[], String> msgSizeEquals() {
     return x -> format("%s must be equal to %s (was %s)", argSize(x), x[2], x[0]);
+  }
+
+  static Function<Object[], String> msgValidEndIndexFor() {
+    return x -> {
+      int i = ((List<?>) x[2]).size();
+      return format("%s must be >= 0 and <= %d (was %d)", argName(x), i, x[0]);
+    };
   }
 
   static Function<Object[], String> msgIsFile() {

@@ -4,6 +4,7 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
+import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
@@ -28,6 +29,23 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
   @Override
   public IntCheck<E> and(IntPredicate test, String message, Object... msgArgs) throws E {
     if (test.test(arg)) {
+      return this;
+    }
+    throw excFactory.apply(String.format(message, msgArgs));
+  }
+
+  @Override
+  public <U> Check<Integer, E> and(IntObjRelation<U> relation, U relateTo) throws E {
+    if (relation.exists(arg, relateTo)) {
+      return this;
+    }
+    throw excFactory.apply(Messages.get(relation, arg, argName, relateTo));
+  }
+
+  @Override
+  public <U> Check<Integer, E> and(
+      IntObjRelation<U> relation, U relateTo, String message, Object... msgArgs) throws E {
+    if (relation.exists(arg, relateTo)) {
       return this;
     }
     throw excFactory.apply(String.format(message, msgArgs));

@@ -1,37 +1,36 @@
 package nl.naturalis.common.function;
 
 /**
- * Defines some kind of relationship between an object and an integer. For example, if x is a {@code
- * Collection} with 6 elements, and y equals 3, then the relation <i>X.size() &gt; Y</i> exists
- * between these two values.
+ * Defines some kind of relationship between an integer and an object. For example, if x equals 6,
+ * and y is an {@code int} array containing 6, then the relation <i>X element-of Y</i> exists.
  *
  * @author Ayco Holleman
- * @param <T> The type of the subject of the relation
+ * @param <T> The type of the object of the relation
  */
 @FunctionalInterface
-public interface ObjIntRelation<T> {
+public interface IntObjRelation<T> {
 
   /**
    * Returns the reverse of the specified relation, swapping subject and object in the relationship.
    *
-   * @param <X> The type of the object of the specified {@code ObjIntRelation} (and the subject of
-   *     the returned {@code IntObjRelation})
+   * @param <X> The type of the object of the original relation (and the subject of the returned
+   *     {@code ObjIntRelation})
    * @param relation The {@code IntObjRelation} to return the reverse of
    * @return An {@code ObjIntRelation} that is the reverse of the specified {@code IntObjRelation}.
    */
-  public static <X> IntObjRelation<X> reverse(ObjIntRelation<X> relation) {
+  public static <X> ObjIntRelation<X> reverse(IntObjRelation<X> relation) {
     return (y, x) -> relation.exists(x, y);
   }
 
   /**
    * Returns the negation of the specified relation.
    *
-   * @param <X> The type of the subject of the original relation
-   * @param relation The {@code ObjIntRelation} to return the negation of
-   * @return The negated {@code ObjIntRelation}
+   * @param <X> The type of the object of the original relation
+   * @param relation The {@code IntObjRelation} to return the negation of
+   * @return The negated {@code IntObjRelation}
    */
-  public static <X> ObjIntRelation<X> not(ObjIntRelation<X> relation) {
-    return (x, y) -> !relation.exists(x, y);
+  public static <X> IntObjRelation<X> not(IntObjRelation<X> relation) {
+    return (y, x) -> !relation.exists(y, x);
   }
 
   /**
@@ -41,5 +40,5 @@ public interface ObjIntRelation<T> {
    * @param object The object of the relation (the entity to which the relationship extends)
    * @return {@code true} if the relation exists, {@code false} otherwise.
    */
-  boolean exists(T subject, int object);
+  boolean exists(int subject, T object);
 }

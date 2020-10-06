@@ -2,6 +2,7 @@ package nl.naturalis.common.check;
 
 import java.util.function.*;
 import nl.naturalis.common.NumberMethods;
+import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
@@ -608,6 +609,66 @@ public abstract class Check<T, E extends Exception> {
    */
   public Check<T, E> is(ObjIntRelation<T> relation, int relateTo, String message, Object... msgArgs)
       throws E {
+    return and(relation, relateTo, message, msgArgs);
+  }
+
+  /**
+   * Verifies that there is some relation between the integer argument and some object.
+   *
+   * @param <U> The type of the object of the relationship
+   * @param relation The relation to verify between the argument and the specified value ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified relation does not exist between subject and object
+   */
+  public abstract <U> Check<T, E> and(IntObjRelation<U> relation, U relateTo) throws E;
+
+  /**
+   * Same as {@link #and(IntObjRelation, Object) and(relation, relateTo)}.
+   *
+   * @param <U> The type of the object of the relationship
+   * @param relation The relation to verify between the argument and the specified value ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified relation does not exist between subject and object
+   */
+  public <U> Check<T, E> is(IntObjRelation<U> relation, U relateTo) throws E {
+    return and(relation, relateTo);
+  }
+
+  /**
+   * Verifies that there is some relation between the integer argument and some object. Allows you
+   * to provide a custom error message.
+   *
+   * @param <U> The type of the object of the relationship
+   * @param relation The relation to verify between the argument and the specified value ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the specified relation does not exist between subject and object
+   */
+  public abstract <U> Check<T, E> and(
+      IntObjRelation<U> relation, U relateTo, String message, Object... msgArgs) throws E;
+
+  /**
+   * Same as {@link #and(IntObjRelation, Object, String, Object...) and(relation, relateTo, message,
+   * msgArgs)}.
+   *
+   * @param <U> The type of the object of the relationship
+   * @param relation The relation to verify between the argument and the specified value ({@code
+   *     relateTo})
+   * @param relateTo The object of the relationship
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the specified relation does not exist between subject and object
+   */
+  public <U> Check<T, E> is(
+      IntObjRelation<U> relation, U relateTo, String message, Object... msgArgs) throws E {
     return and(relation, relateTo, message, msgArgs);
   }
 

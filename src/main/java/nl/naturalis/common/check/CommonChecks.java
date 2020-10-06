@@ -10,6 +10,7 @@ import nl.naturalis.common.ObjectMethods;
 import nl.naturalis.common.Sizeable;
 import nl.naturalis.common.StringMethods;
 import nl.naturalis.common.Tuple;
+import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
@@ -792,6 +793,47 @@ public class CommonChecks {
 
   static {
     add(sizeAtMost(), msgSizeAtMost());
+  }
+
+  /* ++++++++++++++ IntObjRelation ++++++++++++++ */
+
+  /**
+   * Verifies that the argument can be used as the "from" index for a {@code List} operation. In
+   * other words, that the argument is greater than or equal to zeo and less than the size of the
+   * list.
+   *
+   * @return An {@code IntObjRelation}
+   */
+  /**
+   * Verifies that the argument can be used as the "from" index for a {@code List} operation. In
+   * other words, that the argument is greater than or equal to zeo and less than the size of the
+   * list.
+   *
+   * @param <E> The type of the elements in the {@code List}
+   * @param <L> The type of the {@code List}
+   * @return An {@code IntObjRelation}
+   */
+  public static <E, L extends List<? super E>> IntObjRelation<L> fromIndexOf() {
+    return (x, y) -> x >= 0 && x < y.size();
+  }
+
+  static {
+    add(toIndexOf(), msgValidEndIndexFor());
+  }
+
+  /**
+   * Verifies that the argument can be used as the "to" index for a {@code List} operation. In other
+   * words, that the argument is greater than or equal to zeo and less than or equal to the size of
+   * the list.
+   *
+   * @return An {@code IntObjRelation}
+   */
+  public static <E, L extends List<? super E>> IntObjRelation<L> toIndexOf() {
+    return (x, y) -> x >= 0 && x <= y.size();
+  }
+
+  static {
+    add(toIndexOf(), msgValidEndIndexFor());
   }
 
   /* ++++++++++++++ IntRelation ++++++++++++++ */
