@@ -195,7 +195,6 @@ public abstract class Check<T, E extends Exception> {
    * @param <U> The type of the argument
    * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
    * @param arg The argument
-   * @param argName The name of the argument
    * @param exceptionFactory A {@code Function} that takes a {@code String} (the error message) and
    *     returns an {@code Exception}
    * @return A new {@code Check} object
