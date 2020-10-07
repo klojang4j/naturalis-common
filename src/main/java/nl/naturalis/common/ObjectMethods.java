@@ -9,9 +9,9 @@ import java.util.function.UnaryOperator;
 import nl.naturalis.common.function.Relation;
 import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
+import static nl.naturalis.common.check.CommonChecks.notNull;
 import static nl.naturalis.common.check.CommonChecks.objEquals;
 import static nl.naturalis.common.check.CommonChecks.objNotEquals;
-import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * General methods applicable to objects of any type.
@@ -37,8 +37,9 @@ public class ObjectMethods {
    *
    * <ul>
    *   <li>{@code obj} is {@code null}
-   *   <li>{@code obj} is an empty {@code CharSequence}
+   *   <li>{@code obj} is an empty {@link CharSequence}
    *   <li>{@code obj} is an empty (zero-size) container object
+   *   <li>{@code obj} is an empty {@link Optional}
    *   <li>{@code obj} is a zero-size {@link Sizeable}
    *   <li>{@code obj} is an empty {@link Emptyable}
    * </ul>
@@ -55,6 +56,7 @@ public class ObjectMethods {
         || obj instanceof Map && ((Map) obj).isEmpty()
         || obj instanceof Object[] && ((Object[]) obj).length == 0
         || isPrimitiveArray(obj) && Array.getLength(obj) == 0
+        || obj instanceof Optional && ((Optional) obj).isEmpty()
         || obj instanceof Sizeable && ((Sizeable) obj).size() == 0
         || obj instanceof Emptyable && ((Emptyable) obj).isEmpty();
   }
@@ -67,8 +69,9 @@ public class ObjectMethods {
    *
    * <ul>
    *   <li>{@code obj} is not {@code null}
-   *   <li>{@code obj} is not an empty {@code CharSequence}
-   *   <li>{@code obj} is not an empty container object
+   *   <li>{@code obj} is not an empty {@link CharSequence}
+   *   <li>{@code obj} is not an empty (zero-size) container object
+   *   <li>{@code obj} is not an empty {@link Optional}
    *   <li>{@code obj} is not a zero-size {@link Sizeable}
    *   <li>{@code obj} is not an empty {@link Emptyable}
    * </ul>
@@ -87,9 +90,10 @@ public class ObjectMethods {
    * <p>
    *
    * <ul>
-   *   <li>{@code obj} is a non-empty {@code CharSequence}
+   *   <li>{@code obj} is a non-empty {@link CharSequence}
    *   <li>{@code obj} is a non-empty container object with only recursively non-empty elements
    *   <li>{@code obj} is a non-empty primitive array
+   *   <li>{@code obj} is a non-empty {@link Optional}
    *   <li>{@code obj} is a non-empty {@link Emptyable}
    *   <li>{@code obj} is a non-zero-size {@link Sizeable}
    *   <li>{@code obj} is a non-null object of any other type
@@ -104,6 +108,7 @@ public class ObjectMethods {
         && (!(obj instanceof Collection) || dne((Collection) obj))
         && (!(obj instanceof Map) || dne((Map) obj))
         && (!(obj instanceof Object[]) || dne((Object[]) obj))
+        && (!(obj instanceof Optional) || ((Optional) obj).isPresent())
         && (!isPrimitiveArray(obj) || Array.getLength(obj) > 0)
         && (!(obj instanceof Sizeable) || ((Sizeable) obj).size() > 0)
         && (!(obj instanceof Emptyable) || !((Emptyable) obj).isEmpty());
@@ -460,9 +465,25 @@ public class ObjectMethods {
    * @param arg The value to testdoIfNotNull
    * @param then The transformation to apply to the value if it is not null
    * @param otherwise A supplier providing the default value
+   * @return The result produced by the {@code Function} or by the {@code Supplier}
    */
   public static <T, U> U ifNotNull(T arg, Function<T, U> then, Supplier<U> otherwise) {
     return arg != null ? then.apply(arg) : otherwise.get();
+  }
+
+  /**
+   * Returns the result of passing the specified argument to the specified {@code Funtion} if the
+   * argument is not null, else returns the result provided by the specified {@code Supplier}. *
+   *
+   * @param <T> The type of the first argument
+   * @param <U> The return type
+   * @param arg The value to testdoIfNotNull
+   * @param then The transformation to apply to the value if it is not null
+   * @param otherwise A supplier providing the default value
+   * @return The result produced by the {@code Function} or by the {@code Supplier}
+   */
+  public static <T, U> U ifNotEmpty(T arg, Function<T, U> then, Supplier<U> otherwise) {
+    return isEmpty(arg) ? then.apply(arg) : otherwise.get();
   }
 
   /**
