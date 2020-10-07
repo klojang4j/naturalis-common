@@ -133,7 +133,7 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is empty as per {@link ObjectMethods#isEmpty(Object)
+   * Verifies that the argument is empty. Equivalent to {@link ObjectMethods#isEmpty(Object)
    * ObjectMethods::isEmpty}.
    *
    * @param <T> The type of the argument
@@ -148,7 +148,7 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is not empty as per {@link ObjectMethods#isNotEmpty(Object)
+   * Verifies that the argument is not empty. Equivalent to {@link ObjectMethods#isNotEmpty(Object)
    * ObjectMethods::isNotEmpty}.
    *
    * @param <T> The type of the argument
@@ -193,7 +193,8 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that a {@code String} argument is not null and not blank.
+   * Verifies that a {@code String} argument is not null and not blank. Equivalent to {@link
+   * StringMethods#isNotBlank(Object) StringMethods::isNotBlank}.
    *
    * @return A {@code Predicate}
    */
@@ -206,7 +207,8 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is an existing, regular file.
+   * Verifies that the argument is an existing, regular file. Equivalent to {@link File#isFile()
+   * File::isFile}.
    *
    * @returnn A {@code Predicate}
    */
@@ -219,7 +221,8 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is an existing directory.
+   * Verifies that the argument is an existing directory. Equivalent to {@link File#isDirectory()
+   * File::isDirectory}.
    *
    * @returnn A {@code Predicate}
    */
@@ -236,16 +239,17 @@ public class CommonChecks {
    *
    * @returnn A {@code Predicate}
    */
-  public static Predicate<File> nonExistingFile() {
+  public static Predicate<File> notOnFileSystem() {
     return f -> !f.exists();
   }
 
   static {
-    add(nonExistingFile(), msgNonExistinFile());
+    add(notOnFileSystem(), msgNotOnFileSystem());
   }
 
   /**
-   * Verifies that the argument is a readable file (implies that the file exists).
+   * Verifies that the argument is a readable file (implies that the file exists). Equivalent to
+   * {@link File#canRead() File::canRead}.
    *
    * @returnn A {@code Predicate}
    */
@@ -258,7 +262,8 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is a writable file (implies that the file exists).
+   * Verifies that the argument is a writable file (implies that the file exists). Equivalent to
+   * {@link File#canWrite() File::canWrite}.
    *
    * @return
    */
@@ -443,18 +448,19 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that a {@code Map} contains a key.
+   * Verifies that a {@code Map} contains a key. Equivalent to {@link Map#containsKey(Object)
+   * Map::containsKey}.
    *
    * @param <K> The type of the keys within the map
    * @param <M> The Type of the {@code Map}
    * @return A {@code Relation}
    */
-  public static <K, M extends Map<? super K, ?>> Relation<M, K> mapWithKey() {
+  public static <K, M extends Map<? super K, ?>> Relation<M, K> containingKey() {
     return Map::containsKey;
   }
 
   static {
-    add(mapWithKey(), msgMapWithKey());
+    add(containingKey(), msgContainingKey());
   }
 
   /**
@@ -464,27 +470,28 @@ public class CommonChecks {
    * @param <M> The Type of the {@code Map}
    * @return A {@code Relation}
    */
-  public static <K, M extends Map<? super K, ?>> Relation<M, K> mapWithoutKey() {
+  public static <K, M extends Map<? super K, ?>> Relation<M, K> notContainingKey() {
     return (x, y) -> !x.containsKey(y);
   }
 
   static {
-    add(mapWithoutKey(), msgMapWithoutKey());
+    add(notContainingKey(), msgNotContainingKey());
   }
 
   /**
-   * Verifies that a {@code Map} contains a value.
+   * Verifies that a {@code Map} contains a value. Equivalent to {@link Map#containsValue(Object)
+   * Map::containsValue}.
    *
    * @param <V> The type of the values within the map
    * @param <M> The Type of the {@code Map}
    * @return A {@code Relation}
    */
-  public static <V, M extends Map<?, ? super V>> Relation<M, V> mapWithValue() {
+  public static <V, M extends Map<?, ? super V>> Relation<M, V> containingValue() {
     return Map::containsValue;
   }
 
   static {
-    add(mapWithValue(), msgContainsValue());
+    add(containingValue(), msgContainingValue());
   }
 
   /**
@@ -494,12 +501,12 @@ public class CommonChecks {
    * @param <M> The Type of the {@code Map}
    * @return A {@code Relation}
    */
-  public static <V, M extends Map<?, ? super V>> Relation<M, V> mapWithoutValue() {
+  public static <V, M extends Map<?, ? super V>> Relation<M, V> notContainingValue() {
     return (x, y) -> !x.containsValue(y);
   }
 
   static {
-    add(mapWithValue(), msgMapWithoutValue());
+    add(containingValue(), msgNotContainingValue());
   }
 
   /**
@@ -826,16 +833,10 @@ public class CommonChecks {
   /* ++++++++++++++ IntObjRelation ++++++++++++++ */
 
   /**
-   * Verifies that the argument can be used as the "from" index for a {@code List} operation. In
-   * other words, that the argument is greater than or equal to zeo and less than the size of the
-   * list.
-   *
-   * @return An {@code IntObjRelation}
-   */
-  /**
-   * Verifies that the argument can be used as the index for a get or set operation on a {@code
-   * List}, or as the start index of a loop. In other words, that the argument is greater than or
-   * equal to zeo and less than the size of the list.
+   * Verifies that the argument can be used as the index for a {@code List} operation like {@link
+   * List#get(int) get} or {@link List#set(int, Object) set}, or as the lower bound of a loop
+   * variable. In other words, that the argument is greater than or equal to zero and less than the
+   * size of the list.
    *
    * @param <E> The type of the elements in the {@code List}
    * @param <L> The type of the {@code List}
@@ -851,18 +852,18 @@ public class CommonChecks {
 
   /**
    * Verifies that the argument can be used as the "to" index for a {@code List} operation like
-   * {@link List#subList(int, int) List.sublist}, or as the end index of a loop. In other words,
-   * that the argument is greater than or equal to zeo and less than or equal to the size of the
-   * list.
+   * {@link List#subList(int, int) List.sublist} or as the upper bound (exclusive) of a loop
+   * variable. In other words, that the argument is greater than or equal to zero and less than or
+   * equal to the size of the list.
    *
    * @return An {@code IntObjRelation}
    */
-  public static <E, L extends List<? super E>> IntObjRelation<L> endIndexOf() {
+  public static <E, L extends List<? super E>> IntObjRelation<L> boundedBy() {
     return (x, y) -> x >= 0 && x <= y.size();
   }
 
   static {
-    add(endIndexOf(), msgIndexOf());
+    add(boundedBy(), msgBoundedBy());
   }
 
   /* ++++++++++++++ IntRelation ++++++++++++++ */

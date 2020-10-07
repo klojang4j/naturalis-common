@@ -16,7 +16,7 @@ import nl.naturalis.common.function.Relation;
  * <p>
  *
  * <pre>
- * this.numChairs = Check.that(numChairs, "numChairs", atLeast(), 2).and(atMost(), 10).and(isEven()).ok();
+ * this.numChairs = Check.that(numChairs).is(notNegative()).is(atMost(), 10).is(even()).ok();
  * </pre>
  *
  * <h4>Common checks</h4>
@@ -50,7 +50,7 @@ import nl.naturalis.common.function.Relation;
  * increased conciceness. For example the last statement could also have been written as:
  *
  * <pre>
- * Check.notNull(employees, "employees").and(size(), atLeast(), 100);
+ * Check.notNull(employees, "employees").has(size(), atLeast(), 100);
  * // "employees.size must be >= 100 (was 36)"
  * </pre>
  *
@@ -59,17 +59,17 @@ import nl.naturalis.common.function.Relation;
  * <p>Most checks are done via the various {@code and()} methods. Generally, the compiler has no
  * problem deciding which {@code and()} method is targeted. When using lambdas, however, the
  * compiler may run into ambiguities. This will result in a compiler error like: <b>The method and
- * [...] is ambigious for type Check [...]</b>. To resolve this, simply type the parameters in the
- * lambda:
+ * [...] is ambigious for type Check [...]</b>. To resolve this, simply specify the type of the
+ * parameters in the lambda:
  *
  * <p>
  *
  * <pre>
  * // WILL NOT COMPILE:
- * // Check.notNull(employee, "employee").and(Employee::getId, "id", x -> x > 0);
+ * // Check.notNull(employee, "employee").has(Employee::getId, "id", x -> x > 0);
  * // WILL COMPILE:
- * Check.notNull(employee, "employee").and(Employee::getId, "id", (int x) -> x > 0); // and(IntPredicate)
- * Check.notNull(employee, "employee").and(Employee::getId, "id", (Integer x) -> x > 0); // and(Predicate&lt;Integer&gt;)
+ * Check.notNull(employee, "employee").has(Employee::getId, "id", (int x) -> x > 0); // and(IntPredicate)
+ * Check.notNull(employee, "employee").has(Employee::getId, "id", (Integer x) -> x > 0); // and(Predicate&lt;Integer&gt;)
  * </pre>
  *
  * <h4>Changing the Exception type</h4>
@@ -80,11 +80,11 @@ import nl.naturalis.common.function.Relation;
  * <p>
  *
  * <pre>
- * this.query = Check.that(query, "query",InvalidQueryException::new)
- *  .and(QuerySpec::getFrom, nullOr(), 0)
- *  .and(QuerySpec::getSize, "size", atLeast(), MIN_BATCH_SIZE)
- *  .and(QuerySpec::getSize, "size", atMost(), MAX_BATCH_SIZE)
- *  .and(QuerySpec::getSortFields, "sortFields", empty())
+ * this.query = Check.that(query, "query", InvalidQueryException::new)
+ *  .has(QuerySpec::getFrom, nullOr(), 0)
+ *  .has(QuerySpec::getSize, "size", atLeast(), MIN_BATCH_SIZE)
+ *  .has(QuerySpec::getSize, "size", atMost(), MAX_BATCH_SIZE)
+ *  .has(QuerySpec::getSortFields, "sortFields", empty())
  *  .ok();
  * </pre>
  *

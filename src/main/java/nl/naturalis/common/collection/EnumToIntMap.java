@@ -14,8 +14,8 @@ import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ObjectMethods.doIf;
 import static nl.naturalis.common.StringMethods.append;
 import static nl.naturalis.common.Tuple.tuple;
-import static nl.naturalis.common.check.CommonChecks.mapWithoutKey;
-import static nl.naturalis.common.check.CommonChecks.mapWithValue;
+import static nl.naturalis.common.check.CommonChecks.notContainingKey;
+import static nl.naturalis.common.check.CommonChecks.containingValue;
 import static nl.naturalis.common.check.CommonChecks.notEmpty;
 import static nl.naturalis.common.check.CommonChecks.notEqualTo;
 import static nl.naturalis.common.check.CommonGetters.enumConstants;
@@ -221,8 +221,8 @@ public final class EnumToIntMap<K extends Enum<K>> {
    */
   public void putAll(Map<K, Integer> other) {
     Check.notNull(other, "other")
-        .is(mapWithoutKey(), null)
-        .is(mapWithValue(), kav)
+        .is(notContainingKey(), null)
+        .is(containingValue(), kav)
         .ok()
         .entrySet()
         .forEach(e -> assign(e.getKey(), e.getValue()));

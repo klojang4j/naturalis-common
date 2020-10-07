@@ -109,6 +109,13 @@ class Messages {
   static Function<Object[], String> msgIndexOf() {
     return x -> {
       int i = ((List<?>) x[2]).size();
+      return format("%s must be >= 0 and < %d (was %d)", argName(x), i, x[0]);
+    };
+  }
+
+  static Function<Object[], String> msgBoundedBy() {
+    return x -> {
+      int i = ((List<?>) x[2]).size();
       return format("%s must be >= 0 and <= %d (was %d)", argName(x), i, x[0]);
     };
   }
@@ -123,7 +130,7 @@ class Messages {
     return x -> format(fmt, argName(x), ((File) x[0]).getAbsolutePath());
   }
 
-  static Function<Object[], String> msgNonExistinFile() {
+  static Function<Object[], String> msgNotOnFileSystem() {
     String fmt = "%s (%s) must not exist";
     return x -> format(fmt, argName(x), ((File) x[0]).getAbsolutePath());
   }
@@ -182,19 +189,19 @@ class Messages {
     return x -> format("%s must not be in %s (was %s)", argName(x), argVal(x[2]), argVal(x[0]));
   }
 
-  static Function<Object[], String> msgMapWithKey() {
+  static Function<Object[], String> msgContainingKey() {
     return x -> format("%s must contain key %s", argName(x), argVal(x[2]));
   }
 
-  static Function<Object[], String> msgMapWithoutKey() {
+  static Function<Object[], String> msgNotContainingKey() {
     return x -> format("%s must not contain key %s", argName(x), argVal(x[2]));
   }
 
-  static Function<Object[], String> msgContainsValue() {
+  static Function<Object[], String> msgContainingValue() {
     return x -> format("%s must not contain value %s", argName(x), argVal(x[2]));
   }
 
-  static Function<Object[], String> msgMapWithoutValue() {
+  static Function<Object[], String> msgNotContainingValue() {
     return x -> format("%s must not contain value %s", argName(x), argVal(x[2]));
   }
 
