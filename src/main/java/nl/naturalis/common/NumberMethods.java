@@ -148,6 +148,13 @@ public class NumberMethods {
     return ObjectMethods.ifNull(b, ZERO_BYTE);
   }
 
+  /**
+   * Returns the absolute value of the specified number.
+   *
+   * @param <T> The type of the number
+   * @param number The number
+   * @return Its absolute value
+   */
   @SuppressWarnings("unchecked")
   public static <T extends Number> T absoluteValue(T number) {
     if (Check.notNull(number).ok().getClass() == Integer.class) {
