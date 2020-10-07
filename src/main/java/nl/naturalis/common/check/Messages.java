@@ -67,6 +67,21 @@ class Messages {
     return x -> format("%s must be not be equal to %s", argName(x), x[2]);
   }
 
+  static Function<Object[], String> msgSameAs() {
+    return x -> {
+      String id0 = cname(x[0]) + '@' + System.identityHashCode(x[0]);
+      String id1 = cname(x[2]) + '@' + System.identityHashCode(x[2]);
+      return format("%s must be have same identity as %s (was %s)", argName(x), id1, id0);
+    };
+  }
+
+  static Function<Object[], String> msgNotSameAs() {
+    return x -> {
+      String id = cname(x[2]) + '@' + System.identityHashCode(x[2]);
+      return format("%s must be not have same identity as %s", argName(x), id);
+    };
+  }
+
   static Function<Object[], String> msgSizeAtMost() {
     return x -> format("%s must be <= %s (was %s)", argSize(x), x[2], x[0]);
   }
@@ -91,24 +106,24 @@ class Messages {
     return x -> format("%s must be equal to %s (was %s)", argSize(x), x[2], x[0]);
   }
 
-  static Function<Object[], String> msgValidEndIndexFor() {
+  static Function<Object[], String> msgIndexOf() {
     return x -> {
       int i = ((List<?>) x[2]).size();
       return format("%s must be >= 0 and <= %d (was %d)", argName(x), i, x[0]);
     };
   }
 
-  static Function<Object[], String> msgIsFile() {
+  static Function<Object[], String> msgExistingFile() {
     String fmt = "%s (%s) must be an existing file";
     return x -> format(fmt, argName(x), ((File) x[0]).getAbsolutePath());
   }
 
-  static Function<Object[], String> msgIsDirectory() {
+  static Function<Object[], String> msgExistingDirectory() {
     String fmt = "%s (%s) must be an existing directory";
     return x -> format(fmt, argName(x), ((File) x[0]).getAbsolutePath());
   }
 
-  static Function<Object[], String> msgFileNotExists() {
+  static Function<Object[], String> msgNonExistinFile() {
     String fmt = "%s (%s) must not exist";
     return x -> format(fmt, argName(x), ((File) x[0]).getAbsolutePath());
   }
@@ -151,11 +166,11 @@ class Messages {
     return x -> format("%s must be null or %s (was (%s)", argName(x), argVal(x[2]), argVal(x[0]));
   }
 
-  static Function<Object[], String> msgContains() {
+  static Function<Object[], String> msgContaining() {
     return x -> format("%s must contain %s", argName(x), argVal(x[2]));
   }
 
-  static Function<Object[], String> msgNotContains() {
+  static Function<Object[], String> msgNotContaining() {
     return x -> format("%s must not contain %s", argName(x), argVal(x[2]));
   }
 
@@ -167,11 +182,11 @@ class Messages {
     return x -> format("%s must not be in %s (was %s)", argName(x), argVal(x[2]), argVal(x[0]));
   }
 
-  static Function<Object[], String> msgContainsKey() {
+  static Function<Object[], String> msgMapWithKey() {
     return x -> format("%s must contain key %s", argName(x), argVal(x[2]));
   }
 
-  static Function<Object[], String> msgNotContainsKey() {
+  static Function<Object[], String> msgMapWithoutKey() {
     return x -> format("%s must not contain key %s", argName(x), argVal(x[2]));
   }
 
@@ -179,7 +194,7 @@ class Messages {
     return x -> format("%s must not contain value %s", argName(x), argVal(x[2]));
   }
 
-  static Function<Object[], String> msgNotContainsValue() {
+  static Function<Object[], String> msgMapWithoutValue() {
     return x -> format("%s must not contain value %s", argName(x), argVal(x[2]));
   }
 
@@ -212,7 +227,7 @@ class Messages {
     return x -> format(fmt, argName(x), ((Class<?>) x[2]).getName(), cname(x[0]));
   }
 
-  static Function<Object[], String> msgIsArray() {
+  static Function<Object[], String> msgAnArray() {
     return x -> format("%s must be an array (was %s)", argName(x), cname(x[0]));
   }
 

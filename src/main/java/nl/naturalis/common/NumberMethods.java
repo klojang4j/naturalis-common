@@ -10,17 +10,17 @@ import nl.naturalis.common.check.Check;
 public class NumberMethods {
 
   /** Zero as Integer */
-  public static final Integer ZERO = 0;
+  public static final Integer ZERO_INTEGER = 0;
   /** Zero as Double */
-  public static final Double ZERO_D = 0D;
+  public static final Double ZERO_DOUBLE = 0D;
   /** Zero as Long */
-  public static final Long ZERO_L = 0L;
+  public static final Long ZERO_LONG = 0L;
   /** Zero as Float */
-  public static final Float ZERO_F = 0F;
+  public static final Float ZERO_FLOAT = 0F;
   /** Zero as Short */
-  public static final Short ZERO_S = 0;
+  public static final Short ZERO_SHORT = 0;
   /** Zero as Byte */
-  public static final Byte ZERO_B = 0;
+  public static final Byte ZERO_BYTE = 0;
 
   /**
    * Returns whether or not the specified {@code Number} can be converted an instance of the {@code
@@ -95,7 +95,7 @@ public class NumberMethods {
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Integer nvl(Integer i) {
-    return ObjectMethods.ifNull(i, ZERO);
+    return ObjectMethods.ifNull(i, ZERO_INTEGER);
   }
 
   /**
@@ -105,7 +105,7 @@ public class NumberMethods {
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Double nvl(Double d) {
-    return ObjectMethods.ifNull(d, ZERO_D);
+    return ObjectMethods.ifNull(d, ZERO_DOUBLE);
   }
 
   /**
@@ -115,7 +115,7 @@ public class NumberMethods {
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Long nvl(Long l) {
-    return ObjectMethods.ifNull(l, ZERO_L);
+    return ObjectMethods.ifNull(l, ZERO_LONG);
   }
 
   /**
@@ -125,7 +125,7 @@ public class NumberMethods {
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Float nvl(Float f) {
-    return ObjectMethods.ifNull(f, ZERO_F);
+    return ObjectMethods.ifNull(f, ZERO_FLOAT);
   }
 
   /**
@@ -135,7 +135,7 @@ public class NumberMethods {
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Short nvl(Short s) {
-    return ObjectMethods.ifNull(s, ZERO_S);
+    return ObjectMethods.ifNull(s, ZERO_SHORT);
   }
 
   /**
@@ -145,7 +145,23 @@ public class NumberMethods {
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Byte nvl(Byte b) {
-    return ObjectMethods.ifNull(b, ZERO_B);
+    return ObjectMethods.ifNull(b, ZERO_BYTE);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T extends Number> T absoluteValue(T number) {
+    if (Check.notNull(number).ok().getClass() == Integer.class) {
+      return number.intValue() >= 0 ? number : (T) Integer.valueOf(-number.intValue());
+    } else if (Check.notNull(number).ok().getClass() == Long.class) {
+      return number.longValue() >= 0 ? number : (T) Long.valueOf(-number.longValue());
+    } else if (Check.notNull(number).ok().getClass() == Double.class) {
+      return number.doubleValue() >= 0 ? number : (T) Double.valueOf(-number.doubleValue());
+    } else if (Check.notNull(number).ok().getClass() == Float.class) {
+      return number.doubleValue() >= 0 ? number : (T) Double.valueOf(-number.doubleValue());
+    } else if (Check.notNull(number).ok().getClass() == Short.class) {
+      return number.shortValue() >= 0 ? number : (T) Short.valueOf((short) -number.shortValue());
+    }
+    return number.byteValue() >= 0 ? number : (T) Byte.valueOf((byte) -number.byteValue());
   }
 
   private NumberMethods() {}

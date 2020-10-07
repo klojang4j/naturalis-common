@@ -3,23 +3,29 @@ package nl.naturalis.common.check;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
+import nl.naturalis.common.NumberMethods;
 
 /**
- * Defines various commonly used getter-type (no-arg) methods. They can be passed as the first
- * argument to the appropriate {@code and(...)} methods in the {@link Check} class. Each getter is
- * associated with the name of the property it exposes, so you can choose the leanest of {@code
- * and()} methods (those that don't let you specify a property name yourself). For example:
+ * Defines various commonly used getter-type (no-arg) methods that can be used to retrieve a
+ * property of the argument. They are meant to be used in conjunction with the various {@code
+ * has(...)} methods of the {@link Check} class. Each getter is associated with the name of the
+ * property it exposes, so you can choose the leanest of the {@code has(...)} methods (those that
+ * don't let you specify a property name yourself). For example:
  *
  * <p>
  *
  * <pre>
- * Check.notNull(stampCollection, "stampCollection").and(size(), greaterThan(), 100);
+ * Check.notNull(stampCollection, "stampCollection").has(size(), greaterThan(), 100);
  * // "stampCollection.size must be > 100 (was 22)"
  * </pre>
  *
- * <p>Most of the getters defined here are plain, unadorned method references. <i>None of them do a
- * null-check on the argument.</i> They rely upon being embedded within in chain of checks on a
- * {@link Check} object, the first of which should be a <i>not-null</i> check.
+ * <p>Most of the getters defined here are plain, unadorned method references. <b>None of them do a
+ * preliminary null-check on the argument.</b> They rely upon being embedded within in chain of
+ * checks on a {@link Check} object, the first of which should be a <i>not-null</i> check.
+ *
+ * <p>NB some getters defined here are actually not no-arg methods on the argument but rather unary
+ * operations on it, disguised as a {@link Function} so they can be passed in as the first argument
+ * to the {@code has (...)} methods.
  *
  * @author Ayco Holleman
  */
@@ -82,12 +88,12 @@ public class CommonGetters {
    * @param <T> The type of the elements in the array
    * @return A {@code Function} that returns the length of an array
    */
-  public static <T> ToIntFunction<T[]> length() {
+  public static <T> ToIntFunction<T[]> arrayLength() {
     return x -> x.length;
   }
 
   static {
-    tmp.put(length(), LENGTH);
+    tmp.put(arrayLength(), LENGTH);
   }
 
   /**
@@ -95,12 +101,12 @@ public class CommonGetters {
    *
    * @return A {@code Function} that returns the length of an array
    */
-  public static ToIntFunction<int[]> intLength() {
+  public static ToIntFunction<int[]> intArrayLength() {
     return x -> x.length;
   }
 
   static {
-    tmp.put(intLength(), LENGTH);
+    tmp.put(intArrayLength(), LENGTH);
   }
 
   /**
@@ -158,6 +164,14 @@ public class CommonGetters {
 
   static {
     tmp.put(setSize(), SIZE);
+  }
+
+  public static <T extends Number> Function<T, T> absoluteValue() {
+    return NumberMethods::absoluteValue;
+  }
+
+  static {
+    tmp.put(absoluteValue(), "absoluteValue");
   }
 
   static String getGetterName(Object getter) {

@@ -14,8 +14,8 @@ import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ObjectMethods.doIf;
 import static nl.naturalis.common.StringMethods.append;
 import static nl.naturalis.common.Tuple.tuple;
-import static nl.naturalis.common.check.CommonChecks.notContainsKey;
-import static nl.naturalis.common.check.CommonChecks.notContainsValue;
+import static nl.naturalis.common.check.CommonChecks.mapWithoutKey;
+import static nl.naturalis.common.check.CommonChecks.mapWithValue;
 import static nl.naturalis.common.check.CommonChecks.notEmpty;
 import static nl.naturalis.common.check.CommonChecks.notEqualTo;
 import static nl.naturalis.common.check.CommonGetters.enumConstants;
@@ -84,7 +84,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
    */
   public EnumToIntMap(Class<K> enumClass, int keyAbsentValue, ToIntFunction<K> initializer) {
     Check.notNull(enumClass, "enumClass")
-        .and(enumConstants(), notEmpty(), "Empty enum not supported");
+        .has(enumConstants(), notEmpty(), "Empty enum not supported");
     this.keys = enumClass.getEnumConstants();
     this.data = new int[keys.length];
     this.kav = keyAbsentValue;
@@ -221,8 +221,8 @@ public final class EnumToIntMap<K extends Enum<K>> {
    */
   public void putAll(Map<K, Integer> other) {
     Check.notNull(other, "other")
-        .and(notContainsKey(), null)
-        .and(notContainsValue(), kav)
+        .is(mapWithoutKey(), null)
+        .is(mapWithValue(), kav)
         .ok()
         .entrySet()
         .forEach(e -> assign(e.getKey(), e.getValue()));

@@ -59,7 +59,7 @@ public class MessagesTest {
     String s = target.getClass().getSimpleName() + "@" + System.identityHashCode(target);
     String expected = "foo must contain " + s;
     System.out.println(expected);
-    String actual = Messages.get(contains(), argument, argName, target);
+    String actual = Messages.get(containing(), argument, argName, target);
     System.out.println(actual);
     assertEquals(expected, actual);
   }
@@ -110,7 +110,7 @@ public class MessagesTest {
     String expected = "list.size must be equal to 3 (was 0)";
     System.out.println(expected);
     try {
-      Check.notNull(argument, "list").and(size(), equalTo(), 3);
+      Check.notNull(argument, "list").has(size(), equalTo(), 3);
     } catch (IllegalArgumentException e) {
       String actual = e.getMessage();
       System.out.println(actual);
@@ -128,7 +128,7 @@ public class MessagesTest {
     System.out.println(expected);
     try {
       // No getter for Object::hashCode in CommonGetters class
-      Check.notNull(argument, "foo").and(Object::hashCode, equalTo(), 3);
+      Check.notNull(argument, "foo").has(Object::hashCode, equalTo(), 3);
     } catch (IllegalArgumentException e) {
       String actual = e.getMessage();
       System.out.println(actual);

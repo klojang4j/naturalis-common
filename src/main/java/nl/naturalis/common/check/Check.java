@@ -94,6 +94,8 @@ import nl.naturalis.common.function.Relation;
  */
 public abstract class Check<T, E extends Exception> {
 
+  private static final Function<String, IllegalArgumentException> DEFAULT_EXCEPTION =
+      IllegalArgumentException::new;
   private static final String DEFAULT_ARG_NAME = "argument";
 
   /**
@@ -103,7 +105,7 @@ public abstract class Check<T, E extends Exception> {
    * @return A new {@code Check} object
    */
   public static Check<Integer, IllegalArgumentException> that(int arg) {
-    return new IntCheck<>(arg, DEFAULT_ARG_NAME, IllegalArgumentException::new);
+    return new IntCheck<>(arg, DEFAULT_ARG_NAME, DEFAULT_EXCEPTION);
   }
 
   /**
@@ -111,12 +113,12 @@ public abstract class Check<T, E extends Exception> {
    *
    * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
    * @param arg The argument
-   * @param excFactory
+   * @param exceptionFactory
    * @return
    */
   public static <F extends Exception> Check<Integer, F> that(
-      int arg, Function<String, F> excFactory) {
-    return new IntCheck<>(arg, DEFAULT_ARG_NAME, excFactory);
+      int arg, Function<String, F> exceptionFactory) {
+    return new IntCheck<>(arg, DEFAULT_ARG_NAME, exceptionFactory);
   }
 
   /**
@@ -128,7 +130,7 @@ public abstract class Check<T, E extends Exception> {
    * @return A new {@code Check} object
    */
   public static <U> Check<U, IllegalArgumentException> that(U arg) {
-    return new ObjectCheck<>(arg, DEFAULT_ARG_NAME, IllegalArgumentException::new);
+    return new ObjectCheck<>(arg, DEFAULT_ARG_NAME, DEFAULT_EXCEPTION);
   }
 
   /**
@@ -138,12 +140,13 @@ public abstract class Check<T, E extends Exception> {
    * @param <U> The type of the argument
    * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
    * @param arg The argument
-   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
+   * @param exceptionFactory A {@code Function} that takes a {@code String} (the error message) and
    *     returns an {@code Exception}
    * @return A new {@code Check} object
    */
-  public static <U, F extends Exception> Check<U, F> that(U arg, Function<String, F> excFactory) {
-    return new ObjectCheck<>(arg, DEFAULT_ARG_NAME, excFactory);
+  public static <U, F extends Exception> Check<U, F> that(
+      U arg, Function<String, F> exceptionFactory) {
+    return new ObjectCheck<>(arg, DEFAULT_ARG_NAME, exceptionFactory);
   }
 
   /**
@@ -154,7 +157,7 @@ public abstract class Check<T, E extends Exception> {
    * @return A new {@code Check} object
    */
   public static Check<Integer, IllegalArgumentException> that(int arg, String argName) {
-    return new IntCheck<>(arg, argName, IllegalArgumentException::new);
+    return new IntCheck<>(arg, argName, DEFAULT_EXCEPTION);
   }
 
   /**
@@ -167,7 +170,41 @@ public abstract class Check<T, E extends Exception> {
    * @return A new {@code Check} object
    */
   public static <U> Check<U, IllegalArgumentException> that(U arg, String argName) {
-    return new ObjectCheck<>(arg, argName, IllegalArgumentException::new);
+    return new ObjectCheck<>(arg, argName, DEFAULT_EXCEPTION);
+  }
+
+  /**
+   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * argument. The argument will have already passed the {@link CommonChecks#notNull() notNull}
+   * test.
+   *
+   * @param <U> The type of the argument
+   * @param arg The argument
+   * @return A new {@code Check} object
+   */
+  public static <U> Check<U, IllegalArgumentException> notNull(U arg)
+      throws IllegalArgumentException {
+    return that(arg, DEFAULT_ARG_NAME, DEFAULT_EXCEPTION).is(CommonChecks.notNull());
+  }
+
+  /**
+   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * argument. The argument will have already passed the {@link CommonChecks#notNull() notNull}
+   * test.
+   *
+   * @param <U> The type of the argument
+   * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
+   * @param arg The argument
+   * @param argName The name of the argument
+   * @param exceptionFactory A {@code Function} that takes a {@code String} (the error message) and
+   *     returns an {@code Exception}
+   * @return A new {@code Check} object
+   * @throws F If the argument fails to pass the {@code notNull} test or any subsequent tests called
+   *     on the returned {@code Check} object
+   */
+  public static <U, F extends Exception> Check<U, F> notNull(
+      U arg, Function<String, F> exceptionFactory) throws F {
+    return that(arg, DEFAULT_ARG_NAME, exceptionFactory).is(CommonChecks.notNull());
   }
 
   /**
@@ -182,7 +219,7 @@ public abstract class Check<T, E extends Exception> {
    */
   public static <U> Check<U, IllegalArgumentException> notNull(U arg, String argName)
       throws IllegalArgumentException {
-    return that(arg, argName, IllegalArgumentException::new).is(CommonChecks.notNull());
+    return that(arg, argName, DEFAULT_EXCEPTION).is(CommonChecks.notNull());
   }
 
   /**
@@ -194,15 +231,15 @@ public abstract class Check<T, E extends Exception> {
    * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
    * @param arg The argument
    * @param argName The name of the argument
-   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
+   * @param exceptionFactory A {@code Function} that takes a {@code String} (the error message) and
    *     returns an {@code Exception}
    * @return A new {@code Check} object
    * @throws F If the argument fails to pass the {@code notNull} test or any subsequent tests called
    *     on the returned {@code Check} object
    */
   public static <U, F extends Exception> Check<U, F> notNull(
-      U arg, String argName, Function<String, F> excFactory) throws F {
-    return that(arg, argName, excFactory).is(CommonChecks.notNull());
+      U arg, String argName, Function<String, F> exceptionFactory) throws F {
+    return that(arg, argName, exceptionFactory).is(CommonChecks.notNull());
   }
 
   /**
@@ -211,13 +248,13 @@ public abstract class Check<T, E extends Exception> {
    * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
    * @param arg The argument
    * @param argName The name of the argument
-   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
+   * @param exceptionFactory A {@code Function} that takes a {@code String} (the error message) and
    *     returns an {@code Exception}
    * @return A new {@code Check} object
    */
   public static <F extends Exception> Check<Integer, F> that(
-      int arg, String argName, Function<String, F> excFactory) {
-    return new IntCheck<>(arg, argName, excFactory);
+      int arg, String argName, Function<String, F> exceptionFactory) {
+    return new IntCheck<>(arg, argName, exceptionFactory);
   }
 
   /**
@@ -226,15 +263,15 @@ public abstract class Check<T, E extends Exception> {
    *
    * @param arg The argument
    * @param argName The name of the argument
-   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
+   * @param exceptionFactory A {@code Function} that takes a {@code String} (the error message) and
    *     returns an {@code Exception}
    * @param <U> The type of the argument
    * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
    * @return A new {@code Check} object
    */
   public static <U, F extends Exception> Check<U, F> that(
-      U arg, String argName, Function<String, F> excFactory) {
-    return new ObjectCheck<>(arg, argName, excFactory);
+      U arg, String argName, Function<String, F> exceptionFactory) {
+    return new ObjectCheck<>(arg, argName, exceptionFactory);
   }
 
   /**
@@ -259,13 +296,13 @@ public abstract class Check<T, E extends Exception> {
    *
    * @param <F> The type of exception thrown if {@code condition} evaluates to false
    * @param condition The condition to evaluate
-   * @param excSupplier The exception supplier
+   * @param exceptionSupplier The exception supplier
    * @throws F The exception thrown if the condition evaluates to false
    */
-  public static <F extends Exception> void that(boolean condition, Supplier<F> excSupplier)
+  public static <F extends Exception> void that(boolean condition, Supplier<F> exceptionSupplier)
       throws F {
     if (!condition) {
-      throw excSupplier.get();
+      throw exceptionSupplier.get();
     }
   }
 
@@ -356,9 +393,9 @@ public abstract class Check<T, E extends Exception> {
   final String argName;
   final Function<String, E> excFactory;
 
-  Check(String argName, Function<String, E> excFactory) {
+  Check(String argName, Function<String, E> exceptionFactory) {
     this.argName = argName;
-    this.excFactory = excFactory;
+    this.excFactory = exceptionFactory;
   }
 
   /**
@@ -379,22 +416,11 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> and(Predicate<T> test) throws E {
+  public Check<T, E> is(Predicate<T> test) throws E {
     if (test.test(ok())) {
       return this;
     }
     throw excFactory.apply(Messages.get(test, ok(), argName));
-  }
-
-  /**
-   * Same as {@link #and(Predicate) and(test)}.
-   *
-   * @param test The test
-   * @return This {@code Check} object
-   * @throws E If the test fails
-   */
-  public Check<T, E> is(Predicate<T> test) throws E {
-    return and(test);
   }
 
   /**
@@ -406,24 +432,11 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> and(Predicate<T> test, String message, Object... msgArgs) throws E {
+  public Check<T, E> is(Predicate<T> test, String message, Object... msgArgs) throws E {
     if (test.test(ok())) {
       return this;
     }
     throw excFactory.apply(String.format(message, msgArgs));
-  }
-
-  /**
-   * Same as {@link #and(Predicate, String, Object...) and(test, message, msgArgs)}.
-   *
-   * @param test The test
-   * @param message The error message
-   * @param msgArgs The message arguments
-   * @return This {@code Check} object
-   * @throws E If the test fails
-   */
-  public Check<T, E> is(Predicate<T> test, String message, Object... msgArgs) throws E {
-    return and(test, message, msgArgs);
   }
 
   /**
@@ -435,18 +448,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract Check<T, E> and(IntPredicate test) throws E;
-
-  /**
-   * Same as {@link #and(IntPredicate) and(test)}.
-   *
-   * @param test The test
-   * @return This {@code Check} object
-   * @throws E If the test fails
-   */
-  public Check<T, E> is(IntPredicate test) throws E {
-    return and(test);
-  }
+  public abstract Check<T, E> is(IntPredicate test) throws E;
 
   /**
    * Submits the argument to the specified test. Allows you to provide a custom error message.
@@ -457,20 +459,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract Check<T, E> and(IntPredicate test, String message, Object... msgArgs) throws E;
-
-  /**
-   * Same as {@link #and(IntPredicate, String, Object...) and(test, message, msgArgs)}.
-   *
-   * @param test The test
-   * @param message The error message
-   * @param msgArgs The message arguments
-   * @return This {@code Check} object
-   * @throws E If the test fails
-   */
-  public Check<T, E> is(IntPredicate test, String message, Object... msgArgs) throws E {
-    return and(test, message, msgArgs);
-  }
+  public abstract Check<T, E> is(IntPredicate test, String message, Object... msgArgs) throws E;
 
   /**
    * Verifies that there is some relation between the argument and some other value. This method is
@@ -484,7 +473,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public <U> Check<T, E> and(Relation<T, U> relation, U relateTo) throws E {
+  public <U> Check<T, E> is(Relation<T, U> relation, U relateTo) throws E {
     if (relation.exists(ok(), relateTo)) {
       return this;
     }
@@ -492,43 +481,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Same as {@link #and(Relation, Object) and(relation, relateTo)}.
-   *
-   * @param <U> The type of the object of the relationship
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @return This {@code Check} object
-   * @throws E If the test fails
-   */
-  public <U> Check<T, E> is(Relation<T, U> relation, U relateTo) throws E {
-    return and(relation, relateTo);
-  }
-
-  /**
    * Verifies that there is some relation between the argument and some other value. Allows you to
    * provide a custom error message.
-   *
-   * @param <U> The type of the object of the relationship
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @param message The error message
-   * @param msgArgs The message arguments
-   * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
-   */
-  public <U> Check<T, E> and(Relation<T, U> relation, U relateTo, String message, Object... msgArgs)
-      throws E {
-    if (relation.exists(ok(), relateTo)) {
-      return this;
-    }
-    throw excFactory.apply(String.format(message, msgArgs));
-  }
-
-  /**
-   * Same as {@link #and(Relation, Object, String, Object...) and(relation, relateTo, message,
-   * msgArgs)}.
    *
    * @param <U> The type of the object of the relationship
    * @param relation The relation to verify between the argument and the specified value ({@code
@@ -541,7 +495,10 @@ public abstract class Check<T, E extends Exception> {
    */
   public <U> Check<T, E> is(Relation<T, U> relation, U relateTo, String message, Object... msgArgs)
       throws E {
-    return and(relation, relateTo, message, msgArgs);
+    if (relation.exists(ok(), relateTo)) {
+      return this;
+    }
+    throw excFactory.apply(String.format(message, msgArgs));
   }
 
   /**
@@ -555,24 +512,11 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public Check<T, E> and(ObjIntRelation<T> relation, int relateTo) throws E {
+  public Check<T, E> is(ObjIntRelation<T> relation, int relateTo) throws E {
     if (relation.exists(ok(), relateTo)) {
       return this;
     }
     throw excFactory.apply(Messages.get(relation, ok(), argName, relateTo));
-  }
-
-  /**
-   * Same as {@link #and(ObjIntRelation, int) and(relation, relateTo)}.
-   *
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
-   */
-  public Check<T, E> is(ObjIntRelation<T> relation, int relateTo) throws E {
-    return and(relation, relateTo);
   }
 
   /**
@@ -587,29 +531,12 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public Check<T, E> and(
-      ObjIntRelation<T> relation, int relateTo, String message, Object... msgArgs) throws E {
+  public Check<T, E> is(ObjIntRelation<T> relation, int relateTo, String message, Object... msgArgs)
+      throws E {
     if (relation.exists(ok(), relateTo)) {
       return this;
     }
     throw excFactory.apply(String.format(message, msgArgs));
-  }
-
-  /**
-   * Same as {@link #and(IntRelation, int, String, Object...) and(relation, relateTo, message,
-   * msgArgs)}.
-   *
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @param message The error message
-   * @param msgArgs The message arguments
-   * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
-   */
-  public Check<T, E> is(ObjIntRelation<T> relation, int relateTo, String message, Object... msgArgs)
-      throws E {
-    return and(relation, relateTo, message, msgArgs);
   }
 
   /**
@@ -622,21 +549,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract <U> Check<T, E> and(IntObjRelation<U> relation, U relateTo) throws E;
-
-  /**
-   * Same as {@link #and(IntObjRelation, Object) and(relation, relateTo)}.
-   *
-   * @param <U> The type of the object of the relationship
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
-   */
-  public <U> Check<T, E> is(IntObjRelation<U> relation, U relateTo) throws E {
-    return and(relation, relateTo);
-  }
+  public abstract <U> Check<T, E> is(IntObjRelation<U> relation, U relateTo) throws E;
 
   /**
    * Verifies that there is some relation between the integer argument and some object. Allows you
@@ -651,26 +564,8 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract <U> Check<T, E> and(
+  public abstract <U> Check<T, E> is(
       IntObjRelation<U> relation, U relateTo, String message, Object... msgArgs) throws E;
-
-  /**
-   * Same as {@link #and(IntObjRelation, Object, String, Object...) and(relation, relateTo, message,
-   * msgArgs)}.
-   *
-   * @param <U> The type of the object of the relationship
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @param message The error message
-   * @param msgArgs The message arguments
-   * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
-   */
-  public <U> Check<T, E> is(
-      IntObjRelation<U> relation, U relateTo, String message, Object... msgArgs) throws E {
-    return and(relation, relateTo, message, msgArgs);
-  }
 
   /**
    * Verifies that there is some relation between the argument and some other value. This method is
@@ -683,20 +578,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract Check<T, E> and(IntRelation relation, int relateTo) throws E;
-
-  /**
-   * Same as {@link #and(IntRelation, int) and(relation, relateTo)}.
-   *
-   * @param relation The relation to verify between the argument and the specified integer ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
-   */
-  public Check<T, E> is(IntRelation relation, int relateTo) throws E {
-    return and(relation, relateTo);
-  }
+  public abstract Check<T, E> is(IntRelation relation, int relateTo) throws E;
 
   /**
    * Verifies that there is some relation between the argument and some other value. Allows you to
@@ -710,25 +592,8 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract Check<T, E> and(
+  public abstract Check<T, E> is(
       IntRelation relation, int relateTo, String message, Object... msgArgs) throws E;
-
-  /**
-   * Same as {@link #and(IntRelation, int, String, Object...) and(relation, relateTo, message,
-   * msgArgs)}.
-   *
-   * @param relation The relation to verify between the argument and the specified integer ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @param message The error message
-   * @param msgArgs The message arguments
-   * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
-   */
-  public Check<T, E> is(IntRelation relation, int relateTo, String message, Object... msgArgs)
-      throws E {
-    return and(relation, relateTo, message, msgArgs);
-  }
 
   /**
    * Submits a property of the argument to the specified test.
@@ -740,7 +605,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract <U> Check<T, E> and(Function<T, U> getter, String property, Predicate<U> test)
+  public abstract <U> Check<T, E> has(Function<T, U> getter, String property, Predicate<U> test)
       throws E;
 
   /**
@@ -753,7 +618,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract <U> Check<T, E> and(Function<T, U> getter, Predicate<U> test) throws E;
+  public abstract <U> Check<T, E> has(Function<T, U> getter, Predicate<U> test) throws E;
 
   /**
    * Submits a property of the argument to the specified test.
@@ -766,7 +631,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract <U> Check<T, E> and(
+  public abstract <U> Check<T, E> has(
       Function<T, U> getter, Predicate<U> test, String message, Object... msgArgs) throws E;
 
   /**
@@ -778,7 +643,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract Check<T, E> and(ToIntFunction<T> getter, String property, IntPredicate test)
+  public abstract Check<T, E> has(ToIntFunction<T> getter, String property, IntPredicate test)
       throws E;
 
   /**
@@ -791,7 +656,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract Check<T, E> and(ToIntFunction<T> getter, IntPredicate test) throws E;
+  public abstract Check<T, E> has(ToIntFunction<T> getter, IntPredicate test) throws E;
 
   /**
    * Submits an {@code int} property of the argument to the specified test.
@@ -803,7 +668,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract Check<T, E> and(
+  public abstract Check<T, E> has(
       ToIntFunction<T> getter, IntPredicate test, String message, Object... msgArgs) throws E;
 
   /**
@@ -820,7 +685,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract <U, V> Check<T, E> and(
+  public abstract <U, V> Check<T, E> has(
       Function<T, U> getter, String property, Relation<U, V> relation, V relateTo) throws E;
 
   /**
@@ -838,7 +703,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract <U, V> Check<T, E> and(Function<T, U> getter, Relation<U, V> relation, V relateTo)
+  public abstract <U, V> Check<T, E> has(Function<T, U> getter, Relation<U, V> relation, V relateTo)
       throws E;
 
   /**
@@ -856,7 +721,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract <U, V> Check<T, E> and(
+  public abstract <U, V> Check<T, E> has(
       Function<T, U> getter, Relation<U, V> relation, V relateTo, String message, Object... msgArgs)
       throws E;
 
@@ -873,7 +738,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract <U> Check<T, E> and(
+  public abstract <U> Check<T, E> has(
       Function<T, U> getter, String property, ObjIntRelation<U> relation, int relateTo) throws E;
 
   /**
@@ -890,7 +755,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract <U> Check<T, E> and(
+  public abstract <U> Check<T, E> has(
       Function<T, U> getter, ObjIntRelation<U> relation, int relateTo) throws E;
 
   /**
@@ -907,7 +772,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract <U> Check<T, E> and(
+  public abstract <U> Check<T, E> has(
       Function<T, U> getter,
       ObjIntRelation<U> relation,
       int relateTo,
@@ -927,7 +792,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract Check<T, E> and(
+  public abstract Check<T, E> has(
       ToIntFunction<T> getter, String property, IntRelation relation, int relateTo) throws E;
 
   /**
@@ -943,23 +808,8 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract Check<T, E> and(ToIntFunction<T> getter, IntRelation relation, int relateTo)
+  public abstract Check<T, E> has(ToIntFunction<T> getter, IntRelation relation, int relateTo)
       throws E;
-
-  /**
-   * Same as {@link #and(ToIntFunction, IntRelation, int) and(getter, relation, relateTo)}.
-   *
-   * @param getter A no-arg method, called on the argument, returning the subject of the
-   *     relationship
-   * @param relation The relation to verify between the argument and the specified integer ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
-   */
-  public Check<T, E> has(ToIntFunction<T> getter, IntRelation relation, int relateTo) throws E {
-    return and(getter, relation, relateTo);
-  }
 
   /**
    * Verifies that there is some relation between a property of the argument and some other value.
@@ -974,7 +824,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract Check<T, E> and(
+  public abstract Check<T, E> has(
       ToIntFunction<T> getter,
       IntRelation relation,
       int relateTo,

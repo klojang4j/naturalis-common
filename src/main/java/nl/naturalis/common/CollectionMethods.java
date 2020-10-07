@@ -5,7 +5,7 @@ import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ArrayMethods.END_INDEX;
 import static nl.naturalis.common.ArrayMethods.START_INDEX;
 import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.check.CommonGetters.length;
+import static nl.naturalis.common.check.CommonGetters.arrayLength;
 
 /** Methods extending the Java Collection framework. */
 public class CollectionMethods {
@@ -114,7 +114,7 @@ public class CollectionMethods {
    */
   @SuppressWarnings("unchecked")
   public static <K, V> HashMap<K, V> newHashMap(Object... kvPairs) {
-    Check.notNull(kvPairs, "kvPairs").and(length(), even());
+    Check.notNull(kvPairs, "kvPairs").has(arrayLength(), even());
     HashMap<K, V> map = new HashMap<>(kvPairs.length);
     for (int i = 0; i < kvPairs.length; i += 2) {
       map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
@@ -147,7 +147,7 @@ public class CollectionMethods {
    */
   @SuppressWarnings("unchecked")
   public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(Object... kvPairs) {
-    Check.notNull(kvPairs, "kvPairs").and(length(), even());
+    Check.notNull(kvPairs, "kvPairs").has(arrayLength(), even());
     LinkedHashMap<K, V> map = new LinkedHashMap<>(kvPairs.length);
     for (int i = 0; i < kvPairs.length; i += 2) {
       map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
@@ -194,7 +194,7 @@ public class CollectionMethods {
    */
   public static <T> List<T> shrink(List<T> list, int by) {
     Check.that(list, "list").is(notEmpty());
-    Check.that(by, "by").is(toIndexOf(), list);
+    Check.that(by, "by").is(endIndexOf(), list);
     int sz = list.size();
     return sz == by ? Collections.emptyList() : list.subList(0, sz - by);
   }
@@ -222,7 +222,7 @@ public class CollectionMethods {
    */
   public static <T> List<T> shift(List<T> list, int by) {
     Check.that(list, "list").is(notEmpty());
-    Check.that(by, "by").is(toIndexOf(), list);
+    Check.that(by, "by").is(endIndexOf(), list);
     int sz = list.size();
     return sz == by ? Collections.emptyList() : list.subList(by, sz);
   }

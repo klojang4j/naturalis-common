@@ -54,12 +54,12 @@ public class NumberMethodsTest {
 
   @Test
   public void nvl01() {
-    assertTrue(nvl((Integer) null) == ZERO);
-    assertTrue(nvl((Double) null) == ZERO_D);
-    assertTrue(nvl((Long) null) == ZERO_L);
-    assertTrue(nvl((Float) null) == ZERO_F);
-    assertTrue(nvl((Short) null) == ZERO_S);
-    assertTrue(nvl((Byte) null) == ZERO_B);
+    assertTrue(nvl((Integer) null) == ZERO_INTEGER);
+    assertTrue(nvl((Double) null) == ZERO_DOUBLE);
+    assertTrue(nvl((Long) null) == ZERO_LONG);
+    assertTrue(nvl((Float) null) == ZERO_FLOAT);
+    assertTrue(nvl((Short) null) == ZERO_SHORT);
+    assertTrue(nvl((Byte) null) == ZERO_BYTE);
     assertTrue(nvl(2) == 2);
     assertTrue(nvl(2.0) == 2D);
     assertTrue(nvl(2L) == 2L);

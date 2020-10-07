@@ -670,7 +670,7 @@ public final class StringMethods {
     if (from < 0) {
       from = sz + from;
     }
-    Check.that(from, "from").is(notNegative()).and(atMost(), sz);
+    Check.that(from, "from").is(notNegative()).is(atMost(), sz);
     return str.substring(from);
   }
 

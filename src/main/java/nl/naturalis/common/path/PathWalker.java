@@ -71,7 +71,7 @@ public final class PathWalker {
    * @param paths
    */
   public PathWalker(Path... paths) {
-    Check.that(paths, "paths").is(notEmpty()).and(noneNull());
+    Check.that(paths, "paths").is(notEmpty()).is(noneNull());
     this.paths = Arrays.copyOf(paths, paths.length);
     this.useDeadEnd = false;
     this.keyDeser = null;
@@ -84,7 +84,7 @@ public final class PathWalker {
    * @param paths
    */
   public PathWalker(String... paths) {
-    Check.that(paths, "paths").is(notEmpty()).and(noneNull());
+    Check.that(paths, "paths").is(notEmpty()).is(noneNull());
     this.paths = Arrays.stream(paths).map(Path::new).toArray(Path[]::new);
     this.useDeadEnd = false;
     this.keyDeser = null;
@@ -127,7 +127,7 @@ public final class PathWalker {
    */
   public PathWalker(
       List<Path> paths, boolean useDeadEndValue, Function<Path, Object> mapKeyDeserializer) {
-    Check.that(paths, "paths").is(notEmpty()).and(noneNull());
+    Check.that(paths, "paths").is(notEmpty()).is(noneNull());
     this.paths = paths.toArray(Path[]::new);
     this.useDeadEnd = useDeadEndValue;
     this.keyDeser = mapKeyDeserializer;
@@ -156,7 +156,7 @@ public final class PathWalker {
    * @throws PathWalkerException
    */
   public void readValues(Object host, Object[] values) throws PathWalkerException {
-    Check.notNull(values, "output").and(length(), atLeast(), paths.length);
+    Check.notNull(values, "output").has(arrayLength(), atLeast(), paths.length);
     IntStream.range(0, paths.length).forEach(i -> values[i] = readObj(host, paths[i]));
   }
 
@@ -195,7 +195,7 @@ public final class PathWalker {
    * @param values
    */
   public void writeValues(Object host, Object... values) {
-    Check.notNull(values, "values").and(length(), atLeast(), paths.length);
+    Check.notNull(values, "values").has(arrayLength(), atLeast(), paths.length);
     for (int i = 0; i < paths.length; ++i) {
       write(host, paths[i], values[i]);
     }

@@ -18,9 +18,10 @@ import static nl.naturalis.common.check.CommonChecks.*;
  *
  * <h3>Container objects</h3>
  *
- * <p>Some methods in this class apply special logic when passed a container object. A container
- * object is an array, a {@code Collection} or a {@code Map}. For {@code Map} objects the logic is
- * only applied to their values, not their keys.
+ * <p>Some methods in this class apply special logic when passed a <b>container object</b>. A
+ * container object is an array, a {@code Collection} or a {@code Map}. For {@code Map} objects the
+ * logic will always only applied to their values, not their keys (use {@link Map#keySet()
+ * Map.keySet()} is you want the logic to their keys as well).
  *
  * @author Ayco Holleman
  */
@@ -36,8 +37,8 @@ public class ObjectMethods {
    *
    * <ul>
    *   <li>{@code obj} is {@code null}
-   *   <li>{@code obj} is an empty {@code String}
-   *   <li>{@code obj} is an empty container object
+   *   <li>{@code obj} is an empty {@code CharSequence}
+   *   <li>{@code obj} is an empty (zero-size) container object
    *   <li>{@code obj} is a zero-size {@link Sizeable}
    *   <li>{@code obj} is an empty {@link Emptyable}
    * </ul>
@@ -49,7 +50,7 @@ public class ObjectMethods {
    */
   public static boolean isEmpty(Object obj) {
     return obj == null
-        || obj instanceof String && ((String) obj).isEmpty()
+        || obj instanceof CharSequence && ((CharSequence) obj).length() == 0
         || obj instanceof Collection && ((Collection) obj).isEmpty()
         || obj instanceof Map && ((Map) obj).isEmpty()
         || obj instanceof Object[] && ((Object[]) obj).length == 0
@@ -66,7 +67,7 @@ public class ObjectMethods {
    *
    * <ul>
    *   <li>{@code obj} is not {@code null}
-   *   <li>{@code obj} is not an empty {@code String}
+   *   <li>{@code obj} is not an empty {@code CharSequence}
    *   <li>{@code obj} is not an empty container object
    *   <li>{@code obj} is not a zero-size {@link Sizeable}
    *   <li>{@code obj} is not an empty {@link Emptyable}
@@ -86,12 +87,12 @@ public class ObjectMethods {
    * <p>
    *
    * <ul>
-   *   <li>{@code obj} is a non-empty {@code String}
-   *   <li>{@code obj} is a non-empty container object with only {@code isDeepNotEmpty} elements
+   *   <li>{@code obj} is a non-empty {@code CharSequence}
+   *   <li>{@code obj} is a non-empty container object with only recursively non-empty elements
    *   <li>{@code obj} is a non-empty primitive array
    *   <li>{@code obj} is a non-empty {@link Emptyable}
    *   <li>{@code obj} is a non-zero-size {@link Sizeable}
-   *   <li>{@code obj} is a non-null of any other type than listed above
+   *   <li>{@code obj} is a non-null object of any other type
    * </ul>
    *
    * @param obj The object to be tested
@@ -99,7 +100,7 @@ public class ObjectMethods {
    */
   public static boolean isDeepNotEmpty(Object obj) {
     return obj != null
-        && (!(obj instanceof String) || !((String) obj).isEmpty())
+        && (!(obj instanceof CharSequence) || ((CharSequence) obj).length() > 0)
         && (!(obj instanceof Collection) || dne((Collection) obj))
         && (!(obj instanceof Map) || dne((Map) obj))
         && (!(obj instanceof Object[]) || dne((Object[]) obj))
@@ -140,8 +141,9 @@ public class ObjectMethods {
   }
 
   /**
-   * Verifies that the argument is not null and does not contain any null values. It may still be an
-   * empty container object, however. Useful for testing varargs arrays.
+   * Verifies that the argument is not null and, if it is a container object, does not contain any
+   * null values. It may still be an empty (zero-size) container object, however. Useful for testing
+   * varargs arrays.
    *
    * @param obj The object to be tested
    * @return Whether or not it is not null and does not contain any null values
@@ -175,18 +177,20 @@ public class ObjectMethods {
    * Tests the provided arguments for equality using <i>empty-equals-null</i> semantics. This is
    * equivalent to {@code Objects.equals(emptyToNull(obj1), emptyToNull(obj2))}, except that an
    * empty instance of one type (e.g. {@code String}) is <b>not</b> equal to an empty instance of
-   * another type (e.g. {@code Set}). So:
+   * another non-comparable type (e.g. {@code Set}). An empty {@code HashSet}, however, is equal to
+   * an empty {@code TreeSet}. So:
    *
    * <p>
    *
    * <ol>
-   *   <li>{@code null} equals an empty {@code String}
+   *   <li>{@code null} equals an empty {@code CharSequence}
    *   <li>{@code null} equals an empty {@code Collection}
    *   <li>{@code null} equals an empty {@code Map}
    *   <li>{@code null} equals a zero-length array
    *   <li>{@code null} equals an empty {@link Emptyable}
    *   <li>{@code null} equals a zero-size {@link Sizeable}
-   *   <li>An empty intance of one type <i>does not equal</i> an empty instance of another type
+   *   <li>An empty intance of one type never equals an empty instance of another non-comparable
+   *       type
    * </ol>
    *
    * @param obj1 The 1st of the pair of objects to compare
@@ -197,7 +201,7 @@ public class ObjectMethods {
     if (obj1 == obj2) {
       return true;
     } else if (isEmpty(obj1)) {
-      return isEmpty(obj2) ? canCompare(obj1, obj2) : false;
+      return isEmpty(obj2) ? e2nComparable(obj1, obj2) : false;
     }
     return isEmpty(obj2) ? false : Objects.equals(obj1, obj2);
   }
@@ -216,7 +220,7 @@ public class ObjectMethods {
     if (obj1 == obj2) {
       return true;
     } else if (isEmpty(obj1)) {
-      return isEmpty(obj2) ? canCompare(obj1, obj2) : false;
+      return isEmpty(obj2) ? e2nComparable(obj1, obj2) : false;
     }
     return isEmpty(obj2) ? false : eq(obj1, obj2);
   }
@@ -292,6 +296,7 @@ public class ObjectMethods {
    * Returns the default {@code char} value ('\u0000') if the argument is null, else the unboxed
    * argument itself.
    *
+   * @see NumberMethods
    * @param c The primitive wrapper
    * @return The argument or the default value of the corresponding primitive type
    */
@@ -302,6 +307,7 @@ public class ObjectMethods {
   /**
    * Returns an empty {@code String} if the argument is null, else the argument itself.
    *
+   * @see NumberMethods
    * @param s The string to return if not null
    * @return The argument itself or an empty {@code String}
    */
@@ -576,8 +582,8 @@ public class ObjectMethods {
     return false;
   }
 
-  private static boolean canCompare(Object obj1, Object obj2) {
-    return obj1 == null // can always compare null to any other type of empty object
+  private static boolean e2nComparable(Object obj1, Object obj2) {
+    return obj1 == null
         || obj2 == null
         || obj1.getClass() == obj2.getClass()
         || obj1 instanceof List && obj2 instanceof List

@@ -27,7 +27,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> and(Predicate<T> test, String message, Object... msgArgs) throws E {
+  public Check<T, E> is(Predicate<T> test, String message, Object... msgArgs) throws E {
     if (test.test(arg)) {
       return this;
     }
@@ -35,7 +35,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> and(IntPredicate test) throws E {
+  public Check<T, E> is(IntPredicate test) throws E {
     if (arg.getClass() == Integer.class) {
       if (test.test(((Integer) arg).intValue())) {
         return this;
@@ -46,7 +46,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> and(IntPredicate test, String message, Object... msgArgs) throws E {
+  public Check<T, E> is(IntPredicate test, String message, Object... msgArgs) throws E {
     if (arg.getClass() == Integer.class) {
       if (test.test(((Integer) arg).intValue())) {
         return this;
@@ -57,7 +57,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public <U> Check<T, E> and(IntObjRelation<U> relation, U relateTo) throws E {
+  public <U> Check<T, E> is(IntObjRelation<U> relation, U relateTo) throws E {
     if (arg.getClass() == Integer.class) {
       if (relation.exists(((Integer) arg).intValue(), relateTo)) {
         return this;
@@ -67,7 +67,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public <U> Check<T, E> and(
+  public <U> Check<T, E> is(
       IntObjRelation<U> relation, U relateTo, String message, Object... msgArgs) throws E {
     if (arg.getClass() == Integer.class) {
       if (relation.exists(((Integer) arg).intValue(), relateTo)) {
@@ -79,7 +79,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> and(IntRelation relation, int relateTo) throws E {
+  public Check<T, E> is(IntRelation relation, int relateTo) throws E {
     if (arg.getClass() == Integer.class) {
       if (relation.exists(((Integer) arg).intValue(), relateTo)) {
         return this;
@@ -90,7 +90,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> and(IntRelation relation, int relateTo, String message, Object... msgArgs)
+  public Check<T, E> is(IntRelation relation, int relateTo, String message, Object... msgArgs)
       throws E {
     if (arg.getClass() == Integer.class) {
       if (relation.exists(((Integer) arg).intValue(), relateTo)) {
@@ -102,7 +102,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public <U> Check<T, E> and(Function<T, U> getter, String property, Predicate<U> test) throws E {
+  public <U> Check<T, E> has(Function<T, U> getter, String property, Predicate<U> test) throws E {
     U propVal = getter.apply(arg);
     if (test.test(propVal)) {
       return this;
@@ -111,12 +111,12 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public <U> Check<T, E> and(Function<T, U> getter, Predicate<U> test) throws E {
-    return and(getter, getGetterName(getter), test);
+  public <U> Check<T, E> has(Function<T, U> getter, Predicate<U> test) throws E {
+    return has(getter, getGetterName(getter), test);
   }
 
   @Override
-  public <U> Check<T, E> and(
+  public <U> Check<T, E> has(
       Function<T, U> getter, Predicate<U> test, String message, Object... msgArgs) throws E {
     if (test.test(getter.apply(arg))) {
       return this;
@@ -125,7 +125,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> and(ToIntFunction<T> getter, String property, IntPredicate test) throws E {
+  public Check<T, E> has(ToIntFunction<T> getter, String property, IntPredicate test) throws E {
     int propVal = getter.applyAsInt(arg);
     if (test.test(propVal)) {
       return this;
@@ -134,12 +134,12 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> and(ToIntFunction<T> getter, IntPredicate test) throws E {
-    return and(getter, getGetterName(getter), test);
+  public Check<T, E> has(ToIntFunction<T> getter, IntPredicate test) throws E {
+    return has(getter, getGetterName(getter), test);
   }
 
   @Override
-  public Check<T, E> and(
+  public Check<T, E> has(
       ToIntFunction<T> getter, IntPredicate test, String message, Object... msgArgs) throws E {
     if (test.test(getter.applyAsInt(arg))) {
       return this;
@@ -148,7 +148,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public <U, V> Check<T, E> and(
+  public <U, V> Check<T, E> has(
       Function<T, U> getter, String property, Relation<U, V> relation, V relateTo) throws E {
     U propVal = getter.apply(arg);
     if (relation.exists(propVal, relateTo)) {
@@ -158,13 +158,13 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public <U, V> Check<T, E> and(Function<T, U> getter, Relation<U, V> relation, V relateTo)
+  public <U, V> Check<T, E> has(Function<T, U> getter, Relation<U, V> relation, V relateTo)
       throws E {
-    return and(getter, getGetterName(getter), relation, relateTo);
+    return has(getter, getGetterName(getter), relation, relateTo);
   }
 
   @Override
-  public <U, V> Check<T, E> and(
+  public <U, V> Check<T, E> has(
       Function<T, U> getter, Relation<U, V> relation, V relateTo, String message, Object... msgArgs)
       throws E {
     if (relation.exists(getter.apply(arg), relateTo)) {
@@ -174,7 +174,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public <U> Check<T, E> and(
+  public <U> Check<T, E> has(
       Function<T, U> getter, String property, ObjIntRelation<U> relation, int relateTo) throws E {
     U propVal = getter.apply(arg);
     if (relation.exists(propVal, relateTo)) {
@@ -184,13 +184,13 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public <U> Check<T, E> and(Function<T, U> getter, ObjIntRelation<U> relation, int relateTo)
+  public <U> Check<T, E> has(Function<T, U> getter, ObjIntRelation<U> relation, int relateTo)
       throws E {
-    return and(getter, getGetterName(getter), relation, relateTo);
+    return has(getter, getGetterName(getter), relation, relateTo);
   }
 
   @Override
-  public <U> Check<T, E> and(
+  public <U> Check<T, E> has(
       Function<T, U> getter,
       ObjIntRelation<U> relation,
       int relateTo,
@@ -204,25 +204,25 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public Check<T, E> and(ToIntFunction<T> getter, String property, IntRelation test, int relateTo)
+  public Check<T, E> has(ToIntFunction<T> getter, String property, IntRelation relation, int relateTo)
       throws E {
     int propVal = getter.applyAsInt(arg);
-    if (test.exists(propVal, relateTo)) {
+    if (relation.exists(propVal, relateTo)) {
       return this;
     }
-    throw excFactory.apply(Messages.get(test, propVal, propName(property), relateTo));
+    throw excFactory.apply(Messages.get(relation, propVal, propName(property), relateTo));
   }
 
   @Override
-  public Check<T, E> and(ToIntFunction<T> getter, IntRelation relation, int relateTo) throws E {
-    return and(getter, getGetterName(getter), relation, relateTo);
+  public Check<T, E> has(ToIntFunction<T> getter, IntRelation relation, int relateTo) throws E {
+    return has(getter, getGetterName(getter), relation, relateTo);
   }
 
   @Override
-  public Check<T, E> and(
-      ToIntFunction<T> getter, IntRelation test, int relateTo, String message, Object... msgArgs)
+  public Check<T, E> has(
+      ToIntFunction<T> getter, IntRelation relation, int relateTo, String message, Object... msgArgs)
       throws E {
-    if (test.exists(getter.applyAsInt(arg), relateTo)) {
+    if (relation.exists(getter.applyAsInt(arg), relateTo)) {
       return this;
     }
     throw excFactory.apply(String.format(message, msgArgs));
