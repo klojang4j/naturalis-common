@@ -9,7 +9,7 @@ import static org.junit.Assert.assertTrue;
 
 import static nl.naturalis.common.ArrayMethods.append;
 import static nl.naturalis.common.ArrayMethods.concat;
-import static nl.naturalis.common.ArrayMethods.isOneOf;
+import static nl.naturalis.common.ArrayMethods.elementOf;
 import static nl.naturalis.common.ArrayMethods.fromTemplate;
 import static nl.naturalis.common.ArrayMethods.indexOf;
 import static nl.naturalis.common.ArrayMethods.prefix;
@@ -17,7 +17,7 @@ import static nl.naturalis.common.ArrayMethods.prefix;
 public class ArrayMethodsTest {
 
   @Test
-  public void append1() {
+  public void append01() {
     String[] a = {"a", "b", "c"};
     String[] expected = {"a", "b", "c", "1"};
     String[] actual = append(a, "1");
@@ -25,7 +25,7 @@ public class ArrayMethodsTest {
   }
 
   @Test
-  public void append2() {
+  public void append02() {
     String[] a = {"a", "b", "c"};
     String[] expected = {"a", "b", "c", "1", "2"};
     String[] actual = append(a, "1", "2");
@@ -33,7 +33,7 @@ public class ArrayMethodsTest {
   }
 
   @Test
-  public void append3() {
+  public void append03() {
     String[] a = {"a", "b", "c"};
     String[] expected = {"a", "b", "c", "1", "2", "3", "4", "5", "6", "7"};
     String[] actual = append(a, "1", "2", "3", "4", "5", "6", "7");
@@ -41,7 +41,7 @@ public class ArrayMethodsTest {
   }
 
   @Test
-  public void concat1() {
+  public void concat01() {
     String[] a = {"a", "b", "c"};
     String[] b = {"1", "2", "3"};
     String[] c = {"A", "B", "C"};
@@ -52,7 +52,7 @@ public class ArrayMethodsTest {
   }
 
   @Test // With interfaces.
-  public void concat2() {
+  public void concat02() {
     CharSequence[] a = {"a", "b", "c"};
     CharSequence[] b = {"1", "2", "3"};
     CharSequence[] c = {"A", "B", "C"};
@@ -63,15 +63,15 @@ public class ArrayMethodsTest {
   }
 
   @Test
-  public void contains1() {
+  public void elementOf01() {
     int[] array = {1, 2, 4, 8, 16};
-    assertTrue(isOneOf(1, array));
-    assertTrue(isOneOf(16, array));
-    assertFalse(isOneOf(23, array));
+    assertTrue(elementOf(1, array));
+    assertTrue(elementOf(16, array));
+    assertFalse(elementOf(23, array));
   }
 
   @Test
-  public void fromTemplate1() {
+  public void fromTemplate01() {
     String[] a = {"a", "b", "c"};
     Object[] b = fromTemplate(a);
     assertEquals(3, b.length);
@@ -79,7 +79,7 @@ public class ArrayMethodsTest {
   }
 
   @Test
-  public void fromTemplate2() {
+  public void fromTemplate02() {
     CharSequence[] a = {"a", "b", "c"};
     Object[] b = fromTemplate(a, 7);
     assertEquals(7, b.length);
@@ -87,7 +87,7 @@ public class ArrayMethodsTest {
   }
 
   @Test
-  public void indexOf1() {
+  public void indexOf01() {
     int[] array = {1, 2, 4, 8, 16};
     assertEquals(0, indexOf(array, 1));
     assertEquals(4, indexOf(array, 16));
@@ -95,7 +95,7 @@ public class ArrayMethodsTest {
   }
 
   @Test
-  public void prefix1() {
+  public void prefix01() {
     String[] a = {"a", "b", "c"};
     String[] expected = {"1", "a", "b", "c"};
     String[] actual = prefix(a, "1");
@@ -103,7 +103,7 @@ public class ArrayMethodsTest {
   }
 
   @Test
-  public void prefix2() {
+  public void prefix02() {
     String[] a = {"a", "b", "c"};
     String[] expected = {"1", "2", "a", "b", "c"};
     String[] actual = prefix(a, "1", "2");
@@ -111,7 +111,7 @@ public class ArrayMethodsTest {
   }
 
   @Test
-  public void prefix3() {
+  public void prefix03() {
     String[] a = {"a", "b", "c"};
     String[] expected = {"1", "2", "3", "4", "5", "6", "7", "a", "b", "c"};
     String[] actual = prefix(a, "1", "2", "3", "4", "5", "6", "7");

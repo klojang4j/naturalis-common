@@ -21,7 +21,7 @@ import static nl.naturalis.common.check.Messages.*;
  * associated with them in case the argument does not pass the test. Many of them are plain,
  * unadorned, method references and they <i>only</i> check what they advertise to be checking.
  * <b>None of them do a preliminary null-check on the argument</b>, except those dedicated to this
- * task, like {@link #notNull()}. They rely upon being embedded within in chain of checks on a
+ * task (like {@link #notNull()}). They rely upon being embedded within in chain of checks on a
  * {@link Check} object, the first of which should be a <i>not-null</i> check.
  *
  * @author Ayco Holleman
@@ -109,12 +109,12 @@ public class CommonChecks {
    * @param <T> The type of the argument
    * @return A {@code Predicate}
    */
-  public static <T> Predicate<T> isNull() {
+  public static <T> Predicate<T> nullRef() {
     return Objects::isNull;
   }
 
   static {
-    add(isNull(), msgIsNull());
+    add(nullRef(), msgNullRef());
   }
 
   /**
@@ -212,12 +212,12 @@ public class CommonChecks {
    *
    * @returnn A {@code Predicate}
    */
-  public static Predicate<File> existingFile() {
+  public static Predicate<File> fileExists() {
     return File::isFile;
   }
 
   static {
-    add(existingFile(), msgExistingFile());
+    add(fileExists(), msgFileExists());
   }
 
   /**
@@ -226,12 +226,12 @@ public class CommonChecks {
    *
    * @returnn A {@code Predicate}
    */
-  public static Predicate<File> existingDirectory() {
+  public static Predicate<File> directoryExists() {
     return File::isDirectory;
   }
 
   static {
-    add(existingDirectory(), msgExistingDirectory());
+    add(directoryExists(), msgDirectoryExists());
   }
 
   /**
@@ -239,12 +239,12 @@ public class CommonChecks {
    *
    * @returnn A {@code Predicate}
    */
-  public static Predicate<File> notOnFileSystem() {
+  public static Predicate<File> fileNotExists() {
     return f -> !f.exists();
   }
 
   static {
-    add(notOnFileSystem(), msgNotOnFileSystem());
+    add(fileNotExists(), msgFileNotExists());
   }
 
   /**
@@ -378,12 +378,12 @@ public class CommonChecks {
    * @param <T> The type of the argument
    * @return A {@code Predicate}
    */
-  public static <T> Predicate<T> anArray() {
+  public static <T> Predicate<T> array() {
     return x -> x.getClass().isArray();
   }
 
   static {
-    add(anArray(), msgAnArray());
+    add(array(), msgAnArray());
   }
 
   /**
@@ -394,12 +394,12 @@ public class CommonChecks {
    * @param <C> The type of the argument
    * @return A {@code Relation}
    */
-  public static <E, C extends Collection<? super E>> Relation<C, E> containing() {
+  public static <E, C extends Collection<? super E>> Relation<C, E> contains() {
     return Collection::contains;
   }
 
   static {
-    add(containing(), msgContaining());
+    add(contains(), msgContains());
   }
 
   /**
@@ -409,12 +409,12 @@ public class CommonChecks {
    * @param <C> The type of the argument
    * @return A {@code Relation}
    */
-  public static <E, C extends Collection<? super E>> Relation<C, E> notContaining() {
+  public static <E, C extends Collection<? super E>> Relation<C, E> notContains() {
     return (x, y) -> !x.contains(y);
   }
 
   static {
-    add(notContaining(), msgNotContaining());
+    add(notContains(), msgNotContains());
   }
 
   /**
@@ -455,12 +455,12 @@ public class CommonChecks {
    * @param <M> The Type of the {@code Map}
    * @return A {@code Relation}
    */
-  public static <K, M extends Map<? super K, ?>> Relation<M, K> containingKey() {
+  public static <K, M extends Map<? super K, ?>> Relation<M, K> hasKey() {
     return Map::containsKey;
   }
 
   static {
-    add(containingKey(), msgContainingKey());
+    add(hasKey(), msgHasKey());
   }
 
   /**
@@ -470,12 +470,12 @@ public class CommonChecks {
    * @param <M> The Type of the {@code Map}
    * @return A {@code Relation}
    */
-  public static <K, M extends Map<? super K, ?>> Relation<M, K> notContainingKey() {
+  public static <K, M extends Map<? super K, ?>> Relation<M, K> notHasKey() {
     return (x, y) -> !x.containsKey(y);
   }
 
   static {
-    add(notContainingKey(), msgNotContainingKey());
+    add(notHasKey(), msgNotHasKey());
   }
 
   /**
@@ -486,12 +486,12 @@ public class CommonChecks {
    * @param <M> The Type of the {@code Map}
    * @return A {@code Relation}
    */
-  public static <V, M extends Map<?, ? super V>> Relation<M, V> containingValue() {
+  public static <V, M extends Map<?, ? super V>> Relation<M, V> hasValue() {
     return Map::containsValue;
   }
 
   static {
-    add(containingValue(), msgContainingValue());
+    add(hasValue(), msgHasValue());
   }
 
   /**
@@ -501,12 +501,12 @@ public class CommonChecks {
    * @param <M> The Type of the {@code Map}
    * @return A {@code Relation}
    */
-  public static <V, M extends Map<?, ? super V>> Relation<M, V> notContainingValue() {
+  public static <V, M extends Map<?, ? super V>> Relation<M, V> notHasValue() {
     return (x, y) -> !x.containsValue(y);
   }
 
   static {
-    add(containingValue(), msgNotContainingValue());
+    add(hasValue(), msgNotHasValue());
   }
 
   /**
@@ -516,12 +516,12 @@ public class CommonChecks {
    * @param <X> The type of the argument
    * @return A {@code Relation}
    */
-  public static <X> Relation<X, X> objEquals() {
+  public static <X> Relation<X, X> equalTo() {
     return Objects::equals;
   }
 
   static {
-    add(objEquals(), msgObjEquals());
+    add(equalTo(), msgEqualTo());
   }
 
   /**
@@ -530,12 +530,12 @@ public class CommonChecks {
    * @param <X> The type of the argument
    * @return A {@code Relation}
    */
-  public static <X> Relation<X, X> objNotEquals() {
+  public static <X> Relation<X, X> notEqualTo() {
     return (x, y) -> !Objects.equals(x, y);
   }
 
   static {
-    add(objNotEquals(), msgObjNotEquals());
+    add(notEqualTo(), msgNotEqualTo());
   }
 
   /**
@@ -553,7 +553,7 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument references another object than some other reference.
+   * Verifies that the argument does not reference the same object than some other reference.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -588,12 +588,13 @@ public class CommonChecks {
    * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> nGreaterThan() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> greaterThan() {
     return (x, y) -> x.doubleValue() > y.doubleValue();
   }
 
   static {
-    add(nGreaterThan(), msgGreaterThan());
+    // Can recycle messages for int comparisons!
+    add(greaterThan(), msgGt());
   }
 
   /**
@@ -604,12 +605,12 @@ public class CommonChecks {
    * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> nAtLeast() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> atLeast() {
     return (x, y) -> x.doubleValue() >= y.doubleValue();
   }
 
   static {
-    add(nAtLeast(), msgAtLeast());
+    add(atLeast(), msgGte());
   }
 
   /**
@@ -618,12 +619,12 @@ public class CommonChecks {
    *
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> nLessThan() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> lessThan() {
     return (x, y) -> x.doubleValue() < y.doubleValue();
   }
 
   static {
-    add(nLessThan(), msgLessThan());
+    add(lessThan(), msgLt());
   }
 
   /**
@@ -634,21 +635,74 @@ public class CommonChecks {
    * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> nAtMost() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> atMost() {
     return (x, y) -> x.doubleValue() <= y.doubleValue();
   }
 
   static {
-    add(nAtMost(), msgAtMost());
+    add(atMost(), msgLte());
+  }
+
+  /**
+   * Verifies that the argument ends with a particular character sequence. Equivalent to {@link
+   * String#endsWith(String) String::endsWith}.
+   *
+   * @return A {@code Relation}
+   */
+  public static Relation<String, String> endsWith() {
+    return String::endsWith;
+  }
+
+  static {
+    add(endsWith(), msgEndsWith());
+  }
+
+  /**
+   * Verifies that the argument does not end with a particular character sequence.
+   *
+   * @return A {@code Relation}
+   */
+  public static Relation<String, String> notEndsWith() {
+    return (x, y) -> !x.endsWith(y);
+  }
+
+  static {
+    add(notEndsWith(), msgNotEndsWith());
+  }
+
+  /**
+   * Verifies that the argument contains a particular character sequence. Equivalent to {@link
+   * String#contains(CharSequence) String::contains}.
+   *
+   * @return A {@code Relation}
+   */
+  public static <T extends CharSequence> Relation<String, T> hasSubstr() {
+    return String::contains;
+  }
+
+  static {
+    add(hasSubstr(), msgHasSubstr());
+  }
+
+  /**
+   * Verifies that the argument does not contain a particular character sequence.
+   *
+   * @return A {@code Relation}
+   */
+  public static <T extends CharSequence> Relation<String, T> notHasSubstr() {
+    return (x, y) -> !x.contains(y);
+  }
+
+  static {
+    add(notHasSubstr(), msgNotHasSubstr());
   }
 
   /* ++++++++++++++ ObjIntRelation ++++++++++++++ */
 
   /**
-   * Verifies that the argument's length or size is equal to a particular value. This method is
-   * well-behaved if the argument is a {@code CharSequence}, {@code Collection}, {@code Map}, {@link
-   * Sizeable} or array. For any other type of argument this method throws an {@code
-   * UnsupportedOperationException}.
+   * Verifies that the argument's length or size is equal to a particular value. The argument must
+   * be an array, {@code CharSequence}, {@code Collection}, {@code Map} or {@link Sizeable}. For any
+   * other type of argument this method will throw an {@code UnsupportedOperationException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -676,10 +730,9 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument's length or size is not equal to a particular value. This method is
-   * well-behaved if the argument is a {@code CharSequence}, {@code Collection}, {@code Map}, {@link
-   * Sizeable} or array. For any other type of argument this method throws an {@code
-   * UnsupportedOperationException}.
+   * Verifies that the argument's length or size is not equal to a particular value. The argument
+   * must be an array, {@code CharSequence}, {@code Collection}, {@code Map} or {@link Sizeable}.
+   * For any other type of argument this method will throw an {@code UnsupportedOperationException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -707,10 +760,9 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument's length or size is greater than a particular value. This method is
-   * well-behaved if the argument is a {@code CharSequence}, {@code Collection}, {@code Map}, {@link
-   * Sizeable} or array. For any other type of argument this method throws an {@code
-   * UnsupportedOperationException}.
+   * Verifies that the argument's length or size is greater than a particular value. The argument
+   * must be an array, {@code CharSequence}, {@code Collection}, {@code Map} or {@link Sizeable}.
+   * For any other type of argument this method will throw an {@code UnsupportedOperationException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -738,10 +790,10 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument's length or size is greater than or equal to a particular value.
-   * This method is well-behaved if the argument is a {@code CharSequence}, {@code Collection},
-   * {@code Map}, {@link Sizeable} or array. For any other type of argument this method throws an
-   * {@code UnsupportedOperationException}.
+   * Verifies that the argument's length or size is greater than or equal to a particular value. The
+   * argument must be an array, {@code CharSequence}, {@code Collection}, {@code Map} or {@link
+   * Sizeable}. For any other type of argument this method will throw an {@code
+   * UnsupportedOperationException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -769,10 +821,9 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument's length or size is less than a particular value. This method is
-   * well-behaved if the argument is a {@code CharSequence}, {@code Collection}, {@code Map}, {@link
-   * Sizeable} or array. For any other type of argument this method throws an {@code
-   * IllegalArgumentException}.
+   * Verifies that the argument's length or size is less than a particular value. The argument must
+   * be an array, {@code CharSequence}, {@code Collection}, {@code Map} or {@link Sizeable}. For any
+   * other type of argument this method will throw an {@code UnsupportedOperationException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -800,10 +851,10 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument's length or size is less than or equal to a particular value. This
-   * method is well-behaved if the argument is a {@code CharSequence}, {@code Collection}, {@code
-   * Map}, {@link Sizeable} or array. For any other type of argument this method always returns
-   * false.
+   * Verifies that the argument's length or size is less than or equal to a particular value. The
+   * argument must be an array, {@code CharSequence}, {@code Collection}, {@code Map} or {@link
+   * Sizeable}. For any other type of argument this method will throw an {@code
+   * UnsupportedOperationException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -833,10 +884,9 @@ public class CommonChecks {
   /* ++++++++++++++ IntObjRelation ++++++++++++++ */
 
   /**
-   * Verifies that the argument can be used as the index for a {@code List} operation like {@link
-   * List#get(int) get} or {@link List#set(int, Object) set}, or as the lower bound of a loop
-   * variable. In other words, that the argument is greater than or equal to zero and less than the
-   * size of the list.
+   * Verifies that the argument is a valid index for a {@code List} operation like {@link
+   * List#get(int) get} or {@link List#set(int, Object) set}. In other words, that the argument is
+   * greater than or equal to zero and less than the size of the list.
    *
    * @param <E> The type of the elements in the {@code List}
    * @param <L> The type of the {@code List}
@@ -851,19 +901,18 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument can be used as the "to" index for a {@code List} operation like
-   * {@link List#subList(int, int) List.sublist} or as the upper bound (exclusive) of a loop
-   * variable. In other words, that the argument is greater than or equal to zero and less than or
-   * equal to the size of the list.
+   * Verifies that the argument is a valid "to" index for a {@code List} operation like {@link
+   * List#subList(int, int) List.sublist}. In other words, that the argument is greater than or
+   * equal to zero and less than or equal to the size of the list.
    *
    * @return An {@code IntObjRelation}
    */
-  public static <E, L extends List<? super E>> IntObjRelation<L> boundedBy() {
+  public static <E, L extends List<? super E>> IntObjRelation<L> toIndexOf() {
     return (x, y) -> x >= 0 && x <= y.size();
   }
 
   static {
-    add(boundedBy(), msgBoundedBy());
+    add(toIndexOf(), msgToIndexOf());
   }
 
   /* ++++++++++++++ IntRelation ++++++++++++++ */
@@ -873,12 +922,12 @@ public class CommonChecks {
    *
    * @return An {@code IntRelation}
    */
-  public static IntRelation equalTo() {
+  public static IntRelation eq() {
     return (x, y) -> x == y;
   }
 
   static {
-    add(equalTo(), msgEqualTo());
+    add(eq(), msgEq());
   }
 
   /**
@@ -886,12 +935,12 @@ public class CommonChecks {
    *
    * @return An {@code IntRelation}
    */
-  public static IntRelation notEqualTo() {
+  public static IntRelation ne() {
     return (x, y) -> x != y;
   }
 
   static {
-    add(notEqualTo(), msgNotEquals());
+    add(ne(), msgNe());
   }
 
   /**
@@ -899,12 +948,12 @@ public class CommonChecks {
    *
    * @return An {@code IntRelation}
    */
-  public static IntRelation greaterThan() {
+  public static IntRelation gt() {
     return (x, y) -> x > y;
   }
 
   static {
-    add(greaterThan(), msgGreaterThan());
+    add(gt(), msgGt());
   }
 
   /**
@@ -912,12 +961,12 @@ public class CommonChecks {
    *
    * @return An {@code IntRelation}
    */
-  public static IntRelation atLeast() {
+  public static IntRelation gte() {
     return (x, y) -> x >= y;
   }
 
   static {
-    add(atLeast(), msgAtLeast());
+    add(gte(), msgGte());
   }
 
   /**
@@ -925,12 +974,12 @@ public class CommonChecks {
    *
    * @return An {@code IntRelation}
    */
-  public static IntRelation lessThan() {
+  public static IntRelation lt() {
     return (x, y) -> x < y;
   }
 
   static {
-    add(lessThan(), msgLessThan());
+    add(lt(), msgLt());
   }
 
   /**
@@ -938,12 +987,12 @@ public class CommonChecks {
    *
    * @return An {@code IntRelation}
    */
-  public static IntRelation atMost() {
+  public static IntRelation lte() {
     return (x, y) -> x <= y;
   }
 
   static {
-    add(atMost(), msgAtMost());
+    add(lte(), msgLte());
   }
 
   /**

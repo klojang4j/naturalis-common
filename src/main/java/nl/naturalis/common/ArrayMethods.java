@@ -89,7 +89,7 @@ public class ArrayMethods {
     Check.that(moreArrays, "moreArrays").is(noneNull());
     long x = Arrays.stream(moreArrays).flatMap(Arrays::stream).count();
     long y = arr0.length + arr1.length + arr2.length + x;
-    Check.that(y).is(nAtMost(), Integer.MAX_VALUE, "Concatenated array too large");
+    Check.that(y).is(atMost(), Integer.MAX_VALUE, "Concatenated array too large");
     int i = (int) y;
     T[] all = fromTemplate(arr0, i);
     i = 0;
@@ -116,7 +116,7 @@ public class ArrayMethods {
    * @param array The array to search
    * @return Whether or not the array contans the value
    */
-  public static boolean isOneOf(int value, int... array) {
+  public static boolean elementOf(int value, int... array) {
     return indexOf(array, value) != -1;
   }
 
@@ -129,8 +129,21 @@ public class ArrayMethods {
    * @return Whether or not the array contans the value
    */
   @SafeVarargs
-  public static <T> boolean isOneOf(T value, T... array) {
+  public static <T> boolean elementOf(T value, T... array) {
     return indexOf(array, value) != -1;
+  }
+
+  /**
+   * Returns {@code true} if the provided array contains the specfied reference, {@code false}
+   * otherwise.
+   *
+   * @param ref The reference to search for
+   * @param array The array to search
+   * @return Whether or not the array contans the specfied referenc
+   */
+  @SafeVarargs
+  public static <T> boolean isOneOf(T ref, T... array) {
+    return Arrays.stream(Check.notNull(array, "array").ok()).anyMatch(t -> t == ref);
   }
 
   /**
@@ -198,7 +211,7 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns the provided array. Syntactic sugar avoiding code bloat.
+   * Returns the provided array. When used as static import allows for leaner code:
    *
    * <p>
    *

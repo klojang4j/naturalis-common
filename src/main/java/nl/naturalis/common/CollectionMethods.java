@@ -119,24 +119,9 @@ public class CollectionMethods {
     for (int i = 0; i < kvPairs.length; i += 2) {
       map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
     }
+
     return map;
   }
-
-  /**
-   * Returns a mutable {@link HashSet} containing the provided elements.
-   *
-   * @param <T>
-   * @param elems
-   * @return
-   */
-  @SafeVarargs
-  public static <T> HashSet<T> newHashSet(T... elems) {
-    Check.notNull(elems, "elems");
-    HashSet<T> set = new HashSet<>(elems.length);
-    Arrays.stream(elems).forEach(set::add);
-    return set;
-  }
-
   /**
    * Returns a mutable {@link LinkedHashMap} containing the provided key-value pairs.
    *
@@ -153,6 +138,48 @@ public class CollectionMethods {
       map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
     }
     return map;
+  }
+
+  /**
+   * Returns a mutable {@link EnumMap} with all enum constants set to non-null values. The number if
+   * values must exactly equal the number of enum constants and they are assigned according to
+   * ordinal number. This method throws an {@link IllegalArgumentException} if the number of values
+   * is not exactly equal to the number of constants in the enum class, or if any of the values is
+   * null.
+   *
+   * @param <K> The key type
+   * @param <V> The value type
+   * @param enumClass The enum class
+   * @param values The values to assign to the
+   * @return A fully-occupied {@code EnumMap} with no null-values
+   * @throws IllegalArgumentException if {@code enumClass} or {@code Values} is null, or if any of
+   *     the provided values is null
+   */
+  @SuppressWarnings("unchecked")
+  public static <K extends Enum<K>, V, M extends EnumMap<K, ? super V>> M fullEnumMap(
+      Class<K> enumClass, V... values) throws IllegalArgumentException {
+    K[] consts = Check.notNull(enumClass, "enumClass").ok().getEnumConstants();
+    Check.that(values, "values").is(noneNull()).has(arrayLength(), eq(), consts.length);
+    EnumMap<K, ? super V> map = new EnumMap<>(enumClass);
+    for (int i = 0; i < consts.length; ++i) {
+      map.put(consts[i], values[i]);
+    }
+    return (M) map;
+  }
+
+  /**
+   * Returns a mutable {@link HashSet} containing the provided elements.
+   *
+   * @param <T>
+   * @param elems
+   * @return
+   */
+  @SafeVarargs
+  public static <T> HashSet<T> newHashSet(T... elems) {
+    Check.notNull(elems, "elems");
+    HashSet<T> set = new HashSet<>(elems.length);
+    Arrays.stream(elems).forEach(set::add);
+    return set;
   }
 
   /**
@@ -194,7 +221,7 @@ public class CollectionMethods {
    */
   public static <T> List<T> shrink(List<T> list, int by) {
     Check.that(list, "list").is(notEmpty());
-    Check.that(by, "by").is(boundedBy(), list);
+    Check.that(by, "by").is(toIndexOf(), list);
     int sz = list.size();
     return sz == by ? Collections.emptyList() : list.subList(0, sz - by);
   }
@@ -222,7 +249,7 @@ public class CollectionMethods {
    */
   public static <T> List<T> shift(List<T> list, int by) {
     int sz = Check.that(list, "list").is(notEmpty()).ok().size();
-    Check.that(by, "by").is(boundedBy(), list);
+    Check.that(by, "by").is(toIndexOf(), list);
     return sz == by ? Collections.emptyList() : list.subList(by, sz);
   }
 
@@ -250,13 +277,13 @@ public class CollectionMethods {
     if (from < 0) {
       from = Check.that(sz + from, START_INDEX).is(notNegative()).intValue();
     } else {
-      Check.that(from, START_INDEX).is(atMost(), sz);
+      Check.that(from, START_INDEX).is(lte(), sz);
     }
     int to;
     if (length >= 0) {
-      to = Check.that(from + length, END_INDEX).is(atMost(), sz).intValue();
+      to = Check.that(from + length, END_INDEX).is(lte(), sz).intValue();
     } else {
-      to = Check.that(from + 1, END_INDEX).is(atMost(), sz).intValue();
+      to = Check.that(from + 1, END_INDEX).is(lte(), sz).intValue();
       from = Check.that(to + length, START_INDEX).is(notNegative()).intValue();
     }
     return list.subList(from, to);

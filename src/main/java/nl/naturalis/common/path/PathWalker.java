@@ -156,7 +156,7 @@ public final class PathWalker {
    * @throws PathWalkerException
    */
   public void readValues(Object host, Object[] values) throws PathWalkerException {
-    Check.notNull(values, "output").has(arrayLength(), atLeast(), paths.length);
+    Check.notNull(values, "output").has(arrayLength(), gte(), paths.length);
     IntStream.range(0, paths.length).forEach(i -> values[i] = readObj(host, paths[i]));
   }
 
@@ -195,7 +195,7 @@ public final class PathWalker {
    * @param values
    */
   public void writeValues(Object host, Object... values) {
-    Check.notNull(values, "values").has(arrayLength(), atLeast(), paths.length);
+    Check.notNull(values, "values").has(arrayLength(), gte(), paths.length);
     for (int i = 0; i < paths.length; ++i) {
       write(host, paths[i], values[i]);
     }

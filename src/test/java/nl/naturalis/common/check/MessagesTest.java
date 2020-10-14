@@ -16,37 +16,37 @@ import static nl.naturalis.common.check.CommonGetters.*;
 public class MessagesTest {
 
   @Test
-  public void atLeast01() {
+  public void gte01() {
     int argument = 2;
     String argName = "foo";
     int target = 5;
     String expected = "foo must be >= 5 (was 2)";
     System.out.println(expected);
-    String actual = Messages.get(atLeast(), argument, argName, target);
+    String actual = Messages.createMessage(gte(), argName, argument, target);
     System.out.println(actual);
     assertEquals(expected, actual);
   }
 
   @Test
-  public void objAtLeast01() {
+  public void atLeast01() {
     Double argument = 2.0;
     String argName = "foo";
     Short target = 5;
     String expected = "foo must be >= 5 (was 2.0)";
     System.out.println(expected);
-    String actual = Messages.get(nAtLeast(), argument, argName, target);
+    String actual = Messages.createMessage(atLeast(), argName, argument, target);
     System.out.println(actual);
     assertEquals(expected, actual);
   }
 
   @Test
-  public void objGreaterThan01() {
+  public void greaterThan01() {
     Long argument = 4L;
     String argName = "foo";
     Float target = 5F;
     String expected = "foo must be > 5.0 (was 4)";
     System.out.println(expected);
-    String actual = Messages.get(nGreaterThan(), argument, argName, target);
+    String actual = Messages.createMessage(greaterThan(), argName, argument, target);
     System.out.println(actual);
     assertEquals(expected, actual);
   }
@@ -59,7 +59,7 @@ public class MessagesTest {
     String s = target.getClass().getSimpleName() + "@" + System.identityHashCode(target);
     String expected = "foo must contain " + s;
     System.out.println(expected);
-    String actual = Messages.get(containing(), argument, argName, target);
+    String actual = Messages.createMessage(contains(), argName, argument, target);
     System.out.println(actual);
     assertEquals(expected, actual);
   }
@@ -72,7 +72,7 @@ public class MessagesTest {
     String s = target.getClass().getSimpleName() + "@" + System.identityHashCode(target);
     String expected = String.format("foo must be in %s (was \"Hello world, how are[...]\")", s);
     System.out.println(expected);
-    String actual = Messages.get(in(), argument, argName, target);
+    String actual = Messages.createMessage(in(), argName, argument, target);
     System.out.println(actual);
     assertEquals(expected, actual);
   }
@@ -87,7 +87,7 @@ public class MessagesTest {
     String s1 = target.getClass().getSimpleName() + "@" + System.identityHashCode(target);
     String expected = String.format("foo must be in %s (was %s)", s1, s0);
     System.out.println(expected);
-    String actual = Messages.get(in(), argument, argName, target);
+    String actual = Messages.createMessage(in(), argName, argument, target);
     System.out.println(actual);
     assertEquals(expected, actual);
   }
@@ -99,7 +99,7 @@ public class MessagesTest {
     Object target = AutoCloseable.class;
     String expected = "foo must be instance of java.lang.AutoCloseable (was java.util.ArrayList)";
     System.out.println(expected);
-    String actual = Messages.get(instanceOf(), argument, argName, target);
+    String actual = Messages.createMessage(instanceOf(), argName, argument, target);
     System.out.println(actual);
     assertEquals(expected, actual);
   }
@@ -107,10 +107,10 @@ public class MessagesTest {
   @Test
   public void size01() {
     Collection<Object> argument = new ArrayList<>();
-    String expected = "list.size must be equal to 3 (was 0)";
+    String expected = "list.size() must be equal to 3 (was 0)";
     System.out.println(expected);
     try {
-      Check.notNull(argument, "list").has(size(), equalTo(), 3);
+      Check.notNull(argument, "list").has(size(), eq(), 3);
     } catch (IllegalArgumentException e) {
       String actual = e.getMessage();
       System.out.println(actual);
@@ -121,14 +121,14 @@ public class MessagesTest {
   }
 
   @Test
-  public void testWithNonRegisteredGetter() {
+  public void testCustomGetter() {
     Object argument = new Object();
     int hash = argument.hashCode();
     String expected = String.format("foo.? must be equal to 3 (was %d)", hash);
     System.out.println(expected);
     try {
-      // No getter for Object::hashCode in CommonGetters class
-      Check.notNull(argument, "foo").has(Object::hashCode, equalTo(), 3);
+      // Object::hashCode not in CommonGetters class
+      Check.notNull(argument, "foo").has(Object::hashCode, eq(), 3);
     } catch (IllegalArgumentException e) {
       String actual = e.getMessage();
       System.out.println(actual);

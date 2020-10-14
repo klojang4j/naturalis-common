@@ -9,9 +9,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static nl.naturalis.common.ObjectMethods.*;
 
+@SuppressWarnings("rawtypes")
 public class ObjectMethodsTest {
 
-  // Not real tests. Just to make sure we understand Java.
+  /*
+   * Not a real test. Just here so we can test our understanding of Java.
+   */
   @Test
   @SuppressWarnings("unlikely-arg-type")
   public void foo() {
@@ -34,7 +37,6 @@ public class ObjectMethodsTest {
   }
 
   @Test
-  @SuppressWarnings("rawtypes")
   public void isDeepNotNull01() {
     assertFalse("01", isDeepNotNull(null));
     assertFalse("02", isDeepNotNull(Collections.emptyList()));
@@ -56,7 +58,6 @@ public class ObjectMethodsTest {
     assertTrue("10", isDeepNotNull(map));
   }
 
-  @SuppressWarnings("rawtypes")
   @Test
   public void isDeepNotEmpty01() {
     assertTrue("01", isDeepNotEmpty(List.of("Hi", new String[] {"Hi", "There"})));
@@ -71,7 +72,13 @@ public class ObjectMethodsTest {
     assertFalse("07", isDeepNotEmpty(List.of("Hi", Collections.emptySet())));
   }
 
-  @SuppressWarnings("rawtypes")
+  @Test
+  public void ifNull01() {
+    assertEquals("01", "13", ifNull("13", "14"));
+    assertEquals("02", "14", ifNull(null, "14"));
+    assertEquals("03", "14", ifNull(null, () -> "14"));
+  }
+
   @Test
   public void ifEmpty01() {
     assertEquals("01", "Hi There", ifEmpty("", "Hi There"));
@@ -79,13 +86,6 @@ public class ObjectMethodsTest {
     assertEquals("03", "World", ifEmpty("World", () -> "Hi There"));
     List list0 = List.of("Hi There");
     assertEquals("04", list0, ifEmpty(Collections.emptyList(), () -> Arrays.asList("Hi There")));
-  }
-
-  @Test
-  public void ifNull01() {
-    assertEquals("01", "13", ifNull("13", "14"));
-    assertEquals("02", "14", ifNull(null, "14"));
-    assertEquals("03", "14", ifNull(null, () -> "14"));
   }
 
   @Test
@@ -97,9 +97,19 @@ public class ObjectMethodsTest {
     i = ifNotNull(s, Integer::valueOf);
     assertNull("02", i);
     i = ifNotNull(s, Integer::valueOf, () -> 8);
-    assertEquals("04", 8, i.intValue());
-    String[] strs = ifNotNull("Hello Crazy World", x -> x.split(" "));
-    assertEquals("05", 3, strs.length);
+    assertEquals("03", 8, i.intValue());
+    String[] strs = ifNotNull("This sentence contains five words", x -> x.split(" "));
+    assertEquals("04", 5, strs.length);
+  }
+
+  @Test
+  public void ifNotEmpty01() {
+    Optional<String> opt1 = Optional.empty();
+    Optional<String> opt2 = Optional.of("");
+    Optional<String> opt3 = Optional.of("Hi");
+    assertEquals("01", "FOO", ifNotEmpty(opt1, Optional::get, () -> "FOO"));
+    assertEquals("02", "FOO", ifNotEmpty(opt2, Optional::get, () -> "FOO"));
+    assertEquals("03", "Hi", ifNotEmpty(opt3, Optional::get, () -> "FOO"));
   }
 
   @Test
@@ -145,7 +155,6 @@ public class ObjectMethodsTest {
   }
 
   @Test // behaviour with sets (pretty extreme edge cases)
-  @SuppressWarnings("rawtypes")
   public void e2nDeepEquals02() {
 
     Set subsubset1 = setOf("John");
@@ -177,7 +186,6 @@ public class ObjectMethodsTest {
     assertTrue("10", e2nDeepEquals(subset6, subset7));
   }
 
-  @SuppressWarnings("rawtypes")
   private static Set setOf(Object... objs) {
     return Arrays.stream(objs).collect(Collectors.toSet());
   }

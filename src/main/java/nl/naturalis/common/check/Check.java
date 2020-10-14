@@ -6,6 +6,8 @@ import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
+import static nl.naturalis.common.check.CommonGetters.getGetterDescription;
+import static nl.naturalis.common.check.Messages.createMessage;
 
 /**
  * Facilitates the validation of object state, arguments and array indices. Validating object state
@@ -96,6 +98,7 @@ public abstract class Check<T, E extends Exception> {
 
   private static final Function<String, IllegalArgumentException> DEFAULT_EXCEPTION =
       IllegalArgumentException::new;
+
   private static final String DEFAULT_ARG_NAME = "argument";
 
   /**
@@ -419,7 +422,8 @@ public abstract class Check<T, E extends Exception> {
     if (test.test(ok())) {
       return this;
     }
-    throw excFactory.apply(Messages.get(test, ok(), argName));
+    String msg = createMessage(test, argName, ok());
+    throw excFactory.apply(msg);
   }
 
   /**
@@ -435,7 +439,8 @@ public abstract class Check<T, E extends Exception> {
     if (test.test(ok())) {
       return this;
     }
-    throw excFactory.apply(String.format(message, msgArgs));
+    String msg = String.format(message, msgArgs);
+    throw excFactory.apply(msg);
   }
 
   /**
@@ -476,7 +481,8 @@ public abstract class Check<T, E extends Exception> {
     if (relation.exists(ok(), relateTo)) {
       return this;
     }
-    throw excFactory.apply(Messages.get(relation, ok(), argName, relateTo));
+    String msg = createMessage(relation, argName, ok(), relateTo);
+    throw excFactory.apply(msg);
   }
 
   /**
@@ -497,7 +503,8 @@ public abstract class Check<T, E extends Exception> {
     if (relation.exists(ok(), relateTo)) {
       return this;
     }
-    throw excFactory.apply(String.format(message, msgArgs));
+    String msg = String.format(message, msgArgs);
+    throw excFactory.apply(msg);
   }
 
   /**
@@ -515,7 +522,8 @@ public abstract class Check<T, E extends Exception> {
     if (relation.exists(ok(), relateTo)) {
       return this;
     }
-    throw excFactory.apply(Messages.get(relation, ok(), argName, relateTo));
+    String msg = createMessage(relation, argName, ok(), relateTo);
+    throw excFactory.apply(msg);
   }
 
   /**
@@ -535,7 +543,8 @@ public abstract class Check<T, E extends Exception> {
     if (relation.exists(ok(), relateTo)) {
       return this;
     }
-    throw excFactory.apply(String.format(message, msgArgs));
+    String msg = String.format(message, msgArgs);
+    throw excFactory.apply(msg);
   }
 
   /**
@@ -598,94 +607,151 @@ public abstract class Check<T, E extends Exception> {
    * Submits a property of the argument to the specified test.
    *
    * @param <U> The type of the property
-   * @param getter A no-arg method, called on the argument, returning the value to be tested
+   * @param getter A {@code Function} which is given the argument as input and which should return
+   *     the value to be tested
    * @param property The name of the property
    * @param test The test
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract <U> Check<T, E> has(Function<T, U> getter, String property, Predicate<U> test)
-      throws E;
+  public <U> Check<T, E> has(Function<T, U> getter, String property, Predicate<U> test) throws E {
+    U value = getter.apply(ok());
+    if (test.test(value)) {
+      return this;
+    }
+    String name = getFullyQualified(property);
+    String msg = createMessage(test, name, value);
+    throw excFactory.apply(msg);
+  }
 
   /**
    * Submits a property of the argument to the specified test. Can be used if you pass one of the
    * getters defined in {@link CommonGetters} as these are already associated with a property name.
    *
    * @param <U> The type of the property
-   * @param getter A no-arg method, called on the argument, returning the value to be tested
+   * @param getter A {@code Function} which is given the argument as input and which should return
+   *     the value to be tested
    * @param test The test
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract <U> Check<T, E> has(Function<T, U> getter, Predicate<U> test) throws E;
+  public <U> Check<T, E> has(Function<T, U> getter, Predicate<U> test) throws E {
+    U value = getter.apply(ok());
+    if (test.test(value)) {
+      return this;
+    }
+    String name = getGetterDescription(argName, getter);
+    String msg = createMessage(test, name, value);
+    throw excFactory.apply(msg);
+  }
 
   /**
    * Submits a property of the argument to the specified test.
    *
    * @param <U> The type of the property
-   * @param getter A no-arg method, called on the argument, returning the value to be tested
+   * @param getter A {@code Function} which is given the argument as input and which should return
+   *     the value to be tested
    * @param test The test
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract <U> Check<T, E> has(
-      Function<T, U> getter, Predicate<U> test, String message, Object... msgArgs) throws E;
+  public <U> Check<T, E> has(
+      Function<T, U> getter, Predicate<U> test, String message, Object... msgArgs) throws E {
+    U value = getter.apply(ok());
+    if (test.test(value)) {
+      return this;
+    }
+    String msg = String.format(message, msgArgs);
+    throw excFactory.apply(msg);
+  }
 
   /**
    * Submits an integer property of the argument to the specified test.
    *
-   * @param getter A no-arg method, called on the argument, returning the value to be tested
+   * @param getter A {@code Function} which is given the argument as input and which should return
+   *     the value to be tested
    * @param property The name of the property
    * @param test The test
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract Check<T, E> has(ToIntFunction<T> getter, String property, IntPredicate test)
-      throws E;
+  public Check<T, E> has(ToIntFunction<T> getter, String property, IntPredicate test) throws E {
+    int value = getter.applyAsInt(ok());
+    if (test.test(value)) {
+      return this;
+    }
+    String name = getFullyQualified(property);
+    String msg = createMessage(test, name, value);
+    throw excFactory.apply(msg);
+  }
 
   /**
    * Submits an integer property of the argument to the specified test. Can be used if you pass one
    * of the getters defined in {@link CommonGetters} as these are already associated with a property
    * name.
    *
-   * @param getter A no-arg method, called on the argument, returning the value to be tested
+   * @param getter A {@code Function} which is given the argument as input and which should return
+   *     the value to be tested
    * @param test The test
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract Check<T, E> has(ToIntFunction<T> getter, IntPredicate test) throws E;
+  public Check<T, E> has(ToIntFunction<T> getter, IntPredicate test) throws E {
+    int value = getter.applyAsInt(ok());
+    if (test.test(value)) {
+      return this;
+    }
+    String name = getGetterDescription(argName, getter);
+    String msg = createMessage(test, name, value);
+    throw excFactory.apply(msg);
+  }
 
   /**
    * Submits an {@code int} property of the argument to the specified test.
    *
-   * @param getter A no-arg method, called on the argument, returning the value to be tested
+   * @param getter A {@code Function} which is given the argument as input and which should return
+   *     the value to be tested
    * @param test The test
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public abstract Check<T, E> has(
-      ToIntFunction<T> getter, IntPredicate test, String message, Object... msgArgs) throws E;
+  public Check<T, E> has(
+      ToIntFunction<T> getter, IntPredicate test, String message, Object... msgArgs) throws E {
+    int value = getter.applyAsInt(ok());
+    if (test.test(value)) {
+      return this;
+    }
+    String msg = String.format(message, msgArgs);
+    throw excFactory.apply(msg);
+  }
 
   /**
    * Verifies that there is some relation between a property of the argument and some other value.
    *
    * @param <U> The type of the property
    * @param <V> The type of the object of the relationship
-   * @param getter A no-arg method, called on the argument, returning the subject of the
-   *     relationship
+   * @param getter A {@code Function} which is given the argument as input and which should return
+   *     the subject of the relationship
    * @param property The name of the property
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
+   * @param relation The relation to verify between subject and object
    * @param relateTo The object of the relationship
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract <U, V> Check<T, E> has(
-      Function<T, U> getter, String property, Relation<U, V> relation, V relateTo) throws E;
+  public <U, V> Check<T, E> has(
+      Function<T, U> getter, String property, Relation<U, V> relation, V relateTo) throws E {
+    U value = getter.apply(ok());
+    if (relation.exists(value, relateTo)) {
+      return this;
+    }
+    String name = getFullyQualified(property);
+    String msg = createMessage(relation, name, value, relateTo);
+    throw excFactory.apply(msg);
+  }
 
   /**
    * Verifies that there is some relation between a property of the argument and some other value.
@@ -694,51 +760,71 @@ public abstract class Check<T, E extends Exception> {
    *
    * @param <U> The type of the property
    * @param <V> The type of the object of the relationship
-   * @param getter A no-arg method, called on the argument, returning the subject of the
-   *     relationship
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
+   * @param getter A {@code Function} which is given the argument as input and which should return
+   *     the subject of the relationship
+   * @param relation The relation to verify between subject and object
    * @param relateTo The object of the relationship
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract <U, V> Check<T, E> has(Function<T, U> getter, Relation<U, V> relation, V relateTo)
-      throws E;
+  public <U, V> Check<T, E> has(Function<T, U> getter, Relation<U, V> relation, V relateTo)
+      throws E {
+    U value = getter.apply(ok());
+    if (relation.exists(value, relateTo)) {
+      return this;
+    }
+    String name = getGetterDescription(argName, getter);
+    String msg = createMessage(relation, name, value, relateTo);
+    throw excFactory.apply(msg);
+  }
 
   /**
    * Verifies that there is some relation between a property of the argument and some other value.
    *
    * @param <U> The type of the property
    * @param <V> The type of the object of the relationship
-   * @param getter A no-arg method, called on the argument, returning the subject of the
-   *     relationship
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
+   * @param getter A {@code Function} which is given the argument as input and which should return
+   *     the subject of the relationship
+   * @param relation The relation to verify between subject and object
    * @param relateTo The object of the relationship
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract <U, V> Check<T, E> has(
+  public <U, V> Check<T, E> has(
       Function<T, U> getter, Relation<U, V> relation, V relateTo, String message, Object... msgArgs)
-      throws E;
+      throws E {
+    U value = getter.apply(ok());
+    if (relation.exists(value, relateTo)) {
+      return this;
+    }
+    String msg = String.format(message, msgArgs);
+    throw excFactory.apply(msg);
+  }
 
   /**
    * Verifies that there is some relation between a property of the argument and some other value.
    *
    * @param <U> The type of the property
-   * @param getter A no-arg method, called on the argument, returning the subject of the
-   *     relationship
+   * @param getter A {@code Function} which is given the argument as input and which should return
+   *     the subject of the relationship
    * @param property The name of the property
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
+   * @param relation The relation to verify between subject and object
    * @param relateTo The object of the relationship
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract <U> Check<T, E> has(
-      Function<T, U> getter, String property, ObjIntRelation<U> relation, int relateTo) throws E;
+  public <U> Check<T, E> has(
+      Function<T, U> getter, String property, ObjIntRelation<U> relation, int relateTo) throws E {
+    U value = getter.apply(ok());
+    if (relation.exists(value, relateTo)) {
+      return this;
+    }
+    String name = getFullyQualified(property);
+    String msg = createMessage(relation, name, value, relateTo);
+    throw excFactory.apply(msg);
+  }
 
   /**
    * Verifies that there is some relation between a property of the argument and some other value.
@@ -746,90 +832,122 @@ public abstract class Check<T, E extends Exception> {
    * already associated with a property name.
    *
    * @param <U> The type of the property
-   * @param getter A no-arg method, called on the argument, returning the subject of the
-   *     relationship
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
+   * @param getter A {@code Function} which is given the argument as input and which should return
+   *     the subject of the relationship
+   * @param relation The relation to verify between subject and object
    * @param relateTo The object of the relationship
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract <U> Check<T, E> has(
-      Function<T, U> getter, ObjIntRelation<U> relation, int relateTo) throws E;
+  public <U> Check<T, E> has(Function<T, U> getter, ObjIntRelation<U> relation, int relateTo)
+      throws E {
+    U value = getter.apply(ok());
+    if (relation.exists(value, relateTo)) {
+      return this;
+    }
+    String name = getGetterDescription(argName, getter);
+    String msg = createMessage(relation, name, value, relateTo);
+    throw excFactory.apply(msg);
+  }
 
   /**
    * Verifies that there is some relation between a property of the argument and some other value.
    *
    * @param <U> The type of the property
-   * @param getter A no-arg method, called on the argument, returning the subject of the
-   *     relationship
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
+   * @param getter A {@code Function} which is given the argument as input and which should return
+   *     the subject of the relationship
+   * @param relation The relation to verify between subject and object
    * @param relateTo The object of the relationship
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract <U> Check<T, E> has(
+  public <U> Check<T, E> has(
       Function<T, U> getter,
       ObjIntRelation<U> relation,
       int relateTo,
       String message,
       Object... msgArgs)
-      throws E;
+      throws E {
+    U value = getter.apply(ok());
+    if (relation.exists(value, relateTo)) {
+      return this;
+    }
+    String msg = String.format(message, msgArgs);
+    throw excFactory.apply(msg);
+  }
 
   /**
    * Verifies that there is some relation between a property of the argument and some other value.
    *
-   * @param getter A no-arg method, called on the argument, returning the subject of the
-   *     relationship
+   * @param getter A {@code Function} which is given the argument as input and which should return
+   *     the subject of the relationship
    * @param property The name of the property
-   * @param relation The relation to verify between the argument and the specified integer ({@code
-   *     relateTo})
+   * @param relation The relation to verify between subject and object
    * @param relateTo The object of the relationship
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract Check<T, E> has(
-      ToIntFunction<T> getter, String property, IntRelation relation, int relateTo) throws E;
+  public Check<T, E> has(
+      ToIntFunction<T> getter, String property, IntRelation relation, int relateTo) throws E {
+    int value = getter.applyAsInt(ok());
+    if (relation.exists(value, relateTo)) {
+      return this;
+    }
+    String name = getFullyQualified(property);
+    String msg = createMessage(relation, name, value, relateTo);
+    throw excFactory.apply(msg);
+  }
 
   /**
    * Verifies that there is some relation between a property of the argument and some other value.
    * Can be used if you pass one of the getters defined in {@link CommonGetters} as these are
    * already associated with a property name.
    *
-   * @param getter A no-arg method, called on the argument, returning the subject of the
-   *     relationship
-   * @param relation The relation to verify between the argument and the specified integer ({@code
-   *     relateTo})
+   * @param getter A {@code Function} which is given the argument as input and which should return
+   *     the subject of the relationship
+   * @param relation The relation to verify between subject and object
    * @param relateTo The object of the relationship
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract Check<T, E> has(ToIntFunction<T> getter, IntRelation relation, int relateTo)
-      throws E;
+  public Check<T, E> has(ToIntFunction<T> getter, IntRelation relation, int relateTo) throws E {
+    int value = getter.applyAsInt(ok());
+    if (relation.exists(value, relateTo)) {
+      return this;
+    }
+    String name = getGetterDescription(argName, getter);
+    String msg = createMessage(relation, name, value, relateTo);
+    throw excFactory.apply(msg);
+  }
 
   /**
    * Verifies that there is some relation between a property of the argument and some other value.
    *
-   * @param getter A no-arg method, called on the argument, returning the subject of the
-   *     relationship
-   * @param relation The relation to verify between the argument and the specified integer ({@code
-   *     relateTo})
+   * @param getter A {@code Function} which is given the argument as input and which should return
+   *     the subject of the relationship
+   * @param relation The relation to verify between subject and object
    * @param relateTo The object of the relationship
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
    * @throws E If the specified relation does not exist between subject and object
    */
-  public abstract Check<T, E> has(
+  public Check<T, E> has(
       ToIntFunction<T> getter,
       IntRelation relation,
       int relateTo,
       String message,
       Object... msgArgs)
-      throws E;
+      throws E {
+    int value = getter.applyAsInt(ok());
+    if (relation.exists(value, relateTo)) {
+      return this;
+    }
+    String msg = String.format(message, msgArgs);
+    throw excFactory.apply(msg);
+  }
 
   /**
    * Returns the argument being tested. To be used as the last call after a chain of checks. For
@@ -844,13 +962,23 @@ public abstract class Check<T, E extends Exception> {
   public abstract T ok();
 
   /**
-   * Passes the argument to a {@code Consumer} to be properly processed. To be used as the last call
-   * after a chain of checks.
+   * Passes the argument to a {@code Consumer}. To be used as the last call after a chain of checks.
    *
    * @param consumer The {@code Consumer}
    */
-  public void ok(Consumer<T> consumer) {
+  public void then(Consumer<T> consumer) {
     consumer.accept(ok());
+  }
+
+  /**
+   * Returns the result of applying the specified {@code Function} to the argument.
+   *
+   * @param <U> The
+   * @param transformer
+   * @return
+   */
+  public <U> U then(Function<T, U> transformer) {
+    return transformer.apply(ok());
   }
 
   /**
@@ -886,5 +1014,9 @@ public abstract class Check<T, E extends Exception> {
    */
   public void intValue(IntConsumer consumer) throws E {
     consumer.accept(intValue());
+  }
+
+  private String getFullyQualified(String name) {
+    return argName + "." + name;
   }
 }

@@ -1,6 +1,9 @@
 package nl.naturalis.common;
 
+import java.math.BigDecimal;
 import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.check.CommonChecks.notBlank;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * Methods for working with {@code Number} instances.
@@ -10,7 +13,7 @@ import nl.naturalis.common.check.Check;
 public class NumberMethods {
 
   /** Zero as Integer */
-  public static final Integer ZERO_INTEGER = 0;
+  public static final Integer ZERO_INT = 0;
   /** Zero as Double */
   public static final Double ZERO_DOUBLE = 0D;
   /** Zero as Long */
@@ -89,17 +92,17 @@ public class NumberMethods {
   }
 
   /**
-   * Returns the default {@code int} value (0) if the argument is null, else the argument itself.
+   * Returns {@link #ZERO_INT} if the argument is null, else the argument itself.
    *
    * @param i The primitive wrapper
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Integer nvl(Integer i) {
-    return ObjectMethods.ifNull(i, ZERO_INTEGER);
+    return ObjectMethods.ifNull(i, ZERO_INT);
   }
 
   /**
-   * Returns the default {@code double} value (0) if the argument is null, else the argument itself.
+   * Returns {@link #ZERO_DOUBLE} the argument is null, else the argument itself.
    *
    * @param d The primitive wrapper
    * @return The argument or the default value of the corresponding primitive type
@@ -109,7 +112,7 @@ public class NumberMethods {
   }
 
   /**
-   * Returns the default {@code long} value (0) if the argument is null, else the argument itself.
+   * Returns {@link #ZERO_LONG} if the argument is null, else the argument itself.
    *
    * @param l The primitive wrapper
    * @return The argument or the default value of the corresponding primitive type
@@ -119,7 +122,7 @@ public class NumberMethods {
   }
 
   /**
-   * Returns the default {@code float} value (0) if the argument is null, else the argument itself.
+   * Returns {@link #ZERO_FLOAT} if the argument is null, else the argument itself.
    *
    * @param f The primitive wrapper
    * @return The argument or the default value of the corresponding primitive type
@@ -129,7 +132,7 @@ public class NumberMethods {
   }
 
   /**
-   * Returns the default {@code short} value (0) if the argument is null, else the argument itself.
+   * Returns {@link #ZERO_SHORT} if the argument is null, else the argument itself.
    *
    * @param s The primitive wrapper
    * @return The argument or the default value of the corresponding primitive type
@@ -139,7 +142,7 @@ public class NumberMethods {
   }
 
   /**
-   * Returns the default {@code byte} value (0) if the argument is null, else the argument itself.
+   * Returns {@link #ZERO_BYTE} if the argument is null, else the argument itself.
    *
    * @param b The primitive wrapper
    * @return The argument or the default value of the corresponding primitive type
@@ -152,23 +155,72 @@ public class NumberMethods {
    * Returns the absolute value of the specified number.
    *
    * @param <T> The type of the number
-   * @param number The number
+   * @param n The number
    * @return Its absolute value
    */
   @SuppressWarnings("unchecked")
-  public static <T extends Number> T absoluteValue(T number) {
-    if (Check.notNull(number).ok().getClass() == Integer.class) {
-      return number.intValue() >= 0 ? number : (T) Integer.valueOf(-number.intValue());
-    } else if (Check.notNull(number).ok().getClass() == Long.class) {
-      return number.longValue() >= 0 ? number : (T) Long.valueOf(-number.longValue());
-    } else if (Check.notNull(number).ok().getClass() == Double.class) {
-      return number.doubleValue() >= 0 ? number : (T) Double.valueOf(-number.doubleValue());
-    } else if (Check.notNull(number).ok().getClass() == Float.class) {
-      return number.doubleValue() >= 0 ? number : (T) Double.valueOf(-number.doubleValue());
-    } else if (Check.notNull(number).ok().getClass() == Short.class) {
-      return number.shortValue() >= 0 ? number : (T) Short.valueOf((short) -number.shortValue());
+  public static <T extends Number> T abs(T number) {
+    final T n = Check.notNull(number).ok();
+    if (n.getClass() == Integer.class) {
+      return n.intValue() >= 0 ? n : (T) Integer.valueOf(-n.intValue());
+    } else if (n.getClass() == Long.class) {
+      return n.longValue() >= 0 ? n : (T) Long.valueOf(-n.longValue());
+    } else if (n.getClass() == Double.class) {
+      return n.doubleValue() >= 0 ? n : (T) Double.valueOf(-n.doubleValue());
+    } else if (n.getClass() == Float.class) {
+      return n.floatValue() >= 0 ? n : (T) Float.valueOf(-n.floatValue());
+    } else if (n.getClass() == Short.class) {
+      return n.shortValue() >= 0 ? n : (T) Short.valueOf((short) -n.shortValue());
     }
-    return number.byteValue() >= 0 ? number : (T) Byte.valueOf((byte) -number.byteValue());
+    return n.byteValue() >= 0 ? n : (T) Byte.valueOf((byte) -n.byteValue());
+  }
+
+  /**
+   * Parses the specified string into an {@code int}. This method is substantially more restrictive
+   * than {@link Integer#parseInt(String) Integer.parseInt}. It uses {@link
+   * BigDecimal#intValueExact() BigDecimal.intValueExact()} and {@link BigDecimal#scale()
+   * BigDecimal.scale()} to make sure the string represents an integer. It does not accept a decimal
+   * point or any decimal fraction (even if consisting of zeros only). It also does not accept
+   * strings using scientific notation.
+   *
+   * <p>Examples of invalid input:
+   *
+   * <p>
+   *
+   * <table>
+   * <tr><td><pre>7F</pre></td><i>Not an integer</i></td></tr>
+   * <tr><td><pre>.7</pre></td><i>Not an integer</i></td></tr>
+   * <tr><td><pre>7.0</pre></td><i>Scale is 1</i></td></tr>
+   * <tr><td><pre>7.</pre></td><i>Decimal point not allowed</i></td></tr>
+   * <tr><td><pre>123456789123456789</pre></td><i>Overflow</i></td></tr>
+   * <tr><td><pre>3.4e+2</pre></td><i>Scientific notation</i></td></tr>
+   * </table>
+   *
+   * <p>Any error occuring while parsing the argument will be converted to a {@code
+   * NumberFormatException}. This includes the argument being null and any {@link
+   * ArithmeticException} thrown by {@code BigDecimal.intValueExact}.
+   *
+   * @param s The string to parse
+   * @return An integer
+   * @throws NumberFormatException If anything goes wrong while parsing the string
+   */
+  public static int asPlainInt(String s) throws NumberFormatException {
+    Check<String, NumberFormatException> check =
+        Check.that(s, NumberFormatException::new).is(notBlank());
+    BigDecimal bd = new BigDecimal(s);
+    if (bd.scale() != 0) {
+      throw new NumberFormatException("Decimal fraction not allowed");
+    }
+    int i;
+    try {
+      i = new BigDecimal(s).intValueExact();
+    } catch (ArithmeticException e) {
+      throw new NumberFormatException(e.getMessage());
+    }
+    check
+        .is(notHasSubstr(), "e", "Scientific notation not allowed")
+        .is(notEndsWith(), ".", "Decimal point not allowed");
+    return i;
   }
 
   private NumberMethods() {}

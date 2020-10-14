@@ -2,8 +2,10 @@ package nl.naturalis.common.check;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 import nl.naturalis.common.NumberMethods;
+import static nl.naturalis.common.ObjectMethods.*;
 
 /**
  * Defines various commonly used getter-type (no-arg) methods that can be used to retrieve a
@@ -16,7 +18,7 @@ import nl.naturalis.common.NumberMethods;
  *
  * <pre>
  * Check.notNull(stampCollection, "stampCollection").has(size(), greaterThan(), 100);
- * // "stampCollection.size must be > 100 (was 22)"
+ * // "stampCollection.size() must be > 100 (was 22)"
  * </pre>
  *
  * <p>Most of the getters defined here are plain, unadorned method references. <b>None of them do a
@@ -30,9 +32,6 @@ import nl.naturalis.common.NumberMethods;
  * @author Ayco Holleman
  */
 public class CommonGetters {
-
-  static final String LENGTH = "length";
-  static final String SIZE = "size";
 
   private CommonGetters() {}
 
@@ -51,7 +50,7 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(type(), "class");
+    tmp.put(type(), "%s.getClass()");
   }
 
   /**
@@ -65,7 +64,7 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(enumConstants(), "enumConstants");
+    tmp.put(enumConstants(), "%s.getEnumConstants()");
   }
 
   /**
@@ -79,7 +78,7 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(stringLength(), LENGTH);
+    tmp.put(stringLength(), "%s.length()");
   }
 
   /**
@@ -93,7 +92,7 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(arrayLength(), LENGTH);
+    tmp.put(arrayLength(), "%s.length");
   }
 
   /**
@@ -106,7 +105,7 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(intArrayLength(), LENGTH);
+    tmp.put(intArrayLength(), "%s.length");
   }
 
   /**
@@ -121,7 +120,7 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(size(), SIZE);
+    tmp.put(size(), "%s.size()");
   }
 
   /**
@@ -135,7 +134,7 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(mapSize(), SIZE);
+    tmp.put(mapSize(), "%s.size()");
   }
 
   /**
@@ -149,7 +148,7 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(listSize(), SIZE);
+    tmp.put(listSize(), "%s.size()");
   }
 
   /**
@@ -163,19 +162,46 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(setSize(), SIZE);
+    tmp.put(setSize(), "%s.size()");
   }
 
-  public static <T extends Number> Function<T, T> absoluteValue() {
-    return NumberMethods::absoluteValue;
+  /**
+   * A {@code Function} that returns the absolute value of a {@code Number}. Equivalent to {@link
+   * NumberMethods#abs(Number) NumberMethods::abs}.
+   *
+   * @param <T> The type of the {@code Number}
+   * @return A {@code Function} that returns the absolute value of a {@code Number}
+   */
+  public static <T extends Number> Function<T, T> abs() {
+    return NumberMethods::abs;
   }
 
   static {
-    tmp.put(absoluteValue(), "absoluteValue");
+    tmp.put(abs(), "abs(%s)");
   }
 
-  static String getGetterName(Object getter) {
-    return names.getOrDefault(getter, "?");
+  /**
+   * A {@code Function} that returns the value supplied by a {@code Supplier}. Equivalent to {@link
+   * Supplier#get() Supplier::get}.
+   *
+   * @param <T> The type of the object supplied by the {@code Supplier}
+   * @param <U> The type of the {@code Supplier}
+   * @return A {@code Function} that returns the value supplied by a {@code Supplier}
+   */
+  public static <T, U extends Supplier<T>> Function<U, T> supplied() {
+    return Supplier::get;
+  }
+
+  static {
+    tmp.put(supplied(), "%s.get()");
+  }
+
+  /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
+  /*            End of getter definitions                    */
+  /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
+
+  static String getGetterDescription(String argName, Object getter) {
+    return ifNotNull(names.get(getter), fmt -> String.format(fmt, argName), () -> argName + ".?");
   }
 
   static {

@@ -670,7 +670,7 @@ public final class StringMethods {
     if (from < 0) {
       from = sz + from;
     }
-    Check.that(from, "from").is(notNegative()).is(atMost(), sz);
+    Check.that(from, "from").is(notNegative()).is(lte(), sz);
     return str.substring(from);
   }
 
@@ -697,13 +697,13 @@ public final class StringMethods {
     if (from < 0) {
       from = Check.that(sz + from, START_INDEX).is(notNegative()).intValue();
     } else {
-      Check.that(from, START_INDEX).is(atMost(), sz);
+      Check.that(from, START_INDEX).is(lte(), sz);
     }
     int to;
     if (length >= 0) {
-      to = Check.that(from + length, END_INDEX).is(atMost(), sz).intValue();
+      to = Check.that(from + length, END_INDEX).is(lte(), sz).intValue();
     } else {
-      to = Check.that(from + 1, END_INDEX).is(atMost(), sz).intValue();
+      to = Check.that(from + 1, END_INDEX).is(lte(), sz).intValue();
       from = Check.that(to + length, START_INDEX).is(notNegative()).intValue();
     }
     return str.substring(from, to);

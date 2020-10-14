@@ -3,13 +3,11 @@ package nl.naturalis.common.check;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
-import java.util.function.ToIntFunction;
+import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.NumberMethods;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
-import nl.naturalis.common.function.ObjIntRelation;
-import nl.naturalis.common.function.Relation;
-import static nl.naturalis.common.check.CommonGetters.getGetterName;
+import static nl.naturalis.common.check.Messages.createMessage;
 
 class ObjectCheck<T, E extends Exception> extends Check<T, E> {
 
@@ -31,60 +29,65 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
     if (test.test(arg)) {
       return this;
     }
-    throw excFactory.apply(String.format(message, msgArgs));
+    String msg = String.format(message, msgArgs);
+    throw excFactory.apply(msg);
   }
 
   @Override
   public Check<T, E> is(IntPredicate test) throws E {
-    if (arg.getClass() == Integer.class) {
-      if (test.test(((Integer) arg).intValue())) {
+    if (ArrayMethods.isOneOf(arg.getClass(), Integer.class, Short.class, Byte.class)) {
+      if (test.test(((Number) arg).intValue())) {
         return this;
       }
-      throw excFactory.apply(Messages.get(test, arg, argName));
+      String msg = createMessage(test, argName, arg);
+      throw excFactory.apply(msg);
     }
     throw notApplicable();
   }
 
   @Override
   public Check<T, E> is(IntPredicate test, String message, Object... msgArgs) throws E {
-    if (arg.getClass() == Integer.class) {
-      if (test.test(((Integer) arg).intValue())) {
+    if (ArrayMethods.isOneOf(arg.getClass(), Integer.class, Short.class, Byte.class)) {
+      if (test.test(((Number) arg).intValue())) {
         return this;
       }
-      throw excFactory.apply(String.format(message, msgArgs));
+      String msg = String.format(message, msgArgs);
+      throw excFactory.apply(msg);
     }
     throw notApplicable();
   }
 
   @Override
   public <U> Check<T, E> is(IntObjRelation<U> relation, U relateTo) throws E {
-    if (arg.getClass() == Integer.class) {
-      if (relation.exists(((Integer) arg).intValue(), relateTo)) {
+    if (ArrayMethods.isOneOf(arg.getClass(), Integer.class, Short.class, Byte.class)) {
+      if (relation.exists(((Number) arg).intValue(), relateTo)) {
         return this;
       }
     }
-    throw excFactory.apply(Messages.get(relation, arg, argName, relateTo));
+    String msg = createMessage(relation, argName, arg, relateTo);
+    throw excFactory.apply(msg);
   }
 
   @Override
   public <U> Check<T, E> is(
       IntObjRelation<U> relation, U relateTo, String message, Object... msgArgs) throws E {
-    if (arg.getClass() == Integer.class) {
-      if (relation.exists(((Integer) arg).intValue(), relateTo)) {
+    if (ArrayMethods.isOneOf(arg.getClass(), Integer.class, Short.class, Byte.class)) {
+      if (relation.exists(((Number) arg).intValue(), relateTo)) {
         return this;
       }
-      throw excFactory.apply(String.format(message, msgArgs));
+      String msg = String.format(message, msgArgs);
+      throw excFactory.apply(msg);
     }
     throw notApplicable();
   }
 
   @Override
   public Check<T, E> is(IntRelation relation, int relateTo) throws E {
-    if (arg.getClass() == Integer.class) {
-      if (relation.exists(((Integer) arg).intValue(), relateTo)) {
+    if (ArrayMethods.isOneOf(arg.getClass(), Integer.class, Short.class, Byte.class)) {
+      if (relation.exists(((Number) arg).intValue(), relateTo)) {
         return this;
       }
-      throw excFactory.apply(Messages.get(relation, arg, argName, relateTo));
+      throw excFactory.apply(createMessage(relation, argName, arg, relateTo));
     }
     throw notApplicable();
   }
@@ -92,140 +95,13 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   @Override
   public Check<T, E> is(IntRelation relation, int relateTo, String message, Object... msgArgs)
       throws E {
-    if (arg.getClass() == Integer.class) {
-      if (relation.exists(((Integer) arg).intValue(), relateTo)) {
+    if (ArrayMethods.isOneOf(arg.getClass(), Integer.class, Short.class, Byte.class)) {
+      if (relation.exists(((Number) arg).intValue(), relateTo)) {
         return this;
       }
       throw excFactory.apply(String.format(message, msgArgs));
     }
     throw notApplicable();
-  }
-
-  @Override
-  public <U> Check<T, E> has(Function<T, U> getter, String property, Predicate<U> test) throws E {
-    U propVal = getter.apply(arg);
-    if (test.test(propVal)) {
-      return this;
-    }
-    throw excFactory.apply(Messages.get(test, propVal, propName(property)));
-  }
-
-  @Override
-  public <U> Check<T, E> has(Function<T, U> getter, Predicate<U> test) throws E {
-    return has(getter, getGetterName(getter), test);
-  }
-
-  @Override
-  public <U> Check<T, E> has(
-      Function<T, U> getter, Predicate<U> test, String message, Object... msgArgs) throws E {
-    if (test.test(getter.apply(arg))) {
-      return this;
-    }
-    throw excFactory.apply(String.format(message, msgArgs));
-  }
-
-  @Override
-  public Check<T, E> has(ToIntFunction<T> getter, String property, IntPredicate test) throws E {
-    int propVal = getter.applyAsInt(arg);
-    if (test.test(propVal)) {
-      return this;
-    }
-    throw excFactory.apply(Messages.get(test, propVal, propName(property)));
-  }
-
-  @Override
-  public Check<T, E> has(ToIntFunction<T> getter, IntPredicate test) throws E {
-    return has(getter, getGetterName(getter), test);
-  }
-
-  @Override
-  public Check<T, E> has(
-      ToIntFunction<T> getter, IntPredicate test, String message, Object... msgArgs) throws E {
-    if (test.test(getter.applyAsInt(arg))) {
-      return this;
-    }
-    throw excFactory.apply(String.format(message, msgArgs));
-  }
-
-  @Override
-  public <U, V> Check<T, E> has(
-      Function<T, U> getter, String property, Relation<U, V> relation, V relateTo) throws E {
-    U propVal = getter.apply(arg);
-    if (relation.exists(propVal, relateTo)) {
-      return this;
-    }
-    throw excFactory.apply(Messages.get(relation, propVal, propName(property), relateTo));
-  }
-
-  @Override
-  public <U, V> Check<T, E> has(Function<T, U> getter, Relation<U, V> relation, V relateTo)
-      throws E {
-    return has(getter, getGetterName(getter), relation, relateTo);
-  }
-
-  @Override
-  public <U, V> Check<T, E> has(
-      Function<T, U> getter, Relation<U, V> relation, V relateTo, String message, Object... msgArgs)
-      throws E {
-    if (relation.exists(getter.apply(arg), relateTo)) {
-      return this;
-    }
-    throw excFactory.apply(String.format(message, msgArgs));
-  }
-
-  @Override
-  public <U> Check<T, E> has(
-      Function<T, U> getter, String property, ObjIntRelation<U> relation, int relateTo) throws E {
-    U propVal = getter.apply(arg);
-    if (relation.exists(propVal, relateTo)) {
-      return this;
-    }
-    throw excFactory.apply(Messages.get(relation, propVal, propName(property), relateTo));
-  }
-
-  @Override
-  public <U> Check<T, E> has(Function<T, U> getter, ObjIntRelation<U> relation, int relateTo)
-      throws E {
-    return has(getter, getGetterName(getter), relation, relateTo);
-  }
-
-  @Override
-  public <U> Check<T, E> has(
-      Function<T, U> getter,
-      ObjIntRelation<U> relation,
-      int relateTo,
-      String message,
-      Object... msgArgs)
-      throws E {
-    if (relation.exists(getter.apply(arg), relateTo)) {
-      return this;
-    }
-    throw excFactory.apply(String.format(message, msgArgs));
-  }
-
-  @Override
-  public Check<T, E> has(ToIntFunction<T> getter, String property, IntRelation relation, int relateTo)
-      throws E {
-    int propVal = getter.applyAsInt(arg);
-    if (relation.exists(propVal, relateTo)) {
-      return this;
-    }
-    throw excFactory.apply(Messages.get(relation, propVal, propName(property), relateTo));
-  }
-
-  @Override
-  public Check<T, E> has(ToIntFunction<T> getter, IntRelation relation, int relateTo) throws E {
-    return has(getter, getGetterName(getter), relation, relateTo);
-  }
-
-  @Override
-  public Check<T, E> has(
-      ToIntFunction<T> getter, IntRelation relation, int relateTo, String message, Object... msgArgs)
-      throws E {
-    if (relation.exists(getter.applyAsInt(arg), relateTo)) {
-      return this;
-    }
-    throw excFactory.apply(String.format(message, msgArgs));
   }
 
   @Override
@@ -248,10 +124,6 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
     }
     String msg = String.format(ERR_OBJECT_TO_INT, argName, arg.getClass().getName());
     throw excFactory.apply(msg);
-  }
-
-  private String propName(String name) {
-    return argName + "." + name;
   }
 
   private UnsupportedOperationException notApplicable() {

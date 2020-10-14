@@ -2,7 +2,7 @@ package nl.naturalis.common;
 
 import org.junit.Test;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static nl.naturalis.common.NumberMethods.*;
 
 public class NumberMethodsTest {
@@ -54,7 +54,7 @@ public class NumberMethodsTest {
 
   @Test
   public void nvl01() {
-    assertTrue(nvl((Integer) null) == ZERO_INTEGER);
+    assertTrue(nvl((Integer) null) == ZERO_INT);
     assertTrue(nvl((Double) null) == ZERO_DOUBLE);
     assertTrue(nvl((Long) null) == ZERO_LONG);
     assertTrue(nvl((Float) null) == ZERO_FLOAT);
@@ -66,5 +66,51 @@ public class NumberMethodsTest {
     assertTrue(nvl(2.0F) == 2F);
     assertTrue(nvl((short) 2) == (short) 2);
     assertTrue(nvl((byte) 2) == (byte) 2);
+  }
+
+  @Test(expected = NumberFormatException.class)
+  public void strictParseInt01() {
+    asPlainInt(null);
+  }
+
+  @Test(expected = NumberFormatException.class)
+  public void strictParseInt02() {
+    asPlainInt(" \n");
+  }
+
+  @Test(expected = NumberFormatException.class)
+  public void strictParseInt03() {
+    asPlainInt("foo");
+  }
+
+  @Test(expected = NumberFormatException.class)
+  public void strictParseInt04() {
+    asPlainInt("7f");
+  }
+
+  @Test(expected = NumberFormatException.class)
+  public void strictParseInt05() {
+    asPlainInt("7.");
+  }
+
+  @Test(expected = NumberFormatException.class)
+  public void strictParseInt06() {
+    asPlainInt("7.0");
+  }
+
+  @Test(expected = NumberFormatException.class)
+  public void strictParseInt07() {
+    asPlainInt("7.0004");
+  }
+
+  @Test(expected = NumberFormatException.class)
+  public void strictParseInt08() {
+    asPlainInt("123456789123456789");
+  }
+
+  @Test
+  public void strictParseInt09() {
+    assertEquals("01", 67, asPlainInt("67"));
+    assertEquals("01", -67, asPlainInt("-67"));
   }
 }

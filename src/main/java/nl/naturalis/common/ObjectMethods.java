@@ -2,26 +2,36 @@ package nl.naturalis.common;
 
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
+import java.util.function.*;
+import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.Relation;
 import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
+import static nl.naturalis.common.check.CommonChecks.equalTo;
+import static nl.naturalis.common.check.CommonChecks.notEmpty;
+import static nl.naturalis.common.check.CommonChecks.notEqualTo;
 import static nl.naturalis.common.check.CommonChecks.notNull;
-import static nl.naturalis.common.check.CommonChecks.objEquals;
-import static nl.naturalis.common.check.CommonChecks.objNotEquals;
+import static nl.naturalis.common.check.CommonGetters.supplied;
 
 /**
  * General methods applicable to objects of any type.
  *
  * <h3>Container objects</h3>
  *
- * <p>Some methods in this class apply special logic when passed a <b>container object</b>. A
- * container object is an array, a {@code Collection} or a {@code Map}. For {@code Map} objects the
- * logic will always only applied to their values, not their keys (use {@link Map#keySet()
- * Map.keySet()} is you want the logic to their keys as well).
+ * <p>Some methods in this class apply special logic (documented on the method itself) when passed a
+ * <i>container object</i>. A container object is one of the following
+ *
+ * <p>
+ *
+ * <ul>
+ *   <li>an instance of {@code Object[]}
+ *   <li>an instance of {@link Collection}
+ *   <li>an instance of {@link Map}
+ *   <li>an array of primitive values
+ * </ul>
+ *
+ * <p>For {@code Map} objects the logic will always only applied to their values, not their keys.
+ * Use {@link Map#keySet() Map.keySet()} if you want to apply the logic to their keys as well.
  *
  * @author Ayco Holleman
  */
@@ -38,8 +48,11 @@ public class ObjectMethods {
    * <ul>
    *   <li>{@code obj} is {@code null}
    *   <li>{@code obj} is an empty {@link CharSequence}
-   *   <li>{@code obj} is an empty (zero-size) container object
-   *   <li>{@code obj} is an empty {@link Optional}
+   *   <li>{@code obj} is an empty {@link Collection}
+   *   <li>{@code obj} is an empty {@link Map}
+   *   <li>{@code obj} is an empty array
+   *   <li>{@code obj} is an empty {@link Optional} or an {@code Optional} containing an {@code
+   *       isEmpty} object
    *   <li>{@code obj} is a zero-size {@link Sizeable}
    *   <li>{@code obj} is an empty {@link Emptyable}
    * </ul>
@@ -56,24 +69,27 @@ public class ObjectMethods {
         || obj instanceof Map && ((Map) obj).isEmpty()
         || obj instanceof Object[] && ((Object[]) obj).length == 0
         || isPrimitiveArray(obj) && Array.getLength(obj) == 0
-        || obj instanceof Optional && ((Optional) obj).isEmpty()
+        || obj instanceof Optional
+            && (((Optional) obj).isEmpty() || isEmpty(((Optional) obj).get()))
         || obj instanceof Sizeable && ((Sizeable) obj).size() == 0
         || obj instanceof Emptyable && ((Emptyable) obj).isEmpty();
   }
 
   /**
-   * Verifies that the argument is not empty. Returns {@code true} if <i>all</i> of the following
+   * Verifies that the argument is not empty. Returns {@code true} if <i>any</i> of the following
    * applies:
    *
    * <p>
    *
    * <ul>
-   *   <li>{@code obj} is not {@code null}
-   *   <li>{@code obj} is not an empty {@link CharSequence}
-   *   <li>{@code obj} is not an empty (zero-size) container object
-   *   <li>{@code obj} is not an empty {@link Optional}
-   *   <li>{@code obj} is not a zero-size {@link Sizeable}
-   *   <li>{@code obj} is not an empty {@link Emptyable}
+   *   <li>{@code obj} is a non-empty {@link CharSequence}
+   *   <li>{@code obj} is a non-empty {@link Collection}
+   *   <li>{@code obj} is a non-empty {@link Map}
+   *   <li>{@code obj} is a non-empty array
+   *   <li>{@code obj} is a non-empty {@link Optional} containing a non-empty object
+   *   <li>{@code obj} is a non-zero-size {@link Sizeable}
+   *   <li>{@code obj} is a non-empty {@link Emptyable}
+   *   <li>{@code obj} is a non-null object of any other type
    * </ul>
    *
    * @param obj The object to be tested
@@ -91,9 +107,14 @@ public class ObjectMethods {
    *
    * <ul>
    *   <li>{@code obj} is a non-empty {@link CharSequence}
-   *   <li>{@code obj} is a non-empty container object with only recursively non-empty elements
+   *   <li>{@code obj} is a non-empty {@link Collection} containing only <i>deep-not-empty</i>
+   *       elements
+   *   <li>{@code obj} is a non-empty {@link Map} containing only <i>deep-not-empty</i> values (keys
+   *       are not considered)
+   *   <li>{@code obj} is a non-empty {@code Object[]} containing only <i>deep-not-empty</i>
+   *       elements
    *   <li>{@code obj} is a non-empty primitive array
-   *   <li>{@code obj} is a non-empty {@link Optional}
+   *   <li>{@code obj} is a non-empty {@link Optional} containing a <i>deep-not-empty</i> object
    *   <li>{@code obj} is a non-empty {@link Emptyable}
    *   <li>{@code obj} is a non-zero-size {@link Sizeable}
    *   <li>{@code obj} is a non-null object of any other type
@@ -108,7 +129,7 @@ public class ObjectMethods {
         && (!(obj instanceof Collection) || dne((Collection) obj))
         && (!(obj instanceof Map) || dne((Map) obj))
         && (!(obj instanceof Object[]) || dne((Object[]) obj))
-        && (!(obj instanceof Optional) || ((Optional) obj).isPresent())
+        && (!(obj instanceof Optional) || dne((Optional) obj))
         && (!isPrimitiveArray(obj) || Array.getLength(obj) > 0)
         && (!(obj instanceof Sizeable) || ((Sizeable) obj).size() > 0)
         && (!(obj instanceof Emptyable) || !((Emptyable) obj).isEmpty());
@@ -124,6 +145,10 @@ public class ObjectMethods {
 
   private static boolean dne(Object[] arr) {
     return arr.length > 0 && Arrays.stream(arr).allMatch(ObjectMethods::isDeepNotEmpty);
+  }
+
+  private static boolean dne(Optional opt) {
+    return opt.isPresent() && isDeepNotEmpty(opt.get());
   }
 
   /**
@@ -146,9 +171,9 @@ public class ObjectMethods {
   }
 
   /**
-   * Verifies that the argument is not null and, if it is a container object, does not contain any
-   * null values. It may still be an empty (zero-size) container object, however. Useful for testing
-   * varargs arrays.
+   * Verifies that the argument is not null and, if it is a {@link Collection}, {@link Map} or
+   * {@code Object[]}, does not contain any null values. It may still be an empty collection, map or
+   * array, however. Useful for testing varargs arrays.
    *
    * @param obj The object to be tested
    * @return Whether or not it is not null and does not contain any null values
@@ -188,10 +213,10 @@ public class ObjectMethods {
    * <p>
    *
    * <ol>
-   *   <li>{@code null} equals an empty {@code CharSequence}
-   *   <li>{@code null} equals an empty {@code Collection}
-   *   <li>{@code null} equals an empty {@code Map}
-   *   <li>{@code null} equals a zero-length array
+   *   <li>{@code null} equals an empty {@link CharSequence}
+   *   <li>{@code null} equals an empty {@link Collection}
+   *   <li>{@code null} equals an empty {@link Map}
+   *   <li>{@code null} equals an empty array
    *   <li>{@code null} equals an empty {@link Emptyable}
    *   <li>{@code null} equals a zero-size {@link Sizeable}
    *   <li>An empty intance of one type never equals an empty instance of another non-comparable
@@ -212,9 +237,7 @@ public class ObjectMethods {
   }
 
   /**
-   * Recursively tests the arguments for equality using <i>empty-equals-null</i> semantics. In other
-   * words, for container objects elements c.q. values are also compared using {@code
-   * e2nDeepEquals}.
+   * Recursively tests the arguments for equality using <i>empty-equals-null</i> semantics.
    *
    * @param obj1 The 1st of the pair of objects to compare
    * @param obj2 The 2nd of the pair of objects to compare
@@ -232,10 +255,10 @@ public class ObjectMethods {
 
   /**
    * Generates a hash code for the provided object using using <i>empty-equals-null</i> semantics.
-   * Consequently, null and {@link #isEmpty(Object) empty} objects all have the same hash code: 0
-   * (zero). Therefore non-generic maps and sets relying on <i>empty-equals-null</i> semantics will
-   * likely have to fall back more often on {@link #e2nEquals(Object, Object) e2nEquals} or {@link
-   * #e2nDeepEquals(Object, Object) e2nDeepEquals}.
+   * Null and {@link #isEmpty(Object) empty} objects (whatever their type) all have the same hash
+   * code: 0 (zero). Therefore a {@link TreeMap} or {@link TreeSet} using on
+   * <i>empty-equals-null</i> semantics may have to fall fall back more often on {@link
+   * #e2nEquals(Object, Object) e2nEquals} or {@link #e2nDeepEquals(Object, Object) e2nDeepEquals}.
    *
    * @param obj The object to generate a hash code for
    * @return The hash code
@@ -263,19 +286,24 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns {@code dfault} if {@code value} is null, else {@code value}.
+   * Returns the first argument if it is not null, else the second argument. This method will throw
+   * an {@link IllegalArgumentException} if the second argument is null, so it is guaranteed to
+   * return a non-null value.
    *
    * @param <T> The input and return type
    * @param value The value to return if not null
-   * @param dfault The value to return if {@code value} is null
-   * @return a non-null value
+   * @param dfault The value to return if the first argument is null
+   * @return A non-null value
    */
   public static <T> T ifNull(T value, T dfault) {
+    Check.notNull(dfault, "dfault");
     return value == null ? dfault : value;
   }
 
   /**
-   * Returns the value supplied by {@code supplier} if {@code value} is null, else {@code value}.
+   * Returns the first argument if it is not null, else the value supplied by the specified {@code
+   * Supplier}. The value supplied by the {@code Supplier} is guaranteed to be non-null, or else an
+   * {@link IllegalArgumentException} is thrown.
    *
    * @param <T> The input and return type
    * @param value The value to return if not null
@@ -283,6 +311,7 @@ public class ObjectMethods {
    * @return a non-null value
    */
   public static <T> T ifNull(T value, Supplier<T> supplier) {
+    Check.notNull(supplier, "supplier").has(supplied(), notNull());
     return value == null ? supplier.get() : value;
   }
 
@@ -290,6 +319,7 @@ public class ObjectMethods {
    * Returns the default {@code boolean} value ({@code false}) if the argument is null, else the
    * argument itself.
    *
+   * @see NumberMethods#nvl(Integer)
    * @param b The primitive wrapper
    * @return The argument or the default value of the corresponding primitive type
    */
@@ -301,7 +331,7 @@ public class ObjectMethods {
    * Returns the default {@code char} value ('\u0000') if the argument is null, else the unboxed
    * argument itself.
    *
-   * @see NumberMethods
+   * @see NumberMethods#nvl(Integer)
    * @param c The primitive wrapper
    * @return The argument or the default value of the corresponding primitive type
    */
@@ -312,7 +342,7 @@ public class ObjectMethods {
   /**
    * Returns an empty {@code String} if the argument is null, else the argument itself.
    *
-   * @see NumberMethods
+   * @see NumberMethods#nvl(Integer)
    * @param s The string to return if not null
    * @return The argument itself or an empty {@code String}
    */
@@ -329,6 +359,7 @@ public class ObjectMethods {
    * @return a non-empty value
    */
   public static <T> T ifEmpty(T value, T dfault) {
+    Check.that(dfault, "dfault").is(notEmpty());
     return isEmpty(value) ? dfault : value;
   }
 
@@ -387,7 +418,7 @@ public class ObjectMethods {
    * @return {@code value} or null
    */
   public static <T> T nullIf(T arg0, T arg1) {
-    return nullIf(arg0, objEquals(), arg1);
+    return nullIf(arg0, equalTo(), arg1);
   }
 
   /**
@@ -400,7 +431,7 @@ public class ObjectMethods {
    * @return {@code arg0} or null
    */
   public static <T> T nullUnless(T arg0, T arg1) {
-    return nullUnless(arg0, objNotEquals(), arg1);
+    return nullUnless(arg0, notEqualTo(), arg1);
   }
 
   /**
@@ -483,7 +514,7 @@ public class ObjectMethods {
    * @return The result produced by the {@code Function} or by the {@code Supplier}
    */
   public static <T, U> U ifNotEmpty(T arg, Function<T, U> then, Supplier<U> otherwise) {
-    return isEmpty(arg) ? then.apply(arg) : otherwise.get();
+    return isNotEmpty(arg) ? then.apply(arg) : otherwise.get();
   }
 
   /**

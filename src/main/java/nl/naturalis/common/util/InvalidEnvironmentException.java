@@ -8,22 +8,15 @@ package nl.naturalis.common.util;
  */
 public class InvalidEnvironmentException extends RuntimeException {
 
-  static InvalidEnvironmentException missingEnvironmentVariable(String name) {
-    String fmt = "Missing environment variable \"%s\"";
-    return new InvalidEnvironmentException(String.format(fmt, name));
-  }
+  static final String MISSING_ENV_VAR = "Missing environment variable \"%s\"";
+  static final String NOT_CONVERTIBLE =
+      "Environment variable \"%s\" not convertible to %s: \"%s\" (Reason: %s)";
 
-  static InvalidEnvironmentException notConvertible(String name, String value, Class<?> target) {
-    String fmt = "Environment variable \"%s\" not convertible to %s. Value is \"%s\"";
-    String msg = String.format(fmt, name, target.getClass().getName(), value);
-    return new InvalidEnvironmentException(msg);
-  }
-
-  private InvalidEnvironmentException(String message, Throwable cause) {
+  InvalidEnvironmentException(String message, Throwable cause) {
     super(message, cause);
   }
 
-  private InvalidEnvironmentException(String message) {
+  InvalidEnvironmentException(String message) {
     super(message);
   }
 }
