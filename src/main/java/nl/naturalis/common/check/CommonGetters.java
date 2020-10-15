@@ -18,7 +18,7 @@ import static nl.naturalis.common.ObjectMethods.*;
  *
  * <pre>
  * Check.notNull(stampCollection, "stampCollection").has(size(), greaterThan(), 100);
- * // "stampCollection.size() must be > 100 (was 22)"
+ * // "stampCollection.size() must be &gt; 100 (was 22)"
  * </pre>
  *
  * <p>Most of the getters defined here are plain, unadorned method references. <b>None of them do a

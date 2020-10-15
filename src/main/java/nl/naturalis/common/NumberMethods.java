@@ -188,12 +188,12 @@ public class NumberMethods {
    * <p>
    *
    * <table>
-   * <tr><td><pre>7F</pre></td><i>Not an integer</i></td></tr>
-   * <tr><td><pre>.7</pre></td><i>Not an integer</i></td></tr>
-   * <tr><td><pre>7.0</pre></td><i>Scale is 1</i></td></tr>
-   * <tr><td><pre>7.</pre></td><i>Decimal point not allowed</i></td></tr>
-   * <tr><td><pre>123456789123456789</pre></td><i>Overflow</i></td></tr>
-   * <tr><td><pre>3.4e+2</pre></td><i>Scientific notation</i></td></tr>
+   * <tr><td><pre>7F</pre></td><td><i>Not an integer</i></td></tr>
+   * <tr><td><pre>.7</pre></td><td><i>Not an integer</i></td></tr>
+   * <tr><td><pre>7.0</pre></td><td><i>Scale is 1</i></td></tr>
+   * <tr><td><pre>7.</pre></td><td><i>Decimal point not allowed</i></td></tr>
+   * <tr><td><pre>123456789123456789</pre></td><td><i>Overflow</i></td></tr>
+   * <tr><td><pre>3.4e+2</pre></td><td><i>Scientific notation</i></td></tr>
    * </table>
    *
    * <p>Any error occuring while parsing the argument will be converted to a {@code

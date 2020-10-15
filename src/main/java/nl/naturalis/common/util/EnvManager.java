@@ -217,7 +217,6 @@ public class EnvManager {
    * else for {@code false}.
    *
    * @param name The name of the environment variable
-   * @param dfault The value to use if the environment variable is not present
    * @return The value of the environment variable
    * @throws InvalidEnvironmentException If the value of the environment variable could not be
    *     converted to a {@code boolean}

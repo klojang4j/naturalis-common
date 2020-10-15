@@ -9,8 +9,8 @@ import java.util.function.ToIntFunction;
 public class FunctionalMethods {
 
   /**
-   * Converts the specified function from one that computes a result from its input into one that
-   * computes an {@code Optional} of that result.
+   * Converts the specified function from one that computes a result into one that computes an
+   * {@code Optional} of that result.
    *
    * @param <T> The input type
    * @param <R> The return type of specified function and the contents of the {@code Optional}.
@@ -22,8 +22,8 @@ public class FunctionalMethods {
   }
 
   /**
-   * Converts the specified function from one that computes a result from its input into one that
-   * computes an {@code OptionalInt} of that result.
+   * Converts the specified function from one that computes a result into one that computes an
+   * {@code OptionalInt} of that result.
    *
    * @param <T> The input type
    * @param fnc The function

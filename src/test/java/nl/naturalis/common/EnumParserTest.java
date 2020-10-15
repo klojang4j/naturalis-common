@@ -1,6 +1,7 @@
 package nl.naturalis.common;
 
 import org.junit.Test;
+import nl.naturalis.common.util.EnumParser;
 import static org.junit.Assert.assertEquals;
 
 public class EnumParserTest {
