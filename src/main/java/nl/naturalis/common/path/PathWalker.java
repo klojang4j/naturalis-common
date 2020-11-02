@@ -34,13 +34,13 @@ import static nl.naturalis.common.check.CommonGetters.*;
  * </ul>
  *
  * <p>If you need to distinguish between true null values and the "dead ends" described above, you
- * can {@link #PathWalker(List, boolean) request} to return a special value, {@link #DEAD_END},
- * instead.
+ * can {@link #PathWalker(List, boolean) instruct} the {@code PathWalker} to return a special value,
+ * {@link #DEAD_END}, in stead of null.
  *
  * <p>If the {@code PathWalker} is on a segment that references a {@code Collection} or an array,
- * the next path segment is supposed to be an array index (unless it is the {@code Collection} or
- * array itself that you are interested in). If it is not, it will silently assume you want the
- * first element of the {@code Collection} c.q. array.
+ * the next path segment must be an array index (unless it is the {@code Collection} or array itself
+ * that you want to retrieve). If it is not, it will silently assume you want the first element of
+ * the {@code Collection} c.q. array.
  *
  * <p>If the {@code PathWalker} is on a segment that references a map key, and the map to be
  * read/written uses non-{@code String} keys, you must instruct the {@code PathWalker} how to
@@ -117,7 +117,7 @@ public final class PathWalker {
    * true}, then the value for a path that could not be walked will be {@link #DEAD_END}, else
    * {@code null}. If it is important to distinguish between "real" null values and dead ends, pass
    * {@code true}. If you need to read from or write to maps with non-string keys, you must provide
-   * a function that converts path segments to map keys.
+   * a function that deserializes a path segment into a map key.
    *
    * @param paths The paths to walk
    * @param useDeadEndValue Whether to use {@link #DEAD_END} or null for paths that could not be
@@ -151,21 +151,21 @@ public final class PathWalker {
    * The length of the output array must be greater than or equal to the number of paths specified
    * through the constructor.
    *
-   * @param host
-   * @param values
+   * @param host The object from which to read the values
+   * @param output An array into which to place the values
    * @throws PathWalkerException
    */
-  public void readValues(Object host, Object[] values) throws PathWalkerException {
-    Check.notNull(values, "output").has(arrayLength(), gte(), paths.length);
-    IntStream.range(0, paths.length).forEach(i -> values[i] = readObj(host, paths[i]));
+  public void readValues(Object host, Object[] output) throws PathWalkerException {
+    Check.notNull(output, "output").has(length(), gte(), paths.length);
+    IntStream.range(0, paths.length).forEach(i -> output[i] = readObj(host, paths[i]));
   }
 
   /**
    * Reads the values of all paths within the provided object and places them in the provided
    * path-to-value map.
    *
-   * @param host
-   * @param output
+   * @param host The object from which to read the values
+   * @param output An {@code Map} into which to put the values
    * @throws PathWalkerException
    */
   public void readValues(Object host, Map<Path, Object> output) throws PathWalkerException {
@@ -195,7 +195,7 @@ public final class PathWalker {
    * @param values
    */
   public void writeValues(Object host, Object... values) {
-    Check.notNull(values, "values").has(arrayLength(), gte(), paths.length);
+    Check.notNull(values, "values").has(length(), gte(), paths.length);
     for (int i = 0; i < paths.length; ++i) {
       write(host, paths[i], values[i]);
     }

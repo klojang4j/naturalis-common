@@ -69,8 +69,10 @@ public class MessagesTest {
     Object argument = "Hello world, how are you?";
     String argName = "foo";
     LinkedHashSet<?> target = new LinkedHashSet<>();
-    String s = target.getClass().getSimpleName() + "@" + System.identityHashCode(target);
-    String expected = String.format("foo must be in %s (was \"Hello world, how are[...]\")", s);
+    String s1 = target.getClass().getSimpleName() + "@" + System.identityHashCode(target);
+    String s2 = argument.getClass().getSimpleName() + "@" + System.identityHashCode(argument);
+    String expected =
+        String.format("foo must be in %s (was %s \"Hello world, how are[...]\")", s1, s2);
     System.out.println(expected);
     String actual = Messages.createMessage(in(), argName, argument, target);
     System.out.println(actual);

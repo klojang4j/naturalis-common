@@ -202,8 +202,8 @@ public class EnvManager {
     Check.notNull(name, "name");
     try {
       return empty == UNDEFINED
-          ? check(name).is(notEmpty(), MISSING_ENV_VAR, name).then(NumberMethods::asPlainInt)
-          : check(name).is(notNull(), MISSING_ENV_VAR, name).then(NumberMethods::asPlainInt);
+          ? check(name).is(notEmpty(), MISSING_ENV_VAR, name).ok(NumberMethods::asPlainInt)
+          : check(name).is(notNull(), MISSING_ENV_VAR, name).ok(NumberMethods::asPlainInt);
     } catch (NumberFormatException e) {
       throw notConvertible(name, int.class, e.getMessage());
     }
@@ -267,8 +267,8 @@ public class EnvManager {
     Check.notNull(name, "name");
     try {
       return empty == UNDEFINED
-          ? check(name).is(notEmpty(), MISSING_ENV_VAR, name).then(this::parseBoolean)
-          : check(name).is(notNull(), MISSING_ENV_VAR, name).then(this::parseBoolean);
+          ? check(name).is(notEmpty(), MISSING_ENV_VAR, name).ok(this::parseBoolean)
+          : check(name).is(notNull(), MISSING_ENV_VAR, name).ok(this::parseBoolean);
     } catch (NumberFormatException e) {
       throw notConvertible(name, boolean.class, e.getMessage());
     }

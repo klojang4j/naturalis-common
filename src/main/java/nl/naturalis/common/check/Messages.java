@@ -219,12 +219,28 @@ class Messages {
     return x -> format("%s must not contain key %s", x[0], argVal(x[2]));
   }
 
+  static Function<Object[], String> msgKeyIn() {
+    return x -> format("%s must be key in %s (was %s)", x[0], argVal(x[2]), argVal(x[1]));
+  }
+
+  static Function<Object[], String> msgNotKeyIn() {
+    return x -> format("%s must not be key in %s (was %s)", x[0], argVal(x[2]), argVal(x[1]));
+  }
+
   static Function<Object[], String> msgHasValue() {
     return x -> format("%s must not contain value %s", x[0], argVal(x[2]));
   }
 
   static Function<Object[], String> msgNotHasValue() {
     return x -> format("%s must not contain value %s", x[0], argVal(x[2]));
+  }
+
+  static Function<Object[], String> msgValueIn() {
+    return x -> format("%s must be value in %s (was %s)", x[0], argVal(x[2]), argVal(x[1]));
+  }
+
+  static Function<Object[], String> msgNotValueIn() {
+    return x -> format("%s must not be value in %s (was %s)", x[0], argVal(x[2]), argVal(x[1]));
   }
 
   static Function<Object[], String> msgEq() {
@@ -301,23 +317,28 @@ class Messages {
     } else if (arg instanceof Enum) {
       return arg.toString();
     } else if (arg instanceof CharSequence) {
-      return truncate(arg);
+      return stringify(arg);
     } else if (arg.getClass() != Object.class) {
       try {
         arg.getClass().getDeclaredMethod("toString");
-        return truncate(arg);
-      } catch (NoSuchMethodException e) {
+        return stringify(arg);
+      } catch (Exception e) {
       }
     }
     return sname(arg) + '@' + System.identityHashCode(arg);
   }
 
-  private static String truncate(Object arg) {
+  private static String stringify(Object arg) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(sname(arg)).append('@').append(System.identityHashCode(arg)).append(" \"");
     String s = arg.toString();
     if (s.length() > 20) {
-      return '"' + s.substring(0, 20) + "[...]\"";
+      sb.append(s.substring(0, 20)).append("[...]");
+    } else {
+      sb.append(s);
     }
-    return '"' + s + '"';
+    sb.append('"');
+    return sb.toString();
   }
 
   // Returns fully-qualified class name

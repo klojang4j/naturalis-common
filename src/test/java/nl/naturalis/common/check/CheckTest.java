@@ -7,9 +7,9 @@ import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.check.CommonGetters.size;
-import static nl.naturalis.common.check.CommonGetters.stringLength;
+import static nl.naturalis.common.check.CommonGetters.*;
 
 /**
  * NB A lot of these tests don't make any assertion, but just verify that we can code them as we do
@@ -130,7 +130,7 @@ public class CheckTest {
 
   @Test
   public void size07() {
-    Check.that("Hello, World!", "fooArg").has(stringLength(), gt(), 3);
+    Check.that("Hello, World!", "fooArg").has(strlen(), gt(), 3);
     assertTrue(true);
   }
 
@@ -147,15 +147,19 @@ public class CheckTest {
     assertTrue(true);
   }
 
-  /**
+  /*
    * The point here is that we can write these tests down in the first place without compilation
    * errors. Note the parameter typing in one of the lambdas, which we were forced to do by the
    * compiler.
    */
   @Test
   public void has01() {
-    Employee employee = new Employee(3, "John Smith", 43, "Skating", "Scoccer");
-    Check.notNull(employee, "employee")
+    Employee emp = new Employee();
+    emp.setId(3);
+    emp.setFullName("John Smith");
+    emp.setAge(43);
+    emp.setHobbies("Skating", "Scoccer");
+    Check.notNull(emp, "employee")
         .has(Employee::getId, "id", gte(), 0)
         .has(Employee::getId, "id", (int x, int y) -> x > y, 0)
         .has(Employee::getHobbies, "hobbies", (x, y) -> x.contains(y), "Skating")
@@ -199,9 +203,8 @@ public class CheckTest {
   @Test
   public void has05() {
     Employee employee = new Employee();
-    employee.setJustSomeNumbers(new float[] {3.2F, 103.2F, 0.8F});
-    Check.notNull(employee, "employee")
-        .has(Employee::getJustSomeNumbers, "justSomeLuckyNumbers", array());
+    employee.setScores(new float[] {3.2F, 103.2F, 0.8F});
+    Check.notNull(employee, "employee").has(Employee::getScores, "justSomeLuckyNumbers", array());
     assertTrue(true);
   }
 
@@ -221,12 +224,24 @@ public class CheckTest {
   }
 
   @Test
+  public void has07a() {
+    Employee[] employees = new Employee[10];
+    try {
+      Check.notNull(employees, "employees").has(length(), gt(), 100);
+    } catch (IllegalArgumentException e) {
+      assertEquals("employees.length must be > 100 (was 10)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
   public void has08() {
     Employee employee = new Employee();
-    employee.setJustSomeNumbers(new float[] {3.2F, 103.2F, 0.8F});
+    employee.setScores(new float[] {3.2F, 103.2F, 0.8F});
     Check.notNull(employee, "employee")
-        .has(Employee::getJustSomeNumbers, "justSomeLuckyNumbers", sizeLessThan(), 100)
-        .has(Employee::getJustSomeNumbers, "justSomeLuckyNumbers", x -> x.length != 100);
+        .has(Employee::getScores, "scores", sizeLessThan(), 100)
+        .has(Employee::getScores, "scores", x -> x.length != 100);
     assertTrue(true);
   }
 
@@ -237,13 +252,42 @@ public class CheckTest {
    */
   @Test
   public void hasInt() {
-    Employee employee = new Employee(3, "John Smith", 43, "Skating", "Scoccer");
-    Check.notNull(employee, "employee")
+    Employee emp = new Employee();
+    emp.setId(3);
+    Check.notNull(emp, "employee")
         .has(Employee::getId, "id", (Integer x) -> x != 2)
         .has(Employee::getId, (Integer x) -> x != 2, "id must not be 2")
         .has(Employee::getId, notEqualTo(), 2, "id must not be 2")
         .has(Employee::getId, (int x) -> x > 0, "Id must be positive")
         .has(Employee::getId, "id", positive())
+        .has(Employee::getId, "id", ne(), 2)
         .has(Employee::getId, "id", notEqualTo(), 2);
+    assertTrue(true);
+  }
+
+  @Test
+  public void str() {
+    Employee emp = new Employee();
+    emp.setId(3);
+    emp.setFullName("John Smith");
+    Check.that(emp, "emp").has(stringValue(), equalTo(), "John Smith (3)");
+  }
+
+  @Test
+  public void strlen01() {
+    String s = "Hello, world!";
+    Check.that(s).has(strlen(), gt(), 2);
+    assertTrue(true);
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void strlen02() {
+    String s = "Hello, world!";
+    Check.that(s, IllegalStateException::new).has(strlen(), lt(), 2);
+  }
+
+  @Test
+  public void abs01() {
+    Check.that(-7).has(abs(), eq(), 7);
   }
 }

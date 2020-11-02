@@ -5,7 +5,7 @@ import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ArrayMethods.END_INDEX;
 import static nl.naturalis.common.ArrayMethods.START_INDEX;
 import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.check.CommonGetters.arrayLength;
+import static nl.naturalis.common.check.CommonGetters.length;
 
 /** Methods extending the Java Collection framework. */
 public class CollectionMethods {
@@ -114,14 +114,14 @@ public class CollectionMethods {
    */
   @SuppressWarnings("unchecked")
   public static <K, V> HashMap<K, V> newHashMap(Object... kvPairs) {
-    Check.notNull(kvPairs, "kvPairs").has(arrayLength(), even());
+    Check.notNull(kvPairs, "kvPairs").has(length(), even());
     HashMap<K, V> map = new HashMap<>(kvPairs.length);
     for (int i = 0; i < kvPairs.length; i += 2) {
       map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
     }
-
     return map;
   }
+
   /**
    * Returns a mutable {@link LinkedHashMap} containing the provided key-value pairs.
    *
@@ -132,7 +132,7 @@ public class CollectionMethods {
    */
   @SuppressWarnings("unchecked")
   public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(Object... kvPairs) {
-    Check.notNull(kvPairs, "kvPairs").has(arrayLength(), even());
+    Check.notNull(kvPairs, "kvPairs").has(length(), even());
     LinkedHashMap<K, V> map = new LinkedHashMap<>(kvPairs.length);
     for (int i = 0; i < kvPairs.length; i += 2) {
       map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
@@ -159,12 +159,26 @@ public class CollectionMethods {
   public static <K extends Enum<K>, V, M extends EnumMap<K, ? super V>> M fullEnumMap(
       Class<K> enumClass, V... values) throws IllegalArgumentException {
     K[] consts = Check.notNull(enumClass, "enumClass").ok().getEnumConstants();
-    Check.that(values, "values").is(noneNull()).has(arrayLength(), eq(), consts.length);
+    Check.that(values, "values").is(noneNull()).has(length(), eq(), consts.length);
     EnumMap<K, ? super V> map = new EnumMap<>(enumClass);
     for (int i = 0; i < consts.length; ++i) {
       map.put(consts[i], values[i]);
     }
     return (M) map;
+  }
+
+  /**
+   * Returns a tightly-sized copy of the specified map.
+   *
+   * @param <K> The type of the keys
+   * @param <V> The type of the values
+   * @param map The {@code Map} to copy
+   * @return A tightly-sized copy of the specified map
+   */
+  public static <K, V> Map<K, V> tightHashMap(Map<K, V> map) {
+    HashMap<K, V> copy = new HashMap<>(map.size() + 1, 1F);
+    copy.putAll(map);
+    return copy;
   }
 
   /**

@@ -155,7 +155,7 @@ public class NumberMethods {
    * Returns the absolute value of the specified number.
    *
    * @param <T> The type of the number
-   * @param n The number
+   * @param number The number
    * @return Its absolute value
    */
   @SuppressWarnings("unchecked")

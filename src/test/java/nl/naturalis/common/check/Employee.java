@@ -1,5 +1,6 @@
 package nl.naturalis.common.check;
 
+import java.util.Arrays;
 import java.util.List;
 
 class Employee {
@@ -7,16 +8,10 @@ class Employee {
   String fullName;
   Integer age;
   List<String> hobbies;
-  float[] justSomeNumbers;
+  float[] scores;
 
-  Employee() {}
-
-  Employee(int id, String fullName, Integer age, String... hobbies) {
-    super();
-    this.id = id;
-    this.fullName = fullName;
-    this.age = age;
-    this.hobbies = List.of(hobbies);
+  public String toString() {
+    return fullName + " (" + id + ")";
   }
 
   int getId() {
@@ -51,11 +46,15 @@ class Employee {
     this.hobbies = hobbies;
   }
 
-  float[] getJustSomeNumbers() {
-    return justSomeNumbers;
+  void setHobbies(String... hobbies) {
+    this.hobbies = Arrays.asList(hobbies);
   }
 
-  void setJustSomeNumbers(float[] justSomeNumbers) {
-    this.justSomeNumbers = justSomeNumbers;
+  float[] getScores() {
+    return scores;
+  }
+
+  void setScores(float[] scores) {
+    this.scores = scores;
   }
 }

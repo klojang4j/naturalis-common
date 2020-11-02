@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
+import nl.naturalis.common.CollectionMethods;
 import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.check.CommonChecks.notKeyIn;
 
 /**
  * Parses strings into enum constants by uniformly normalizing both the strings to be parsed and the
@@ -31,8 +33,8 @@ import nl.naturalis.common.check.Check;
  */
 public class EnumParser<T extends Enum<T>> {
 
-  private static final String ERR_INVALID_VALUE = "Invalid value for %s: \"%s\"";
-  private static final String ERR_BAD_NORMALIZER =
+  private static final String INVALID_VALUE = "Invalid value for %s: %s";
+  private static final String BAD_NORMALIZER =
       "Normalizer must produce unique strings for enum constants";
 
   /**
@@ -66,24 +68,28 @@ public class EnumParser<T extends Enum<T>> {
   public EnumParser(Class<T> enumClass, UnaryOperator<String> normalizer) {
     this.enumClass = Check.notNull(enumClass, "enumClass").ok();
     this.normalizer = Check.notNull(normalizer, "normalizer").ok();
-    HashMap<String, T> tmp = new HashMap<>(enumClass.getEnumConstants().length);
+    HashMap<String, T> map = new HashMap<>(enumClass.getEnumConstants().length);
     Arrays.stream(enumClass.getEnumConstants())
         .forEach(
             e -> {
-              if (null != tmp.put(normalizer.apply(e.toString()), e)) {
-                throw new IllegalArgumentException(ERR_BAD_NORMALIZER);
-              }
-              if (e.toString() != e.name()) {
-                if (null != tmp.put(normalizer.apply(e.name()), e)) {
-                  throw new IllegalArgumentException(ERR_BAD_NORMALIZER);
-                }
+              if (e.name().equals(e.toString())) {
+                Check.that(normalizer.apply(e.name()))
+                    .is(notKeyIn(), map, BAD_NORMALIZER)
+                    .then(s -> map.put(s, e));
+              } else {
+                Check.that(normalizer.apply(e.name())).is(notKeyIn(), map, BAD_NORMALIZER);
+                Check.that(normalizer.apply(e.toString())).is(notKeyIn(), map, BAD_NORMALIZER);
+                map.put(normalizer.apply(e.name()), e);
+                map.put(normalizer.apply(e.toString()), e);
               }
             });
-    this.lookups = tmp;
+    this.lookups = CollectionMethods.tightHashMap(map);
   }
 
   /**
    * Parses the provided value into an instant of the enum class managed by this {@code EnumParser}.
+   * This method accepts null values, but the normalizer used by this {@code EnumParser} may not.
+   * The {@link #DEFAULT_NORMALIZER} does not accept null values.
    *
    * @param value The string to be parsed into an enum constant.
    * @return The enum constant
@@ -91,11 +97,10 @@ public class EnumParser<T extends Enum<T>> {
    *     constants.
    */
   public T parse(String value) throws IllegalArgumentException {
-    Check.notNull(value);
     T constant = lookups.get(normalizer.apply(value));
     if (constant == null) {
-      throw new IllegalArgumentException(
-          String.format(ERR_INVALID_VALUE, enumClass.getSimpleName(), value));
+      String msg = String.format(INVALID_VALUE, enumClass.getSimpleName(), value);
+      throw new IllegalArgumentException(msg);
     }
     return constant;
   }

@@ -11,13 +11,11 @@ import nl.naturalis.common.Tuple;
 import nl.naturalis.common.check.Check;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static nl.naturalis.common.ObjectMethods.doIf;
-import static nl.naturalis.common.StringMethods.append;
 import static nl.naturalis.common.Tuple.tuple;
-import static nl.naturalis.common.check.CommonChecks.notHasKey;
 import static nl.naturalis.common.check.CommonChecks.hasValue;
-import static nl.naturalis.common.check.CommonChecks.notEmpty;
 import static nl.naturalis.common.check.CommonChecks.ne;
+import static nl.naturalis.common.check.CommonChecks.notEmpty;
+import static nl.naturalis.common.check.CommonChecks.notHasKey;
 import static nl.naturalis.common.check.CommonGetters.enumConstants;
 
 /**
@@ -64,8 +62,8 @@ public final class EnumToIntMap<K extends Enum<K>> {
 
   /**
    * Creates a new {@code EnumToIntMap} using Integer.MIN_VALUE as the <i>key-absent-value</i> value
-   * and with its keys initialized using the specified initializer function. This allows for simple
-   * initializations like {@code new EnumToIntMap(WeekDay.class, k -> k.ordinal() +1)}.
+   * and with its keys initialized using the specified initializer function. For example: {@code new
+   * EnumToIntMap(WeekDay.class, k -> k.ordinal() +1)}.
    *
    * @param enumClass The type of the enum class
    * @param initializer A function called to initialize the array elements
@@ -107,7 +105,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
 
   /**
    * Instantiates a new {@code EnumToIntMap} with the same key-value mappings as the specifed {@code
-   * EnumToIntMap}, but (potentially) with a new <i>key-absent-value</i> value.
+   * EnumToIntMap}, but (potentially) with a new <i>key-absent-value</i>.
    *
    * @param other The {@code EnumToIntMap} whose key-value mappings to copy
    * @param keyAbsentValue The value used to signify the absence of a key
@@ -133,8 +131,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
 
   /**
    * Whether or not the map contains the specified value. It is not permitted to search for the
-   * <i>key-absent-value</i> value. An {@code IllegalArgumentException} is thrown if you attempt to
-   * do so.
+   * <i>key-absent-value</i> value. An {@code IllegalArgumentException} is thrown if you do.
    *
    * @param val The value
    * @return Whether or not the map contains the value
@@ -202,9 +199,9 @@ public final class EnumToIntMap<K extends Enum<K>> {
   }
 
   /**
-   * Adds all entries of the specified map to this map, overwriting any previous values. The other
-   * map is allowed to have a different <i>key-absent-value</i> value, but it must not contain
-   * <i>this</i> map's NULL value. An {@link IllegalArgumentException} is thrown if it does.
+   * Adds all entries of the specified map to this map, overwriting any previous values. The source
+   * map must not contain the <i>key-absent-value</i> of this map. An {@link
+   * IllegalArgumentException} is thrown if it does.
    *
    * @param other The {@code EnumToIntMap} whose key-value mappings to copy
    */
@@ -215,7 +212,8 @@ public final class EnumToIntMap<K extends Enum<K>> {
 
   /**
    * Adds all entries of the specified map to this map. This method acts as a bridge to
-   * fully-generic map implementations.
+   * fully-generic map implementations. The source map must not contain the <i>key-absent-value</i>
+   * of this map. An {@link IllegalArgumentException} is thrown if it does.
    *
    * @param other The {@code Map} whose key-value mappings to copy
    */
@@ -223,15 +221,13 @@ public final class EnumToIntMap<K extends Enum<K>> {
     Check.notNull(other, "other")
         .is(notHasKey(), null)
         .is(hasValue(), kav)
-        .ok()
-        .entrySet()
-        .forEach(e -> assign(e.getKey(), e.getValue()));
+        .then(m -> m.entrySet().forEach(e -> assign(e.getKey(), e.getValue())));
   }
 
   /**
    * Returns a fully-generic version of this map.
    *
-   * @return
+   * @return A fully-generic version of this map
    */
   public Map<K, Integer> toGenericMap() {
     return streamKeys().collect(toMap(e -> e, Enum::ordinal));
@@ -358,23 +354,15 @@ public final class EnumToIntMap<K extends Enum<K>> {
     return true;
   }
 
-  @Override
+  /** {@inheritDoc} */
   public int hashCode() {
     return Objects.hash(data, kav);
   }
 
+  /** {@inheritDoc} */
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append('{');
-    streamKeys()
-        .forEach(
-            k -> {
-              doIf(sb.length() != 1, () -> sb.append(";"));
-              append(sb, '"', k, "\":", valueOf(k));
-            });
-    sb.append('}');
-    return sb.toString();
+    return toGenericMap().toString();
   }
 
   private void copyEntries(EnumToIntMap<K> other) {

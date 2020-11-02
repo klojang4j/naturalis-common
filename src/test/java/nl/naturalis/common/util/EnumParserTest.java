@@ -1,8 +1,7 @@
-package nl.naturalis.common;
+package nl.naturalis.common.util;
 
 import org.junit.Test;
-import nl.naturalis.common.util.EnumParser;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class EnumParserTest {
 
@@ -10,8 +9,27 @@ public class EnumParserTest {
     DAY_ONE,
     DAY_TWO,
     _THIRD,
-    _FOURTH_,
+    _FOURTH_("^^^fourth^^^"),
     FIFTH_DAY_IN_A_ROW;
+    private String s;
+
+    private TestEnum() {
+      this.s = name();
+    }
+
+    private TestEnum(String s) {
+      this.s = s;
+    }
+
+    public String toString() {
+      return s;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  @SuppressWarnings("unused")
+  public void testBadNormalizer() {
+    new EnumParser<>(TestEnum.class, s -> "Hi");
   }
 
   @Test
@@ -28,15 +46,17 @@ public class EnumParserTest {
   public void parse01() {
     EnumParser<TestEnum> parser = new EnumParser<>(TestEnum.class);
     TestEnum e = parser.parse("day one");
-    assertEquals(TestEnum.DAY_ONE, e);
+    assertSame("01", TestEnum.DAY_ONE, e);
     e = parser.parse("DayTwo");
-    assertEquals(TestEnum.DAY_TWO, e);
+    assertSame("02", TestEnum.DAY_TWO, e);
     e = parser.parse("third");
-    assertEquals(TestEnum._THIRD, e);
+    assertSame("03", TestEnum._THIRD, e);
     e = parser.parse(" fOurTh ");
-    assertEquals(TestEnum._FOURTH_, e);
+    assertSame("04", TestEnum._FOURTH_, e);
+    e = parser.parse("^^^fOurTh^^^");
+    assertSame("05", TestEnum._FOURTH_, e);
     e = parser.parse("fifthDayInARow");
-    assertEquals(TestEnum.FIFTH_DAY_IN_A_ROW, e);
+    assertSame("06", TestEnum.FIFTH_DAY_IN_A_ROW, e);
   }
 
   @Test(expected = IllegalArgumentException.class)

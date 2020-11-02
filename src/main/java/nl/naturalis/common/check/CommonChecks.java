@@ -418,7 +418,7 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is an element of a {@code Collection}.
+   * Verifies the presence of an element within a {@code Collection}.
    *
    * @param <E> The type of the argument
    * @param <C> The type of the {@code Collection}
@@ -433,7 +433,7 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is not an element of a {@code Collection}.
+   * Verifies the absence of an element within a {@code Collection}.
    *
    * @param <E> The type of the argument
    * @param <C> The type of the {@code Collection}
@@ -479,6 +479,36 @@ public class CommonChecks {
   }
 
   /**
+   * Verifies the presence of a key within a {@code Map}.
+   *
+   * @param <K> The type of the keys within the map
+   * @param <M> The Type of the {@code Map}
+   * @return A {@code Relation}
+   */
+  public static <K, M extends Map<? super K, ?>> Relation<K, M> keyIn() {
+    return (x, y) -> y.containsKey(x);
+  }
+
+  static {
+    add(keyIn(), msgKeyIn());
+  }
+
+  /**
+   * Verifies the absence of a key withinin a {@code Map}.
+   *
+   * @param <K> The type of the keys within the map
+   * @param <M> The Type of the {@code Map}
+   * @return A {@code Relation}
+   */
+  public static <K, M extends Map<? super K, ?>> Relation<K, M> notKeyIn() {
+    return (x, y) -> !y.containsKey(x);
+  }
+
+  static {
+    add(keyIn(), msgNotKeyIn());
+  }
+
+  /**
    * Verifies that a {@code Map} contains a value. Equivalent to {@link Map#containsValue(Object)
    * Map::containsValue}.
    *
@@ -510,14 +540,44 @@ public class CommonChecks {
   }
 
   /**
+   * Verifies the presence of a value within a {@code Map}.
+   *
+   * @param <K> The type of the keys within the map
+   * @param <M> The Type of the {@code Map}
+   * @return A {@code Relation}
+   */
+  public static <K, M extends Map<? super K, ?>> Relation<K, M> valueIn() {
+    return (x, y) -> y.containsValue(x);
+  }
+
+  static {
+    add(valueIn(), msgValueIn());
+  }
+
+  /**
+   * Verifies the absence of a value withinin a {@code Map}.
+   *
+   * @param <K> The type of the keys within the map
+   * @param <M> The Type of the {@code Map}
+   * @return A {@code Relation}
+   */
+  public static <K, M extends Map<? super K, ?>> Relation<K, M> notValueIn() {
+    return (x, y) -> !y.containsValue(x);
+  }
+
+  static {
+    add(notValueIn(), msgNotValueIn());
+  }
+
+  /**
    * Verifies that the argument is equal to a particular value. Equivalent to {@link
-   * Objects#equals(Object, Object) Objects::equals}.
+   * Object#equals(Object) Object::equals}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
    */
   public static <X> Relation<X, X> equalTo() {
-    return Objects::equals;
+    return Object::equals;
   }
 
   static {
@@ -531,7 +591,7 @@ public class CommonChecks {
    * @return A {@code Relation}
    */
   public static <X> Relation<X, X> notEqualTo() {
-    return (x, y) -> !Objects.equals(x, y);
+    return (x, y) -> !x.equals(y);
   }
 
   static {
@@ -700,9 +760,20 @@ public class CommonChecks {
   /* ++++++++++++++ ObjIntRelation ++++++++++++++ */
 
   /**
-   * Verifies that the argument's length or size is equal to a particular value. The argument must
-   * be an array, {@code CharSequence}, {@code Collection}, {@code Map} or {@link Sizeable}. For any
-   * other type of argument this method will throw an {@code UnsupportedOperationException}.
+   * Verifies that the argument's length or size is equal to a particular value. The returned {@code
+   * ObjIntRelation} evaluates in a meaningful way if the argument is:
+   *
+   * <p>
+   *
+   * <ul>
+   *   <li>an array
+   *   <li>a {@link CharSequence}
+   *   <li>a {@link Collection}
+   *   <li>a {@link Map}
+   *   <li>a {@link Sizeable}
+   * </ul>
+   *
+   * <p>For any other type of argument this method the relation always evaluates to {@code false}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -721,7 +792,7 @@ public class CommonChecks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() == y;
       }
-      throw notSupported("sizeEquals", x);
+      return false;
     };
   }
 
@@ -730,29 +801,26 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument's length or size is not equal to a particular value. The argument
-   * must be an array, {@code CharSequence}, {@code Collection}, {@code Map} or {@link Sizeable}.
-   * For any other type of argument this method will throw an {@code UnsupportedOperationException}.
+   * Verifies that the argument's length or size is not equal to a particular value. The returned
+   * {@code ObjIntRelation} evaluates in a meaningful way if the argument is:
+   *
+   * <p>
+   *
+   * <ul>
+   *   <li>an array
+   *   <li>a {@link CharSequence}
+   *   <li>a {@link Collection}
+   *   <li>a {@link Map}
+   *   <li>a {@link Sizeable}
+   * </ul>
+   *
+   * <p>For any other type of argument this method the relation always evaluates to {@code false}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
    */
-  @SuppressWarnings("rawtypes")
   public static <X> ObjIntRelation<X> sizeNotEquals() {
-    return (x, y) -> {
-      if (x instanceof CharSequence) {
-        return ((CharSequence) x).length() != y;
-      } else if (x instanceof Collection) {
-        return ((Collection) x).size() != y;
-      } else if (x instanceof Map) {
-        return ((Map) x).size() != y;
-      } else if (x.getClass().isArray()) {
-        return Array.getLength(x) != y;
-      } else if (x instanceof Sizeable) {
-        return ((Sizeable) x).size() != y;
-      }
-      throw notSupported("sizeNotEquals", x);
-    };
+    return (x, y) -> !sizeEquals().exists(x, y);
   }
 
   static {
@@ -760,9 +828,20 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument's length or size is greater than a particular value. The argument
-   * must be an array, {@code CharSequence}, {@code Collection}, {@code Map} or {@link Sizeable}.
-   * For any other type of argument this method will throw an {@code UnsupportedOperationException}.
+   * Verifies that the argument's length or size is greater than a particular value. The returned
+   * {@code ObjIntRelation} evaluates in a meaningful way if the argument is:
+   *
+   * <p>
+   *
+   * <ul>
+   *   <li>an array
+   *   <li>a {@link CharSequence}
+   *   <li>a {@link Collection}
+   *   <li>a {@link Map}
+   *   <li>a {@link Sizeable}
+   * </ul>
+   *
+   * <p>For any other type of argument this method the relation always evaluates to {@code false}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -791,29 +870,25 @@ public class CommonChecks {
 
   /**
    * Verifies that the argument's length or size is greater than or equal to a particular value. The
-   * argument must be an array, {@code CharSequence}, {@code Collection}, {@code Map} or {@link
-   * Sizeable}. For any other type of argument this method will throw an {@code
-   * UnsupportedOperationException}.
+   * returned {@code ObjIntRelation} evaluates in a meaningful way if the argument is:
+   *
+   * <p>
+   *
+   * <ul>
+   *   <li>an array
+   *   <li>a {@link CharSequence}
+   *   <li>a {@link Collection}
+   *   <li>a {@link Map}
+   *   <li>a {@link Sizeable}
+   * </ul>
+   *
+   * <p>For any other type of argument this method the relation always evaluates to {@code false}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
    */
-  @SuppressWarnings("rawtypes")
   public static <X> ObjIntRelation<X> sizeAtLeast() {
-    return (x, y) -> {
-      if (x instanceof CharSequence) {
-        return ((CharSequence) x).length() >= y;
-      } else if (x instanceof Collection) {
-        return ((Collection) x).size() >= y;
-      } else if (x instanceof Map) {
-        return ((Map) x).size() >= y;
-      } else if (x.getClass().isArray()) {
-        return Array.getLength(x) >= y;
-      } else if (x instanceof Sizeable) {
-        return ((Sizeable) x).size() >= y;
-      }
-      throw notSupported("sizeAtLeast", x);
-    };
+    return (x, y) -> !sizeLessThan().exists(x, y);
   }
 
   static {
@@ -821,9 +896,20 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument's length or size is less than a particular value. The argument must
-   * be an array, {@code CharSequence}, {@code Collection}, {@code Map} or {@link Sizeable}. For any
-   * other type of argument this method will throw an {@code UnsupportedOperationException}.
+   * Verifies that the argument's length or size is less than to a particular value. The returned
+   * {@code ObjIntRelation} evaluates in a meaningful way if the argument is:
+   *
+   * <p>
+   *
+   * <ul>
+   *   <li>an array
+   *   <li>a {@link CharSequence}
+   *   <li>a {@link Collection}
+   *   <li>a {@link Map}
+   *   <li>a {@link Sizeable}
+   * </ul>
+   *
+   * <p>For any other type of argument this method the relation always evaluates to {@code false}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -842,7 +928,7 @@ public class CommonChecks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() < y;
       }
-      throw notSupported("sizeLessThan", x);
+      return false;
     };
   }
 
@@ -852,29 +938,25 @@ public class CommonChecks {
 
   /**
    * Verifies that the argument's length or size is less than or equal to a particular value. The
-   * argument must be an array, {@code CharSequence}, {@code Collection}, {@code Map} or {@link
-   * Sizeable}. For any other type of argument this method will throw an {@code
-   * UnsupportedOperationException}.
+   * returned {@code ObjIntRelation} evaluates in a meaningful way if the argument is:
+   *
+   * <p>
+   *
+   * <ul>
+   *   <li>an array
+   *   <li>a {@link CharSequence}
+   *   <li>a {@link Collection}
+   *   <li>a {@link Map}
+   *   <li>a {@link Sizeable}
+   * </ul>
+   *
+   * <p>For any other type of argument this method the relation always evaluates to {@code false}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
    */
-  @SuppressWarnings("rawtypes")
   public static <X> ObjIntRelation<X> sizeAtMost() {
-    return (x, y) -> {
-      if (x instanceof CharSequence) {
-        return ((CharSequence) x).length() <= y;
-      } else if (x instanceof Collection) {
-        return ((Collection) x).size() <= y;
-      } else if (x instanceof Map) {
-        return ((Map) x).size() <= y;
-      } else if (x.getClass().isArray()) {
-        return Array.getLength(x) <= y;
-      } else if (x instanceof Sizeable) {
-        return ((Sizeable) x).size() <= y;
-      }
-      throw notSupported("sizeAtMost", x);
-    };
+    return (x, y) -> !sizeGreaterThan().exists(x, y);
   }
 
   static {

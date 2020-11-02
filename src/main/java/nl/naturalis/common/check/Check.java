@@ -18,7 +18,7 @@ import static nl.naturalis.common.check.Messages.createMessage;
  * <p>
  *
  * <pre>
- * this.numChairs = Check.that(numChairs).is(notNegative()).is(atMost(), 10).is(even()).ok();
+ * this.numChairs = Check.that(numChairs).is(notNegative()).is(lte(), 10).is(even()).ok();
  * </pre>
  *
  * <h4>Common checks</h4>
@@ -30,7 +30,7 @@ import static nl.naturalis.common.check.Messages.createMessage;
  * <p>
  *
  * <pre>
- * Check.that(numChairs, "numChairs").is(atLeast(), 2);
+ * Check.that(numChairs, "numChairs").is(gte(), 2);
  * // "numChairs must be >= 2 (was 0)"
  * </pre>
  *
@@ -42,27 +42,27 @@ import static nl.naturalis.common.check.Messages.createMessage;
  * <p>
  *
  * <pre>
- * Check.notNull(name, "name").and(String::length, "length", atLeast(), 10);
- * Check.notNull(employee, "employee").and(Employee::getAge, "age", lessThan(), 50);
- * Check.notNull(intArray, "intArray").and(Array::getLength, "length", isEven());
- * Check.notNull(employees, "employees").and(Collection::size, "size", atLeast(), 100);
+ * Check.notNull(name, "name").has(String::length, "length", gte(), 10);
+ * Check.notNull(employee, "employee").has(Employee::getAge, "age", lt(), 50);
+ * Check.notNull(intArray, "intArray").has(Array::getLength, "length", even());
+ * Check.notNull(employees, "employees").has(Collection::size, "size", gte(), 100);
  * </pre>
  *
- * <p>The {@link CommonGetters} class defines some common getters that you can optionally use for
- * increased conciceness. For example the last statement could also have been written as:
+ * <p>The {@link CommonGetters} class defines some common getters that you can use for conciseness:
  *
  * <pre>
- * Check.notNull(employees, "employees").has(size(), atLeast(), 100);
- * // "employees.size must be >= 100 (was 36)"
+ * Check.notNull(name, "name").has(strlen(), gte(), 10);
+ * Check.notNull(intArray, "intArray").has(length(), even());
+ * Check.notNull(employees, "employees").has(size(), gte(), 100);
  * </pre>
  *
  * <h4>Lambdas</h4>
  *
- * <p>Most checks are done via the various {@code and()} methods. Generally, the compiler has no
- * problem deciding which {@code and()} method is targeted. When using lambdas, however, the
- * compiler may run into ambiguities. This will result in a compiler error like: <b>The method and
- * [...] is ambigious for type Check [...]</b>. To resolve this, simply specify the type of the
- * parameters in the lambda:
+ * <p>Checks are done via the various {@code is(...)} and {@code has(...)} methods. Generally, the
+ * compiler has no problem deciding which of the overloaded methods is targeted. When using lambdas,
+ * however, the compiler may run into ambiguities. This will result in a compiler error like: <b>The
+ * method has [...] is ambigious for type Check [...]</b>. To resolve this, simply specify the type
+ * of the parameters in the lambda:
  *
  * <p>
  *
@@ -84,8 +84,8 @@ import static nl.naturalis.common.check.Messages.createMessage;
  * <pre>
  * this.query = Check.that(query, "query", InvalidQueryException::new)
  *  .has(QuerySpec::getFrom, nullOr(), 0)
- *  .has(QuerySpec::getSize, "size", atLeast(), MIN_BATCH_SIZE)
- *  .has(QuerySpec::getSize, "size", atMost(), MAX_BATCH_SIZE)
+ *  .has(QuerySpec::getSize, "size", gte(), MIN_BATCH_SIZE)
+ *  .has(QuerySpec::getSize, "size", lt(), MAX_BATCH_SIZE)
  *  .has(QuerySpec::getSortFields, "sortFields", empty())
  *  .ok();
  * </pre>
@@ -962,23 +962,25 @@ public abstract class Check<T, E extends Exception> {
   public abstract T ok();
 
   /**
-   * Passes the argument to a {@code Consumer}. To be used as the last call after a chain of checks.
+   * Passes the validated argument to the specified {@code Function} and returns the value computed
+   * by the {@code Function}. To be used as the last call after a chain of checks.
+   *
+   * @param <U> The type of the returned value
+   * @param transformer A {@code Function} that transforms the argument into some other value
+   * @return The value computed by the {@code Function}
+   */
+  public <U> U ok(Function<T, U> transformer) {
+    return transformer.apply(ok());
+  }
+
+  /**
+   * Passes the validated argument to a {@code Consumer} to be processed safely. To be used as the
+   * last call after a chain of checks.
    *
    * @param consumer The {@code Consumer}
    */
   public void then(Consumer<T> consumer) {
     consumer.accept(ok());
-  }
-
-  /**
-   * Returns the result of applying the specified {@code Function} to the argument.
-   *
-   * @param <U> The
-   * @param transformer
-   * @return
-   */
-  public <U> U then(Function<T, U> transformer) {
-    return transformer.apply(ok());
   }
 
   /**

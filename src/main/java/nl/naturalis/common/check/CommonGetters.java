@@ -1,33 +1,33 @@
 package nl.naturalis.common.check;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 import nl.naturalis.common.NumberMethods;
-import static nl.naturalis.common.ObjectMethods.*;
+import static nl.naturalis.common.ObjectMethods.ifNotNull;
 
 /**
- * Defines various commonly used getter-type (no-arg) methods that can be used to retrieve a
- * property of the argument. They are meant to be used in conjunction with the various {@code
- * has(...)} methods of the {@link Check} class. Each getter is associated with the name of the
- * property it exposes, so you can choose the leanest of the {@code has(...)} methods (those that
- * don't let you specify a property name yourself). For example:
+ * Defines various functions that can be used to retrieve a property of the argument. They are meant
+ * to be used as the first argument to the various {@code has(...)} methods of the {@link Check}
+ * class. Some functions, are not actually getters (no-arg methods called on the argument), but
+ * rather single-argument methods which get passed the argument.
+ *
+ * <p>Each getter is already associated with the name of the property it exposes, so the combination
+ * of a getter from the {@code CommonGetters} class and a check from the {@link CommonChecks} class
+ * allows the underlying code to generate a full-blown error message. For example:
  *
  * <p>
  *
  * <pre>
- * Check.notNull(stampCollection, "stampCollection").has(size(), greaterThan(), 100);
- * // "stampCollection.size() must be &gt; 100 (was 22)"
+ * Check.that(stampCollection, "stampCollection").has(size(), gt(), 100);
+ * // Error message: "stampCollection.size() must be &gt; 100 (was 22)"
  * </pre>
  *
- * <p>Most of the getters defined here are plain, unadorned method references. <b>None of them do a
- * preliminary null-check on the argument.</b> They rely upon being embedded within in chain of
- * checks on a {@link Check} object, the first of which should be a <i>not-null</i> check.
- *
- * <p>NB some getters defined here are actually not no-arg methods on the argument but rather unary
- * operations on it, disguised as a {@link Function} so they can be passed in as the first argument
- * to the {@code has (...)} methods.
+ * <p>Most methods in this class return plain method references. <b>None of them do a preliminary
+ * null-check on the argument.</b> They rely upon being embedded within in chain of checks on a
+ * {@link Check} object, the first of which should be a <i>not-null</i> check.
  *
  * @author Ayco Holleman
  */
@@ -39,14 +39,28 @@ public class CommonGetters {
   private static final IdentityHashMap<Object, String> names;
 
   /**
-   * A {@code Function} that returns the {@code Class} of an object.
+   * Equivalent to {@link Object#toString() Object::toString}.
+   *
+   * @param <T> The type of the object on which to call {@code toString{}}.
+   * @return A {@code Function} that returns the result of calling {@code toString()} on the object.
+   */
+  public static <T> Function<T, String> stringValue() {
+    return Object::toString;
+  }
+
+  static {
+    tmp.put(stringValue(), "%s.toString()");
+  }
+
+  /**
+   * A {@code Function} that returns the {@code Class} of an object. Equivalent to {@link
+   * Object#getClass() Object::getClass}.
    *
    * @param <T> The type of the object
    * @return A {@code Function} that returns the {@code Class} of an object
    */
-  @SuppressWarnings("unchecked")
-  public static <T> Function<T, Class<T>> type() {
-    return x -> (Class<T>) x.getClass();
+  public static <T> Function<T, Class<? extends Object>> type() {
+    return Object::getClass;
   }
 
   static {
@@ -54,17 +68,48 @@ public class CommonGetters {
   }
 
   /**
-   * A {@code Function} that returns all enum constants of an {@code Enum} class.
+   * A {@code Function} that returns the constants of an {@code Enum} class. Equivalent to {@link
+   * Class#getEnumConstants() Class::getEnumConstants}.
    *
    * @param <T> The enum class
    * @return A {@code Function} that returns all enum constants of an {@code Enum} class
    */
   public static <T extends Enum<T>> Function<Class<T>, T[]> enumConstants() {
-    return x -> x.getEnumConstants();
+    return Class::getEnumConstants;
   }
 
   static {
     tmp.put(enumConstants(), "%s.getEnumConstants()");
+  }
+
+  /**
+   * A function that returns the name of an enum constant. Equivalent to {@link Enum#name()
+   * Enum::name}.
+   *
+   * @param <T> The type of the enum class
+   * @return A {@code Function} that returns the name of the enum constant
+   */
+  public static <T extends Enum<T>> Function<T, String> name() {
+    return Enum::name;
+  }
+
+  static {
+    tmp.put(name(), "%s.name()");
+  }
+
+  /**
+   * A function that returns the ordinal of an enum constant. Equivalent to {@link Enum#ordinal()
+   * Enum::ordinal}.
+   *
+   * @param <T> The type of the enum class
+   * @return A {@code Function} that returns the ordinal of the enum constant
+   */
+  public static <T extends Enum<T>> ToIntFunction<T> ordinal() {
+    return Enum::ordinal;
+  }
+
+  static {
+    tmp.put(ordinal(), "%s.ordinal()");
   }
 
   /**
@@ -73,39 +118,27 @@ public class CommonGetters {
    *
    * @return A {@code Function} that returns the length of a {@code String}
    */
-  public static ToIntFunction<String> stringLength() {
+  public static ToIntFunction<String> strlen() {
     return String::length;
   }
 
   static {
-    tmp.put(stringLength(), "%s.length()");
+    tmp.put(strlen(), "%s.length()");
   }
 
   /**
-   * A {@code Function} that returns the length of an array.
+   * A {@code Function} that returns the length of an array. Equivalent to {@link
+   * Array#getLength(Object) Array::getLength}.
    *
-   * @param <T> The type of the elements in the array
+   * @param <T> The type of the array.
    * @return A {@code Function} that returns the length of an array
    */
-  public static <T> ToIntFunction<T[]> arrayLength() {
-    return x -> x.length;
+  public static <T> ToIntFunction<T> length() {
+    return Array::getLength;
   }
 
   static {
-    tmp.put(arrayLength(), "%s.length");
-  }
-
-  /**
-   * A {@code Function} that returns the length of an {@code int} array.
-   *
-   * @return A {@code Function} that returns the length of an array
-   */
-  public static ToIntFunction<int[]> intArrayLength() {
-    return x -> x.length;
-  }
-
-  static {
-    tmp.put(intArrayLength(), "%s.length");
+    tmp.put(length(), "%s.length");
   }
 
   /**
@@ -134,11 +167,12 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(mapSize(), "%s.size()");
+    tmp.put(mapSize(), tmp.get(size()));
   }
 
   /**
    * A {@code Function} that returns the size of a {@code List}. Equivalent to {@code List::size}.
+   * Could be used if the {@link #size()} method causes a name clash.
    *
    * @param <L> The type of the {@code List}
    * @return A {@code Function} that returns the size of a {@code List}
@@ -148,11 +182,12 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(listSize(), "%s.size()");
+    tmp.put(listSize(), tmp.get(size()));
   }
 
   /**
    * A {@code Function} that returns the size of a {@code Set}. Equivalent to {@code Set::size}.
+   * Could be used if the {@link #size()} method causes a name clash.
    *
    * @param <S> The type of the {@code Set}.
    * @return A {@code Function} that returns the size of a {@code Set}
@@ -166,18 +201,32 @@ public class CommonGetters {
   }
 
   /**
+   * A {@code Function} that returns the absolute value of an integer. Equivalent to {@link
+   * Math#abs(int) Math::abs}.
+   *
+   * @return A {@code Function} that returns the absolute value of an integer
+   */
+  public static ToIntFunction<Integer> abs() {
+    return Math::abs;
+  }
+
+  static {
+    tmp.put(abs(), "abs(%s)");
+  }
+
+  /**
    * A {@code Function} that returns the absolute value of a {@code Number}. Equivalent to {@link
    * NumberMethods#abs(Number) NumberMethods::abs}.
    *
    * @param <T> The type of the {@code Number}
    * @return A {@code Function} that returns the absolute value of a {@code Number}
    */
-  public static <T extends Number> Function<T, T> abs() {
+  public static <T extends Number> Function<T, T> absoluteValue() {
     return NumberMethods::abs;
   }
 
   static {
-    tmp.put(abs(), "abs(%s)");
+    tmp.put(absoluteValue(), tmp.get(abs()));
   }
 
   /**
