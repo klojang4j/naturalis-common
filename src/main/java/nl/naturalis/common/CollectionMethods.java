@@ -156,7 +156,7 @@ public class CollectionMethods {
    *     the provided values is null
    */
   @SuppressWarnings("unchecked")
-  public static <K extends Enum<K>, V, M extends EnumMap<K, ? super V>> M fullEnumMap(
+  public static <K extends Enum<K>, V, M extends EnumMap<K, ? super V>> M saturatedEnumMap(
       Class<K> enumClass, V... values) throws IllegalArgumentException {
     K[] consts = Check.notNull(enumClass, "enumClass").ok().getEnumConstants();
     Check.that(values, "values").is(noneNull()).has(length(), eq(), consts.length);
@@ -184,9 +184,9 @@ public class CollectionMethods {
   /**
    * Returns a mutable {@link HashSet} containing the provided elements.
    *
-   * @param <T>
-   * @param elems
-   * @return
+   * @param <T> The type of the elements
+   * @param elems The elements
+   * @return A {@code HashSet} containing the elements
    */
   @SafeVarargs
   public static <T> HashSet<T> newHashSet(T... elems) {
@@ -199,9 +199,9 @@ public class CollectionMethods {
   /**
    * Returns a mutable {@link LinkedHashSet} containing the provided elements.
    *
-   * @param <T>
-   * @param elems
-   * @return
+   * @param <T> The type of the elements
+   * @param elems The elements
+   * @return A {@code HashSet} containing the elements
    */
   @SafeVarargs
   public static <T> LinkedHashSet<T> newLinkedHashSet(T... elems) {
@@ -235,7 +235,7 @@ public class CollectionMethods {
    */
   public static <T> List<T> shrink(List<T> list, int by) {
     Check.that(list, "list").is(notEmpty());
-    Check.that(by, "by").is(toIndexOf(), list);
+    Check.that(by, "by").is(inBoundsOf(), list);
     int sz = list.size();
     return sz == by ? Collections.emptyList() : list.subList(0, sz - by);
   }
@@ -263,7 +263,7 @@ public class CollectionMethods {
    */
   public static <T> List<T> shift(List<T> list, int by) {
     int sz = Check.that(list, "list").is(notEmpty()).ok().size();
-    Check.that(by, "by").is(toIndexOf(), list);
+    Check.that(by, "by").is(inBoundsOf(), list);
     return sz == by ? Collections.emptyList() : list.subList(by, sz);
   }
 

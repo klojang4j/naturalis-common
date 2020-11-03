@@ -7,7 +7,7 @@ import java.util.OptionalInt;
 import nl.naturalis.common.NumberMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.internal.VisibleForTesting;
-import static nl.naturalis.common.CollectionMethods.fullEnumMap;
+import static nl.naturalis.common.CollectionMethods.saturatedEnumMap;
 import static nl.naturalis.common.FunctionalMethods.asOptional;
 import static nl.naturalis.common.FunctionalMethods.asOptionalInt;
 import static nl.naturalis.common.ObjectMethods.ifEmpty;
@@ -59,7 +59,7 @@ public class EnvManager {
   }
 
   private static final EnumMap<EmptyValue, EnvManager> mgrs =
-      fullEnumMap(
+      saturatedEnumMap(
           EmptyValue.class,
           new EnvManager(EMPTY),
           new EnvManager(UNDEFINED),

@@ -9,11 +9,10 @@ import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.notKeyIn;
 
 /**
- * Parses strings into enum constants by uniformly normalizing both the strings to be parsed and the
- * names of the enum constants. The normalization function is customizable. Internally {@code
- * EnumParser} maintains a string-to-enum map with normalized versions of {@code Enum.name()} and
- * {@code Enum.toString()} as keys. The strings to be parsed are normalized in the same way and then
- * looked up in the map.
+ * Parses strings into enum constants by uniformly normalizing input strings and enum constant
+ * names. The normalization function is customizable. Internally {@code EnumParser} maintains a
+ * string-to-enum map with the normalized versions of {@code Enum#name() Enum.name()} and {@code
+ * Enum#toString() Enum.toString()} as keys.
  *
  * <p>
  *
@@ -34,8 +33,7 @@ import static nl.naturalis.common.check.CommonChecks.notKeyIn;
 public class EnumParser<T extends Enum<T>> {
 
   private static final String INVALID_VALUE = "Invalid value for %s: %s";
-  private static final String BAD_NORMALIZER =
-      "Normalizer must produce unique strings for enum constants";
+  private static final String BAD_NORMALIZER = "Normalizer must produce unique strings";
 
   /**
    * The default normalization function. Removes spaces, hyphens and underscores and returns an

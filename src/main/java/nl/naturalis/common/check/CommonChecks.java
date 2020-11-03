@@ -571,13 +571,13 @@ public class CommonChecks {
 
   /**
    * Verifies that the argument is equal to a particular value. Equivalent to {@link
-   * Object#equals(Object) Object::equals}.
+   * Objects#equals(Object) Objects::equals}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
    */
   public static <X> Relation<X, X> equalTo() {
-    return Object::equals;
+    return Objects::equals;
   }
 
   static {
@@ -591,7 +591,7 @@ public class CommonChecks {
    * @return A {@code Relation}
    */
   public static <X> Relation<X, X> notEqualTo() {
-    return (x, y) -> !x.equals(y);
+    return (x, y) -> !Objects.equals(x, y);
   }
 
   static {
@@ -989,12 +989,12 @@ public class CommonChecks {
    *
    * @return An {@code IntObjRelation}
    */
-  public static <E, L extends List<? super E>> IntObjRelation<L> toIndexOf() {
+  public static <E, L extends List<? super E>> IntObjRelation<L> inBoundsOf() {
     return (x, y) -> x >= 0 && x <= y.size();
   }
 
   static {
-    add(toIndexOf(), msgToIndexOf());
+    add(inBoundsOf(), msgToIndexOf());
   }
 
   /* ++++++++++++++ IntRelation ++++++++++++++ */
