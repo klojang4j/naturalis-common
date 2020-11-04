@@ -8,7 +8,7 @@ import org.junit.Test;
 import nl.naturalis.common.ClassMethods;
 import static org.junit.Assert.assertEquals;
 import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.check.CommonGetters.*;
+import static nl.naturalis.common.check.CommonGetters.size;
 
 /*
  * These tests are especially meant to verify that the IdentityHashMap in Messages works as intended

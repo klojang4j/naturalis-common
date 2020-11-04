@@ -4,7 +4,7 @@ import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ObjectMethods.isEmpty;
 import static nl.naturalis.common.ObjectMethods.isNotEmpty;
-import static nl.naturalis.common.StringMethods.rtrim;
+import static nl.naturalis.common.StringMethods.*;
 
 /**
  * Provides detailed information about the origin of an exception. Useful for tracing back an
@@ -17,8 +17,8 @@ import static nl.naturalis.common.StringMethods.rtrim;
  *
  * } catch (Exception e) {
  *
- *   // Returns exception message plus class and line number
- *   // within nl.naturalis code where things flew off the rails
+ *   // Log exception message plus class and line number within the
+ *   // nl.naturalis code base where things flew off the rails
  *
  *   logger.error(new ExceptionOrigin(e, "nl.naturalis").getDetailedMessage());
  * }
@@ -26,18 +26,18 @@ import static nl.naturalis.common.StringMethods.rtrim;
  *
  * @see ExceptionMethods#getDetailedMessage(Throwable, String)
  */
-public class ExceptionOrigin {
+public final class ExceptionOrigin {
 
   private final Throwable exc;
-  private final StackTraceElement ste;
   private final String search;
+  // The stack trace element matching the search string
+  private final StackTraceElement ste;
 
   /**
-   * Equivalent to {@code new ExceptionSource(t, null)}. Looks at the 1st entry in the stack trace,
-   * which is the point of origin <i>if</i> the exception has no cause. Since ordinarily you cannot
-   * know this, this constructor is useless unless you explicitly pass it the root cause of an
-   * exception. See {@link ExceptionMethods#getDetailedMessage(Throwable)
-   * ExceptionMethods.getDetailedMessage} and {@link ExceptionMethods#getRootCause(Throwable)
+   * Equivalent to {@code new ExceptionOrigin(t, null)}. Looks at the 1st entry in the stack trace,
+   * which contains the statement that cause the exception <i>if</i> the exception has no cause.
+   * Since you cannot ordinarily know this, this constructor is useless unless you explicitly pass
+   * it the root cause of an exception. See {@link ExceptionMethods#getRootCause(Throwable)
    * ExceptionMethods#getRootCause}.
    *
    * @param exc The exception to analyze
@@ -48,13 +48,14 @@ public class ExceptionOrigin {
 
   /**
    * Creates a new {@code ExceptionOrigin} for the provided exception, searching its stack trace for
-   * an execution point matching {@code search}. The {@code search} argument is explicitly allowed
-   * to be null, in which case the first element of the stack trace is used to provide extra
-   * information about the exception.
+   * an element matching the search string. Matching happens through a simple {@link
+   * String#contains(CharSequence) String.contains} on the fully-qualified class name. The {@code
+   * search} argument may be null, in which case the first element of the stack trace is used to
+   * provide extra information about the exception.
    *
    * @param exc The exception to analyze
-   * @param search Any part of the package name or fully-qualified class name that you want the
-   *     exception to be traced back to. May be null.
+   * @param search Any part of the package name or class name that you want the exception to be
+   *     traced back to. May be null.
    */
   public ExceptionOrigin(Throwable exc, String search) {
     this.exc = Check.notNull(exc, "exc").ok();
@@ -69,10 +70,10 @@ public class ExceptionOrigin {
   }
 
   /**
-   * Provides a detailed exception message that includes the class, method and line at which the
-   * exception occurred, or at the execution point matching the search.
+   * Provides a detailed exception message that includes the class, method and line of the first
+   * statement in the stack trace that matches the search string.
    *
-   * @return
+   * @return A detailed exception message
    */
   public String getDetailedMessage() {
     StringBuilder sb = new StringBuilder(100);
@@ -80,18 +81,16 @@ public class ExceptionOrigin {
       sb.append(rtrim(exc.getMessage(), ". ")).append(". ");
     }
     sb.append(exc.getClass().getName());
-    if (ste != null) {
-      if (search != null) {
-        sb.append(" originating from ")
-            .append(getClassName())
-            .append('.')
-            .append(getMethod())
-            .append(" (line ")
-            .append(getLine())
-            .append(")");
+    if (search == null) {
+      if (ste == null) {
+        sb.append(" (no stack trace available)");
       } else {
-        sb.append(" (no origin in \"").append(search).append("\")");
+        addStackTraceInfo(sb);
       }
+    } else if (ste == null) {
+      sb.append(" (not originating from ").append(search).append(")");
+    } else {
+      addStackTraceInfo(sb);
     }
     return sb.toString();
   }
@@ -102,15 +101,21 @@ public class ExceptionOrigin {
     return getDetailedMessage();
   }
 
-  /** Returns the exception wrapped by this {@code ExceptionSource}. */
+  /**
+   * Returns the exception wrapped by this {@code ExceptionOrigin}.
+   *
+   * @return The exception wrapped by this {@code ExceptionOrigin}
+   */
   public Throwable getException() {
     return exc;
   }
 
   /**
-   * Returns the first stack trace element found to contain {@code search}
+   * Returns the first stack trace element matching the search string, or the very first stack trace
+   * element if no search string was specified.
    *
-   * @return
+   * @return The first stack trace element matching the search string, or the very first stack trace
+   *     element if no search string was specified
    */
   public StackTraceElement geStackTraceElement() {
     return ste;
@@ -120,7 +125,8 @@ public class ExceptionOrigin {
    * Returns the module in which the exception occurred or null if the exception came without a
    * stack trace.
    *
-   * @return
+   * @return The module in which the exception occurred or null if the exception came without a
+   *     stack trace
    */
   public String getModule() {
     return ste == null ? null : ste.getModuleName();
@@ -130,7 +136,8 @@ public class ExceptionOrigin {
    * Returns the class in which the exception occurred or null if the exception came without a stack
    * trace.
    *
-   * @return
+   * @return The class in which the exception occurred or null if the exception came without a stack
+   *     trace
    */
   public String getClassName() {
     return ste == null ? null : ste.getClassName();
@@ -140,7 +147,8 @@ public class ExceptionOrigin {
    * Returns the method in which the exception occurred or null if the exception came without a
    * stack trace.
    *
-   * @return
+   * @return The method in which the exception occurred or null if the exception came without a
+   *     stack trace
    */
   public String getMethod() {
     return ste == null ? null : ste.getMethodName();
@@ -150,7 +158,8 @@ public class ExceptionOrigin {
    * Returns the line at which the exception occurred or -1 if the exception came without a stack
    * trace.
    *
-   * @return
+   * @return The line at which the exception occurred or -1 if the exception came without a stack
+   *     trace
    */
   public int getLine() {
     return ste == null ? -1 : ste.getLineNumber();
@@ -168,5 +177,15 @@ public class ExceptionOrigin {
       }
     }
     return null;
+  }
+
+  private void addStackTraceInfo(StringBuilder sb) {
+    sb.append(" at ")
+        .append(getClassName())
+        .append('.')
+        .append(getMethod())
+        .append(" (line ")
+        .append(getLine())
+        .append(")");
   }
 }

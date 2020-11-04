@@ -1,18 +1,11 @@
 package nl.naturalis.common;
 
 import org.junit.Test;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
-import static nl.naturalis.common.ArrayMethods.append;
-import static nl.naturalis.common.ArrayMethods.concat;
-import static nl.naturalis.common.ArrayMethods.elementOf;
-import static nl.naturalis.common.ArrayMethods.fromTemplate;
-import static nl.naturalis.common.ArrayMethods.indexOf;
-import static nl.naturalis.common.ArrayMethods.prefix;
+import static nl.naturalis.common.ArrayMethods.*;
 
 public class ArrayMethodsTest {
 

@@ -37,7 +37,7 @@ public class EnumParser<T extends Enum<T>> {
 
   /**
    * The default normalization function. Removes spaces, hyphens and underscores and returns an
-   * all-lowercase string.
+   * all-lowercase string. The default normalizer does not allow {@code null} as input string.
    */
   public static final UnaryOperator<String> DEFAULT_NORMALIZER =
       s -> Check.notNull(s).ok().replaceAll("[-_ ]", "").toLowerCase();
@@ -70,15 +70,13 @@ public class EnumParser<T extends Enum<T>> {
     Arrays.stream(enumClass.getEnumConstants())
         .forEach(
             e -> {
-              if (e.name().equals(e.toString())) {
-                Check.that(normalizer.apply(e.name()))
+              Check.that(normalizer.apply(e.name()))
+                  .is(notKeyIn(), map, BAD_NORMALIZER)
+                  .then(s -> map.put(s, e));
+              if (!e.name().equals(e.toString())) {
+                Check.that(normalizer.apply(e.toString()))
                     .is(notKeyIn(), map, BAD_NORMALIZER)
                     .then(s -> map.put(s, e));
-              } else {
-                Check.that(normalizer.apply(e.name())).is(notKeyIn(), map, BAD_NORMALIZER);
-                Check.that(normalizer.apply(e.toString())).is(notKeyIn(), map, BAD_NORMALIZER);
-                map.put(normalizer.apply(e.name()), e);
-                map.put(normalizer.apply(e.toString()), e);
               }
             });
     this.lookups = CollectionMethods.tightHashMap(map);
