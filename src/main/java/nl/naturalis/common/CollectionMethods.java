@@ -235,7 +235,7 @@ public class CollectionMethods {
    */
   public static <T> List<T> shrink(List<T> list, int by) {
     Check.that(list, "list").is(notEmpty());
-    Check.that(by, "by").is(inBoundsOf(), list);
+    Check.that(by, "by").is(toIndexOf(), list);
     int sz = list.size();
     return sz == by ? Collections.emptyList() : list.subList(0, sz - by);
   }
@@ -263,7 +263,7 @@ public class CollectionMethods {
    */
   public static <T> List<T> shift(List<T> list, int by) {
     int sz = Check.that(list, "list").is(notEmpty()).ok().size();
-    Check.that(by, "by").is(inBoundsOf(), list);
+    Check.that(by, "by").is(toIndexOf(), list);
     return sz == by ? Collections.emptyList() : list.subList(by, sz);
   }
 

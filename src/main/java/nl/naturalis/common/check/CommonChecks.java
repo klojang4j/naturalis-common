@@ -15,6 +15,8 @@ import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
 import static nl.naturalis.common.check.Messages.*;
+import static nl.naturalis.common.ObjectMethods.*;
+import static nl.naturalis.common.check.InvalidCheckException.*;
 
 /**
  * Defines various common tests for arguments. These tests have short, informative error messages
@@ -29,8 +31,10 @@ import static nl.naturalis.common.check.Messages.*;
 public class CommonChecks {
 
   static final IdentityHashMap<Object, Function<Object[], String>> messages;
+  static final IdentityHashMap<Object, String> names;
 
-  private static ArrayList<Tuple<Object, Function<Object[], String>>> temp = new ArrayList<>();
+  private static ArrayList<Tuple<Object, Function<Object[], String>>> tmp0 = new ArrayList<>();
+  private static ArrayList<Tuple<Object, String>> tmp1 = new ArrayList<>();
 
   private CommonChecks() {}
 
@@ -114,7 +118,8 @@ public class CommonChecks {
   }
 
   static {
-    add(nullRef(), msgNullRef());
+    addMessage(nullRef(), msgNullRef());
+    addName(nullRef(), "nullRef");
   }
 
   /**
@@ -129,7 +134,8 @@ public class CommonChecks {
   }
 
   static {
-    add(notNull(), msgNotNull());
+    addMessage(notNull(), msgNotNull());
+    addName(notNull(), "notNull");
   }
 
   /**
@@ -144,7 +150,8 @@ public class CommonChecks {
   }
 
   static {
-    add(empty(), msgEmpty());
+    addMessage(empty(), msgEmpty());
+    addName(empty(), "empty");
   }
 
   /**
@@ -159,7 +166,8 @@ public class CommonChecks {
   }
 
   static {
-    add(notEmpty(), msgNotEmpty());
+    addMessage(notEmpty(), msgNotEmpty());
+    addName(notEmpty(), "notEmpty");
   }
 
   /**
@@ -174,7 +182,8 @@ public class CommonChecks {
   }
 
   static {
-    add(noneNull(), msgNoneNull());
+    addMessage(noneNull(), msgNoneNull());
+    addName(noneNull(), "noneNull");
   }
 
   /**
@@ -189,7 +198,8 @@ public class CommonChecks {
   }
 
   static {
-    add(deepNotEmpty(), msgDeepNotEmpty());
+    addMessage(deepNotEmpty(), msgDeepNotEmpty());
+    addName(deepNotEmpty(), "deepNotEmpty");
   }
 
   /**
@@ -203,7 +213,8 @@ public class CommonChecks {
   }
 
   static {
-    add(notBlank(), msgNotBlank());
+    addMessage(notBlank(), msgNotBlank());
+    addName(notBlank(), "notBlank");
   }
 
   /**
@@ -217,7 +228,8 @@ public class CommonChecks {
   }
 
   static {
-    add(fileExists(), msgFileExists());
+    addMessage(fileExists(), msgFileExists());
+    addName(fileExists(), "fileExists");
   }
 
   /**
@@ -231,7 +243,8 @@ public class CommonChecks {
   }
 
   static {
-    add(directoryExists(), msgDirectoryExists());
+    addMessage(directoryExists(), msgDirectoryExists());
+    addName(directoryExists(), "directoryExists");
   }
 
   /**
@@ -244,7 +257,8 @@ public class CommonChecks {
   }
 
   static {
-    add(fileNotExists(), msgFileNotExists());
+    addMessage(fileNotExists(), msgFileNotExists());
+    addName(fileNotExists(), "fileNotExists");
   }
 
   /**
@@ -258,7 +272,8 @@ public class CommonChecks {
   }
 
   static {
-    add(readable(), msgReadable());
+    addMessage(readable(), msgReadable());
+    addName(readable(), "readable");
   }
 
   /**
@@ -272,7 +287,8 @@ public class CommonChecks {
   }
 
   static {
-    add(writable(), msgWritable());
+    addMessage(writable(), msgWritable());
+    addName(writable(), "writable");
   }
 
   /* ++++++++++++++ IntPredicate ++++++++++++++ */
@@ -287,7 +303,8 @@ public class CommonChecks {
   }
 
   static {
-    add(even(), msgIsEven());
+    addMessage(even(), msgIsEven());
+    addName(even(), "even");
   }
 
   /**
@@ -300,7 +317,8 @@ public class CommonChecks {
   }
 
   static {
-    add(odd(), msgIsOdd());
+    addMessage(odd(), msgIsOdd());
+    addName(odd(), "odd");
   }
 
   /**
@@ -313,7 +331,8 @@ public class CommonChecks {
   }
 
   static {
-    add(positive(), msgPositive());
+    addMessage(positive(), msgPositive());
+    addName(positive(), "positive");
   }
 
   /**
@@ -326,7 +345,8 @@ public class CommonChecks {
   }
 
   static {
-    add(notPositive(), msgNotPositive());
+    addMessage(notPositive(), msgNotPositive());
+    addName(notPositive(), "notPositive");
   }
 
   /**
@@ -339,7 +359,8 @@ public class CommonChecks {
   }
 
   static {
-    add(negative(), msgNegative());
+    addMessage(negative(), msgNegative());
+    addName(negative(), "negative");
   }
 
   /**
@@ -352,7 +373,8 @@ public class CommonChecks {
   }
 
   static {
-    add(notNegative(), msgNotNegative());
+    addMessage(notNegative(), msgNotNegative());
+    addName(notNegative(), "notNegative");
   }
 
   /* ++++++++++++++ Relation ++++++++++++++ */
@@ -369,7 +391,8 @@ public class CommonChecks {
   }
 
   static {
-    add(instanceOf(), msgInstanceOf());
+    addMessage(instanceOf(), msgInstanceOf());
+    addName(instanceOf(), "instanceOf");
   }
 
   /**
@@ -383,7 +406,8 @@ public class CommonChecks {
   }
 
   static {
-    add(array(), msgAnArray());
+    addMessage(array(), msgArray());
+    addName(array(), "array");
   }
 
   /**
@@ -399,7 +423,8 @@ public class CommonChecks {
   }
 
   static {
-    add(contains(), msgContains());
+    addMessage(contains(), msgContains());
+    addName(contains(), "contains");
   }
 
   /**
@@ -414,7 +439,8 @@ public class CommonChecks {
   }
 
   static {
-    add(notContains(), msgNotContains());
+    addMessage(notContains(), msgNotContains());
+    addName(notContains(), "notContains");
   }
 
   /**
@@ -429,7 +455,8 @@ public class CommonChecks {
   }
 
   static {
-    add(in(), msgIn());
+    addMessage(in(), msgIn());
+    addName(in(), "in");
   }
 
   /**
@@ -444,7 +471,8 @@ public class CommonChecks {
   }
 
   static {
-    add(notIn(), msgNotIn());
+    addMessage(notIn(), msgNotIn());
+    addName(notIn(), "notIn");
   }
 
   /**
@@ -460,7 +488,8 @@ public class CommonChecks {
   }
 
   static {
-    add(hasKey(), msgHasKey());
+    addMessage(hasKey(), msgHasKey());
+    addName(hasKey(), "hasKey");
   }
 
   /**
@@ -475,7 +504,8 @@ public class CommonChecks {
   }
 
   static {
-    add(notHasKey(), msgNotHasKey());
+    addMessage(notHasKey(), msgNotHasKey());
+    addName(notHasKey(), "notHasKey");
   }
 
   /**
@@ -490,7 +520,8 @@ public class CommonChecks {
   }
 
   static {
-    add(keyIn(), msgKeyIn());
+    addMessage(keyIn(), msgKeyIn());
+    addName(keyIn(), "keyIn");
   }
 
   /**
@@ -505,7 +536,8 @@ public class CommonChecks {
   }
 
   static {
-    add(keyIn(), msgNotKeyIn());
+    addMessage(notKeyIn(), msgNotKeyIn());
+    addName(notKeyIn(), "notKeyIn");
   }
 
   /**
@@ -521,7 +553,8 @@ public class CommonChecks {
   }
 
   static {
-    add(hasValue(), msgHasValue());
+    addMessage(hasValue(), msgHasValue());
+    addName(hasValue(), "hasValue");
   }
 
   /**
@@ -536,7 +569,8 @@ public class CommonChecks {
   }
 
   static {
-    add(hasValue(), msgNotHasValue());
+    addMessage(notHasValue(), msgNotHasValue());
+    addName(notHasValue(), "notHasValue");
   }
 
   /**
@@ -551,7 +585,8 @@ public class CommonChecks {
   }
 
   static {
-    add(valueIn(), msgValueIn());
+    addMessage(valueIn(), msgValueIn());
+    addName(valueIn(), "valueIn");
   }
 
   /**
@@ -566,7 +601,8 @@ public class CommonChecks {
   }
 
   static {
-    add(notValueIn(), msgNotValueIn());
+    addMessage(notValueIn(), msgNotValueIn());
+    addName(notValueIn(), "notValueIn");
   }
 
   /**
@@ -581,7 +617,8 @@ public class CommonChecks {
   }
 
   static {
-    add(equalTo(), msgEqualTo());
+    addMessage(equalTo(), msgEqualTo());
+    addName(equalTo(), "equalTo");
   }
 
   /**
@@ -595,7 +632,8 @@ public class CommonChecks {
   }
 
   static {
-    add(notEqualTo(), msgNotEqualTo());
+    addMessage(notEqualTo(), msgNotEqualTo());
+    addName(notEqualTo(), "notEqualTo");
   }
 
   /**
@@ -609,7 +647,8 @@ public class CommonChecks {
   }
 
   static {
-    add(sameAs(), msgSameAs());
+    addMessage(sameAs(), msgSameAs());
+    addName(sameAs(), "sameAs");
   }
 
   /**
@@ -623,7 +662,8 @@ public class CommonChecks {
   }
 
   static {
-    add(notSameAs(), msgNotSameAs());
+    addMessage(notSameAs(), msgNotSameAs());
+    addName(notSameAs(), "notSameAs");
   }
 
   /**
@@ -637,7 +677,8 @@ public class CommonChecks {
   }
 
   static {
-    add(nullOr(), msgNullOr());
+    addMessage(nullOr(), msgNullOr());
+    addName(nullOr(), "nullOr");
   }
 
   /**
@@ -653,8 +694,9 @@ public class CommonChecks {
   }
 
   static {
-    // Can recycle messages for int comparisons!
-    add(greaterThan(), msgGt());
+    // Can recycle messages for int comparisons
+    addMessage(greaterThan(), msgGt());
+    addName(greaterThan(), "greaterThan");
   }
 
   /**
@@ -670,7 +712,8 @@ public class CommonChecks {
   }
 
   static {
-    add(atLeast(), msgGte());
+    addMessage(atLeast(), msgGte());
+    addName(atLeast(), "atLeast");
   }
 
   /**
@@ -684,7 +727,8 @@ public class CommonChecks {
   }
 
   static {
-    add(lessThan(), msgLt());
+    addMessage(lessThan(), msgLt());
+    addName(lessThan(), "lessThan");
   }
 
   /**
@@ -700,7 +744,8 @@ public class CommonChecks {
   }
 
   static {
-    add(atMost(), msgLte());
+    addMessage(atMost(), msgLte());
+    addName(atMost(), "atMost");
   }
 
   /**
@@ -714,7 +759,8 @@ public class CommonChecks {
   }
 
   static {
-    add(endsWith(), msgEndsWith());
+    addMessage(endsWith(), msgEndsWith());
+    addName(endsWith(), "endsWith");
   }
 
   /**
@@ -727,7 +773,8 @@ public class CommonChecks {
   }
 
   static {
-    add(notEndsWith(), msgNotEndsWith());
+    addMessage(notEndsWith(), msgNotEndsWith());
+    addName(notEndsWith(), "notEndsWith");
   }
 
   /**
@@ -741,7 +788,8 @@ public class CommonChecks {
   }
 
   static {
-    add(hasSubstr(), msgHasSubstr());
+    addMessage(hasSubstr(), msgHasSubstr());
+    addName(hasSubstr(), "hasSubstr");
   }
 
   /**
@@ -754,14 +802,15 @@ public class CommonChecks {
   }
 
   static {
-    add(notHasSubstr(), msgNotHasSubstr());
+    addMessage(notHasSubstr(), msgNotHasSubstr());
+    addName(notHasSubstr(), "notHasSubstr");
   }
 
   /* ++++++++++++++ ObjIntRelation ++++++++++++++ */
 
   /**
-   * Verifies that the argument's length or size is equal to a particular value. The returned {@code
-   * ObjIntRelation} evaluates in a meaningful way if the argument is:
+   * Verifies that the argument's length or size is equal to a particular value. The type of
+   * argument be one of:
    *
    * <p>
    *
@@ -773,7 +822,7 @@ public class CommonChecks {
    *   <li>a {@link Sizeable}
    * </ul>
    *
-   * <p>For any other type of argument this method the relation always evaluates to {@code false}.
+   * <p>For any other type of argument this method throws an {@link InvalidCheckException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -792,17 +841,18 @@ public class CommonChecks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() == y;
       }
-      return false;
+      throw notApplicable(sizeEquals(), x);
     };
   }
 
   static {
-    add(sizeEquals(), msgSizeEquals());
+    addMessage(sizeEquals(), msgSizeEquals());
+    addName(sizeEquals(), "sizeEquals");
   }
 
   /**
-   * Verifies that the argument's length or size is not equal to a particular value. The returned
-   * {@code ObjIntRelation} evaluates in a meaningful way if the argument is:
+   * Verifies that the argument's length or size is not equal to a particular value. The type of
+   * argument be one of:
    *
    * <p>
    *
@@ -814,22 +864,37 @@ public class CommonChecks {
    *   <li>a {@link Sizeable}
    * </ul>
    *
-   * <p>For any other type of argument this method the relation always evaluates to {@code false}.
+   * <p>For any other type of argument this method throws an {@link InvalidCheckException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
    */
+  @SuppressWarnings("rawtypes")
   public static <X> ObjIntRelation<X> sizeNotEquals() {
-    return (x, y) -> !sizeEquals().exists(x, y);
+    return (x, y) -> {
+      if (x instanceof CharSequence) {
+        return ((CharSequence) x).length() != y;
+      } else if (x instanceof Collection) {
+        return ((Collection) x).size() != y;
+      } else if (x instanceof Map) {
+        return ((Map) x).size() != y;
+      } else if (x.getClass().isArray()) {
+        return Array.getLength(x) != y;
+      } else if (x instanceof Sizeable) {
+        return ((Sizeable) x).size() != y;
+      }
+      throw notApplicable(sizeNotEquals(), x);
+    };
   }
 
   static {
-    add(sizeNotEquals(), msgSizeNotEquals());
+    addMessage(sizeNotEquals(), msgSizeNotEquals());
+    addName(sizeNotEquals(), "sizeNotEquals");
   }
 
   /**
-   * Verifies that the argument's length or size is greater than a particular value. The returned
-   * {@code ObjIntRelation} evaluates in a meaningful way if the argument is:
+   * Verifies that the argument's length or size is greater than a particular value. The type of
+   * argument be one of:
    *
    * <p>
    *
@@ -841,7 +906,7 @@ public class CommonChecks {
    *   <li>a {@link Sizeable}
    * </ul>
    *
-   * <p>For any other type of argument this method the relation always evaluates to {@code false}.
+   * <p>For any other type of argument this method throws an {@link InvalidCheckException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -860,17 +925,18 @@ public class CommonChecks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() > y;
       }
-      throw notSupported("sizeGreaterThan", x);
+      throw notApplicable(sizeGreaterThan(), x);
     };
   }
 
   static {
-    add(sizeGreaterThan(), msgSizeGreaterThan());
+    addMessage(sizeGreaterThan(), msgSizeGreaterThan());
+    addName(sizeGreaterThan(), "sizeGreaterThan");
   }
 
   /**
    * Verifies that the argument's length or size is greater than or equal to a particular value. The
-   * returned {@code ObjIntRelation} evaluates in a meaningful way if the argument is:
+   * type of argument be one of:
    *
    * <p>
    *
@@ -882,22 +948,37 @@ public class CommonChecks {
    *   <li>a {@link Sizeable}
    * </ul>
    *
-   * <p>For any other type of argument this method the relation always evaluates to {@code false}.
+   * <p>For any other type of argument this method throws an {@link InvalidCheckException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
    */
+  @SuppressWarnings("rawtypes")
   public static <X> ObjIntRelation<X> sizeAtLeast() {
-    return (x, y) -> !sizeLessThan().exists(x, y);
+    return (x, y) -> {
+      if (x instanceof CharSequence) {
+        return ((CharSequence) x).length() >= y;
+      } else if (x instanceof Collection) {
+        return ((Collection) x).size() >= y;
+      } else if (x instanceof Map) {
+        return ((Map) x).size() >= y;
+      } else if (x.getClass().isArray()) {
+        return Array.getLength(x) >= y;
+      } else if (x instanceof Sizeable) {
+        return ((Sizeable) x).size() >= y;
+      }
+      throw notApplicable(sizeAtLeast(), x);
+    };
   }
 
   static {
-    add(sizeAtLeast(), msgSizeAtLeast());
+    addMessage(sizeAtLeast(), msgSizeAtLeast());
+    addName(sizeAtLeast(), "sizeAtLeast");
   }
 
   /**
-   * Verifies that the argument's length or size is less than to a particular value. The returned
-   * {@code ObjIntRelation} evaluates in a meaningful way if the argument is:
+   * Verifies that the argument's length or size is less than a particular value. The type of
+   * argument be one of:
    *
    * <p>
    *
@@ -909,7 +990,7 @@ public class CommonChecks {
    *   <li>a {@link Sizeable}
    * </ul>
    *
-   * <p>For any other type of argument this method the relation always evaluates to {@code false}.
+   * <p>For any other type of argument this method throws an {@link InvalidCheckException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -928,12 +1009,13 @@ public class CommonChecks {
       } else if (x instanceof Sizeable) {
         return ((Sizeable) x).size() < y;
       }
-      return false;
+      throw notApplicable(sizeLessThan(), x);
     };
   }
 
   static {
-    add(sizeLessThan(), msgSizeLessThan());
+    addMessage(sizeLessThan(), msgSizeLessThan());
+    addName(sizeLessThan(), "sizeLessThan");
   }
 
   /**
@@ -955,12 +1037,27 @@ public class CommonChecks {
    * @param <X> The type of the argument
    * @return A {@code Relation}
    */
+  @SuppressWarnings("rawtypes")
   public static <X> ObjIntRelation<X> sizeAtMost() {
-    return (x, y) -> !sizeGreaterThan().exists(x, y);
+    return (x, y) -> {
+      if (x instanceof CharSequence) {
+        return ((CharSequence) x).length() <= y;
+      } else if (x instanceof Collection) {
+        return ((Collection) x).size() <= y;
+      } else if (x instanceof Map) {
+        return ((Map) x).size() <= y;
+      } else if (x.getClass().isArray()) {
+        return Array.getLength(x) <= y;
+      } else if (x instanceof Sizeable) {
+        return ((Sizeable) x).size() <= y;
+      }
+      throw notApplicable(sizeGreaterThan(), x);
+    };
   }
 
   static {
-    add(sizeAtMost(), msgSizeAtMost());
+    addMessage(sizeAtMost(), msgSizeAtMost());
+    addName(sizeAtMost(), "sizeAtMost");
   }
 
   /* ++++++++++++++ IntObjRelation ++++++++++++++ */
@@ -979,7 +1076,8 @@ public class CommonChecks {
   }
 
   static {
-    add(indexOf(), msgIndexOf());
+    addMessage(indexOf(), msgIndexOf());
+    addName(indexOf(), "indexOf");
   }
 
   /**
@@ -989,12 +1087,13 @@ public class CommonChecks {
    *
    * @return An {@code IntObjRelation}
    */
-  public static <E, L extends List<? super E>> IntObjRelation<L> inBoundsOf() {
+  public static <E, L extends List<? super E>> IntObjRelation<L> toIndexOf() {
     return (x, y) -> x >= 0 && x <= y.size();
   }
 
   static {
-    add(inBoundsOf(), msgToIndexOf());
+    addMessage(toIndexOf(), msgToIndexOf());
+    addName(toIndexOf(), "toIndexOf");
   }
 
   /* ++++++++++++++ IntRelation ++++++++++++++ */
@@ -1009,7 +1108,8 @@ public class CommonChecks {
   }
 
   static {
-    add(eq(), msgEq());
+    addMessage(eq(), msgEq());
+    addName(eq(), "eq");
   }
 
   /**
@@ -1022,7 +1122,8 @@ public class CommonChecks {
   }
 
   static {
-    add(ne(), msgNe());
+    addMessage(ne(), msgNe());
+    addName(ne(), "ne");
   }
 
   /**
@@ -1035,7 +1136,8 @@ public class CommonChecks {
   }
 
   static {
-    add(gt(), msgGt());
+    addMessage(gt(), msgGt());
+    addName(gt(), "gt");
   }
 
   /**
@@ -1048,7 +1150,8 @@ public class CommonChecks {
   }
 
   static {
-    add(gte(), msgGte());
+    addMessage(gte(), msgGte());
+    addName(gte(), "gte");
   }
 
   /**
@@ -1061,7 +1164,8 @@ public class CommonChecks {
   }
 
   static {
-    add(lt(), msgLt());
+    addMessage(lt(), msgLt());
+    addName(lt(), "lt");
   }
 
   /**
@@ -1074,7 +1178,8 @@ public class CommonChecks {
   }
 
   static {
-    add(lte(), msgLte());
+    addMessage(lte(), msgLte());
+    addName(lte(), "lte");
   }
 
   /**
@@ -1087,22 +1192,54 @@ public class CommonChecks {
   }
 
   static {
-    add(multipleOf(), msgMultipleOf());
+    addMessage(multipleOf(), msgMultipleOf());
+    addName(multipleOf(), "multipleOf");
   }
 
   static {
-    messages = new IdentityHashMap<>(temp.size());
-    temp.forEach(t -> t.addTo(messages));
-    temp = null;
+    messages = new IdentityHashMap<>(tmp0.size());
+    names = new IdentityHashMap<>(tmp1.size());
+    tmp0.forEach(t -> t.addTo(messages));
+    tmp1.forEach(t -> t.addTo(names));
+    tmp0 = null;
+    tmp1 = null;
   }
 
-  private static UnsupportedOperationException notSupported(String test, Object obj) {
-    String fmt = "Test \"%s\" not applicable to %s";
-    String msg = String.format(fmt, test, obj.getClass().getName());
-    return new UnsupportedOperationException(msg);
+  private static final String suffix = "()";
+
+  @SuppressWarnings("rawtypes")
+  static String nameOf(Predicate test) {
+    return ifNotNull(names.get(test), name -> name + suffix, () -> "Predicate");
   }
 
-  private static void add(Object test, Function<Object[], String> message) {
-    temp.add(new Tuple<>(test, message));
+  static String nameOf(IntPredicate test) {
+    return ifNotNull(names.get(test), name -> name + suffix, () -> "IntPredicate");
+  }
+
+  @SuppressWarnings("rawtypes")
+  static String nameOf(Relation test) {
+    return ifNotNull(names.get(test), name -> name + suffix, () -> "Relation");
+  }
+
+  static String nameOf(IntRelation test) {
+    return ifNotNull(names.get(test), name -> name + suffix, () -> "IntRelation");
+  }
+
+  @SuppressWarnings("rawtypes")
+  static String nameOf(ObjIntRelation test) {
+    return ifNotNull(names.get(test), name -> name + suffix, () -> "ObjIntRelation");
+  }
+
+  @SuppressWarnings("rawtypes")
+  static String nameOf(IntObjRelation test) {
+    return ifNotNull(names.get(test), name -> name + suffix, () -> "IntObjRelation");
+  }
+
+  private static void addMessage(Object test, Function<Object[], String> message) {
+    tmp0.add(new Tuple<>(test, message));
+  }
+
+  private static void addName(Object test, String name) {
+    tmp1.add(new Tuple<>(test, name));
   }
 }

@@ -131,14 +131,14 @@ class Messages {
   static Function<Object[], String> msgIndexOf() {
     return x -> {
       int i = ((List<?>) x[2]).size();
-      return format("%s must be >= 0 and < %d (was %d)", x[0], i, x[1]);
+      return format("%s must be >= 0 and < %s (was %s)", x[0], i, x[1]);
     };
   }
 
   static Function<Object[], String> msgToIndexOf() {
     return x -> {
       int i = ((List<?>) x[2]).size();
-      return format("%s must be >= 0 and <= %d (was %d)", x[0], i, x[1]);
+      return format("%s must be >= 0 and <= %s (was %s)", x[0], i, x[1]);
     };
   }
 
@@ -288,7 +288,7 @@ class Messages {
     return x -> format(fmt, x[0], ((Class<?>) x[2]).getName(), cname(x[1]));
   }
 
-  static Function<Object[], String> msgAnArray() {
+  static Function<Object[], String> msgArray() {
     return x -> format("%s must be an array (was %s)", x[0], cname(x[1]));
   }
 

@@ -3,6 +3,7 @@ package nl.naturalis.common;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
 import static java.lang.System.arraycopy;
 import static nl.naturalis.common.check.CommonChecks.*;
@@ -22,7 +23,7 @@ public class ArrayMethods {
   static final String END_INDEX = "End index";
 
   /**
-   * Appends the provided object to the provided array.
+   * Appends the specified object to the specified array.
    *
    * @param array The array to append the object to
    * @param obj The object to append
@@ -37,7 +38,7 @@ public class ArrayMethods {
   }
 
   /**
-   * Appends the provided objects to the provided array.
+   * Appends the specified objects to the specified array.
    *
    * @param array The array to append the objects to
    * @param obj1 The 1st object to append
@@ -59,12 +60,12 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns a new array containing all elements of the provided arrays.
+   * Returns a new array containing all elements of the specified arrays.
    *
    * @param <T> The element type of the arrays
    * @param array1 The 1st array to go into the new array
    * @param array2 The 2nd array to go into the new array
-   * @return A new array containing all elements of the provided arrays
+   * @return A new array containing all elements of the specified arrays
    */
   @SuppressWarnings("unchecked")
   public static <T> T[] concat(T[] array1, T[] array2) {
@@ -72,14 +73,14 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns a new array containing all elements of the provided arrays.
+   * Returns a new array containing all elements of the specified arrays.
    *
    * @param <T> The element type of the arrays.
    * @param arr0 The 1st array to go into the new array
    * @param arr1 The 2nd array to go into the new array
    * @param arr2 The 3rd array to go into the new array
    * @param moreArrays More arrays to concatenate
-   * @return A new array containing all elements of the provided arrays
+   * @return A new array containing all elements of the specified arrays
    */
   @SafeVarargs
   public static <T> T[] concat(T[] arr0, T[] arr1, T[] arr2, T[]... moreArrays) {
@@ -109,7 +110,7 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns {@code true} if the provided array contains the specfied value, {@code false}
+   * Returns {@code true} if the specified array contains the specfied value, {@code false}
    * otherwise.
    *
    * @param value The value to search for
@@ -121,7 +122,7 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns {@code true} if the provided array contains the specfied value, {@code false}
+   * Returns {@code true} if the specified array contains the specfied value, {@code false}
    * otherwise.
    *
    * @param value The value to search for
@@ -134,7 +135,7 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns {@code true} if the provided array contains the specfied reference, {@code false}
+   * Returns {@code true} if the specified array contains the specfied reference, {@code false}
    * otherwise.
    *
    * @param ref The reference to search for
@@ -147,7 +148,7 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns a new, empty array with the same element type and length as the provided array's
+   * Returns a new, empty array with the same element type and length as the specified array's
    * element type and length.
    *
    * @param <T> The type of the elements in the requested array
@@ -158,13 +159,13 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns a new, empty array with the same element type as the provided array's element type. The
-   * length of the returned array is specified through the {@code length} parameter.
+   * Returns a new, empty array with the same element type as the specified array's element type.
+   * The length of the returned array is specified through the {@code length} parameter.
    *
    * @param <T> The type of the elements in the requested array
    * @param template An array with the same element type as the requested array
    * @param length The desired length of the new array
-   * @return A new array with the same length and element type as the provided array
+   * @return A new array with the same length and element type as the specified array
    */
   @SuppressWarnings("unchecked")
   public static <T> T[] fromTemplate(T[] template, int length) {
@@ -174,8 +175,8 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns the array index of the first occurrence of {@code value} within the provided array.
-   * Returns -1 if the array does not contain the value.
+   * Returns the array index of the first occurrence of the specified value within the specified
+   * array. Returns -1 if the array does not contain the value.
    *
    * @param array The array to search
    * @param value The value to search for
@@ -183,17 +184,12 @@ public class ArrayMethods {
    */
   public static int indexOf(int[] array, int value) {
     Check.notNull(array, "array");
-    for (int i = 0; i < array.length; ++i) {
-      if (array[i] == value) {
-        return i;
-      }
-    }
-    return -1;
+    return IntStream.range(0, array.length).filter(i -> array[i] == value).findFirst().orElse(-1);
   }
 
   /**
-   * Returns the array index of the first occurrence of {@code value} within the provided array.
-   * Returns -1 if the array does not contain the value.
+   * Returns the array index of the first occurrence of the specified value within the specified
+   * array. Returns -1 if the array does not contain the value.
    *
    * @param <T> The type of the elements within the array
    * @param array The array to search
@@ -202,22 +198,36 @@ public class ArrayMethods {
    */
   public static <T> int indexOf(T[] array, T value) {
     Check.notNull(array, "array");
-    for (int i = 0; i < array.length; ++i) {
-      if (Objects.deepEquals(array[i], value)) {
-        return i;
-      }
-    }
-    return -1;
+    return IntStream.range(0, array.length)
+        .filter(i -> Objects.deepEquals(array[i], value))
+        .findFirst()
+        .orElse(-1);
   }
 
   /**
-   * Returns the provided array. When used as static import allows for leaner code:
+   * Returns the array index of the first occurrence of the specified reference within the specified
+   * array. Returns -1 if the array does not contain the reference.
+   *
+   * @param array The array to search
+   * @param reference The reference to search for
+   * @return The array index of the reference
+   */
+  public static int find(Object[] array, Object reference) {
+    Check.notNull(array, "array");
+    return IntStream.range(0, array.length)
+        .filter(i -> array[i] == reference)
+        .findFirst()
+        .orElse(-1);
+  }
+
+  /**
+   * Returns the specified array. When used as static import this method allows for leaner code:
    *
    * <p>
    *
    * <pre>
-   * String words0 = new String[] {"Hello", "world"};
-   * String words1 = pack("Hello", "world");
+   * String[] words0 = new String[] {"Hello", "world"};
+   * String[] words1 = pack("Hello", "world");
    * </pre>
    *
    * @param <T> The type of the objects to pack
@@ -230,12 +240,12 @@ public class ArrayMethods {
   }
 
   /**
-   * Prefixes the provided object to the provided array.
+   * Prefixes the specified object to the specified array.
    *
    * @param <T> The type of the array elements and the object to be prefixed
    * @param array The array to be prefixed
    * @param obj The object to prefix
-   * @return A new array containing the provided object and the elements of the provided array
+   * @return A new array containing the specified object and the elements of the specified array
    */
   public static <T> T[] prefix(T[] array, T obj) {
     Check.notNull(array, "array");
@@ -246,14 +256,14 @@ public class ArrayMethods {
   }
 
   /**
-   * Prefixes the provided object to the provided array.
+   * Prefixes the specified object to the specified array.
    *
    * @param <T> The type of the array elements and the object to be prefixed
    * @param array The array to be prefixed
    * @param obj1 The 1st object to prefix
    * @param obj2 The 2nd object to prefix
    * @param moreObjs More objects to prefix
-   * @return A new array containing the provided objects and the elements of the provided array
+   * @return A new array containing the specified objects and the elements of the specified array
    */
   @SafeVarargs
   public static <T> T[] prefix(T[] array, T obj1, T obj2, T... moreObjs) {

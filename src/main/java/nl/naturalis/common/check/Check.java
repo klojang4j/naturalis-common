@@ -83,7 +83,7 @@ import static nl.naturalis.common.check.Messages.createMessage;
  *
  * <pre>
  * this.query = Check.that(query, "query", InvalidQueryException::new)
- *  .has(QuerySpec::getFrom, nullOr(), 0)
+ *  .has(QuerySpec::getFrom, "from", nullOr(), 0)
  *  .has(QuerySpec::getSize, "size", gte(), MIN_BATCH_SIZE)
  *  .has(QuerySpec::getSize, "size", lt(), MAX_BATCH_SIZE)
  *  .has(QuerySpec::getSortFields, "sortFields", empty())
@@ -96,10 +96,10 @@ import static nl.naturalis.common.check.Messages.createMessage;
  */
 public abstract class Check<T, E extends Exception> {
 
+  static final String DEFAULT_ARG_NAME = "argument";
+
   private static final Function<String, IllegalArgumentException> DEFAULT_EXCEPTION =
       IllegalArgumentException::new;
-
-  private static final String DEFAULT_ARG_NAME = "argument";
 
   /**
    * Static factory method. Returns a new {@code Check} object suitable for testing integers.
@@ -954,7 +954,7 @@ public abstract class Check<T, E extends Exception> {
    * example:
    *
    * <pre>
-   * int age = Check.notNull(employee, "employee").and(Employee::getAge, "age", lessThan(), 50).ok().getAge();
+   * int age = Check.notNull(employee, "employee").has(Employee::getAge, "age", lt(), 50).ok().getAge();
    * </pre>
    *
    * @return The argument
@@ -985,23 +985,9 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Returns the argument being tested as an {@code int}. To be used as the last call after a chain
-   * of checks. Using this method if the argument being tested actually is an {@code int} (rather
-   * than an {@code Integer}), this method saves the cost of a boxing-unboxing round trip incurred
-   * by {@link #ok()}. Otherwise the following applies:
-   *
-   * <p>
-   *
-   * <ul>
-   *   <li>If the argument is null, an {@code UnsupportedOperationException} is thrown.
-   *   <li>If the argument is a {@link Number} <i>and</i> the {@code Number} can be converted to an
-   *       integer without loss of precision (it has no fractional part and is not too wide), {@link
-   *       Number#intValue() Number.intValue()} will be returned
-   *   <li>If the argument is a {@link CharSequence} <i>and</i> it can be parsed into an integer
-   *       without loss of precision (it has no fractional part and is not too wide), the value of
-   *       {@link Integer#parseInt(String) Integer.parseInt()} will be returned
-   *   <li>If the argument is anything else (including null) an {@code Exception} is thrown, the
-   *       type of which is determined by the &lt;E&gt; type parameter
-   * </ul>
+   * of checks. If the argument being tested actually is an {@code int} (rather than an {@code
+   * Integer}), this method saves the cost of a boxing-unboxing round trip incurred by {@link
+   * #ok()}.
    *
    * @see NumberMethods#fitsInto(Number, Class)
    * @return The argument cast or converted to an {@code int}

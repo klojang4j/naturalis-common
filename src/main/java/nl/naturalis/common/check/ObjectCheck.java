@@ -3,10 +3,11 @@ package nl.naturalis.common.check;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
-import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.NumberMethods;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
+import static nl.naturalis.common.ArrayMethods.isOneOf;
+import static nl.naturalis.common.check.InvalidCheckException.notApplicable;
 import static nl.naturalis.common.check.Messages.createMessage;
 
 class ObjectCheck<T, E extends Exception> extends Check<T, E> {
@@ -15,7 +16,6 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   private static final String ERR_NULL_TO_INT = ERR_INT_VALUE + " (was null)";
   private static final String ERR_NUMBER_TO_INT = ERR_INT_VALUE + " (was %s)";
   private static final String ERR_OBJECT_TO_INT = ERR_INT_VALUE + " (%s)";
-  private static final String ERR_NOT_APPLICABLE = "Test not applicable to argument %s (%s)";
 
   final T arg;
 
@@ -35,73 +35,74 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
 
   @Override
   public Check<T, E> is(IntPredicate test) throws E {
-    if (ArrayMethods.isOneOf(arg.getClass(), Integer.class, Short.class, Byte.class)) {
+    if (applicable()) {
       if (test.test(((Number) arg).intValue())) {
         return this;
       }
       String msg = createMessage(test, argName, arg);
       throw excFactory.apply(msg);
     }
-    throw notApplicable();
+    throw notApplicable(test, arg, argName);
   }
 
   @Override
   public Check<T, E> is(IntPredicate test, String message, Object... msgArgs) throws E {
-    if (ArrayMethods.isOneOf(arg.getClass(), Integer.class, Short.class, Byte.class)) {
+    if (applicable()) {
       if (test.test(((Number) arg).intValue())) {
         return this;
       }
       String msg = String.format(message, msgArgs);
       throw excFactory.apply(msg);
     }
-    throw notApplicable();
+    throw notApplicable(test, arg, argName);
   }
 
   @Override
   public <U> Check<T, E> is(IntObjRelation<U> relation, U relateTo) throws E {
-    if (ArrayMethods.isOneOf(arg.getClass(), Integer.class, Short.class, Byte.class)) {
+    if (applicable()) {
       if (relation.exists(((Number) arg).intValue(), relateTo)) {
         return this;
       }
+      String msg = createMessage(relation, argName, arg, relateTo);
+      throw excFactory.apply(msg);
     }
-    String msg = createMessage(relation, argName, arg, relateTo);
-    throw excFactory.apply(msg);
+    throw notApplicable(relation, arg, argName);
   }
 
   @Override
   public <U> Check<T, E> is(
       IntObjRelation<U> relation, U relateTo, String message, Object... msgArgs) throws E {
-    if (ArrayMethods.isOneOf(arg.getClass(), Integer.class, Short.class, Byte.class)) {
+    if (applicable()) {
       if (relation.exists(((Number) arg).intValue(), relateTo)) {
         return this;
       }
       String msg = String.format(message, msgArgs);
       throw excFactory.apply(msg);
     }
-    throw notApplicable();
+    throw notApplicable(relation, arg, argName);
   }
 
   @Override
   public Check<T, E> is(IntRelation relation, int relateTo) throws E {
-    if (ArrayMethods.isOneOf(arg.getClass(), Integer.class, Short.class, Byte.class)) {
+    if (applicable()) {
       if (relation.exists(((Number) arg).intValue(), relateTo)) {
         return this;
       }
       throw excFactory.apply(createMessage(relation, argName, arg, relateTo));
     }
-    throw notApplicable();
+    throw notApplicable(relation, arg, argName);
   }
 
   @Override
   public Check<T, E> is(IntRelation relation, int relateTo, String message, Object... msgArgs)
       throws E {
-    if (ArrayMethods.isOneOf(arg.getClass(), Integer.class, Short.class, Byte.class)) {
+    if (applicable()) {
       if (relation.exists(((Number) arg).intValue(), relateTo)) {
         return this;
       }
       throw excFactory.apply(String.format(message, msgArgs));
     }
-    throw notApplicable();
+    throw notApplicable(relation, arg, argName);
   }
 
   @Override
@@ -126,12 +127,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
     throw excFactory.apply(msg);
   }
 
-  private UnsupportedOperationException notApplicable() {
-    if (arg == null) {
-      String message = String.format(ERR_NOT_APPLICABLE, argName, "was null");
-      throw new UnsupportedOperationException(message);
-    }
-    String message = String.format(ERR_NOT_APPLICABLE, argName, arg.getClass().getName());
-    return new UnsupportedOperationException(message);
+  private boolean applicable() {
+    return isOneOf(arg.getClass(), Integer.class, Short.class, Byte.class);
   }
 }

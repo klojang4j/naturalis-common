@@ -1,5 +1,6 @@
 package nl.naturalis.common;
 
+import java.io.ByteArrayOutputStream;
 import org.junit.Test;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -85,6 +86,22 @@ public class ArrayMethodsTest {
     assertEquals(0, indexOf(array, 1));
     assertEquals(4, indexOf(array, 16));
     assertEquals(-1, indexOf(array, 23));
+  }
+
+  @Test
+  public void find01() {
+    String s0 = "Hello";
+    String s1 = "World";
+    /*
+     * Interesting, we have to use brute force to get a new string, otherwise the compiler
+     * apparently detects and coalesces the two occurrences of "World".
+     */
+    String s2 = new String("World");
+    String[] ss = pack(s0, s1, s2);
+    assertEquals("01", 0, find(ss, s0));
+    assertEquals("02", 1, find(ss, s1));
+    assertEquals("03", 2, find(ss, s2));
+    assertEquals("04", -1, find(ss, new String("Hello")));
   }
 
   @Test

@@ -1,5 +1,6 @@
 package nl.naturalis.common.check;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -94,9 +95,23 @@ public class CheckTest {
    * The sizeXXX checks are special because they work on weakly typed arguments (Object) and
    * validate them programmatically
    */
-  @Test(expected = UnsupportedOperationException.class)
-  public void size01() {
+  @Test(expected = InvalidCheckException.class)
+  public void size01a() {
     Check.that(new Object(), "fooArg").is(sizeGreaterThan(), 5);
+  }
+
+  @Test
+  public void size01b() {
+    try {
+      Check.that(new ByteArrayOutputStream(), "fooArg").is(sizeAtLeast(), 5);
+    } catch (InvalidCheckException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "Error while checking argument: java.io.ByteArrayOutputStream cannot be subject of sizeAtLeast()",
+          e.getMessage());
+      return;
+    }
+    fail();
   }
 
   @Test
@@ -149,8 +164,7 @@ public class CheckTest {
 
   /*
    * The point here is that we can write these tests down in the first place without compilation
-   * errors. Note the parameter typing in one of the lambdas, which we were forced to do by the
-   * compiler.
+   * errors. Note the parameter typing in one of the lambdas, forced upon us by the compiler.
    */
   @Test
   public void has01() {
@@ -289,5 +303,33 @@ public class CheckTest {
   @Test
   public void abs01() {
     Check.that(-7).has(abs(), eq(), 7);
+  }
+
+  @Test
+  public void testNotApplicable01() {
+    try {
+      Check.that("s", "foo").is(indexOf(), List.of("X", "Y", "Z"));
+    } catch (InvalidCheckException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "Error while checking foo: java.lang.String cannot be subject of indexOf()",
+          e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void testNotApplicable02() {
+    try {
+      Check.that("s").is(indexOf(), List.of("X", "Y", "Z"));
+    } catch (InvalidCheckException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "Error while checking argument: java.lang.String cannot be subject of indexOf()",
+          e.getMessage());
+      return;
+    }
+    fail();
   }
 }

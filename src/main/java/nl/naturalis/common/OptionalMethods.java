@@ -15,7 +15,7 @@ public class OptionalMethods {
    * <pre>
    * Optional&lt;CharSequence&gt; opt = Optional.of("Hello");
    * //String s1 = opt.get(); *** Does not compile ***
-   * String s2 = OptionalMethods.get(opt);
+   * String s2 = OptionalMethods.contentsOf(opt);
    * </pre>
    *
    * @param <T> The type of the object within the {@code Optional} (a superclass or interface)
@@ -59,8 +59,8 @@ public class OptionalMethods {
   }
 
   /**
-   * Widens the type of the provided optional. This method always returns the provided {@code
-   * Optional} itself.
+   * Widens the type of the provided optional. This method simply returns the specified {@code
+   * Optional}, but circumvents the compilation error caused by brute force casting:
    *
    * <pre>
    * Optional&lt;String&gt; opt1 = Optional.of("Hello");
@@ -70,12 +70,12 @@ public class OptionalMethods {
    * </pre>
    *
    * @param <T> The type of the object in the returned {@code Optional}
-   * @param <U> The type of the object in the provided {@code Optional}
+   * @param <U> The type of the object in the specified {@code Optional}
    * @param optional The {@code Optional} to be widened
    * @return An {@code Optional} with a widened type
    */
   @SuppressWarnings("unchecked")
   public static <T, U extends T> Optional<T> widen(Optional<U> optional) {
-    return (Optional<T>) Check.notNull(optional, "optional").ok();
+    return (Optional<T>) Check.notNull(optional).ok();
   }
 }
