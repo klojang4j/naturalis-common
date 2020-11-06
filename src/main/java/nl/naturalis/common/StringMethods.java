@@ -10,11 +10,11 @@ import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.ObjectMethods.*;
 
 /**
- * Methods for working with strings. Most methods are friendly towards batch-wise print jobs, trying
- * "to make the best" of their input: they are mostly are null-safe and they never return null. The
- * string to be manipulated is named {@code subject} and is passed in as an {@link Object}. If the
- * argument is null, an empty string is returned. Otherwise manipulation is done on the string
- * resulting from {@link Object#toString() Object.toString}.
+ * Methods for working with strings. Most methods are suitable for batch-wise print jobs: they try
+ * to make the best of their input. They are are null-safe (unless indicated otherwise) and they
+ * never return null. The string to be manipulated is named {@code subject} and is passed in as an
+ * {@link Object}. If the argument is null, an empty string is returned. Otherwise manipulation is
+ * done on the string resulting from {@link Object#toString() Object.toString}.
  */
 public final class StringMethods {
 
@@ -312,22 +312,6 @@ public final class StringMethods {
       }
     } while (changed);
     return s0;
-  }
-
-  /**
-   * Left-pads a string to the specified width using the space character (' ') and then appends the
-   * specified delimiter.
-   *
-   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
-   *     treated as the empty string.
-   * @param width The total length of the padded string. If the string itself is wider than the
-   *     specified width, the string is returned without padding.
-   * @param delimiter The delimiter to append to the left-padded string.
-   * @return The left-padded string
-   * @throws IllegalArgumentException If {@code terminator} is null
-   */
-  public static String lpad(Object obj, int width, String delimiter) {
-    return lpad(obj, width, ' ', delimiter);
   }
 
   /**
@@ -667,7 +651,7 @@ public final class StringMethods {
    *       {@code from} now becoming the <i>last</i> character of the substring.
    * </ol>
    *
-   * @param str The {@code String} to extract a substring from
+   * @param str The {@code String} to extract a substring from. <i>Must not be null.</i>
    * @param from The start index within {@code string} (may be negative)
    * @param length The desired length of the substring
    * @return The substring
