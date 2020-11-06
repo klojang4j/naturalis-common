@@ -1,6 +1,5 @@
 package nl.naturalis.common;
 
-import java.io.ByteArrayOutputStream;
 import org.junit.Test;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

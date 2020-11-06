@@ -171,7 +171,7 @@ public class ObjectMethods {
   }
 
   /**
-   * Verifies that the argument is not null and, if it is a {@link Collection}, {@link Map} or
+   * Verifies that the argument is not null and, in case of a {@link Collection}, {@link Map} or
    * {@code Object[]}, does not contain any null values. It may still be an empty collection, map or
    * array, however. Useful for testing varargs arrays.
    *
@@ -181,12 +181,12 @@ public class ObjectMethods {
   public static boolean isNoneNull(Object obj) {
     if (obj == null) {
       return false;
+    } else if (obj instanceof Object[]) {
+      return Arrays.stream((Object[]) obj).allMatch(notNull());
     } else if (obj instanceof Collection) {
       return ((Collection) obj).stream().allMatch(notNull());
     } else if (obj instanceof Map) {
       return ((Map) obj).values().stream().allMatch(notNull());
-    } else if (obj instanceof Object[]) {
-      return Arrays.stream((Object[]) obj).allMatch(notNull());
     }
     return true;
   }
@@ -409,8 +409,7 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns null if {@code arg0} is equal to {@code arg1}, else {@code arg0}. Equivalent to {@code
-   * nullIf(arg0, Objects::equals, arg1)}.
+   * Returns null if {@code arg0} is equal to {@code arg1}, else {@code arg0}.
    *
    * @param <T> The input and return type
    * @param arg0 The value to test
@@ -422,8 +421,7 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns null unless {@code arg0} equals {@code arg1}, else {@code arg0}. Equivalent to {@code
-   * nullUnless(arg0, Objects::equals, arg1)}.
+   * Returns null unless {@code arg0} equals {@code arg1}, else {@code arg0}.
    *
    * @param <T> The input and return type
    * @param arg0 The value to test
@@ -484,16 +482,34 @@ public class ObjectMethods {
 
   /**
    * Returns the result of passing the specified argument to the specified {@code Funtion} if the
-   * argument is not null, else returns the result provided by the specified {@code Supplier}. For
-   * example:
+   * argument is not null, else a default value. For example:
    *
    * <pre>
-   * String[] strs = ifNotNull("Hello World", s -> s.split(" "), () -> new String[0]);
+   * String[] strs = ifNotNull("Hello World", s -> s.split(" "), new String[0]);
    * </pre>
    *
    * @param <T> The type of the first argument
    * @param <U> The return type
-   * @param arg The value to testdoIfNotNull
+   * @param arg The value to test
+   * @param then The transformation to apply to the value if it is not null
+   * @param dfault A default value to return if the argument is null
+   * @return The result produced by the {@code Function} or by the {@code Supplier}
+   */
+  public static <T, U> U ifNotNull(T arg, Function<T, U> then, U dfault) {
+    return arg != null ? then.apply(arg) : dfault;
+  }
+
+  /**
+   * Returns the result of passing the specified argument to the specified {@code Funtion} if the
+   * argument is not null, else returns the result provided by the specified {@code Supplier}. When
+   * using a lambda for the supplier the compiler will probably force you to assign the result of
+   * {@code ifNotNull} to a local variable first and then pass the local variable to a subsequent
+   * method call. Directly embedding the {@code ifNotNull} as an argument to another method causes
+   * the compiler to run into ambiguities.
+   *
+   * @param <T> The type of the first argument
+   * @param <U> The return type
+   * @param arg The value to test
    * @param then The transformation to apply to the value if it is not null
    * @param otherwise A supplier providing the default value
    * @return The result produced by the {@code Function} or by the {@code Supplier}
@@ -504,13 +520,32 @@ public class ObjectMethods {
 
   /**
    * Returns the result of passing the specified argument to the specified {@code Funtion} if the
-   * argument is not null, else returns the result provided by the specified {@code Supplier}. *
+   * argument is not {@link #isEmpty(Object) empty}, else a default value.
    *
    * @param <T> The type of the first argument
    * @param <U> The return type
    * @param arg The value to testdoIfNotNull
-   * @param then The transformation to apply to the value if it is not null
-   * @param otherwise A supplier providing the default value
+   * @param then The function to apply to the value if it is not null
+   * @param dfault A default value to return if the argument is empty
+   * @return The result produced by the {@code Function} or by the {@code Supplier}
+   */
+  public static <T, U> U ifNotEmpty(T arg, Function<T, U> then, U dfault) {
+    return isNotEmpty(arg) ? then.apply(arg) : dfault;
+  }
+
+  /**
+   * Returns the result of passing the specified argument to the specified {@code Funtion} if the
+   * argument is not null, else returns the result provided by the specified {@code Supplier}. When
+   * using a lambda for the supplier the compiler will probably force you to assign the result of
+   * {@code ifNotEmpty} to a local variable first and then pass the local variable to a subsequent
+   * method call. Directly embedding the {@code isNotEmpty} as an argument to another method causes
+   * the compiler to run into ambiguities.
+   *
+   * @param <T> The type of the first argument
+   * @param <U> The return type
+   * @param arg The value to test
+   * @param then The function to apply to the value if it is not null
+   * @param otherwise The supplier providing a default value
    * @return The result produced by the {@code Function} or by the {@code Supplier}
    */
   public static <T, U> U ifNotEmpty(T arg, Function<T, U> then, Supplier<U> otherwise) {

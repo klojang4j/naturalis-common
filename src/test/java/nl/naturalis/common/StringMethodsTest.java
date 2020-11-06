@@ -41,15 +41,15 @@ public class StringMethodsTest {
   @Test
   public void substr_3args01() {
     assertEquals("01", "", substring("", 0, 0));
-    //    assertEquals("02", "what", substring("whatever", 0, 4));
-    //    assertEquals("03", "ever", substring("whatever", -4, 4));
-    //    assertEquals("04", "eve", substring("whatever", -4, 3));
-    //    assertEquals("05", "e", substring("whatever", -4, 1));
-    //    assertEquals("06", "e", substring("whatever", 4, 1));
-    //    assertEquals("07", "", substring("whatever", 0, 0));
-    //    assertEquals("08", "", substring("whatever", 1, 0));
-    //    assertEquals("09", "", substring("whatever", 7, 0));
-    //    assertEquals("10", "r", substring("whatever", 7, 1));
+    assertEquals("02", "what", substring("whatever", 0, 4));
+    assertEquals("03", "ever", substring("whatever", -4, 4));
+    assertEquals("04", "eve", substring("whatever", -4, 3));
+    assertEquals("05", "e", substring("whatever", -4, 1));
+    assertEquals("06", "e", substring("whatever", 4, 1));
+    assertEquals("07", "", substring("whatever", 0, 0));
+    assertEquals("08", "", substring("whatever", 1, 0));
+    assertEquals("09", "", substring("whatever", 7, 0));
+    assertEquals("10", "r", substring("whatever", 7, 1));
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -167,5 +167,65 @@ public class StringMethodsTest {
             "than"));
     assertEquals("", lchop(s, true, "TheCatIsBothDeadAndAliveButMoreDeadThanAlive", ""));
     assertEquals("TheCatIsBothDeadAndAliveButMoreDeadThanAlive", lchop(s, true, "", ""));
+  }
+
+  @Test
+  public void lpad01() {
+    assertEquals("01", "hello", lpad("hello", 5));
+    assertEquals("02", " hello", lpad("hello", 6));
+    assertEquals("03", "  hello", lpad("hello", 7));
+    assertEquals("04", "       ", lpad("", 7));
+    assertEquals("05", "       ", lpad(null, 7));
+    assertEquals("06", "hello", lpad("hello", 0));
+  }
+
+  @Test
+  public void lpad02() {
+    assertEquals("01", "hello|", lpad("hello", 5, '.', "|"));
+    assertEquals("02", ".hello|", lpad("hello", 6, '.', "|"));
+    assertEquals("03", "..hello|", lpad("hello", 7, '.', "|"));
+    assertEquals("04", ".......|", lpad("", 7, '.', "|"));
+    assertEquals("05", ".......|", lpad(null, 7, '.', "|"));
+    assertEquals("06", "hello|", lpad("hello", 0, '.', "|"));
+  }
+
+  @Test
+  public void rpad01() {
+    //    assertEquals("01", "hello", rpad("hello", 5));
+    //    assertEquals("02", "hello ", rpad("hello", 6));
+    //    assertEquals("03", "hello  ", rpad("hello", 7));
+    //    assertEquals("04", "       ", rpad("", 7));
+    assertEquals("05", "       ", rpad(null, 7));
+    //    assertEquals("06", "hello", rpad("hello", 0));
+  }
+
+  @Test
+  public void rpad02() {
+    assertEquals("01", "hello|", rpad("hello", 5, '.', "|"));
+    assertEquals("02", "hello.|", rpad("hello", 6, '.', "|"));
+    assertEquals("03", "hello..|", rpad("hello", 7, '.', "|"));
+    assertEquals("04", ".......|", rpad("", 7, '.', "|"));
+    assertEquals("05", ".......|", rpad(null, 7, '.', "|"));
+    assertEquals("06", "hello|", rpad("hello", 0, '.', "|"));
+  }
+
+  @Test
+  public void pad01() {
+    assertEquals("01", "hello", pad("hello", 5));
+    assertEquals("02", "hello ", pad("hello", 6));
+    assertEquals("03", " hello ", pad("hello", 7));
+    assertEquals("04", " hello  ", pad("hello", 8));
+    assertEquals("05", "  hello  ", pad("hello", 9));
+    assertEquals("06", "hello", pad("hello", 0));
+  }
+
+  @Test
+  public void pad02() {
+    assertEquals("01", "hello|", pad("hello", 5, '.', "|"));
+    assertEquals("02", "hello.|", pad("hello", 6, '.', "|"));
+    assertEquals("03", ".hello.|", pad("hello", 7, '.', "|"));
+    assertEquals("04", ".......|", pad("", 7, '.', "|"));
+    assertEquals("05", ".......|", pad(null, 7, '.', "|"));
+    assertEquals("06", "hello|", pad("hello", 0, '.', "|"));
   }
 }

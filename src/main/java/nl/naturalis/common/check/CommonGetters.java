@@ -250,7 +250,7 @@ public class CommonGetters {
   /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
   static String getGetterDescription(String argName, Object getter) {
-    return ifNotNull(names.get(getter), fmt -> String.format(fmt, argName), () -> argName + ".?");
+    return ifNotNull(names.get(getter), fmt -> String.format(fmt, argName), argName + ".?");
   }
 
   static {

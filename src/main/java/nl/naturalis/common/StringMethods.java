@@ -7,10 +7,11 @@ import static nl.naturalis.common.ArrayMethods.END_INDEX;
 import static nl.naturalis.common.ArrayMethods.START_INDEX;
 import static nl.naturalis.common.ObjectMethods.ifTrue;
 import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.ObjectMethods.*;
 
 /**
  * Methods for working with strings. Most methods are friendly towards batch-wise print jobs, trying
- * "to make the best" of their input: all methods are null-safe and they never return null. The
+ * "to make the best" of their input: they are mostly are null-safe and they never return null. The
  * string to be manipulated is named {@code subject} and is passed in as an {@link Object}. If the
  * argument is null, an empty string is returned. Otherwise manipulation is done on the string
  * resulting from {@link Object#toString() Object.toString}.
@@ -315,18 +316,18 @@ public final class StringMethods {
 
   /**
    * Left-pads a string to the specified width using the space character (' ') and then appends the
-   * specified terminator.
+   * specified delimiter.
    *
    * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
    *     treated as the empty string.
    * @param width The total length of the padded string. If the string itself is wider than the
-   *     specified width, the string is printed without padding.
-   * @param terminator The delimiter to append to the left-padded string.
+   *     specified width, the string is returned without padding.
+   * @param delimiter The delimiter to append to the left-padded string.
    * @return The left-padded string
    * @throws IllegalArgumentException If {@code terminator} is null
    */
-  public static String lpad(Object obj, int width, String terminator) {
-    return lpad(obj, width, ' ', terminator);
+  public static String lpad(Object obj, int width, String delimiter) {
+    return lpad(obj, width, ' ', delimiter);
   }
 
   /**
@@ -335,11 +336,11 @@ public final class StringMethods {
    * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
    *     treated as the empty string.
    * @param width The total length of the padded string. If the string itself is wider than the
-   *     specified width, the string is printed without padding.
+   *     specified width, the string is returned without padding.
    * @return The left-padded string
    */
   public static String lpad(Object obj, int width) {
-    return lpad(obj, width, ' ', EMPTY);
+    return lpad(obj, width, ' ', null);
   }
 
   /**
@@ -348,43 +349,41 @@ public final class StringMethods {
    * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
    *     treated as the empty string.
    * @param width The total length of the padded string. If the string itself is wider than the
-   *     specified width, the string is printed without padding.
+   *     specified width, the string is returned without padding.
    * @param padChar The character used to left-pad the string
    * @return The left-padded string
    */
   public static String lpad(Object obj, int width, char padChar) {
-    return lpad(obj, width, padChar, EMPTY);
+    return lpad(obj, width, padChar, null);
   }
 
   /**
    * Left-pads a string to the specified width using the specified padding character and then
    * appends the specified terminator.
    *
-   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
-   *     treated as the empty string.
+   * @param subject An object whose {@code toString()} method produces the string to be padded. Null
+   *     is treated as the empty string.
    * @param width The total length of the padded string. If the string itself is wider than the
-   *     specified width, the string is printed without padding.
+   *     specified width, the string is returned without padding.
    * @param padChar The character used to left-pad the string
-   * @param terminator The string to append to the left-padded string
+   * @param delimiter A delimiter to append to the padded string. Specify null or an empty string to
+   *     indicate that no delimiter should be appended.
    * @return The left-padded string
    * @throws IllegalArgumentException If {@code terminator} is null
    */
-  public static String lpad(Object obj, int width, char padChar, String terminator) {
-    Check.notNull(terminator, "terminator");
-    String s;
-    if (obj == null) {
-      s = EMPTY;
-    } else {
-      if ((s = obj.toString()).length() >= width) {
-        return s + terminator;
-      }
+  public static String lpad(Object subject, int width, char padChar, String delimiter) {
+    Check.that(width, "width").is(notNegative());
+    String s = ifNotNull(subject, Object::toString, EMPTY);
+    String d = ifNull(delimiter, EMPTY);
+    if (s.length() >= width) {
+      return s + d;
     }
-    StringBuilder sb = new StringBuilder(width + terminator.length());
+    StringBuilder sb = new StringBuilder(width + d.length());
     for (int i = s.length(); i < width; ++i) {
       sb.append(padChar);
     }
     sb.append(s);
-    sb.append(terminator);
+    sb.append(d);
     return sb.toString();
   }
 
@@ -432,54 +431,52 @@ public final class StringMethods {
   /**
    * Centers (left- and right-pads) a string within the specified width using the space character.
    *
-   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
-   *     treated as the empty string.
+   * @param subject An object whose {@code toString()} method produces the string to be padded. Null
+   *     is treated as the empty string.
    * @param width
    */
-  public static String pad(Object obj, int width) {
-    return pad(obj, width, ' ', EMPTY);
+  public static String pad(Object subject, int width) {
+    return pad(subject, width, ' ', null);
   }
 
   /**
    * Centers (left- and right-pads) a string within the specified width using the specified padding
    * character.
    *
-   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
-   *     treated as the empty string.
+   * @param subject An object whose {@code toString()} method produces the string to be padded. Null
+   *     is treated as the empty string.
    * @param width The total length of the padded string. If the string itself is wider than the
    *     specified width, the string is printed without padding.
    * @param padChar The character used to left- and right-pad the string.
    * @return The left- and right-padded string plus the terminator
    */
-  public static String pad(Object obj, int width, char padChar) {
-    return pad(obj, width, padChar, EMPTY);
+  public static String pad(Object subject, int width, char padChar) {
+    return pad(subject, width, padChar, null);
   }
 
   /**
    * Centers (left- and right-pads) a string within the specified width using the specified padding
-   * character and then appends the specified terminator.
+   * character and then appends the specified delimiter.
    *
    * @param subject An object whose {@code toString()} method produces the string to be padded. Null
    *     is treated as the empty string.
    * @param width The total length of the padded string. If the string itself is wider than the
    *     specified width, the string is printed without padding.
    * @param padChar The character used to left- and right-pad the string.
-   * @param terminator The string to append to the padded string
+   * @param delimiter A delimiter to append to the padded string. Specify null or an empty string to
+   *     indicate that no delimiter should be appended.
    * @return The left- and right-padded string plus the terminator
    */
-  public static String pad(Object subject, int width, char padChar, String terminator) {
-    String s;
-    if (subject == null) {
-      s = EMPTY;
-    } else {
-      s = subject.toString();
-      if (s.length() >= width) {
-        return s + terminator;
-      }
+  public static String pad(Object subject, int width, char padChar, String delimiter) {
+    Check.that(width, "width").is(notNegative());
+    String s = ifNotNull(subject, Object::toString, EMPTY);
+    String d = ifNull(delimiter, EMPTY);
+    if (s.length() >= width) {
+      return s + d;
     }
+    StringBuilder sb = new StringBuilder(width + d.length());
     int left = (width - s.length()) / 2;
     int right = width - left - s.length();
-    StringBuilder sb = new StringBuilder(width + terminator.length());
     for (int i = 0; i < left; ++i) {
       sb.append(padChar);
     }
@@ -487,7 +484,7 @@ public final class StringMethods {
     for (int i = 0; i < right; ++i) {
       sb.append(padChar);
     }
-    sb.append(terminator);
+    sb.append(d);
     return sb.toString();
   }
 
@@ -525,74 +522,58 @@ public final class StringMethods {
   }
 
   /**
-   * Right-pads a string to the specified width using the space character (' ') and then appends the
-   * specified terminator.
-   *
-   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
-   *     treated as the empty string.
-   * @param width The total length of the padded string. If the string itself is wider than the
-   *     specified width, the string is printed without padding.
-   * @param terminator The delimiter to append to the right-padded string.
-   * @return The right-padded string
-   */
-  public static String rpad(Object obj, int width, String terminator) {
-    return rpad(obj, width, ' ', terminator);
-  }
-
-  /**
    * Right-pads a string to the specified width using the space character (' ').
    *
-   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
-   *     treated as the empty string.
+   * @param subject An object whose {@code toString()} method produces the string to be padded. Null
+   *     is treated as the empty string.
    * @param width The total length of the padded string. If the string itself is wider than the
-   *     specified width, the string is printed without padding.
+   *     specified width, the string is returned without padding.
    * @return The right-padded string
    */
-  public static String rpad(Object obj, int width) {
-    return rpad(obj, width, ' ', EMPTY);
+  public static String rpad(Object subject, int width) {
+    return rpad(subject, width, ' ', null);
   }
 
   /**
    * Right-pads a string to the specified width using the specified padding character.
    *
-   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
-   *     treated as the empty string.
+   * @param subject An object whose {@code toString()} method produces the string to be padded. Null
+   *     is treated as the empty string.
    * @param width The total length of the padded string. If the string itself is wider than the
-   *     specified width, the string is printed without padding.
+   *     specified width, the string is returned without padding.
    * @param padChar The character used to left-pad the string.
    * @return The right-padded string
    */
-  public static String rpad(Object obj, int width, char padChar) {
-    return rpad(obj, width, padChar, EMPTY);
+  public static String rpad(Object subject, int width, char padChar) {
+    return rpad(subject, width, padChar, null);
   }
 
   /**
    * Right-pads a string to the specified width using the specified padding character and then
-   * appends the specified terminator.
+   * appends the specified delimiter.
    *
-   * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
-   *     treated as the empty string.
+   * @param subject An object whose {@code toString()} method produces the string to be padded. Null
+   *     is treated as the empty string.
    * @param width The total length of the padded string. If the string itself is wider than the
    *     specified width, the string is printed without padding.
-   * @param padChar The character used to left-pad the string.
-   * @param terminator The string to append to the left-padded string
+   * @param padChar The character used to right-pad the string.
+   * @param delimiter A delimiter to append to the padded string. Specify null or an empty string to
+   *     indicate that no delimiter should be appended.
    * @return The right-padded string
    */
-  public static String rpad(Object obj, int width, char padChar, String terminator) {
-    String s;
-    if (obj == null) {
-      s = EMPTY;
-    } else {
-      if ((s = obj.toString()).length() >= width) {
-        return s + terminator;
-      }
+  public static String rpad(Object subject, int width, char padChar, String delimiter) {
+    Check.that(width, "width").is(notNegative());
+    String s = ifNotNull(subject, Object::toString, EMPTY);
+    String d = ifNull(delimiter, EMPTY);
+    if (s.length() >= width) {
+      return s + d;
     }
-    StringBuilder sb = new StringBuilder(width + terminator.length());
+    StringBuilder sb = new StringBuilder(width + d.length());
     sb.append(s);
     for (int i = s.length(); i < width; ++i) {
       sb.append(padChar);
     }
-    sb.append(terminator);
+    sb.append(d);
     return sb.toString();
   }
 
@@ -655,8 +636,7 @@ public final class StringMethods {
    * <p>
    *
    * <ol>
-   *   <li>If the input string is empty and the {@code from} equals zero, an empty string is
-   *       returned.
+   *   <li>If the input string is empty and {@code from} equals zero, an empty string is returned.
    *   <li>If {@code from} is negative, it is taken relative to the end of the string.
    * </ol>
    *
@@ -676,19 +656,20 @@ public final class StringMethods {
 
   /**
    * Substring method that facilitates substring retrieval relative to the end of a string as well
-   * as substring retrieval in the opposite direction.
+   * as substring retrieval in the opposite direction. The {@code from} and {@code length} arguments
+   * works as follows:
    *
    * <p>
    *
    * <ol>
    *   <li>If {@code from} is negative, it is taken relative to the end of the string.
    *   <li>If {@code length} is negative, the substring is taken in the opposite direction, with
-   *       {@code from} now becoming the <i>last</i> character of the substring
+   *       {@code from} now becoming the <i>last</i> character of the substring.
    * </ol>
    *
    * @param str The {@code String} to extract a substring from
    * @param from The start index within {@code string} (may be negative)
-   * @param length The length the substring
+   * @param length The desired length of the substring
    * @return The substring
    */
   public static String substring(String str, int from, int length) {

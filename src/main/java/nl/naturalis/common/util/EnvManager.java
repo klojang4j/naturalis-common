@@ -110,8 +110,8 @@ public class EnvManager {
   public Optional<String> get(String name) {
     Check.notNull(name, "name");
     return empty == UNDEFINED
-        ? ifNotEmpty(getenv(name), Optional::of, Optional::empty)
-        : ifNotNull(getenv(name), Optional::of, Optional::empty);
+        ? ifNotEmpty(getenv(name), Optional::of, Optional.empty())
+        : ifNotNull(getenv(name), Optional::of, Optional.empty());
   }
 
   /**
@@ -161,8 +161,8 @@ public class EnvManager {
     String val = getenv(name);
     try {
       return empty == UNDEFINED
-          ? ifNotEmpty(val, asOptionalInt(NumberMethods::asPlainInt), OptionalInt::empty)
-          : ifNotNull(val, asOptionalInt(NumberMethods::asPlainInt), OptionalInt::empty);
+          ? ifNotEmpty(val, asOptionalInt(NumberMethods::asPlainInt), OptionalInt.empty())
+          : ifNotNull(val, asOptionalInt(NumberMethods::asPlainInt), OptionalInt.empty());
     } catch (NumberFormatException e) {
       throw notConvertible(name, int.class, e.getMessage());
     }
@@ -182,8 +182,8 @@ public class EnvManager {
     String val = getenv(name);
     try {
       return empty == UNDEFINED || empty == DEFAULT
-          ? ifNotEmpty(val, NumberMethods::asPlainInt, () -> dfault)
-          : ifNotNull(val, NumberMethods::asPlainInt, () -> dfault);
+          ? ifNotEmpty(val, NumberMethods::asPlainInt, dfault)
+          : ifNotNull(val, NumberMethods::asPlainInt, dfault);
     } catch (NumberFormatException e) {
       throw notConvertible(name, int.class, e.getMessage());
     }
@@ -226,8 +226,8 @@ public class EnvManager {
     String val = getenv(name);
     try {
       return empty == UNDEFINED
-          ? ifNotEmpty(val, asOptional(this::parseBoolean), Optional::empty)
-          : ifNotNull(val, asOptional(this::parseBoolean), Optional::empty);
+          ? ifNotEmpty(val, asOptional(this::parseBoolean), Optional.empty())
+          : ifNotNull(val, asOptional(this::parseBoolean), Optional.empty());
     } catch (IllegalArgumentException e) {
       throw notConvertible(name, boolean.class, e.getMessage());
     }
@@ -247,8 +247,8 @@ public class EnvManager {
     String val = getenv(name);
     try {
       return empty == UNDEFINED || empty == DEFAULT
-          ? ifNotEmpty(val, this::parseBoolean, () -> dfault)
-          : ifNotNull(val, this::parseBoolean, () -> dfault);
+          ? ifNotEmpty(val, this::parseBoolean, dfault)
+          : ifNotNull(val, this::parseBoolean, dfault);
     } catch (NumberFormatException e) {
       throw notConvertible(name, boolean.class, e.getMessage());
     }

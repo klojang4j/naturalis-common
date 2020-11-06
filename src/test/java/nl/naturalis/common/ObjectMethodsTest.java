@@ -96,7 +96,7 @@ public class ObjectMethodsTest {
     s = null;
     i = ifNotNull(s, Integer::valueOf);
     assertNull("02", i);
-    i = ifNotNull(s, Integer::valueOf, () -> 8);
+    i = ifNotNull(s, Integer::valueOf, 8);
     assertEquals("03", 8, i.intValue());
     String[] strs = ifNotNull("This sentence contains five words", x -> x.split(" "));
     assertEquals("04", 5, strs.length);
@@ -107,9 +107,9 @@ public class ObjectMethodsTest {
     Optional<String> opt1 = Optional.empty();
     Optional<String> opt2 = Optional.of("");
     Optional<String> opt3 = Optional.of("Hi");
-    assertEquals("01", "FOO", ifNotEmpty(opt1, Optional::get, () -> "FOO"));
-    assertEquals("02", "FOO", ifNotEmpty(opt2, Optional::get, () -> "FOO"));
-    assertEquals("03", "Hi", ifNotEmpty(opt3, Optional::get, () -> "FOO"));
+    assertEquals("01", "FOO", ifNotEmpty(opt1, Optional::get, "FOO"));
+    assertEquals("02", "FOO", ifNotEmpty(opt2, Optional::get, "FOO"));
+    assertEquals("03", "Hi", ifNotEmpty(opt3, Optional::get, "FOO"));
   }
 
   @Test

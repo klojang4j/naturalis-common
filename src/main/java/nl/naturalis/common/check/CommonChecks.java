@@ -1209,30 +1209,30 @@ public class CommonChecks {
 
   @SuppressWarnings("rawtypes")
   static String nameOf(Predicate test) {
-    return ifNotNull(names.get(test), name -> name + suffix, () -> "Predicate");
+    return ifNotNull(names.get(test), name -> name + suffix, Predicate.class.getSimpleName());
   }
 
   static String nameOf(IntPredicate test) {
-    return ifNotNull(names.get(test), name -> name + suffix, () -> "IntPredicate");
+    return ifNotNull(names.get(test), name -> name + suffix, IntPredicate.class.getSimpleName());
   }
 
   @SuppressWarnings("rawtypes")
   static String nameOf(Relation test) {
-    return ifNotNull(names.get(test), name -> name + suffix, () -> "Relation");
+    return ifNotNull(names.get(test), name -> name + suffix, Relation.class.getSimpleName());
   }
 
   static String nameOf(IntRelation test) {
-    return ifNotNull(names.get(test), name -> name + suffix, () -> "IntRelation");
+    return ifNotNull(names.get(test), name -> name + suffix, IntRelation.class.getSimpleName());
   }
 
   @SuppressWarnings("rawtypes")
   static String nameOf(ObjIntRelation test) {
-    return ifNotNull(names.get(test), name -> name + suffix, () -> "ObjIntRelation");
+    return ifNotNull(names.get(test), name -> name + suffix, ObjIntRelation.class.getSimpleName());
   }
 
   @SuppressWarnings("rawtypes")
   static String nameOf(IntObjRelation test) {
-    return ifNotNull(names.get(test), name -> name + suffix, () -> "IntObjRelation");
+    return ifNotNull(names.get(test), name -> name + suffix, IntObjRelation.class.getSimpleName());
   }
 
   private static void addMessage(Object test, Function<Object[], String> message) {
