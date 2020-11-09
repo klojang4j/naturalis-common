@@ -13,6 +13,18 @@ public class StringMethodsTest {
     assertEquals("01", 3, count(s, "This is"));
     assertEquals("02", 6, count(s, "is"));
     assertEquals("03", 7, count(s, "is", true));
+    s = "aaaaaa";
+    assertEquals("03", 5, count(s, "aa"));
+  }
+
+  @Test
+  public void countDiscrete01() {
+    String s = "This is This is This is BLISS!";
+    assertEquals("01", 3, countDiscrete(s, "This is"));
+    assertEquals("02", 6, countDiscrete(s, "is"));
+    assertEquals("03", 7, countDiscrete(s, "is", true));
+    s = "aaaaaa";
+    assertEquals("03", 3, countDiscrete(s, "aa"));
   }
 
   @Test
@@ -191,12 +203,12 @@ public class StringMethodsTest {
 
   @Test
   public void rpad01() {
-    //    assertEquals("01", "hello", rpad("hello", 5));
-    //    assertEquals("02", "hello ", rpad("hello", 6));
-    //    assertEquals("03", "hello  ", rpad("hello", 7));
-    //    assertEquals("04", "       ", rpad("", 7));
+    assertEquals("01", "hello", rpad("hello", 5));
+    assertEquals("02", "hello ", rpad("hello", 6));
+    assertEquals("03", "hello  ", rpad("hello", 7));
+    assertEquals("04", "       ", rpad("", 7));
     assertEquals("05", "       ", rpad(null, 7));
-    //    assertEquals("06", "hello", rpad("hello", 0));
+    assertEquals("06", "hello", rpad("hello", 0));
   }
 
   @Test

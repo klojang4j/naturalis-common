@@ -70,7 +70,7 @@ class ParseSpecProperties extends Properties {
    * @return
    * @throws FuzzyDateException
    */
-  List<ParseInfo> createParseSpecs() throws FuzzyDateException {
+  List<ParseInfo> createParseInfos() throws FuzzyDateException {
     List<ParseInfo> parseSpecs = new ArrayList<>();
     for (String dateType : supportedDateTypes.keySet()) {
       parseSpecs.addAll(createParseSpecs(dateType));
@@ -156,9 +156,10 @@ class ParseSpecProperties extends Properties {
   }
 
   /*
-   * Creates an instance of DateTimeFormatter using the provided name. The name must be either the simple name of a public static
-   * DateTimeFormatter field on the DateTimeFormatter class (like "BASIC_ISO_DATE"), or the fully-qualified name of a public static
-   * DateTimeFormatter field on an arbitrary class.
+   * Creates an instance of DateTimeFormatter using the provided name. The name must be either the
+   * simple name of a public static DateTimeFormatter field on the DateTimeFormatter class (like
+   * "BASIC_ISO_DATE"), or the fully-qualified name of a public static DateTimeFormatter field on an
+   * arbitrary class.
    */
   private static DateTimeFormatter getNamedFormatter(String name) throws FuzzyDateException {
     Field field;

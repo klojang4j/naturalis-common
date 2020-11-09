@@ -1,26 +1,14 @@
 package nl.naturalis.common.time;
 
-import static java.time.temporal.ChronoField.DAY_OF_MONTH;
-import static java.time.temporal.ChronoField.HOUR_OF_DAY;
-import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
-import static java.time.temporal.ChronoField.MONTH_OF_YEAR;
-import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
-import static java.time.temporal.ChronoField.YEAR;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.Year;
-import java.time.YearMonth;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.time.temporal.TemporalAccessor;
+import static java.time.temporal.ChronoField.*;
 
 /**
  * A {@code FuzzyDate} represents a date of which at least the year is known. You can retrieve
- * regular {@code java.time} objects from it and it stores the verbatim date string from which it
- * was created as well as the {@link ParseInfo} instance used to parse the verbatim date string. You
- * obtain an instance by calling {@link FuzzyDateParser#parse(String) FuzzyDateParser.parse}.
+ * regular {@code java.time} objects from it as well as the verbatim date string from which it was
+ * created as well. You obtain an instance by calling {@link FuzzyDateParser#parse(String)
+ * FuzzyDateParser.parse}.
  */
 public final class FuzzyDate {
 
@@ -37,7 +25,7 @@ public final class FuzzyDate {
   /**
    * Converts this {@code FuzzyDate} to an {@link Instant java.time.Instant} object.
    *
-   * @return
+   * @return An instance of {@code Instant}
    */
   public Instant toInstant() {
     if (ta.getClass() == Instant.class) {
@@ -53,7 +41,7 @@ public final class FuzzyDate {
    * Converts this {@code FuzzyDate} to a {@link LocalDateTime} object, setting month and day to 1
    * if unknown, and setting hour, minute and second to 0 if unknown.
    *
-   * @return
+   * @return An instance of {@code LocalDateTime}
    */
   public LocalDateTime toLocalDateTime() {
     if (ta.getClass() == LocalDateTime.class) {
@@ -79,7 +67,7 @@ public final class FuzzyDate {
    * Converts this {@code FuzzyDate} to a {@link LocalDate} object, setting month and/or day to 1 if
    * unknown.
    *
-   * @return
+   * @return An instance of {@code LocalDateTime}
    */
   public LocalDate toLocalDate() {
     if (ta.getClass() == LocalDate.class) {
@@ -101,7 +89,7 @@ public final class FuzzyDate {
   /**
    * Returns the most granular date/time object that could be parsed out of the date string.
    *
-   * @return
+   * @return An instance of {@code TemporalAccessor} that best matches the date string
    */
   public TemporalAccessor bestMatch() {
     int year = ta.get(YEAR);
@@ -125,7 +113,7 @@ public final class FuzzyDate {
   /**
    * Returns the raw {@link TemporalAccessor} object that was created from the verbatim date string.
    *
-   * @return
+   * @return An instance of {@code TemporalAccessor}
    */
   public TemporalAccessor getTemporalAccessor() {
     return ta;
@@ -134,47 +122,50 @@ public final class FuzzyDate {
   /**
    * Returns the original date string from which this FuzzyDate instance was created.
    *
-   * @return
+   * @return The original date string from which this FuzzyDate instance was created
    */
   public String getVerbatim() {
     return verbatim;
   }
 
   /**
-   * Returns the {@link ParseInfo} used to parse the date string into this {@code FuzzyDate}
-   * instance.
+   * Returns the {@link ParseInfo} instance used to parse the date string into this {@code
+   * FuzzyDate} instance.
    *
    * @return
    */
-  public ParseInfo getParseSpec() {
+  public ParseInfo getParseInfo() {
     return parseSpec;
   }
 
   /**
-   * Returns true if either month or day is unknown, false if both are known.
+   * Returns whether or not this instance contains a fuzzy date. Returns true if either month or day
+   * is unknown, false if both are known.
    *
-   * @return
+   * @return Whether or not this instance contains a fuzzy date
    */
   public boolean isFuzzyDate() {
     return !(ta.isSupported(MONTH_OF_YEAR) && ta.isSupported(DAY_OF_MONTH));
   }
 
   /**
-   * Returns true if either the hour or the minute is unknown, false if both are known. Seconds are
-   * ignored, so time is <i>not</i> regarded as fuzzy if hour and minute are known but the second is
-   * not. If seconds are important, use the <code>isSupported</code> method on the {@link
-   * TemporalAccessor} instance returned by {@link #getTemporalAccessor() getTemporalAccessor}.
+   * Returns whether or not this instance contains a fuzzy time. Returns true if either the hour or
+   * the minute is unknown, false if both are known. Seconds are ignored, so time is <i>not</i>
+   * regarded as fuzzy if hour and minute are known but the second is not. If seconds are important,
+   * use the <code>isSupported</code> method on the {@link TemporalAccessor} instance returned by
+   * {@link #getTemporalAccessor() getTemporalAccessor}.
    *
-   * @return
+   * @return Whether or not this instance contains a fuzzy time
    */
   public boolean isFuzzyTime() {
     return !(ta.isSupported(HOUR_OF_DAY) && ta.isSupported(MINUTE_OF_HOUR));
   }
 
   /**
-   * Equivalent to {@code isFuzzyDate() || isFuzzyTime()}.
+   * Returns whether or not there is anything fuzzy about this instance except for (perhaps) its
+   * second. Equivalent to {@code isFuzzyDate() || isFuzzyTime()}.
    *
-   * @return
+   * @return Whether or not there is anything fuzzy about this instance
    */
   public boolean isFuzzyDateTime() {
     return isFuzzyDate() || isFuzzyTime();

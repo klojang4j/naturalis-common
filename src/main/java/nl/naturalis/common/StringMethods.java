@@ -10,11 +10,12 @@ import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.ObjectMethods.*;
 
 /**
- * Methods for working with strings. Most methods are suitable for batch-wise print jobs: they try
- * to make the best of their input. They are are null-safe (unless indicated otherwise) and they
- * never return null. The string to be manipulated is named {@code subject} and is passed in as an
- * {@link Object}. If the argument is null, an empty string is returned. Otherwise manipulation is
- * done on the string resulting from {@link Object#toString() Object.toString}.
+ * Methods for working with strings. Most methods are friendly towards batch-wise print jobs, trying
+ * to make the best of their input. They are are null-safe with respect to the string to be
+ * manipulated and they never return null (unless indicated otherwise). The string to be manipulated
+ * is named {@code subject} and is passed in as an {@link Object}. If the argument is null, an empty
+ * string is returned. Otherwise manipulation is done on the string resulting from {@link
+ * Object#toString() Object.toString}.
  */
 public final class StringMethods {
 
@@ -32,7 +33,7 @@ public final class StringMethods {
    */
   public static StringBuilder append(StringBuilder sb, Object... data) {
     Check.notNull(sb, "sb");
-    Arrays.stream(Check.notNull(data, "data").ok()).forEach(sb::append);
+    Check.notNull(data, "data").ok(Arrays::stream).forEach(sb::append);
     return sb;
   }
 

@@ -278,7 +278,7 @@ public class FuzzyDateParserTest {
   }
 
   ////////////////////////////////////////////////////////////////////////////////////
-  // Miscellaneous aspects of the FyzzyDate library
+  // Miscellaneous aspects of the FyzzyDate package
   ////////////////////////////////////////////////////////////////////////////////////
   @Test
   public void test200() throws FuzzyDateException {
@@ -289,23 +289,23 @@ public class FuzzyDateParserTest {
 
     FuzzyDateParser parser = new FuzzyDateParser(ps0, ps1, ps2);
     FuzzyDate date = parser.parse("2018/08/14 13:42:33");
-    assertEquals("01", ps0, date.getParseSpec());
+    assertEquals("01", ps0, date.getParseInfo());
 
     parser = new FuzzyDateParser(ps2, ps0, ps1);
     date = parser.parse("2018/08/14 13:42:33");
-    assertEquals("02", ps2, date.getParseSpec());
+    assertEquals("02", ps2, date.getParseInfo());
 
     parser = new FuzzyDateParser(ps1, ps2, ps0);
     date = parser.parse("2018/08/14 13:42:33");
-    assertEquals("03", ps2, date.getParseSpec());
+    assertEquals("03", ps2, date.getParseInfo());
 
     parser = new FuzzyDateParser(ps0, ps1, ps2);
     date = parser.parse("2018/08/14");
-    assertEquals("04", ps1, date.getParseSpec());
+    assertEquals("04", ps1, date.getParseInfo());
 
     parser = new FuzzyDateParser(ps2, ps1, ps0);
     date = parser.parse("2018/08/14");
-    assertEquals("05", ps2, date.getParseSpec());
+    assertEquals("05", ps2, date.getParseInfo());
   }
 
   private static FuzzyDateParser simpleParser(String pattern, TemporalQuery<?> parseInto) {
