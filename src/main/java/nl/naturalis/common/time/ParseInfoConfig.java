@@ -34,7 +34,7 @@ import static nl.naturalis.common.StringMethods.ifBlank;
  *
  * @author Ayco Holleman
  */
-class ParseSpecProperties extends Properties {
+class ParseInfoConfig extends Properties {
 
   /**
    * A map of all supported {@link Temporal} classes, mapped to the {@link TemporalQuery} used to
@@ -53,7 +53,7 @@ class ParseSpecProperties extends Properties {
   private final String globalCaseSensitive;
   private final String globalFilter;
 
-  ParseSpecProperties(InputStream is) {
+  ParseInfoConfig(InputStream is) {
     try {
       load(is);
     } catch (IOException e) {

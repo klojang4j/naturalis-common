@@ -11,12 +11,10 @@ import java.util.function.UnaryOperator;
 import nl.naturalis.common.check.Check;
 
 /**
- * A {@code ParseInfo} specifies how to parse a date string. It minimally consists of a date/time
- * pattern string or a {@link DateTimeFormatter} instance. A {@link FuzzyDateParser} is instantiated
- * with a list of {@code ParseInfo} instances. When parsing a date string it iterates over these
- * {@code ParseInfo} instances in order the produce a {@link FuzzyDate}.
+ * A {@code ParseInfo} specifies how to parse a date string. The following can be specified when
+ * parsing a date string:
  *
- * <p>The following can be specified when parsing a date string:
+ * <p>
  *
  * <ol>
  *   <li>Either a date/time pattern or a {@link DateTimeFormatter} instance. <i>Required.</i>
@@ -31,19 +29,19 @@ import nl.naturalis.common.check.Check;
 public final class ParseInfo {
 
   /**
-   * A ready-made {@code ParseInfo} that parses date strings using the {@link
+   * A ready-made {@code ParseInfo} instance that parses date strings using the {@link
    * DateTimeFormatter#ISO_INSTANT ISO_INSTANT} formatter into an instance of {@link Instant}.
    */
   public static final ParseInfo ISO_INSTANT =
       new ParseInfo(DateTimeFormatter.ISO_INSTANT, Instant::from);
   /**
-   * A ready-made {@code ParseInfo} that parses date strings using the {@link
+   * A ready-made {@code ParseInfo} instance that parses date strings using the {@link
    * DateTimeFormatter#ISO_INSTANT ISO_LOCAL_DATE} formatter into an instance of {@link LocalDate}.
    */
   public static final ParseInfo ISO_LOCAL_DATE =
       new ParseInfo(DateTimeFormatter.ISO_LOCAL_DATE, LocalDate::from);
   /**
-   * A ready-made {@code ParseInfo} that parses date strings using the {@link
+   * A ready-made {@code ParseInfo} instance that parses date strings using the {@link
    * DateTimeFormatter#ISO_INSTANT ISO_LOCAL_DATE_TIME} formatter into an instance of {@link
    * LocalDateTime}.
    */
@@ -95,9 +93,9 @@ public final class ParseInfo {
 
   /**
    * Returns the filter used to transform the input string, or null if no filter is used by this
-   * {@code ParseInfo}. The filter's {@link UnaryOperator#apply(Object) apply} method is explicitly
-   * allowed to return null, in which case the input string will be treated as not parsable by this
-   * {@code ParseInfo}.
+   * {@code ParseInfo}. The filter's {@link UnaryOperator#apply(Object) apply} method is allowed to
+   * return null, in which case the input string will be treated as not parsable by this {@code
+   * ParseInfo}.
    *
    * @return
    */

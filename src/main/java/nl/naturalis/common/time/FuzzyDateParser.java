@@ -18,7 +18,7 @@ import static nl.naturalis.common.check.CommonChecks.noneNull;
  *
  * <p>Date strings are parsed by iterating over a list of {@link ParseInfo} instances, passed in
  * through one of the constructors . A {@link ParseInfo} instance specifies how to parse the input
- * string. As soon as a {@code ParseSpec} is capable of parsing the date string into a {@code
+ * string. As soon as a {@code ParseInfo} is capable of parsing the date string into a {@code
  * java.time} object, the iteration stops. Therefore the more granular {@link ParseInfo} instances
  * should come first in the list.
  *
@@ -99,7 +99,7 @@ public class FuzzyDateParser {
   // Reserved for the default parser
   private FuzzyDateParser() {
     InputStream is = FuzzyDateParser.class.getResourceAsStream("FuzzyDate.properties.txt");
-    ParseSpecProperties config = new ParseSpecProperties(is);
+    ParseInfoConfig config = new ParseInfoConfig(is);
     try {
       this.parseInfos = config.createParseInfos();
     } catch (FuzzyDateException e) {
@@ -118,7 +118,7 @@ public class FuzzyDateParser {
    */
   public FuzzyDateParser(InputStream is) throws FuzzyDateException {
     Check.notNull(is);
-    ParseSpecProperties config = new ParseSpecProperties(is);
+    ParseInfoConfig config = new ParseInfoConfig(is);
     this.parseInfos = config.createParseInfos();
   }
 

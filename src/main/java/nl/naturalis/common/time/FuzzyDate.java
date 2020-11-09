@@ -7,7 +7,7 @@ import static java.time.temporal.ChronoField.*;
 /**
  * A {@code FuzzyDate} represents a date of which at least the year is known. You can retrieve
  * regular {@code java.time} objects from it as well as the verbatim date string from which it was
- * created as well. You obtain an instance by calling {@link FuzzyDateParser#parse(String)
+ * created. You obtain an instance by calling {@link FuzzyDateParser#parse(String)
  * FuzzyDateParser.parse}.
  */
 public final class FuzzyDate {
@@ -34,6 +34,32 @@ public final class FuzzyDate {
       return ((LocalDate) ta).atStartOfDay(ZoneOffset.UTC).toInstant();
     } else {
       return Instant.from(ta);
+    }
+  }
+
+  /**
+   * Converts this {@code FuzzyDate} to a {@link OffsetDateTime} object, setting month and day to 1
+   * if unknown; hour, minute and second to 0 if unknown; and the time zone to UTC if unknown.
+   *
+   * @return An instance of {@code LocalDateTime}
+   */
+  public OffsetDateTime toOffsetDateTime() {
+    if (ta.getClass() == OffsetDateTime.class) {
+      return (OffsetDateTime) ta;
+    } else if (ta.getClass() == LocalDateTime.class) {
+      return ((LocalDateTime) ta).atOffset(ZoneOffset.UTC);
+    } else if (ta.getClass() == LocalDate.class) {
+      return ((LocalDate) ta).atStartOfDay().atOffset(ZoneOffset.UTC);
+    } else if (ta.getClass() == Instant.class) {
+      return OffsetDateTime.ofInstant((Instant) ta, ZoneOffset.UTC);
+    } else {
+      int year = ta.get(YEAR);
+      int month = ta.isSupported(MONTH_OF_YEAR) ? ta.get(MONTH_OF_YEAR) : 1;
+      int day = ta.isSupported(DAY_OF_MONTH) ? ta.get(DAY_OF_MONTH) : 1;
+      int hour = ta.isSupported(HOUR_OF_DAY) ? ta.get(HOUR_OF_DAY) : 0;
+      int minute = ta.isSupported(MINUTE_OF_HOUR) ? ta.get(MINUTE_OF_HOUR) : 0;
+      int second = ta.isSupported(SECOND_OF_MINUTE) ? ta.get(SECOND_OF_MINUTE) : 0;
+      return LocalDateTime.of(year, month, day, hour, minute, second).atOffset(ZoneOffset.UTC);
     }
   }
 
@@ -169,5 +195,30 @@ public final class FuzzyDate {
    */
   public boolean isFuzzyDateTime() {
     return isFuzzyDate() || isFuzzyTime();
+  }
+
+  /**
+   * Returns true if this object's {@link TemporalAccessor} equals the other object's {@code
+   * TemporalAccessor}, or if this object's {@link OffsetDateTime} representation equals the other
+   * object's {@link OffsetDateTime} representation. The verbatim date strings and the {@code
+   * ParseInfo} objects from which the two {@code FuzzyDate} instances were created are ignored.
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    } else if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    FuzzyDate other = (FuzzyDate) obj;
+    if (ta.equals(other.ta) || toOffsetDateTime().equals(other.toOffsetDateTime())) {
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return ta.hashCode();
   }
 }
