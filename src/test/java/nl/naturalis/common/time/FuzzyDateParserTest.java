@@ -14,13 +14,14 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class FuzzyDateParserTest {
 
   /*
-   * These tests yield that, when parsing, you should use "d-M-uuuu" as date pattern rather than "dd-MM-uuuu", because "d-M-uuuu" will match
-   * "12-04-2004", but "dd-MM-uuuu" will not match "2-4-2012"
+   * These tests yield that, when parsing, you should use "d-M-uuuu" as date pattern rather than
+   * "dd-MM-uuuu", because "d-M-uuuu" will match "12-04-2004", but "dd-MM-uuuu" will not match
+   * "2-4-2012"
    */
   @Test
   public void test1() throws FuzzyDateException {
@@ -28,7 +29,7 @@ public class FuzzyDateParserTest {
     FuzzyDate parsed = parser.parse("12-04-2004");
     assertNotNull("01", parsed);
     assertNotNull("02", parsed);
-    assertFalse("03", parsed.isFuzzyDate());
+    assertFalse("03", parsed.isDateFuzzy());
     assertEquals("04", LocalDate.class, parsed.bestMatch().getClass());
     assertEquals("05", parsed.toLocalDate(), LocalDate.of(2004, 4, 12));
   }
@@ -39,7 +40,7 @@ public class FuzzyDateParserTest {
     FuzzyDate parsed = parser.parse("22-7-2004");
     assertNotNull("01", parsed);
     assertNotNull("02", parsed);
-    assertFalse("03", parsed.isFuzzyDate());
+    assertFalse("03", parsed.isDateFuzzy());
     assertEquals("04", LocalDate.class, parsed.bestMatch().getClass());
     assertEquals("05", parsed.toLocalDate(), LocalDate.of(2004, 7, 22));
   }
@@ -50,7 +51,7 @@ public class FuzzyDateParserTest {
     FuzzyDate parsed = parser.parse("3-03-04");
     assertNotNull("01", parsed);
     assertNotNull("02", parsed);
-    assertFalse("03", parsed.isFuzzyDate());
+    assertFalse("03", parsed.isDateFuzzy());
     assertEquals("04", LocalDate.class, parsed.bestMatch().getClass());
     assertEquals("05", parsed.toLocalDate(), LocalDate.of(2004, 3, 3));
   }
@@ -82,7 +83,7 @@ public class FuzzyDateParserTest {
     FuzzyDate parsed = parser.parse("2004");
     assertNotNull("01", parsed);
     assertNotNull("02", parsed);
-    assertTrue("03", parsed.isFuzzyDate());
+    assertTrue("03", parsed.isDateFuzzy());
     assertEquals("04", Year.class, parsed.bestMatch().getClass());
     assertEquals("05", parsed.toLocalDate(), LocalDate.of(2004, 1, 1));
   }
@@ -93,7 +94,7 @@ public class FuzzyDateParserTest {
     FuzzyDate parsed = parser.parse("2004-04");
     assertNotNull("01", parsed);
     assertNotNull("02", parsed);
-    assertTrue("03", parsed.isFuzzyDate());
+    assertTrue("03", parsed.isDateFuzzy());
     assertEquals("04", YearMonth.class, parsed.bestMatch().getClass());
     assertEquals("05", parsed.toLocalDate(), LocalDate.of(2004, 4, 1));
   }
@@ -105,7 +106,7 @@ public class FuzzyDateParserTest {
     FuzzyDate parsed = parser.parse("2007-10-13T13:02Z");
     assertNotNull("01", parsed);
     assertNotNull("02", parsed);
-    assertFalse("03", parsed.isFuzzyDate());
+    assertFalse("03", parsed.isDateFuzzy());
     assertEquals("04", LocalDateTime.class, parsed.bestMatch().getClass());
     assertEquals("05", parsed.toLocalDate(), LocalDate.of(2007, 10, 13));
   }
@@ -116,7 +117,7 @@ public class FuzzyDateParserTest {
     FuzzyDate parsed = parser.parse("2007-10-13T13:02Z");
     assertNotNull("01", parsed);
     assertNotNull("02", parsed);
-    assertFalse("03", parsed.isFuzzyDate());
+    assertFalse("03", parsed.isDateFuzzy());
     assertEquals("04", LocalDateTime.class, parsed.bestMatch().getClass());
     assertEquals("05", parsed.toLocalDate(), LocalDate.of(2007, 10, 13));
   }
@@ -213,20 +214,22 @@ public class FuzzyDateParserTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void test12() throws FuzzyDateException {
-    UnaryOperator<String> filter = new YearFilter();
+    UnaryOperator<String> filter = YearFilter.INSTANCE;
     DateTimeFormatter formatter = formatter("uuuu");
-    TemporalQuery<?>[] parseInto = new TemporalQuery[] {Year::from};
-    List<ParseInfo> parseSpecs = Arrays.asList(new ParseInfo(filter, formatter, parseInto));
+    TemporalQuery<TemporalAccessor>[] parseInto = new TemporalQuery[] {Year::from};
+    List<ParseInfo> parseSpecs =
+        Arrays.asList(new ParseInfo(formatter, List.of(parseInto), filter));
     FuzzyDateParser parser = new FuzzyDateParser(parseSpecs);
     FuzzyDate date = parser.parse("2008a");
-    assertTrue("01", date.isFuzzyDate());
+    assertTrue("01", date.isDateFuzzy());
     assertEquals("02", Year.class, date.bestMatch().getClass());
     assertEquals("03", date.toLocalDate(), LocalDate.of(2008, 1, 1));
   }
 
   ////////////////////////////////////////////////////////////////
-  // Tests with the "default" parser (using fuzzy-date.properties)
+  // Tests with the "default" parser (using FuzzyDate.properties)
   ////////////////////////////////////////////////////////////////
 
   @Test(expected = FuzzyDateException.class)
@@ -256,8 +259,9 @@ public class FuzzyDateParserTest {
 
   @Test
   public void test104() throws FuzzyDateException {
-    FuzzyDateParser.DEFAULT.parse("2005-02-29");
+    FuzzyDateParser.DEFAULT.parse("2005-02-32"); // 32-feb
     // Default is to parse lenient (no FuzzyDateException expected)
+    assertTrue(true);
   }
 
   @Test
@@ -283,9 +287,9 @@ public class FuzzyDateParserTest {
   @Test
   public void test200() throws FuzzyDateException {
 
-    ParseInfo ps0 = new ParseInfo("uuuu/MM/dd HH:mm:ss", LocalDateTime::from);
-    ParseInfo ps1 = new ParseInfo("uuuu/MM/dd", LocalDate::from);
-    ParseInfo ps2 = new ParseInfo("uuuu/MM/dd[ HH:mm:ss]", LocalDate::from);
+    ParseInfo ps0 = new ParseInfo("uuuu/MM/dd HH:mm:ss", List.of(LocalDateTime::from));
+    ParseInfo ps1 = new ParseInfo("uuuu/MM/dd", List.of(LocalDate::from));
+    ParseInfo ps2 = new ParseInfo("uuuu/MM/dd[ HH:mm:ss]", List.of(LocalDate::from));
 
     FuzzyDateParser parser = new FuzzyDateParser(ps0, ps1, ps2);
     FuzzyDate date = parser.parse("2018/08/14 13:42:33");
@@ -308,12 +312,42 @@ public class FuzzyDateParserTest {
     assertEquals("05", ps2, date.getParseInfo());
   }
 
-  private static FuzzyDateParser simpleParser(String pattern, TemporalQuery<?> parseInto) {
-    List<ParseInfo> parseSpecs = new ArrayList<>(1);
+  @Test
+  public void test201() {
+    Instant now = Instant.now();
+    // Cannot simply extract year straight away from Instant !
+    assertFalse(now.isSupported(ChronoField.YEAR));
+    // Should do it this way:
+    now.atOffset(ZoneOffset.UTC).get(ChronoField.YEAR);
+    // Or this way:
+    LocalDate.ofInstant(now, ZoneOffset.UTC).get(ChronoField.YEAR);
+    assertTrue(true);
+  }
+
+  /*
+   * This is the example provided in the javadocs of FuzzyDate. Better make sure it actually works.
+   */
+  @Test
+  @SuppressWarnings("unused")
+  public void test202() throws FuzzyDateException {
+    ParseInfo info1 = new ParseInfo("yyyy-MM-dd HH:mm:ss");
+    ParseInfo info2 = new ParseInfo("yyyy-MM-dd");
+    FuzzyDateParser parser = new FuzzyDateParser(info1, info2);
+    String dateString = "2020-09-18";
+    FuzzyDate fuzzyDate = parser.parse(dateString);
+    assertTrue(fuzzyDate.isTimeFuzzy());
+    assertFalse(fuzzyDate.isDateFuzzy());
+    assertSame(LocalDate.class, fuzzyDate.bestMatch().getClass());
+    assertSame(info2, fuzzyDate.getParseInfo());
+    OffsetDateTime realDate = fuzzyDate.toOffsetDateTime();
+  }
+
+  private static FuzzyDateParser simpleParser(
+      String pattern, TemporalQuery<TemporalAccessor> parseInto) {
+    List<ParseInfo> infos = new ArrayList<>(1);
     DateTimeFormatter formatter = formatter(pattern);
-    TemporalQuery<?>[] into = new TemporalQuery[] {parseInto};
-    parseSpecs.add(new ParseInfo(null, formatter, into));
-    return new FuzzyDateParser(parseSpecs);
+    infos.add(new ParseInfo(formatter, List.of(parseInto), null));
+    return new FuzzyDateParser(infos);
   }
 
   private static DateTimeFormatter formatter(String pattern) {

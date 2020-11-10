@@ -9,16 +9,18 @@ import java.util.regex.Pattern;
  * year from date strings like "2007b" or "1914 - 1918". If you are determined to at least extract a
  * year from a piece of text using the {@link FuzzyDateParser}, you can instantiate it with a {@link
  * ParseInfo} that specifies this filter to be applied. The {@code YearFilter} is also used, as a
- * last resort, by the {@link FuzzyDateParser#DEFAULT default} {code FuzzyDateParser}.
+ * last resort, by the {@link FuzzyDateParser#DEFAULT default parser}.
  */
 public class YearFilter implements UnaryOperator<String> {
+
+  public static YearFilter INSTANCE = new YearFilter();
 
   private static final int MIN_YEAR = 1500;
   private static final int MAX_YEAR = 2100;
 
   private static final Pattern PATTERN = Pattern.compile("(^|\\D+)(\\d{4})($|\\D+)");
 
-  public YearFilter() {}
+  YearFilter() {}
 
   @Override
   public String apply(String dateString) {

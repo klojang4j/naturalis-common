@@ -3,30 +3,22 @@ package nl.naturalis.common.time;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.Year;
-import java.time.YearMonth;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.ResolverStyle;
 import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalQuery;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.UnaryOperator;
 import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
-
-import static nl.naturalis.common.CollectionMethods.newLinkedHashMap;
 import static nl.naturalis.common.StringMethods.ifBlank;
+import static nl.naturalis.common.check.CommonChecks.keyIn;
 
 /**
  * An extension of {@link Properties} dedicated to reading configurations for the {@link
@@ -37,17 +29,20 @@ import static nl.naturalis.common.StringMethods.ifBlank;
 class ParseInfoConfig extends Properties {
 
   /**
-   * A map of all supported {@link Temporal} classes, mapped to the {@link TemporalQuery} used to
-   * instantiate them.
+   * Maps the supported {@link Temporal} classes to the {@link TemporalQuery} used to instantiate
+   * them.
    */
-  private static final Map<String, TemporalQuery<?>[]> supportedDateTypes =
-      newLinkedHashMap(
-          Instant.class.getSimpleName(), new TemporalQuery[] {Instant::from},
-          OffsetDateTime.class.getSimpleName(), new TemporalQuery[] {OffsetDateTime::from},
-          LocalDateTime.class.getSimpleName(), new TemporalQuery[] {LocalDateTime::from},
-          LocalDate.class.getSimpleName(), new TemporalQuery[] {LocalDate::from},
-          YearMonth.class.getSimpleName(), new TemporalQuery[] {YearMonth::from},
-          Year.class.getSimpleName(), new TemporalQuery[] {Year::from});
+  private static final Map<String, List<TemporalQuery<TemporalAccessor>>> supported =
+      new LinkedHashMap<>();
+
+  static {
+    supported.put(Instant.class.getSimpleName(), List.of(Instant::from));
+    supported.put(OffsetDateTime.class.getSimpleName(), List.of(Instant::from));
+    supported.put(LocalDateTime.class.getSimpleName(), List.of(LocalDateTime::from));
+    supported.put(LocalDate.class.getSimpleName(), List.of(LocalDate::from));
+    supported.put(YearMonth.class.getSimpleName(), List.of(YearMonth::from));
+    supported.put(Year.class.getSimpleName(), List.of(Year::from));
+  }
 
   private final String globalResolverStyle;
   private final String globalCaseSensitive;
@@ -72,44 +67,44 @@ class ParseInfoConfig extends Properties {
    */
   List<ParseInfo> createParseInfos() throws FuzzyDateException {
     List<ParseInfo> parseSpecs = new ArrayList<>();
-    for (String dateType : supportedDateTypes.keySet()) {
-      parseSpecs.addAll(createParseSpecs(dateType));
+    for (String dateType : supported.keySet()) {
+      parseSpecs.addAll(createParseInfos(dateType));
     }
     return parseSpecs;
   }
 
-  private List<ParseInfo> createParseSpecs(String dateType) throws FuzzyDateException {
-    List<ParseInfo> parseSpecs = new ArrayList<>();
+  private List<ParseInfo> createParseInfos(String dateTimeClass) throws FuzzyDateException {
+    List<ParseInfo> infos = new ArrayList<>();
     for (int i = 0; ; i++) {
-      String key = dateType + "." + i + ".name";
+      String key = dateTimeClass + "." + i + ".name";
       String val = getProperty(key);
       if (val != null) {
-        UnaryOperator<String> filter = getFilter(dateType, i);
+        UnaryOperator<String> filter = getFilter(dateTimeClass, i);
         DateTimeFormatter formatter = getNamedFormatter(val);
-        TemporalQuery<?>[] parseInto = getParseInto(dateType);
-        parseSpecs.add(new ParseInfo(filter, formatter, parseInto));
+        List<TemporalQuery<TemporalAccessor>> parseInto = getParseInto(dateTimeClass);
+        infos.add(new ParseInfo(formatter, parseInto, filter));
       } else {
-        key = dateType + "." + i + ".pattern";
+        key = dateTimeClass + "." + i + ".pattern";
         val = getProperty(key);
         if (val == null) {
           break;
         }
         DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder();
         builder.appendPattern(val);
-        if (!getCaseSensitive(dateType, i)) {
+        if (!getCaseSensitive(dateTimeClass, i)) {
           builder.parseCaseInsensitive();
         }
-        ResolverStyle resolverStyle = getResolverStyle(dateType, i);
+        ResolverStyle resolverStyle = getResolverStyle(dateTimeClass, i);
         if (resolverStyle == ResolverStyle.LENIENT) {
           builder.parseLenient();
         }
-        UnaryOperator<String> filter = getFilter(dateType, i);
+        UnaryOperator<String> filter = getFilter(dateTimeClass, i);
         DateTimeFormatter formatter = builder.toFormatter();
-        TemporalQuery<?>[] parseInto = getParseInto(dateType);
-        parseSpecs.add(new ParseInfo(filter, formatter, parseInto));
+        List<TemporalQuery<TemporalAccessor>> parseInto = getParseInto(dateTimeClass);
+        infos.add(new ParseInfo(formatter, parseInto, filter));
       }
     }
-    return parseSpecs;
+    return infos;
   }
 
   private ResolverStyle getResolverStyle(String dateType, int i) throws FuzzyDateException {
@@ -147,12 +142,11 @@ class ParseInfoConfig extends Properties {
     }
   }
 
-  private static TemporalQuery<?>[] getParseInto(String dateType) throws FuzzyDateException {
-    TemporalQuery<?>[] parseInto = supportedDateTypes.get(dateType);
-    Check.that(
-        parseInto != null,
-        () -> new FuzzyDateException("Non-existent or unsupported date/time class: " + dateType));
-    return parseInto;
+  private static List<TemporalQuery<TemporalAccessor>> getParseInto(String className)
+      throws FuzzyDateException {
+    return Check.that(className, FuzzyDateException::new)
+        .is(keyIn(), supported, "Unknown or unsupported date/time class: %s", className)
+        .ok(supported::get);
   }
 
   /*
@@ -173,9 +167,9 @@ class ParseInfoConfig extends Properties {
         Class<?> clazz = Class.forName(name.substring(0, i));
         field = clazz.getDeclaredField(name.substring(i + 1));
         int m = field.getModifiers();
-        Check.that(
-            isStatic(m) && isPublic(m),
-            () -> cannotCreateFormatter(name, "not a public static field"));
+        if (!isStatic(m) || !isPublic(m)) {
+          throw cannotCreateFormatter(name, "not a public static field");
+        }
       } catch (Exception e1) {
         throw cannotCreateFormatter(name, e1.toString());
       }

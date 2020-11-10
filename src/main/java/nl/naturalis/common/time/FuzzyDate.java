@@ -2,24 +2,66 @@ package nl.naturalis.common.time;
 
 import java.time.*;
 import java.time.temporal.TemporalAccessor;
+import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoField.*;
+import static nl.naturalis.common.ArrayMethods.isOneOf;
+import static nl.naturalis.common.ArrayMethods.pack;
+import static nl.naturalis.common.ObjectMethods.ifNull;
 
 /**
  * A {@code FuzzyDate} represents a date of which at least the year is known. You can retrieve
  * regular {@code java.time} objects from it as well as the verbatim date string from which it was
  * created. You obtain an instance by calling {@link FuzzyDateParser#parse(String)
  * FuzzyDateParser.parse}.
+ *
+ * <p>A simple example of the workflow and capabilities of {@code FuzzyDate} and friends:
+ *
+ * <p>
+ *
+ * <pre>
+ * ParseInfo info1 = new ParseInfo("yyyy-MM-dd HH:mm:ss");
+ * ParseInfo info2 = new ParseInfo("yyyy-MM-dd");
+ * FuzzyDateParser parser = new FuzzyDateParser(info1, info2);
+ * String dateString = "2020-09-18";
+ * FuzzyDate fuzzyDate = parser.parse(dateString);
+ * assertTrue(fuzzyDate.isTimeFuzzy());
+ * assertFalse(fuzzyDate.isDateFuzzy());
+ * assertSame(LocalDate.class, fuzzyDate.bestMatch().getClass());
+ * assertSame(info2, fuzzyDate.getParseInfo());
+ * OffsetDateTime realDate = fuzzyDate.toOffsetDateTime();
+ * </pre>
  */
 public final class FuzzyDate {
 
-  private final TemporalAccessor ta;
-  private final String verbatim;
-  private final ParseInfo parseSpec;
+  private static Class<?>[] supported =
+      pack(
+          OffsetDateTime.class,
+          LocalDateTime.class,
+          LocalDate.class,
+          YearMonth.class,
+          Year.class,
+          Instant.class);
 
-  FuzzyDate(TemporalAccessor ta, String verbatim, ParseInfo parseSpec) {
+  private final TemporalAccessor ta;
+  private final int year;
+  private final String verbatim;
+  private final ParseInfo parseInfo;
+
+  FuzzyDate(TemporalAccessor ta, int year, String verbatim, ParseInfo parseInfo) {
     this.ta = ta;
+    this.year = year;
     this.verbatim = verbatim;
-    this.parseSpec = parseSpec;
+    this.parseInfo = parseInfo;
+  }
+
+  /**
+   * Returns the year of this {@code FuzzyDate}, which is the one date/time field that is guaranteed
+   * to be known.
+   *
+   * @return The year of this {@code FuzzyDate}
+   */
+  public int getYear() {
+    return year;
   }
 
   /**
@@ -28,12 +70,20 @@ public final class FuzzyDate {
    * @return An instance of {@code Instant}
    */
   public Instant toInstant() {
-    if (ta.getClass() == Instant.class) {
-      return (Instant) ta;
+    if (ta.getClass() == Year.class) {
+      return ((Year) ta).atDay(1).atStartOfDay(UTC).toInstant();
+    } else if (ta.getClass() == YearMonth.class) {
+      return ((YearMonth) ta).atDay(1).atStartOfDay(UTC).toInstant();
     } else if (ta.getClass() == LocalDate.class) {
-      return ((LocalDate) ta).atStartOfDay(ZoneOffset.UTC).toInstant();
+      return ((LocalDate) ta).atStartOfDay(UTC).toInstant();
+    } else if (ta.getClass() == LocalDateTime.class) {
+      return ((LocalDateTime) ta).atOffset(UTC).toInstant();
+    } else if (ta.getClass() == OffsetDateTime.class) {
+      return ((OffsetDateTime) ta).toInstant();
+    } else if (ta.getClass() == Instant.class) {
+      return ((Instant) ta);
     } else {
-      return Instant.from(ta);
+      return assemble().toInstant();
     }
   }
 
@@ -44,71 +94,68 @@ public final class FuzzyDate {
    * @return An instance of {@code LocalDateTime}
    */
   public OffsetDateTime toOffsetDateTime() {
-    if (ta.getClass() == OffsetDateTime.class) {
-      return (OffsetDateTime) ta;
-    } else if (ta.getClass() == LocalDateTime.class) {
-      return ((LocalDateTime) ta).atOffset(ZoneOffset.UTC);
+    if (ta.getClass() == Year.class) {
+      return ((Year) ta).atDay(1).atStartOfDay(UTC).toOffsetDateTime();
+    } else if (ta.getClass() == YearMonth.class) {
+      return ((YearMonth) ta).atDay(1).atStartOfDay(UTC).toOffsetDateTime();
     } else if (ta.getClass() == LocalDate.class) {
-      return ((LocalDate) ta).atStartOfDay().atOffset(ZoneOffset.UTC);
+      return ((LocalDate) ta).atStartOfDay().atOffset(UTC);
+    } else if (ta.getClass() == LocalDateTime.class) {
+      return ((LocalDateTime) ta).atOffset(UTC);
+    } else if (ta.getClass() == OffsetDateTime.class) {
+      return ((OffsetDateTime) ta);
     } else if (ta.getClass() == Instant.class) {
-      return OffsetDateTime.ofInstant((Instant) ta, ZoneOffset.UTC);
+      return OffsetDateTime.ofInstant((Instant) ta, UTC);
     } else {
-      int year = ta.get(YEAR);
-      int month = ta.isSupported(MONTH_OF_YEAR) ? ta.get(MONTH_OF_YEAR) : 1;
-      int day = ta.isSupported(DAY_OF_MONTH) ? ta.get(DAY_OF_MONTH) : 1;
-      int hour = ta.isSupported(HOUR_OF_DAY) ? ta.get(HOUR_OF_DAY) : 0;
-      int minute = ta.isSupported(MINUTE_OF_HOUR) ? ta.get(MINUTE_OF_HOUR) : 0;
-      int second = ta.isSupported(SECOND_OF_MINUTE) ? ta.get(SECOND_OF_MINUTE) : 0;
-      return LocalDateTime.of(year, month, day, hour, minute, second).atOffset(ZoneOffset.UTC);
+      return assemble();
     }
   }
 
   /**
    * Converts this {@code FuzzyDate} to a {@link LocalDateTime} object, setting month and day to 1
-   * if unknown, and setting hour, minute and second to 0 if unknown.
+   * if unknown, and hour, minute and second to 0 if unknown.
    *
    * @return An instance of {@code LocalDateTime}
    */
   public LocalDateTime toLocalDateTime() {
-    if (ta.getClass() == LocalDateTime.class) {
+    if (ta.getClass() == Year.class) {
+      return ((YearMonth) ta).atDay(1).atStartOfDay();
+    } else if (ta.getClass() == YearMonth.class) {
+      return ((YearMonth) ta).atDay(1).atStartOfDay();
+    } else if (ta.getClass() == LocalDate.class) {
+      return ((LocalDate) ta).atStartOfDay();
+    } else if (ta.getClass() == LocalDateTime.class) {
       return (LocalDateTime) ta;
     } else if (ta.getClass() == OffsetDateTime.class) {
       return ((OffsetDateTime) ta).toLocalDateTime();
-    } else if (ta.getClass() == LocalDate.class) {
-      return ((LocalDate) ta).atStartOfDay();
     } else if (ta.getClass() == Instant.class) {
-      return LocalDateTime.ofInstant((Instant) ta, ZoneOffset.UTC);
+      return LocalDateTime.ofInstant((Instant) ta, UTC);
     } else {
-      int year = ta.get(YEAR);
-      int month = ta.isSupported(MONTH_OF_YEAR) ? ta.get(MONTH_OF_YEAR) : 1;
-      int day = ta.isSupported(DAY_OF_MONTH) ? ta.get(DAY_OF_MONTH) : 1;
-      int hour = ta.isSupported(HOUR_OF_DAY) ? ta.get(HOUR_OF_DAY) : 0;
-      int minute = ta.isSupported(MINUTE_OF_HOUR) ? ta.get(MINUTE_OF_HOUR) : 0;
-      int second = ta.isSupported(SECOND_OF_MINUTE) ? ta.get(SECOND_OF_MINUTE) : 0;
-      return LocalDateTime.of(year, month, day, hour, minute, second);
+      return assemble().toLocalDateTime();
     }
   }
 
   /**
-   * Converts this {@code FuzzyDate} to a {@link LocalDate} object, setting month and/or day to 1 if
+   * Converts this {@code FuzzyDate} to a {@link LocalDate} object, setting month and day to 1 if
    * unknown.
    *
-   * @return An instance of {@code LocalDateTime}
+   * @return An instance of {@code LocalDate}
    */
   public LocalDate toLocalDate() {
-    if (ta.getClass() == LocalDate.class) {
-      return (LocalDate) ta;
+    if (ta.getClass() == Year.class) {
+      return ((Year) ta).atDay(1);
+    } else if (ta.getClass() == YearMonth.class) {
+      return ((YearMonth) ta).atDay(1);
     } else if (ta.getClass() == OffsetDateTime.class) {
       return ((OffsetDateTime) ta).toLocalDate();
     } else if (ta.getClass() == LocalDateTime.class) {
       return ((LocalDateTime) ta).toLocalDate();
+    } else if (ta.getClass() == OffsetDateTime.class) {
+      return ((OffsetDateTime) ta).toLocalDate();
     } else if (ta.getClass() == Instant.class) {
-      return LocalDate.ofInstant((Instant) ta, ZoneId.of("Z"));
+      return LocalDate.ofInstant((Instant) ta, UTC);
     } else {
-      int year = ta.get(YEAR);
-      int month = ta.isSupported(MONTH_OF_YEAR) ? ta.get(MONTH_OF_YEAR) : 1;
-      int day = ta.isSupported(DAY_OF_MONTH) ? ta.get(DAY_OF_MONTH) : 1;
-      return LocalDate.of(year, month, day);
+      return assemble().toLocalDate();
     }
   }
 
@@ -118,7 +165,9 @@ public final class FuzzyDate {
    * @return An instance of {@code TemporalAccessor} that best matches the date string
    */
   public TemporalAccessor bestMatch() {
-    int year = ta.get(YEAR);
+    if (isOneOf(ta.getClass(), supported)) {
+      return ta;
+    }
     if (ta.isSupported(MONTH_OF_YEAR)) {
       int month = ta.get(MONTH_OF_YEAR);
       if (ta.isSupported(DAY_OF_MONTH)) {
@@ -127,7 +176,11 @@ public final class FuzzyDate {
           int hour = ta.get(HOUR_OF_DAY);
           int minute = ta.isSupported(MINUTE_OF_HOUR) ? ta.get(MINUTE_OF_HOUR) : 0;
           int second = ta.isSupported(SECOND_OF_MINUTE) ? ta.get(SECOND_OF_MINUTE) : 0;
-          return LocalDateTime.of(year, month, day, hour, minute, second);
+          ZoneOffset z = getZoneOffset();
+          if (z == null) {
+            return LocalDateTime.of(year, month, day, hour, minute, second);
+          }
+          return OffsetDateTime.of(year, month, day, hour, minute, second, 0, z);
         }
         return LocalDate.of(year, month, day);
       }
@@ -161,46 +214,46 @@ public final class FuzzyDate {
    * @return
    */
   public ParseInfo getParseInfo() {
-    return parseSpec;
+    return parseInfo;
   }
 
   /**
-   * Returns whether or not this instance contains a fuzzy date. Returns true if either month or day
+   * Returns whether or not the date of this instance is fuzzy. Returns true if either month or day
    * is unknown, false if both are known.
    *
-   * @return Whether or not this instance contains a fuzzy date
+   * @return Whether or not the date of this instance is fuzzy
    */
-  public boolean isFuzzyDate() {
+  public boolean isDateFuzzy() {
     return !(ta.isSupported(MONTH_OF_YEAR) && ta.isSupported(DAY_OF_MONTH));
   }
 
   /**
-   * Returns whether or not this instance contains a fuzzy time. Returns true if either the hour or
+   * Returns whether or not the time of this instance is fuzzy. Returns true if either the hour or
    * the minute is unknown, false if both are known. Seconds are ignored, so time is <i>not</i>
    * regarded as fuzzy if hour and minute are known but the second is not. If seconds are important,
    * use the <code>isSupported</code> method on the {@link TemporalAccessor} instance returned by
    * {@link #getTemporalAccessor() getTemporalAccessor}.
    *
-   * @return Whether or not this instance contains a fuzzy time
+   * @return Whether or not the date of this instance is fuzzy
    */
-  public boolean isFuzzyTime() {
+  public boolean isTimeFuzzy() {
     return !(ta.isSupported(HOUR_OF_DAY) && ta.isSupported(MINUTE_OF_HOUR));
   }
 
   /**
    * Returns whether or not there is anything fuzzy about this instance except for (perhaps) its
-   * second. Equivalent to {@code isFuzzyDate() || isFuzzyTime()}.
+   * second. Equivalent to {@code isDateFuzzy() || isTimeFuzzy()}.
    *
    * @return Whether or not there is anything fuzzy about this instance
    */
-  public boolean isFuzzyDateTime() {
-    return isFuzzyDate() || isFuzzyTime();
+  public boolean isFuzzy() {
+    return isDateFuzzy() || isTimeFuzzy();
   }
 
   /**
    * Returns true if this object's {@link TemporalAccessor} equals the other object's {@code
    * TemporalAccessor}, or if this object's {@link OffsetDateTime} representation equals the other
-   * object's {@link OffsetDateTime} representation. The verbatim date strings and the {@code
+   * object's {@link OffsetDateTime} representation. The verbatim date string and the {@code
    * ParseInfo} objects from which the two {@code FuzzyDate} instances were created are ignored.
    */
   @Override
@@ -220,5 +273,23 @@ public final class FuzzyDate {
   @Override
   public int hashCode() {
     return ta.hashCode();
+  }
+
+  private OffsetDateTime assemble() {
+    int month = ta.isSupported(MONTH_OF_YEAR) ? ta.get(MONTH_OF_YEAR) : 1;
+    int day = ta.isSupported(DAY_OF_MONTH) ? ta.get(DAY_OF_MONTH) : 1;
+    int hour = ta.isSupported(HOUR_OF_DAY) ? ta.get(HOUR_OF_DAY) : 0;
+    int minute = ta.isSupported(MINUTE_OF_HOUR) ? ta.get(MINUTE_OF_HOUR) : 0;
+    int second = ta.isSupported(SECOND_OF_MINUTE) ? ta.get(SECOND_OF_MINUTE) : 0;
+    ZoneOffset z = ifNull(getZoneOffset(), UTC);
+    return OffsetDateTime.of(year, month, day, hour, minute, second, 0, z);
+  }
+
+  private ZoneOffset getZoneOffset() {
+    try {
+      return ZoneOffset.from(ta);
+    } catch (DateTimeException e) {
+      return null;
+    }
   }
 }

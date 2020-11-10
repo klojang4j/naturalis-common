@@ -3,13 +3,17 @@ package nl.naturalis.common.time;
 import java.io.InputStream;
 import java.time.DateTimeException;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalQuery;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
 import static java.time.temporal.ChronoField.YEAR;
+import static nl.naturalis.common.ObjectMethods.ifNotNull;
+import static nl.naturalis.common.ObjectMethods.isEmpty;
 import static nl.naturalis.common.check.CommonChecks.noneNull;
 
 /**
@@ -164,38 +168,36 @@ public class FuzzyDateParser {
     String input; // goes into the formatter
     TemporalAccessor ta; // comes out of the formatter
     for (ParseInfo info : parseInfos) {
-      if (info.filter == null) {
-        input = dateString;
-      } else {
-        input = info.filter.apply(dateString);
-        if (input == null) {
-          continue;
-        }
+      input = ifNotNull(info.filter, f -> f.apply(dateString), dateString);
+      if (input == null) {
+        continue;
       }
       try {
-        if (info.parseInto == null || info.parseInto.length == 0) {
+        if (isEmpty(info.parseInto)) {
           ta = info.formatter.parse(input);
         } else {
-          if (info.parseInto.length == 1) {
-            ta = (TemporalAccessor) info.formatter.parse(input, info.parseInto[0]);
+          if (info.parseInto.size() == 1) {
+            ta = info.formatter.parse(input, info.parseInto.get(0));
           } else {
-            ta = info.formatter.parseBest(input, info.parseInto);
+            ta = info.formatter.parseBest(input, info.parseInto.toArray(TemporalQuery[]::new));
           }
         }
-        Check.that(hasKnownYear(ta), () -> new FuzzyDateException("Missing year: " + dateString));
-        return new FuzzyDate(ta, dateString, info);
+        Integer year = getYear(ta);
+        if (year != null) {
+          return new FuzzyDate(ta, year, dateString, info);
+        }
       } catch (DateTimeException e) { // Next one then
       }
     }
-    throw new FuzzyDateException("Could not create FuzzyDate for \": " + dateString + "\"");
+    throw new FuzzyDateException("Could not parse \"" + dateString + "\" into FuzzyDate");
   }
 
-  /*
-   * Whether or not a year can be extracted from the specified TemporalAccessor. Generally this
-   * comes down to calling the isSupported on the TemporalAccessor, but for Instant this will return
-   * false even though a year can obviously extracted from them.
-   */
-  private static boolean hasKnownYear(TemporalAccessor ta) {
-    return ta.isSupported(YEAR) || ta.getClass() == Instant.class;
+  private static Integer getYear(TemporalAccessor ta) {
+    if (ta.isSupported(YEAR)) {
+      return ta.get(YEAR);
+    } else if (ta.getClass() == Instant.class) {
+      return ((Instant) ta).atOffset(ZoneOffset.UTC).getYear();
+    }
+    return null;
   }
 }
