@@ -2,11 +2,11 @@ package nl.naturalis.common.time;
 
 import java.time.*;
 import java.time.temporal.TemporalAccessor;
+import java.util.Optional;
 import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoField.*;
 import static nl.naturalis.common.ArrayMethods.isOneOf;
-import static nl.naturalis.common.ArrayMethods.pack;
-import static nl.naturalis.common.ObjectMethods.ifNull;
+import static nl.naturalis.common.ObjectMethods.ifNotEmpty;
 
 /**
  * A {@code FuzzyDate} represents a date of which at least the year is known. You can retrieve
@@ -33,15 +33,6 @@ import static nl.naturalis.common.ObjectMethods.ifNull;
  */
 public final class FuzzyDate {
 
-  private static Class<?>[] supported =
-      pack(
-          OffsetDateTime.class,
-          LocalDateTime.class,
-          LocalDate.class,
-          YearMonth.class,
-          Year.class,
-          Instant.class);
-
   private final TemporalAccessor ta;
   private final int year;
   private final String verbatim;
@@ -55,8 +46,7 @@ public final class FuzzyDate {
   }
 
   /**
-   * Returns the year of this {@code FuzzyDate}, which is the one date/time field that is guaranteed
-   * to be known.
+   * Returns the year of this {@code FuzzyDate}.
    *
    * @return The year of this {@code FuzzyDate}
    */
@@ -65,59 +55,100 @@ public final class FuzzyDate {
   }
 
   /**
-   * Converts this {@code FuzzyDate} to an {@link Instant java.time.Instant} object.
+   * Converts this {@code FuzzyDate} to an {@link Instant}. Month and day are set to 1 if unknown.
+   * Hour, minute and second are set to 0 if unknown. The time zone is set to {@link ZoneOffset#UTC
+   * UTC} if unknown.
    *
-   * @return An instance of {@code Instant}
+   * @return The {@code Instant} most closely corresponding to this {@code FuzzyDate}
    */
   public Instant toInstant() {
+    return toInstant(UTC);
+  }
+
+  /**
+   * Converts this {@code FuzzyDate} to an {@link Instant}. Month and day are set to 1 if unknown.
+   * Hour, minute and second are set to 0 if unknown. The time zone is set to the specified time
+   * zone if unknown.
+   *
+   * @param zone The {@code ZoneOffset} to use if no {@code ZoneOffset} could be extracted from the
+   *     date string
+   * @return The {@code Instant} most closely corresponding to this {@code FuzzyDate}
+   */
+  public Instant toInstant(ZoneOffset zone) {
     if (ta.getClass() == Year.class) {
-      return ((Year) ta).atDay(1).atStartOfDay(UTC).toInstant();
+      return ((Year) ta).atDay(1).atStartOfDay(getZone(zone)).toInstant();
     } else if (ta.getClass() == YearMonth.class) {
-      return ((YearMonth) ta).atDay(1).atStartOfDay(UTC).toInstant();
+      return ((YearMonth) ta).atDay(1).atStartOfDay(getZone(zone)).toInstant();
     } else if (ta.getClass() == LocalDate.class) {
-      return ((LocalDate) ta).atStartOfDay(UTC).toInstant();
+      return ((LocalDate) ta).atStartOfDay(getZone(zone)).toInstant();
     } else if (ta.getClass() == LocalDateTime.class) {
-      return ((LocalDateTime) ta).atOffset(UTC).toInstant();
+      return ((LocalDateTime) ta).atOffset(getZone(zone)).toInstant();
     } else if (ta.getClass() == OffsetDateTime.class) {
       return ((OffsetDateTime) ta).toInstant();
     } else if (ta.getClass() == Instant.class) {
       return ((Instant) ta);
     } else {
-      return assemble().toInstant();
+      return assemble(zone).toInstant();
     }
   }
 
   /**
-   * Converts this {@code FuzzyDate} to a {@link OffsetDateTime} object, setting month and day to 1
-   * if unknown; hour, minute and second to 0 if unknown; and the time zone to UTC if unknown.
+   * Converts this {@code FuzzyDate} to an {@link OffsetDateTime}. Month and day are set to 1 if
+   * unknown. Hour, minute and second are set to 0 if unknown. The time zone is set to {@link
+   * ZoneOffset#UTC UTC} if unknown.
    *
-   * @return An instance of {@code LocalDateTime}
+   * @return The {@code OffsetDateTime} most closely corresponding to this {@code FuzzyDate}
    */
   public OffsetDateTime toOffsetDateTime() {
+    return toOffsetDateTime(UTC);
+  }
+
+  /**
+   * Converts this {@code FuzzyDate} to an {@link OffsetDateTime}. Month and day are set to 1 if
+   * unknown. Hour, minute and second are set to 0 if unknown. The time zone is set to the specified
+   * time zone if unknown.
+   *
+   * @param zone The {@code ZoneOffset} to use if no {@code ZoneOffset} could be extracted from the
+   *     date string
+   * @return The {@code Instant} most closely corresponding to this {@code FuzzyDate}
+   */
+  public OffsetDateTime toOffsetDateTime(ZoneOffset zone) {
     if (ta.getClass() == Year.class) {
-      return ((Year) ta).atDay(1).atStartOfDay(UTC).toOffsetDateTime();
+      return ((Year) ta).atDay(1).atStartOfDay(getZone(zone)).toOffsetDateTime();
     } else if (ta.getClass() == YearMonth.class) {
-      return ((YearMonth) ta).atDay(1).atStartOfDay(UTC).toOffsetDateTime();
+      return ((YearMonth) ta).atDay(1).atStartOfDay(getZone(zone)).toOffsetDateTime();
     } else if (ta.getClass() == LocalDate.class) {
-      return ((LocalDate) ta).atStartOfDay().atOffset(UTC);
+      return ((LocalDate) ta).atStartOfDay().atOffset(getZone(zone));
     } else if (ta.getClass() == LocalDateTime.class) {
-      return ((LocalDateTime) ta).atOffset(UTC);
+      return ((LocalDateTime) ta).atOffset(getZone(zone));
     } else if (ta.getClass() == OffsetDateTime.class) {
       return ((OffsetDateTime) ta);
     } else if (ta.getClass() == Instant.class) {
-      return OffsetDateTime.ofInstant((Instant) ta, UTC);
-    } else {
-      return assemble();
+      return OffsetDateTime.ofInstant((Instant) ta, getZone(zone));
     }
+    return assemble(zone);
   }
 
   /**
-   * Converts this {@code FuzzyDate} to a {@link LocalDateTime} object, setting month and day to 1
-   * if unknown, and hour, minute and second to 0 if unknown.
+   * Converts this {@code FuzzyDate} to a {@link LocalDateTime}. Month and day are set to 1 if
+   * unknown. Hour, minute and second are set to 0 if unknown. The time zone is set to {@link
+   * ZoneOffset#UTC UTC} if unknown.
    *
-   * @return An instance of {@code LocalDateTime}
+   * @return The {@code LocalDateTime} most closely corresponding to this {@code FuzzyDate}
    */
   public LocalDateTime toLocalDateTime() {
+    return toLocalDateTime(UTC);
+  }
+
+  /**
+   * Converts this {@code FuzzyDate} to a {@link LocalDateTime}, setting month and day to 1 if
+   * unknown, and hour, minute and second to 0 if unknown.
+   *
+   * @param zone The {@code ZoneOffset} to use if no {@code ZoneOffset} could be extracted from the
+   *     date string
+   * @return The {@code Instant} most closely corresponding to this {@code FuzzyDate}
+   */
+  public LocalDateTime toLocalDateTime(ZoneOffset zone) {
     if (ta.getClass() == Year.class) {
       return ((YearMonth) ta).atDay(1).atStartOfDay();
     } else if (ta.getClass() == YearMonth.class) {
@@ -129,19 +160,30 @@ public final class FuzzyDate {
     } else if (ta.getClass() == OffsetDateTime.class) {
       return ((OffsetDateTime) ta).toLocalDateTime();
     } else if (ta.getClass() == Instant.class) {
-      return LocalDateTime.ofInstant((Instant) ta, UTC);
-    } else {
-      return assemble().toLocalDateTime();
+      return LocalDateTime.ofInstant((Instant) ta, zone);
     }
+    return assemble(zone).toLocalDateTime();
   }
 
   /**
-   * Converts this {@code FuzzyDate} to a {@link LocalDate} object, setting month and day to 1 if
-   * unknown.
+   * Converts this {@code FuzzyDate} to a {@link LocalDate}. Month and day are set to 1 if unknown.
+   * Hour, minute and second are set to 0 if unknown. The time zone is set to {@link ZoneOffset#UTC
+   * UTC} if unknown.
    *
-   * @return An instance of {@code LocalDate}
+   * @return The {@code LocalDate} most closely corresponding to this {@code FuzzyDate}
    */
   public LocalDate toLocalDate() {
+    return toLocalDate(UTC);
+  }
+
+  /**
+   * Converts this {@code FuzzyDate} to a {@link LocalDateTime}. Month and day are set to 1 if
+   * unknown. Hour, minute and second are set to 0 if unknown. The time zone is set to {@link
+   * ZoneOffset#UTC UTC} if unknown.
+   *
+   * @return The {@code LocalDateTime} most closely corresponding to this {@code FuzzyDate}
+   */
+  public LocalDate toLocalDate(ZoneOffset timeZone) {
     if (ta.getClass() == Year.class) {
       return ((Year) ta).atDay(1);
     } else if (ta.getClass() == YearMonth.class) {
@@ -153,20 +195,56 @@ public final class FuzzyDate {
     } else if (ta.getClass() == OffsetDateTime.class) {
       return ((OffsetDateTime) ta).toLocalDate();
     } else if (ta.getClass() == Instant.class) {
-      return LocalDate.ofInstant((Instant) ta, UTC);
-    } else {
-      return assemble().toLocalDate();
+      return LocalDate.ofInstant((Instant) ta, getZone(timeZone));
     }
+    return assemble(timeZone).toLocalDate();
   }
 
   /**
-   * Returns the most granular date/time object that could be parsed out of the date string.
+   * Returns a date/time object whose type depends on the actual granularity of this {@code
+   * FuzzyDate}. See {@link #bestMatch(ZoneOffset)}.
    *
-   * @return An instance of {@code TemporalAccessor} that best matches the date string
+   * @return A date/time object whose type depends on the actual granularity of this {@code
+   *     FuzzyDate}
    */
   public TemporalAccessor bestMatch() {
-    if (isOneOf(ta.getClass(), supported)) {
+    return bestMatch(UTC);
+  }
+
+  /**
+   * Returns a date/time object whose type depends on the actual granularity of this {@code
+   * FuzzyDate}. The following {@code java.time} objects are supported:
+   *
+   * <p>
+   *
+   * <ul>
+   *   <li>{@link OffsetDateTime}
+   *   <li>{@link LocalDateTime}
+   *   <li>{@link LocalDate}
+   *   <li>{@link YearMonth}
+   *   <li>{@link Year}
+   * </ul>
+   *
+   * <p>This method will never return a {@link ZonedDateTime}, even if the date string was actually
+   * parsed into such an object. If desirable, you can use {@link #getTemporalAccessor()
+   * getTemporalAccessor()} and check if the returned object is {@code ZonedDateTime}.
+   *
+   * @return A date/time object whose type depends on the actual granularity of this {@code
+   *     FuzzyDate}
+   */
+  public TemporalAccessor bestMatch(ZoneOffset timeZone) {
+    if (isOneOf(
+        ta.getClass(),
+        OffsetDateTime.class,
+        LocalDateTime.class,
+        LocalDate.class,
+        YearMonth.class,
+        Year.class)) {
       return ta;
+    } else if (ta.getClass() == ZonedDateTime.class) {
+      return ((ZonedDateTime) ta).toOffsetDateTime();
+    } else if (ta.getClass() == Instant.class) {
+      return LocalDateTime.ofInstant((Instant) ta, timeZone);
     }
     if (ta.isSupported(MONTH_OF_YEAR)) {
       int month = ta.get(MONTH_OF_YEAR);
@@ -174,13 +252,12 @@ public final class FuzzyDate {
         int day = ta.get(DAY_OF_MONTH);
         if (ta.isSupported(HOUR_OF_DAY)) {
           int hour = ta.get(HOUR_OF_DAY);
-          int minute = ta.isSupported(MINUTE_OF_HOUR) ? ta.get(MINUTE_OF_HOUR) : 0;
-          int second = ta.isSupported(SECOND_OF_MINUTE) ? ta.get(SECOND_OF_MINUTE) : 0;
-          ZoneOffset z = getZoneOffset();
-          if (z == null) {
-            return LocalDateTime.of(year, month, day, hour, minute, second);
-          }
-          return OffsetDateTime.of(year, month, day, hour, minute, second, 0, z);
+          int min = ta.isSupported(MINUTE_OF_HOUR) ? ta.get(MINUTE_OF_HOUR) : 0;
+          int sec = ta.isSupported(SECOND_OF_MINUTE) ? ta.get(SECOND_OF_MINUTE) : 0;
+          return ifNotEmpty(
+              getTimeZone(),
+              z -> OffsetDateTime.of(year, month, day, hour, min, sec, 0, z.get()),
+              LocalDateTime.of(year, month, day, hour, min, sec));
         }
         return LocalDate.of(year, month, day);
       }
@@ -199,9 +276,26 @@ public final class FuzzyDate {
   }
 
   /**
-   * Returns the original date string from which this FuzzyDate instance was created.
+   * Returns an {@code Optional} containing the time zone or an empty {@code Optional} if unknown.
    *
-   * @return The original date string from which this FuzzyDate instance was created
+   * @return An {@code Optional} containing the time zone or an empty {@code Optional} if unknown
+   */
+  public Optional<ZoneOffset> getTimeZone() {
+    try {
+      return Optional.of(ZoneOffset.from(ta));
+    } catch (DateTimeException e) {
+      try {
+        return Optional.of(ZoneId.from(ta).getRules().getOffset(Instant.from(ta)));
+      } catch (DateTimeException e2) {
+        return Optional.empty();
+      }
+    }
+  }
+
+  /**
+   * Returns the original date string from which this instance was created.
+   *
+   * @return The original date string from which this instance was created
    */
   public String getVerbatim() {
     return verbatim;
@@ -241,10 +335,20 @@ public final class FuzzyDate {
   }
 
   /**
-   * Returns whether or not there is anything fuzzy about this instance except for (perhaps) its
-   * second. Equivalent to {@code isDateFuzzy() || isTimeFuzzy()}.
+   * Returns whether or not the time zone of this instance is fuzzy. Returns true if no {@link
+   * ZoneId} or {@link ZoneOffset} could be extracted from the date string.
    *
-   * @return Whether or not there is anything fuzzy about this instance
+   * @return Whether or not the time zone of this instance is fuzzy
+   */
+  public boolean isTimeZoneFuzzy() {
+    return getTimeZone().isEmpty();
+  }
+
+  /**
+   * Returns whether or not the date and/or time are fuzzy. Equivalent to {@code isDateFuzzy() ||
+   * isTimeFuzzy()}.
+   *
+   * @return Whether or not the date and/or time are fuzzy.
    */
   public boolean isFuzzy() {
     return isDateFuzzy() || isTimeFuzzy();
@@ -272,24 +376,19 @@ public final class FuzzyDate {
 
   @Override
   public int hashCode() {
-    return ta.hashCode();
+    return toOffsetDateTime().hashCode();
   }
 
-  private OffsetDateTime assemble() {
+  private OffsetDateTime assemble(ZoneOffset dfault) {
     int month = ta.isSupported(MONTH_OF_YEAR) ? ta.get(MONTH_OF_YEAR) : 1;
     int day = ta.isSupported(DAY_OF_MONTH) ? ta.get(DAY_OF_MONTH) : 1;
     int hour = ta.isSupported(HOUR_OF_DAY) ? ta.get(HOUR_OF_DAY) : 0;
     int minute = ta.isSupported(MINUTE_OF_HOUR) ? ta.get(MINUTE_OF_HOUR) : 0;
     int second = ta.isSupported(SECOND_OF_MINUTE) ? ta.get(SECOND_OF_MINUTE) : 0;
-    ZoneOffset z = ifNull(getZoneOffset(), UTC);
-    return OffsetDateTime.of(year, month, day, hour, minute, second, 0, z);
+    return OffsetDateTime.of(year, month, day, hour, minute, second, 0, getZone(dfault));
   }
 
-  private ZoneOffset getZoneOffset() {
-    try {
-      return ZoneOffset.from(ta);
-    } catch (DateTimeException e) {
-      return null;
-    }
+  private ZoneOffset getZone(ZoneOffset dfault) {
+    return getTimeZone().orElse(dfault);
   }
 }

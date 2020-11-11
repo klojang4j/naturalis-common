@@ -2,7 +2,10 @@ package nl.naturalis.common;
 
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.Relation;
 import static java.util.stream.Collectors.toSet;
@@ -488,9 +491,9 @@ public class ObjectMethods {
    * String[] strs = ifNotNull("Hello World", s -> s.split(" "), new String[0]);
    * </pre>
    *
-   * @param <T> The type of the first argument
+   * @param <T> The type of the first value to transform
    * @param <U> The return type
-   * @param arg The value to test
+   * @param arg The value to transform
    * @param then The transformation to apply to the value if it is not null
    * @param dfault A default value to return if the argument is null
    * @return The result produced by the {@code Function} or by the {@code Supplier}
@@ -501,55 +504,17 @@ public class ObjectMethods {
 
   /**
    * Returns the result of passing the specified argument to the specified {@code Funtion} if the
-   * argument is not null, else returns the result provided by the specified {@code Supplier}. When
-   * using a lambda for the supplier the compiler will probably force you to assign the result of
-   * {@code ifNotNull} to a local variable first and then pass the local variable to a subsequent
-   * method call. Directly embedding the {@code ifNotNull} as an argument to another method causes
-   * the compiler to run into ambiguities.
-   *
-   * @param <T> The type of the first argument
-   * @param <U> The return type
-   * @param arg The value to test
-   * @param then The transformation to apply to the value if it is not null
-   * @param otherwise A supplier providing the default value
-   * @return The result produced by the {@code Function} or by the {@code Supplier}
-   */
-  public static <T, U> U ifNotNull(T arg, Function<T, U> then, Supplier<U> otherwise) {
-    return arg != null ? then.apply(arg) : otherwise.get();
-  }
-
-  /**
-   * Returns the result of passing the specified argument to the specified {@code Funtion} if the
    * argument is not {@link #isEmpty(Object) empty}, else a default value.
    *
-   * @param <T> The type of the first argument
+   * @param <T> The type of the value to transform
    * @param <U> The return type
-   * @param arg The value to testdoIfNotNull
+   * @param arg The value to transform
    * @param then The function to apply to the value if it is not null
    * @param dfault A default value to return if the argument is empty
-   * @return The result produced by the {@code Function} or by the {@code Supplier}
+   * @return The result produced by the {@code Function} or a default value
    */
   public static <T, U> U ifNotEmpty(T arg, Function<T, U> then, U dfault) {
     return isNotEmpty(arg) ? then.apply(arg) : dfault;
-  }
-
-  /**
-   * Returns the result of passing the specified argument to the specified {@code Funtion} if the
-   * argument is not null, else returns the result provided by the specified {@code Supplier}. When
-   * using a lambda for the supplier the compiler will probably force you to assign the result of
-   * {@code ifNotEmpty} to a local variable first and then pass the local variable to a subsequent
-   * method call. Directly embedding the {@code isNotEmpty} as an argument to another method causes
-   * the compiler to run into ambiguities.
-   *
-   * @param <T> The type of the first argument
-   * @param <U> The return type
-   * @param arg The value to test
-   * @param then The function to apply to the value if it is not null
-   * @param otherwise The supplier providing a default value
-   * @return The result produced by the {@code Function} or by the {@code Supplier}
-   */
-  public static <T, U> U ifNotEmpty(T arg, Function<T, U> then, Supplier<U> otherwise) {
-    return isNotEmpty(arg) ? then.apply(arg) : otherwise.get();
   }
 
   /**
