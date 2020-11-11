@@ -302,10 +302,9 @@ public final class FuzzyDate {
   }
 
   /**
-   * Returns the {@link ParseInfo} instance used to parse the date string into this {@code
-   * FuzzyDate} instance.
+   * Returns the {@link ParseInfo} instance that was used to parse the date string.
    *
-   * @return
+   * @return The {@code ParseInfo} instance that was used to parse the date string
    */
   public ParseInfo getParseInfo() {
     return parseInfo;
@@ -355,10 +354,9 @@ public final class FuzzyDate {
   }
 
   /**
-   * Returns true if this object's {@link TemporalAccessor} equals the other object's {@code
-   * TemporalAccessor}, or if this object's {@link OffsetDateTime} representation equals the other
-   * object's {@link OffsetDateTime} representation. The verbatim date string and the {@code
-   * ParseInfo} objects from which the two {@code FuzzyDate} instances were created are ignored.
+   * Returns true if this object's {@link #bestMatch()} equals the other object's {@code
+   * bestMatch()}. The verbatim date string and the {@code ParseInfo} objects from which the two
+   * {@code FuzzyDate} instances were created are ignored.
    */
   @Override
   public boolean equals(Object obj) {
@@ -368,10 +366,7 @@ public final class FuzzyDate {
       return false;
     }
     FuzzyDate other = (FuzzyDate) obj;
-    if (ta.equals(other.ta) || toOffsetDateTime().equals(other.toOffsetDateTime())) {
-      return true;
-    }
-    return false;
+    return bestMatch().equals(other.bestMatch());
   }
 
   @Override
