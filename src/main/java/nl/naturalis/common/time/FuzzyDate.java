@@ -12,12 +12,11 @@ import static nl.naturalis.common.ArrayMethods.isOneOf;
 import static nl.naturalis.common.ObjectMethods.ifNotEmpty;
 
 /**
- * A {@code FuzzyDate} represents the result of parsing a date string into a {@code java.time}. You
- * obtain an instance by calling {@link FuzzyDateParser#parse(String) FuzzyDateParser.parse}. If
- * this method does not throw an exception, the returned {@code FuzzyDate} is guaranteed to have at
- * least a known year. Month, day, hour, minute, second and time zone may or may not be known.
- * However, you can still convert the {@link FuzzyDate} to a regular {@code java.time} object using
- * conversion methods like {@link #toLocalDateTime()}.
+ * A {@code FuzzyDate} represents the result of parsing a date string into a date/time object. You
+ * obtain a {@code FuzzyDate} by calling {@link FuzzyDateParser#parse(String)}. The instance
+ * returned by the parser is guaranteed to have at least a known year. Month, day, hour, minute,
+ * second and time zone may or may not be known. If the parser could not extract a year from the
+ * date string a {@link FuzzyDateException} is thrown.
  *
  * <p>A simple example of the workflow and capabilities of {@code FuzzyDate} and friends:
  *
@@ -390,9 +389,7 @@ public final class FuzzyDate {
   /**
    * Returns whether or not the time of this instance is fuzzy. Returns true if either the hour or
    * the minute is unknown, false if both are known. Seconds are ignored, so time is <i>not</i>
-   * regarded as fuzzy if hour and minute are known but the second is not. If seconds are important,
-   * use the <code>isSupported</code> method on the {@link TemporalAccessor} instance returned by
-   * {@link #getTemporalAccessor() getTemporalAccessor}.
+   * regarded as fuzzy if hour and minute are known but the second is not.
    *
    * @return Whether or not the date of this instance is fuzzy
    */
@@ -411,7 +408,7 @@ public final class FuzzyDate {
   }
 
   /**
-   * Returns whether or not the date and/or time are fuzzy. Equivalent to {@code isDateFuzzy() ||
+   * Returns whether or not the date or time is fuzzy. Equivalent to {@code isDateFuzzy() ||
    * isTimeFuzzy()}.
    *
    * @return Whether or not the date and/or time are fuzzy.

@@ -19,6 +19,7 @@ import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 import static nl.naturalis.common.StringMethods.ifBlank;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
+import static nl.naturalis.common.time.FuzzyDateException.*;
 
 /**
  * An extension of {@link Properties} dedicated to reading configurations for the {@link
@@ -118,7 +119,7 @@ class ParseInfoConfig extends Properties {
       case "LENIENT":
         return ResolverStyle.LENIENT;
       default:
-        throw new FuzzyDateException("Invalid resolver style: " + val);
+        throw noSuchResolverStyle(val);
     }
   }
 
@@ -138,14 +139,14 @@ class ParseInfoConfig extends Properties {
     try {
       return (UnaryOperator<String>) Class.forName(val).getDeclaredConstructor().newInstance();
     } catch (Exception e) {
-      throw new FuzzyDateException(String.format("Could not create filter for \"%s\": %s", val, e));
+      throw cannotCreateFilter(val);
     }
   }
 
   private static List<TemporalQuery<TemporalAccessor>> getParseInto(String className)
       throws FuzzyDateException {
-    return Check.that(className, FuzzyDateException::new)
-        .is(keyIn(), supported, "Unknown or unsupported date/time class: %s", className)
+    return Check.that(className, s -> unsupportedDateTimeClass(className))
+        .is(keyIn(), supported)
         .ok(supported::get);
   }
 
@@ -182,15 +183,5 @@ class ParseInfoConfig extends Properties {
     } catch (IllegalAccessException e2) {
       throw cannotCreateFormatter(name, e2.toString());
     }
-  }
-
-  private static FuzzyDateException cannotCreateFormatter(String name) {
-    return new FuzzyDateException(
-        String.format("Cannot create DateTimeFormatter for \"%s\"", name));
-  }
-
-  private static FuzzyDateException cannotCreateFormatter(String name, String reason) {
-    return new FuzzyDateException(
-        String.format("Cannot create DateTimeFormatter for \"%s\": %s", name, reason));
   }
 }

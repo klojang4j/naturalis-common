@@ -176,7 +176,7 @@ public class ObjectMethods {
   /**
    * Verifies that the argument is not null and, if it is a {@link Collection}, {@link Map} or
    * {@code Object[]}, does not contain any null values. It may still be an empty collection, map or
-   * array, however. Useful for testing varargs arrays.
+   * array, however.
    *
    * @param obj The object to be tested
    * @return Whether or not it is not null and does not contain any null values

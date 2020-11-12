@@ -53,7 +53,7 @@ class Messages {
     return String.format(ERR_INVALID_VALUE, msgArgs[0], argVal(msgArgs[1]));
   }
 
-  static Function<Object[], String> msgNullRef() {
+  static Function<Object[], String> msgNotSet() {
     return x -> format("%s must be null (was %s)", x[0], argVal(x[1]));
   }
 

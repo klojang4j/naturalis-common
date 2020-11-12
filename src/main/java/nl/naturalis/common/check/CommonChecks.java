@@ -113,13 +113,13 @@ public class CommonChecks {
    * @param <T> The type of the argument
    * @return A {@code Predicate}
    */
-  public static <T> Predicate<T> nullRef() {
+  public static <T> Predicate<T> notSet() {
     return Objects::isNull;
   }
 
   static {
-    addMessage(nullRef(), msgNullRef());
-    addName(nullRef(), "nullRef");
+    addMessage(notSet(), msgNotSet());
+    addName(notSet(), "notSet");
   }
 
   /**

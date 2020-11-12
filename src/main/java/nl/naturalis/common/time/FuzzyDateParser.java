@@ -159,6 +159,7 @@ public class FuzzyDateParser {
     Check.notNull(dateString, "dateString");
     String input; // goes into the formatter
     TemporalAccessor ta; // comes out of the formatter
+    boolean parsable = false;
     for (ParseInfo info : parseInfos) {
       input = ifNotNull(info.filter, f -> f.apply(dateString), dateString);
       if (input == null) {
@@ -167,13 +168,12 @@ public class FuzzyDateParser {
       try {
         if (isEmpty(info.parseInto)) {
           ta = info.formatter.parse(input);
+        } else if (info.parseInto.size() == 1) {
+          ta = info.formatter.parse(input, info.parseInto.get(0));
         } else {
-          if (info.parseInto.size() == 1) {
-            ta = info.formatter.parse(input, info.parseInto.get(0));
-          } else {
-            ta = info.formatter.parseBest(input, info.parseInto.toArray(TemporalQuery[]::new));
-          }
+          ta = info.formatter.parseBest(input, info.parseInto.toArray(TemporalQuery[]::new));
         }
+        parsable = true;
         Integer year = getYear(ta);
         if (year != null) {
           return new FuzzyDate(ta, year, dateString, info);
@@ -181,7 +181,10 @@ public class FuzzyDateParser {
       } catch (DateTimeException e) { // Next one then
       }
     }
-    throw new FuzzyDateException("Could not parse \"" + dateString + "\" into FuzzyDate");
+    if (parsable) {
+      throw FuzzyDateException.missingYear(dateString);
+    }
+    throw FuzzyDateException.notParsable(dateString);
   }
 
   private static Integer getYear(TemporalAccessor ta) {
