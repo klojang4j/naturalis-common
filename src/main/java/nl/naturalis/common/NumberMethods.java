@@ -97,7 +97,7 @@ public class NumberMethods {
    * @param i The primitive wrapper
    * @return The argument or the default value of the corresponding primitive type
    */
-  public static Integer nvl(Integer i) {
+  public static Integer ntz(Integer i) {
     return ObjectMethods.ifNull(i, ZERO_INT);
   }
 
@@ -107,7 +107,7 @@ public class NumberMethods {
    * @param d The primitive wrapper
    * @return The argument or the default value of the corresponding primitive type
    */
-  public static Double nvl(Double d) {
+  public static Double ntz(Double d) {
     return ObjectMethods.ifNull(d, ZERO_DOUBLE);
   }
 
@@ -117,7 +117,7 @@ public class NumberMethods {
    * @param l The primitive wrapper
    * @return The argument or the default value of the corresponding primitive type
    */
-  public static Long nvl(Long l) {
+  public static Long ntz(Long l) {
     return ObjectMethods.ifNull(l, ZERO_LONG);
   }
 
@@ -127,7 +127,7 @@ public class NumberMethods {
    * @param f The primitive wrapper
    * @return The argument or the default value of the corresponding primitive type
    */
-  public static Float nvl(Float f) {
+  public static Float ntz(Float f) {
     return ObjectMethods.ifNull(f, ZERO_FLOAT);
   }
 
@@ -137,7 +137,7 @@ public class NumberMethods {
    * @param s The primitive wrapper
    * @return The argument or the default value of the corresponding primitive type
    */
-  public static Short nvl(Short s) {
+  public static Short ntz(Short s) {
     return ObjectMethods.ifNull(s, ZERO_SHORT);
   }
 
@@ -147,7 +147,7 @@ public class NumberMethods {
    * @param b The primitive wrapper
    * @return The argument or the default value of the corresponding primitive type
    */
-  public static Byte nvl(Byte b) {
+  public static Byte ntz(Byte b) {
     return ObjectMethods.ifNull(b, ZERO_BYTE);
   }
 

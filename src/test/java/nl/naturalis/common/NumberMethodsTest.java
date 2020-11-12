@@ -55,18 +55,18 @@ public class NumberMethodsTest {
 
   @Test
   public void nvl01() {
-    assertTrue(nvl((Integer) null) == ZERO_INT);
-    assertTrue(nvl((Double) null) == ZERO_DOUBLE);
-    assertTrue(nvl((Long) null) == ZERO_LONG);
-    assertTrue(nvl((Float) null) == ZERO_FLOAT);
-    assertTrue(nvl((Short) null) == ZERO_SHORT);
-    assertTrue(nvl((Byte) null) == ZERO_BYTE);
-    assertTrue(nvl(2) == 2);
-    assertTrue(nvl(2.0) == 2D);
-    assertTrue(nvl(2L) == 2L);
-    assertTrue(nvl(2.0F) == 2F);
-    assertTrue(nvl((short) 2) == (short) 2);
-    assertTrue(nvl((byte) 2) == (byte) 2);
+    assertTrue(ntz((Integer) null) == ZERO_INT);
+    assertTrue(ntz((Double) null) == ZERO_DOUBLE);
+    assertTrue(ntz((Long) null) == ZERO_LONG);
+    assertTrue(ntz((Float) null) == ZERO_FLOAT);
+    assertTrue(ntz((Short) null) == ZERO_SHORT);
+    assertTrue(ntz((Byte) null) == ZERO_BYTE);
+    assertTrue(ntz(2) == 2);
+    assertTrue(ntz(2.0) == 2D);
+    assertTrue(ntz(2L) == 2L);
+    assertTrue(ntz(2.0F) == 2F);
+    assertTrue(ntz((short) 2) == (short) 2);
+    assertTrue(ntz((byte) 2) == (byte) 2);
   }
 
   @Test(expected = NumberFormatException.class)

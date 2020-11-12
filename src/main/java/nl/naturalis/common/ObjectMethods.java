@@ -174,7 +174,7 @@ public class ObjectMethods {
   }
 
   /**
-   * Verifies that the argument is not null and, in case of a {@link Collection}, {@link Map} or
+   * Verifies that the argument is not null and, if it is a {@link Collection}, {@link Map} or
    * {@code Object[]}, does not contain any null values. It may still be an empty collection, map or
    * array, however. Useful for testing varargs arrays.
    *
@@ -316,41 +316,6 @@ public class ObjectMethods {
   public static <T> T ifNull(T value, Supplier<T> supplier) {
     Check.notNull(supplier, "supplier").has(supplied(), notNull());
     return value == null ? supplier.get() : value;
-  }
-
-  /**
-   * Returns the default {@code boolean} value ({@code false}) if the argument is null, else the
-   * argument itself.
-   *
-   * @see NumberMethods#nvl(Integer)
-   * @param b The primitive wrapper
-   * @return The argument or the default value of the corresponding primitive type
-   */
-  public static Boolean nvl(Boolean b) {
-    return ifNull(b, Boolean.FALSE);
-  }
-
-  /**
-   * Returns the default {@code char} value ('\u0000') if the argument is null, else the unboxed
-   * argument itself.
-   *
-   * @see NumberMethods#nvl(Integer)
-   * @param c The primitive wrapper
-   * @return The argument or the default value of the corresponding primitive type
-   */
-  public static Character nvl(Character c) {
-    return ifNull(c, '\u0000');
-  }
-
-  /**
-   * Returns an empty {@code String} if the argument is null, else the argument itself.
-   *
-   * @see NumberMethods#nvl(Integer)
-   * @param s The string to return if not null
-   * @return The argument itself or an empty {@code String}
-   */
-  public static String nvl(String s) {
-    return ifNull(s, StringMethods.EMPTY);
   }
 
   /**

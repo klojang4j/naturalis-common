@@ -284,6 +284,7 @@ public class FuzzyDateParserTest {
   ////////////////////////////////////////////////////////////////////////////////////
   // Miscellaneous aspects of the FyzzyDate package
   ////////////////////////////////////////////////////////////////////////////////////
+
   @Test
   public void test200() throws FuzzyDateException {
 
@@ -340,6 +341,40 @@ public class FuzzyDateParserTest {
     assertSame(LocalDate.class, fuzzyDate.bestMatch().getClass());
     assertSame(info2, fuzzyDate.getParseInfo());
     OffsetDateTime realDate = fuzzyDate.toOffsetDateTime();
+  }
+
+  @Test
+  public void test203() throws FuzzyDateException {
+    ParseInfo info1 = ParseInfo.ISO_OFFSET_DATE_TIME;
+    FuzzyDateParser parser = new FuzzyDateParser(info1);
+    String dateString = "2020-09-18T00:03:04+02:00";
+    FuzzyDate fd = parser.parse(dateString);
+    assertFalse("01", fd.isTimeZoneFuzzy());
+    assertEquals("02", ZoneOffset.ofHours(2), fd.getTimeZone().get());
+  }
+
+  /*
+   *  Tests with non-sensical, but valid date formats
+   */
+
+  @Test
+  public void test301() throws FuzzyDateException {
+    ParseInfo info1 = new ParseInfo("yyyy-ss");
+    FuzzyDateParser parser = new FuzzyDateParser(info1);
+    String dateString = "2020-02";
+    FuzzyDate fd = parser.parse(dateString);
+    assertSame(Year.class, fd.bestMatch().getClass());
+    assertEquals("02", LocalDateTime.of(2020, 1, 1, 0, 0, 2), fd.toLocalDateTime());
+  }
+
+  @Test
+  public void test302() throws FuzzyDateException {
+    ParseInfo info1 = new ParseInfo("yyyy-dd mm:ss");
+    FuzzyDateParser parser = new FuzzyDateParser(info1);
+    String dateString = "2020-02 23:12";
+    FuzzyDate fd = parser.parse(dateString);
+    assertSame("01", Year.class, fd.bestMatch().getClass());
+    assertEquals("02", LocalDateTime.of(2020, 1, 2, 0, 23, 12), fd.toLocalDateTime());
   }
 
   private static FuzzyDateParser simpleParser(

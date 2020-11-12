@@ -1,18 +1,23 @@
 package nl.naturalis.common.time;
 
 import java.time.*;
+import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoField.*;
 import static nl.naturalis.common.ArrayMethods.isOneOf;
 import static nl.naturalis.common.ObjectMethods.ifNotEmpty;
 
 /**
- * A {@code FuzzyDate} represents a date of which at least the year is known. You can retrieve
- * regular {@code java.time} objects from it as well as the verbatim date string from which it was
- * created. You obtain an instance by calling {@link FuzzyDateParser#parse(String)
- * FuzzyDateParser.parse}.
+ * A {@code FuzzyDate} represents the result of parsing a date string into a {@code java.time}. You
+ * obtain an instance by calling {@link FuzzyDateParser#parse(String) FuzzyDateParser.parse}. If
+ * this method does not throw an exception, the returned {@code FuzzyDate} is guaranteed to have at
+ * least a known year. Month, day, hour, minute, second and time zone may or may not be known.
+ * However, you can still convert the {@link FuzzyDate} to a regular {@code java.time} object using
+ * conversion methods like {@link #toLocalDateTime()}.
  *
  * <p>A simple example of the workflow and capabilities of {@code FuzzyDate} and friends:
  *
@@ -52,6 +57,84 @@ public final class FuzzyDate {
    */
   public int getYear() {
     return year;
+  }
+
+  /**
+   * Returns an {@code OptionalInt} containing the month of this {@code FuzzyDate} or an empty
+   * {@code OptionalInt} if no month could be extracted from the date string.
+   *
+   * @return The month of this {@code FuzzyDate}
+   */
+  public OptionalInt getMonth() {
+    return get(MONTH_OF_YEAR);
+  }
+
+  /**
+   * Returns an {@code OptionalInt} containing the day of this {@code FuzzyDate} or an empty {@code
+   * OptionalInt} if no day could be extracted from the date string.
+   *
+   * @return The day of this {@code FuzzyDate}
+   */
+  public OptionalInt getDay() {
+    return get(DAY_OF_MONTH);
+  }
+
+  /**
+   * Returns an {@code OptionalInt} containing the hour of this {@code FuzzyDate} or an empty {@code
+   * OptionalInt} if no hour could be extracted from the date string.
+   *
+   * @return The hour of this {@code FuzzyDate}
+   */
+  public OptionalInt getHour() {
+    return get(HOUR_OF_DAY);
+  }
+
+  /**
+   * Returns an {@code OptionalInt} containing the minute of this {@code FuzzyDate} or an empty
+   * {@code OptionalInt} if no minute could be extracted from the date string.
+   *
+   * @return The minute of this {@code FuzzyDate}
+   */
+  public OptionalInt getMinute() {
+    return get(MINUTE_OF_HOUR);
+  }
+
+  /**
+   * Returns an {@code OptionalInt} containing the second of this {@code FuzzyDate} or an empty
+   * {@code OptionalInt} if no second could be extracted from the date string.
+   *
+   * @return The second of this {@code FuzzyDate}
+   */
+  public OptionalInt getSecond() {
+    return get(SECOND_OF_MINUTE);
+  }
+
+  /**
+   * Returns an {@code OptionalInt} containing the nano second of this {@code FuzzyDate} or an empty
+   * {@code OptionalInt} if no nano second could be extracted from the date string.
+   *
+   * @return The nano second of this {@code FuzzyDate}
+   */
+  public OptionalInt getNano() {
+    return get(NANO_OF_SECOND);
+  }
+
+  /**
+   * Returns an {@code Optional} containing the time zone or an empty {@code Optional} if no nano
+   * second could be extracted from the date string.
+   *
+   * @return An {@code Optional} containing the time zone
+   */
+  public Optional<ZoneOffset> getTimeZone() {
+    try {
+      return Optional.of(ZoneOffset.from(ta));
+    } catch (DateTimeException e) {
+      try {
+        return Optional.of(ZoneId.from(ta).getRules().getOffset(Instant.from(ta)));
+      } catch (DateTimeException e2) {
+        return Optional.empty();
+      }
+    }
   }
 
   /**
@@ -252,11 +335,12 @@ public final class FuzzyDate {
         int day = ta.get(DAY_OF_MONTH);
         if (ta.isSupported(HOUR_OF_DAY)) {
           int hour = ta.get(HOUR_OF_DAY);
-          int min = ta.isSupported(MINUTE_OF_HOUR) ? ta.get(MINUTE_OF_HOUR) : 0;
-          int sec = ta.isSupported(SECOND_OF_MINUTE) ? ta.get(SECOND_OF_MINUTE) : 0;
+          int min = getMinute().orElse(0);
+          int sec = getSecond().orElse(0);
+          int nano = getNano().orElse(0);
           return ifNotEmpty(
               getTimeZone(),
-              z -> OffsetDateTime.of(year, month, day, hour, min, sec, 0, z.get()),
+              z -> OffsetDateTime.of(year, month, day, hour, min, sec, nano, z.get()),
               LocalDateTime.of(year, month, day, hour, min, sec));
         }
         return LocalDate.of(year, month, day);
@@ -273,23 +357,6 @@ public final class FuzzyDate {
    */
   public TemporalAccessor getTemporalAccessor() {
     return ta;
-  }
-
-  /**
-   * Returns an {@code Optional} containing the time zone or an empty {@code Optional} if unknown.
-   *
-   * @return An {@code Optional} containing the time zone or an empty {@code Optional} if unknown
-   */
-  public Optional<ZoneOffset> getTimeZone() {
-    try {
-      return Optional.of(ZoneOffset.from(ta));
-    } catch (DateTimeException e) {
-      try {
-        return Optional.of(ZoneId.from(ta).getRules().getOffset(Instant.from(ta)));
-      } catch (DateTimeException e2) {
-        return Optional.empty();
-      }
-    }
   }
 
   /**
@@ -366,7 +433,17 @@ public final class FuzzyDate {
       return false;
     }
     FuzzyDate other = (FuzzyDate) obj;
-    return bestMatch().equals(other.bestMatch());
+    if (ta.equals(other.ta)) {
+      return true;
+    }
+    return year == other.year
+        && Objects.equals(get(MONTH_OF_YEAR), other.get(MONTH_OF_YEAR))
+        && Objects.equals(get(DAY_OF_MONTH), other.get(DAY_OF_MONTH))
+        && Objects.equals(get(HOUR_OF_DAY), other.get(HOUR_OF_DAY))
+        && Objects.equals(get(MINUTE_OF_HOUR), other.get(MINUTE_OF_HOUR))
+        && Objects.equals(get(SECOND_OF_MINUTE), other.get(SECOND_OF_MINUTE))
+        && Objects.equals(get(NANO_OF_SECOND), other.get(NANO_OF_SECOND))
+        && Objects.equals(getTimeZone(), other.getTimeZone());
   }
 
   @Override
@@ -375,12 +452,19 @@ public final class FuzzyDate {
   }
 
   private OffsetDateTime assemble(ZoneOffset dfault) {
-    int month = ta.isSupported(MONTH_OF_YEAR) ? ta.get(MONTH_OF_YEAR) : 1;
-    int day = ta.isSupported(DAY_OF_MONTH) ? ta.get(DAY_OF_MONTH) : 1;
-    int hour = ta.isSupported(HOUR_OF_DAY) ? ta.get(HOUR_OF_DAY) : 0;
-    int minute = ta.isSupported(MINUTE_OF_HOUR) ? ta.get(MINUTE_OF_HOUR) : 0;
-    int second = ta.isSupported(SECOND_OF_MINUTE) ? ta.get(SECOND_OF_MINUTE) : 0;
-    return OffsetDateTime.of(year, month, day, hour, minute, second, 0, getZone(dfault));
+    return OffsetDateTime.of(
+        year,
+        getMonth().orElse(1),
+        getDay().orElse(1),
+        getHour().orElse(0),
+        getMinute().orElse(0),
+        getSecond().orElse(0),
+        getNano().orElse(0),
+        getZone(dfault));
+  }
+
+  private OptionalInt get(ChronoField field) {
+    return ta.isSupported(field) ? OptionalInt.of(ta.get(field)) : OptionalInt.empty();
   }
 
   private ZoneOffset getZone(ZoneOffset dfault) {

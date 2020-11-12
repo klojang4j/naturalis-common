@@ -6,8 +6,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalQuery;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
@@ -15,6 +13,7 @@ import static java.time.temporal.ChronoField.YEAR;
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
 import static nl.naturalis.common.ObjectMethods.isEmpty;
 import static nl.naturalis.common.check.CommonChecks.noneNull;
+import static nl.naturalis.common.check.CommonChecks.notEmpty;
 
 /**
  * Parses date strings into {@link FuzzyDate} instances. The minimum requirement for a valid date
@@ -130,17 +129,10 @@ public class FuzzyDateParser {
    * Creates a {@code FuzzyDateParser} that uses the specified {@code ParseInfo} instances to parse
    * date strings.
    *
-   * @param parseInfo0 The 1st {@code ParseInfo} instance
-   * @param parseInfo1 The 2nd {@code ParseInfo} instance
-   * @param moreParseInfos More {@code ParseInfo} instances
+   * @param parseInfos More {@code ParseInfo} instances
    */
-  public FuzzyDateParser(ParseInfo parseInfo0, ParseInfo parseInfo1, ParseInfo... moreParseInfos) {
-    Check.that(moreParseInfos, "moreParseInfos").is(noneNull());
-    List<ParseInfo> parseSpecs = new ArrayList<>(moreParseInfos.length + 2);
-    parseSpecs.add(Check.notNull(parseInfo0, "parseInfo0").ok());
-    parseSpecs.add(Check.notNull(parseInfo1, "parseInfo1").ok());
-    parseSpecs.addAll(Arrays.asList(moreParseInfos));
-    this.parseInfos = parseSpecs;
+  public FuzzyDateParser(ParseInfo... parseInfos) {
+    this.parseInfos = Check.that(parseInfos).is(notEmpty()).is(noneNull()).ok(List::of);
   }
 
   /**
@@ -150,7 +142,7 @@ public class FuzzyDateParser {
    * @param parseInfos The {@code ParseInfo} instances used to parse date strings
    */
   public FuzzyDateParser(List<ParseInfo> parseInfos) {
-    this.parseInfos = Check.that(parseInfos, "parseInfos").is(noneNull()).ok();
+    this.parseInfos = Check.that(parseInfos).is(notEmpty()).is(noneNull()).ok(List::copyOf);
   }
 
   /**
