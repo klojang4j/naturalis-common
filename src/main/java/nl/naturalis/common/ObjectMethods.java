@@ -155,25 +155,6 @@ public class ObjectMethods {
   }
 
   /**
-   * Verifies that the argument is not null, not empty, and does not contain any null values.
-   *
-   * @param obj The object to be tested
-   * @return Whether or not it is not null, not empty, and does not contain any null values
-   */
-  public static boolean isDeepNotNull(Object obj) {
-    if (obj == null) {
-      return false;
-    } else if (obj instanceof Collection) {
-      return !((Collection) obj).isEmpty() && ((Collection) obj).stream().allMatch(notNull());
-    } else if (obj instanceof Map) {
-      return !((Map) obj).isEmpty() && ((Map) obj).values().stream().allMatch(notNull());
-    } else if (obj instanceof Object[]) {
-      return ((Object[]) obj).length != 0 && Arrays.stream((Object[]) obj).allMatch(notNull());
-    }
-    return true;
-  }
-
-  /**
    * Verifies that the argument is not null and, if it is a {@link Collection}, {@link Map} or
    * {@code Object[]}, does not contain any null values. It may still be an empty collection, map or
    * array, however.

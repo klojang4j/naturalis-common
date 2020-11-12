@@ -37,28 +37,6 @@ public class ObjectMethodsTest {
   }
 
   @Test
-  public void isDeepNotNull01() {
-    assertFalse("01", isDeepNotNull(null));
-    assertFalse("02", isDeepNotNull(Collections.emptyList()));
-    assertFalse("03", isDeepNotNull(Collections.emptySet()));
-    assertFalse("04", isDeepNotNull(Collections.emptyMap()));
-    assertFalse("05", isDeepNotNull(new String[0]));
-    assertFalse("06", isDeepNotNull(new String[] {null}));
-    assertFalse("07", isDeepNotNull(new String[] {null, null}));
-    assertFalse("08", isDeepNotNull(new String[] {null, null, null}));
-    assertFalse("09", isDeepNotNull(new String[] {null, "", null}));
-    assertFalse("10", isDeepNotNull(Arrays.asList(null, null, null)));
-    assertTrue("11", isDeepNotNull(Arrays.asList("Hello, world")));
-    Map map = CollectionMethods.newHashMap("KEY1", null, "KEY2", null, "KEY3", null);
-    assertFalse("12", isDeepNotNull(map));
-    map = CollectionMethods.newHashMap(null, "VAL1", "KEY2", null, "KEY3", null);
-    assertFalse("13", isDeepNotNull(map));
-    assertTrue("10", isDeepNotNull(Arrays.asList("hello", "World")));
-    map = CollectionMethods.newHashMap("KEY1", "VAL1", "KEY2", "VAL2", "KEY3", "VAL3");
-    assertTrue("10", isDeepNotNull(map));
-  }
-
-  @Test
   public void isDeepNotEmpty01() {
     assertTrue("01", isDeepNotEmpty(List.of("Hi", new String[] {"Hi", "There"})));
     assertFalse("02", isDeepNotEmpty(List.of("Hi", new String[0])));
