@@ -183,7 +183,7 @@ public class NumberMethods {
    * point or any decimal fraction (even if consisting of zeros only). It also does not accept
    * strings using scientific notation.
    *
-   * <p>Examples of invalid input:
+   * <p>Examples of <i>invalid</i> input:
    *
    * <p>
    *
@@ -217,6 +217,7 @@ public class NumberMethods {
     } catch (ArithmeticException e) {
       throw new NumberFormatException(e.getMessage());
     }
+    Check.that(s, NumberFormatException::new).is(notBlank());
     check
         .is(notHasSubstr(), "e", "Scientific notation not allowed")
         .is(notEndsWith(), ".", "Decimal point not allowed");

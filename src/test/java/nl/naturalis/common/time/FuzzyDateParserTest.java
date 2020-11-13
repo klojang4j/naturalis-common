@@ -349,7 +349,7 @@ public class FuzzyDateParserTest {
     FuzzyDateParser parser = new FuzzyDateParser(info1);
     String dateString = "2020-09-18T00:03:04+02:00";
     FuzzyDate fd = parser.parse(dateString);
-    assertFalse("01", fd.isTimeZoneFuzzy());
+    assertFalse("01", fd.getTimeZone().isEmpty());
     assertEquals("02", ZoneOffset.ofHours(2), fd.getTimeZone().get());
   }
 

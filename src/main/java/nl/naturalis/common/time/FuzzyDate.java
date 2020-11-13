@@ -3,7 +3,6 @@ package nl.naturalis.common.time;
 import java.time.*;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import static java.time.ZoneOffset.UTC;
@@ -17,6 +16,15 @@ import static nl.naturalis.common.ObjectMethods.ifNotEmpty;
  * returned by the parser is guaranteed to have at least a known year. Month, day, hour, minute,
  * second and time zone may or may not be known. If the parser could not extract a year from the
  * date string a {@link FuzzyDateException} is thrown.
+ *
+ * <p>Although any number of date/time patterns can be used to parse date strings into date/time
+ * objects, {@code FuzzyDate} works best when they are composed of the usual date fields: {@link
+ * ChronoField#YEAR YEAR}, {@link ChronoField#MONTH_OF_YEAR MONTH_OF_YEAR}, {@link
+ * ChronoField#DAY_OF_MONTH DAY_OF_MONTH}, {@link ChronoField#HOUR_OF_DAY HOUR_OF_DAY}, {@link
+ * ChronoField#MINUTE_OF_HOUR MINUTE_OF_HOUR}, {@link ChronoField#SECOND_OF_MINUTE
+ * SECOND_OF_MINUTE}, {@link ChronoField#NANO_OF_SECOND NANO_OF_SECOND}, {@link ZoneOffset} and
+ * {@link ZoneId}. It may not be accurate when composed of more exotic date fields like {@link
+ * ChronoField#DAY_OF_YEAR DAY_OF_YEAR} or {@link ChronoField#SECOND_OF_DAY SECOND_OF_DAY}.
  *
  * <p>A simple example of the workflow and capabilities of {@code FuzzyDate} and friends:
  *
@@ -109,13 +117,20 @@ public final class FuzzyDate {
   }
 
   /**
-   * Returns an {@code OptionalInt} containing the nano second of this {@code FuzzyDate} or an empty
-   * {@code OptionalInt} if no nano second could be extracted from the date string.
+   * Returns an {@code OptionalInt} containing the nanosecond of this {@code FuzzyDate} or an empty
+   * {@code OptionalInt} if no nanosecond, microsecond or millisecond could be extracted from the
+   * date string.
    *
    * @return The nano second of this {@code FuzzyDate}
    */
   public OptionalInt getNano() {
-    return get(NANO_OF_SECOND);
+    return ta.isSupported(NANO_OF_SECOND)
+        ? OptionalInt.of(ta.get(NANO_OF_SECOND))
+        : ta.isSupported(MICRO_OF_SECOND)
+            ? OptionalInt.of(ta.get(MICRO_OF_SECOND) * 1000)
+            : ta.isSupported(MILLI_OF_SECOND)
+                ? OptionalInt.of(ta.get(MILLI_OF_SECOND) * 1000 * 1000)
+                : OptionalInt.empty();
   }
 
   /**
@@ -223,8 +238,9 @@ public final class FuzzyDate {
   }
 
   /**
-   * Converts this {@code FuzzyDate} to a {@link LocalDateTime}, setting month and day to 1 if
-   * unknown, and hour, minute and second to 0 if unknown.
+   * Converts this {@code FuzzyDate} to a {@link LocalDateTime}. Month and day are set to 1 if
+   * unknown. Hour, minute and second are set to 0 if unknown. The time zone is set to the specified
+   * time zone if unknown.
    *
    * @param zone The {@code ZoneOffset} to use if no {@code ZoneOffset} could be extracted from the
    *     date string
@@ -249,8 +265,7 @@ public final class FuzzyDate {
 
   /**
    * Converts this {@code FuzzyDate} to a {@link LocalDate}. Month and day are set to 1 if unknown.
-   * Hour, minute and second are set to 0 if unknown. The time zone is set to {@link ZoneOffset#UTC
-   * UTC} if unknown.
+   * The time zone is set to {@link ZoneOffset#UTC UTC} if unknown.
    *
    * @return The {@code LocalDate} most closely corresponding to this {@code FuzzyDate}
    */
@@ -259,9 +274,8 @@ public final class FuzzyDate {
   }
 
   /**
-   * Converts this {@code FuzzyDate} to a {@link LocalDateTime}. Month and day are set to 1 if
-   * unknown. Hour, minute and second are set to 0 if unknown. The time zone is set to {@link
-   * ZoneOffset#UTC UTC} if unknown.
+   * Converts this {@code FuzzyDate} to a {@link LocalDate}. Month and day are set to 1 if unknown.
+   * The time zone is set to {@link ZoneOffset#UTC UTC} if unknown.
    *
    * @return The {@code LocalDateTime} most closely corresponding to this {@code FuzzyDate}
    */
@@ -295,7 +309,7 @@ public final class FuzzyDate {
 
   /**
    * Returns a date/time object whose type depends on the actual granularity of this {@code
-   * FuzzyDate}. The following {@code java.time} objects are supported:
+   * FuzzyDate}. This method will always return one of the following types:
    *
    * <p>
    *
@@ -307,9 +321,15 @@ public final class FuzzyDate {
    *   <li>{@link Year}
    * </ul>
    *
-   * <p>This method will never return a {@link ZonedDateTime}, even if the date string was actually
-   * parsed into such an object. If desirable, you can use {@link #getTemporalAccessor()
-   * getTemporalAccessor()} and check if the returned object is {@code ZonedDateTime}.
+   * <p>If the raw {@link TemporalAccessor} encapsulated by this {@code FuzzyDate} already is an
+   * instance of one of these types, it will simply be returned as-is. If it is an instance of a
+   * {@link ZonedDateTime}, it will be converted to an {@code OffsetDateTime}. Otherwise a subclass
+   * of {@code TemporalAccessor} will be assembled whose granularity depends on the availability of
+   * {@link ChronoField#MONTH_OF_YEAR MONTH_OF_YEAR}, {@link ChronoField#DAY_OF_MONTH DAY_OF_MONTH},
+   * {@link ChronoField#HOUR_OF_DAY HOUR_OF_DAY}, {@link ChronoField#MINUTE_OF_HOUR MINUTE_OF_HOUR},
+   * {@link ChronoField#SECOND_OF_MINUTE SECOND_OF_MINUTE}, {@link ChronoField#NANO_OF_SECOND
+   * NANO_OF_SECOND}, {@link ZoneOffset} and {@link ZoneId}. More exotic date fields like {@link
+   * ChronoField#DAY_OF_WEEK} are not considered.
    *
    * @return A date/time object whose type depends on the actual granularity of this {@code
    *     FuzzyDate}
@@ -398,29 +418,19 @@ public final class FuzzyDate {
   }
 
   /**
-   * Returns whether or not the time zone of this instance is fuzzy. Returns true if no {@link
-   * ZoneId} or {@link ZoneOffset} could be extracted from the date string.
-   *
-   * @return Whether or not the time zone of this instance is fuzzy
-   */
-  public boolean isTimeZoneFuzzy() {
-    return getTimeZone().isEmpty();
-  }
-
-  /**
    * Returns whether or not the date or time is fuzzy. Equivalent to {@code isDateFuzzy() ||
    * isTimeFuzzy()}.
    *
-   * @return Whether or not the date and/or time are fuzzy.
+   * @return Whether or not the date and/or time is fuzzy.
    */
   public boolean isFuzzy() {
     return isDateFuzzy() || isTimeFuzzy();
   }
 
   /**
-   * Returns true if this object's {@link #bestMatch()} equals the other object's {@code
-   * bestMatch()}. The verbatim date string and the {@code ParseInfo} objects from which the two
-   * {@code FuzzyDate} instances were created are ignored.
+   * Returns true if the {@code TemporalAccessor} encapsulated by this instance equals the @code
+   * TemporalAccessor} encapsulated by the other instance, or if date fields listed in the comments
+   * for this class are pair-wise equal.
    */
   @Override
   public boolean equals(Object obj) {
@@ -434,18 +444,26 @@ public final class FuzzyDate {
       return true;
     }
     return year == other.year
-        && Objects.equals(get(MONTH_OF_YEAR), other.get(MONTH_OF_YEAR))
-        && Objects.equals(get(DAY_OF_MONTH), other.get(DAY_OF_MONTH))
-        && Objects.equals(get(HOUR_OF_DAY), other.get(HOUR_OF_DAY))
-        && Objects.equals(get(MINUTE_OF_HOUR), other.get(MINUTE_OF_HOUR))
-        && Objects.equals(get(SECOND_OF_MINUTE), other.get(SECOND_OF_MINUTE))
-        && Objects.equals(get(NANO_OF_SECOND), other.get(NANO_OF_SECOND))
-        && Objects.equals(getTimeZone(), other.getTimeZone());
+        && getMonth().equals(other.getMonth())
+        && getDay().equals(other.getDay())
+        && getHour().equals(other.getHour())
+        && getMinute().equals(other.getMinute())
+        && getSecond().equals(other.getSecond())
+        && getNano().equals(other.getNano())
+        && getTimeZone().equals(other.getTimeZone());
   }
 
+  /** Returns a hash code based on the date/time fields listed in the comments for this class. */
   @Override
   public int hashCode() {
-    return toOffsetDateTime().hashCode();
+    int hash = year;
+    hash = hash * 31 + getMonth().orElse(0);
+    hash = hash * 31 + getDay().orElse(0);
+    hash = hash * 31 + getHour().orElse(-1);
+    hash = hash * 31 + getMinute().orElse(-1);
+    hash = hash * 31 + getNano().orElse(-1);
+    hash = hash * 31 + (getTimeZone().isPresent() ? getTimeZone().get().getTotalSeconds() : -1);
+    return hash;
   }
 
   private OffsetDateTime assemble(ZoneOffset dfault) {
