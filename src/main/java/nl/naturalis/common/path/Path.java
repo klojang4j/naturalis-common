@@ -10,6 +10,9 @@ import nl.naturalis.common.check.Check;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
 import static java.util.function.Predicate.not;
+import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonChecks.lt;
+import static nl.naturalis.common.check.CommonChecks.lte;
 
 /**
  * Specifies a path to a value within an object. Path segments are spearated by '.' (dot). For
@@ -75,12 +78,6 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
     return sb.toString();
   }
 
-  static boolean isArrayIndex(String segment) {
-    return segment != null
-        && !segment.isEmpty()
-        && segment.codePoints().allMatch(i -> Character.isDigit(i));
-  }
-
   private final String[] elems;
 
   // Caches toString()
@@ -126,19 +123,6 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns true if this {@code Path} consists of a single segment and that segment is an array
-   * index. Otherwise returns false.
-   *
-   * @return
-   */
-  public boolean isArrayIndex() {
-    return elems.length > 0
-        && elems[0] != null
-        && elems[0].length() > 0
-        && elems[0].codePoints().allMatch(i -> Character.isDigit(i));
-  }
-
-  /**
    * Returns true if this {@code Path} consists of a single segment and that segment is null
    * (meaning that this path can only possibly be valid for map objects that allow null keys).
    * Otherwise returns false.
@@ -158,36 +142,36 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    */
   public String segment(int index) {
     int i = index < 0 ? elems.length + index : index;
-    return elems[Check.index(i, elems.length, "i")];
+    return Check.that(i).is(lt(), elems.length).intValue(x -> elems[x]);
   }
 
   /**
-   * Returns a new {@code Path} consisting of all segments starting with the segment at the
-   * specified array index. The E.g. <code>myPath.subpath(-2)</code> returns a new {@code Path}
-   * consisting of the last two segments of {@code myPath}.
+   * Returns a new {@code Path} starting with the segment at the specified array index. Specify a
+   * negative index to count back from the last segment of the {@code Path} (-1 returns the last
+   * path segment).
    *
    * @param from
    * @return
    */
   public Path subpath(int from) {
-    int from0 = from < 0 ? elems.length + from : from;
-    Check.index(from0, elems.length, "from0");
-    return new Path(copyOfRange(elems, from0, elems.length));
+    int i = from < 0 ? elems.length + from : from;
+    Check.that(i).is(lt(), elems.length);
+    return new Path(copyOfRange(elems, i, elems.length));
   }
 
   /**
-   * Returns a new {@code Path} consisting of {@code len} starting with segment {@code from}. The
-   * 1st argument may be negative to indicate a left-offset from the last segment.
+   * Returns a new {@code Path} consisting of {@code len} segments starting with segment {@code
+   * from}. The 1st argument may be negative to indicate a left-offset from the last segment.
    *
    * @param from
    * @return
    */
   public Path subpath(int from, int len) {
-    int from0 = from < 0 ? elems.length + from : from;
-    int to = from0 + len;
-    Check.index(from0, elems.length, "from");
-    Check.index(to, from0, elems.length, "to");
-    return new Path(copyOfRange(elems, from0, to));
+    int i = from < 0 ? elems.length + from : from;
+    int j = i + len;
+    Check.that(i, "from").is(lt(), elems.length);
+    Check.that(j, "from+len").is(gte(), i).is(lte(), elems.length);
+    return new Path(copyOfRange(elems, i, j));
   }
 
   /**
@@ -206,7 +190,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    * @return
    */
   public Path getCanonicalPath() {
-    return new Path(Arrays.stream(elems).filter(not(Path::isArrayIndex)).toArray(String[]::new));
+    return new Path(stream().filter(not(NumberMethods::isArrayIndex)).toArray(String[]::new));
   }
 
   /**
@@ -242,7 +226,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    * @return
    */
   public Path replace(int index, String newValue) {
-    Check.index(index, 0, elems.length, "index");
+    Check.that(index, "index").is(gte(), 0).is(lte(), elems.length);
     String[] copy = Arrays.copyOf(elems, elems.length);
     copy[index] = newValue;
     return new Path(copy);
@@ -278,7 +262,10 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
       }
 
       public String next() {
-        return elems[Check.index(++i, elems.length, "i")];
+        if (++i < elems.length) {
+          return elems[i];
+        }
+        throw new ArrayIndexOutOfBoundsException(i);
       }
     };
   }

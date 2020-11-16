@@ -1,9 +1,7 @@
 package nl.naturalis.common;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.notBlank;
-import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * Methods for working with {@code Number} instances.
@@ -176,52 +174,22 @@ public class NumberMethods {
   }
 
   /**
-   * Parses the specified string into an {@code int}. This method is substantially more restrictive
-   * than {@link Integer#parseInt(String) Integer.parseInt}. It uses {@link
-   * BigDecimal#intValueExact() BigDecimal.intValueExact()} and {@link BigDecimal#scale()
-   * BigDecimal.scale()} to make sure the string represents an integer. It does not accept a decimal
-   * point or any decimal fraction (even if consisting of zeros only). It also does not accept
-   * strings using scientific notation.
+   * Returns whether or not the specified string represents a valid array index. Returns {@code
+   * true} if the argument is not null, not empty and consists of digits ony, and fits into a 32-bit
+   * integer. Otherwise this method returns {@code false}.
    *
-   * <p>Examples of <i>invalid</i> input:
-   *
-   * <p>
-   *
-   * <table>
-   * <tr><td><pre>7F</pre></td><td><i>Not an integer</i></td></tr>
-   * <tr><td><pre>.7</pre></td><td><i>Not an integer</i></td></tr>
-   * <tr><td><pre>7.0</pre></td><td><i>Scale is 1</i></td></tr>
-   * <tr><td><pre>7.</pre></td><td><i>Decimal point not allowed</i></td></tr>
-   * <tr><td><pre>123456789123456789</pre></td><td><i>Overflow</i></td></tr>
-   * <tr><td><pre>3.4e+2</pre></td><td><i>Scientific notation</i></td></tr>
-   * </table>
-   *
-   * <p>Any error occuring while parsing the argument will be converted to a {@code
-   * NumberFormatException}. This includes the argument being null and any {@link
-   * ArithmeticException} thrown by {@code BigDecimal.intValueExact}.
-   *
-   * @param s The string to parse
-   * @return An integer
-   * @throws NumberFormatException If anything goes wrong while parsing the string
+   * @param s The string to check
+   * @return Whether or not it represents a valid array index
    */
-  public static int asPlainInt(String s) throws NumberFormatException {
-    Check<String, NumberFormatException> check =
-        Check.that(s, NumberFormatException::new).is(notBlank());
-    BigDecimal bd = new BigDecimal(s);
-    if (bd.scale() != 0) {
-      throw new NumberFormatException("Decimal fraction not allowed");
+  public static boolean isArrayIndex(String s) {
+    if (s != null && !s.isEmpty() && s.codePoints().allMatch(Character::isDigit)) {
+      try {
+        new BigInteger(s).intValueExact();
+        return true;
+      } catch (ArithmeticException e) {
+      }
     }
-    int i;
-    try {
-      i = new BigDecimal(s).intValueExact();
-    } catch (ArithmeticException e) {
-      throw new NumberFormatException(e.getMessage());
-    }
-    Check.that(s, NumberFormatException::new).is(notBlank());
-    check
-        .is(notHasSubstr(), "e", "Scientific notation not allowed")
-        .is(notEndsWith(), ".", "Decimal point not allowed");
-    return i;
+    return false;
   }
 
   private NumberMethods() {}

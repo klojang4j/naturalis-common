@@ -10,10 +10,10 @@ import static nl.naturalis.common.check.CommonGetters.getGetterDescription;
 import static nl.naturalis.common.check.Messages.createMessage;
 
 /**
- * Facilitates the validation of object state, arguments and array indices. Validating object state
- * and array indices happens through static methods. Validation of arguments happens by means of an
- * actual instance of the {@code Check} class. You obtain an instance through one of the static
- * factory methods. For example:
+ * Facilitates the validation of arguments and object state. Validating object state and array
+ * indices happens through a single public static method. Validation of arguments happens by means
+ * of an actual instance of the {@code Check} class. You obtain an instance through one of the
+ * static factory methods. For example:
  *
  * <p>
  *
@@ -277,8 +277,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Generic check method. Throws an {@code IllegalArgumentException} if the provided condition
-   * evaluates to false, else does nothing.
+   * Generic check method, not related the static factory methods with the same name. Throws an
+   * {@code IllegalArgumentException} if the provided condition evaluates to false, else does
+   * nothing.
    *
    * @param condition The condition to evaluate
    * @param message The error message
@@ -293,8 +294,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Generic check method. Throws the exception supplied by the provided supplier if the provided
-   * condition evaluates to false, else does nothing.
+   * Generic check method, not related the static factory methods with the same name. Throws the
+   * exception supplied by the provided supplier if the provided condition evaluates to false, else
+   * does nothing.
    *
    * @param <F> The type of exception thrown if {@code condition} evaluates to false
    * @param condition The condition to evaluate
@@ -306,45 +308,6 @@ public abstract class Check<T, E extends Exception> {
     if (!condition) {
       throw exceptionSupplier.get();
     }
-  }
-
-  /**
-   * Verifies that the argument is a valid array index. Throws an {@code
-   * ArrayIndexOutOfBoundsException} if {@code arg} is less than zero or greater than or equal to
-   * {@code maxExclusive}, else returns {@code arg}. This is especially useful to test "from"
-   * arguments, which generally should be <i>less than</i> the length or size of the object operated
-   * upon.
-   *
-   * @param arg The argument The argument to test
-   * @param maxExclusive The maximum allowed value (exclusive)
-   * @return The argument
-   * @throws ArrayIndexOutOfBoundsException
-   */
-  public static int index(int arg, int maxExclusive, String argName) {
-    if (arg < maxExclusive) {
-      return arg;
-    }
-    throw badIndex(arg, argName);
-  }
-
-  /**
-   * Verifies that the argument is a valid array index. Throws an {@code
-   * ArrayIndexOutOfBoundsException} if {@code arg} is less than {@code min} or greater than {@code
-   * max}, else returns {@code arg}. This is especially useful to test "to" or "until" arguments,
-   * which generally should be <i>less than or equal to</i> the length or size of the object
-   * operated upon.
-   *
-   * @param arg The argument The argument to test
-   * @param minInclusive The minimum allowed value (inclusive)
-   * @param MaxInclusive The maximum allowed value (inclusive)
-   * @return The argument
-   * @throws ArrayIndexOutOfBoundsException
-   */
-  public static int index(int arg, int minInclusive, int MaxInclusive, String argName) {
-    if (arg >= minInclusive && arg <= MaxInclusive) {
-      return arg;
-    }
-    throw badIndex(arg, argName);
   }
 
   /**
@@ -379,13 +342,9 @@ public abstract class Check<T, E extends Exception> {
    * @param msgArgs The {@code String.format} message arguments
    * @return An {@code IllegalArgumentException Supplier}
    */
-  public static Supplier<IllegalArgumentException> badArgument(String message, Object... msgArgs) {
-    return () -> new IllegalArgumentException(String.format(message, msgArgs));
-  }
-
-  private static ArrayIndexOutOfBoundsException badIndex(int arg, String argName) {
-    String fmt = "Index variable \"%s\" out of range: %d";
-    return new ArrayIndexOutOfBoundsException(String.format(fmt, argName, arg));
+  public static Function<String, IllegalArgumentException> badArgument(
+      String message, Object... msgArgs) {
+    return (s) -> new IllegalArgumentException(String.format(message, msgArgs));
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -995,16 +954,16 @@ public abstract class Check<T, E extends Exception> {
   public abstract int intValue() throws E;
 
   /**
-   * Passes the argument to a {@code Consumer} to be properly processed. To be used as the last call
-   * after a chain of checks.
+   * Passes the validated argument to the specified {@code Function} and returns the value computed
+   * by the {@code Function}. To be used as the last call after a chain of checks.
    *
-   * @param consumer The {@code Consumer}
+   * @param transformer An {@code IntFunction} that transforms the argument into some other value
    */
-  public void intValue(IntConsumer consumer) throws E {
-    consumer.accept(intValue());
+  public <U> U intValue(IntFunction<U> transformer) throws E {
+    return transformer.apply(intValue());
   }
 
-  private String getFullyQualified(String name) {
-    return argName + "." + name;
+  private String getFullyQualified(String property) {
+    return argName + "." + property;
   }
 }

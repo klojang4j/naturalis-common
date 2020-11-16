@@ -9,14 +9,16 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import nl.naturalis.common.ClassMethods;
+import nl.naturalis.common.NumberMethods;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ClassMethods.getArrayTypeSimpleName;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
-import static nl.naturalis.common.path.Path.isArrayIndex;
+import static nl.naturalis.common.check.Check.badArgument;
+import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonChecks.noneNull;
+import static nl.naturalis.common.check.CommonChecks.notEmpty;
+import static nl.naturalis.common.check.CommonGetters.length;
 import static nl.naturalis.common.path.PathWalkerException.illegalAccess;
-import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.check.Check.*;
-import static nl.naturalis.common.check.CommonGetters.*;
 
 /**
  * Reads/writes values within a given Object using {@link Path} objects. The {@code PathWalker}
@@ -243,7 +245,7 @@ public final class PathWalker {
 
   private Object readElement(Collection collection, Path path) {
     String segment = path.segment(0);
-    if (isArrayIndex(segment)) {
+    if (NumberMethods.isArrayIndex(segment)) {
       int idx = Integer.parseInt(segment);
       if (idx < collection.size()) {
         return readObj(collection.toArray()[idx], path.shift());
@@ -254,7 +256,7 @@ public final class PathWalker {
 
   private Object readElement(Object[] array, Path path) {
     String segment = path.segment(0);
-    if (isArrayIndex(segment)) {
+    if (NumberMethods.isArrayIndex(segment)) {
       int idx = Integer.parseInt(segment);
       if (idx < array.length) {
         return readObj(array[idx], path.shift());
@@ -266,7 +268,7 @@ public final class PathWalker {
   private Object readPrimitiveElement(Object array, Path path) {
     if (path.size() == 1) { // primitive *must* be the end of the trail
       String segment = path.segment(0);
-      if (isArrayIndex(segment)) {
+      if (NumberMethods.isArrayIndex(segment)) {
         int idx = Integer.parseInt(segment);
         if (idx < Array.getLength(array)) {
           return readObj(Array.get(array, idx), path.shift());
@@ -297,7 +299,7 @@ public final class PathWalker {
   private void write(Object host, Path path, Object value) {
     Path parent = path.parent();
     Path target = path.subpath(-1);
-    if (target.isArrayIndex()) {
+    if (NumberMethods.isArrayIndex(target.segment(0))) {
       if (parent.isEmpty()) {
         throw new PathWalkerException("Invalid path: " + path);
       }
@@ -349,9 +351,9 @@ public final class PathWalker {
         arr[idx] = value;
       }
     } else if (isPrimitiveArray(parval)) {
-      Check.that(
-          value != null,
-          badArgument("Cannot assign null to element of %s[]", getArrayTypeSimpleName(parval)));
+      Check.notNull(
+          value,
+          badArgument("Cannot assign null to element of %s", getArrayTypeSimpleName(parval)));
       if (idx < Array.getLength(parval)) {
         Array.set(parval, idx, value);
       }

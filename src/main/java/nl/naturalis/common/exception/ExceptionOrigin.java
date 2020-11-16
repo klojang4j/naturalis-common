@@ -4,11 +4,14 @@ import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ObjectMethods.isEmpty;
 import static nl.naturalis.common.ObjectMethods.isNotEmpty;
-import static nl.naturalis.common.StringMethods.*;
+import static nl.naturalis.common.StringMethods.append;
+import static nl.naturalis.common.StringMethods.rtrim;
 
 /**
  * Provides detailed information about the origin of an exception. Useful for tracing back an
- * exception to a statement within your own code.
+ * exception to a statement within some code base (e.g. your own). Example:
+ *
+ * <p>
  *
  * <pre>
  * try {
@@ -78,7 +81,7 @@ public final class ExceptionOrigin {
   public String getDetailedMessage() {
     StringBuilder sb = new StringBuilder(100);
     if (exc.getMessage() != null) {
-      sb.append(rtrim(exc.getMessage(), ". ")).append(". ");
+      append(sb, rtrim(exc.getMessage(), ". "), ". ");
     }
     sb.append(exc.getClass().getName());
     if (search == null) {
@@ -88,7 +91,7 @@ public final class ExceptionOrigin {
         addStackTraceInfo(sb);
       }
     } else if (ste == null) {
-      sb.append(" (not originating from ").append(search).append(")");
+      append(sb, " (not originating from ", search, ")");
     } else {
       addStackTraceInfo(sb);
     }
@@ -180,12 +183,6 @@ public final class ExceptionOrigin {
   }
 
   private void addStackTraceInfo(StringBuilder sb) {
-    sb.append(" at ")
-        .append(getClassName())
-        .append('.')
-        .append(getMethod())
-        .append(" (line ")
-        .append(getLine())
-        .append(")");
+    append(sb, " at ", getClassName(), ".", getMethod(), " (line ", getLine(), ")");
   }
 }

@@ -4,7 +4,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
-import nl.naturalis.common.NumberMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.internal.VisibleForTesting;
 import static nl.naturalis.common.CollectionMethods.saturatedEnumMap;
@@ -147,8 +146,7 @@ public class EnvManager {
   /**
    * Returns an {@code OptionalInt} containing the integer value of the specified environment
    * variable or an empty {@code OptionalInt} if there is no environment variable with the specified
-   * name. Parsing is substantially stricter than {@link Integer#parseInt(String) Integer.parseInt}.
-   * See {@link NumberMethods#asPlainInt(String) NumberMethods.asPlainInt}.
+   * name.
    *
    * @param name The name of the environment variable
    * @return An {@code OptionalInt} containing the value of the environment variable or an empty
@@ -161,10 +159,10 @@ public class EnvManager {
     String val = getenv(name);
     try {
       return empty == UNDEFINED
-          ? ifNotEmpty(val, asOptionalInt(NumberMethods::asPlainInt), OptionalInt.empty())
-          : ifNotNull(val, asOptionalInt(NumberMethods::asPlainInt), OptionalInt.empty());
+          ? ifNotEmpty(val, asOptionalInt(Integer::parseInt), OptionalInt.empty())
+          : ifNotNull(val, asOptionalInt(Integer::parseInt), OptionalInt.empty());
     } catch (NumberFormatException e) {
-      throw notConvertible(name, int.class, e.getMessage());
+      throw parseError(name, int.class, e.getMessage());
     }
   }
 
@@ -182,10 +180,10 @@ public class EnvManager {
     String val = getenv(name);
     try {
       return empty == UNDEFINED || empty == DEFAULT
-          ? ifNotEmpty(val, NumberMethods::asPlainInt, dfault)
-          : ifNotNull(val, NumberMethods::asPlainInt, dfault);
+          ? ifNotEmpty(val, Integer::parseInt, dfault)
+          : ifNotNull(val, Integer::parseInt, dfault);
     } catch (NumberFormatException e) {
-      throw notConvertible(name, int.class, e.getMessage());
+      throw parseError(name, int.class, e.getMessage());
     }
   }
 
@@ -202,10 +200,10 @@ public class EnvManager {
     Check.notNull(name, "name");
     try {
       return empty == UNDEFINED
-          ? check(name).is(notEmpty(), MISSING_ENV_VAR, name).ok(NumberMethods::asPlainInt)
-          : check(name).is(notNull(), MISSING_ENV_VAR, name).ok(NumberMethods::asPlainInt);
+          ? check(name).is(notEmpty(), MISSING_ENV_VAR, name).ok(Integer::parseInt)
+          : check(name).is(notNull(), MISSING_ENV_VAR, name).ok(Integer::parseInt);
     } catch (NumberFormatException e) {
-      throw notConvertible(name, int.class, e.getMessage());
+      throw parseError(name, int.class, e.getMessage());
     }
   }
 
@@ -229,7 +227,7 @@ public class EnvManager {
           ? ifNotEmpty(val, asOptional(this::parseBoolean), Optional.empty())
           : ifNotNull(val, asOptional(this::parseBoolean), Optional.empty());
     } catch (IllegalArgumentException e) {
-      throw notConvertible(name, boolean.class, e.getMessage());
+      throw parseError(name, boolean.class, e.getMessage());
     }
   }
 
@@ -249,8 +247,8 @@ public class EnvManager {
       return empty == UNDEFINED || empty == DEFAULT
           ? ifNotEmpty(val, this::parseBoolean, dfault)
           : ifNotNull(val, this::parseBoolean, dfault);
-    } catch (NumberFormatException e) {
-      throw notConvertible(name, boolean.class, e.getMessage());
+    } catch (IllegalArgumentException e) {
+      throw parseError(name, boolean.class, e.getMessage());
     }
   }
 
@@ -269,15 +267,15 @@ public class EnvManager {
       return empty == UNDEFINED
           ? check(name).is(notEmpty(), MISSING_ENV_VAR, name).ok(this::parseBoolean)
           : check(name).is(notNull(), MISSING_ENV_VAR, name).ok(this::parseBoolean);
-    } catch (NumberFormatException e) {
-      throw notConvertible(name, boolean.class, e.getMessage());
+    } catch (IllegalArgumentException e) {
+      throw parseError(name, boolean.class, e.getMessage());
     }
   }
 
-  private Boolean parseBoolean(String val) {
-    if ("true".equalsIgnoreCase(val)) {
+  private Boolean parseBoolean(String s) {
+    if (s.equalsIgnoreCase("true")) {
       return Boolean.TRUE;
-    } else if ("false".equalsIgnoreCase(val)) {
+    } else if (s.equalsIgnoreCase("false")) {
       return Boolean.FALSE;
     }
     String msg = "Value must be \"true\" or \"false\" (ignoring case)";
@@ -292,8 +290,7 @@ public class EnvManager {
     return env.get(name);
   }
 
-  private InvalidEnvironmentException notConvertible(
-      String varname, Class<?> into, String message) {
+  private InvalidEnvironmentException parseError(String varname, Class<?> into, String message) {
     String reason = ifEmpty(message, message.getClass().getSimpleName());
     String msg = String.format(NOT_CONVERTIBLE, varname, into.getName(), getenv(varname), reason);
     return new InvalidEnvironmentException(msg);

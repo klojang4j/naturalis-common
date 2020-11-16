@@ -55,7 +55,7 @@ public final class ParseInfo {
 
   /**
    * A ready-made {@code ParseInfo} instance that parses date strings using the {@link
-   * DateTimeFormatter#ISO_OFFSET_DATE_TIME ISO_OFFSET_DATE_TIME} formatter into aN {@link
+   * DateTimeFormatter#ISO_OFFSET_DATE_TIME ISO_OFFSET_DATE_TIME} formatter into an {@link
    * OffsetDateTime} object.
    */
   public static final ParseInfo ISO_OFFSET_DATE_TIME =
@@ -148,8 +148,8 @@ public final class ParseInfo {
   /**
    * Returns the filter used to transform the input string, or null if no filter is used by this
    * {@code ParseInfo}. The filter's {@link UnaryOperator#apply(Object) apply} method is allowed to
-   * return null, in which case the input string will be treated as not parsable by this {@code
-   * ParseInfo}.
+   * return null, in which case the input string will be treated as not parsable by the {@link
+   * FuzzyDateParser}.
    *
    * @return
    */
