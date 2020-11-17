@@ -44,7 +44,8 @@ public class ObjectMethods {
   private ObjectMethods() {}
 
   /**
-   * Verifies that the object is empty. Returns {@code true} if <i>any</i> of the following applies:
+   * Verifies that the argument is empty. Returns {@code true} if <i>any</i> of the following
+   * applies:
    *
    * <p>
    *
@@ -53,9 +54,9 @@ public class ObjectMethods {
    *   <li>{@code obj} is an empty {@link CharSequence}
    *   <li>{@code obj} is an empty {@link Collection}
    *   <li>{@code obj} is an empty {@link Map}
-   *   <li>{@code obj} is an empty array
-   *   <li>{@code obj} is an empty {@link Optional} or an {@code Optional} containing an {@code
-   *       isEmpty} object
+   *   <li>{@code obj} is a zero-length array
+   *   <li>{@code obj} is an empty {@link Optional} or an {@code Optional} containing an empty
+   *       object
    *   <li>{@code obj} is a zero-size {@link Sizeable}
    *   <li>{@code obj} is an empty {@link Emptyable}
    * </ul>
@@ -88,7 +89,7 @@ public class ObjectMethods {
    *   <li>{@code obj} is a non-empty {@link CharSequence}
    *   <li>{@code obj} is a non-empty {@link Collection}
    *   <li>{@code obj} is a non-empty {@link Map}
-   *   <li>{@code obj} is a non-empty array
+   *   <li>{@code obj} is a non-zero-length array
    *   <li>{@code obj} is a non-empty {@link Optional} containing a non-empty object
    *   <li>{@code obj} is a non-zero-size {@link Sizeable}
    *   <li>{@code obj} is a non-empty {@link Emptyable}
@@ -114,9 +115,9 @@ public class ObjectMethods {
    *       elements
    *   <li>{@code obj} is a non-empty {@link Map} containing only <i>deep-not-empty</i> values (keys
    *       are not considered)
-   *   <li>{@code obj} is a non-empty {@code Object[]} containing only <i>deep-not-empty</i>
+   *   <li>{@code obj} is a non-zero-length {@code Object[]} containing only <i>deep-not-empty</i>
    *       elements
-   *   <li>{@code obj} is a non-empty primitive array
+   *   <li>{@code obj} is a non-zero-length primitive array
    *   <li>{@code obj} is a non-empty {@link Optional} containing a <i>deep-not-empty</i> object
    *   <li>{@code obj} is a non-empty {@link Emptyable}
    *   <li>{@code obj} is a non-zero-size {@link Sizeable}
@@ -189,8 +190,8 @@ public class ObjectMethods {
 
   /**
    * Tests the provided arguments for equality using <i>empty-equals-null</i> semantics. This is
-   * equivalent to {@code Objects.equals(emptyToNull(obj1), emptyToNull(obj2))}, except that an
-   * empty instance of one type (e.g. {@code String}) is <b>not</b> equal to an empty instance of
+   * roughly equivalent to {@code Objects.equals(emptyToNull(obj1), emptyToNull(obj2))}, except that
+   * an empty instance of one type (e.g. {@code String}) is <i>not</i> equal to an empty instance of
    * another non-comparable type (e.g. {@code Set}). An empty {@code HashSet}, however, is equal to
    * an empty {@code TreeSet}. So:
    *
@@ -212,12 +213,7 @@ public class ObjectMethods {
    * @return Whether or not the provided arguments are equal using empty-equals-null semantics
    */
   public static boolean e2nEquals(Object obj1, Object obj2) {
-    if (obj1 == obj2) {
-      return true;
-    } else if (isEmpty(obj1)) {
-      return isEmpty(obj2) ? e2nComparable(obj1, obj2) : false;
-    }
-    return isEmpty(obj2) ? false : Objects.equals(obj1, obj2);
+    return obj1 == null ? isEmpty(obj2) : obj2 == null ? isEmpty(obj1) : Objects.equals(obj1, obj2);
   }
 
   /**
@@ -229,12 +225,7 @@ public class ObjectMethods {
    *     semantics
    */
   public static boolean e2nDeepEquals(Object obj1, Object obj2) {
-    if (obj1 == obj2) {
-      return true;
-    } else if (isEmpty(obj1)) {
-      return isEmpty(obj2) ? e2nComparable(obj1, obj2) : false;
-    }
-    return isEmpty(obj2) ? false : eq(obj1, obj2);
+    return obj1 == null ? isEmpty(obj2) : obj2 == null ? isEmpty(obj1) : eq(obj1, obj2);
   }
 
   /**
@@ -578,15 +569,5 @@ public class ObjectMethods {
       return true;
     }
     return false;
-  }
-
-  private static boolean e2nComparable(Object obj1, Object obj2) {
-    return obj1 == null
-        || obj2 == null
-        || obj1.getClass() == obj2.getClass()
-        || obj1 instanceof List && obj2 instanceof List
-        || obj1 instanceof Set && obj2 instanceof Set
-        || obj1 instanceof Map && obj2 instanceof Map
-        || obj1 instanceof Object[] && obj2 instanceof Object[];
   }
 }
