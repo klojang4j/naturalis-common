@@ -6,7 +6,11 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
 import static java.lang.System.arraycopy;
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonChecks.atMost;
+import static nl.naturalis.common.check.CommonChecks.lt;
+import static nl.naturalis.common.check.CommonChecks.noneNull;
+import static nl.naturalis.common.check.CommonChecks.notNegative;
+import static nl.naturalis.common.check.CommonGetters.length;
 
 /** Methods for working with arrays. */
 public class ArrayMethods {
@@ -22,6 +26,9 @@ public class ArrayMethods {
   static final String START_INDEX = "Start index";
   static final String END_INDEX = "End index";
 
+  // Maximum length of an array
+  private static final int MAX_SIZE = Integer.MAX_VALUE;
+
   /**
    * Appends the specified object to the specified array.
    *
@@ -30,7 +37,7 @@ public class ArrayMethods {
    * @return A concatenation of {@code array} and {@code obj}
    */
   public static <T> T[] append(T[] array, T obj) {
-    Check.notNull(array, "array");
+    Check.notNull(array, "array").has(length(), lt(), MAX_SIZE);
     T[] res = fromTemplate(array, array.length + 1);
     arraycopy(array, 0, res, 0, array.length);
     res[array.length] = obj;
@@ -41,20 +48,20 @@ public class ArrayMethods {
    * Appends the specified objects to the specified array.
    *
    * @param array The array to append the objects to
-   * @param obj1 The 1st object to append
-   * @param obj2 The 2nd object to append
+   * @param obj0 The 1st object to append
+   * @param obj1 The 2nd object to append
    * @param moreObjs More objects to append
    * @return A concatenation of {@code array}, {@code obj1}, {@code obj2} and {@code moreObjs}
    */
   @SafeVarargs
-  public static <T> T[] append(T[] array, T obj1, T obj2, T... moreObjs) {
+  public static <T> T[] append(T[] array, T obj0, T obj1, T... moreObjs) {
     Check.notNull(array, "array");
-    Check.notNull(moreObjs, "moreObjs");
+    Check.notNull(moreObjs, "moreObjs").has(length(), x -> MAX_SIZE - array.length - 2 - x >= 0);
     int sz = array.length + 2 + moreObjs.length;
     T[] res = fromTemplate(array, sz);
     arraycopy(array, 0, res, 0, array.length);
-    res[array.length] = obj1;
-    res[array.length + 1] = obj2;
+    res[array.length] = obj0;
+    res[array.length + 1] = obj1;
     arraycopy(moreObjs, 0, res, array.length + 2, moreObjs.length);
     return res;
   }
@@ -63,13 +70,13 @@ public class ArrayMethods {
    * Returns a new array containing all elements of the specified arrays.
    *
    * @param <T> The element type of the arrays
-   * @param array1 The 1st array to go into the new array
-   * @param array2 The 2nd array to go into the new array
+   * @param arr0 The 1st array to go into the new array
+   * @param arr1 The 2nd array to go into the new array
    * @return A new array containing all elements of the specified arrays
    */
   @SuppressWarnings("unchecked")
-  public static <T> T[] concat(T[] array1, T[] array2) {
-    return (T[]) concat(array1, array2, new Object[0][0]);
+  public static <T> T[] concat(T[] arr0, T[] arr1) {
+    return (T[]) concat(arr0, arr1, new Object[0][0]);
   }
 
   /**
@@ -117,7 +124,7 @@ public class ArrayMethods {
    * @param array The array to search
    * @return Whether or not the array contans the value
    */
-  public static boolean elementOf(int value, int... array) {
+  public static boolean inArray(int value, int... array) {
     return indexOf(array, value) != -1;
   }
 
@@ -130,7 +137,7 @@ public class ArrayMethods {
    * @return Whether or not the array contans the value
    */
   @SafeVarargs
-  public static <T> boolean elementOf(T value, T... array) {
+  public static <T> boolean inArray(T value, T... array) {
     return indexOf(array, value) != -1;
   }
 
@@ -154,8 +161,10 @@ public class ArrayMethods {
    * @param <T> The type of the elements in the requested array
    * @param template An array with the same length and element type as the requested array
    */
+  @SuppressWarnings("unchecked")
   public static <T> T[] fromTemplate(T[] template) {
-    return fromTemplate(template, template.length);
+    Check.notNull(template, "template");
+    return (T[]) Array.newInstance(template.getClass().getComponentType(), template.length);
   }
 
   /**
@@ -214,6 +223,7 @@ public class ArrayMethods {
    */
   public static int find(Object[] array, Object reference) {
     Check.notNull(array, "array");
+    Check.notNull(reference, "reference");
     return IntStream.range(0, array.length)
         .filter(i -> array[i] == reference)
         .findFirst()
@@ -221,7 +231,7 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns the specified array. When used as static import this method allows for leaner code:
+   * Simply returns the specified array, but allows for leaner code.
    *
    * <p>
    *
@@ -248,7 +258,7 @@ public class ArrayMethods {
    * @return A new array containing the specified object and the elements of the specified array
    */
   public static <T> T[] prefix(T[] array, T obj) {
-    Check.notNull(array, "array");
+    Check.notNull(array, "array").has(length(), lt(), MAX_SIZE);
     T[] res = fromTemplate(array, array.length + 1);
     res[0] = obj;
     arraycopy(array, 0, res, 1, array.length);
@@ -260,19 +270,19 @@ public class ArrayMethods {
    *
    * @param <T> The type of the array elements and the object to be prefixed
    * @param array The array to be prefixed
-   * @param obj1 The 1st object to prefix
-   * @param obj2 The 2nd object to prefix
+   * @param obj0 The 1st object to prefix
+   * @param obj1 The 2nd object to prefix
    * @param moreObjs More objects to prefix
    * @return A new array containing the specified objects and the elements of the specified array
    */
   @SafeVarargs
-  public static <T> T[] prefix(T[] array, T obj1, T obj2, T... moreObjs) {
+  public static <T> T[] prefix(T[] array, T obj0, T obj1, T... moreObjs) {
     Check.notNull(array, "array");
-    Check.notNull(moreObjs, "moreObjs");
+    Check.notNull(moreObjs, "moreObjs").has(length(), x -> MAX_SIZE - array.length - 2 - x >= 0);
     int sz = array.length + 2 + moreObjs.length;
     T[] res = fromTemplate(array, sz);
-    res[0] = obj1;
-    res[1] = obj2;
+    res[0] = obj0;
+    res[1] = obj1;
     arraycopy(moreObjs, 0, res, 2, moreObjs.length);
     arraycopy(array, 0, res, 2 + moreObjs.length, array.length);
     return res;

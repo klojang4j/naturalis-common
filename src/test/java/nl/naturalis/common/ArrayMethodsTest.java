@@ -56,11 +56,11 @@ public class ArrayMethodsTest {
   }
 
   @Test
-  public void elementOf01() {
+  public void inArray01() {
     int[] array = {1, 2, 4, 8, 16};
-    assertTrue(elementOf(1, array));
-    assertTrue(elementOf(16, array));
-    assertFalse(elementOf(23, array));
+    assertTrue(inArray(1, array));
+    assertTrue(inArray(16, array));
+    assertFalse(inArray(23, array));
   }
 
   @Test
