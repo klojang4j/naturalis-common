@@ -417,7 +417,7 @@ public class ObjectMethods {
    * @return {@code value} or null
    */
   public static <T, U> U ifNotNull(T arg, Function<T, U> then) {
-    return arg != null ? then.apply(arg) : null;
+    return ifNotNull(arg, then, null);
   }
 
   /**
@@ -437,6 +437,20 @@ public class ObjectMethods {
    */
   public static <T, U> U ifNotNull(T arg, Function<T, U> then, U dfault) {
     return arg != null ? then.apply(arg) : dfault;
+  }
+
+  /**
+   * Returns the result of passing the specified argument to the specified {@code Funtion} if the
+   * argument is not {@link #isEmpty(Object) empty}, else returns null.
+   *
+   * @param <T> The type of the value to transform
+   * @param <U> The return type
+   * @param arg The value to transform
+   * @param then The function to apply to the value if it is not null
+   * @return The result produced by the {@code Function} or a default value
+   */
+  public static <T, U> U ifNotEmpty(T arg, Function<T, U> then) {
+    return ifNotEmpty(arg, then, null);
   }
 
   /**
