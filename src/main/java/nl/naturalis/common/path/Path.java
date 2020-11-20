@@ -1,5 +1,6 @@
 package nl.naturalis.common.path;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -76,6 +77,17 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
       }
     }
     return sb.toString();
+  }
+
+  static boolean isArrayIndex(String s) {
+    if (s != null && !s.isEmpty() && s.codePoints().allMatch(Character::isDigit)) {
+      try {
+        new BigInteger(s).intValueExact();
+        return true;
+      } catch (ArithmeticException e) {
+      }
+    }
+    return false;
   }
 
   private final String[] elems;
@@ -190,7 +202,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    * @return
    */
   public Path getCanonicalPath() {
-    return new Path(stream().filter(not(NumberMethods::isArrayIndex)).toArray(String[]::new));
+    return new Path(stream().filter(not(Path::isArrayIndex)).toArray(String[]::new));
   }
 
   /**

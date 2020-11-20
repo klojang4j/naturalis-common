@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import nl.naturalis.common.ClassMethods;
-import nl.naturalis.common.NumberMethods;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ClassMethods.getArrayTypeSimpleName;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
@@ -18,13 +17,12 @@ import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonChecks.noneNull;
 import static nl.naturalis.common.check.CommonChecks.notEmpty;
 import static nl.naturalis.common.check.CommonGetters.length;
-import static nl.naturalis.common.path.PathWalkerException.illegalAccess;
+import static nl.naturalis.common.path.PathWalkerException.*;
 
 /**
- * Reads/writes values within a given Object using {@link Path} objects. The {@code PathWalker}
- * class is especially useful for reading large batches of sparsely populated objects or maps. It
- * will simply return null if a path could not be walked all the way to the last path segment, due
- * to any of the following reasons:
+ * Reads/writes objects using {@link Path} objects. The {@code PathWalker} class is useful for
+ * reading large batches of sparsely populated objects or maps. It will not throw an exception if a
+ * path could not be read for a particular object due to any of the following reasons:
  *
  * <p>
  *
@@ -35,21 +33,14 @@ import static nl.naturalis.common.path.PathWalkerException.illegalAccess;
  *   <li>the path continued after having reached a terminal value within the object (a primitive)
  * </ul>
  *
- * <p>If you need to distinguish between true null values and the "dead ends" described above, you
- * can {@link #PathWalker(List, boolean) instruct} the {@code PathWalker} to return a special value,
+ * <p>Instead, it will just return null. If you need to distinguish between true null values and the
+ * "dead ends" described above, you can instruct the {@code PathWalker} to return a special value,
  * {@link #DEAD_END}, in stead of null.
  *
  * <p>If the {@code PathWalker} is on a segment that references a {@code Collection} or an array,
  * the next path segment must be an array index (unless it is the {@code Collection} or array itself
  * that you want to retrieve). If it is not, it will silently assume you want the first element of
- * the {@code Collection} c.q. array.
- *
- * <p>If the {@code PathWalker} is on a segment that references a map key, and the map to be
- * read/written uses non-{@code String} keys, you must instruct the {@code PathWalker} how to
- * deserialize the path segment into an appropriately typed key. This is done by passing in a {@code
- * Function} takes a {@code Path} and returns the key. The first path segment of the {@code Path} is
- * the segment specifying the key. You still get the entire path following that segment so you know
- * where you are within the object you are reading.
+ * the {@code Collection} or array.
  *
  * @author Ayco Holleman
  */
@@ -245,7 +236,7 @@ public final class PathWalker {
 
   private Object readElement(Collection collection, Path path) {
     String segment = path.segment(0);
-    if (NumberMethods.isArrayIndex(segment)) {
+    if (Path.isArrayIndex(segment)) {
       int idx = Integer.parseInt(segment);
       if (idx < collection.size()) {
         return readObj(collection.toArray()[idx], path.shift());
@@ -256,7 +247,7 @@ public final class PathWalker {
 
   private Object readElement(Object[] array, Path path) {
     String segment = path.segment(0);
-    if (NumberMethods.isArrayIndex(segment)) {
+    if (Path.isArrayIndex(segment)) {
       int idx = Integer.parseInt(segment);
       if (idx < array.length) {
         return readObj(array[idx], path.shift());
@@ -268,7 +259,7 @@ public final class PathWalker {
   private Object readPrimitiveElement(Object array, Path path) {
     if (path.size() == 1) { // primitive *must* be the end of the trail
       String segment = path.segment(0);
-      if (NumberMethods.isArrayIndex(segment)) {
+      if (Path.isArrayIndex(segment)) {
         int idx = Integer.parseInt(segment);
         if (idx < Array.getLength(array)) {
           return readObj(Array.get(array, idx), path.shift());
@@ -281,59 +272,53 @@ public final class PathWalker {
   private Object readAny(Object any, Path path) {
     String segment = path.segment(0);
     try {
-      Field f = ClassMethods.getField(any, segment);
+      Field f = ClassMethods.getField(segment, any);
       if (f == null) {
         return deadEnd();
       }
       return readObj(f.get(any), path.shift());
     } catch (IllegalAccessException e) {
-      throw illegalAccess(e, any, segment);
+      throw readWriteError(e, any, segment);
     }
   }
 
-  /*
-   * NB setting the value of a path actually means setting a value in the object referenced
-   * by the parent of that path. E.g. if you want to set employee.name to "John", you actually
-   * invoke a setter of the Employee class.
-   */
   private void write(Object host, Path path, Object value) {
     Path parent = path.parent();
-    Path target = path.subpath(-1);
-    if (NumberMethods.isArrayIndex(target.segment(0))) {
+    Path child = path.subpath(-1);
+    if (Path.isArrayIndex(child.segment(0))) {
       if (parent.isEmpty()) {
-        throw new PathWalkerException("Invalid path: " + path);
+        throw invalidPath(path);
       }
       PathWalker pw = new PathWalker(parent);
       Object parval = pw.read(host);
       if (parval != null) {
-        int idx = Integer.parseInt(target.toString());
+        int idx = Integer.parseInt(child.toString());
         writeElement(parval, idx, value);
       }
     } else {
       PathWalker pw = new PathWalker(parent);
-      Object parval = pw.read(host);
-      if (parval != null) {
-        if (parval instanceof Map) {
-          Map map = (Map) parval;
+      Object parentObject = pw.read(host);
+      if (parentObject != null) {
+        if (parentObject instanceof Map) {
+          Map map = (Map) parentObject;
           Object key;
-          if (target.isNullSegment()) {
+          if (child.isNullSegment()) {
             key = null;
           } else if (keyDeser == null) {
-            key = target.toString();
+            key = child.toString();
           } else {
-            key = keyDeser.apply(target);
+            key = keyDeser.apply(child);
           }
           map.put(key, value);
-        } else if (!target.isNullSegment()) {
+        } else if (!child.isNullSegment()) {
           try {
-            Field f = ClassMethods.getField(parval, target.toString());
-            f.set(parval, value);
+            Field f = ClassMethods.getField(child.toString(), parentObject);
+            f.set(parentObject, value);
           } catch (IllegalAccessException e) {
-            throw illegalAccess(e, parval, target.toString());
+            throw readWriteError(e, parentObject, child.toString());
           }
         } else {
-          throw new PathWalkerException(
-              "Null segment can only be used to write map value with key null");
+          throw nullSegmentNotAllowed(parentObject);
         }
       }
     }

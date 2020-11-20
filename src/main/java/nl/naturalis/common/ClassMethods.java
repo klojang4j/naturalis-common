@@ -31,70 +31,77 @@ public class ClassMethods {
   }
 
   /**
-   * Tests whether the 1st argument is an instance of the 2nd argument.
-   *
-   * @param objectToTest
-   * @param superOrInterface
-   * @return
-   */
-  public static boolean isA(Object objectToTest, Class<?> superOrInterface) {
-    Check.notNull(objectToTest, "objectToTest");
-    Check.notNull(superOrInterface, "superOrInterface");
-    return superOrInterface.isAssignableFrom(objectToTest.getClass());
-  }
-
-  /**
-   * Tests whether the provided object is an array of primitives without using reflection.
+   * Returns whether or not the argument is an array of primitives without using reflection.
    * Null-safe.
    *
-   * @param obj
-   * @return
+   * @param arg The object to test
+   * @return Whether or not it is an array of primitives
    */
-  public static boolean isPrimitiveArray(Object obj) {
-    return obj != null
-        && (obj instanceof int[]
-            || obj instanceof byte[]
-            || obj instanceof double[]
-            || obj instanceof char[]
-            || obj instanceof long[]
-            || obj instanceof float[]
-            || obj instanceof boolean[]
-            || obj instanceof short[]);
+  public static boolean isPrimitiveArray(Object arg) {
+    Class<?> c;
+    return arg != null
+        && ((c = arg.getClass()) == int[].class
+            || c == byte[].class
+            || c == double[].class
+            || c == char[].class
+            || c == long[].class
+            || c == float[].class
+            || c == boolean[].class
+            || c == short[].class);
   }
 
   /**
-   * Returns a description of the type of the specified array, including the fully-qualified name of
-   * the array's component type. For example <code>getArrayTypeName(new String[0][0])</code> will
-   * return "java.lang.String[][]", which is a bit less harsh than the description produced by
-   * <code>
-   * myStringArray.toString()</code>
+   * Returns {@link #getArrayTypeName(Object)} if the argument is an array, else {@code
+   * obj.getClass().getName()}.
+   *
+   * @param obj The object whose class name to return
+   * @return The class name
+   */
+  public static String getClassName(Object obj) {
+    Class<?> c = Check.notNull(obj).ok(Object::getClass);
+    return c.isArray() ? getArrayTypeName(obj) : c.getName();
+  }
+
+  /**
+   * Returns {@link #getArrayTypeSimpleName(Object)} if the argument is an array, else {@code
+   * obj.getClass().getSimpleName()}.
+   *
+   * @param obj The object whose class name to return
+   * @return The class name
+   */
+  public static String getSimpleClassName(Object obj) {
+    Class<?> c = Check.notNull(obj).ok(Object::getClass);
+    return c.isArray() ? getArrayTypeSimpleName(obj) : c.getSimpleName();
+  }
+
+  /**
+   * Returns a friendly description of the type of the specified array. For example {@code
+   * getArrayTypeName(new String[0][0])} will return {@code java.lang.String[][]}.
    *
    * @param array The array
    * @return The simple name of the array type
    */
   public static String getArrayTypeName(Object array) {
-    Check.notNull(array, "array").is(array());
-    Class<?> ct = array.getClass().getComponentType();
+    Check.notNull(array).is(array());
+    Class<?> c = array.getClass().getComponentType();
     int i = 0;
-    for (; ct.isArray(); ct = ct.getComponentType()) {
+    for (; c.isArray(); c = c.getComponentType()) {
       ++i;
     }
-    StringBuilder sb = new StringBuilder(ct.getName());
+    StringBuilder sb = new StringBuilder(c.getName());
     IntStream.rangeClosed(0, i).forEach(x -> sb.append("[]"));
     return sb.toString();
   }
 
   /**
-   * Returns a description of the type of the specified array, including the simple name of the
-   * array's component type. For example <code>getArrayTypeSimpleName(new String[0][0])</code> will
-   * return "String[][]", which is a bit less harsh than the description produced by <code>
-   * myStringArray.toString()</code>
+   * Returns a friendly description of the type of the specified array. For example {@code
+   * getArrayTypeName(new String[0][0])} will return {@code String[][]}.
    *
    * @param array The array
    * @return The simple name of the array type
    */
   public static String getArrayTypeSimpleName(Object array) {
-    Check.notNull(array, "array").is(array());
+    Check.notNull(array).is(array());
     return array.getClass().getComponentType().getSimpleName() + "[]";
   }
 
@@ -102,27 +109,26 @@ public class ClassMethods {
   private static final HashMap<Tuple<String, Class>, Field> fields = new HashMap<>();
 
   /**
-   * Returns a {@code Field} object corresponding to the provided field name within the provided
-   * object's type. The fields {@code accessible} flag will be set to {@code true}.
+   * Returns a {@code Field} object corresponding to the specified field name. If found. the field's
+   * {@code accessible} flag will be set to {@code true}.
    *
-   * @param obj
-   * @param fieldName
-   * @return
+   * @param fieldName The name of the field
+   * @param obj An object whose class is supposed to declare or inherit the field
+   * @return The {@code Field} or null if the specified field name does not correspond to a {@code
+   *     Field} in the specified object's class
    */
   @SuppressWarnings("rawtypes")
-  public static Field getField(Object obj, String fieldName) {
+  public static Field getField(String fieldName, Object obj) {
     Tuple<String, Class> key = Tuple.tuple(fieldName, obj.getClass());
     Field field = fields.get(key);
     if (field == null) {
-      if (!fields.containsKey(key)) {
-        LOOP:
-        for (Class c = obj.getClass(); c != Object.class; c = c.getSuperclass()) {
-          for (Field f : c.getDeclaredFields()) {
-            if (f.getName().equals(fieldName)) {
-              f.setAccessible(true);
-              fields.put(key, field = f);
-              break LOOP;
-            }
+      LOOP:
+      for (Class c = obj.getClass(); c != Object.class; c = c.getSuperclass()) {
+        for (Field f : c.getDeclaredFields()) {
+          if (f.getName().equals(fieldName)) {
+            f.setAccessible(true);
+            fields.put(key, field = f);
+            break LOOP;
           }
         }
       }

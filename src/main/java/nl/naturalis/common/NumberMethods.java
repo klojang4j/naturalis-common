@@ -1,6 +1,5 @@
 package nl.naturalis.common;
 
-import java.math.BigInteger;
 import nl.naturalis.common.check.Check;
 
 /**
@@ -171,25 +170,6 @@ public class NumberMethods {
       return n.shortValue() >= 0 ? n : (T) Short.valueOf((short) -n.shortValue());
     }
     return n.byteValue() >= 0 ? n : (T) Byte.valueOf((byte) -n.byteValue());
-  }
-
-  /**
-   * Returns whether or not the specified string represents a valid array index. Returns {@code
-   * true} if the argument is not null, not empty and consists of digits ony, and fits into a 32-bit
-   * integer. Otherwise this method returns {@code false}.
-   *
-   * @param s The string to check
-   * @return Whether or not it represents a valid array index
-   */
-  public static boolean isArrayIndex(String s) {
-    if (s != null && !s.isEmpty() && s.codePoints().allMatch(Character::isDigit)) {
-      try {
-        new BigInteger(s).intValueExact();
-        return true;
-      } catch (ArithmeticException e) {
-      }
-    }
-    return false;
   }
 
   private NumberMethods() {}
