@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static nl.naturalis.common.NumberMethods.*;
 import static nl.naturalis.common.ObjectMethods.*;
 
 @SuppressWarnings("rawtypes")
@@ -166,5 +167,21 @@ public class ObjectMethodsTest {
 
   private static Set setOf(Object... objs) {
     return Arrays.stream(objs).collect(Collectors.toSet());
+  }
+
+  @Test
+  public void n2e01() {
+    assertTrue(ObjectMethods.n2e((Integer) null) == ZERO_INT);
+    assertTrue(ObjectMethods.n2e((Double) null) == ZERO_DOUBLE);
+    assertTrue(ObjectMethods.n2e((Long) null) == ZERO_LONG);
+    assertTrue(ObjectMethods.n2e((Float) null) == ZERO_FLOAT);
+    assertTrue(ObjectMethods.n2e((Short) null) == ZERO_SHORT);
+    assertTrue(ObjectMethods.n2e((Byte) null) == ZERO_BYTE);
+    assertTrue(ObjectMethods.n2e(2) == 2);
+    assertTrue(ObjectMethods.n2e(2.0) == 2D);
+    assertTrue(ObjectMethods.n2e(2L) == 2L);
+    assertTrue(ObjectMethods.n2e(2.0F) == 2F);
+    assertTrue(ObjectMethods.n2e((short) 2) == (short) 2);
+    assertTrue(ObjectMethods.n2e((byte) 2) == (byte) 2);
   }
 }

@@ -13,26 +13,6 @@ public class CollectionMethods {
   private CollectionMethods() {}
 
   /**
-   * Whether or not the provided <code>Collection</code> is null or empty.
-   *
-   * @param c
-   * @return
-   */
-  public static boolean isEmpty(Collection<?> c) {
-    return c == null || c.isEmpty();
-  }
-
-  /**
-   * Whether or not the provided <code>Collection</code> is neither null nor empty.
-   *
-   * @param c
-   * @return
-   */
-  public static boolean isNotEmpty(Collection<?> c) {
-    return !isEmpty(c);
-  }
-
-  /**
    * Returns the specified list if it is not empty else an immutable list containing only the
    * specified element.
    *
@@ -42,7 +22,7 @@ public class CollectionMethods {
    * @return
    */
   public static <T> List<T> ifEmpty(List<T> list, T e0) {
-    return isEmpty(list) ? Collections.singletonList(e0) : list;
+    return ObjectMethods.isEmpty(list) ? Collections.singletonList(e0) : list;
   }
 
   /**
@@ -58,7 +38,7 @@ public class CollectionMethods {
    */
   @SafeVarargs
   public static <T> List<T> ifEmpty(List<T> list, T e0, T e1, T... moreElems) {
-    return isEmpty(list) ? List.of(ArrayMethods.prefix(moreElems, e0, e1)) : list;
+    return ObjectMethods.isEmpty(list) ? List.of(ArrayMethods.prefix(moreElems, e0, e1)) : list;
   }
 
   /**
@@ -71,7 +51,7 @@ public class CollectionMethods {
    * @return
    */
   public static <T> Set<T> ifEmpty(Set<T> set, T e0) {
-    return isEmpty(set) ? Collections.singleton(e0) : set;
+    return ObjectMethods.isEmpty(set) ? Collections.singleton(e0) : set;
   }
 
   /**
@@ -87,7 +67,7 @@ public class CollectionMethods {
    */
   @SafeVarargs
   public static <T> Set<T> ifEmpty(Set<T> set, T e0, T e1, T... moreElems) {
-    return isEmpty(set) ? Set.of(ArrayMethods.prefix(moreElems, e0, e1)) : set;
+    return ObjectMethods.isEmpty(set) ? Set.of(ArrayMethods.prefix(moreElems, e0, e1)) : set;
   }
 
   /**
@@ -101,7 +81,7 @@ public class CollectionMethods {
    * @return
    */
   public static <T, U extends Collection<T>> U ifEmpty(U collection, U alternative) {
-    return isEmpty(collection) ? alternative : collection;
+    return ObjectMethods.isEmpty(collection) ? alternative : collection;
   }
 
   /**

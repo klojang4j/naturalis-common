@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.check.CommonChecks;
 import nl.naturalis.common.function.Relation;
 import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
@@ -41,47 +42,163 @@ import static nl.naturalis.common.check.CommonGetters.supplied;
 @SuppressWarnings("rawtypes")
 public class ObjectMethods {
 
+  private static final String ERR_NULL_OPTIONAL = "Optional must not be null";
+
   private ObjectMethods() {}
 
   /**
-   * Verifies that the argument is empty. Returns {@code true} if <i>any</i> of the following
-   * applies:
+   * Whether or not the specified {@code String} is null or empty.
+   *
+   * @param arg The {@code String} to check
+   * @return Whether or not it is null or empty
+   */
+  public static boolean isEmpty(String arg) {
+    return arg == null || arg.isEmpty();
+  }
+
+  /**
+   * Returns whether or not the specified {@code Collection} is null or empty.
+   *
+   * @param arg The {@code Collection} to check
+   * @return Whether or not it is null or empty
+   */
+  public static boolean isEmpty(Collection arg) {
+    return arg == null || arg.isEmpty();
+  }
+
+  /**
+   * Returns whether or not the specified {@code Map} is null or empty.
+   *
+   * @param arg The {@code Map} to check
+   * @return Whether or not it is null or empty
+   */
+  public static boolean isEmpty(Map arg) {
+    return arg == null || arg.isEmpty();
+  }
+
+  /**
+   * Returns whether or not the specified {@code Optional} is empty or contains an empty object.
+   * This is the only {@code isNotEmpty} method that will actually throw an {@code
+   * IllegalArgumentException} if the argument is null as {@code Optional} objects should never be
+   * null.
+   *
+   * @param arg The {@code Optional} to check
+   * @return Whether or not it is empty or contains an empty object
+   */
+  public static boolean isEmpty(Optional arg) {
+    if (arg == null) {
+      throw new IllegalArgumentException(ERR_NULL_OPTIONAL);
+    }
+    return arg.isEmpty() || isEmpty(arg.get());
+  }
+
+  /**
+   * Returns whether or not the specified array is null or empty.
+   *
+   * @param arg The array to check
+   * @return Whether or not it is null or empty
+   */
+  public static boolean isEmpty(Object[] arg) {
+    return arg == null || arg.length == 0;
+  }
+
+  /**
+   * Returns whether or not the specified argument is null or empty. This method is (and can be)
+   * used for broad-stroke methods like {@link #ifEmpty(Object, Object)} and {@link
+   * CommonChecks#notEmpty()}. Returns {@code true} if <i>any</i> of the following applies:
    *
    * <p>
    *
    * <ul>
-   *   <li>{@code obj} is {@code null}
-   *   <li>{@code obj} is an empty {@link CharSequence}
-   *   <li>{@code obj} is an empty {@link Collection}
-   *   <li>{@code obj} is an empty {@link Map}
-   *   <li>{@code obj} is a zero-length array
-   *   <li>{@code obj} is an empty {@link Optional} or an {@code Optional} containing an empty
+   *   <li>{@code arg} is {@code null}
+   *   <li>{@code arg} is an empty {@link CharSequence}
+   *   <li>{@code arg} is an empty {@link Collection}
+   *   <li>{@code arg} is an empty {@link Map}
+   *   <li>{@code arg} is a zero-length array
+   *   <li>{@code arg} is an empty {@link Optional} or an {@code Optional} containing an empty
    *       object
-   *   <li>{@code obj} is a zero-size {@link Sizeable}
-   *   <li>{@code obj} is an empty {@link Emptyable}
+   *   <li>{@code arg} is a zero-size {@link Sizeable}
+   *   <li>{@code arg} is an empty {@link Emptyable}
    * </ul>
    *
    * <p>Otherwise this method returns {@code false}.
    *
-   * @param obj The object to be tested
-   * @return Whether or not it is empty
+   * @param arg The argument to check
+   * @return Whether or not it is null or empty
    */
-  public static boolean isEmpty(Object obj) {
-    return obj == null
-        || obj instanceof CharSequence && ((CharSequence) obj).length() == 0
-        || obj instanceof Collection && ((Collection) obj).isEmpty()
-        || obj instanceof Map && ((Map) obj).isEmpty()
-        || obj instanceof Object[] && ((Object[]) obj).length == 0
-        || isPrimitiveArray(obj) && Array.getLength(obj) == 0
-        || obj instanceof Optional
-            && (((Optional) obj).isEmpty() || isEmpty(((Optional) obj).get()))
-        || obj instanceof Sizeable && ((Sizeable) obj).size() == 0
-        || obj instanceof Emptyable && ((Emptyable) obj).isEmpty();
+  public static boolean isEmpty(Object arg) {
+    return arg == null
+        || arg instanceof CharSequence && ((CharSequence) arg).length() == 0
+        || arg instanceof Collection && ((Collection) arg).isEmpty()
+        || arg instanceof Map && ((Map) arg).isEmpty()
+        || arg instanceof Object[] && ((Object[]) arg).length == 0
+        || isPrimitiveArray(arg) && Array.getLength(arg) == 0
+        || arg instanceof Optional
+            && (((Optional) arg).isEmpty() || isEmpty(((Optional) arg).get()))
+        || arg instanceof Sizeable && ((Sizeable) arg).size() == 0
+        || arg instanceof Emptyable && ((Emptyable) arg).isEmpty();
   }
 
   /**
-   * Verifies that the argument is not empty. Returns {@code true} if <i>any</i> of the following
-   * applies:
+   * Returns whether or not the specified {@code String} is neither null nor empty.
+   *
+   * @param arg The {@code String} to check
+   * @return Whether or not it is neither null nor empty
+   */
+  public static boolean isNotEmpty(String arg) {
+    return !isEmpty(arg);
+  }
+
+  /**
+   * Returns whether or not the specified {@code Collection} is neither null nor empty.
+   *
+   * @param arg The {@code Collection} to check
+   * @return Whether or not it is neither null nor empty
+   */
+  public static boolean isNotEmpty(Collection arg) {
+    return !isEmpty(arg);
+  }
+
+  /**
+   * Returns whether or not the specified {@code Map} is neither null nor empty.
+   *
+   * @param arg The {@code Map} to check
+   * @return Whether or not it is neither null nor empty
+   */
+  public static boolean isNotEmpty(Map arg) {
+    return !isEmpty(arg);
+  }
+
+  /**
+   * Returns whether or not the specified {@code Optional} neither empty nor contains an empty
+   * object. This is the only {@code isNotEmpty} method that will actually throw an {@code
+   * IllegalArgumentException} if the argument is null as {@code Optional} objects should never be
+   * null.
+   *
+   * @param arg The {@code Optional} to check
+   * @return Whether or not it is neither empty nor contains an empty object
+   * @throws IllegalArgumentException If the argument is null
+   */
+  public static boolean isNotEmpty(Optional arg) throws IllegalArgumentException {
+    if (arg == null) {
+      throw new IllegalArgumentException(ERR_NULL_OPTIONAL);
+    }
+    return !isEmpty(arg);
+  }
+
+  /**
+   * Returns whether or not the specified {@code Optional} is neither null nor empty.
+   *
+   * @param arg The {@code String} to check
+   * @return Whether or not it is neither null nor empty
+   */
+  public static boolean isNotEmpty(Object[] arg) {
+    return !isEmpty(arg);
+  }
+  /**
+   * Verifies that the argument is neither null nor empty. This method is (and can be) used for
+   * broad-stroke methods like {@link #ifNotEmpty(Object, Object)} and {@link
+   * CommonChecks#notEmpty()}. Returns {@code true} if <i>any</i> of the following applies:
    *
    * <p>
    *
@@ -96,11 +213,11 @@ public class ObjectMethods {
    *   <li>{@code obj} is a non-null object of any other type
    * </ul>
    *
-   * @param obj The object to be tested
+   * @param arg The object to be tested
    * @return Whether or not it is empty
    */
-  public static boolean isNotEmpty(Object obj) {
-    return !isEmpty(obj);
+  public static boolean isNotEmpty(Object arg) {
+    return !isEmpty(arg);
   }
 
   /**
@@ -117,7 +234,7 @@ public class ObjectMethods {
    *       are not considered)
    *   <li>{@code obj} is a non-zero-length {@code Object[]} containing only <i>deep-not-empty</i>
    *       elements
-   *   <li>{@code obj} is a non-zero-length primitive array
+   *   <li>{@code obj} is a non-zero-length array of primitives
    *   <li>{@code obj} is a non-empty {@link Optional} containing a <i>deep-not-empty</i> object
    *   <li>{@code obj} is a non-empty {@link Emptyable}
    *   <li>{@code obj} is a non-zero-size {@link Sizeable}
@@ -160,40 +277,39 @@ public class ObjectMethods {
    * {@code Object[]}, does not contain any null values. It may still be an empty collection, map or
    * array, however.
    *
-   * @param obj The object to be tested
+   * @param arg The object to be tested
    * @return Whether or not it is not null and does not contain any null values
    */
-  public static boolean isNoneNull(Object obj) {
-    if (obj == null) {
+  public static boolean isNoneNull(Object arg) {
+    if (arg == null) {
       return false;
-    } else if (obj instanceof Object[]) {
-      return Arrays.stream((Object[]) obj).allMatch(notNull());
-    } else if (obj instanceof Collection) {
-      return ((Collection) obj).stream().allMatch(notNull());
-    } else if (obj instanceof Map) {
-      return ((Map) obj).values().stream().allMatch(notNull());
+    } else if (arg instanceof Object[]) {
+      return Arrays.stream((Object[]) arg).allMatch(notNull());
+    } else if (arg instanceof Collection) {
+      return ((Collection) arg).stream().allMatch(notNull());
+    } else if (arg instanceof Map) {
+      return ((Map) arg).values().stream().allMatch(notNull());
     }
     return true;
   }
 
   /**
-   * Returns {@code null} if the argument is {@link #isEmpty(Object) empty}, else the argument
-   * itself.
+   * Empty-to-null: returns {@code null} if the argument is {@link #isEmpty(Object) empty}, else the
+   * argument itself.
    *
    * @param <T> The type of the argument
-   * @param obj The argument
-   * @return The argument itself or {@code null}
+   * @param arg The argument
+   * @return The argument itself if not empty or {@code null}
    */
-  public static <T> T emptyToNull(T obj) {
-    return isEmpty(obj) ? null : obj;
+  public static <T> T e2n(T arg) {
+    return isEmpty(arg) ? null : arg;
   }
 
   /**
    * Tests the provided arguments for equality using <i>empty-equals-null</i> semantics. This is
-   * roughly equivalent to {@code Objects.equals(emptyToNull(obj1), emptyToNull(obj2))}, except that
-   * an empty instance of one type (e.g. {@code String}) is <i>not</i> equal to an empty instance of
-   * another non-comparable type (e.g. {@code Set}). An empty {@code HashSet}, however, is equal to
-   * an empty {@code TreeSet}. So:
+   * roughly equivalent to {@code Objects.equals(e2n(arg0), e2n(arg1))}, except that empty (but
+   * non-null) instances of different types (e.g. {@code String} and {@code Set}) are generally not
+   * equal to each other. (An empty {@code HashSet}, however, is equal to an empty {@code TreeSet}.)
    *
    * <p>
    *
@@ -202,30 +318,32 @@ public class ObjectMethods {
    *   <li>{@code null} equals an empty {@link Collection}
    *   <li>{@code null} equals an empty {@link Map}
    *   <li>{@code null} equals an empty array
+   *   <li>{@code null} equals an empty {@link Optional} or an {@link Optional} containing an empty
+   *       object
    *   <li>{@code null} equals an empty {@link Emptyable}
    *   <li>{@code null} equals a zero-size {@link Sizeable}
-   *   <li>An empty intance of one type never equals an empty instance of another non-comparable
+   *   <li>A empty intance of one type is not equal to a empty instance of another non-comparable
    *       type
    * </ol>
    *
-   * @param obj1 The 1st of the pair of objects to compare
-   * @param obj2 The 2nd of the pair of objects to compare
+   * @param arg0 The 1st of the pair of objects to compare
+   * @param arg1 The 2nd of the pair of objects to compare
    * @return Whether or not the provided arguments are equal using empty-equals-null semantics
    */
-  public static boolean e2nEquals(Object obj1, Object obj2) {
-    return obj1 == null ? isEmpty(obj2) : obj2 == null ? isEmpty(obj1) : Objects.equals(obj1, obj2);
+  public static boolean e2nEquals(Object arg0, Object arg1) {
+    return arg0 == null ? isEmpty(arg1) : arg1 == null ? isEmpty(arg0) : Objects.equals(arg0, arg1);
   }
 
   /**
    * Recursively tests the arguments for equality using <i>empty-equals-null</i> semantics.
    *
-   * @param obj1 The 1st of the pair of objects to compare
-   * @param obj2 The 2nd of the pair of objects to compare
+   * @param arg0 The 1st of the pair of objects to compare
+   * @param arg1 The 2nd of the pair of objects to compare
    * @return Whether or not the provided arguments are deeply equal using empty-equals-null
    *     semantics
    */
-  public static boolean e2nDeepEquals(Object obj1, Object obj2) {
-    return obj1 == null ? isEmpty(obj2) : obj2 == null ? isEmpty(obj1) : eq(obj1, obj2);
+  public static boolean e2nDeepEquals(Object arg0, Object arg1) {
+    return arg0 == null ? isEmpty(arg1) : arg1 == null ? isEmpty(arg0) : eq(arg0, arg1);
   }
 
   /**
@@ -510,23 +628,137 @@ public class ObjectMethods {
     }
   }
 
-  private static boolean eq(Object obj1, Object obj2) {
-    if (obj1 instanceof Object[] && obj2 instanceof Object[]) {
-      return arraysEqual((Object[]) obj1, (Object[]) obj2);
-    } else if (obj1 instanceof List && obj2 instanceof List) {
-      return listsEqual((List) obj1, (List) obj2);
-    } else if (obj1 instanceof Set && obj2 instanceof Set) {
-      return setsEqual((Set) obj1, (Set) obj2);
-    } else if (obj1 instanceof Map && obj2 instanceof Map) {
-      return mapsEqual((Map) obj1, (Map) obj2);
-    }
-    return Objects.deepEquals(obj1, obj2);
+  /**
+   * Null-to-empty: returns an empty {@code String} if the argument is null, else the argument
+   * itself.
+   *
+   * @param arg An argument of type {@code String}
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static String n2e(String arg) {
+    return ifNull(arg, StringMethods.EMPTY);
   }
 
-  private static boolean arraysEqual(Object[] objs1, Object[] objs2) {
-    if (objs1.length == objs2.length) {
-      for (int i = 0; i < objs1.length; ++i) {
-        if (!e2nDeepEquals(objs1[i], objs2[i])) {
+  /**
+   * Null-to-empty: returns {@link Collections#emptyList()} if the argument is null, else the
+   * argument itself.
+   *
+   * @param arg An argument of type {@code List}
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static <T> List<T> n2e(List<T> arg) {
+    return ifNull(arg, Collections.emptyList());
+  }
+
+  /**
+   * Null-to-empty: returns {@link Collections#emptySet()} if the argument is null, else the
+   * argument itself.
+   *
+   * @param arg An argument of type {@code List}
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static <T> Set<T> n2e(Set<T> arg) {
+    return ifNull(arg, Collections.emptySet());
+  }
+
+  /**
+   * Null-to-empty: returns {@link Collections#emptyMap()} if the argument is null, else the
+   * argument itself.
+   *
+   * @param arg An argument of type {@code List}
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static <K, V> Map<K, V> n2e(Map<K, V> arg) {
+    return ifNull(arg, Collections.emptyMap());
+  }
+
+  /**
+   * Returns {@link NumberMethods#ZERO_INT} if the argument is null, else the argument itself.
+   *
+   * @param arg An argument of type {@code Integer}
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static Integer n2e(Integer arg) {
+    return ifNull(arg, NumberMethods.ZERO_INT);
+  }
+
+  /**
+   * Returns {@link NumberMethods#ZERO_DOUBLE} the argument is null, else the argument itself.
+   *
+   * @param arg An argument of type {@code Double}
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static Double n2e(Double arg) {
+    return ifNull(arg, NumberMethods.ZERO_DOUBLE);
+  }
+
+  /**
+   * Returns {@link NumberMethods#ZERO_LONG} if the argument is null, else the argument itself.
+   *
+   * @param arg An argument of type {@code Long}
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static Long n2e(Long arg) {
+    return ifNull(arg, NumberMethods.ZERO_LONG);
+  }
+
+  /**
+   * Returns {@link NumberMethods#ZERO_FLOAT} if the argument is null, else the argument itself.
+   *
+   * @param arg An argument of type {@code Float}
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static Float n2e(Float arg) {
+    return ifNull(arg, NumberMethods.ZERO_FLOAT);
+  }
+
+  /**
+   * Returns {@link NumberMethods#ZERO_SHORT} if the argument is null, else the argument itself.
+   *
+   * @param arg An argument of type {@code Short}
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static Short n2e(Short arg) {
+    return ifNull(arg, NumberMethods.ZERO_SHORT);
+  }
+
+  /**
+   * Returns {@link NumberMethods#ZERO_BYTE} if the argument is null, else the argument itself.
+   *
+   * @param arg An argument of type {@code Byte}
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static Byte n2e(Byte arg) {
+    return ifNull(arg, NumberMethods.ZERO_BYTE);
+  }
+
+  /**
+   * Returns {@link Boolean#FALSE} if the argument is null, else the argument itself.
+   *
+   * @param arg An argument of type {@code Byte}
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static Boolean n2e(Boolean arg) {
+    return ifNull(arg, Boolean.FALSE);
+  }
+
+  private static boolean eq(Object arg0, Object arg1) {
+    if (arg0 instanceof Object[] && arg1 instanceof Object[]) {
+      return arraysEqual((Object[]) arg0, (Object[]) arg1);
+    } else if (arg0 instanceof List && arg1 instanceof List) {
+      return listsEqual((List) arg0, (List) arg1);
+    } else if (arg0 instanceof Set && arg1 instanceof Set) {
+      return setsEqual((Set) arg0, (Set) arg1);
+    } else if (arg0 instanceof Map && arg1 instanceof Map) {
+      return mapsEqual((Map) arg0, (Map) arg1);
+    }
+    return Objects.deepEquals(arg0, arg1);
+  }
+
+  private static boolean arraysEqual(Object[] arr0, Object[] arr1) {
+    if (arr0.length == arr1.length) {
+      for (int i = 0; i < arr0.length; ++i) {
+        if (!e2nDeepEquals(arr0[i], arr1[i])) {
           return false;
         }
       }
@@ -535,12 +767,12 @@ public class ObjectMethods {
     return false;
   }
 
-  private static boolean listsEqual(List list1, List list2) {
-    if (list1.size() == list2.size()) {
+  private static boolean listsEqual(List list0, List list1) {
+    if (list0.size() == list1.size()) {
+      Iterator it0 = list0.iterator();
       Iterator it1 = list1.iterator();
-      Iterator it2 = list2.iterator();
-      while (it1.hasNext()) {
-        if (!it2.hasNext() || !e2nDeepEquals(it1.next(), it2.next())) {
+      while (it0.hasNext()) {
+        if (!it1.hasNext() || !e2nDeepEquals(it0.next(), it1.next())) {
           return false;
         }
       }
@@ -549,20 +781,20 @@ public class ObjectMethods {
     return false;
   }
 
-  private static boolean setsEqual(Set set1, Set set2) {
-    Set s1 = (Set) set1.stream().map(ObjectMethods::emptyToNull).collect(toSet());
-    Set s2 = (Set) set2.stream().map(ObjectMethods::emptyToNull).collect(toSet());
-    if (s1.size() != s2.size()) {
+  private static boolean setsEqual(Set set0, Set set1) {
+    Set s0 = (Set) set0.stream().map(ObjectMethods::e2n).collect(toSet());
+    Set s1 = (Set) set1.stream().map(ObjectMethods::e2n).collect(toSet());
+    if (s0.size() != s1.size()) {
       return false;
-    } else if (s1.equals(s2)) {
+    } else if (s0.equals(s1)) {
       return true;
     }
-    for (Object obj1 : s1) {
+    for (Object obj0 : s0) {
       boolean found = false;
-      for (Object obj2 : s2) {
-        if (e2nDeepEquals(obj1, obj2)) {
+      for (Object obj1 : s1) {
+        if (e2nDeepEquals(obj0, obj1)) {
           found = true;
-          s2.remove(obj1);
+          s1.remove(obj0);
           break;
         }
       }
@@ -573,10 +805,10 @@ public class ObjectMethods {
     return true;
   }
 
-  private static boolean mapsEqual(Map map1, Map map2) {
-    if (map1.size() == map2.size()) {
-      for (Object k : map1.keySet()) {
-        if (!map2.containsKey(k) || !e2nDeepEquals(map1.get(k), map2.get(k))) {
+  private static boolean mapsEqual(Map map0, Map map1) {
+    if (map0.size() == map1.size()) {
+      for (Object k : map0.keySet()) {
+        if (!map1.containsKey(k) || !e2nDeepEquals(map0.get(k), map1.get(k))) {
           return false;
         }
       }

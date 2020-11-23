@@ -51,20 +51,4 @@ public class NumberMethodsTest {
   public void test09() {
     assertTrue(fitsInto(3.0000000000000001D, Integer.class));
   }
-
-  @Test
-  public void nvl01() {
-    assertTrue(ntz((Integer) null) == ZERO_INT);
-    assertTrue(ntz((Double) null) == ZERO_DOUBLE);
-    assertTrue(ntz((Long) null) == ZERO_LONG);
-    assertTrue(ntz((Float) null) == ZERO_FLOAT);
-    assertTrue(ntz((Short) null) == ZERO_SHORT);
-    assertTrue(ntz((Byte) null) == ZERO_BYTE);
-    assertTrue(ntz(2) == 2);
-    assertTrue(ntz(2.0) == 2D);
-    assertTrue(ntz(2L) == 2L);
-    assertTrue(ntz(2.0F) == 2F);
-    assertTrue(ntz((short) 2) == (short) 2);
-    assertTrue(ntz((byte) 2) == (byte) 2);
-  }
 }
