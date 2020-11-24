@@ -11,9 +11,9 @@ import nl.naturalis.common.check.CommonChecks;
 import nl.naturalis.common.function.Relation;
 import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
-import static nl.naturalis.common.check.CommonChecks.equalTo;
+import static nl.naturalis.common.check.CommonChecks.inArray;
 import static nl.naturalis.common.check.CommonChecks.notEmpty;
-import static nl.naturalis.common.check.CommonChecks.notEqualTo;
+import static nl.naturalis.common.check.CommonChecks.notInArray;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 import static nl.naturalis.common.check.CommonGetters.supplied;
 
@@ -105,7 +105,7 @@ public class ObjectMethods {
   /**
    * Returns whether or not the specified argument is null or empty. This method is (and can be)
    * used for broad-stroke methods like {@link #ifEmpty(Object, Object)} and {@link
-   * CommonChecks#notEmpty()}. Returns {@code true} if <i>any</i> of the following applies:
+   * CommonChecks#empty()}. Returns {@code true} if <i>any</i> of the following applies:
    *
    * <p>
    *
@@ -467,27 +467,36 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns null if {@code arg0} is equal to {@code arg1}, else {@code arg0}.
+   * Returns null if {@code arg0} is equal to any of the specified values, else {@code arg0}. For
+   * example:
+   *
+   * <p>
+   *
+   * <pre>
+   *  this.type = nullIf(type, Type.UNKNOWN);
+   * </pre>
    *
    * @param <T> The input and return type
    * @param arg0 The value to test
-   * @param arg1 The value it must not have in order to be returned
+   * @param values The value it must not have in order to be returned
    * @return {@code value} or null
    */
-  public static <T> T nullIf(T arg0, T arg1) {
-    return nullIf(arg0, equalTo(), arg1);
+  @SuppressWarnings("unchecked")
+  public static <T> T nullIf(T arg0, T... values) {
+    return nullIf(arg0, inArray(), values);
   }
 
   /**
-   * Returns null unless {@code arg0} equals {@code arg1}, else {@code arg0}.
+   * Returns null unless {@code arg0} equals one of the specified values.
    *
    * @param <T> The input and return type
    * @param arg0 The value to test
-   * @param arg1 The value {@code arg0} must have in order to be returned
+   * @param values The values {@code arg0} may have in order to be returned
    * @return {@code arg0} or null
    */
-  public static <T> T nullUnless(T arg0, T arg1) {
-    return nullUnless(arg0, notEqualTo(), arg1);
+  @SuppressWarnings("unchecked")
+  public static <T> T nullUnless(T arg0, T... values) {
+    return nullUnless(arg0, notInArray(), values);
   }
 
   /**

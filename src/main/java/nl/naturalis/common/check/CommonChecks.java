@@ -3,20 +3,16 @@ package nl.naturalis.common.check;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
-import nl.naturalis.common.ObjectMethods;
-import nl.naturalis.common.Sizeable;
-import nl.naturalis.common.StringMethods;
-import nl.naturalis.common.Tuple;
+import nl.naturalis.common.*;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
+import static nl.naturalis.common.ObjectMethods.ifNotNull;
+import static nl.naturalis.common.check.InvalidCheckException.notApplicable;
 import static nl.naturalis.common.check.Messages.*;
-import static nl.naturalis.common.ObjectMethods.*;
-import static nl.naturalis.common.check.InvalidCheckException.*;
 
 /**
  * Defines various common tests for arguments. These tests have short, informative error messages
@@ -30,10 +26,12 @@ import static nl.naturalis.common.check.InvalidCheckException.*;
  */
 public class CommonChecks {
 
-  static final IdentityHashMap<Object, Function<Object[], String>> messages;
+  // Stores the error messages associated with the checks (or rather message generators)
+  static final IdentityHashMap<Object, Formatter> messages;
+  // Stores the names of the checks
   static final IdentityHashMap<Object, String> names;
 
-  private static ArrayList<Tuple<Object, Function<Object[], String>>> tmp0 = new ArrayList<>();
+  private static ArrayList<Tuple<Object, Formatter>> tmp0 = new ArrayList<>();
   private static ArrayList<Tuple<Object, String>> tmp1 = new ArrayList<>();
 
   private CommonChecks() {}
@@ -606,6 +604,39 @@ public class CommonChecks {
   }
 
   /**
+   * Verifies the presence of an element within an array. Equivalent to {@link
+   * ArrayMethods#inArray(Object, Object...) ArrayMethods::inArray}.
+   *
+   * @param <X> The type of the argument
+   * @param <Y> The component type of the array
+   * @return A {@code Relation}
+   */
+  public static <Y, X extends Y> Relation<X, Y[]> inArray() {
+    return ArrayMethods::inArray;
+  }
+
+  static {
+    addMessage(inArray(), msgIn()); // recycle message
+    addName(inArray(), "inArray");
+  }
+
+  /**
+   * Verifies the absence of an element within an array.
+   *
+   * @param <X> The type of the argument
+   * @param <Y> The component type of the array
+   * @return A {@code Relation}
+   */
+  public static <Y, X extends Y> Relation<X, Y[]> notInArray() {
+    return (x, y) -> !ArrayMethods.inArray(x, y);
+  }
+
+  static {
+    addMessage(notInArray(), msgNotIn());
+    addName(notInArray(), "notInArray");
+  }
+
+  /**
    * Verifies that the argument is equal to a particular value. Equivalent to {@link
    * Objects#equals(Object) Objects::equals}.
    *
@@ -694,8 +725,7 @@ public class CommonChecks {
   }
 
   static {
-    // Can recycle messages for int comparisons
-    addMessage(greaterThan(), msgGt());
+    addMessage(greaterThan(), msgGt()); // recycle message
     addName(greaterThan(), "greaterThan");
   }
 
@@ -1235,7 +1265,7 @@ public class CommonChecks {
     return ifNotNull(names.get(test), name -> name + suffix, IntObjRelation.class.getSimpleName());
   }
 
-  private static void addMessage(Object test, Function<Object[], String> message) {
+  private static void addMessage(Object test, Formatter message) {
     tmp0.add(new Tuple<>(test, message));
   }
 

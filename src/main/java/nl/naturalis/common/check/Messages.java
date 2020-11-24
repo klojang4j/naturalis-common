@@ -2,16 +2,14 @@ package nl.naturalis.common.check;
 
 import java.io.File;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
+import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
 import static java.lang.String.format;
-import static nl.naturalis.common.ClassMethods.getArrayTypeName;
-import static nl.naturalis.common.ClassMethods.getArrayTypeSimpleName;
 import static nl.naturalis.common.check.CommonChecks.messages;
 
 @SuppressWarnings("rawtypes")
@@ -46,50 +44,50 @@ class Messages {
   }
 
   private static String message(Object key, Object... msgArgs) {
-    Function<Object[], String> fnc = messages.get(key);
+    Formatter fnc = messages.get(key);
     if (fnc != null) {
       return fnc.apply(msgArgs);
     }
     return String.format(ERR_INVALID_VALUE, msgArgs[0], argVal(msgArgs[1]));
   }
 
-  static Function<Object[], String> msgNotSet() {
+  static Formatter msgNotSet() {
     return x -> format("%s must be null (was %s)", x[0], argVal(x[1]));
   }
 
-  static Function<Object[], String> msgNotNull() {
+  static Formatter msgNotNull() {
     return x -> format("%s must not be null", x[0]);
   }
 
-  static Function<Object[], String> msgNoneNull() {
+  static Formatter msgNoneNull() {
     return x -> format("%s must not ne null or contain null values", x[0]);
   }
 
-  static Function<Object[], String> msgDeepNotEmpty() {
+  static Formatter msgDeepNotEmpty() {
     return x -> format("%s must not be empty or contain empty values", x[0]);
   }
 
-  static Function<Object[], String> msgEmpty() {
+  static Formatter msgEmpty() {
     return x -> format("%s must be empty (was %s)", x[0], argVal(x[1]));
   }
 
-  static Function<Object[], String> msgNotEmpty() {
+  static Formatter msgNotEmpty() {
     return x -> format("%s must not be null or empty", x[0]);
   }
 
-  static Function<Object[], String> msgNotBlank() {
+  static Formatter msgNotBlank() {
     return x -> format("%s must not be null or whitespace-only", x[0]);
   }
 
-  static Function<Object[], String> msgEqualTo() {
+  static Formatter msgEqualTo() {
     return x -> format("%s must be equal to %s (was %s)", x[0], argVal(x[2]), argVal(x[1]));
   }
 
-  static Function<Object[], String> msgNotEqualTo() {
+  static Formatter msgNotEqualTo() {
     return x -> format("%s must be not be equal to %s", x[0], x[2]);
   }
 
-  static Function<Object[], String> msgSameAs() {
+  static Formatter msgSameAs() {
     return x -> {
       String id0 = cname(x[1]) + '@' + System.identityHashCode(x[1]);
       String id1 = cname(x[2]) + '@' + System.identityHashCode(x[2]);
@@ -97,202 +95,202 @@ class Messages {
     };
   }
 
-  static Function<Object[], String> msgNotSameAs() {
+  static Formatter msgNotSameAs() {
     return x -> {
       String id = cname(x[2]) + '@' + System.identityHashCode(x[2]);
       return format("%s must be not have same identity as %s", x[0], id);
     };
   }
 
-  static Function<Object[], String> msgSizeAtMost() {
+  static Formatter msgSizeAtMost() {
     return x -> format("%s must be <= %s (was %s)", argSize(x), x[2], x[1]);
   }
 
-  static Function<Object[], String> msgSizeLessThan() {
+  static Formatter msgSizeLessThan() {
     return x -> format("%s must be < %s (was %s)", argSize(x), x[2], x[1]);
   }
 
-  static Function<Object[], String> msgSizeAtLeast() {
+  static Formatter msgSizeAtLeast() {
     return x -> format("%s must be >= %s (was %s)", argSize(x), x[2], x[1]);
   }
 
-  static Function<Object[], String> msgSizeGreaterThan() {
+  static Formatter msgSizeGreaterThan() {
     return x -> format("%s must be > %s (was %s)", argSize(x), x[2], x[1]);
   }
 
-  static Function<Object[], String> msgSizeNotEquals() {
+  static Formatter msgSizeNotEquals() {
     return x -> format("%s must be not be equal to %s", argSize(x), x[2]);
   }
 
-  static Function<Object[], String> msgSizeEquals() {
+  static Formatter msgSizeEquals() {
     return x -> format("%s must be equal to %s (was %s)", argSize(x), x[2], x[1]);
   }
 
-  static Function<Object[], String> msgIndexOf() {
+  static Formatter msgIndexOf() {
     return x -> {
       int i = ((List<?>) x[2]).size();
       return format("%s must be >= 0 and < %s (was %s)", x[0], i, x[1]);
     };
   }
 
-  static Function<Object[], String> msgToIndexOf() {
+  static Formatter msgToIndexOf() {
     return x -> {
       int i = ((List<?>) x[2]).size();
       return format("%s must be >= 0 and <= %s (was %s)", x[0], i, x[1]);
     };
   }
 
-  static Function<Object[], String> msgFileExists() {
+  static Formatter msgFileExists() {
     String fmt = "%s (%s) must be an existing file";
     return x -> format(fmt, x[0], ((File) x[1]).getAbsolutePath());
   }
 
-  static Function<Object[], String> msgDirectoryExists() {
+  static Formatter msgDirectoryExists() {
     String fmt = "%s (%s) must be an existing directory";
     return x -> format(fmt, x[0], ((File) x[1]).getAbsolutePath());
   }
 
-  static Function<Object[], String> msgFileNotExists() {
+  static Formatter msgFileNotExists() {
     String fmt = "%s (%s) must not exist";
     return x -> format(fmt, x[0], ((File) x[1]).getAbsolutePath());
   }
 
-  static Function<Object[], String> msgReadable() {
+  static Formatter msgReadable() {
     String fmt = "%s (%s) must be readable";
     return x -> format(fmt, x[0], ((File) x[1]).getAbsolutePath());
   }
 
-  static Function<Object[], String> msgWritable() {
+  static Formatter msgWritable() {
     String fmt = "%s (%s) must be writable";
     return x -> format(fmt, x[0], ((File) x[1]).getAbsolutePath());
   }
 
-  static Function<Object[], String> msgIsEven() {
+  static Formatter msgIsEven() {
     return x -> format("%s must be even (was %d)", x[0], x[1]);
   }
 
-  static Function<Object[], String> msgIsOdd() {
+  static Formatter msgIsOdd() {
     return x -> format("%s must be odd (was %d)", x[0], x[1]);
   }
 
-  static Function<Object[], String> msgPositive() {
+  static Formatter msgPositive() {
     return x -> format("%s must be positive (was %d)", x[0], x[1]);
   }
 
-  static Function<Object[], String> msgNotNegative() {
+  static Formatter msgNotNegative() {
     return x -> format("%s must be zero or positive (was %d)", x[0], x[1]);
   }
 
-  static Function<Object[], String> msgNegative() {
+  static Formatter msgNegative() {
     return x -> format("%s must be negative (was %d)", x[0], x[1]);
   }
 
-  static Function<Object[], String> msgNotPositive() {
+  static Formatter msgNotPositive() {
     return x -> format("%s must be zero or negative (was %d)", x[0], x[1]);
   }
 
-  static Function<Object[], String> msgNullOr() {
+  static Formatter msgNullOr() {
     return x -> format("%s must be null or %s (was (%s)", x[0], argVal(x[2]), argVal(x[1]));
   }
 
-  static Function<Object[], String> msgContains() {
+  static Formatter msgContains() {
     return x -> format("%s must contain %s", x[0], argVal(x[2]));
   }
 
-  static Function<Object[], String> msgNotContains() {
+  static Formatter msgNotContains() {
     return x -> format("%s must not contain %s", x[0], argVal(x[2]));
   }
 
-  static Function<Object[], String> msgIn() {
+  static Formatter msgIn() {
     return x -> format("%s must be in %s (was %s)", x[0], argVal(x[2]), argVal(x[1]));
   }
 
-  static Function<Object[], String> msgNotIn() {
+  static Formatter msgNotIn() {
     return x -> format("%s must not be in %s (was %s)", x[0], argVal(x[2]), argVal(x[1]));
   }
 
-  static Function<Object[], String> msgHasKey() {
+  static Formatter msgHasKey() {
     return x -> format("%s must contain key %s", x[0], argVal(x[2]));
   }
 
-  static Function<Object[], String> msgNotHasKey() {
+  static Formatter msgNotHasKey() {
     return x -> format("%s must not contain key %s", x[0], argVal(x[2]));
   }
 
-  static Function<Object[], String> msgKeyIn() {
+  static Formatter msgKeyIn() {
     return x -> format("%s must be key in %s (was %s)", x[0], argVal(x[2]), argVal(x[1]));
   }
 
-  static Function<Object[], String> msgNotKeyIn() {
+  static Formatter msgNotKeyIn() {
     return x -> format("%s must not be key in %s (was %s)", x[0], argVal(x[2]), argVal(x[1]));
   }
 
-  static Function<Object[], String> msgHasValue() {
+  static Formatter msgHasValue() {
     return x -> format("%s must not contain value %s", x[0], argVal(x[2]));
   }
 
-  static Function<Object[], String> msgNotHasValue() {
+  static Formatter msgNotHasValue() {
     return x -> format("%s must not contain value %s", x[0], argVal(x[2]));
   }
 
-  static Function<Object[], String> msgValueIn() {
+  static Formatter msgValueIn() {
     return x -> format("%s must be value in %s (was %s)", x[0], argVal(x[2]), argVal(x[1]));
   }
 
-  static Function<Object[], String> msgNotValueIn() {
+  static Formatter msgNotValueIn() {
     return x -> format("%s must not be value in %s (was %s)", x[0], argVal(x[2]), argVal(x[1]));
   }
 
-  static Function<Object[], String> msgEq() {
+  static Formatter msgEq() {
     return x -> format("%s must be equal to %d (was %s)", x[0], x[2], x[1]);
   }
 
-  static Function<Object[], String> msgNe() {
+  static Formatter msgNe() {
     return x -> format("%s must not be equal to %s", x[0], x[2]);
   }
 
-  static Function<Object[], String> msgGt() {
+  static Formatter msgGt() {
     return x -> format("%s must be > %s (was %s)", x[0], x[2], x[1]);
   }
 
-  static Function<Object[], String> msgGte() {
+  static Formatter msgGte() {
     return x -> format("%s must be >= %s (was %s)", x[0], x[2], x[1]);
   }
 
-  static Function<Object[], String> msgLt() {
+  static Formatter msgLt() {
     return x -> format("%s must be < %s (was %s)", x[0], x[2], x[1]);
   }
 
-  static Function<Object[], String> msgLte() {
+  static Formatter msgLte() {
     return x -> format("%s must be <= %s (was %s)", x[0], x[2], x[1]);
   }
 
-  static Function<Object[], String> msgEndsWith() {
+  static Formatter msgEndsWith() {
     return x -> format("%s must end with \"%s\" (was %s)", x[0], x[2], x[1]);
   }
 
-  static Function<Object[], String> msgNotEndsWith() {
+  static Formatter msgNotEndsWith() {
     return x -> format("%s must not end with \"%s\" (was %s)", x[0], x[2], x[1]);
   }
 
-  static Function<Object[], String> msgHasSubstr() {
+  static Formatter msgHasSubstr() {
     return x -> format("%s must contain \"%s\" (was %s)", x[0], x[2], x[1]);
   }
 
-  static Function<Object[], String> msgNotHasSubstr() {
+  static Formatter msgNotHasSubstr() {
     return x -> format("%s must not contain \"%s\" (was %s)", x[0], x[2], x[1]);
   }
 
-  static Function<Object[], String> msgInstanceOf() {
+  static Formatter msgInstanceOf() {
     String fmt = "%s must be instance of %s (was %s)";
     return x -> format(fmt, x[0], ((Class<?>) x[2]).getName(), cname(x[1]));
   }
 
-  static Function<Object[], String> msgArray() {
+  static Formatter msgArray() {
     return x -> format("%s must be an array (was %s)", x[0], cname(x[1]));
   }
 
-  static Function<Object[], String> msgMultipleOf() {
+  static Formatter msgMultipleOf() {
     return x -> format("%s must be multiple of %d (was %d)", x[0], x[2], x[1]);
   }
 
@@ -341,19 +339,11 @@ class Messages {
     return sb.toString();
   }
 
-  // Returns fully-qualified class name
   private static String cname(Object obj) {
-    if (obj.getClass().isArray()) {
-      return getArrayTypeName(obj);
-    }
-    return obj.getClass().getName();
+    return ClassMethods.getClassName(obj);
   }
 
-  // Returns simple class name
   private static String sname(Object obj) {
-    if (obj.getClass().isArray()) {
-      return getArrayTypeSimpleName(obj);
-    }
-    return obj.getClass().getSimpleName();
+    return ClassMethods.getSimpleClassName(obj);
   }
 }

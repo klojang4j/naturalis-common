@@ -12,10 +12,10 @@ import nl.naturalis.common.check.Check;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.Tuple.tuple;
-import static nl.naturalis.common.check.CommonChecks.hasValue;
 import static nl.naturalis.common.check.CommonChecks.ne;
 import static nl.naturalis.common.check.CommonChecks.notEmpty;
 import static nl.naturalis.common.check.CommonChecks.notHasKey;
+import static nl.naturalis.common.check.CommonChecks.notHasValue;
 import static nl.naturalis.common.check.CommonGetters.enumConstants;
 
 /**
@@ -220,7 +220,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
   public void putAll(Map<K, Integer> other) {
     Check.notNull(other, "other")
         .is(notHasKey(), null)
-        .is(hasValue(), kav)
+        .is(notHasValue(), kav)
         .then(m -> m.entrySet().forEach(e -> assign(e.getKey(), e.getValue())));
   }
 

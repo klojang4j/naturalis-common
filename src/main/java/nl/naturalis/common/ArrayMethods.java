@@ -132,7 +132,7 @@ public class ArrayMethods {
    * Returns {@code true} if the specified array contains the specfied value, {@code false}
    * otherwise.
    *
-   * @param value The value to search for
+   * @param value The value to search for (may be null)
    * @param array The array to search
    * @return Whether or not the array contans the value
    */
@@ -198,36 +198,42 @@ public class ArrayMethods {
 
   /**
    * Returns the array index of the first occurrence of the specified value within the specified
-   * array. Returns -1 if the array does not contain the value.
+   * array. Returns -1 if the array does not contain the value. Searching for null is allowed.
+   * Comparisons are done using {@link Objects#deepEquals(Object, Object)}.
    *
    * @param <T> The type of the elements within the array
    * @param array The array to search
-   * @param value The value to search for
+   * @param value The value to search for (may be null)
    * @return The array index of the value
    */
   public static <T> int indexOf(T[] array, T value) {
     Check.notNull(array, "array");
-    return IntStream.range(0, array.length)
-        .filter(i -> Objects.deepEquals(array[i], value))
-        .findFirst()
-        .orElse(-1);
+    return indices(array).filter(i -> Objects.deepEquals(array[i], value)).findFirst().orElse(-1);
   }
 
   /**
    * Returns the array index of the first occurrence of the specified reference within the specified
-   * array. Returns -1 if the array does not contain the reference.
+   * array. Returns -1 if the array does not contain the reference. Searching for null is <i>not</i>
+   * allowed.
    *
    * @param array The array to search
-   * @param reference The reference to search for
+   * @param reference The reference to search for (must not be null)
    * @return The array index of the reference
    */
   public static int find(Object[] array, Object reference) {
-    Check.notNull(array, "array");
     Check.notNull(reference, "reference");
-    return IntStream.range(0, array.length)
-        .filter(i -> array[i] == reference)
-        .findFirst()
-        .orElse(-1);
+    return indices(array).filter(i -> array[i] == reference).findFirst().orElse(-1);
+  }
+
+  /**
+   * Returns a {@code Stream} of the indices of the specified array.
+   *
+   * @param <T> The component type of the array
+   * @param array The array
+   * @return a {@code Stream} of its indices
+   */
+  public static <T> IntStream indices(T[] array) {
+    return Check.notNull(array).ok(x -> IntStream.range(0, x.length));
   }
 
   /**
