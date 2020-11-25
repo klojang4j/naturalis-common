@@ -193,11 +193,11 @@ class Messages {
     return x -> format("%s must be null or %s (was (%s)", x[0], argVal(x[2]), argVal(x[1]));
   }
 
-  static Formatter msgContains() {
+  static Formatter msgContaining() {
     return x -> format("%s must contain %s", x[0], argVal(x[2]));
   }
 
-  static Formatter msgNotContains() {
+  static Formatter msgNotContaining() {
     return x -> format("%s must not contain %s", x[0], argVal(x[2]));
   }
 
@@ -209,11 +209,11 @@ class Messages {
     return x -> format("%s must not be in %s (was %s)", x[0], argVal(x[2]), argVal(x[1]));
   }
 
-  static Formatter msgHasKey() {
+  static Formatter msgContainingKey() {
     return x -> format("%s must contain key %s", x[0], argVal(x[2]));
   }
 
-  static Formatter msgNotHasKey() {
+  static Formatter msgNotContainingKey() {
     return x -> format("%s must not contain key %s", x[0], argVal(x[2]));
   }
 
@@ -225,11 +225,11 @@ class Messages {
     return x -> format("%s must not be key in %s (was %s)", x[0], argVal(x[2]), argVal(x[1]));
   }
 
-  static Formatter msgHasValue() {
+  static Formatter msgContainingValue() {
     return x -> format("%s must not contain value %s", x[0], argVal(x[2]));
   }
 
-  static Formatter msgNotHasValue() {
+  static Formatter msgNotContainingValue() {
     return x -> format("%s must not contain value %s", x[0], argVal(x[2]));
   }
 

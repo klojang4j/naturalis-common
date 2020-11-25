@@ -7,7 +7,7 @@ import java.util.function.UnaryOperator;
 import nl.naturalis.common.CollectionMethods;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
-import static nl.naturalis.common.check.CommonChecks.notHasKey;
+import static nl.naturalis.common.check.CommonChecks.notContainingKey;
 
 /**
  * Parses strings into enum constants. Internally {@code EnumParser} maintains a string-to-enum map
@@ -65,24 +65,26 @@ public class EnumParser<T extends Enum<T>> {
    */
   public EnumParser(Class<T> enumClass, UnaryOperator<String> normalizer) {
     Check.notNull(enumClass, "enumClass");
+    this.normalizer = Check.notNull(normalizer, "normalizer").ok();
     HashMap<String, T> map = new HashMap<>(enumClass.getEnumConstants().length);
     Arrays.stream(enumClass.getEnumConstants())
         .forEach(
             e -> {
               if (e.name().equals(e.toString())) {
-                String k0 = normalizer.apply(e.name());
-                Check.that(map).is(notHasKey(), k0, BAD_KEY, k0);
-                map.put(k0, e);
+                String key = normalizer.apply(e.name());
+                Check.that(map).is(notContainingKey(), key, BAD_KEY, key);
+                map.put(key, e);
               } else {
-                String k0 = normalizer.apply(e.name());
-                String k1 = normalizer.apply(e.toString());
-                Check.that(map).is(notHasKey(), k0, BAD_KEY, k0).is(notHasKey(), k1, BAD_KEY, k1);
-                map.put(k0, e);
-                map.put(k1, e);
+                String key0 = normalizer.apply(e.name());
+                String key1 = normalizer.apply(e.toString());
+                Check.that(map)
+                    .is(notContainingKey(), key0, BAD_KEY, key0)
+                    .is(notContainingKey(), key1, BAD_KEY, key1);
+                map.put(key0, e);
+                map.put(key1, e);
               }
             });
     this.lookups = CollectionMethods.tightHashMap(map);
-    this.normalizer = Check.notNull(normalizer, "normalizer").ok();
   }
 
   /**

@@ -180,9 +180,6 @@ public class ObjectMethods {
    * @throws IllegalArgumentException If the argument is null
    */
   public static boolean isNotEmpty(Optional arg) throws IllegalArgumentException {
-    if (arg == null) {
-      throw new IllegalArgumentException(ERR_NULL_OPTIONAL);
-    }
     return !isEmpty(arg);
   }
 

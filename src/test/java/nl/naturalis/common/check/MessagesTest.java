@@ -59,7 +59,7 @@ public class MessagesTest {
     String s = target.getClass().getSimpleName() + "@" + System.identityHashCode(target);
     String expected = "foo must contain " + s;
     System.out.println(expected);
-    String actual = Messages.createMessage(contains(), argName, argument, target);
+    String actual = Messages.createMessage(containing(), argName, argument, target);
     System.out.println(actual);
     assertEquals(expected, actual);
   }

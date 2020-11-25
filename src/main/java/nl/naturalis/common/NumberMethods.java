@@ -25,33 +25,33 @@ public class NumberMethods {
 
   /**
    * Returns whether or not the specified {@code Number} can be converted into an instance of the
-   * specified {@code Number} type without losing of information.
+   * specified {@code Number} class without loss of information.
    *
    * @param <T> The type of {@code Number} to convert to
    * @param number The {@code Number} to convert
-   * @param targetType The type of {@code Number} to convert to
+   * @param targetClass The type of {@code Number} to convert to
    * @return Whether or not conversion will be lossless
    */
-  public static <T extends Number> boolean fitsInto(Number number, Class<T> targetType) {
+  public static <T extends Number> boolean fitsInto(Number number, Class<T> targetClass) {
     Class<?> myClass = Check.notNull(number, "number").ok(Object::getClass);
-    Check.notNull(targetType, "targetType");
-    if (isOneOf(targetType, number.getClass(), Double.class)) {
+    Check.notNull(targetClass, "targetType");
+    if (isOneOf(targetClass, myClass, Double.class)) {
       return true;
-    } else if (targetType == Long.class) {
+    } else if (targetClass == Long.class) {
       if (myClass == Double.class) {
         return (long) number.doubleValue() == number.doubleValue();
       } else if (myClass == Float.class) {
         return (long) number.floatValue() == number.floatValue();
       }
       return true;
-    } else if (targetType == Float.class) {
+    } else if (targetClass == Float.class) {
       if (myClass == Double.class) {
         return (float) number.doubleValue() == number.doubleValue();
       } else if (myClass == Long.class) {
         return (float) number.longValue() == number.longValue();
       }
       return true;
-    } else if (targetType == Integer.class) {
+    } else if (targetClass == Integer.class) {
       if (myClass == Double.class) {
         return (int) number.doubleValue() == number.doubleValue();
       } else if (myClass == Long.class) {
@@ -60,7 +60,7 @@ public class NumberMethods {
         return (int) number.floatValue() == number.floatValue();
       }
       return true;
-    } else if (targetType == Short.class) {
+    } else if (targetClass == Short.class) {
       if (myClass == Double.class) {
         return (short) number.doubleValue() == number.doubleValue();
       } else if (myClass == Long.class) {

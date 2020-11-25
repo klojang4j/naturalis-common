@@ -10,7 +10,9 @@ import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
+import static nl.naturalis.common.ClassMethods.getSimpleClassName;
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
+import static nl.naturalis.common.Tuple.tuple;
 import static nl.naturalis.common.check.InvalidCheckException.notApplicable;
 import static nl.naturalis.common.check.Messages.*;
 
@@ -31,8 +33,8 @@ public class CommonChecks {
   // Stores the names of the checks
   static final IdentityHashMap<Object, String> names;
 
-  private static ArrayList<Tuple<Object, Formatter>> tmp0 = new ArrayList<>();
-  private static ArrayList<Tuple<Object, String>> tmp1 = new ArrayList<>();
+  private static ArrayList<Tuple<Object, Formatter>> tmp0 = new ArrayList<>(50);
+  private static ArrayList<Tuple<Object, String>> tmp1 = new ArrayList<>(50);
 
   private CommonChecks() {}
 
@@ -416,13 +418,13 @@ public class CommonChecks {
    * @param <C> The type of the argument
    * @return A {@code Relation}
    */
-  public static <E, C extends Collection<? super E>> Relation<C, E> contains() {
+  public static <E, C extends Collection<? super E>> Relation<C, E> containing() {
     return Collection::contains;
   }
 
   static {
-    addMessage(contains(), msgContains());
-    addName(contains(), "contains");
+    addMessage(containing(), msgContaining());
+    addName(containing(), "containing");
   }
 
   /**
@@ -432,13 +434,13 @@ public class CommonChecks {
    * @param <C> The type of the argument
    * @return A {@code Relation}
    */
-  public static <E, C extends Collection<? super E>> Relation<C, E> notContains() {
+  public static <E, C extends Collection<? super E>> Relation<C, E> notContaining() {
     return (x, y) -> !x.contains(y);
   }
 
   static {
-    addMessage(notContains(), msgNotContains());
-    addName(notContains(), "notContains");
+    addMessage(notContaining(), msgNotContaining());
+    addName(notContaining(), "notContaining");
   }
 
   /**
@@ -481,13 +483,13 @@ public class CommonChecks {
    * @param <M> The Type of the {@code Map}
    * @return A {@code Relation}
    */
-  public static <K, M extends Map<? super K, ?>> Relation<M, K> hasKey() {
+  public static <K, M extends Map<? super K, ?>> Relation<M, K> containingKey() {
     return Map::containsKey;
   }
 
   static {
-    addMessage(hasKey(), msgHasKey());
-    addName(hasKey(), "hasKey");
+    addMessage(containingKey(), msgContainingKey());
+    addName(containingKey(), "containingKey");
   }
 
   /**
@@ -497,13 +499,13 @@ public class CommonChecks {
    * @param <M> The Type of the {@code Map}
    * @return A {@code Relation}
    */
-  public static <K, M extends Map<? super K, ?>> Relation<M, K> notHasKey() {
+  public static <K, M extends Map<? super K, ?>> Relation<M, K> notContainingKey() {
     return (x, y) -> !x.containsKey(y);
   }
 
   static {
-    addMessage(notHasKey(), msgNotHasKey());
-    addName(notHasKey(), "notHasKey");
+    addMessage(notContainingKey(), msgNotContainingKey());
+    addName(notContainingKey(), "notContainingKey");
   }
 
   /**
@@ -546,13 +548,13 @@ public class CommonChecks {
    * @param <M> The Type of the {@code Map}
    * @return A {@code Relation}
    */
-  public static <V, M extends Map<?, ? super V>> Relation<M, V> hasValue() {
+  public static <V, M extends Map<?, ? super V>> Relation<M, V> containingValue() {
     return Map::containsValue;
   }
 
   static {
-    addMessage(hasValue(), msgHasValue());
-    addName(hasValue(), "hasValue");
+    addMessage(containingValue(), msgContainingValue());
+    addName(containingValue(), "containingValue");
   }
 
   /**
@@ -562,13 +564,13 @@ public class CommonChecks {
    * @param <M> The Type of the {@code Map}
    * @return A {@code Relation}
    */
-  public static <V, M extends Map<?, ? super V>> Relation<M, V> notHasValue() {
+  public static <V, M extends Map<?, ? super V>> Relation<M, V> notContainingValue() {
     return (x, y) -> !x.containsValue(y);
   }
 
   static {
-    addMessage(notHasValue(), msgNotHasValue());
-    addName(notHasValue(), "notHasValue");
+    addMessage(notContainingValue(), msgNotContainingValue());
+    addName(notContainingValue(), "notContainingValue");
   }
 
   /**
@@ -742,7 +744,7 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(atLeast(), msgGte());
+    addMessage(atLeast(), msgGte()); // recycle message
     addName(atLeast(), "atLeast");
   }
 
@@ -757,7 +759,7 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(lessThan(), msgLt());
+    addMessage(lessThan(), msgLt()); // recycle message
     addName(lessThan(), "lessThan");
   }
 
@@ -774,7 +776,7 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(atMost(), msgLte());
+    addMessage(atMost(), msgLte()); // recycle message
     addName(atMost(), "atMost");
   }
 
@@ -840,7 +842,7 @@ public class CommonChecks {
 
   /**
    * Verifies that the argument's length or size is equal to a particular value. The type of
-   * argument be one of:
+   * argument must be one of:
    *
    * <p>
    *
@@ -882,7 +884,7 @@ public class CommonChecks {
 
   /**
    * Verifies that the argument's length or size is not equal to a particular value. The type of
-   * argument be one of:
+   * argument must be one of:
    *
    * <p>
    *
@@ -924,7 +926,7 @@ public class CommonChecks {
 
   /**
    * Verifies that the argument's length or size is greater than a particular value. The type of
-   * argument be one of:
+   * argument must be one of:
    *
    * <p>
    *
@@ -966,7 +968,7 @@ public class CommonChecks {
 
   /**
    * Verifies that the argument's length or size is greater than or equal to a particular value. The
-   * type of argument be one of:
+   * type of argument must be one of:
    *
    * <p>
    *
@@ -1008,7 +1010,7 @@ public class CommonChecks {
 
   /**
    * Verifies that the argument's length or size is less than a particular value. The type of
-   * argument be one of:
+   * argument must be one of:
    *
    * <p>
    *
@@ -1049,8 +1051,8 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument's length or size is less than or equal to a particular value. The
-   * returned {@code ObjIntRelation} evaluates in a meaningful way if the argument is:
+   * Verifies that the argument's length or size is less than a particular value. The type of
+   * argument must be one of:
    *
    * <p>
    *
@@ -1062,7 +1064,7 @@ public class CommonChecks {
    *   <li>a {@link Sizeable}
    * </ul>
    *
-   * <p>For any other type of argument this method the relation always evaluates to {@code false}.
+   * <p>For any other type of argument this method throws an {@link InvalidCheckException}.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -1229,47 +1231,43 @@ public class CommonChecks {
   static {
     messages = new IdentityHashMap<>(tmp0.size());
     names = new IdentityHashMap<>(tmp1.size());
-    tmp0.forEach(t -> t.addTo(messages));
-    tmp1.forEach(t -> t.addTo(names));
+    tmp0.forEach(tuple -> tuple.addTo(messages));
+    tmp1.forEach(tuple -> tuple.addTo(names));
     tmp0 = null;
     tmp1 = null;
   }
 
   private static final String suffix = "()";
 
-  @SuppressWarnings("rawtypes")
-  static String nameOf(Predicate test) {
-    return ifNotNull(names.get(test), name -> name + suffix, Predicate.class.getSimpleName());
+  static String nameOf(Predicate<?> test) {
+    return ifNotNull(names.get(test), name -> name + suffix, getSimpleClassName(test));
   }
 
   static String nameOf(IntPredicate test) {
-    return ifNotNull(names.get(test), name -> name + suffix, IntPredicate.class.getSimpleName());
+    return ifNotNull(names.get(test), name -> name + suffix, getSimpleClassName(test));
   }
 
-  @SuppressWarnings("rawtypes")
-  static String nameOf(Relation test) {
-    return ifNotNull(names.get(test), name -> name + suffix, Relation.class.getSimpleName());
+  static String nameOf(Relation<?, ?> test) {
+    return ifNotNull(names.get(test), name -> name + suffix, getSimpleClassName(test));
   }
 
   static String nameOf(IntRelation test) {
-    return ifNotNull(names.get(test), name -> name + suffix, IntRelation.class.getSimpleName());
+    return ifNotNull(names.get(test), name -> name + suffix, getSimpleClassName(test));
   }
 
-  @SuppressWarnings("rawtypes")
-  static String nameOf(ObjIntRelation test) {
-    return ifNotNull(names.get(test), name -> name + suffix, ObjIntRelation.class.getSimpleName());
+  static String nameOf(ObjIntRelation<?> test) {
+    return ifNotNull(names.get(test), name -> name + suffix, getSimpleClassName(test));
   }
 
-  @SuppressWarnings("rawtypes")
-  static String nameOf(IntObjRelation test) {
-    return ifNotNull(names.get(test), name -> name + suffix, IntObjRelation.class.getSimpleName());
+  static String nameOf(IntObjRelation<?> test) {
+    return ifNotNull(names.get(test), name -> name + suffix, getSimpleClassName(test));
   }
 
   private static void addMessage(Object test, Formatter message) {
-    tmp0.add(new Tuple<>(test, message));
+    tmp0.add(tuple(test, message));
   }
 
   private static void addName(Object test, String name) {
-    tmp1.add(new Tuple<>(test, name));
+    tmp1.add(tuple(test, name));
   }
 }

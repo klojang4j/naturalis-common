@@ -14,19 +14,19 @@ import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.Tuple.tuple;
 import static nl.naturalis.common.check.CommonChecks.ne;
 import static nl.naturalis.common.check.CommonChecks.notEmpty;
-import static nl.naturalis.common.check.CommonChecks.notHasKey;
-import static nl.naturalis.common.check.CommonChecks.notHasValue;
+import static nl.naturalis.common.check.CommonChecks.notContainingKey;
+import static nl.naturalis.common.check.CommonChecks.notContainingValue;
 import static nl.naturalis.common.check.CommonGetters.enumConstants;
 
 /**
  * A fast enum-to-int Map implementation. The map is backed by a simple int array with the same
  * length as the number of constants in the {@code enum} class. One integer must be designated to
- * signify the absence of a key (i.e. an enum constant). By default this is {@link Integer#MIN_VALUE
+ * signify the absence of a key within the map. By default this is {@link Integer#MIN_VALUE
  * Integer.MIN_VALUE}. If an element in the int array has this value, it means there is no entry for
- * the corresponding enum constant in the {@code EnumToIntMap}. It is not allowed to add a key with
- * this value to the map, as is would in effect amount to <i>removing</i> that key from the map. It
- * is also not allowed to pass this value to {@link #containsValue(int) containsValue}. In both
- * cases an {@code IllegalArgumentException} is thrown.
+ * the corresponding enum constant in the map. It is not allowed to add a key with this value to the
+ * map, as is would in effect amount to <i>removing</i> that key from the map. It is also not
+ * allowed to pass this value to {@link #containsValue(int) containsValue}. In both cases an {@code
+ * IllegalArgumentException} is thrown.
  *
  * @author Ayco Holleman
  * @param <K> The type of the enum class
@@ -35,7 +35,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
 
   private final K[] keys;
   private final int[] data;
-  private final int kav;
+  private final int kav; // the value used to indicate the absence of a key
 
   /**
    * Creates a new empty {@code EnumToIntMap} for the specfied enum class using {@link
@@ -81,9 +81,10 @@ public final class EnumToIntMap<K extends Enum<K>> {
    * @param initializer A function called to initialize the array elements
    */
   public EnumToIntMap(Class<K> enumClass, int keyAbsentValue, ToIntFunction<K> initializer) {
-    Check.notNull(enumClass, "enumClass")
-        .has(enumConstants(), notEmpty(), "Empty enum not supported");
-    this.keys = enumClass.getEnumConstants();
+    this.keys =
+        Check.notNull(enumClass, "enumClass")
+            .has(enumConstants(), notEmpty(), "Empty enum not supported")
+            .ok(enumConstants());
     this.data = new int[keys.length];
     this.kav = keyAbsentValue;
     Arrays.stream(keys).forEach(k -> assign(k, initializer.applyAsInt(k)));
@@ -125,8 +126,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
    * @return Whether or not the map contains an entry for the enum constant
    */
   public boolean containsKey(K key) {
-    Check.notNull(key, "key");
-    return isPresent(key);
+    return Check.notNull(key).ok(this::isPresent);
   }
 
   /**
@@ -137,7 +137,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
    * @return Whether or not the map contains the value
    */
   public boolean containsValue(int val) {
-    Check.that(val, "val").is(ne(), kav);
+    Check.that(val).is(ne(), kav);
     return Arrays.stream(data).filter(x -> x == val).findFirst().isPresent();
   }
 
@@ -151,8 +151,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
    *     map contains no mapping for the key
    */
   public int get(K key) {
-    Check.notNull(key, "key");
-    return valueOf(key);
+    return valueOf(Check.notNull(key).ok());
   }
 
   /**
@@ -219,8 +218,8 @@ public final class EnumToIntMap<K extends Enum<K>> {
    */
   public void putAll(Map<K, Integer> other) {
     Check.notNull(other, "other")
-        .is(notHasKey(), null)
-        .is(notHasValue(), kav)
+        .is(notContainingKey(), null)
+        .is(notContainingValue(), kav)
         .then(m -> m.entrySet().forEach(e -> assign(e.getKey(), e.getValue())));
   }
 
@@ -354,12 +353,10 @@ public final class EnumToIntMap<K extends Enum<K>> {
     return true;
   }
 
-  /** {@inheritDoc} */
   public int hashCode() {
     return Objects.hash(data, kav);
   }
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     return toGenericMap().toString();
