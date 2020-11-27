@@ -15,7 +15,6 @@ import static nl.naturalis.common.check.CommonChecks.inArray;
 import static nl.naturalis.common.check.CommonChecks.notEmpty;
 import static nl.naturalis.common.check.CommonChecks.notInArray;
 import static nl.naturalis.common.check.CommonChecks.notNull;
-import static nl.naturalis.common.check.CommonGetters.supplied;
 
 /**
  * General methods applicable to objects of any type.
@@ -386,8 +385,7 @@ public class ObjectMethods {
    * @return A non-null value
    */
   public static <T> T ifNull(T value, T dfault) {
-    Check.notNull(dfault, "dfault");
-    return value == null ? dfault : value;
+    return value == null ? Check.notNull(dfault, "dfault").ok() : value;
   }
 
   /**
@@ -401,12 +399,13 @@ public class ObjectMethods {
    * @return a non-null value
    */
   public static <T> T ifNull(T value, Supplier<T> supplier) {
-    Check.notNull(supplier, "supplier").has(supplied(), notNull());
-    return value == null ? supplier.get() : value;
+    return ifNull(value, Check.notNull(supplier, "supplier").ok().get());
   }
 
   /**
    * Returns {@code dfault} if {@code value} is {@link #isEmpty(Object) empty}, else {@code value}.
+   * This method will throw an {@link IllegalArgumentException} if the second argument is empty, so
+   * it is guaranteed to return a non-empty value.
    *
    * @param <T> The input and return type
    * @param value The value to test
@@ -414,13 +413,13 @@ public class ObjectMethods {
    * @return a non-empty value
    */
   public static <T> T ifEmpty(T value, T dfault) {
-    Check.that(dfault, "dfault").is(notEmpty());
-    return isEmpty(value) ? dfault : value;
+    return isEmpty(value) ? Check.that(dfault, "dfault").is(notEmpty()).ok() : value;
   }
 
   /**
    * Returns the value supplied by {@code supplier} if {@code value} is {@link #isEmpty(Object)
-   * empty}, else {@code value}.
+   * empty}, else {@code value}. The value supplied by the {@code Supplier} is guaranteed to be
+   * non-empty, or else an {@link IllegalArgumentException} is thrown.
    *
    * @param <T> The input and return type
    * @param value The value to return if not empty
@@ -428,7 +427,7 @@ public class ObjectMethods {
    * @return a non-empty value
    */
   public static <T> T ifEmpty(T value, Supplier<T> supplier) {
-    return isEmpty(value) ? supplier.get() : value;
+    return ifEmpty(value, Check.notNull(supplier, "supplier").ok().get());
   }
 
   /**
@@ -470,7 +469,7 @@ public class ObjectMethods {
    * <p>
    *
    * <pre>
-   *  this.type = nullIf(type, Type.UNKNOWN);
+   *  this.operator = nullIf(operator, Operator.AND);
    * </pre>
    *
    * @param <T> The input and return type
@@ -484,7 +483,13 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns null unless {@code arg0} equals one of the specified values.
+   * Returns null unless {@code arg0} equals one of the specified values. For example:
+   *
+   * <p>
+   *
+   * <pre>
+   *  this.operator = nullUnless(operator, Operator.OR);
+   * </pre>
    *
    * @param <T> The input and return type
    * @param arg0 The value to test

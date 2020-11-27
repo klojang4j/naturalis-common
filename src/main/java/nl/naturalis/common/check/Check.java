@@ -6,7 +6,7 @@ import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
-import static nl.naturalis.common.check.CommonGetters.getGetterDescription;
+import static nl.naturalis.common.check.CommonGetters.formatGetterName;
 import static nl.naturalis.common.check.Messages.createMessage;
 
 /**
@@ -599,7 +599,7 @@ public abstract class Check<T, E extends Exception> {
     if (test.test(value)) {
       return this;
     }
-    String name = getGetterDescription(argName, getter);
+    String name = formatGetterName(argName, getter);
     String msg = createMessage(test, name, value);
     throw excFactory.apply(msg);
   }
@@ -662,7 +662,7 @@ public abstract class Check<T, E extends Exception> {
     if (test.test(value)) {
       return this;
     }
-    String name = getGetterDescription(argName, getter);
+    String name = formatGetterName(argName, getter);
     String msg = createMessage(test, name, value);
     throw excFactory.apply(msg);
   }
@@ -732,7 +732,7 @@ public abstract class Check<T, E extends Exception> {
     if (relation.exists(value, relateTo)) {
       return this;
     }
-    String name = getGetterDescription(argName, getter);
+    String name = formatGetterName(argName, getter);
     String msg = createMessage(relation, name, value, relateTo);
     throw excFactory.apply(msg);
   }
@@ -804,7 +804,7 @@ public abstract class Check<T, E extends Exception> {
     if (relation.exists(value, relateTo)) {
       return this;
     }
-    String name = getGetterDescription(argName, getter);
+    String name = formatGetterName(argName, getter);
     String msg = createMessage(relation, name, value, relateTo);
     throw excFactory.apply(msg);
   }
@@ -876,7 +876,7 @@ public abstract class Check<T, E extends Exception> {
     if (relation.exists(value, relateTo)) {
       return this;
     }
-    String name = getGetterDescription(argName, getter);
+    String name = formatGetterName(argName, getter);
     String msg = createMessage(relation, name, value, relateTo);
     throw excFactory.apply(msg);
   }

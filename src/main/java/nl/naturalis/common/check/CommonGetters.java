@@ -3,26 +3,33 @@ package nl.naturalis.common.check;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 import nl.naturalis.common.NumberMethods;
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
 
 /**
- * Defines various functions that can be used to retrieve a property of the argument. They are meant
- * to be used as the first argument to the various {@code has(...)} methods of the {@link Check}
- * class. Some functions, are not actually getters (no-arg methods called on the argument), but
- * rather single-argument methods which get passed the argument.
- *
- * <p>Each getter is already associated with the name of the property it exposes, so the combination
- * of a getter from the {@code CommonGetters} class and a check from the {@link CommonChecks} class
- * allows the underlying code to generate a full-blown error message. For example:
+ * Defines various functions that retrieve some oft-used property of a well-known class. For
+ * example: {@link Object#toString() Object::toString}. They can optionally be used as the first
+ * argument to the various {@code has(...)} methods of the {@link Check} class. The advantage of
+ * using these functions rather than the method references they return is that they are already
+ * associated with the name of the property they expose, so generating an error message requires
+ * very little hand-crafting. For example:
  *
  * <p>
  *
  * <pre>
- * Check.that(stampCollection, "stampCollection").has(size(), gt(), 100);
- * // Error message: "stampCollection.size() must be &gt; 100 (was 22)"
+ * Check.that(car, "car").has(stringValue(), equalTo(), "BMW");
+ * // Error message: "car.toString() must be equal to BMW (was Toyota)"
+ * </pre>
+ *
+ * <p>Some functions, are in fact not really getters (no-arg methods called on the argument), but
+ * rather single-argument methods which get passed the argument. For example:
+ *
+ * <p>
+ *
+ * <pre>
+ * Check.that(temperature, "temperature").has(abs(), lt(), 20);
+ * // Error message: "abs(temperature) must be &lt; 20 (was -39)"
  * </pre>
  *
  * <p>Most methods in this class return plain method references. <b>None of them do a preliminary
@@ -172,7 +179,8 @@ public class CommonGetters {
 
   /**
    * A {@code Function} that returns the size of a {@code List}. Equivalent to {@code List::size}.
-   * Could be used if the {@link #size()} method causes a name clash.
+   * Can be used if there already is a {@code size()} method in the class in which to execute a size
+   * check.
    *
    * @param <L> The type of the {@code List}
    * @return A {@code Function} that returns the size of a {@code List}
@@ -186,8 +194,9 @@ public class CommonGetters {
   }
 
   /**
-   * A {@code Function} that returns the size of a {@code Set}. Equivalent to {@code Set::size}.
-   * Could be used if the {@link #size()} method causes a name clash.
+   * A {@code Function} that returns the size of a {@code Set}. Equivalent to {@code Set::size}. Can
+   * be used if there already is a {@code size()} method in the class in which to execute a size
+   * check.
    *
    * @param <S> The type of the {@code Set}.
    * @return A {@code Function} that returns the size of a {@code Set}
@@ -197,7 +206,7 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(setSize(), "%s.size()");
+    tmp.put(setSize(), tmp.get(size()));
   }
 
   /**
@@ -229,27 +238,11 @@ public class CommonGetters {
     tmp.put(absoluteValue(), tmp.get(abs()));
   }
 
-  /**
-   * A {@code Function} that returns the value supplied by a {@code Supplier}. Equivalent to {@link
-   * Supplier#get() Supplier::get}.
-   *
-   * @param <T> The type of the object supplied by the {@code Supplier}
-   * @param <U> The type of the {@code Supplier}
-   * @return A {@code Function} that returns the value supplied by a {@code Supplier}
-   */
-  public static <T, U extends Supplier<T>> Function<U, T> supplied() {
-    return Supplier::get;
-  }
-
-  static {
-    tmp.put(supplied(), "%s.get()");
-  }
-
   /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
   /*            End of getter definitions                    */
   /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
-  static String getGetterDescription(String argName, Object getter) {
+  static String formatGetterName(String argName, Object getter) {
     return ifNotNull(names.get(getter), fmt -> String.format(fmt, argName), argName + ".?");
   }
 
