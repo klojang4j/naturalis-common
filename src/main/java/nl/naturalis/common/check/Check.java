@@ -2,10 +2,7 @@ package nl.naturalis.common.check;
 
 import java.util.function.*;
 import nl.naturalis.common.NumberMethods;
-import nl.naturalis.common.function.IntObjRelation;
-import nl.naturalis.common.function.IntRelation;
-import nl.naturalis.common.function.ObjIntRelation;
-import nl.naturalis.common.function.Relation;
+import nl.naturalis.common.function.*;
 import static nl.naturalis.common.check.CommonGetters.formatGetterName;
 import static nl.naturalis.common.check.Messages.createMessage;
 
@@ -938,7 +935,7 @@ public abstract class Check<T, E extends Exception> {
    *
    * @param consumer The {@code Consumer}
    */
-  public void then(Consumer<T> consumer) {
+  public <F extends Exception> void then(ThrowingConsumer<T, F> consumer) throws F {
     consumer.accept(ok());
   }
 
