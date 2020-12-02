@@ -1,20 +1,29 @@
 package nl.naturalis.common.io;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.IOMethods.*;
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.IOMethods.pipe;
+import static nl.naturalis.common.check.CommonChecks.file;
+import static nl.naturalis.common.check.CommonChecks.fileNotExists;
+import static nl.naturalis.common.check.CommonChecks.gte;
 
 /**
- * A {@link SwapOutputStream} that swaps to file once its internal buffer overflows. The {@link
- * FileOutputStream} created for the swap file is already wrapped into a {@link
- * BufferedOutputStream}, so it's pointless to wrap the {@code SwapFileOutputStream} itself into a
- * {@code BufferedOutputStream}.
+ * A {@link SwapOutputStream} that swaps to file once its internal buffer overflows. Example:
+ *
+ * <p>
+ *
+ * <pre>
+ *   String data = "Is this going to be swapped???";
+ *   // Create SwapFileOutputStream that swaps to a temp file if more
+ *   // than 8 bytes are written to it
+ *   SwapFileOutputStream sfos = SwapFileOutputStream.newInstance(8);
+ *   sfos.write(data.getBytes());
+ *   ByteArrayOutputStream baos = new ByteArrayOutputStream();
+ *   sfos.collect(baos);
+ *   // Delete swap file
+ *   sfos.cleanup();
+ *   assertEquals(data, baos.toString());
+ * </pre>
  *
  * @see SwapOutputStream
  * @author Ayco Holleman
@@ -32,7 +41,7 @@ public class SwapFileOutputStream extends SwapOutputStream {
    * @throws IOException If an I/O error occurs
    */
   public static SwapFileOutputStream newInstance() throws IOException {
-    return new SwapFileOutputStream(tempFile());
+    return new SwapFileOutputStream(createTempFile());
   }
 
   /**
@@ -45,7 +54,7 @@ public class SwapFileOutputStream extends SwapOutputStream {
    * @throws IOException If an I/O error occurs
    */
   public static SwapFileOutputStream newInstance(int treshold) throws IOException {
-    return new SwapFileOutputStream(tempFile(), treshold);
+    return new SwapFileOutputStream(createTempFile(), treshold);
   }
 
   /**
@@ -54,15 +63,24 @@ public class SwapFileOutputStream extends SwapOutputStream {
    * created for the swap file will have a size of {@code bufSize} bytes.
    *
    * @param treshold The size in bytes of the internal buffer
-   * @param bufSize The buffer size of the {@code BufferedOutputStream} created for the swap file
+   * @param bufSize The buffer size of the {@code BufferedOutputStream} used to write to the swap
+   *     file and the {@code BufferedInpuStream} used to read from the swap file (in the {@link
+   *     #collect(OutputStream) collect} method)
    * @return A {@code SwapFileOutputStream} that swaps to an auto-generated temp file
    * @throws IOException If an I/O error occurs
    */
   public static SwapFileOutputStream newInstance(int treshold, int bufSize) throws IOException {
-    return new SwapFileOutputStream(tempFile(), treshold, bufSize);
+    return new SwapFileOutputStream(createTempFile(), treshold, bufSize);
   }
 
-  private File swapFile;
+  private final File swapFile;
+
+  /*
+   * This is the buffer size for the BufferedOutputStream and the BufferedInputStream writing
+   * to/reading from the swap file. It has nothing to do with the size of the internal buffer
+   * maintained by SwapOutputStream.
+   */
+  private final int bufSize;
 
   /**
    * Creates a new instance that swaps to the specified file. The size of the internal buffer will
@@ -74,7 +92,7 @@ public class SwapFileOutputStream extends SwapOutputStream {
    * @throws IOException If an I/O error occurs
    */
   public SwapFileOutputStream(File swapFile) throws IOException {
-    super(swapTo(swapFile, 512));
+    this(swapFile, 4 * 1024, 512);
   }
 
   /**
@@ -87,8 +105,7 @@ public class SwapFileOutputStream extends SwapOutputStream {
    * @throws IOException
    */
   public SwapFileOutputStream(File swapFile, int treshold) throws IOException {
-    super(swapTo(swapFile, 512), treshold);
-    this.swapFile = swapFile;
+    this(swapFile, treshold, 512);
   }
 
   /**
@@ -98,21 +115,25 @@ public class SwapFileOutputStream extends SwapOutputStream {
    *
    * @param swapFile The file to write to once the internal buffer overflows
    * @param treshold The size in bytes of the internal buffer
-   * @param bufSize The buffer size of the {@code BufferedOutputStream} created for the swap file
+   * @param bufSize The buffer size of the {@code BufferedOutputStream} used to write to the swap
+   *     file and the {@code BufferedInpuStream} used to read from the swap file (in the {@link
+   *     #collect(OutputStream) collect} method)
    * @throws IOException If an I/O error occurs
    */
   public SwapFileOutputStream(File swapFile, int treshold, int bufSize) throws IOException {
-    super(swapTo(swapFile, bufSize), treshold);
+    super(createOutputStream(swapFile, bufSize), treshold);
     this.swapFile = swapFile;
+    this.bufSize = bufSize;
   }
 
+  /** See {@link SwapOutputStream#collect(OutputStream)}. */
   public void collect(OutputStream output) throws IOException {
+    Check.notNull(output);
+    out.close();
     if (hasSwapped()) {
-      Check.that(swapFile, IOException::new)
-          .is(fileExists(), "Swap file gone missing: %s", swapFile.getPath());
-      close();
+      Check.that(swapFile, IllegalStateException::new).is(file());
       try (FileInputStream fis = new FileInputStream(swapFile)) {
-        pipe(fis, output, 2048);
+        pipe(fis, output, bufSize);
       }
     } else {
       writeBuffer(output);
@@ -120,37 +141,44 @@ public class SwapFileOutputStream extends SwapOutputStream {
   }
 
   /**
-   * Deletes the swap file and closes the {@code SwapFileOutputStream}.
+   * Deletes the swap file.
    *
-   * @throws IOException
+   * @throws IOException If an I/O error occurs
    */
-  public void cleanupAndClose() throws IOException {
-    close();
+  public void cleanup() throws IOException {
     if (swapFile.exists()) {
       swapFile.delete();
     }
   }
 
-  private static OutputStream swapTo(File swapFile, int bufSize) throws IOException {
-    Check.that(swapFile, "Swap file").is(fileNotExists());
+  /**
+   * Returns the swap file.
+   *
+   * @return The swap file
+   */
+  public File getSwapFile() {
+    return swapFile;
+  }
+
+  private static OutputStream createOutputStream(File swapFile, int bufSize) throws IOException {
+    Check.notNull(swapFile, "swapFile").is(fileNotExists());
+    Check.that(bufSize, "bufSize").is(gte(), 0);
     return new BufferedOutputStream(new FileOutputStream(swapFile), bufSize);
   }
 
-  /**
-   * NB Creating a temp file using File.createTempFile is not satisfactory as the swap files may be
-   * created in rapid succession while File.createTempFile seems to use System.currentTimeMillis()
-   * to invent a file name.
+  /*
+   * Creating a temp file using File.createTempFile() is not satisfactory as the swap files may
+   * be created in rapid succession and File.createTempFile() seems to use only
+   * System.currentTimeMillis() to invent a file name.
    */
-  private static File tempFile() {
+  private static File createTempFile() {
     StringBuilder sb = new StringBuilder(64);
-    sb.append(System.getProperty("java.io.tmpdir"));
-    sb.append('/');
-    sb.append(System.identityHashCode(new Object()));
-    sb.append('.');
-    sb.append(System.currentTimeMillis());
-    sb.append('.');
-    sb.append(SwapFileOutputStream.class.getSimpleName().toLowerCase());
-    sb.append(".swp");
+    sb.append(System.getProperty("java.io.tmpdir"))
+        .append('/')
+        .append(SwapFileOutputStream.class.getSimpleName())
+        .append(System.identityHashCode(new Object()))
+        .append(System.currentTimeMillis())
+        .append(".swp");
     return new File(sb.toString());
   }
 }

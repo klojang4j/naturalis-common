@@ -140,14 +140,26 @@ class Messages {
     };
   }
 
-  static Formatter msgFileExists() {
-    String fmt = "%s (%s) must be an existing file";
-    return x -> format(fmt, x[0], ((File) x[1]).getAbsolutePath());
+  static Formatter msgFile() {
+    return x -> {
+      File f = (File) x[1];
+      String s = f.getAbsolutePath();
+      if (f.exists()) {
+        return format("%s must be a regular file (was %s)", x[0], s);
+      }
+      return format("Missing file: %s", s);
+    };
   }
 
-  static Formatter msgDirectoryExists() {
-    String fmt = "%s (%s) must be an existing directory";
-    return x -> format(fmt, x[0], ((File) x[1]).getAbsolutePath());
+  static Formatter msgDirectory() {
+    return x -> {
+      File f = (File) x[1];
+      String s = f.getAbsolutePath();
+      if (f.exists()) {
+        return format("%s must be a directory (was %s)", x[0], s);
+      }
+      return format("Missing directory: %s", s);
+    };
   }
 
   static Formatter msgFileNotExists() {
