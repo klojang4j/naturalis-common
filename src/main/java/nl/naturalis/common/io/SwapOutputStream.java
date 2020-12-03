@@ -4,17 +4,15 @@ import java.io.IOException;
 import java.io.OutputStream;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
  * An output stream implementing a swap mechanism. A {@code SwapOutputStream} first fills up an
- * internal buffer. If the buffer reaches full capacity, it is flushed to an underlying output
- * stream. From then onwards all write actions are forwarded to the underlying output stream. The
- * underlying output stream would typically write to some form of persistent storage (e.g. a swap
- * file). It is transparent to clients whether or not data has actually been swapped out of memory.
- * Once they are done writing data, clients can collect the data without having to know whether or
- * not it was swapped. The collection mechanism is left to concrete subclasses of {@code
- * SwapOutputStream}.
+ * internal (in-memory) buffer. If the buffer reaches full capacity, it is flushed to an underlying
+ * output stream. From then onwards all write actions are forwarded to the underlying output stream.
+ * The underlying output stream would typically write to some form of persistent storage (e.g. a
+ * swap file). It is transparent to clients whether or not data has actually been swapped out of
+ * memory. Once they are done writing data, clients can collect the data without having to know
+ * whether or not it was swapped.
  *
  * <p>This class is not thread-safe. If necessary, method calls must be synchronized externally by
  * the caller.
@@ -94,9 +92,12 @@ public abstract class SwapOutputStream extends OutputStream {
 
   /**
    * Retrieves all data written to this {@code SwapOutputStream} and writes it to the specified
-   * output stream. Subclasses are expected to close the underlying output stream, even if no data
-   * has been written it yet (in which case they would only have to read the contents of the
-   * internal buffer).
+   * output stream. The implementation of this is left to subclasses. Subclasses <i>must</i> close
+   * the underlying output stream, even if no data has been written to it yet (in which case they
+   * could just read the contents of the internal buffer). If data <i>has</i> been written to the
+   * underlying output stream, implementations will want to close it before starting to read from
+   * the resource that the outputstream was writing to. To make this method have a consistent and
+   * predictable effect, subclasses must close the output stream in any case.
    *
    * @param output The output stream to which to write the data
    * @throws IOException If an I/O error occurs
@@ -114,7 +115,7 @@ public abstract class SwapOutputStream extends OutputStream {
   public void cleanup() throws IOException {}
 
   /**
-   * Calls {@link OutputStream#flush() flush()} on the underlying output stream if the {@code
+   * Calls {@link OutputStream#flush() flush()} on the underlying output stream <i>if</i> the {@code
    * SwapOutputStream} has started writing to it. Otherwise this method does nothing.
    */
   @Override
@@ -125,7 +126,7 @@ public abstract class SwapOutputStream extends OutputStream {
   }
 
   /**
-   * Closes the underlying output stream. Regular code does not have to call this method, because
+   * Closes the underlying output stream. Regular code does not need to call this method, because
    * the {@link #collect(OutputStream) collect} method already implicitly closes the output stream.
    * However you may have to call this method if you find yourself in the {@code catch} block of an
    * exception.
@@ -135,12 +136,10 @@ public abstract class SwapOutputStream extends OutputStream {
   }
 
   /**
-   * Does nothing. Notably this method doesn't close the underlying output stream as this is done
+   * Does nothing. Notably this method does not close the underlying output stream. This is done
    * either implicitly by the {@link #collect(OutputStream) collect} method or explicitly by the
-   * {@link #closeSwapToStream() closeSwapToStream} method. Therefore it's probably rather more than
-   * less confusing to instantiate a {@code SwapOutputStream} using a <i>try-with-resources</i>
-   * block, as the {@code collect} method would have to be called within the
-   * <i>try-with-resources</i> block.
+   * {@link #closeSwapToStream() closeSwapToStream} method. Therefore, though allowed, it is
+   * misleading to call this method or set up a <i>try-with-resources</i> block.
    */
   @Override
   public void close() throws IOException {}
@@ -186,7 +185,7 @@ public abstract class SwapOutputStream extends OutputStream {
    * @throws IllegalStateException If the swap has already taken place
    */
   protected void writeBuffer(OutputStream to) throws IOException {
-    Check.that(buf, IllegalStateException::new).is(notNull(), "Already swapped");
+    Check.state(!hasSwapped(), "Already swapped");
     Check.notNull(to).then(out -> out.write(buf, 0, sz));
   }
 }

@@ -140,25 +140,35 @@ class Messages {
     };
   }
 
-  static Formatter msgFile() {
+  static Formatter msgFileExists() {
     return x -> {
       File f = (File) x[1];
       String s = f.getAbsolutePath();
       if (f.exists()) {
+        if (f.isDirectory()) {
+          return format("%s must be a regular file (was directory %s)", x[0], s);
+        }
         return format("%s must be a regular file (was %s)", x[0], s);
+      } else if (noArgNameProvided(x)) {
+        return format("Missing file: %s", s);
       }
-      return format("Missing file: %s", s);
+      return format("Missing file: %s (argument \"%s\")", s, x[0]);
     };
   }
 
-  static Formatter msgDirectory() {
+  static Formatter msgDirectoryExists() {
     return x -> {
       File f = (File) x[1];
       String s = f.getAbsolutePath();
       if (f.exists()) {
+        if (f.isFile()) {
+          return format("%s must be a directory (was file %s)", x[0], s);
+        }
         return format("%s must be a directory (was %s)", x[0], s);
+      } else if (noArgNameProvided(x)) {
+        return format("Missing directory: %s", s);
       }
-      return format("Missing directory: %s", s);
+      return format("Missing directory: %s (argument \"%s\")", s, x[0]);
     };
   }
 
@@ -357,5 +367,9 @@ class Messages {
 
   private static String sname(Object obj) {
     return ClassMethods.getSimpleClassName(obj);
+  }
+
+  private static boolean noArgNameProvided(Object[] msgArgs) {
+    return msgArgs[0].equals(Check.DEFAULT_ARG_NAME);
   }
 }

@@ -1,5 +1,5 @@
 /**
- * IO-related classes and interfaces
+ * Basic I/O utilities.
  *
  * @author Ayco Holleman
  */

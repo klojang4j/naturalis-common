@@ -223,13 +223,13 @@ public class CommonChecks {
    *
    * @returnn A {@code Predicate}
    */
-  public static Predicate<File> file() {
+  public static Predicate<File> fileExists() {
     return File::isFile;
   }
 
   static {
-    addMessage(file(), msgFile());
-    addName(file(), "file");
+    addMessage(fileExists(), msgFileExists());
+    addName(fileExists(), "fileExists");
   }
 
   /**
@@ -238,13 +238,13 @@ public class CommonChecks {
    *
    * @returnn A {@code Predicate}
    */
-  public static Predicate<File> directory() {
+  public static Predicate<File> directoryExists() {
     return File::isDirectory;
   }
 
   static {
-    addMessage(directory(), msgDirectory());
-    addName(directory(), "directory");
+    addMessage(directoryExists(), msgDirectoryExists());
+    addName(directoryExists(), "directoryExists");
   }
 
   /**
