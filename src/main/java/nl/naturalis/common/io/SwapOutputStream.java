@@ -39,6 +39,7 @@ public abstract class SwapOutputStream extends OutputStream {
   // The number of bytes written to the buffer
   private int cnt;
 
+  // Whether or not the swap-to output stream has been closed
   private boolean closed;
 
   /**
@@ -112,8 +113,8 @@ public abstract class SwapOutputStream extends OutputStream {
   public abstract void collect(OutputStream output) throws IOException;
 
   /**
-   * Deletes the swap-to resource(e.g. a swap file). Can be called after {@link
-   * #collect(OutputStream) collect} if the resource is no longer needed, or in the {@code catch}
+   * Deletes the swap-to resource (e.g. a swap file). Can be called after {@link
+   * #collect(OutputStream) collect()} if the resource is no longer needed, or in the {@code catch}
    * block of an exception. The {@code cleanup} method of {@code SwapOutputStream} does nothing.
    *
    * @throws IOException
@@ -137,7 +138,10 @@ public abstract class SwapOutputStream extends OutputStream {
    */
   @Override
   public void close() throws IOException {
-    if (!closed && out != null) {
+    if (out != null && !closed) {
+      if (cnt > 0) {
+        out.write(buf, 0, cnt);
+      }
       out.close();
       closed = true;
     }

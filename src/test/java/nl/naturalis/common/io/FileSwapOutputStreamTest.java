@@ -1,6 +1,7 @@
 package nl.naturalis.common.io;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import org.junit.Test;
 import static org.junit.Assert.assertArrayEquals;
@@ -31,8 +32,8 @@ public class FileSwapOutputStreamTest {
   @Test
   public void test02() throws IOException {
     FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
-    sfos.write((byte) 1);
-    sfos.write((byte) 2);
+    sfos.write(1);
+    sfos.write(2);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sfos.collect(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2}, baos.toByteArray());
@@ -41,9 +42,9 @@ public class FileSwapOutputStreamTest {
   @Test
   public void test03() throws IOException {
     FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
-    sfos.write((byte) 1);
-    sfos.write((byte) 2);
-    sfos.write((byte) 3);
+    sfos.write(1);
+    sfos.write(2);
+    sfos.write(3);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sfos.collect(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2, (byte) 3}, baos.toByteArray());
@@ -52,10 +53,10 @@ public class FileSwapOutputStreamTest {
   @Test
   public void test04() throws IOException {
     FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
-    sfos.write((byte) 1);
-    sfos.write((byte) 2);
-    sfos.write((byte) 3);
-    sfos.write((byte) 4);
+    sfos.write(1);
+    sfos.write(2);
+    sfos.write(3);
+    sfos.write(4);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sfos.collect(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2, (byte) 3, (byte) 4}, baos.toByteArray());
@@ -64,7 +65,7 @@ public class FileSwapOutputStreamTest {
   @Test
   public void test05() throws IOException {
     FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
-    sfos.write((byte) 1);
+    sfos.write(1);
     sfos.write(new byte[] {(byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sfos.collect(baos);
@@ -75,7 +76,7 @@ public class FileSwapOutputStreamTest {
   public void test06() throws IOException {
     FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
     sfos.write(new byte[] {(byte) 1, (byte) 2});
-    sfos.write((byte) 3);
+    sfos.write(3);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sfos.collect(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2, (byte) 3}, baos.toByteArray());
@@ -104,7 +105,7 @@ public class FileSwapOutputStreamTest {
     assertFalse(sfos.hasSwapped());
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = FileNotFoundException.class)
   @SuppressWarnings("resource")
   public void test10() throws IOException {
     FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);

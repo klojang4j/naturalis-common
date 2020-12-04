@@ -4,7 +4,6 @@ import java.io.*;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.ThrowingSupplier;
 import static nl.naturalis.common.IOMethods.pipe;
-import static nl.naturalis.common.check.CommonChecks.fileExists;
 import static nl.naturalis.common.check.CommonChecks.fileNotExists;
 
 /**
@@ -89,10 +88,8 @@ public class FileSwapOutputStream extends SwapOutputStream {
   /** See {@link SwapOutputStream#collect(OutputStream)}. */
   public void collect(OutputStream output) throws IOException {
     Check.notNull(output);
-    // Make sure the swap file is still there
-    Check.that(swapFile, IllegalStateException::new).is(fileExists());
-    close();
     if (hasSwapped()) {
+      close();
       try (FileInputStream fis = new FileInputStream(swapFile)) {
         pipe(fis, output, treshold());
       }
