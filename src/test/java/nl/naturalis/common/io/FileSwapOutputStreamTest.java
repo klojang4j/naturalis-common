@@ -8,11 +8,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class SwapFileOutputStreamTest {
+public class FileSwapOutputStreamTest {
 
   @Test
   public void test00() throws IOException {
-    SwapFileOutputStream sfos = SwapFileOutputStream.newInstance(2);
+    FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
     sfos.write(new byte[0]);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sfos.collect(baos);
@@ -21,7 +21,7 @@ public class SwapFileOutputStreamTest {
 
   @Test
   public void test01() throws IOException {
-    SwapFileOutputStream sfos = SwapFileOutputStream.newInstance(2);
+    FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
     sfos.write((byte) 1);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sfos.collect(baos);
@@ -30,7 +30,7 @@ public class SwapFileOutputStreamTest {
 
   @Test
   public void test02() throws IOException {
-    SwapFileOutputStream sfos = SwapFileOutputStream.newInstance(2);
+    FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
     sfos.write((byte) 1);
     sfos.write((byte) 2);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -40,7 +40,7 @@ public class SwapFileOutputStreamTest {
 
   @Test
   public void test03() throws IOException {
-    SwapFileOutputStream sfos = SwapFileOutputStream.newInstance(2);
+    FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
     sfos.write((byte) 1);
     sfos.write((byte) 2);
     sfos.write((byte) 3);
@@ -51,7 +51,7 @@ public class SwapFileOutputStreamTest {
 
   @Test
   public void test04() throws IOException {
-    SwapFileOutputStream sfos = SwapFileOutputStream.newInstance(2);
+    FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
     sfos.write((byte) 1);
     sfos.write((byte) 2);
     sfos.write((byte) 3);
@@ -63,7 +63,7 @@ public class SwapFileOutputStreamTest {
 
   @Test
   public void test05() throws IOException {
-    SwapFileOutputStream sfos = SwapFileOutputStream.newInstance(2);
+    FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
     sfos.write((byte) 1);
     sfos.write(new byte[] {(byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -73,7 +73,7 @@ public class SwapFileOutputStreamTest {
 
   @Test
   public void test06() throws IOException {
-    SwapFileOutputStream sfos = SwapFileOutputStream.newInstance(2);
+    FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
     sfos.write(new byte[] {(byte) 1, (byte) 2});
     sfos.write((byte) 3);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -83,7 +83,7 @@ public class SwapFileOutputStreamTest {
 
   @Test
   public void test07() throws IOException {
-    SwapFileOutputStream sfos = SwapFileOutputStream.newInstance(2);
+    FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
     sfos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sfos.collect(baos);
@@ -92,14 +92,14 @@ public class SwapFileOutputStreamTest {
 
   @Test
   public void test08() throws IOException {
-    SwapFileOutputStream sfos = SwapFileOutputStream.newInstance(2);
+    FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
     sfos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
     assertTrue(sfos.hasSwapped());
   }
 
   @Test
   public void test09() throws IOException {
-    SwapFileOutputStream sfos = SwapFileOutputStream.newInstance(2);
+    FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
     sfos.write(new byte[] {(byte) 1, (byte) 2});
     assertFalse(sfos.hasSwapped());
   }
@@ -107,7 +107,7 @@ public class SwapFileOutputStreamTest {
   @Test(expected = IllegalStateException.class)
   @SuppressWarnings("resource")
   public void test10() throws IOException {
-    SwapFileOutputStream sfos = SwapFileOutputStream.newInstance(2);
+    FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
     sfos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
     sfos.close();
     sfos.getSwapFile().delete();
@@ -116,7 +116,7 @@ public class SwapFileOutputStreamTest {
 
   @Test
   public void test11() throws IOException {
-    SwapFileOutputStream sfos = SwapFileOutputStream.newInstance(2);
+    FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
     sfos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sfos.collect(baos);
@@ -125,12 +125,12 @@ public class SwapFileOutputStreamTest {
     assertFalse(sfos.getSwapFile().exists());
   }
 
-  @Test // Example provided in the class comments of SwapFileOutputStream
+  @Test // Example provided in the class comments of FileSwapOutputStream
   public void test12() throws IOException {
     String data = "Is this going to be swapped???";
-    // Create SwapFileOutputStream that swaps to a temp file if more
+    // Create FileSwapOutputStream that swaps to a temp file if more
     // than 8 bytes are written to it
-    SwapFileOutputStream sfos = SwapFileOutputStream.newInstance(8);
+    FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(8);
     sfos.write(data.getBytes());
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sfos.collect(baos);

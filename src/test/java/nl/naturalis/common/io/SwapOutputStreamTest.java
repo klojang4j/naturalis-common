@@ -15,11 +15,11 @@ public class SwapOutputStreamTest {
   class TestSwapOutputStream extends SwapOutputStream {
 
     public TestSwapOutputStream(int treshold) {
-      super(new ByteArrayOutputStream(), treshold);
+      super(() -> new ByteArrayOutputStream(), treshold);
     }
 
     public TestSwapOutputStream() {
-      super(new ByteArrayOutputStream());
+      super(() -> new ByteArrayOutputStream());
     }
 
     @Override
@@ -31,7 +31,7 @@ public class SwapOutputStreamTest {
       }
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       try {
-        writeBuffer(baos);
+        readBuffer(baos);
         return new String(baos.toByteArray(), StandardCharsets.UTF_8);
       } catch (IOException e) {
         throw new RuntimeException(e);
@@ -39,15 +39,9 @@ public class SwapOutputStreamTest {
     }
   }
 
-  /** Test with zero-size internal buffer. Pointless but allowed. */
-  @Test
-  public void test01() {
-    TestSwapOutputStream sos = new TestSwapOutputStream(0);
-    try (PrintWriter pw = new PrintWriter(sos)) {
-      pw.append("Hello, world");
-    }
-    assertTrue("01", sos.hasSwapped());
-    assertEquals("02", "Hello, world", sos.getContents());
+  @Test(expected = IllegalArgumentException.class)
+  public void test01() throws IOException {
+    try (TestSwapOutputStream sos = new TestSwapOutputStream(0)) {}
   }
 
   @Test
