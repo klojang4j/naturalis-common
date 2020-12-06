@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.ThrowingSupplier;
-import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.ObjectMethods.*;
+import static nl.naturalis.common.check.CommonChecks.gt;
+import static nl.naturalis.common.check.CommonChecks.nullPointer;
 
 /**
  * An output stream implementing a swap mechanism. A {@code SwapOutputStream} first fills up an
@@ -79,7 +79,8 @@ public abstract class SwapOutputStream extends OutputStream {
     if (cnt == buf.length) {
       swap();
     }
-    buf[cnt++] = (byte) b;
+    byte[] filtered = receive(b);
+    write(filtered, 0, filtered.length);
   }
 
   /**
@@ -90,15 +91,17 @@ public abstract class SwapOutputStream extends OutputStream {
    */
   @Override
   public void write(byte[] b, int off, int len) throws IOException {
-    if (len > buf.length) {
+    byte[] filtered = receive(b, off, len);
+    int x = filtered.length;
+    if (x > buf.length) {
       swap();
-      swap(out, b, off, len);
+      send(out, filtered, 0, x);
     } else {
-      if (cnt + len > buf.length) {
+      if (cnt + x > buf.length) {
         swap();
       }
-      System.arraycopy(b, off, buf, cnt, len);
-      cnt += len;
+      System.arraycopy(filtered, 0, buf, cnt, x);
+      cnt += x;
     }
   }
 
@@ -158,14 +161,14 @@ public abstract class SwapOutputStream extends OutputStream {
     if (out == null) {
       out = factory.get();
     }
-    swap(out, buf, 0, cnt);
+    send(out, buf, 0, cnt);
     cnt = 0;
   }
 
   /**
    * Returns whether or not the {@code SwapOutputStream} has started to write to the swap-to output
-   * stream. You should not need to call this method under normal circumstances, as swapping is
-   * meant to be taken care of automatically, but it could be used for debug or logging purposes.
+   * stream. You should not normally need to call this method as swapping is meant to be taken care
+   * of automatically, but it could be used for debug or logging purposes.
    */
   public final boolean hasSwapped() {
     return out != null;
@@ -181,26 +184,61 @@ public abstract class SwapOutputStream extends OutputStream {
   }
 
   /**
-   * Copies the contents of the internal buffer to the specified output stream. An IOException is
-   * thrown if the {@code SwapOutputStream} has already started writing to the swap-to outputstream.
+   * Copies the contents of the internal buffer to the specified output stream. Subclasses need this
+   * method to implement the {@link #collect(OutputStream) collect} method for the case that the
+   * data written to the {@code SwapOutputStream} still resides in the internal buffer (no swapping
+   * was necessary). An IOException is thrown if the {@code SwapOutputStream} has already started
+   * writing to the swap-to outputstream. Otherwise this method can be called as often as desired.
    *
    * @param to The output stream to which to copy the contents of the internal buffer
-   * @throws IOException If an I/O error occurs
-   * @throws IllegalStateException If the swap has already taken place
+   * @throws IOException If an I/O error occurs or if the {@code SwapOutputStream} has already
+   *     started writing to the swap-to outputstream.
    */
   protected final void readBuffer(OutputStream to) throws IOException {
     Check.notNull(to);
     Check.that(out, IOException::new).is(nullPointer(), "Already swapped");
-    // Check.that(hasSwapped(), IOException::new).is(no(), "Already swapped");
     if (cnt > 0) {
-      swap(to, buf, 0, cnt);
+      send(to, buf, 0, cnt);
     }
   }
 
   /**
-   * Writes the specified byte array to the specified output stream. Subclasses can override this
-   * method if the byte array needs to go through some filtering mechanism on their way out of the
-   * internal buffer and into the swap-to output stream. The implementation of {@code
+   * Processes the byte on its way into the internal buffer. Can be overridden by subclasses to
+   * apply apply a filtering mechanism like compression. The {@code SwapOutputStream} class simply
+   * returns a on-element byte array containing the byte.
+   *
+   * @param b The byte
+   * @return A byte array resulting from the transformation of the byte
+   * @throws IOException If an I/O error occurs
+   */
+  protected byte[] receive(int b) throws IOException {
+    return new byte[] {(byte) (b & 0xff)};
+  }
+
+  /**
+   * Processes the bytes on their way into the internal buffer. Can be overridden by subclasses to
+   * apply apply a filtering mechanism like compression. The {@code SwapOutputStream} class simply
+   * returns the byte array if {@code off} equals 0 and {@code len} equals {@code b.length}, or the
+   * sub-array specified by {@code off} and {@code len}.
+   *
+   * @param b The byte array
+   * @param off The offset in the byte array
+   * @param len The length of the sub-array
+   * @return A byte array resulting from the transformation of the byte
+   * @throws IOException
+   */
+  protected byte[] receive(byte[] b, int off, int len) throws IOException {
+    if (off == 0 && len == b.length) {
+      return b;
+    }
+    byte[] b2 = new byte[len];
+    System.arraycopy(b, off, b2, 0, len);
+    return b2;
+  }
+
+  /**
+   * Writes the specified byte array to the specified output stream. Can be overridden by subclasses
+   * to process the bytes on their way out of the internal buffer. The implementation of {@code
    * SwapOutpuStream} simply executes <code>out.write(b, off, len)</code>
    *
    * @param out The output stream
@@ -209,7 +247,7 @@ public abstract class SwapOutputStream extends OutputStream {
    * @param len The number of bytes to write
    * @throws IOException If an I/O error occurs
    */
-  protected void swap(OutputStream out, byte[] b, int off, int len) throws IOException {
+  protected void send(OutputStream out, byte[] b, int off, int len) throws IOException {
     out.write(b, off, len);
   }
 }
