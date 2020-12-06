@@ -91,7 +91,7 @@ public class FileSwapOutputStream extends SwapOutputStream {
     if (hasSwapped()) {
       close();
       try (FileInputStream fis = new FileInputStream(swapFile)) {
-        pipe(fis, output, treshold());
+        pipe(fis, output, bufferSize());
       }
     } else {
       readBuffer(output);

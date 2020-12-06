@@ -39,8 +39,9 @@ public class CommonChecks {
   private CommonChecks() {}
 
   /**
-   * Equivalent to {@link Predicate#not(Predicate) Predicate.not(test)}. Not associated with an
-   * error message.
+   * Equivalent to {@link Predicate#not(Predicate) Predicate.not(test)}. This is a utility method.
+   * It can be used to transform an argument check, but it is not itself an argument check. It is
+   * not associated with a message.
    *
    * @param <X> The type of the argument
    * @param test The test
@@ -51,8 +52,23 @@ public class CommonChecks {
   }
 
   /**
+   * Returns a {@code Predicate} that ignores its argument and simply evaluates the specified
+   * condition. This is a utility method. It is not associated with a message.
+   *
+   * @param <X> The argument
+   * @param condition The condition to evaluate whatever the argument's value
+   * @return A {@code Predicate} that ignores its argument and simply evaluates the specified
+   *     condition
+   */
+  public static <X> Predicate<X> whatever(boolean condition) {
+    return x -> condition;
+  }
+
+  /**
    * Returns the negation of the specified {@code Relation}. Equivalent to {@link
-   * Relation#not(Relation) Relation.not(relation)}. Not associated with an error message.
+   * Relation#not(Relation) Relation.not(relation)}. This is a utility method. It can be used to
+   * transform an argument check, but it is not itself an argument check. It is not associated with
+   * a message.
    *
    * @see Relation#not(Relation)
    * @param <X> The type of the subject of the original relation
@@ -66,7 +82,9 @@ public class CommonChecks {
 
   /**
    * Returns the negation of the specified {@code IntRelation}. Equivalent to {@link
-   * IntRelation#not(Relation) IntRelation.not(relation)}. Not associated with an error message.
+   * IntRelation#not(Relation) IntRelation.not(relation)}. This is a utility method. It can be used
+   * to transform an argument check, but it is not itself an argument check. It is not associated
+   * with a message.
    *
    * @see IntRelation#not(Relation)
    * @param relation The {@code IntRelation} to return the negation of
@@ -78,8 +96,9 @@ public class CommonChecks {
 
   /**
    * Returns the reverse of the specified {@code Relation}, swapping subject and object of the
-   * relation. Equivalent to {@link Relation#reverse(Relation) Relation.reverse(relation)}. Not
-   * associated with an error message.
+   * relation. Equivalent to {@link Relation#reverse(Relation) Relation.reverse(relation)}. This is
+   * a utility method. It can be used to transform an argument check, but it is not itself an
+   * argument check. It is not associated with a message.
    *
    * @see Relation#reverse(Relation)
    * @param <X> The type of the subject of the original relation
@@ -94,7 +113,8 @@ public class CommonChecks {
   /**
    * Returns the reverse of the specified {@code IntRelation}, swapping subject and object of the
    * relation. Equivalent to {@link IntRelation#reverse(Relation) IntRelation.reverse(relation)}.
-   * Not associated with an error message.
+   * This is a utility method. It can be used to transform an argument check, but it is not itself
+   * an argument check. It is not associated with a message.
    *
    * @see IntRelation#not(Relation)
    * @param relation The {@code IntRelation} to return the negation of
@@ -113,13 +133,13 @@ public class CommonChecks {
    * @param <T> The type of the argument
    * @return A {@code Predicate}
    */
-  public static <T> Predicate<T> notSet() {
+  public static <T> Predicate<T> nullPointer() {
     return Objects::isNull;
   }
 
   static {
-    addMessage(notSet(), msgNotSet());
-    addName(notSet(), "notSet");
+    addMessage(nullPointer(), msgNullPointer());
+    addName(nullPointer(), "nullPointer");
   }
 
   /**
@@ -136,6 +156,36 @@ public class CommonChecks {
   static {
     addMessage(notNull(), msgNotNull());
     addName(notNull(), "notNull");
+  }
+
+  /**
+   * Verifies that the argument is true. If the argument is a Boolean rather than a boolean and the
+   * argument might be null, you should not use this check. Use {@link #nullOr() nullOr(true)}.
+   *
+   * @return A {@code Predicate}
+   */
+  public static Predicate<Boolean> yes() {
+    return x -> x;
+  }
+
+  static {
+    addMessage(yes(), msgYes());
+    addName(yes(), "yes");
+  }
+
+  /**
+   * Verifies that the argument is true. If the argument is a Boolean rather than a boolean and the
+   * argument might be null, you should not use this check. Use {@link #nullOr() nullOr(true)}.
+   *
+   * @return A {@code Predicate}
+   */
+  public static Predicate<Boolean> no() {
+    return x -> !x;
+  }
+
+  static {
+    addMessage(no(), msgNo());
+    addName(no(), "no");
   }
 
   /**

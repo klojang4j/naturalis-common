@@ -12,14 +12,16 @@ import static org.junit.Assert.assertTrue;
 
 public class SwapOutputStreamTest {
 
-  class TestSwapOutputStream extends SwapOutputStream {
+  static class TestSwapOutputStream extends SwapOutputStream {
+
+    private static ByteArrayOutputStream swapTo = new ByteArrayOutputStream();
 
     public TestSwapOutputStream(int treshold) {
-      super(() -> new ByteArrayOutputStream(), treshold);
+      super(() -> (swapTo = new ByteArrayOutputStream()), treshold);
     }
 
     public TestSwapOutputStream() {
-      super(() -> new ByteArrayOutputStream());
+      super(() -> (swapTo = new ByteArrayOutputStream()));
     }
 
     @Override
@@ -27,7 +29,7 @@ public class SwapOutputStreamTest {
 
     public String getContents() {
       if (hasSwapped()) {
-        return new String(((ByteArrayOutputStream) out).toByteArray(), StandardCharsets.UTF_8);
+        return new String(swapTo.toByteArray(), StandardCharsets.UTF_8);
       }
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       try {

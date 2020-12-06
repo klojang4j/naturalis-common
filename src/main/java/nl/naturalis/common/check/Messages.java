@@ -51,12 +51,20 @@ class Messages {
     return String.format(ERR_INVALID_VALUE, msgArgs[0], argVal(msgArgs[1]));
   }
 
-  static Formatter msgNotSet() {
+  static Formatter msgNullPointer() {
     return x -> format("%s must be null (was %s)", x[0], argVal(x[1]));
   }
 
   static Formatter msgNotNull() {
     return x -> format("%s must not be null", x[0]);
+  }
+
+  static Formatter msgYes() {
+    return x -> format("%s must be true (was false)", x[0]);
+  }
+
+  static Formatter msgNo() {
+    return x -> format("%s must be false (was true)", x[0]);
   }
 
   static Formatter msgNoneNull() {

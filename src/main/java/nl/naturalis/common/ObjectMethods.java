@@ -9,6 +9,7 @@ import java.util.function.UnaryOperator;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.check.CommonChecks;
 import nl.naturalis.common.function.Relation;
+import nl.naturalis.common.function.ThrowingSupplier;
 import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
 import static nl.naturalis.common.check.CommonChecks.inArray;
@@ -398,7 +399,8 @@ public class ObjectMethods {
    * @param supplier A {@code Supplier} supplying the default value if {@code value} is null
    * @return a non-null value
    */
-  public static <T> T ifNull(T value, Supplier<T> supplier) {
+  public static <T, E extends Exception> T ifNull(T value, ThrowingSupplier<T, E> supplier)
+      throws E {
     return ifNull(value, Check.notNull(supplier, "supplier").ok().get());
   }
 

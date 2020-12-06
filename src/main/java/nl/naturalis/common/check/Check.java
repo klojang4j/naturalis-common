@@ -274,40 +274,6 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Generic check method, not related the static factory methods with the same name. Throws an
-   * {@code IllegalArgumentException} if the provided condition evaluates to false, else does
-   * nothing.
-   *
-   * @param condition The condition to evaluate
-   * @param message The error message
-   * @param msgArgs The message arguments
-   * @throws IllegalArgumentException If the condition to evaluate
-   */
-  public static void that(boolean condition, String message, Object... msgArgs)
-      throws IllegalArgumentException {
-    if (!condition) {
-      throw new IllegalArgumentException(String.format(message, msgArgs));
-    }
-  }
-
-  /**
-   * Generic check method, not related the static factory methods with the same name. Throws the
-   * exception supplied by the provided supplier if the provided condition evaluates to false, else
-   * does nothing.
-   *
-   * @param <F> The type of exception thrown if {@code condition} evaluates to false
-   * @param condition The condition to evaluate
-   * @param exceptionSupplier The exception supplier
-   * @throws F The exception thrown if the condition evaluates to false
-   */
-  public static <F extends Exception> void that(boolean condition, Supplier<F> exceptionSupplier)
-      throws F {
-    if (!condition) {
-      throw exceptionSupplier.get();
-    }
-  }
-
-  /**
    * Does nothing if the provided condition evaluates to {@code true}, else throws an {@link
    * IllegalStateException}.
    *
@@ -318,7 +284,9 @@ public abstract class Check<T, E extends Exception> {
    */
   public static void state(boolean condition, String message, Object... msgArgs)
       throws IllegalStateException {
-    that(condition, () -> new IllegalStateException(String.format(message, msgArgs)));
+    if (!condition) {
+      throw new IllegalStateException(String.format(message, msgArgs));
+    }
   }
 
   /**

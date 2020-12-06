@@ -23,13 +23,12 @@ public class CheckTest {
 
   @Test(expected = IOException.class)
   public void that01() throws IOException {
-    Check.that(3 > 5, () -> new IOException());
+    Check.that(3 > 5, IOException::new).is(yes());
   }
 
-  @Test
+  @Test(expected = IOException.class)
   public void that02() throws IOException {
-    Check.that(5 > 3, () -> new IOException());
-    assertTrue(true);
+    Check.that(5 > 3, IOException::new).is(no());
   }
 
   @Test

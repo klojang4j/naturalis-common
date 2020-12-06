@@ -18,8 +18,9 @@ import nl.naturalis.common.check.Check;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 import static nl.naturalis.common.StringMethods.ifBlank;
-import static nl.naturalis.common.check.CommonChecks.keyIn;
+import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.time.FuzzyDateException.*;
+import static nl.naturalis.common.check.CommonGetters.*;
 
 /**
  * An extension of {@link Properties} dedicated to reading configurations for the {@link
@@ -162,8 +163,10 @@ class ParseInfoConfig extends Properties {
       field = DateTimeFormatter.class.getDeclaredField(name);
     } catch (NoSuchFieldException e0) {
       int i = name.lastIndexOf('.');
-      Check.that(
-          i > 0 && name.length() > 3 && !name.endsWith("."), () -> cannotCreateFormatter(name));
+      Check.that(name, s -> cannotCreateFormatter(name))
+          .has(strlen(), gt(), 3)
+          .is(endsWith(), ".")
+          .is(whatever(i > 0));
       try {
         Class<?> clazz = Class.forName(name.substring(0, i));
         field = clazz.getDeclaredField(name.substring(i + 1));
