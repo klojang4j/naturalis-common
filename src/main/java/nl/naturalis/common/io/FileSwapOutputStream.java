@@ -77,7 +77,7 @@ public class FileSwapOutputStream extends SwapOutputStream {
    * @param treshold The size in bytes of the internal buffer
    * @param bufSize The buffer size of the {@code BufferedOutputStream} used to write to the swap
    *     file and the {@code BufferedInpuStream} used to read from the swap file (in the {@link
-   *     #collect(OutputStream) collect} method)
+   *     #recall(OutputStream) collect} method)
    * @throws IOException If an I/O error occurs
    */
   public FileSwapOutputStream(File swapFile, int treshold) throws IOException {
@@ -85,8 +85,8 @@ public class FileSwapOutputStream extends SwapOutputStream {
     this.swapFile = swapFile;
   }
 
-  /** See {@link SwapOutputStream#collect(OutputStream)}. */
-  public void collect(OutputStream output) throws IOException {
+  /** See {@link SwapOutputStream#recall(OutputStream)}. */
+  public void recall(OutputStream output) throws IOException {
     Check.notNull(output);
     if (hasSwapped()) {
       close();

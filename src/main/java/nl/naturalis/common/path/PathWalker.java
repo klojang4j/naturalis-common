@@ -337,8 +337,8 @@ public final class PathWalker {
       }
     } else if (isPrimitiveArray(parval)) {
       Check.notNull(
-          value,
-          badArgument("Cannot assign null to element of %s", getArrayTypeSimpleName(parval)));
+          badArgument("Cannot assign null to element of %s", getArrayTypeSimpleName(parval)),
+          value);
       if (idx < Array.getLength(parval)) {
         Array.set(parval, idx, value);
       }

@@ -283,7 +283,7 @@ public class EnvManager {
   }
 
   private Check<String, InvalidEnvironmentException> check(String name) {
-    return Check.that(getenv(name), InvalidEnvironmentException::new);
+    return Check.with(InvalidEnvironmentException::new, getenv(name));
   }
 
   private String getenv(String name) {

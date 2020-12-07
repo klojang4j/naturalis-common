@@ -146,7 +146,7 @@ class ParseInfoConfig extends Properties {
 
   private static List<TemporalQuery<TemporalAccessor>> getParseInto(String className)
       throws FuzzyDateException {
-    return Check.that(className, s -> unsupportedDateTimeClass(className))
+    return Check.with(s -> unsupportedDateTimeClass(className), className)
         .is(keyIn(), supported)
         .ok(supported::get);
   }
@@ -163,7 +163,7 @@ class ParseInfoConfig extends Properties {
       field = DateTimeFormatter.class.getDeclaredField(name);
     } catch (NoSuchFieldException e0) {
       int i = name.lastIndexOf('.');
-      Check.that(name, s -> cannotCreateFormatter(name))
+      Check.with(s -> cannotCreateFormatter(name), name)
           .has(strlen(), gt(), 3)
           .is(endsWith(), ".")
           .is(whatever(i > 0));

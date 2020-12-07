@@ -25,7 +25,7 @@ public class SwapOutputStreamTest {
     }
 
     @Override
-    public void collect(OutputStream output) throws IOException {}
+    public void recall(OutputStream output) throws IOException {}
 
     public String getContents() {
       if (hasSwapped()) {

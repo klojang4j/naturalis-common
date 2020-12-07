@@ -102,51 +102,22 @@ public abstract class Check<T, E extends Exception> {
    * Static factory method. Returns a new {@code Check} object suitable for testing integers.
    *
    * @param arg The argument
-   * @return A new {@code Check} object
+   * @return A {@code Check} object suitable for testing integers
    */
   public static Check<Integer, IllegalArgumentException> that(int arg) {
     return new IntCheck<>(arg, DEFAULT_ARG_NAME, DEFAULT_EXCEPTION);
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing integers.
-   *
-   * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
-   * @param arg The argument
-   * @param exceptionFactory
-   * @return
-   */
-  public static <F extends Exception> Check<Integer, F> that(
-      int arg, Function<String, F> exceptionFactory) {
-    return new IntCheck<>(arg, DEFAULT_ARG_NAME, exceptionFactory);
-  }
-
-  /**
    * Static factory method. Returns a new {@code Check} object suitable for testing the provided
    * argument.
    *
    * @param <U> The type of the argument
    * @param arg The argument
-   * @return A new {@code Check} object
+   * @return A {@code Check} object suitable for testing the provided argument
    */
   public static <U> Check<U, IllegalArgumentException> that(U arg) {
     return new ObjectCheck<>(arg, DEFAULT_ARG_NAME, DEFAULT_EXCEPTION);
-  }
-
-  /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
-   * argument.
-   *
-   * @param <U> The type of the argument
-   * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
-   * @param arg The argument
-   * @param exceptionFactory A {@code Function} that takes a {@code String} (the error message) and
-   *     returns an {@code Exception}
-   * @return A new {@code Check} object
-   */
-  public static <U, F extends Exception> Check<U, F> that(
-      U arg, Function<String, F> exceptionFactory) {
-    return new ObjectCheck<>(arg, DEFAULT_ARG_NAME, exceptionFactory);
   }
 
   /**
@@ -184,26 +155,7 @@ public abstract class Check<T, E extends Exception> {
    */
   public static <U> Check<U, IllegalArgumentException> notNull(U arg)
       throws IllegalArgumentException {
-    return that(arg, DEFAULT_ARG_NAME, DEFAULT_EXCEPTION).is(CommonChecks.notNull());
-  }
-
-  /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
-   * argument. The argument will have already passed the {@link CommonChecks#notNull() notNull}
-   * test.
-   *
-   * @param <U> The type of the argument
-   * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
-   * @param arg The argument
-   * @param exceptionFactory A {@code Function} that takes a {@code String} (the error message) and
-   *     returns an {@code Exception}
-   * @return A new {@code Check} object
-   * @throws F If the argument fails to pass the {@code notNull} test or any subsequent tests called
-   *     on the returned {@code Check} object
-   */
-  public static <U, F extends Exception> Check<U, F> notNull(
-      U arg, Function<String, F> exceptionFactory) throws F {
-    return that(arg, DEFAULT_ARG_NAME, exceptionFactory).is(CommonChecks.notNull());
+    return with(DEFAULT_EXCEPTION, arg, DEFAULT_ARG_NAME).is(CommonChecks.notNull());
   }
 
   /**
@@ -218,7 +170,7 @@ public abstract class Check<T, E extends Exception> {
    */
   public static <U> Check<U, IllegalArgumentException> notNull(U arg, String argName)
       throws IllegalArgumentException {
-    return that(arg, argName, DEFAULT_EXCEPTION).is(CommonChecks.notNull());
+    return with(DEFAULT_EXCEPTION, arg, argName).is(CommonChecks.notNull());
   }
 
   /**
@@ -226,51 +178,99 @@ public abstract class Check<T, E extends Exception> {
    * argument. The argument will have already passed the {@link CommonChecks#notNull() notNull}
    * test.
    *
+   * @param exception A {@code Function} that takes a {@code String} (the error message) and returns
+   *     an {@code Exception}
+   * @param arg The argument
    * @param <U> The type of the argument
    * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
+   * @return A new {@code Check} object
+   * @throws F If the argument fails to pass the {@code notNull} test or any subsequent tests called
+   *     on the returned {@code Check} object
+   */
+  public static <U, F extends Exception> Check<U, F> notNull(Function<String, F> exception, U arg)
+      throws F {
+    return with(exception, arg, DEFAULT_ARG_NAME).is(CommonChecks.notNull());
+  }
+
+  /**
+   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * argument. The argument will have already passed the {@link CommonChecks#notNull() notNull}
+   * test.
+   *
+   * @param exception A {@code Function} that will produce the exception if a test fails. The {@code
+   *     Function} takes a {@code String} (the error message) and returns the {@code Exception}
    * @param arg The argument
    * @param argName The name of the argument
-   * @param exceptionFactory A {@code Function} that takes a {@code String} (the error message) and
-   *     returns an {@code Exception}
+   * @param <U> The type of the argument
+   * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
    * @return A new {@code Check} object
    * @throws F If the argument fails to pass the {@code notNull} test or any subsequent tests called
    *     on the returned {@code Check} object
    */
   public static <U, F extends Exception> Check<U, F> notNull(
-      U arg, String argName, Function<String, F> exceptionFactory) throws F {
-    return that(arg, argName, exceptionFactory).is(CommonChecks.notNull());
+      Function<String, F> exception, U arg, String argName) throws F {
+    return with(exception, arg, argName).is(CommonChecks.notNull());
   }
 
   /**
    * Static factory method. Returns a new {@code Check} object suitable for testing integers.
    *
-   * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
+   * @param exception A {@code Function} that will produce the exception if a test fails. The {@code
+   *     Function} takes a {@code String} (the error message) and returns the {@code Exception}
    * @param arg The argument
-   * @param argName The name of the argument
-   * @param exceptionFactory A {@code Function} that takes a {@code String} (the error message) and
-   *     returns an {@code Exception}
-   * @return A new {@code Check} object
+   * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
+   * @return A {@code Check} object suitable for testing {@code int} arguments
    */
-  public static <F extends Exception> Check<Integer, F> that(
-      int arg, String argName, Function<String, F> exceptionFactory) {
-    return new IntCheck<>(arg, argName, exceptionFactory);
+  public static <F extends Exception> Check<Integer, F> with(
+      Function<String, F> exception, int arg) {
+    return new IntCheck<>(arg, DEFAULT_ARG_NAME, exception);
   }
 
   /**
    * Static factory method. Returns a new {@code Check} object suitable for testing the provided
    * argument.
    *
+   * @param exception A {@code Function} that will produce the exception if a test fails. The {@code
+   *     Function} takes a {@code String} (the error message) and returns the {@code Exception}
+   * @param arg The argument
+   * @param <U> The type of the argument
+   * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
+   * @return A {@code Check} object suitable for testing the provided argument
+   */
+  public static <U, F extends Exception> Check<U, F> with(Function<String, F> exception, U arg) {
+    return new ObjectCheck<>(arg, DEFAULT_ARG_NAME, exception);
+  }
+
+  /**
+   * Static factory method. Returns a new {@code Check} object suitable for testing integers.
+   *
+   * @param exception A {@code Function} that will produce the exception if a test fails. The {@code
+   *     Function} takes a {@code String} (the error message) and returns the {@code Exception}
    * @param arg The argument
    * @param argName The name of the argument
-   * @param exceptionFactory A {@code Function} that takes a {@code String} (the error message) and
-   *     returns an {@code Exception}
+   * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
+   * @return A new {@code Check} object
+   */
+  public static <F extends Exception> Check<Integer, F> with(
+      Function<String, F> exception, int arg, String argName) {
+    return new IntCheck<>(arg, argName, exception);
+  }
+
+  /**
+   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * argument.
+   *
+   * @param exception A {@code Function} that will produce the exception if a test fails. The {@code
+   *     Function} takes a {@code String} (the error message) and returns the {@code Exception}
+   * @param arg The argument
+   * @param argName The name of the argument
    * @param <U> The type of the argument
    * @param <F> The type of {@code Exception} thrown if the argument fails to pass a test
    * @return A new {@code Check} object
    */
-  public static <U, F extends Exception> Check<U, F> that(
-      U arg, String argName, Function<String, F> exceptionFactory) {
-    return new ObjectCheck<>(arg, argName, exceptionFactory);
+  public static <U, F extends Exception> Check<U, F> with(
+      Function<String, F> exception, U arg, String argName) {
+    return new ObjectCheck<>(arg, argName, exception);
   }
 
   /**

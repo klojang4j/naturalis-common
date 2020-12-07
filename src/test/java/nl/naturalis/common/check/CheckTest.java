@@ -23,12 +23,12 @@ public class CheckTest {
 
   @Test(expected = IOException.class)
   public void that01() throws IOException {
-    Check.that(3 > 5, IOException::new).is(yes());
+    Check.with(IOException::new, 3 > 5).is(yes());
   }
 
   @Test(expected = IOException.class)
   public void that02() throws IOException {
-    Check.that(5 > 3, IOException::new).is(no());
+    Check.with(IOException::new, 5 > 3).is(no());
   }
 
   @Test
@@ -197,7 +197,7 @@ public class CheckTest {
   public void has03() throws IOException {
     Employee employee = new Employee();
     employee.setHobbies(List.of("Skating", "Scuba diving"));
-    Check.notNull(employee, "employee", IOException::new)
+    Check.notNull(IOException::new, employee, "employee")
         .has(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
         .ok();
     assertTrue(true);
@@ -207,7 +207,7 @@ public class CheckTest {
   public void has04() throws IOException {
     Employee employee = new Employee();
     employee.setId(-23);
-    Check.notNull(employee, "employee", IOException::new)
+    Check.notNull(IOException::new, employee, "employee")
         .has(Employee::getId, gt(), 0, "Id must not be negative")
         .ok();
     assertTrue(true);
@@ -296,7 +296,7 @@ public class CheckTest {
   @Test(expected = IllegalStateException.class)
   public void strlen02() {
     String s = "Hello, world!";
-    Check.that(s, IllegalStateException::new).has(strlen(), lt(), 2);
+    Check.with(IllegalStateException::new, s).has(strlen(), lt(), 2);
   }
 
   @Test

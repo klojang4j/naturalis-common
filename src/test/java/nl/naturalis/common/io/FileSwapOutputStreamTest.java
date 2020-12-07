@@ -16,7 +16,7 @@ public class FileSwapOutputStreamTest {
     FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
     sfos.write(new byte[0]);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    sfos.collect(baos);
+    sfos.recall(baos);
     assertArrayEquals(new byte[0], baos.toByteArray());
   }
 
@@ -25,7 +25,7 @@ public class FileSwapOutputStreamTest {
     FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
     sfos.write((byte) 1);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    sfos.collect(baos);
+    sfos.recall(baos);
     assertArrayEquals(new byte[] {(byte) 1}, baos.toByteArray());
   }
 
@@ -35,7 +35,7 @@ public class FileSwapOutputStreamTest {
     sfos.write(1);
     sfos.write(2);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    sfos.collect(baos);
+    sfos.recall(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2}, baos.toByteArray());
   }
 
@@ -46,7 +46,7 @@ public class FileSwapOutputStreamTest {
     sfos.write(2);
     sfos.write(3);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    sfos.collect(baos);
+    sfos.recall(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2, (byte) 3}, baos.toByteArray());
   }
 
@@ -58,7 +58,7 @@ public class FileSwapOutputStreamTest {
     sfos.write(3);
     sfos.write(4);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    sfos.collect(baos);
+    sfos.recall(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2, (byte) 3, (byte) 4}, baos.toByteArray());
   }
 
@@ -68,7 +68,7 @@ public class FileSwapOutputStreamTest {
     sfos.write(1);
     sfos.write(new byte[] {(byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    sfos.collect(baos);
+    sfos.recall(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2, (byte) 3}, baos.toByteArray());
   }
 
@@ -78,7 +78,7 @@ public class FileSwapOutputStreamTest {
     sfos.write(new byte[] {(byte) 1, (byte) 2});
     sfos.write(3);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    sfos.collect(baos);
+    sfos.recall(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2, (byte) 3}, baos.toByteArray());
   }
 
@@ -87,7 +87,7 @@ public class FileSwapOutputStreamTest {
     FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
     sfos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    sfos.collect(baos);
+    sfos.recall(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2, (byte) 3}, baos.toByteArray());
   }
 
@@ -112,7 +112,7 @@ public class FileSwapOutputStreamTest {
     sfos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
     sfos.close();
     sfos.getSwapFile().delete();
-    sfos.collect(new ByteArrayOutputStream()); // Oops, swap file gone
+    sfos.recall(new ByteArrayOutputStream()); // Oops, swap file gone
   }
 
   @Test
@@ -120,7 +120,7 @@ public class FileSwapOutputStreamTest {
     FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(2);
     sfos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    sfos.collect(baos);
+    sfos.recall(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2, (byte) 3}, baos.toByteArray());
     sfos.cleanup();
     assertFalse(sfos.getSwapFile().exists());
@@ -134,7 +134,7 @@ public class FileSwapOutputStreamTest {
     FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(8);
     sfos.write(data.getBytes());
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    sfos.collect(baos);
+    sfos.recall(baos);
     sfos.cleanup();
     assertEquals(data, baos.toString());
   }
