@@ -4,7 +4,6 @@ import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.check.CommonChecks;
@@ -395,13 +394,19 @@ public class ObjectMethods {
    * {@link IllegalArgumentException} is thrown.
    *
    * @param <T> The input and return type
+   * @param <E> The exception potentially being thrown by the supplier as it produces a default
+   *     value
    * @param value The value to return if not null
-   * @param supplier A {@code Supplier} supplying the default value if {@code value} is null
+   * @param supplier The supplier of a default value if {@code value} is null
    * @return a non-null value
    */
   public static <T, E extends Exception> T ifNull(T value, ThrowingSupplier<T, E> supplier)
       throws E {
-    return ifNull(value, Check.notNull(supplier, "supplier").ok().get());
+    Check.notNull(supplier, "supplier");
+    if (value == null) {
+      return Check.that(supplier.get()).is(notNull(), "Supplier must not supply null").ok();
+    }
+    return value;
   }
 
   /**
@@ -424,12 +429,19 @@ public class ObjectMethods {
    * non-empty, or else an {@link IllegalArgumentException} is thrown.
    *
    * @param <T> The input and return type
+   * @param <E> The exception potentially being thrown by the supplier as it produces a default
+   *     value
    * @param value The value to return if not empty
-   * @param supplier A {@code Supplier} supplying a default value if {@code value} is empty
+   * @param supplier The supplier of a default value if {@code value} is null
    * @return a non-empty value
    */
-  public static <T> T ifEmpty(T value, Supplier<T> supplier) {
-    return ifEmpty(value, Check.notNull(supplier, "supplier").ok().get());
+  public static <T, E extends Exception> T ifEmpty(T value, ThrowingSupplier<T, E> supplier)
+      throws E {
+    Check.notNull(supplier, "supplier");
+    if (isEmpty(value)) {
+      return Check.that(supplier.get()).is(notEmpty(), "Supplier must not supply empty value").ok();
+    }
+    return value;
   }
 
   /**
