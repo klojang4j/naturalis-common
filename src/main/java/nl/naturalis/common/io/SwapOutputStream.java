@@ -9,38 +9,42 @@ import static nl.naturalis.common.check.CommonChecks.gt;
 import static nl.naturalis.common.check.CommonChecks.nullPointer;
 
 /**
- * An output stream implementing a swap mechanism. A {@code SwapOutputStream} first fills up an
- * internal buffer. If the buffer reaches full capacity, an outstream to some swap-to resource is
- * created. The swap-to resource typically is some form of persistent storage (e.g. a swap file). It
- * is transparent to clients whether or not data has actually been swapped out of memory. Once they
- * are done writing data, clients can {@link #recall(OutputStream) collect} the data again without
- * having to know whether it came from the internal buffer or the swap-to resource.
+ * A {@link RecallOutputStream} implementing a swap mechanism. A {@code SwapOutputStream} first
+ * fills up an internal buffer. If (and only if) the buffer reaches full capacity, an underlying
+ * outstream to some resource is created to sink the data into. The swap-to resource typically is
+ * some form of persistent storage (e.g. a swap file). It is transparent to clients whether or not
+ * data has actually been swapped out of memory. Clients can {@link #recall(OutputStream) recall}
+ * the data without having to know whether it came from the internal buffer or persistent storage.
  *
- * <p>{@code SwapOutputStream} is basically a {@link BufferedOutputStream}, except that the
- * underlying output stream is lazily instantiated and you can read back what you have written to
- * it. Therefore it makes little sense to wrap a {@code SwapOutputStream} into a {@code
- * BufferedOutputStream}.
+ * <p>{@code SwapOutputStream} basically is a {@link BufferedOutputStream}, except that the
+ * underlying output stream is lazily instantiated and you can read back what you wrote to it.
+ * Therefore there is no performance gain to be had from wrapping a {@code SwapOutputStream} into a
+ * {@code BufferedOutputStream}.
  *
  * <p>This class is not thread-safe. Synchronization, if necessary, must be enforced by the calling
  * method.
+ *
+ * <p>Contrary to most {@code OutputStream} implementations, a {@code SwapOutputStream} can be
+ * re-used after being closed. Because the underlying output stream is lazily instantiated using a
+ * {@link ThrowingSupplier}, a subsequent write action will simply retrieve a new {@code
+ * OutputStream} from the {@code ThrowingSupplier}.
  *
  * @author Ayco Holleman
  */
 public abstract class SwapOutputStream extends RecallOutputStream {
 
-  /** A factory producing the output stream to the swap-to resource. */
+  // A factory producing the output stream to the swap-to resource
   private final ThrowingSupplier<OutputStream, IOException> factory;
 
-  /** The output stream to the swap-to resource. */
-  private OutputStream out;
-
   // The internal buffer
-  private byte buf[];
+  private final byte buf[];
 
-  // The number of bytes written to the buffer
+  // The live bytes in the buffer
   private int cnt;
 
-  // Whether or not the swap-to output stream has been closed
+  // The output stream to the swap-to resource
+  private OutputStream out;
+
   private boolean closed;
 
   /**
@@ -59,9 +63,7 @@ public abstract class SwapOutputStream extends RecallOutputStream {
    * Creates a {@code SwapOutputStream} with an internal buffer of {@code treshold} bytes, swapping
    * to the specified resource once the buffer overflows.
    *
-   * @param swapTo A supplier supplying an outputstream to the swap-to resource. The supplier's
-   *     {@link ThrowingSupplier#get() get()} method will only be called if the internal buffer
-   *     overflows.
+   * @param swapTo The {@code Supplier} of the swap-to outputstream.
    * @param bufSize The size in bytes of the internal buffer
    */
   public SwapOutputStream(ThrowingSupplier<OutputStream, IOException> swapTo, int bufSize) {
@@ -69,11 +71,7 @@ public abstract class SwapOutputStream extends RecallOutputStream {
     this.buf = Check.that(bufSize).is(gt(), 0).ok(byte[]::new);
   }
 
-  /**
-   * Writes the specified byte to this output stream. If this causes an overflow of the internal
-   * buffer, the buffer is flushed to the underlying output stream and all subsequent write actions
-   * will be forwarded to the underlying output stream.
-   */
+  /** Writes the specified byte to this output stream. */
   @Override
   public void write(int b) throws IOException {
     if (cnt == buf.length) {
@@ -84,9 +82,7 @@ public abstract class SwapOutputStream extends RecallOutputStream {
 
   /**
    * Writes <code>len</code> bytes from the specified byte array starting at offset <code>off</code>
-   * to this output stream. If this causes an overflow of the internal buffer, the buffer is flushed
-   * to the underlying output stream and all subsequent write actions will be forwarded to the
-   * underlying output stream.
+   * to this output stream.
    */
   @Override
   public void write(byte[] b, int off, int len) throws IOException {
@@ -125,9 +121,14 @@ public abstract class SwapOutputStream extends RecallOutputStream {
 
   /**
    * If the {@code SwapOutputStream} has started writing to the swap-to output stream, any remaining
-   * bytes in the internal buffer will be flushed to it and then its {@code close()} method will be
-   * called. Otherwise this method does nothing. Any remaining bytes in the internal buffer will
-   * just stay there.
+   * bytes in the internal buffer will be flushed to the swap-to output stream and then its {@code
+   * close()} method will be called. Otherwise this method does nothing. Any remaining bytes in the
+   * internal buffer will just stay there.
+   *
+   * <p>Contrary to most {@code OutputStream} implementations, a {@code SwapOutputStream} can be
+   * re-used after being closed. Because the underlying output stream is lazily instantiated using a
+   * {@link ThrowingSupplier}, a subsequent write action will simply open the underlying output
+   * stream again.
    */
   @Override
   public void close() throws IOException {
@@ -151,6 +152,7 @@ public abstract class SwapOutputStream extends RecallOutputStream {
   public final void swap() throws IOException {
     if (out == null) {
       out = factory.get();
+      closed = false;
     }
     swap(out, buf, 0, cnt);
     cnt = 0;
@@ -163,24 +165,6 @@ public abstract class SwapOutputStream extends RecallOutputStream {
    */
   public final boolean hasSwapped() {
     return out != null;
-  }
-
-  /**
-   * Returns the size of the internal buffer.
-   *
-   * @return The size of the internal buffer
-   */
-  protected final int bufferSize() {
-    return buf.length;
-  }
-
-  /**
-   * Returns the number of live bytes in the internal buffer.
-   *
-   * @return The live bytes in the internal buffer
-   */
-  protected final int byteCount() {
-    return cnt;
   }
 
   /**
@@ -197,6 +181,15 @@ public abstract class SwapOutputStream extends RecallOutputStream {
     if (cnt > 0) {
       swap(to, buf, 0, cnt);
     }
+  }
+
+  /**
+   * Returns the size of the internal buffer.
+   *
+   * @return The size of the internal buffer
+   */
+  protected final int bufferSize() {
+    return buf.length;
   }
 
   private static void swap(OutputStream out, byte[] b, int off, int len) throws IOException {

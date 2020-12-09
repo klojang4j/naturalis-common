@@ -1,9 +1,11 @@
 package nl.naturalis.common.io;
 
 import java.io.*;
+import java.util.Optional;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.ThrowingSupplier;
 import static nl.naturalis.common.IOMethods.pipe;
+import static nl.naturalis.common.check.CommonChecks.fileExists;
 import static nl.naturalis.common.check.CommonChecks.fileNotExists;
 
 /**
@@ -29,66 +31,63 @@ import static nl.naturalis.common.check.CommonChecks.fileNotExists;
 public class FileSwapOutputStream extends SwapOutputStream {
 
   /**
-   * Creates a new instance that swaps to an auto-generated temp file. The size of the internal
-   * buffer will be 8 kilobytes. (In other words, the {@code FileSwapOutputStream} will create a
-   * swap file if more than 8192 bytes are written to it.)
+   * Creates a new instance that swaps to an auto-generated temp file.
    *
+   * @see SwapOutputStream#SwapOutputStream(ThrowingSupplier)
    * @return A {@code FileSwapOutputStream} that swaps to an auto-generated temp file
-   * @throws IOException If an I/O error occurs
    */
-  public static FileSwapOutputStream newInstance() throws IOException {
+  public static FileSwapOutputStream newInstance() {
     return new FileSwapOutputStream(createTempFile());
   }
 
   /**
    * Creates a new instance that swaps to an auto-generated temp file. The size of the internal
-   * buffer is specified through the {@code treshold} parameter. The {@code BufferedOutputStream}
-   * created for the swap file will have a 512-byte buffer.
+   * buffer is specified through the {@code bufSize} parameter.
    *
-   * @param treshold The size in bytes of the internal buffer
+   * @see SwapOutputStream#SwapOutputStream(ThrowingSupplier, int)
+   * @param bufSize The size in bytes of the internal buffer
    * @return A {@code FileSwapOutputStream} that swaps to an auto-generated temp file
-   * @throws IOException If an I/O error occurs
    */
-  public static FileSwapOutputStream newInstance(int treshold) throws IOException {
-    return new FileSwapOutputStream(createTempFile(), treshold);
+  public static FileSwapOutputStream newInstance(int bufSize) {
+    return new FileSwapOutputStream(createTempFile(), bufSize);
   }
 
   private final File swapFile;
 
   /**
-   * Creates a new instance that swaps to the specified file. The size of the internal buffer will
-   * be 4 kilobytes. The {@code BufferedOutputStream} created for the swap file will have a 512-byte
-   * buffer. (In other words, the {@code FileSwapOutputStream} first fills up an internal buffer of
-   * 8 kilobytes, and then starts writing to the swap file in chunks of 512 bytes.)
+   * Creates a new instance that swaps to the specified file.
    *
+   * @see SwapOutputStream#SwapOutputStream(ThrowingSupplier)
    * @param swapFile The file to write to once the internal buffer overflows
-   * @throws IOException If an I/O error occurs
    */
-  public FileSwapOutputStream(File swapFile) throws IOException {
-    this(swapFile, 8 * 1024);
-  }
-
-  /**
-   * Creates a new instance that swaps to the specified file. The size of the internal buffer is
-   * specified through the {@code treshold} parameter. The {@code BufferedOutputStream} created for
-   * the swap file will have a size of {@code bufSize} bytes.
-   *
-   * @param swapFile The file to write to once the internal buffer overflows
-   * @param treshold The size in bytes of the internal buffer
-   * @param bufSize The buffer size of the {@code BufferedOutputStream} used to write to the swap
-   *     file and the {@code BufferedInpuStream} used to read from the swap file (in the {@link
-   *     #recall(OutputStream) collect} method)
-   * @throws IOException If an I/O error occurs
-   */
-  public FileSwapOutputStream(File swapFile, int treshold) throws IOException {
-    super(createOutputStream(swapFile), treshold);
+  public FileSwapOutputStream(File swapFile) {
+    super(createOutputStream(swapFile));
     this.swapFile = swapFile;
   }
 
-  /** See {@link SwapOutputStream#recall(OutputStream)}. */
+  /**
+   * Creates a new instance that swaps to the specified file.
+   *
+   * @see SwapOutputStream#SwapOutputStream(ThrowingSupplier, int)
+   * @param swapFile The file to write to once the internal buffer overflows
+   * @param bufSize The size in bytes of the internal buffer
+   */
+  public FileSwapOutputStream(File swapFile, int bufSize) {
+    super(createOutputStream(swapFile), bufSize);
+    this.swapFile = swapFile;
+  }
+
+  /**
+   * Reads back the data written to this instance and writes it to the specified output stream. If
+   * the data written to the {@code FileSwapOutputStream} still resides in the internal buffer (no
+   * swapping has taken place yet), the contents of the internal buffer is written to the specified
+   * output stream. Otherwise this method will first close the output stream to the swap file and
+   * then open a {@link FileInputStream} on it in order to read back the data.
+   */
   public void recall(OutputStream output) throws IOException {
     Check.notNull(output);
     if (hasSwapped()) {
+      Check.with(IOException::new, swapFile).is(fileExists(), "Swap file gone");
       close();
       try (FileInputStream fis = new FileInputStream(swapFile)) {
         pipe(fis, output, bufferSize());
@@ -103,19 +102,20 @@ public class FileSwapOutputStream extends SwapOutputStream {
    *
    * @throws IOException If an I/O error occurs
    */
-  public void cleanup() throws IOException {
+  public void cleanup() {
     if (swapFile.exists()) {
       swapFile.delete();
     }
   }
 
   /**
-   * Returns the swap file.
+   * Returns an {@code Optional} containing a {@code File} object corresponding to the swap file if
+   * a swap file was created and still exists. Otherwise returns an empy {@code Optional}.
    *
    * @return The swap file
    */
-  public File getSwapFile() {
-    return swapFile;
+  public Optional<File> getSwapFile() {
+    return swapFile.isFile() ? Optional.of(swapFile) : Optional.empty();
   }
 
   private static ThrowingSupplier<OutputStream, IOException> createOutputStream(File swapFile) {

@@ -20,9 +20,22 @@ public final class Tuple<LEFT, RIGHT> {
    * @param <V> The type of the second element (or value) of the tuple
    * @param left The first element (or key) of the tupl
    * @param right The second element (or value) of the tuple
-   * @return
+   * @return A tuple containing the provided values
    */
   public static <K, V> Tuple<K, V> tuple(K left, V right) {
+    return new Tuple<K, V>(left, right);
+  }
+
+  /**
+   * Creates a tuple containing the provided values.
+   *
+   * @param <K> The type of the first element (or key) of the tuple
+   * @param <V> The type of the second element (or value) of the tuple
+   * @param left The first element (or key) of the tupl
+   * @param right The second element (or value) of the tuple
+   * @return A tuple containing the provided values
+   */
+  public static <K, V> Tuple<K, V> of(K left, V right) {
     return new Tuple<K, V>(left, right);
   }
 
