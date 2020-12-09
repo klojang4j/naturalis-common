@@ -269,7 +269,7 @@ public class CollectionMethods {
     Check.notNull(list, "list");
     int sz = list.size();
     if (from < 0) {
-      from = Check.that(sz + from, START_INDEX).is(notNegative()).intValue();
+      from = Check.that(sz + from, START_INDEX).is(gte(), 0).intValue();
     } else {
       Check.that(from, START_INDEX).is(lte(), sz);
     }
@@ -278,7 +278,7 @@ public class CollectionMethods {
       to = Check.that(from + length, END_INDEX).is(lte(), sz).intValue();
     } else {
       to = Check.that(from + 1, END_INDEX).is(lte(), sz).intValue();
-      from = Check.that(to + length, START_INDEX).is(notNegative()).intValue();
+      from = Check.that(to + length, START_INDEX).is(gte(), 0).intValue();
     }
     return list.subList(from, to);
   }

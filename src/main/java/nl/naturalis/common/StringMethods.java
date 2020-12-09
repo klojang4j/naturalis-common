@@ -5,9 +5,10 @@ import java.util.Collection;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ArrayMethods.END_INDEX;
 import static nl.naturalis.common.ArrayMethods.START_INDEX;
+import static nl.naturalis.common.ObjectMethods.ifNotNull;
+import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.ObjectMethods.ifTrue;
 import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.ObjectMethods.*;
 
 /**
  * Methods for working with strings. Most methods are friendly towards batch-wise print jobs, trying
@@ -326,7 +327,7 @@ public final class StringMethods {
    * @throws IllegalArgumentException If {@code terminator} is null
    */
   public static String lpad(Object subject, int width, char padChar, String delimiter) {
-    Check.that(width, "width").is(notNegative());
+    Check.that(width, "width").is(gte(), 0);
     String s = ifNotNull(subject, Object::toString, EMPTY);
     String d = ifNull(delimiter, EMPTY);
     if (s.length() >= width) {
@@ -422,7 +423,7 @@ public final class StringMethods {
    * @return The left- and right-padded string plus the terminator
    */
   public static String pad(Object subject, int width, char padChar, String delimiter) {
-    Check.that(width, "width").is(notNegative());
+    Check.that(width, "width").is(gte(), 0);
     String s = ifNotNull(subject, Object::toString, EMPTY);
     String d = ifNull(delimiter, EMPTY);
     if (s.length() >= width) {
@@ -516,7 +517,7 @@ public final class StringMethods {
    * @return The right-padded string
    */
   public static String rpad(Object subject, int width, char padChar, String delimiter) {
-    Check.that(width, "width").is(notNegative());
+    Check.that(width, "width").is(gte(), 0);
     String s = ifNotNull(subject, Object::toString, EMPTY);
     String d = ifNull(delimiter, EMPTY);
     if (s.length() >= width) {
@@ -604,7 +605,7 @@ public final class StringMethods {
     if (from < 0) {
       from = sz + from;
     }
-    Check.that(from, "from").is(notNegative()).is(lte(), sz);
+    Check.that(from, "from").is(gte(), 0).is(lte(), sz);
     return str.substring(from);
   }
 
@@ -630,7 +631,7 @@ public final class StringMethods {
     Check.notNull(str, "str");
     int sz = str.length();
     if (from < 0) {
-      from = Check.that(sz + from, START_INDEX).is(notNegative()).intValue();
+      from = Check.that(sz + from, START_INDEX).is(gte(), 0).intValue();
     } else {
       Check.that(from, START_INDEX).is(lte(), sz);
     }
@@ -639,7 +640,7 @@ public final class StringMethods {
       to = Check.that(from + length, END_INDEX).is(lte(), sz).intValue();
     } else {
       to = Check.that(from + 1, END_INDEX).is(lte(), sz).intValue();
-      from = Check.that(to + length, START_INDEX).is(notNegative()).intValue();
+      from = Check.that(to + length, START_INDEX).is(gte(), 0).intValue();
     }
     return str.substring(from, to);
   }

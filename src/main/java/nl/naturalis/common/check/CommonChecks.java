@@ -288,13 +288,13 @@ public class CommonChecks {
    *
    * @returnn A {@code Predicate}
    */
-  public static Predicate<File> directoryExists() {
+  public static Predicate<File> directory() {
     return File::isDirectory;
   }
 
   static {
-    addMessage(directoryExists(), msgDirectoryExists());
-    addName(directoryExists(), "directoryExists");
+    addMessage(directory(), msgDirectory());
+    addName(directory(), "directory");
   }
 
   /**
@@ -353,7 +353,7 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(even(), msgIsEven());
+    addMessage(even(), msgEven());
     addName(even(), "even");
   }
 
@@ -367,7 +367,7 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(odd(), msgIsOdd());
+    addMessage(odd(), msgOdd());
     addName(odd(), "odd");
   }
 
@@ -386,20 +386,6 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is zero or negative.
-   *
-   * @return An {@code IntPredicate}
-   */
-  public static IntPredicate notPositive() {
-    return x -> x <= 0;
-  }
-
-  static {
-    addMessage(notPositive(), msgNotPositive());
-    addName(notPositive(), "notPositive");
-  }
-
-  /**
    * Verifies that the argument is negative.
    *
    * @return An {@code IntPredicate}
@@ -411,20 +397,6 @@ public class CommonChecks {
   static {
     addMessage(negative(), msgNegative());
     addName(negative(), "negative");
-  }
-
-  /**
-   * Verifies that the argument is zero or positive.
-   *
-   * @return An {@code IntPredicate}
-   */
-  public static IntPredicate notNegative() {
-    return x -> x >= 0;
-  }
-
-  static {
-    addMessage(notNegative(), msgNotNegative());
-    addName(notNegative(), "notNegative");
   }
 
   /* ++++++++++++++ Relation ++++++++++++++ */

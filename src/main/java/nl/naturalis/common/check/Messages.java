@@ -153,36 +153,36 @@ class Messages {
       File f = (File) x[1];
       String s = f.getAbsolutePath();
       if (f.exists()) {
-        if (f.isDirectory()) {
-          return format("%s must be a regular file (was directory %s)", x[0], s);
-        }
         return format("%s must be a regular file (was %s)", x[0], s);
       } else if (noArgNameProvided(x)) {
         return format("Missing file: %s", s);
       }
-      return format("Missing file: %s (argument \"%s\")", s, x[0]);
+      return format("Missing file: %s (%s)", s, x[0]);
     };
   }
 
-  static Formatter msgDirectoryExists() {
+  static Formatter msgDirectory() {
     return x -> {
       File f = (File) x[1];
       String s = f.getAbsolutePath();
       if (f.exists()) {
-        if (f.isFile()) {
-          return format("%s must be a directory (was file %s)", x[0], s);
-        }
         return format("%s must be a directory (was %s)", x[0], s);
       } else if (noArgNameProvided(x)) {
         return format("Missing directory: %s", s);
       }
-      return format("Missing directory: %s (argument \"%s\")", s, x[0]);
+      return format("Missing directory: %s (%s)", s, x[0]);
     };
   }
 
   static Formatter msgFileNotExists() {
-    String fmt = "%s (%s) must not exist";
-    return x -> format(fmt, x[0], ((File) x[1]).getAbsolutePath());
+    return x -> {
+      File f = (File) x[1];
+      String s = f.getAbsolutePath();
+      if (noArgNameProvided(x)) {
+        return format("File already exists: %s", s);
+      }
+      return format("File already exists: %s (%s)", s, x[0]);
+    };
   }
 
   static Formatter msgReadable() {
@@ -195,11 +195,11 @@ class Messages {
     return x -> format(fmt, x[0], ((File) x[1]).getAbsolutePath());
   }
 
-  static Formatter msgIsEven() {
+  static Formatter msgEven() {
     return x -> format("%s must be even (was %d)", x[0], x[1]);
   }
 
-  static Formatter msgIsOdd() {
+  static Formatter msgOdd() {
     return x -> format("%s must be odd (was %d)", x[0], x[1]);
   }
 
@@ -207,16 +207,8 @@ class Messages {
     return x -> format("%s must be positive (was %d)", x[0], x[1]);
   }
 
-  static Formatter msgNotNegative() {
-    return x -> format("%s must be zero or positive (was %d)", x[0], x[1]);
-  }
-
   static Formatter msgNegative() {
     return x -> format("%s must be negative (was %d)", x[0], x[1]);
-  }
-
-  static Formatter msgNotPositive() {
-    return x -> format("%s must be zero or negative (was %d)", x[0], x[1]);
   }
 
   static Formatter msgNullOr() {

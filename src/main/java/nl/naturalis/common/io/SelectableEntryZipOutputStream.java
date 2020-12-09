@@ -32,7 +32,7 @@ public class SelectableEntryZipOutputStream extends OutputStream {
   }
 
   public void addEntry(String name) {
-    addEntry(new ZipEntry(name), ZipSwapOutputStream.newInstance(1024 * 1024));
+    // addEntry(new ZipEntry(name), ZipFileSwapOutputStream.newInstance(1024 * 1024));
   }
 
   /**
@@ -44,7 +44,7 @@ public class SelectableEntryZipOutputStream extends OutputStream {
    * @throws IOException
    */
   public void addEntry(String name, int bufSize) {
-    addEntry(new ZipEntry(name), ZipSwapOutputStream.newInstance(bufSize));
+    // addEntry(new ZipEntry(name), ZipFileSwapOutputStream.newInstance(bufSize));
   }
 
   public void addEntry(ZipEntry entry, RecallOutputStream ros) {

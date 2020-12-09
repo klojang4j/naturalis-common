@@ -16,8 +16,8 @@ public class SwapOutputStreamTest {
 
     private static ByteArrayOutputStream swapTo = new ByteArrayOutputStream();
 
-    public TestSwapOutputStream(int treshold) {
-      super(() -> (swapTo = new ByteArrayOutputStream()), treshold);
+    public TestSwapOutputStream(int bufSize) {
+      super(() -> (swapTo = new ByteArrayOutputStream()), bufSize);
     }
 
     public TestSwapOutputStream() {
@@ -38,6 +38,16 @@ public class SwapOutputStreamTest {
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
+    }
+
+    @Override
+    protected void intercept(int b) throws IOException {
+      doWrite(b);
+    }
+
+    @Override
+    protected void intercept(byte[] b, int off, int len) throws IOException {
+      doWrite(b, off, len);
     }
   }
 

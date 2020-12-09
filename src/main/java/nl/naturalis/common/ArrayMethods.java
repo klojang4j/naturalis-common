@@ -7,9 +7,9 @@ import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
 import static java.lang.System.arraycopy;
 import static nl.naturalis.common.check.CommonChecks.atMost;
+import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonChecks.lt;
 import static nl.naturalis.common.check.CommonChecks.noneNull;
-import static nl.naturalis.common.check.CommonChecks.notNegative;
 import static nl.naturalis.common.check.CommonGetters.length;
 
 /** Methods for working with arrays. */
@@ -179,7 +179,7 @@ public class ArrayMethods {
   @SuppressWarnings("unchecked")
   public static <T> T[] fromTemplate(T[] template, int length) {
     Check.notNull(template, "template");
-    Check.that(length, "length").is(notNegative());
+    Check.that(length, "length").is(gte(), 0);
     return (T[]) Array.newInstance(template.getClass().getComponentType(), length);
   }
 

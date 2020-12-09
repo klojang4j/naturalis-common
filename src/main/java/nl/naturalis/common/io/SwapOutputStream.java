@@ -51,19 +51,19 @@ public abstract class SwapOutputStream extends RecallOutputStream {
    * Creates a {@code SwapOutputStream} with an internal buffer of 8 kilobytes, swapping to the
    * specified resource once the buffer overflows.
    *
-   * @param swapTo A supplier supplying an outputstream to the swap-to resource. The supplier's
-   *     {@link ThrowingSupplier#get() get()} method will only be called if the internal buffer
-   *     overflows.
+   * @param swapTo The supplier of an outputstream to the swap-to resource (e.g. a swap file). The
+   *     supplier will only be called upon if the internal buffer overflows.
    */
   public SwapOutputStream(ThrowingSupplier<OutputStream, IOException> swapTo) {
     this(swapTo, 8 * 1024);
   }
 
   /**
-   * Creates a {@code SwapOutputStream} with an internal buffer of {@code treshold} bytes, swapping
+   * Creates a {@code SwapOutputStream} with an internal buffer of {@code bufSize} bytes, swapping
    * to the specified resource once the buffer overflows.
    *
-   * @param swapTo The {@code Supplier} of the swap-to outputstream.
+   * @param swapTo The supplier of an outputstream to the swap-to resource (e.g. a swap file). The
+   *     supplier will only be called upon if the internal buffer overflows.
    * @param bufSize The size in bytes of the internal buffer
    */
   public SwapOutputStream(ThrowingSupplier<OutputStream, IOException> swapTo, int bufSize) {
@@ -73,11 +73,8 @@ public abstract class SwapOutputStream extends RecallOutputStream {
 
   /** Writes the specified byte to this output stream. */
   @Override
-  public void write(int b) throws IOException {
-    if (cnt == buf.length) {
-      swap();
-    }
-    buf[cnt++] = (byte) b;
+  public final void write(int b) throws IOException {
+    intercept(b);
   }
 
   /**
@@ -85,17 +82,8 @@ public abstract class SwapOutputStream extends RecallOutputStream {
    * to this output stream.
    */
   @Override
-  public void write(byte[] b, int off, int len) throws IOException {
-    if (len > buf.length) {
-      swap();
-      swap(out, b, off, len);
-    } else {
-      if (cnt + len > buf.length) {
-        swap();
-      }
-      System.arraycopy(b, off, buf, cnt, len);
-      cnt += len;
-    }
+  public final void write(byte[] b, int off, int len) throws IOException {
+    intercept(b, off, len);
   }
 
   /**
@@ -122,13 +110,13 @@ public abstract class SwapOutputStream extends RecallOutputStream {
   /**
    * If the {@code SwapOutputStream} has started writing to the swap-to output stream, any remaining
    * bytes in the internal buffer will be flushed to the swap-to output stream and then its {@code
-   * close()} method will be called. Otherwise this method does nothing. Any remaining bytes in the
-   * internal buffer will just stay there.
+   * close()} method will be called. If the swap-to output stream had not been opened yet this
+   * method does nothing. Any remaining bytes in the internal buffer will just stay there.
    *
-   * <p>Contrary to most {@code OutputStream} implementations, a {@code SwapOutputStream} can be
-   * re-used after being closed. Because the underlying output stream is lazily instantiated using a
-   * {@link ThrowingSupplier}, a subsequent write action will simply open the underlying output
-   * stream again.
+   * <p>Because the swap-to output stream is lazily instantiated via a {@link ThrowingSupplier}, a
+   * {@code SwapOutputStream} can safely be re-used even after it has been closed. A subsequent
+   * {@code write} action will simply cause the swap-to output stream to be retrieved again from the
+   * supplier.
    */
   @Override
   public void close() throws IOException {
@@ -165,6 +153,64 @@ public abstract class SwapOutputStream extends RecallOutputStream {
    */
   public final boolean hasSwapped() {
     return out != null;
+  }
+
+  /**
+   * The {@link #write(int)} method does nothing but call this method. Subclasses must implement
+   * this method so they can filter or modify the incoming byte before it is actually written to the
+   * {@code SwapOutputStream}. Unless something exception happens, or the byte is to be discarded,
+   * the {@code intercept} method should end with a call to one of the {@code doWrite} methods.
+   *
+   * @param b The byte
+   * @throws IOException If an I/O error occurs
+   */
+  protected abstract void intercept(int b) throws IOException;
+
+  /**
+   * The {@link #write(byte[], int, int)} method does nothing but call this method. Subclasses must
+   * implement this method so they can filter or modify the incoming bytes before they are actually
+   * written to the {@code SwapOutputStream}. Unless something exception happens, or the byte is to
+   * be discarded, the {@code intercept} method should end with a call to one of the {@code doWrite}
+   * methods.
+   *
+   * @param b The byte
+   * @throws IOException If an I/O error occurs
+   */
+  protected abstract void intercept(byte[] b, int off, int len) throws IOException;
+
+  /**
+   * Writes the specified byte to this output stream.
+   *
+   * @param b The byte
+   * @throws IOException If an I/O error occurs
+   */
+  protected final void doWrite(int b) throws IOException {
+    if (cnt == buf.length) {
+      swap();
+    }
+    buf[cnt++] = (byte) b;
+  }
+
+  /**
+   * Writes <code>len</code> bytes from the specified byte array starting at offset <code>off</code>
+   * to this output stream.
+   *
+   * @param b the data.
+   * @param off the start offset in the data.
+   * @param len the number of bytes to write.
+   * @throws IOException If an I/O error occurs
+   */
+  protected final void doWrite(byte[] b, int off, int len) throws IOException {
+    if (len > buf.length) {
+      swap();
+      swap(out, b, off, len);
+    } else {
+      if (cnt + len > buf.length) {
+        swap();
+      }
+      System.arraycopy(b, off, buf, cnt, len);
+      cnt += len;
+    }
   }
 
   /**
