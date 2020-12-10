@@ -6,20 +6,20 @@ import java.io.OutputStream;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.ThrowingSupplier;
 import static nl.naturalis.common.check.CommonChecks.gt;
-import static nl.naturalis.common.check.CommonChecks.nullPointer;
+import static nl.naturalis.common.check.CommonChecks.no;
 
 /**
  * A {@link RecallOutputStream} implementing a swap mechanism. A {@code SwapOutputStream} first
  * fills up an internal buffer. If (and only if) the buffer reaches full capacity, an underlying
- * outstream to some resource is created to sink the data into. The swap-to resource typically is
- * some form of persistent storage (e.g. a swap file). It is transparent to clients whether or not
- * data has actually been swapped out of memory. Clients can {@link #recall(OutputStream) recall}
- * the data without having to know whether it came from the internal buffer or persistent storage.
+ * outstream to some persistent resource is created to sink the data into. It is transparent to
+ * clients whether or not data has actually been swapped out of memory. Clients can {@link
+ * #recall(OutputStream) recall} the data without having to know whether it came from the internal
+ * buffer or persistent storage.
  *
  * <p>{@code SwapOutputStream} basically is a {@link BufferedOutputStream}, except that the
- * underlying output stream is lazily instantiated and you can read back what you wrote to it.
- * Therefore there is no performance gain to be had from wrapping a {@code SwapOutputStream} into a
- * {@code BufferedOutputStream}.
+ * underlying output stream is lazily instantiated and that you can read back what you wrote to it.
+ * Therefore you don't anything from wrapping a {@code SwapOutputStream} into a {@code
+ * BufferedOutputStream}.
  *
  * @author Ayco Holleman
  */
@@ -104,11 +104,6 @@ public abstract class SwapOutputStream extends RecallOutputStream {
    * bytes in the internal buffer will be flushed to the swap-to output stream and then its {@code
    * close()} method will be called. If the swap-to output stream had not been opened yet this
    * method does nothing. Any remaining bytes in the internal buffer will just stay there.
-   *
-   * <p>Because the swap-to output stream is lazily instantiated via a {@link ThrowingSupplier}, a
-   * {@code SwapOutputStream} can safely be re-used even after it has been closed. A subsequent
-   * {@code write} action will simply cause the swap-to output stream to be retrieved again from the
-   * supplier.
    */
   @Override
   public void close() throws IOException {
@@ -218,7 +213,7 @@ public abstract class SwapOutputStream extends RecallOutputStream {
    */
   protected final void readBuffer(OutputStream to) throws IOException {
     Check.notNull(to);
-    Check.with(IOException::new, out).is(nullPointer(), "Already swapped");
+    Check.with(IOException::new, hasSwapped()).is(no(), "Already swapped");
     if (cnt > 0) {
       to.write(buf, 0, cnt);
     }
