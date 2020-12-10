@@ -232,8 +232,4 @@ public abstract class SwapOutputStream extends RecallOutputStream {
   protected final int bufferSize() {
     return buf.length;
   }
-
-  private static void swap(OutputStream out, byte[] b, int off, int len) throws IOException {
-    out.write(b, off, len);
-  }
 }
