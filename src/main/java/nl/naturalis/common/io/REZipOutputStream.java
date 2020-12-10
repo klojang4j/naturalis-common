@@ -22,13 +22,13 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  * iteration over the same table for every zip entry that needs to be populated.
  *
  * <p>One zip entry needs to be designated the main entry. This entry is written directly to the
- * output stream provided by the client. The other zip entries are buffered and potentially swapped
- * to file before being merged into the main output stream.
+ * {@link #withMainEntry(ZipEntry, OutputStream) output stream} provided by the client. The other
+ * zip entries are buffered and potentially swapped to file before being merged into the main output
+ * stream.
  *
  * <p>Though you could, it makes no sense to {@code REZipOutputStream} into a {@link
- * BufferedOutputStream}. See {@link SwapOutputStream}. It could make sense however to wrap the main
- * output stream (provided through {@link #withMainEntry(ZipEntry, OutputStream)}) into a {@code
- * BufferedOutputStream}.
+ * BufferedOutputStream}. See {@link SwapOutputStream}. The client-provided output stream, however,
+ * is not automatically wrapped into a {@code BufferedOutputStream}.
  *
  * @author Ayco Holleman
  */

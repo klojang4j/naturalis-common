@@ -137,7 +137,7 @@ public class ZipFileSwapOutputStream extends FileSwapOutputStream {
     Check.notNull(output);
     finish();
     if (hasSwapped()) {
-      closeSession();
+      super.close();
       try (InflaterInputStream iis = new InflaterInputStream(new FileInputStream(getSwapFile()))) {
         pipe(iis, output, bufferSize());
       }
