@@ -21,14 +21,6 @@ import static nl.naturalis.common.check.CommonChecks.nullPointer;
  * Therefore there is no performance gain to be had from wrapping a {@code SwapOutputStream} into a
  * {@code BufferedOutputStream}.
  *
- * <p>This class is not thread-safe. Synchronization, if necessary, must be enforced by the calling
- * method.
- *
- * <p>Contrary to most {@code OutputStream} implementations, a {@code SwapOutputStream} can be
- * re-used after being closed. Because the underlying output stream is lazily instantiated using a
- * {@link ThrowingSupplier}, a subsequent write action will simply retrieve a new {@code
- * OutputStream} from the {@code ThrowingSupplier}.
- *
  * @author Ayco Holleman
  */
 public abstract class SwapOutputStream extends RecallOutputStream {
@@ -120,11 +112,13 @@ public abstract class SwapOutputStream extends RecallOutputStream {
    */
   @Override
   public void close() throws IOException {
-    if (out != null && !closed) {
-      if (cnt > 0) {
-        swap();
+    if (!closed) {
+      if (out != null) {
+        if (cnt > 0) {
+          swap();
+        }
+        out.close();
       }
-      out.close();
       closed = true;
     }
   }
@@ -140,9 +134,8 @@ public abstract class SwapOutputStream extends RecallOutputStream {
   public final void swap() throws IOException {
     if (out == null) {
       out = factory.get();
-      closed = false;
     }
-    swap(out, buf, 0, cnt);
+    out.write(buf, 0, cnt);
     cnt = 0;
   }
 
@@ -158,7 +151,7 @@ public abstract class SwapOutputStream extends RecallOutputStream {
   /**
    * The {@link #write(int)} method does nothing but call this method. Subclasses must implement
    * this method so they can filter or modify the incoming byte before it is actually written to the
-   * {@code SwapOutputStream}. Unless something exception happens, or the byte is to be discarded,
+   * {@code SwapOutputStream}. Unless something exceptional happens, or the byte is to be discarded,
    * the {@code intercept} method should end with a call to one of the {@code doWrite} methods.
    *
    * @param b The byte
@@ -169,11 +162,11 @@ public abstract class SwapOutputStream extends RecallOutputStream {
   /**
    * The {@link #write(byte[], int, int)} method does nothing but call this method. Subclasses must
    * implement this method so they can filter or modify the incoming bytes before they are actually
-   * written to the {@code SwapOutputStream}. Unless something exception happens, or the byte is to
-   * be discarded, the {@code intercept} method should end with a call to one of the {@code doWrite}
-   * methods.
+   * written to the {@code SwapOutputStream}. Unless something exceptional happens, or the byte
+   * array is to be discarded, the {@code intercept} method should end with a call to one of the
+   * {@code doWrite} methods.
    *
-   * @param b The byte
+   * @param b The byte array
    * @throws IOException If an I/O error occurs
    */
   protected abstract void intercept(byte[] b, int off, int len) throws IOException;
@@ -201,9 +194,11 @@ public abstract class SwapOutputStream extends RecallOutputStream {
    * @throws IOException If an I/O error occurs
    */
   protected final void doWrite(byte[] b, int off, int len) throws IOException {
+    // If the incoming byte array is bigger than the internal buffer we don't bother buffering it.
+    // We flush the internal buffer and then write the byte array directly to the output stream
     if (len > buf.length) {
       swap();
-      swap(out, b, off, len);
+      out.write(b, off, len);
     } else {
       if (cnt + len > buf.length) {
         swap();
@@ -225,7 +220,7 @@ public abstract class SwapOutputStream extends RecallOutputStream {
     Check.notNull(to);
     Check.with(IOException::new, out).is(nullPointer(), "Already swapped");
     if (cnt > 0) {
-      swap(to, buf, 0, cnt);
+      to.write(buf, 0, cnt);
     }
   }
 
