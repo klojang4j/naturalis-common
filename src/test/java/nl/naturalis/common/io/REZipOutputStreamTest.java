@@ -202,5 +202,8 @@ public class REZipOutputStreamTest {
       rezos.mergeEntries().close();
     }
     // Now we have our archive
+    try (ZipFile zf = new ZipFile(archive)) {
+      // etc.
+    }
   }
 }

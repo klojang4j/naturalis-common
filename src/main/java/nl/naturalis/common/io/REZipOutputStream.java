@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 import nl.naturalis.common.Tuple;
 import nl.naturalis.common.check.Check;
@@ -51,6 +52,9 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  *   rezos.mergeEntries().close();
  * }
  * // Now we have our archive
+ * try(ZipFile zf = new ZipFile(archive)) {
+ *   // etc.
+ * }
  * </pre>
  *
  * @author Ayco Holleman
