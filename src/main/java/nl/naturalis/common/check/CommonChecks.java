@@ -12,7 +12,6 @@ import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
 import static nl.naturalis.common.ClassMethods.getSimpleClassName;
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
-import static nl.naturalis.common.Tuple.tuple;
 import static nl.naturalis.common.check.InvalidCheckException.notApplicable;
 import static nl.naturalis.common.check.Messages.*;
 
@@ -1286,10 +1285,10 @@ public class CommonChecks {
   }
 
   private static void addMessage(Object test, Formatter message) {
-    tmp0.add(tuple(test, message));
+    tmp0.add(Tuple.of(test, message));
   }
 
   private static void addName(Object test, String name) {
-    tmp1.add(tuple(test, name));
+    tmp1.add(Tuple.of(test, name));
   }
 }

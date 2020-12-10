@@ -3,7 +3,7 @@ package nl.naturalis.common;
 import java.io.*;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.io.SimpleFileSwapOutputStream;
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonChecks.fileNotExists;
 
 /**
  * I/O-related methods.
@@ -73,10 +73,12 @@ public class IOMethods {
     sb.append(System.getProperty("java.io.tmpdir"))
         .append('/')
         .append(SimpleFileSwapOutputStream.class.getSimpleName())
-        .append(System.identityHashCode(new Object()))
+        .append(tempCount++)
         .append(System.currentTimeMillis())
         .append(extension);
     File f = new File(sb.toString());
     return Check.with(IOException::new, f).is(fileNotExists()).ok();
   }
+
+  private static int tempCount = 100000;
 }

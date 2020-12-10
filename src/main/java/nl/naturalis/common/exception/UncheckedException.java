@@ -3,7 +3,6 @@ package nl.naturalis.common.exception;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-
 import nl.naturalis.common.ExceptionMethods;
 
 /**

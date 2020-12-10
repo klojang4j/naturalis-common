@@ -1,15 +1,12 @@
 package nl.naturalis.common.io;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.ThrowingSupplier;
+import static nl.naturalis.common.IOMethods.createTempFile;
 import static nl.naturalis.common.IOMethods.pipe;
 import static nl.naturalis.common.check.CommonChecks.fileExists;
-import static nl.naturalis.common.IOMethods.*;
 
 /**
  * A {@link SwapOutputStream} that swaps to file once its internal buffer overflows. Example:
@@ -17,15 +14,14 @@ import static nl.naturalis.common.IOMethods.*;
  * <p>
  *
  * <pre>
- *   String data = "Is this going to be swapped?";
- *   // Create FileSwapOutputStream that swaps to a temp file if more
- *   // than 8 bytes are written to it
- *   FileSwapOutputStream sfos = FileSwapOutputStream.newInstance(8);
- *   sfos.write(data.getBytes());
+ * String data = "Will this be swapped or not? It doesn't matter";
+ * try (RecallOutputStream ros = SimpleFileSwapOutputStream.newInstance()) {
+ *   ros.write(data.getBytes());
  *   ByteArrayOutputStream baos = new ByteArrayOutputStream();
- *   sfos.collect(baos);
- *   sfos.cleanup(); // delete swap file
+ *   ros.recall(baos);
+ *   ros.cleanup(); // delete swap file if created
  *   assertEquals(data, baos.toString());
+ * }
  * </pre>
  *
  * @see SwapOutputStream

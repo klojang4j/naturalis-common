@@ -11,11 +11,10 @@ import nl.naturalis.common.Tuple;
 import nl.naturalis.common.check.Check;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static nl.naturalis.common.Tuple.tuple;
 import static nl.naturalis.common.check.CommonChecks.ne;
-import static nl.naturalis.common.check.CommonChecks.notEmpty;
 import static nl.naturalis.common.check.CommonChecks.notContainingKey;
 import static nl.naturalis.common.check.CommonChecks.notContainingValue;
+import static nl.naturalis.common.check.CommonChecks.notEmpty;
 import static nl.naturalis.common.check.CommonGetters.enumConstants;
 
 /**
@@ -270,7 +269,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
    * @return A set view of the mappings contained in this map
    */
   public Set<Map.Entry<K, Integer>> entrySet() {
-    return streamKeys().map(k -> tuple(k, valueOf(k))).map(Tuple::toEntry).collect(toSet());
+    return streamKeys().map(k -> Tuple.of(k, valueOf(k))).map(Tuple::toEntry).collect(toSet());
   }
 
   /**

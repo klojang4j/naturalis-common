@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
+import java.util.zip.InflaterOutputStream;
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.ThrowingSupplier;
@@ -73,6 +74,8 @@ public class ZipFileSwapOutputStream extends FileSwapOutputStream {
   private final Deflater def;
   private final byte[] buf = new byte[1024];
 
+  private boolean closed;
+
   /**
    * Creates a {@code SwapOutputStream} with an internal buffer of {@code treshold} bytes, swapping
    * to the specified resource once the buffer overflows. Data entering the {@code
@@ -135,14 +138,16 @@ public class ZipFileSwapOutputStream extends FileSwapOutputStream {
   @Override
   public void recall(OutputStream output) throws IOException {
     Check.notNull(output);
+    // Flush any remaining bytes in the Deflater's buffer to the internal buffer
     finish();
     if (hasSwapped()) {
+      // Flush any remaining bytes in the internal buffer to the swap-to output stream
       super.close();
       try (InflaterInputStream iis = new InflaterInputStream(new FileInputStream(getSwapFile()))) {
         pipe(iis, output, bufferSize());
       }
     } else {
-      readBuffer(output);
+      readBuffer(new InflaterOutputStream(output));
     }
   }
 
@@ -151,10 +156,11 @@ public class ZipFileSwapOutputStream extends FileSwapOutputStream {
    * re-use a {@code ZipFileSwapOutputStream} once you have called this method.
    */
   public void close() throws IOException {
-    try {
-      closeSession();
-    } finally {
+    if (!closed) {
+      finish();
+      super.close();
       def.end();
+      closed = true;
     }
   }
 

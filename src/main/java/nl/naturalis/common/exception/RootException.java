@@ -2,9 +2,7 @@ package nl.naturalis.common.exception;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
-
 import nl.naturalis.common.ExceptionMethods;
-
 import static nl.naturalis.common.ExceptionMethods.getRootCause;
 
 /**

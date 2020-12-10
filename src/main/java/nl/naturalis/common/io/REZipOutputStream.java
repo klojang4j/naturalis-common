@@ -22,20 +22,43 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  * iteration over the same table for every zip entry that needs to be populated.
  *
  * <p>One zip entry needs to be designated the main entry. This entry is written directly to the
- * {@link #withMainEntry(ZipEntry, OutputStream) output stream} provided by the client. The other
- * zip entries are buffered and potentially swapped to file before being merged into the main output
+ * {@link #withMainEntry(ZipEntry, OutputStream) client-provided output stream}. The other zip
+ * entries are buffered and potentially swapped to file before being merged into the main output
  * stream.
  *
- * <p>Though you could, it makes no sense to {@code REZipOutputStream} into a {@link
+ * <p>Though you could, it makes no sense to wrap a {@code REZipOutputStream} into a {@link
  * BufferedOutputStream}. See {@link SwapOutputStream}. The client-provided output stream, however,
- * is not automatically wrapped into a {@code BufferedOutputStream}.
+ * is not automatically wrapped into a {@code BufferedOutputStream}, so could benefit from it.
+ *
+ * <p>Example:
+ *
+ * <p>
+ *
+ * <pre>
+ * File archive = Path.of(System.getProperty("user.home"), "genesis.zip").toFile();
+ * FileOutputStream fos = new FileOutputStream(archive);
+ * BufferedOutputStream bos = new BufferedOutputStream(fos, 1024);
+ * try (REZipOutputStream rezos =
+ *   REZipOutputStream.withMainEntry("The Beginning.txt", bos)
+ *     .addEntry("Adam and Eve.txt")
+ *     .addEntry("The Fall.txt")
+ *     .build()) {
+ *   rezos.write("In the beginning there was nothing".getBytes());
+ *   rezos.setActiveEntry("Adam and Eve.txt");
+ *   rezos.write("Then came Adam & Eve".getBytes());
+ *   rezos.setActiveEntry("The Fall.txt");
+ *   rezos.write("It all went downhill from there".getBytes());
+ *   rezos.mergeEntries().close();
+ * }
+ * // Now we have our archive
+ * </pre>
  *
  * @author Ayco Holleman
  */
 public class REZipOutputStream extends OutputStream {
 
   /**
-   * A factory for {@code REZipOutputStream} instances.
+   * A builder class for {@code REZipOutputStream} instances.
    *
    * @author Ayco Holleman
    */
@@ -120,7 +143,7 @@ public class REZipOutputStream extends OutputStream {
   }
 
   /**
-   * Returns a {@code Builder} object that lets you configure new {@code REZipOutputStream}
+   * Returns a {@code Builder} object that lets you configure a new {@code REZipOutputStream}
    * instance.
    *
    * @param mainEntry The name of main zip entry
@@ -154,7 +177,7 @@ public class REZipOutputStream extends OutputStream {
    * Makes the zip entry with the specified name the target for subsequent {@code write} actions.
    *
    * @param name The name of the zip entry
-   * @throws IOException
+   * @throws IOException If an I/O error occurs
    */
   public void setActiveEntry(String name) throws IOException {
     if (Check.notNull(name).ok().equals(mainEntry.getName())) {
@@ -167,23 +190,49 @@ public class REZipOutputStream extends OutputStream {
     }
   }
 
+  /** Writes the specified byte to the active output stream. */
   @Override
   public void write(int b) throws IOException {
     active.write(b);
   }
 
+  /** Writes the specified byte array to the active output stream. */
   @Override
   public void write(byte[] b, int off, int len) throws IOException {
     active.write(b, off, len);
   }
 
+  /**
+   * Flushes all outputstreams. Flushing should be kept to a minimum as it increases the chance that
+   * the output streams for the side entries start swapping.
+   */
   @Override
   public void flush() throws IOException {
+    mainOut.flush();
     for (Tuple<ZipEntry, RecallOutputStream> t : sideEntries.values()) {
       t.getRight().flush();
     }
   }
 
+  /**
+   * Flushes the output stream for the active zip entry.
+   *
+   * @throws IOException If an I/O error occurs
+   */
+  public void flushActive() throws IOException {
+    active.flush();
+  }
+
+  /**
+   * Merges the output streams for the side entries back into the main (client-provided) output
+   * stream and returns the {@link ZipOutputStream} that was wrapped around the main output stream.
+   * Neither {@link ZipOutputStream#finish()} nor {@link ZipOutputStream#close()} has been called
+   * yet on the {@code ZipOutputStream}. This allows clients to add extra entries in serial fashion.
+   * It is up to clients to close the {@code ZipOutputStream}.
+   *
+   * @return A {@code ZipOutpuStream} wrapping the client-provided output stream
+   * @throws IOException If an I/O error occurs
+   */
   public ZipOutputStream mergeEntries() throws IOException {
     for (Tuple<ZipEntry, RecallOutputStream> t : sideEntries.values()) {
       mainOut.putNextEntry(t.getLeft());
@@ -192,6 +241,10 @@ public class REZipOutputStream extends OutputStream {
     return mainOut;
   }
 
+  /**
+   * Closes the outputstreams for all side entries but does not close the main (client-provided)
+   * output stream. See {@link #mergeEntries()}.
+   */
   public void close() throws IOException {
     for (Tuple<ZipEntry, RecallOutputStream> t : sideEntries.values()) {
       t.getRight().cleanup();

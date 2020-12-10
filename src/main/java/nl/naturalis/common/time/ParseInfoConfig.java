@@ -18,9 +18,15 @@ import nl.naturalis.common.check.Check;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 import static nl.naturalis.common.StringMethods.ifBlank;
-import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.time.FuzzyDateException.*;
-import static nl.naturalis.common.check.CommonGetters.*;
+import static nl.naturalis.common.check.CommonChecks.endsWith;
+import static nl.naturalis.common.check.CommonChecks.gt;
+import static nl.naturalis.common.check.CommonChecks.keyIn;
+import static nl.naturalis.common.check.CommonChecks.whatever;
+import static nl.naturalis.common.check.CommonGetters.strlen;
+import static nl.naturalis.common.time.FuzzyDateException.cannotCreateFilter;
+import static nl.naturalis.common.time.FuzzyDateException.cannotCreateFormatter;
+import static nl.naturalis.common.time.FuzzyDateException.noSuchResolverStyle;
+import static nl.naturalis.common.time.FuzzyDateException.unsupportedDateTimeClass;
 
 /**
  * An extension of {@link Properties} dedicated to reading configurations for the {@link

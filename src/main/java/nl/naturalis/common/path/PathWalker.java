@@ -17,7 +17,9 @@ import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonChecks.noneNull;
 import static nl.naturalis.common.check.CommonChecks.notEmpty;
 import static nl.naturalis.common.check.CommonGetters.length;
-import static nl.naturalis.common.path.PathWalkerException.*;
+import static nl.naturalis.common.path.PathWalkerException.invalidPath;
+import static nl.naturalis.common.path.PathWalkerException.nullSegmentNotAllowed;
+import static nl.naturalis.common.path.PathWalkerException.readWriteError;
 
 /**
  * Reads/writes objects using {@link Path} objects. The {@code PathWalker} class is useful for

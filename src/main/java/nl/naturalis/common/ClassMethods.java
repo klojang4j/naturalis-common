@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonChecks.array;
 
 /**
  * Methods for inspecting types.
@@ -119,7 +119,7 @@ public class ClassMethods {
    */
   @SuppressWarnings("rawtypes")
   public static Field getField(String fieldName, Object obj) {
-    Tuple<String, Class> key = Tuple.tuple(fieldName, obj.getClass());
+    Tuple<String, Class> key = Tuple.of(fieldName, obj.getClass());
     Field field = fields.get(key);
     if (field == null) {
       LOOP:

@@ -1,7 +1,7 @@
 package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.ArrayMethods.*;
+import static nl.naturalis.common.ArrayMethods.isOneOf;
 
 /**
  * Methods for working with {@code Number} instances.

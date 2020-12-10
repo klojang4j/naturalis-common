@@ -126,15 +126,14 @@ public class FileSwapOutputStreamTest {
   }
 
   @Test // Example provided in the class comments of SimpleFileSwapOutputStream
-  public void test12() throws IOException {
-    String data = "Is this going to be swapped???";
-    // Create SimpleFileSwapOutputStream that swaps to a temp file if more
-    // than 8 bytes are written to it
-    SimpleFileSwapOutputStream sfos = SimpleFileSwapOutputStream.newInstance(8);
-    sfos.write(data.getBytes());
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    sfos.recall(baos);
-    sfos.cleanup();
-    assertEquals(data, baos.toString());
+  public void example() throws IOException {
+    String data = "Will this be swapped or not? It doesn't matter";
+    try (RecallOutputStream ros = SimpleFileSwapOutputStream.newInstance()) {
+      ros.write(data.getBytes());
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ros.recall(baos);
+      ros.cleanup(); // delete swap file if created
+      assertEquals(data, baos.toString());
+    }
   }
 }

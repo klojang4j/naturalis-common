@@ -6,9 +6,9 @@ import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
+import static java.lang.String.format;
+import static nl.naturalis.common.check.Check.DEFAULT_ARG_NAME;
 import static nl.naturalis.common.check.CommonChecks.nameOf;
-import static nl.naturalis.common.check.Check.*;
-import static java.lang.String.*;
 
 /**
  * Thrown if a check on an argument cannot actually be applied to that argument, or if the check
