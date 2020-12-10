@@ -6,13 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import nl.naturalis.common.IOMethods;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertArrayEquals;
 
 public class REZipOutputStreamTest {
 
@@ -40,6 +37,123 @@ public class REZipOutputStreamTest {
         REZipOutputStream.withMainEntry("The Beginning.txt", bos)
             .addEntry("Adam and Eve.txt", 100)
             .addEntry("The Fall.txt", 100)
+            .build()) {
+      rezos.write(THE_BEGINNING);
+      rezos.setActiveEntry("Adam and Eve.txt");
+      rezos.write(ADAM_AND_EVE);
+      rezos.setActiveEntry("The Fall.txt");
+      rezos.write(THE_FALL);
+      rezos.mergeEntries().close();
+    }
+    try (ZipFile zf = new ZipFile(archive)) {
+      ZipEntry ze = zf.getEntry("The Beginning.txt");
+      ByteArrayOutputStream baos = new ByteArrayOutputStream(1000);
+      try (InputStream is = zf.getInputStream(ze)) {
+        IOMethods.pipe(is, baos, 10000);
+      }
+      assertArrayEquals("01", THE_BEGINNING, baos.toByteArray());
+      ze = zf.getEntry("Adam and Eve.txt");
+      baos.reset();
+      try (InputStream is = zf.getInputStream(ze)) {
+        IOMethods.pipe(is, baos, 10000);
+      }
+      assertArrayEquals("02", ADAM_AND_EVE, baos.toByteArray());
+      ze = zf.getEntry("The Fall.txt");
+      baos.reset();
+      try (InputStream is = zf.getInputStream(ze)) {
+        IOMethods.pipe(is, baos, 10000);
+      }
+      assertArrayEquals("03", THE_FALL, baos.toByteArray());
+    }
+  }
+
+  @Test // With minuscule buffers (1)
+  public void test02() throws IOException {
+    File archive = Path.of(System.getProperty("user.home"), "genesis.zip").toFile();
+    FileOutputStream fos = new FileOutputStream(archive);
+    BufferedOutputStream bos = new BufferedOutputStream(fos);
+    try (REZipOutputStream rezos =
+        REZipOutputStream.withMainEntry("The Beginning.txt", bos)
+            .addEntry("Adam and Eve.txt", 1)
+            .addEntry("The Fall.txt", 1)
+            .build()) {
+      rezos.write(THE_BEGINNING);
+      rezos.setActiveEntry("Adam and Eve.txt");
+      rezos.write(ADAM_AND_EVE);
+      rezos.setActiveEntry("The Fall.txt");
+      rezos.write(THE_FALL);
+      rezos.mergeEntries().close();
+    }
+    try (ZipFile zf = new ZipFile(archive)) {
+      ZipEntry ze = zf.getEntry("The Beginning.txt");
+      ByteArrayOutputStream baos = new ByteArrayOutputStream(1000);
+      try (InputStream is = zf.getInputStream(ze)) {
+        IOMethods.pipe(is, baos, 10000);
+      }
+      assertArrayEquals("01", THE_BEGINNING, baos.toByteArray());
+      ze = zf.getEntry("Adam and Eve.txt");
+      baos.reset();
+      try (InputStream is = zf.getInputStream(ze)) {
+        IOMethods.pipe(is, baos, 10000);
+      }
+      assertArrayEquals("02", ADAM_AND_EVE, baos.toByteArray());
+      ze = zf.getEntry("The Fall.txt");
+      baos.reset();
+      try (InputStream is = zf.getInputStream(ze)) {
+        IOMethods.pipe(is, baos, 10000);
+      }
+      assertArrayEquals("03", THE_FALL, baos.toByteArray());
+    }
+  }
+
+  @Test // Around the edges (part I)
+  public void test03() throws IOException {
+    File archive = Path.of(System.getProperty("user.home"), "genesis.zip").toFile();
+    FileOutputStream fos = new FileOutputStream(archive);
+    BufferedOutputStream bos = new BufferedOutputStream(fos);
+    try (REZipOutputStream rezos =
+        REZipOutputStream.withMainEntry("The Beginning.txt", bos)
+            .addEntry("Adam and Eve.txt", ADAM_AND_EVE.length)
+            .addEntry("The Fall.txt", THE_FALL.length)
+            .build()) {
+      rezos.write(THE_BEGINNING);
+      rezos.setActiveEntry("Adam and Eve.txt");
+      rezos.write(ADAM_AND_EVE);
+      rezos.setActiveEntry("The Fall.txt");
+      rezos.write(THE_FALL);
+      rezos.mergeEntries().close();
+    }
+    try (ZipFile zf = new ZipFile(archive)) {
+      ZipEntry ze = zf.getEntry("The Beginning.txt");
+      ByteArrayOutputStream baos = new ByteArrayOutputStream(1000);
+      try (InputStream is = zf.getInputStream(ze)) {
+        IOMethods.pipe(is, baos, 10000);
+      }
+      assertArrayEquals("01", THE_BEGINNING, baos.toByteArray());
+      ze = zf.getEntry("Adam and Eve.txt");
+      baos.reset();
+      try (InputStream is = zf.getInputStream(ze)) {
+        IOMethods.pipe(is, baos, 10000);
+      }
+      assertArrayEquals("02", ADAM_AND_EVE, baos.toByteArray());
+      ze = zf.getEntry("The Fall.txt");
+      baos.reset();
+      try (InputStream is = zf.getInputStream(ze)) {
+        IOMethods.pipe(is, baos, 10000);
+      }
+      assertArrayEquals("03", THE_FALL, baos.toByteArray());
+    }
+  }
+
+  @Test // Around the edges (part II)
+  public void test04() throws IOException {
+    File archive = Path.of(System.getProperty("user.home"), "genesis.zip").toFile();
+    FileOutputStream fos = new FileOutputStream(archive);
+    BufferedOutputStream bos = new BufferedOutputStream(fos);
+    try (REZipOutputStream rezos =
+        REZipOutputStream.withMainEntry("The Beginning.txt", bos)
+            .addEntry("Adam and Eve.txt", ADAM_AND_EVE.length - 1)
+            .addEntry("The Fall.txt", THE_FALL.length - 1)
             .build()) {
       rezos.write(THE_BEGINNING);
       rezos.setActiveEntry("Adam and Eve.txt");
