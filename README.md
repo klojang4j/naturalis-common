@@ -2,7 +2,7 @@
 
 Naturalis Java Language Extensions Library
 
-Java module containing basic language extensions and utility classes. Design goals:
+Java module containing basic language extensions and utility classes.
 
 - Small footprint
 - Self-contained  (zero dependencies outside the `java.*` namespace)

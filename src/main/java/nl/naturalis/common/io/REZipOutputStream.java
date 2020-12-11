@@ -22,12 +22,13 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  *
  * <p>One zip entry needs to be designated the main entry. This entry is written directly to the
  * {@link #withMainEntry(ZipEntry, OutputStream) client-provided} output stream. The other zip
- * entries are buffered and potentially swapped to file before being merged into the client-provided
- * output stream.
+ * entries are buffered and potentially swapped to file before being merged back into the
+ * client-provided output stream.
  *
- * <p>Though you could, it makes no sense to wrap a {@code REZipOutputStream} into a {@link
- * BufferedOutputStream}. See {@link SwapOutputStream}. The client-provided output stream, however,
- * is not automatically wrapped into a {@code BufferedOutputStream}, so could benefit from it.
+ * <p>Though you could, it makes no sense to wrap a {@code REZipOutputStream} into a {@code
+ * BufferedOutputStream}. See {@link SwapOutputStream} for why this is so. The client-provided
+ * output stream, however, is not automatically wrapped into a {@code BufferedOutputStream}, so
+ * could benefit from it.
  *
  * <p>Example:
  *
@@ -90,7 +91,10 @@ public class REZipOutputStream extends OutputStream {
 
     /**
      * Adds a buffered zip entry with the specified name. The buffer is swapped to file when it
-     * grows beyond {@code bufSize} bytes.
+     * grows beyond {@code bufSize} bytes. Bytes entering the buffer are compressed to decrease the
+     * chance it needs to be swapped out to file. Note though that this is quite separate from the
+     * fact that {@code REZipOutputStream} as a whole is about producing a multi-entry zip-formatted
+     * output stream.
      *
      * @param name The name of the zip entry
      * @param bufSize The buffer size in bytes
