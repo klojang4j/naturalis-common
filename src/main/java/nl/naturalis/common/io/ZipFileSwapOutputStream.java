@@ -12,13 +12,11 @@ import static nl.naturalis.common.IOMethods.createTempFile;
 import static nl.naturalis.common.IOMethods.pipe;
 
 /**
- * A {@link RecallOutputStream} implementing a swap mechanism. Data is compressed as it enters the
- * {@code ZipFileSwapOutputStream}. If the internal of the {@code ZipFileSwapOutputStream} reaches
- * full capacity, a swap file is created to sink the data into. When reading back the data using the
- * {@link #recall(OutputStream) recall} method, the data is uncompressed again. This class combines
- * the functionality of {@link DeflaterOutputStream} and {@link BufferedOutputStream}. Therefore
- * there is no performance gain to be had from wrapping a {@code SwapOutputStream} into a {@code
- * BufferedOutputStream}.
+ * A subclass of {@code SwapOutputStream} that swaps to file once its internal buffer overflows.
+ * Data is compressed as it is written to an internal buffer, thereby decreasing the chance that the
+ * internal buffer will have to be swapped out to file. This class combines the functionality of
+ * {@link DeflaterOutputStream} and {@link BufferedOutputStream}. Therefore you don't anything from
+ * wrapping a {@code ZipFileSwapOutputStream} into a {@code BufferedOutputStream}.
  *
  * @author Ayco Holleman
  */

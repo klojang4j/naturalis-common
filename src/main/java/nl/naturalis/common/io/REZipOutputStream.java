@@ -15,16 +15,15 @@ import static nl.naturalis.common.check.CommonChecks.notKeyIn;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
- * An {@link OutputStream} that compresses data according to the zip file format. This class lets
- * you write multiple zip entries at the same time, rather than one at a time as with {@link
- * ZipOutputStream}. This can save a lot of time in scenarios where (for example) a single database
- * record feeds multiple zip entries. With {@link ZipOutputStream} you would have to make the same
- * iteration over the same table for every zip entry that needs to be populated.
+ * An alternative to {@link ZipOutputStream} that lets you write multiple zip entries at the same
+ * time. This can save a lot of time in scenarios where (for example) a single database record feeds
+ * multiple zip entries. With {@code ZipOutputStream} you would have to make the same iteration over
+ * the same table for every zip entry that needs to be populated.
  *
  * <p>One zip entry needs to be designated the main entry. This entry is written directly to the
- * {@link #withMainEntry(ZipEntry, OutputStream) client-provided output stream}. The other zip
- * entries are buffered and potentially swapped to file before being merged into the main output
- * stream.
+ * {@link #withMainEntry(ZipEntry, OutputStream) client-provided} output stream. The other zip
+ * entries are buffered and potentially swapped to file before being merged into the client-provided
+ * output stream.
  *
  * <p>Though you could, it makes no sense to wrap a {@code REZipOutputStream} into a {@link
  * BufferedOutputStream}. See {@link SwapOutputStream}. The client-provided output stream, however,
@@ -66,13 +65,16 @@ public class REZipOutputStream extends OutputStream {
    * @author Ayco Holleman
    */
   public static class Builder {
+
     private OutputStream out;
     private ZipEntry mainEntry;
-    private HashMap<String, Tuple<ZipEntry, RecallOutputStream>> sideEntries = new HashMap<>();
+    private HashMap<String, Tuple<ZipEntry, RecallOutputStream>> sideEntries;
+    private boolean cleanup = true;
 
     private Builder(ZipEntry mainEntry, OutputStream out) {
       this.out = Check.notNull(out, "out").ok();
       this.mainEntry = Check.notNull(mainEntry, "mainEntry").ok();
+      this.sideEntries = new HashMap<>();
     }
 
     /**
@@ -118,6 +120,18 @@ public class REZipOutputStream extends OutputStream {
     }
 
     /**
+     * Whether or not to automatically clean up any swap files created by REZipOutputStream. Default
+     * true.
+     *
+     * @param cleanup Whether or not to automatically clean up any swap files
+     * @return This {@code Builder}
+     */
+    public Builder withAutoCleanup(boolean cleanup) {
+      this.cleanup = cleanup;
+      return this;
+    }
+
+    /**
      * Returns a new {@code REZipOutputStream} instance. The initially {@link
      * REZipOutputStream#setActiveEntry(String) active entry} will be the main entry.
      *
@@ -125,7 +139,8 @@ public class REZipOutputStream extends OutputStream {
      * @throws IOException If an I/O error occurs
      */
     public REZipOutputStream build() throws IOException {
-      return new REZipOutputStream(out, mainEntry, Collections.unmodifiableMap(sideEntries));
+      return new REZipOutputStream(
+          out, mainEntry, Collections.unmodifiableMap(sideEntries), cleanup);
     }
   }
 
@@ -161,18 +176,21 @@ public class REZipOutputStream extends OutputStream {
   private final ZipEntry mainEntry;
   private final ZipOutputStream mainOut;
   private final Map<String, Tuple<ZipEntry, RecallOutputStream>> sideEntries;
+  private final boolean cleanup;
 
   private OutputStream active;
 
   private REZipOutputStream(
       OutputStream out,
       ZipEntry mainEntry,
-      Map<String, Tuple<ZipEntry, RecallOutputStream>> sideEntries)
+      Map<String, Tuple<ZipEntry, RecallOutputStream>> sideEntries,
+      boolean cleanup)
       throws IOException {
     this.mainEntry = mainEntry;
     this.mainOut = new ZipOutputStream(out);
     this.mainOut.putNextEntry(mainEntry);
     this.sideEntries = sideEntries;
+    this.cleanup = cleanup;
     this.active = mainOut;
   }
 
@@ -250,7 +268,9 @@ public class REZipOutputStream extends OutputStream {
    */
   public void close() throws IOException {
     for (Tuple<ZipEntry, RecallOutputStream> t : sideEntries.values()) {
-      t.getRight().cleanup();
+      if (cleanup) {
+        t.getRight().cleanup();
+      }
       t.getRight().close();
     }
   }

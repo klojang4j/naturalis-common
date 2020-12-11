@@ -9,12 +9,12 @@ import static nl.naturalis.common.check.CommonChecks.gt;
 import static nl.naturalis.common.check.CommonChecks.no;
 
 /**
- * A {@link RecallOutputStream} implementing a swap mechanism. A {@code SwapOutputStream} first
- * fills up an internal buffer. If (and only if) the buffer reaches full capacity, an underlying
- * outstream to some persistent resource is created to sink the data into. It is transparent to
- * clients whether or not data has actually been swapped out of memory. Clients can {@link
- * #recall(OutputStream) recall} the data without having to know whether it came from the internal
- * buffer or persistent storage.
+ * Abstract base class for {@link RecallOutputStream} classes that use memory swapping to ensure
+ * data can be read back. A {@code SwapOutputStream} first fills up an internal buffer. If (and only
+ * if) the buffer reaches full capacity, an underlying outstream to some persistent resource is
+ * created to sink the data into. It is transparent to clients whether or not data has actually been
+ * swapped out of memory. Clients can {@link #recall(OutputStream) recall} the data without having
+ * to know whether it came from the internal buffer or persistent storage.
  *
  * <p>{@code SwapOutputStream} basically is a {@link BufferedOutputStream}, except that the
  * underlying output stream is lazily instantiated and that you can read back what you wrote to it.

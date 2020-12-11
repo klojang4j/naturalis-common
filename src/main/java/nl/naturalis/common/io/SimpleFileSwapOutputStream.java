@@ -9,7 +9,8 @@ import static nl.naturalis.common.IOMethods.pipe;
 import static nl.naturalis.common.check.CommonChecks.fileExists;
 
 /**
- * A {@link SwapOutputStream} that swaps to file once its internal buffer overflows. Example:
+ * A subclass of {@code SwapOutputStream} that swaps to file once its internal buffer overflows.
+ * Example:
  *
  * <p>
  *

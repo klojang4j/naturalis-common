@@ -8,6 +8,11 @@ import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.ThrowingSupplier;
 import static nl.naturalis.common.check.CommonChecks.fileNotExists;
 
+/**
+ * Abstract base class for {@code SwapOutputStream} classes that swap to file.
+ *
+ * @author Ayco Holleman
+ */
 public abstract class FileSwapOutputStream extends SwapOutputStream {
 
   private final File swapFile;
@@ -48,7 +53,7 @@ public abstract class FileSwapOutputStream extends SwapOutputStream {
 
   /**
    * Returns a {@code File} object for the swap file. Note that the swap file may not actually have
-   * been created because the data written to the {@code FileSwapOutputStream} still reside in its
+   * been created because the data written to the {@code FileSwapOutputStream} still fits into its
    * internal buffer.
    *
    * @returna A {@code File} object for the swap file
