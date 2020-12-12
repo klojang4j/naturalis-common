@@ -7,11 +7,11 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class ZipSwapOutputStreamTest {
+public class DeflatedArraySwapOutputStreamTest {
 
   @Test
   public void test00() throws IOException {
-    ZipFileSwapOutputStream sfos = ZipFileSwapOutputStream.newInstance(2);
+    DeflatedArraySwapOutputStream sfos = DeflatedArraySwapOutputStream.newInstance(2);
     sfos.write(new byte[0]);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sfos.recall(baos);
@@ -20,7 +20,7 @@ public class ZipSwapOutputStreamTest {
 
   @Test
   public void test01() throws IOException {
-    ZipFileSwapOutputStream sfos = ZipFileSwapOutputStream.newInstance(2);
+    DeflatedArraySwapOutputStream sfos = DeflatedArraySwapOutputStream.newInstance(2);
     sfos.write((byte) 1);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sfos.recall(baos);
@@ -29,7 +29,7 @@ public class ZipSwapOutputStreamTest {
 
   @Test
   public void test02() throws IOException {
-    ZipFileSwapOutputStream sfos = ZipFileSwapOutputStream.newInstance(2);
+    DeflatedArraySwapOutputStream sfos = DeflatedArraySwapOutputStream.newInstance(2);
     sfos.write(1);
     sfos.write(2);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -39,7 +39,7 @@ public class ZipSwapOutputStreamTest {
 
   @Test
   public void test03() throws IOException {
-    ZipFileSwapOutputStream sfos = ZipFileSwapOutputStream.newInstance(2);
+    DeflatedArraySwapOutputStream sfos = DeflatedArraySwapOutputStream.newInstance(2);
     sfos.write(1);
     sfos.write(2);
     sfos.write(3);
@@ -50,7 +50,7 @@ public class ZipSwapOutputStreamTest {
 
   @Test
   public void test04() throws IOException {
-    ZipFileSwapOutputStream sfos = ZipFileSwapOutputStream.newInstance(2);
+    DeflatedArraySwapOutputStream sfos = DeflatedArraySwapOutputStream.newInstance(2);
     sfos.write(1);
     sfos.write(2);
     sfos.write(3);
@@ -62,7 +62,7 @@ public class ZipSwapOutputStreamTest {
 
   @Test
   public void test05() throws IOException {
-    ZipFileSwapOutputStream sfos = ZipFileSwapOutputStream.newInstance(2);
+    DeflatedArraySwapOutputStream sfos = DeflatedArraySwapOutputStream.newInstance(2);
     sfos.write(1);
     sfos.write(new byte[] {(byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -72,7 +72,7 @@ public class ZipSwapOutputStreamTest {
 
   @Test
   public void test06() throws IOException {
-    ZipFileSwapOutputStream sfos = ZipFileSwapOutputStream.newInstance(2);
+    DeflatedArraySwapOutputStream sfos = DeflatedArraySwapOutputStream.newInstance(2);
     sfos.write(new byte[] {(byte) 1, (byte) 2});
     sfos.write(3);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -82,7 +82,7 @@ public class ZipSwapOutputStreamTest {
 
   @Test
   public void test07() throws IOException {
-    ZipFileSwapOutputStream sfos = ZipFileSwapOutputStream.newInstance(2);
+    DeflatedArraySwapOutputStream sfos = DeflatedArraySwapOutputStream.newInstance(2);
     sfos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sfos.recall(baos);
@@ -91,7 +91,7 @@ public class ZipSwapOutputStreamTest {
 
   @Test
   public void test08() throws IOException {
-    ZipFileSwapOutputStream sfos = ZipFileSwapOutputStream.newInstance(3);
+    DeflatedArraySwapOutputStream sfos = DeflatedArraySwapOutputStream.newInstance(3);
     sfos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sfos.recall(baos);
@@ -100,7 +100,7 @@ public class ZipSwapOutputStreamTest {
 
   @Test
   public void test09() throws IOException {
-    ZipFileSwapOutputStream sfos = ZipFileSwapOutputStream.newInstance(2);
+    DeflatedArraySwapOutputStream sfos = DeflatedArraySwapOutputStream.newInstance(2);
     sfos.write(new byte[] {(byte) 1, (byte) 2});
     assertFalse(sfos.hasSwapped());
   }
@@ -108,22 +108,22 @@ public class ZipSwapOutputStreamTest {
   @Test(expected = IOException.class)
   @SuppressWarnings("resource")
   public void test10() throws IOException {
-    ZipFileSwapOutputStream sfos = ZipFileSwapOutputStream.newInstance(2);
+    DeflatedArraySwapOutputStream sfos = DeflatedArraySwapOutputStream.newInstance(2);
     sfos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
     sfos.close();
-    sfos.getSwapFile().delete();
+    sfos.swapFile.delete();
     sfos.recall(new ByteArrayOutputStream()); // Oops, swap file gone
   }
 
   @Test
   public void test11() throws IOException {
-    ZipFileSwapOutputStream sfos = ZipFileSwapOutputStream.newInstance(2);
+    DeflatedArraySwapOutputStream sfos = DeflatedArraySwapOutputStream.newInstance(2);
     sfos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sfos.recall(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2, (byte) 3}, baos.toByteArray());
     sfos.cleanup();
-    assertFalse(sfos.getSwapFile().exists());
+    assertFalse(sfos.swapFile.exists());
   }
 
   @Test // Example provided in the class comments of ZipFileSwapOutputStream
@@ -131,7 +131,7 @@ public class ZipSwapOutputStreamTest {
     String data = "Is this going to be swapped???";
     // Create ZipFileSwapOutputStream that swaps to a temp file if more
     // than 8 bytes are written to it
-    ZipFileSwapOutputStream sfos = ZipFileSwapOutputStream.newInstance(8);
+    DeflatedArraySwapOutputStream sfos = DeflatedArraySwapOutputStream.newInstance(8);
     sfos.write(data.getBytes());
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sfos.recall(baos);

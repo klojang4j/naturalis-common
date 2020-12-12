@@ -2,7 +2,6 @@ package nl.naturalis.common;
 
 import java.io.*;
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.io.SimpleFileSwapOutputStream;
 import static nl.naturalis.common.check.CommonChecks.fileNotExists;
 
 /**
@@ -72,7 +71,7 @@ public class IOMethods {
     StringBuilder sb = new StringBuilder(64);
     sb.append(System.getProperty("java.io.tmpdir"))
         .append('/')
-        .append(SimpleFileSwapOutputStream.class.getSimpleName())
+        .append(IOMethods.class.getSimpleName())
         .append(tempCount++)
         .append(System.currentTimeMillis())
         .append(extension);

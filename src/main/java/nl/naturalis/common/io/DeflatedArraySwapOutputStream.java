@@ -12,25 +12,26 @@ import static nl.naturalis.common.IOMethods.createTempFile;
 import static nl.naturalis.common.IOMethods.pipe;
 
 /**
- * A subclass of {@code SwapOutputStream} that swaps to file once its internal buffer overflows.
- * Data is compressed as it is written to an internal buffer, thereby decreasing the chance that the
- * internal buffer will have to be swapped out to file. This class combines the functionality of
- * {@link DeflaterOutputStream} and {@link BufferedOutputStream}. Therefore you don't anything from
- * wrapping a {@code ZipFileSwapOutputStream} into a {@code BufferedOutputStream}.
+ * A subclass of {@code ArraySwapOutputStream} that swaps to file once its internal buffer
+ * overflows. Data is compressed as it is written to an internal buffer, thereby decreasing the
+ * chance that the internal buffer will have to be swapped out to file. This class combines the
+ * functionality of {@link DeflaterOutputStream} and {@link BufferedOutputStream}. Therefore you
+ * don't anything from wrapping a {@code ZipFileSwapOutputStream} into a {@code
+ * BufferedOutputStream}.
  *
  * @author Ayco Holleman
  */
-public class ZipFileSwapOutputStream extends FileSwapOutputStream {
+public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
 
   /**
    * Creates a new instance that swaps to an auto-generated temp file.
    *
-   * @see SwapOutputStream#SwapOutputStream(ThrowingSupplier)
+   * @see ArraySwapOutputStream#SwapOutputStream(ThrowingSupplier)
    * @return A {@code ZipFileSwapOutputStream} that swaps to an auto-generated temp file
    */
-  public static ZipFileSwapOutputStream newInstance() {
+  public static DeflatedArraySwapOutputStream newInstance() {
     try {
-      return new ZipFileSwapOutputStream(createTempFile());
+      return new DeflatedArraySwapOutputStream(createTempFile());
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -40,13 +41,13 @@ public class ZipFileSwapOutputStream extends FileSwapOutputStream {
    * Creates a new instance that swaps to an auto-generated temp file. The size of the internal
    * buffer is specified through the {@code bufSize} parameter.
    *
-   * @see SwapOutputStream#SwapOutputStream(ThrowingSupplier, int)
+   * @see ArraySwapOutputStream#SwapOutputStream(ThrowingSupplier, int)
    * @param bufSize The size in bytes of the internal buffer
    * @return A {@code ZipFileSwapOutputStream} that swaps to an auto-generated temp file
    */
-  public static ZipFileSwapOutputStream newInstance(int bufSize) {
+  public static DeflatedArraySwapOutputStream newInstance(int bufSize) {
     try {
-      return new ZipFileSwapOutputStream(createTempFile(), bufSize);
+      return new DeflatedArraySwapOutputStream(createTempFile(), bufSize);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -56,14 +57,14 @@ public class ZipFileSwapOutputStream extends FileSwapOutputStream {
    * Creates a new instance that swaps to an auto-generated temp file. The size of the internal
    * buffer is specified through the {@code bufSize} parameter.
    *
-   * @see SwapOutputStream#SwapOutputStream(ThrowingSupplier, int)
+   * @see ArraySwapOutputStream#SwapOutputStream(ThrowingSupplier, int)
    * @param bufSize The size in bytes of the internal buffer
    * @param compressionLevel The compression level (0-9)
    * @return A {@code ZipFileSwapOutputStream} that swaps to an auto-generated temp file
    */
-  public static ZipFileSwapOutputStream newInstance(int bufSize, int compressionLevel) {
+  public static DeflatedArraySwapOutputStream newInstance(int bufSize, int compressionLevel) {
     try {
-      return new ZipFileSwapOutputStream(createTempFile(), bufSize, compressionLevel);
+      return new DeflatedArraySwapOutputStream(createTempFile(), bufSize, compressionLevel);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -75,28 +76,28 @@ public class ZipFileSwapOutputStream extends FileSwapOutputStream {
   private boolean closed;
 
   /**
-   * Creates a {@code SwapOutputStream} with an internal buffer of {@code treshold} bytes, swapping
-   * to the specified resource once the buffer overflows. Data entering the {@code
+   * Creates a {@code ArraySwapOutputStream} with an internal buffer of {@code treshold} bytes,
+   * swapping to the specified resource once the buffer overflows. Data entering the {@code
    * ZipFileSwapOutputStream} is compressed using the {@link Deflater#DEFAULT_COMPRESSION default
    * compression level}.
    *
    * @param swapFile A {@code Supplier} of the swap-to outputstream.
    */
-  public ZipFileSwapOutputStream(File swapFile) {
+  public DeflatedArraySwapOutputStream(File swapFile) {
     super(swapFile);
     this.def = new Deflater();
   }
 
   /**
-   * Creates a {@code SwapOutputStream} with an internal buffer of {@code treshold} bytes, swapping
-   * to the specified resource once the buffer overflows. Data entering the {@code
+   * Creates a {@code ArraySwapOutputStream} with an internal buffer of {@code treshold} bytes,
+   * swapping to the specified resource once the buffer overflows. Data entering the {@code
    * ZipFileSwapOutputStream} is compressed using the {@link Deflater#DEFAULT_COMPRESSION default
    * compression level}.
    *
    * @param swapFile A {@code Supplier} of the swap-to outputstream.
    * @param bufSize The size in bytes of the internal buffer
    */
-  public ZipFileSwapOutputStream(File swapFile, int bufSize) {
+  public DeflatedArraySwapOutputStream(File swapFile, int bufSize) {
     super(swapFile, bufSize);
     this.def = new Deflater();
   }
@@ -109,30 +110,24 @@ public class ZipFileSwapOutputStream extends FileSwapOutputStream {
    * @param bufSize The size in bytes of the internal buffer
    * @param compressionLevel The compression level (0-9)
    */
-  public ZipFileSwapOutputStream(File swapFile, int bufSize, int compressionLevel) {
+  public DeflatedArraySwapOutputStream(File swapFile, int bufSize, int compressionLevel) {
     super(swapFile, bufSize);
     this.def = new Deflater(compressionLevel);
   }
 
-  /** Writes the specified byte to this output stream. */
   @Override
-  protected void intercept(int b) throws IOException {
+  public void write(int b) throws IOException {
     write(new byte[] {(byte) (b & 0xff)}, 0, 1);
   }
 
-  /**
-   * Writes <code>len</code> bytes from the specified byte array starting at offset <code>off</code>
-   * to this output stream.
-   */
   @Override
-  public void intercept(byte[] b, int off, int len) throws IOException {
+  public void write(byte[] b, int off, int len) throws IOException {
     def.setInput(b, off, len);
     while (!def.needsInput()) {
       deflate();
     }
   }
 
-  /** @see RecallOutputStream#recall(OutputStream) */
   @Override
   public void recall(OutputStream output) throws IOException {
     Check.notNull(output);
@@ -141,7 +136,7 @@ public class ZipFileSwapOutputStream extends FileSwapOutputStream {
     if (hasSwapped()) {
       // Flush any remaining bytes in the internal buffer to the swap-to output stream
       super.close();
-      try (InflaterInputStream iis = new InflaterInputStream(new FileInputStream(getSwapFile()))) {
+      try (InflaterInputStream iis = new InflaterInputStream(new FileInputStream(swapFile))) {
         pipe(iis, output, bufferSize());
       }
     } else {
@@ -162,20 +157,6 @@ public class ZipFileSwapOutputStream extends FileSwapOutputStream {
     }
   }
 
-  /**
-   * Compresseses any remaining data and, if open, closes the swap-to output stream. Because the
-   * swap-to output stream is lazily instantiated via a {@link ThrowingSupplier}, a {@code
-   * SwapOutputStream} can safely be re-used after this method has been called. A subsequent {@code
-   * write} action will simply cause the swap-to output stream to be retrieved again from the
-   * supplier.
-   *
-   * @throws IOException If an I/O error occurs
-   */
-  public void closeSession() throws IOException {
-    finish();
-    super.close();
-  }
-
   private void finish() throws IOException {
     if (!def.finished()) {
       def.finish();
@@ -188,7 +169,7 @@ public class ZipFileSwapOutputStream extends FileSwapOutputStream {
   private void deflate() throws IOException {
     int len = def.deflate(buf, 0, buf.length);
     if (len > 0) {
-      doWrite(buf, 0, len);
+      super.write(buf, 0, len);
     }
   }
 }

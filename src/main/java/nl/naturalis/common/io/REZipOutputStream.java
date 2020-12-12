@@ -1,6 +1,5 @@
 package nl.naturalis.common.io;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
@@ -26,7 +25,7 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  * client-provided output stream.
  *
  * <p>Though you could, it makes no sense to wrap a {@code REZipOutputStream} into a {@code
- * BufferedOutputStream}. See {@link SwapOutputStream} for why this is so. The client-provided
+ * BufferedOutputStream}. See {@link ArraySwapOutputStream} for why this is so. The client-provided
  * output stream, however, is not automatically wrapped into a {@code BufferedOutputStream}, so
  * could benefit from it.
  *
@@ -69,7 +68,7 @@ public class REZipOutputStream extends OutputStream {
 
     private OutputStream out;
     private ZipEntry mainEntry;
-    private HashMap<String, Tuple<ZipEntry, RecallOutputStream>> sideEntries;
+    private HashMap<String, Tuple<ZipEntry, SwapOutputStream>> sideEntries;
     private boolean cleanup = true;
 
     private Builder(ZipEntry mainEntry, OutputStream out) {
@@ -101,18 +100,18 @@ public class REZipOutputStream extends OutputStream {
      * @return This {@code Builder}
      */
     public Builder addEntry(String name, int bufSize) {
-      return addEntry(new ZipEntry(name), ZipFileSwapOutputStream.newInstance(bufSize));
+      return addEntry(new ZipEntry(name), DeflatedArraySwapOutputStream.newInstance(bufSize));
     }
 
     /**
      * Adds a buffered zip entry with the specified name. Data is written, buffered and recalled
-     * using the specified {@link RecallOutputStream}.
+     * using the specified {@link SwapOutputStream}.
      *
      * @param entry The zip entry
      * @param out The output stream to which data for this entry is written
      * @return This {@code Builder}
      */
-    public Builder addEntry(ZipEntry entry, RecallOutputStream out) {
+    public Builder addEntry(ZipEntry entry, SwapOutputStream out) {
       Check.notNull(entry, "entry");
       Check.notNull(out, "out");
       String name = entry.getName();
@@ -179,7 +178,7 @@ public class REZipOutputStream extends OutputStream {
 
   private final ZipEntry mainEntry;
   private final ZipOutputStream mainOut;
-  private final Map<String, Tuple<ZipEntry, RecallOutputStream>> sideEntries;
+  private final Map<String, Tuple<ZipEntry, SwapOutputStream>> sideEntries;
   private final boolean cleanup;
 
   private OutputStream active;
@@ -187,7 +186,7 @@ public class REZipOutputStream extends OutputStream {
   private REZipOutputStream(
       OutputStream out,
       ZipEntry mainEntry,
-      Map<String, Tuple<ZipEntry, RecallOutputStream>> sideEntries,
+      Map<String, Tuple<ZipEntry, SwapOutputStream>> sideEntries,
       boolean cleanup)
       throws IOException {
     this.mainEntry = mainEntry;
@@ -234,7 +233,7 @@ public class REZipOutputStream extends OutputStream {
   @Override
   public void flush() throws IOException {
     mainOut.flush();
-    for (Tuple<ZipEntry, RecallOutputStream> t : sideEntries.values()) {
+    for (Tuple<ZipEntry, SwapOutputStream> t : sideEntries.values()) {
       t.getRight().flush();
     }
   }
@@ -259,7 +258,7 @@ public class REZipOutputStream extends OutputStream {
    * @throws IOException If an I/O error occurs
    */
   public ZipOutputStream mergeEntries() throws IOException {
-    for (Tuple<ZipEntry, RecallOutputStream> t : sideEntries.values()) {
+    for (Tuple<ZipEntry, SwapOutputStream> t : sideEntries.values()) {
       mainOut.putNextEntry(t.getLeft());
       t.getRight().recall(mainOut);
     }
@@ -271,7 +270,7 @@ public class REZipOutputStream extends OutputStream {
    * output stream. See {@link #mergeEntries()}.
    */
   public void close() throws IOException {
-    for (Tuple<ZipEntry, RecallOutputStream> t : sideEntries.values()) {
+    for (Tuple<ZipEntry, SwapOutputStream> t : sideEntries.values()) {
       if (cleanup) {
         t.getRight().cleanup();
       }

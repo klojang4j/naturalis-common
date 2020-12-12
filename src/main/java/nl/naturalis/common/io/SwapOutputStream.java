@@ -1,230 +1,78 @@
 package nl.naturalis.common.io;
 
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.function.ThrowingSupplier;
-import static nl.naturalis.common.check.CommonChecks.gt;
-import static nl.naturalis.common.check.CommonChecks.no;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
- * Abstract base class for {@link RecallOutputStream} classes that use memory swapping to ensure
- * data can be read back. A {@code SwapOutputStream} first fills up an internal buffer. If (and only
- * if) the buffer reaches full capacity, an underlying outstream to some persistent resource is
- * created to sink the data into. It is transparent to clients whether or not data has actually been
- * swapped out of memory. Clients can {@link #recall(OutputStream) recall} the data without having
- * to know whether it came from the internal buffer or persistent storage.
- *
- * <p>{@code SwapOutputStream} basically is a {@link BufferedOutputStream}, except that the
- * underlying output stream is lazily instantiated and that you can read back what you wrote to it.
- * Therefore you don't anything from wrapping a {@code SwapOutputStream} into a {@code
- * BufferedOutputStream}.
+ * An extension of {@code OutputStream} that allows for data written to it to be recalled.
  *
  * @author Ayco Holleman
  */
-public abstract class SwapOutputStream extends RecallOutputStream {
+public abstract class SwapOutputStream extends OutputStream {
 
-  // A factory producing the output stream to the swap-to resource
-  private final ThrowingSupplier<OutputStream, IOException> factory;
-
-  // The internal buffer
-  private final byte buf[];
-
-  // The live bytes in the buffer
-  private int cnt;
-
-  // The output stream to the swap-to resource
-  private OutputStream out;
-
-  private boolean closed;
+  final File swapFile;
 
   /**
-   * Creates a {@code SwapOutputStream} with an internal buffer of 8 kilobytes, swapping to the
-   * specified resource once the buffer overflows.
+   * Creates a new instance with a 64 kB internal buffer, swapping to the specified file once the
+   * buffer reaches full capacity.
    *
-   * @param swapTo The supplier of an outputstream to the swap-to resource (e.g. a swap file). The
-   *     supplier will only be called upon if the internal buffer overflows.
-   */
-  public SwapOutputStream(ThrowingSupplier<OutputStream, IOException> swapTo) {
-    this(swapTo, 8 * 1024);
-  }
-
-  /**
-   * Creates a {@code SwapOutputStream} with an internal buffer of {@code bufSize} bytes, swapping
-   * to the specified resource once the buffer overflows.
-   *
-   * @param swapTo The supplier of an outputstream to the swap-to resource (e.g. a swap file). The
-   *     supplier will only be called upon if the internal buffer overflows.
+   * @param swapFile The file to write to once the internal buffer reaches full capacity
    * @param bufSize The size in bytes of the internal buffer
    */
-  public SwapOutputStream(ThrowingSupplier<OutputStream, IOException> swapTo, int bufSize) {
-    this.factory = Check.notNull(swapTo, "swapTo").ok();
-    this.buf = Check.that(bufSize).is(gt(), 0).ok(byte[]::new);
-  }
-
-  /** Writes the specified byte to this output stream. */
-  @Override
-  public final void write(int b) throws IOException {
-    intercept(b);
+  public SwapOutputStream(File swapFile) {
+    this.swapFile = Check.notNull(swapFile).ok();
   }
 
   /**
-   * Writes <code>len</code> bytes from the specified byte array starting at offset <code>off</code>
-   * to this output stream.
-   */
-  @Override
-  public final void write(byte[] b, int off, int len) throws IOException {
-    intercept(b, off, len);
-  }
-
-  /**
-   * Deletes the swap-to resource (e.g. a swap file). Can be called after {@link
-   * #recall(OutputStream) collect()} if the swap-to resource (e.g. a swap file) is no longer
-   * needed, or in the {@code catch} block of an exception. The {@code cleanup} method of {@code
-   * SwapOutputStream} does nothing.
+   * Creates a new instance with an internal buffer of the specified size, swapping to the specified
+   * file once the buffer reaches full capacity.
    *
-   * @throws IOException
+   * @param swapFile The file to write to once the internal buffer reaches full capacity
+   * @param bufSize The size in bytes of the internal buffer
    */
-  public void cleanup() throws IOException {}
+  public SwapOutputStream(File swapFile, int bufSize) {
+    this(swapFile);
+  }
 
   /**
-   * Calls {@link OutputStream#flush() flush()} on the swap-to output stream if the {@code
-   * SwapOutputStream} has started writing to it. Otherwise this method does nothing.
+   * Collects the data written to this instance and writes it to the specified output stream.
+   *
+   * @param output The output stream to which to write the data
+   * @throws IOException If an I/O error occurs
    */
-  @Override
-  public void flush() throws IOException {
-    if (out != null) {
-      out.flush();
+  public abstract void recall(OutputStream output) throws IOException;
+
+  /**
+   * Deletes the swap file. Can be called if, after the data has been recalled, the swap file is no
+   * longer needed. You might also want to call this method in the {@code catch} block of an
+   * exception.
+   */
+  public void cleanup() {
+    if (swapFile.exists()) {
+      swapFile.delete();
     }
   }
 
   /**
-   * If the {@code SwapOutputStream} has started writing to the swap-to output stream, any remaining
-   * bytes in the internal buffer will be flushed to the swap-to output stream and then its {@code
-   * close()} method will be called. If the swap-to output stream had not been opened yet this
-   * method does nothing. Any remaining bytes in the internal buffer will just stay there.
-   */
-  @Override
-  public void close() throws IOException {
-    if (!closed) {
-      if (out != null) {
-        if (cnt > 0) {
-          swap();
-        }
-        out.close();
-      }
-      closed = true;
-    }
-  }
-
-  /**
-   * Forces the internal buffer to be flushed to the swap-to output stream, even if the internal
-   * buffer has not reached full capacity yet. You should not normally call this method as swapping
-   * is taken care of automatically, but it could be useful for debug purposes (e.g. to inspect the
+   * Forces the internal buffer to be flushed to the swap file, even if the internal buffer has not
+   * reached full capacity yet. You should not normally call this method as swapping is intended to
+   * be taken care of transparently. But it might be useful for debug purposes (e.g. to inspect the
    * contents of a swap file).
    *
    * @throws IOException If an I/O error occurs
    */
-  public final void swap() throws IOException {
-    if (out == null) {
-      out = factory.get();
-    }
-    out.write(buf, 0, cnt);
-    cnt = 0;
-  }
+  public abstract void swap() throws IOException;
 
   /**
-   * Returns whether or not the {@code SwapOutputStream} has started to write to the swap-to output
-   * stream. You should not normally need to call this method as swapping is taken care of
+   * Returns whether or not the {@code ArraySwapOutputStream} has started to write to the swap-to
+   * output stream. You should not normally need to call this method as swapping is taken care of
    * automatically, but it could be used for debug or logging purposes.
    */
-  public final boolean hasSwapped() {
-    return out != null;
-  }
+  public abstract boolean hasSwapped();
 
-  /**
-   * The {@link #write(int)} method does nothing but call this method. Subclasses must implement
-   * this method so they can filter or modify the incoming byte before it is actually written to the
-   * {@code SwapOutputStream}. Unless something exceptional happens, or the byte is to be discarded,
-   * the {@code intercept} method should end with a call to one of the {@code doWrite} methods.
-   *
-   * @param b The byte
-   * @throws IOException If an I/O error occurs
-   */
-  protected abstract void intercept(int b) throws IOException;
-
-  /**
-   * The {@link #write(byte[], int, int)} method does nothing but call this method. Subclasses must
-   * implement this method so they can filter or modify the incoming bytes before they are actually
-   * written to the {@code SwapOutputStream}. Unless something exceptional happens, or the byte
-   * array is to be discarded, the {@code intercept} method should end with a call to one of the
-   * {@code doWrite} methods.
-   *
-   * @param b The byte array
-   * @throws IOException If an I/O error occurs
-   */
-  protected abstract void intercept(byte[] b, int off, int len) throws IOException;
-
-  /**
-   * Writes the specified byte to this output stream.
-   *
-   * @param b The byte
-   * @throws IOException If an I/O error occurs
-   */
-  protected final void doWrite(int b) throws IOException {
-    if (cnt == buf.length) {
-      swap();
-    }
-    buf[cnt++] = (byte) b;
-  }
-
-  /**
-   * Writes <code>len</code> bytes from the specified byte array starting at offset <code>off</code>
-   * to this output stream.
-   *
-   * @param b the data.
-   * @param off the start offset in the data.
-   * @param len the number of bytes to write.
-   * @throws IOException If an I/O error occurs
-   */
-  protected final void doWrite(byte[] b, int off, int len) throws IOException {
-    // If the incoming byte array is bigger than the internal buffer we don't bother buffering it.
-    // We flush the internal buffer and then write the byte array directly to the output stream
-    if (len > buf.length) {
-      swap();
-      out.write(b, off, len);
-    } else {
-      if (cnt + len > buf.length) {
-        swap();
-      }
-      System.arraycopy(b, off, buf, cnt, len);
-      cnt += len;
-    }
-  }
-
-  /**
-   * Copies the contents of the internal buffer to the specified output stream. An IOException is
-   * thrown if the {@code SwapOutputStream} has already started writing to the swap-to outputstream.
-   *
-   * @param to The output stream to which to copy the contents of the internal buffer
-   * @throws IOException If an I/O error occurs
-   * @throws IllegalStateException If the swap has already taken place
-   */
-  protected final void readBuffer(OutputStream to) throws IOException {
-    Check.notNull(to);
-    Check.with(IOException::new, hasSwapped()).is(no(), "Already swapped");
-    if (cnt > 0) {
-      to.write(buf, 0, cnt);
-    }
-  }
-
-  /**
-   * Returns the size of the internal buffer.
-   *
-   * @return The size of the internal buffer
-   */
-  protected final int bufferSize() {
-    return buf.length;
+  final OutputStream open() throws IOException {
+    Check.that(swapFile).is(fileNotExists());
+    return new FileOutputStream(swapFile);
   }
 }
