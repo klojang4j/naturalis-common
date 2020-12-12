@@ -91,9 +91,7 @@ public class REZipOutputStream extends OutputStream {
     /**
      * Adds a buffered zip entry with the specified name. The buffer is swapped to file when it
      * grows beyond {@code bufSize} bytes. Bytes entering the buffer are compressed to decrease the
-     * chance it needs to be swapped out to file. Note though that this is quite separate from the
-     * fact that {@code REZipOutputStream} as a whole is about producing a multi-entry zip-formatted
-     * output stream.
+     * chance it needs to be swapped out to file.
      *
      * @param name The name of the zip entry
      * @param bufSize The buffer size in bytes

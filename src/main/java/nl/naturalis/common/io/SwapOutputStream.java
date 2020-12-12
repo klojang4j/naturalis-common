@@ -2,10 +2,20 @@ package nl.naturalis.common.io;
 
 import java.io.*;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonChecks.fileNotExists;
 
 /**
- * An extension of {@code OutputStream} that allows for data written to it to be recalled.
+ * An extension of {@code OutputStream} that allows for data written to it to be recalled. Data
+ * written to a {@code SwapOutputStream} first fills up an internal buffer. If (and only if) the
+ * buffer reaches full capacity, a swap file is created to sink the data into. This ensures that
+ * whatever the total size of the data written to a {@code SwapOutputStream}, it can always be
+ * recalled. It is transparent to clients whether or not data has actually been swapped out of
+ * memory. Clients can recall the data without having to know whether it came from the internal
+ * buffer or from the swap file.
+ *
+ * <p>In many respects {@code SwapOutputStream} and its subclasses work just like a {@link
+ * BufferedOutputStream}. Therefore it doesn't make much sense to wrap a {@code SwapOutputStream}
+ * into a {@code BufferedOutputStream}.
  *
  * @author Ayco Holleman
  */
@@ -14,25 +24,13 @@ public abstract class SwapOutputStream extends OutputStream {
   final File swapFile;
 
   /**
-   * Creates a new instance with a 64 kB internal buffer, swapping to the specified file once the
-   * buffer reaches full capacity.
+   * Creates a new {@code SwapOutputStream} that swaps to the specified file once its internal
+   * buffer fills up
    *
-   * @param swapFile The file to write to once the internal buffer reaches full capacity
-   * @param bufSize The size in bytes of the internal buffer
+   * @param swapFile The swap file
    */
   public SwapOutputStream(File swapFile) {
     this.swapFile = Check.notNull(swapFile).ok();
-  }
-
-  /**
-   * Creates a new instance with an internal buffer of the specified size, swapping to the specified
-   * file once the buffer reaches full capacity.
-   *
-   * @param swapFile The file to write to once the internal buffer reaches full capacity
-   * @param bufSize The size in bytes of the internal buffer
-   */
-  public SwapOutputStream(File swapFile, int bufSize) {
-    this(swapFile);
   }
 
   /**

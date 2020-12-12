@@ -10,17 +10,7 @@ import static nl.naturalis.common.check.CommonChecks.gt;
 import static nl.naturalis.common.check.CommonChecks.no;
 
 /**
- * Abstract base class for {@link SwapOutputStream} classes that use memory swapping to ensure data
- * can be read back. A {@code ArraySwapOutputStream} first fills up an internal buffer. If (and only
- * if) the buffer reaches full capacity, an underlying outstream to some persistent resource is
- * created to sink the data into. It is transparent to clients whether or not data has actually been
- * swapped out of memory. Clients can {@link #recall(OutputStream) recall} the data without having
- * to know whether it came from the internal buffer or persistent storage.
- *
- * <p>{@code ArraySwapOutputStream} basically is a {@link BufferedOutputStream}, except that the
- * underlying output stream is lazily instantiated and that you can read back what you wrote to it.
- * Therefore you don't anything from wrapping a {@code ArraySwapOutputStream} into a {@code
- * BufferedOutputStream}.
+ * A {@code SwapOutputStream} that uses a byte array as internal buffer.
  *
  * @author Ayco Holleman
  */
@@ -29,7 +19,6 @@ public class ArraySwapOutputStream extends SwapOutputStream {
   /**
    * Creates a new instance that swaps to an auto-generated temp file.
    *
-   * @see ArraySwapOutputStream#SwapOutputStream(ThrowingSupplier)
    * @return A {@code FileSwapOutputStream} that swaps to an auto-generated temp file
    */
   public static ArraySwapOutputStream newInstance() {
@@ -44,7 +33,6 @@ public class ArraySwapOutputStream extends SwapOutputStream {
    * Creates a new instance that swaps to an auto-generated temp file. The size of the internal
    * buffer is specified through the {@code bufSize} parameter.
    *
-   * @see ArraySwapOutputStream#SwapOutputStream(ThrowingSupplier, int)
    * @param bufSize The size in bytes of the internal buffer
    * @return A {@code FileSwapOutputStream} that swaps to an auto-generated temp file
    */
@@ -67,12 +55,25 @@ public class ArraySwapOutputStream extends SwapOutputStream {
 
   private boolean closed;
 
+  /**
+   * Creates a new {@code ArraySwapOutputStream} with an internal buffer of 64 kB, swapping to the
+   * specified file once its internal buffer fills up
+   *
+   * @param swapFile The swap file
+   */
   public ArraySwapOutputStream(File swapFile) {
     this(swapFile, 64 * 1024);
   }
 
+  /**
+   * Creates a new {@code ArraySwapOutputStream} with an internal buffer of {@code bufSize} bytes,
+   * swapping to the specified file once its internal buffer fills up
+   *
+   * @param swapFile The swap file
+   * @param bufSize The size in bytes of the internal buffer
+   */
   public ArraySwapOutputStream(File swapFile, int bufSize) {
-    super(swapFile, bufSize);
+    super(swapFile);
     this.buf = Check.that(bufSize).is(gt(), 0).ok(byte[]::new);
   }
 
@@ -131,10 +132,10 @@ public class ArraySwapOutputStream extends SwapOutputStream {
   }
 
   /**
-   * If the {@code ArraySwapOutputStream} has started writing to the swap-to output stream, any
-   * remaining bytes in the internal buffer will be flushed to the swap-to output stream and then
-   * its {@code close()} method will be called. If the swap-to output stream had not been opened yet
-   * this method does nothing. Any remaining bytes in the internal buffer will just stay there.
+   * If the {@code ArraySwapOutputStream} has started writing to the swap file, any remaining bytes
+   * in the internal buffer will be flushed to it and the output stream to the swap file will be
+   * closed. Otherwise this method does nothing. Any remaining bytes in the internal buffer will
+   * just stay there.
    */
   @Override
   public void close() throws IOException {
