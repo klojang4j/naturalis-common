@@ -16,16 +16,16 @@ import static nl.naturalis.common.IOMethods.createTempFile;
  *
  * @author Ayco Holleman
  */
-public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
+public class DeflatedNioSwapOutputStream extends NioSwapOutputStream {
 
   /**
    * Creates a new instance that swaps to an auto-generated temp file.
    *
    * @return A {@code DeflatedArraySwapOutputStream} that swaps to an auto-generated temp file
    */
-  public static DeflatedArraySwapOutputStream newInstance() {
+  public static DeflatedNioSwapOutputStream newInstance() {
     try {
-      return new DeflatedArraySwapOutputStream(createTempFile(DeflatedArraySwapOutputStream.class));
+      return new DeflatedNioSwapOutputStream(createTempFile(DeflatedNioSwapOutputStream.class));
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -38,10 +38,10 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
    * @param bufSize The size in bytes of the internal buffer
    * @return A {@code DeflatedArraySwapOutputStream} that swaps to an auto-generated temp file
    */
-  public static DeflatedArraySwapOutputStream newInstance(int bufSize) {
+  public static DeflatedNioSwapOutputStream newInstance(int bufSize) {
     try {
-      return new DeflatedArraySwapOutputStream(
-          createTempFile(DeflatedArraySwapOutputStream.class), bufSize);
+      return new DeflatedNioSwapOutputStream(
+          createTempFile(DeflatedNioSwapOutputStream.class), bufSize);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -55,10 +55,10 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
    * @param compressionLevel The compression level (0-9)
    * @return A {@code DeflatedArraySwapOutputStream} that swaps to an auto-generated temp file
    */
-  public static DeflatedArraySwapOutputStream newInstance(int bufSize, int compressionLevel) {
+  public static DeflatedNioSwapOutputStream newInstance(int bufSize, int compressionLevel) {
     try {
-      return new DeflatedArraySwapOutputStream(
-          createTempFile(DeflatedArraySwapOutputStream.class), bufSize, compressionLevel);
+      return new DeflatedNioSwapOutputStream(
+          createTempFile(DeflatedNioSwapOutputStream.class), bufSize, compressionLevel);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -76,7 +76,7 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
    *
    * @param swapFile The swap file
    */
-  public DeflatedArraySwapOutputStream(File swapFile) {
+  public DeflatedNioSwapOutputStream(File swapFile) {
     super(swapFile);
     this.def = new Deflater();
   }
@@ -88,7 +88,7 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
    * @param swapFile The swap file
    * @param bufSize The size in bytes of the internal buffer
    */
-  public DeflatedArraySwapOutputStream(File swapFile, int bufSize) {
+  public DeflatedNioSwapOutputStream(File swapFile, int bufSize) {
     super(swapFile, bufSize);
     this.def = new Deflater();
   }
@@ -101,7 +101,7 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
    * @param bufSize The size in bytes of the internal buffer
    * @param compressionLevel The compression level (0-9)
    */
-  public DeflatedArraySwapOutputStream(File swapFile, int bufSize, int compressionLevel) {
+  public DeflatedNioSwapOutputStream(File swapFile, int bufSize, int compressionLevel) {
     super(swapFile, bufSize);
     this.def = new Deflater(compressionLevel);
   }
@@ -123,6 +123,7 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
   @Override
   public void recall(OutputStream out) throws IOException {
     Check.notNull(out);
+    // Flush any remaining bytes in the Deflater's buffer to the internal buffer
     finish();
     if (hasSwapped()) {
       readSwapFile(new InflaterOutputStream(out));

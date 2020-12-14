@@ -14,117 +14,117 @@ public class ArraySwapOutputStreamTest {
 
   @Test
   public void test00() throws IOException {
-    ArraySwapOutputStream asos = ArraySwapOutputStream.newInstance(2);
-    asos.write(new byte[0]);
+    ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2);
+    sos.write(new byte[0]);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    asos.recall(baos);
+    sos.recall(baos);
     assertArrayEquals(new byte[0], baos.toByteArray());
   }
 
   @Test
   public void test01() throws IOException {
-    ArraySwapOutputStream asos = ArraySwapOutputStream.newInstance(2);
-    asos.write((byte) 1);
+    ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2);
+    sos.write((byte) 1);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    asos.recall(baos);
+    sos.recall(baos);
     assertArrayEquals(new byte[] {(byte) 1}, baos.toByteArray());
   }
 
   @Test
   public void test02() throws IOException {
-    ArraySwapOutputStream asos = ArraySwapOutputStream.newInstance(2);
-    asos.write(1);
-    asos.write(2);
+    ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2);
+    sos.write(1);
+    sos.write(2);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    asos.recall(baos);
+    sos.recall(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2}, baos.toByteArray());
   }
 
   @Test
   public void test03() throws IOException {
-    ArraySwapOutputStream asos = ArraySwapOutputStream.newInstance(2);
-    asos.write(1);
-    asos.write(2);
-    asos.write(3);
+    ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2);
+    sos.write(1);
+    sos.write(2);
+    sos.write(3);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    asos.recall(baos);
+    sos.recall(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2, (byte) 3}, baos.toByteArray());
   }
 
   @Test
   public void test04() throws IOException {
-    ArraySwapOutputStream asos = ArraySwapOutputStream.newInstance(2);
-    asos.write(1);
-    asos.write(2);
-    asos.write(3);
-    asos.write(4);
+    ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2);
+    sos.write(1);
+    sos.write(2);
+    sos.write(3);
+    sos.write(4);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    asos.recall(baos);
+    sos.recall(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2, (byte) 3, (byte) 4}, baos.toByteArray());
   }
 
   @Test
   public void test05() throws IOException {
-    ArraySwapOutputStream asos = ArraySwapOutputStream.newInstance(2);
-    asos.write(1);
-    asos.write(new byte[] {(byte) 2, (byte) 3});
+    ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2);
+    sos.write(1);
+    sos.write(new byte[] {(byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    asos.recall(baos);
+    sos.recall(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2, (byte) 3}, baos.toByteArray());
   }
 
   @Test
   public void test06() throws IOException {
-    ArraySwapOutputStream asos = ArraySwapOutputStream.newInstance(2);
-    asos.write(new byte[] {(byte) 1, (byte) 2});
-    asos.write(3);
+    ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2);
+    sos.write(new byte[] {(byte) 1, (byte) 2});
+    sos.write(3);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    asos.recall(baos);
+    sos.recall(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2, (byte) 3}, baos.toByteArray());
   }
 
   @Test
   public void test07() throws IOException {
-    ArraySwapOutputStream asos = ArraySwapOutputStream.newInstance(2);
-    asos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
+    ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2);
+    sos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    asos.recall(baos);
+    sos.recall(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2, (byte) 3}, baos.toByteArray());
   }
 
   @Test
   public void test08() throws IOException {
-    ArraySwapOutputStream asos = ArraySwapOutputStream.newInstance(2);
-    asos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
-    assertTrue(asos.hasSwapped());
+    ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2);
+    sos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
+    assertTrue(sos.hasSwapped());
   }
 
   @Test
   public void test09() throws IOException {
-    ArraySwapOutputStream asos = ArraySwapOutputStream.newInstance(2);
-    asos.write(new byte[] {(byte) 1, (byte) 2});
-    assertFalse(asos.hasSwapped());
+    ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2);
+    sos.write(new byte[] {(byte) 1, (byte) 2});
+    assertFalse(sos.hasSwapped());
   }
 
   @Test(expected = IOException.class)
   @SuppressWarnings("resource")
   public void test10() throws IOException {
-    ArraySwapOutputStream asos = ArraySwapOutputStream.newInstance(2);
-    asos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
-    asos.close();
-    asos.swapFile.delete();
-    asos.recall(new ByteArrayOutputStream()); // Oops, swap file gone
+    ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2);
+    sos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
+    sos.close();
+    sos.swapFile.delete();
+    sos.recall(new ByteArrayOutputStream()); // Oops, swap file gone
   }
 
   @Test
   public void test11() throws IOException {
-    ArraySwapOutputStream asos = ArraySwapOutputStream.newInstance(2);
-    asos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
+    ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2);
+    sos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    asos.recall(baos);
+    sos.recall(baos);
     assertArrayEquals(new byte[] {(byte) 1, (byte) 2, (byte) 3}, baos.toByteArray());
-    asos.cleanup();
-    assertFalse(asos.swapFile.exists());
+    sos.cleanup();
+    assertFalse(sos.swapFile.exists());
   }
 
   @Test(expected = IllegalArgumentException.class) // null file not allowed
@@ -139,43 +139,43 @@ public class ArraySwapOutputStreamTest {
 
   @Test
   public void test102() throws IOException {
-    ArraySwapOutputStream asos = ArraySwapOutputStream.newInstance(1);
-    try (PrintWriter pw = new PrintWriter(asos)) {
+    ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(1);
+    try (PrintWriter pw = new PrintWriter(sos)) {
       pw.append("Hello, world");
     }
-    assertTrue("01", asos.hasSwapped());
-    assertEquals("02", "Hello, world", getContents(asos));
+    assertTrue("01", sos.hasSwapped());
+    assertEquals("02", "Hello, world", getContents(sos));
   }
 
   @Test
   public void test103() throws IOException {
-    ArraySwapOutputStream asos = ArraySwapOutputStream.newInstance(2);
-    try (PrintWriter pw = new PrintWriter(asos)) {
+    ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2);
+    try (PrintWriter pw = new PrintWriter(sos)) {
       pw.append("Hello, world");
     }
-    assertTrue("01", asos.hasSwapped());
-    assertEquals("02", "Hello, world", getContents(asos));
+    assertTrue("01", sos.hasSwapped());
+    assertEquals("02", "Hello, world", getContents(sos));
   }
 
   @Test
   public void test104() throws IOException {
-    ArraySwapOutputStream asos = ArraySwapOutputStream.newInstance(100);
-    try (PrintWriter pw = new PrintWriter(asos)) {
+    ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(100);
+    try (PrintWriter pw = new PrintWriter(sos)) {
       pw.append("Hello, world");
     }
-    assertFalse("01", asos.hasSwapped());
-    assertEquals("02", "Hello, world", getContents(asos));
+    assertFalse("01", sos.hasSwapped());
+    assertEquals("02", "Hello, world", getContents(sos));
   }
 
   @Test
   public void test105() throws IOException {
     int sz = "Hello, world".getBytes(StandardCharsets.UTF_8).length;
-    ArraySwapOutputStream asos = ArraySwapOutputStream.newInstance(sz);
-    try (PrintWriter pw = new PrintWriter(asos)) {
+    ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(sz);
+    try (PrintWriter pw = new PrintWriter(sos)) {
       pw.append("Hello, world");
     }
-    assertFalse("01", asos.hasSwapped());
-    assertEquals("02", "Hello, world", getContents(asos));
+    assertFalse("01", sos.hasSwapped());
+    assertEquals("02", "Hello, world", getContents(sos));
   }
 
   @Test // Example provided in the class comments of ArraySwapOutputStream
@@ -190,9 +190,9 @@ public class ArraySwapOutputStreamTest {
     }
   }
 
-  private static String getContents(ArraySwapOutputStream asos) throws IOException {
+  private static String getContents(ArraySwapOutputStream sos) throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    asos.recall(baos);
+    sos.recall(baos);
     return new String(baos.toByteArray(), StandardCharsets.UTF_8);
   }
 }

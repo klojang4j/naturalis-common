@@ -126,10 +126,7 @@ public class ArraySwapOutputStream extends SwapOutputStream {
   public void recall(OutputStream out) throws IOException {
     Check.notNull(out);
     if (hasSwapped()) {
-      close();
-      try (FileInputStream fis = new FileInputStream(swapFile)) {
-        pipe(fis, out, buf.length);
-      }
+      readSwapFile(out);
     } else {
       readBuffer(out);
     }
@@ -149,30 +146,19 @@ public class ArraySwapOutputStream extends SwapOutputStream {
     return out != null;
   }
 
-  /**
-   * Copies the contents of the internal buffer to the specified output stream. An IOException is
-   * thrown if the {@code ArraySwapOutputStream} has already started writing to the swap-to
-   * outputstream.
-   *
-   * @param to The output stream to which to copy the contents of the internal buffer
-   * @throws IOException If an I/O error occurs
-   * @throws IllegalStateException If the swap has already taken place
-   */
-  final void readBuffer(OutputStream to) throws IOException {
-    Check.notNull(to);
-    Check.with(IOException::new, hasSwapped()).is(no(), "Already swapped");
-    if (cnt > 0) {
-      to.write(buf, 0, cnt);
+  final void readSwapFile(OutputStream target) throws IOException, FileNotFoundException {
+    close();
+    try (FileInputStream fis = new FileInputStream(swapFile)) {
+      pipe(fis, target, buf.length);
     }
   }
 
-  /**
-   * Returns the size of the internal buffer.
-   *
-   * @return The size of the internal buffer
-   */
-  final int bufferSize() {
-    return buf.length;
+  final void readBuffer(OutputStream target) throws IOException {
+    Check.notNull(target);
+    Check.with(IOException::new, hasSwapped()).is(no(), "Already swapped");
+    if (cnt > 0) {
+      target.write(buf, 0, cnt);
+    }
   }
 
   private final OutputStream openOutputStream() throws IOException {

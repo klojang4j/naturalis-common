@@ -120,16 +120,7 @@ public class NioSwapOutputStream extends SwapOutputStream {
   public void recall(OutputStream out) throws IOException {
     Check.notNull(out);
     if (hasSwapped()) {
-      close();
-      try (FileChannel fc = FileChannel.open(swapFile.toPath(), READ)) {
-        int sz = Math.min(2048, buf.capacity());
-        byte[] tmp = new byte[sz];
-        for (int i = fc.read(buf); i > 0; i = fc.read(buf)) {
-          buf.flip();
-          pipe(tmp, out);
-          buf.clear();
-        }
-      }
+      readSwapFile(out);
     } else {
       readBuffer(out);
     }
@@ -150,15 +141,19 @@ public class NioSwapOutputStream extends SwapOutputStream {
     return chan != null;
   }
 
-  /**
-   * Copies the contents of the internal buffer to the specified output stream. An IOException is
-   * thrown if the {@code ArraySwapOutputStream} has already started writing to the swap-to
-   * outputstream.
-   *
-   * @param out The output stream to which to copy the contents of the internal buffer
-   * @throws IOException If an I/O error occurs
-   * @throws IllegalStateException If the swap has already taken place
-   */
+  final void readSwapFile(OutputStream out) throws IOException {
+    close();
+    try (FileChannel fc = FileChannel.open(swapFile.toPath(), READ)) {
+      int sz = Math.min(2048, buf.capacity());
+      byte[] tmp = new byte[sz];
+      for (int i = fc.read(buf); i > 0; i = fc.read(buf)) {
+        buf.flip();
+        pipe(tmp, out);
+        buf.clear();
+      }
+    }
+  }
+
   final void readBuffer(OutputStream out) throws IOException {
     Check.notNull(out);
     Check.with(IOException::new, hasSwapped()).is(no(), "Already swapped");

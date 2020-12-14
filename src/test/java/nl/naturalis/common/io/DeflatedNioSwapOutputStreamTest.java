@@ -7,11 +7,11 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class DeflatedArraySwapOutputStreamTest {
+public class DeflatedNioSwapOutputStreamTest {
 
   @Test
   public void test00() throws IOException {
-    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(2);
+    DeflatedNioSwapOutputStream sos = DeflatedNioSwapOutputStream.newInstance(2);
     sos.write(new byte[0]);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sos.recall(baos);
@@ -20,7 +20,7 @@ public class DeflatedArraySwapOutputStreamTest {
 
   @Test
   public void test01() throws IOException {
-    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(2);
+    DeflatedNioSwapOutputStream sos = DeflatedNioSwapOutputStream.newInstance(2);
     sos.write((byte) 1);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sos.recall(baos);
@@ -29,7 +29,7 @@ public class DeflatedArraySwapOutputStreamTest {
 
   @Test
   public void test02() throws IOException {
-    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(2);
+    DeflatedNioSwapOutputStream sos = DeflatedNioSwapOutputStream.newInstance(2);
     sos.write(1);
     sos.write(2);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -39,7 +39,7 @@ public class DeflatedArraySwapOutputStreamTest {
 
   @Test
   public void test03() throws IOException {
-    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(2);
+    DeflatedNioSwapOutputStream sos = DeflatedNioSwapOutputStream.newInstance(2);
     sos.write(1);
     sos.write(2);
     sos.write(3);
@@ -50,7 +50,7 @@ public class DeflatedArraySwapOutputStreamTest {
 
   @Test
   public void test04() throws IOException {
-    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(2);
+    DeflatedNioSwapOutputStream sos = DeflatedNioSwapOutputStream.newInstance(2);
     sos.write(1);
     sos.write(2);
     sos.write(3);
@@ -62,7 +62,7 @@ public class DeflatedArraySwapOutputStreamTest {
 
   @Test
   public void test05() throws IOException {
-    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(2);
+    DeflatedNioSwapOutputStream sos = DeflatedNioSwapOutputStream.newInstance(2);
     sos.write(1);
     sos.write(new byte[] {(byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -72,7 +72,7 @@ public class DeflatedArraySwapOutputStreamTest {
 
   @Test
   public void test06() throws IOException {
-    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(2);
+    DeflatedNioSwapOutputStream sos = DeflatedNioSwapOutputStream.newInstance(2);
     sos.write(new byte[] {(byte) 1, (byte) 2});
     sos.write(3);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -82,7 +82,7 @@ public class DeflatedArraySwapOutputStreamTest {
 
   @Test
   public void test07() throws IOException {
-    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(2);
+    DeflatedNioSwapOutputStream sos = DeflatedNioSwapOutputStream.newInstance(2);
     sos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sos.recall(baos);
@@ -91,7 +91,7 @@ public class DeflatedArraySwapOutputStreamTest {
 
   @Test
   public void test08() throws IOException {
-    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(3);
+    DeflatedNioSwapOutputStream sos = DeflatedNioSwapOutputStream.newInstance(3);
     sos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sos.recall(baos);
@@ -100,7 +100,7 @@ public class DeflatedArraySwapOutputStreamTest {
 
   @Test
   public void test09() throws IOException {
-    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(2);
+    DeflatedNioSwapOutputStream sos = DeflatedNioSwapOutputStream.newInstance(2);
     sos.write(new byte[] {(byte) 1, (byte) 2});
     assertFalse(sos.hasSwapped());
   }
@@ -108,7 +108,7 @@ public class DeflatedArraySwapOutputStreamTest {
   @Test(expected = IOException.class)
   @SuppressWarnings("resource")
   public void test10() throws IOException {
-    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(2);
+    DeflatedNioSwapOutputStream sos = DeflatedNioSwapOutputStream.newInstance(2);
     sos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
     sos.close();
     sos.swapFile.delete();
@@ -117,7 +117,7 @@ public class DeflatedArraySwapOutputStreamTest {
 
   @Test
   public void test11() throws IOException {
-    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(2);
+    DeflatedNioSwapOutputStream sos = DeflatedNioSwapOutputStream.newInstance(2);
     sos.write(new byte[] {(byte) 1, (byte) 2, (byte) 3});
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sos.recall(baos);
@@ -131,7 +131,7 @@ public class DeflatedArraySwapOutputStreamTest {
     String data = "Is this going to be swapped???";
     // Create ZipFileSwapOutputStream that swaps to a temp file if more
     // than 8 bytes are written to it
-    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(8);
+    DeflatedNioSwapOutputStream sos = DeflatedNioSwapOutputStream.newInstance(8);
     sos.write(data.getBytes());
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sos.recall(baos);
