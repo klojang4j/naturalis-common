@@ -68,7 +68,8 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
   }
 
   private final Deflater def;
-  private final byte[] park = new byte[1024];
+  // Buffer for the deflator to
+  private final byte[] temp = new byte[1024];
 
   private boolean closed;
 
@@ -161,9 +162,9 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
   }
 
   private void deflate() throws IOException {
-    int len = def.deflate(park, 0, park.length);
+    int len = def.deflate(temp, 0, temp.length);
     if (len > 0) {
-      super.write(park, 0, len);
+      super.write(temp, 0, len);
     }
   }
 }
