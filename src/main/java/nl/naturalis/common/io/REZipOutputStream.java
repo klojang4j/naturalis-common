@@ -70,11 +70,14 @@ public class REZipOutputStream extends OutputStream {
     private ZipEntry mainEntry;
     private HashMap<String, Tuple<ZipEntry, SwapOutputStream>> sideEntries;
     private boolean cleanup = true;
+    private boolean nio = false;
 
     private Builder(ZipEntry mainEntry, OutputStream out) {
       this.out = Check.notNull(out, "out").ok();
       this.mainEntry = Check.notNull(mainEntry, "mainEntry").ok();
       this.sideEntries = new HashMap<>();
+      String prop = REZipOutputStream.class.getName() + ".nio";
+      this.nio = System.getProperty(prop, "false").equalsIgnoreCase("true");
     }
 
     /**
@@ -98,6 +101,26 @@ public class REZipOutputStream extends OutputStream {
      * @return This {@code Builder}
      */
     public Builder addEntry(String name, int bufSize) {
+      return addEntry(name, bufSize, nio);
+    }
+
+    /**
+     * Adds a buffered zip entry with the specified name. The buffer is swapped to file when it
+     * grows beyond {@code bufSize} bytes. Bytes entering the buffer are compressed to decrease the
+     * chance it needs to be swapped out to file. You can optional specify that you want to use a
+     * implementation based on {@code java.nio} for buffered zip entries. This might be beneficial
+     * for very large entries. Alternatively, you can specify a system property to specify the
+     * default implementation: {@code -Dnl.naturalis.common.io.REZipOutputStream.nio=true}.
+     *
+     * @param name The name of the zip entry
+     * @param bufSize The buffer size in bytes
+     * @param nio Whether or not to use {@code java.nio} for zip buffered entries
+     * @return This {@code Builder}
+     */
+    public Builder addEntry(String name, int bufSize, boolean nio) {
+      if (nio) {
+        return addEntry(new ZipEntry(name), DeflatedNioSwapOutputStream.newInstance(bufSize));
+      }
       return addEntry(new ZipEntry(name), DeflatedArraySwapOutputStream.newInstance(bufSize));
     }
 
@@ -246,11 +269,11 @@ public class REZipOutputStream extends OutputStream {
   }
 
   /**
-   * Merges the output streams for the side entries back into the main (client-provided) output
-   * stream and returns the {@link ZipOutputStream} that was wrapped around the main output stream.
-   * Neither {@link ZipOutputStream#finish()} nor {@link ZipOutputStream#close()} has been called
-   * yet on the {@code ZipOutputStream}. This allows clients to add extra entries in serial fashion.
-   * It is up to clients to close the {@code ZipOutputStream}.
+   * Merges all zip entries back into the main output stream and returns the {@link ZipOutputStream}
+   * that was wrapped around the main output stream. Neither {@link ZipOutputStream#finish()} nor
+   * {@link ZipOutputStream#close()} has been called yet on the {@code ZipOutputStream}. This allows
+   * clients to add extra entries in serial fashion. It is up to clients to close the {@code
+   * ZipOutputStream}.
    *
    * @return A {@code ZipOutpuStream} wrapping the client-provided output stream
    * @throws IOException If an I/O error occurs
