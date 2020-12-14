@@ -28,7 +28,7 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
    */
   public static DeflatedArraySwapOutputStream newInstance() {
     try {
-      return new DeflatedArraySwapOutputStream(createTempFile());
+      return new DeflatedArraySwapOutputStream(createTempFile(DeflatedArraySwapOutputStream.class));
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -43,7 +43,8 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
    */
   public static DeflatedArraySwapOutputStream newInstance(int bufSize) {
     try {
-      return new DeflatedArraySwapOutputStream(createTempFile(), bufSize);
+      return new DeflatedArraySwapOutputStream(
+          createTempFile(DeflatedArraySwapOutputStream.class), bufSize);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -59,14 +60,15 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
    */
   public static DeflatedArraySwapOutputStream newInstance(int bufSize, int compressionLevel) {
     try {
-      return new DeflatedArraySwapOutputStream(createTempFile(), bufSize, compressionLevel);
+      return new DeflatedArraySwapOutputStream(
+          createTempFile(DeflatedArraySwapOutputStream.class), bufSize, compressionLevel);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
   }
 
   private final Deflater def;
-  private final byte[] buf = new byte[1024];
+  private final byte[] park = new byte[1024];
 
   private boolean closed;
 
@@ -121,18 +123,18 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
 
   /** See {@link SwapOutputStream#recall(OutputStream)}. */
   @Override
-  public void recall(OutputStream output) throws IOException {
-    Check.notNull(output);
+  public void recall(OutputStream out) throws IOException {
+    Check.notNull(out);
     // Flush any remaining bytes in the Deflater's buffer to the internal buffer
     finish();
     if (hasSwapped()) {
       // Flush any remaining bytes in the internal buffer to the swap-to output stream
       super.close();
       try (InflaterInputStream iis = new InflaterInputStream(new FileInputStream(swapFile))) {
-        pipe(iis, output, bufferSize());
+        pipe(iis, out, bufferSize());
       }
     } else {
-      readBuffer(new InflaterOutputStream(output));
+      readBuffer(new InflaterOutputStream(out));
     }
   }
 
@@ -159,9 +161,9 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
   }
 
   private void deflate() throws IOException {
-    int len = def.deflate(buf, 0, buf.length);
+    int len = def.deflate(park, 0, park.length);
     if (len > 0) {
-      super.write(buf, 0, len);
+      super.write(park, 0, len);
     }
   }
 }

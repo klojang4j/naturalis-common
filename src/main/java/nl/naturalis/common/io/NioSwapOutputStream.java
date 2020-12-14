@@ -1,29 +1,36 @@
 package nl.naturalis.common.io;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import static java.nio.file.StandardOpenOption.READ;
+import static java.nio.file.StandardOpenOption.WRITE;
 import static nl.naturalis.common.IOMethods.createTempFile;
-import static nl.naturalis.common.IOMethods.pipe;
 import static nl.naturalis.common.check.CommonChecks.fileNotExists;
 import static nl.naturalis.common.check.CommonChecks.gt;
 import static nl.naturalis.common.check.CommonChecks.no;
 
 /**
- * A {@code SwapOutputStream} that uses a byte array as internal buffer.
+ * A {@code SwapOutputStream} that uses {@code java.nio} classes to implement buffering and
+ * swapping.
  *
  * @author Ayco Holleman
  */
-public class ArraySwapOutputStream extends SwapOutputStream {
+public class NioSwapOutputStream extends SwapOutputStream {
 
   /**
    * Creates a new instance that swaps to an auto-generated temp file.
    *
    * @return A {@code FileSwapOutputStream} that swaps to an auto-generated temp file
    */
-  public static ArraySwapOutputStream newInstance() {
+  public static NioSwapOutputStream newInstance() {
     try {
-      return new ArraySwapOutputStream(createTempFile(ArraySwapOutputStream.class));
+      return new NioSwapOutputStream(createTempFile(NioSwapOutputStream.class));
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -36,40 +43,35 @@ public class ArraySwapOutputStream extends SwapOutputStream {
    * @param bufSize The size in bytes of the internal buffer
    * @return A {@code FileSwapOutputStream} that swaps to an auto-generated temp file
    */
-  public static ArraySwapOutputStream newInstance(int bufSize) {
+  public static NioSwapOutputStream newInstance(int bufSize) {
     try {
-      return new ArraySwapOutputStream(createTempFile(ArraySwapOutputStream.class), bufSize);
+      return new NioSwapOutputStream(createTempFile(NioSwapOutputStream.class), bufSize);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
   }
 
-  private final byte buf[];
+  protected final ByteBuffer buf;
 
-  // The number live bytes in the buffer
-  private int cnt;
-  // The output stream to the swap file
-  private OutputStream out;
+  private FileChannel chan;
   private boolean closed;
 
-  /** See {@link SwapOutputStream#SwapOutputStream(File)}. */
-  public ArraySwapOutputStream(File swapFile) {
+  public NioSwapOutputStream(File swapFile) {
     this(swapFile, 64 * 1024);
   }
 
-  /** See {@link SwapOutputStream#SwapOutputStream(File, int)}. */
-  public ArraySwapOutputStream(File swapFile, int bufSize) {
+  public NioSwapOutputStream(File swapFile, int bufSize) {
     super(swapFile);
-    this.buf = Check.that(bufSize).is(gt(), 0).ok(byte[]::new);
+    this.buf = Check.that(bufSize).is(gt(), 0).ok(ByteBuffer::allocateDirect);
   }
 
   /** Writes the specified byte to this output stream. */
   @Override
   public void write(int b) throws IOException {
-    if (cnt == buf.length) {
+    if (buf.position() + 1 > buf.capacity()) {
       swap();
     }
-    buf[cnt++] = (byte) b;
+    buf.put((byte) b);
   }
 
   /**
@@ -80,28 +82,20 @@ public class ArraySwapOutputStream extends SwapOutputStream {
   public void write(byte[] b, int off, int len) throws IOException {
     // If the incoming byte array is bigger than the internal buffer we don't bother buffering it.
     // We flush the internal buffer and then write the byte array directly to the output stream
-    if (len > buf.length) {
+    if (len > buf.capacity()) {
       swap();
-      out.write(b, off, len);
+      chan.write(ByteBuffer.wrap(b, off, len));
     } else {
-      if (cnt + len > buf.length) {
+      if (buf.position() + len > buf.capacity()) {
         swap();
       }
-      System.arraycopy(b, off, buf, cnt, len);
-      cnt += len;
+      buf.put(b, off, len);
     }
   }
 
-  /**
-   * Calls {@link OutputStream#flush() flush()} on the swap-to output stream if the {@code
-   * ArraySwapOutputStream} has started writing to it. Otherwise this method does nothing.
-   */
+  /** This method does nothing. */
   @Override
-  public void flush() throws IOException {
-    if (out != null) {
-      out.flush();
-    }
-  }
+  public void flush() throws IOException {}
 
   /**
    * If the {@code ArraySwapOutputStream} has started writing to the swap file, any remaining bytes
@@ -112,11 +106,11 @@ public class ArraySwapOutputStream extends SwapOutputStream {
   @Override
   public void close() throws IOException {
     if (!closed) {
-      if (out != null) {
-        if (cnt > 0) {
+      if (chan != null) {
+        if (buf.position() > 0) {
           swap();
         }
-        out.close();
+        chan.close();
       }
       closed = true;
     }
@@ -127,26 +121,33 @@ public class ArraySwapOutputStream extends SwapOutputStream {
     Check.notNull(out);
     if (hasSwapped()) {
       close();
-      try (FileInputStream fis = new FileInputStream(swapFile)) {
-        pipe(fis, out, buf.length);
+      try (FileChannel fc = FileChannel.open(swapFile.toPath(), READ)) {
+        int sz = Math.min(2048, buf.capacity());
+        byte[] tmp = new byte[sz];
+        for (int i = fc.read(buf); i > 0; i = fc.read(buf)) {
+          buf.flip();
+          pipe(tmp, out);
+          buf.clear();
+        }
       }
     } else {
       readBuffer(out);
     }
   }
 
-  /** See {@link SwapOutputStream#swap()}. */
-  public final void swap() throws IOException {
-    if (out == null) {
-      out = openOutputStream();
+  @Override
+  public void swap() throws IOException {
+    if (chan == null) {
+      chan = openChannel();
     }
-    out.write(buf, 0, cnt);
-    cnt = 0;
+    buf.flip();
+    chan.write(buf);
+    buf.clear();
   }
 
-  /** See {@link SwapOutputStream#hasSwapped()}. */
-  public final boolean hasSwapped() {
-    return out != null;
+  @Override
+  public boolean hasSwapped() {
+    return chan != null;
   }
 
   /**
@@ -154,29 +155,37 @@ public class ArraySwapOutputStream extends SwapOutputStream {
    * thrown if the {@code ArraySwapOutputStream} has already started writing to the swap-to
    * outputstream.
    *
-   * @param to The output stream to which to copy the contents of the internal buffer
+   * @param out The output stream to which to copy the contents of the internal buffer
    * @throws IOException If an I/O error occurs
    * @throws IllegalStateException If the swap has already taken place
    */
-  final void readBuffer(OutputStream to) throws IOException {
-    Check.notNull(to);
+  final void readBuffer(OutputStream out) throws IOException {
+    Check.notNull(out);
     Check.with(IOException::new, hasSwapped()).is(no(), "Already swapped");
-    if (cnt > 0) {
-      to.write(buf, 0, cnt);
+    // The readBuffer in ArraySwapOutputStream (unintentionally) is idempotent; you can read the
+    // buffer while you're still writing to it. buf.flip() would disrupt this however. For
+    // predictability's sake, let's make this implementation of readBuffer idempotent as well.
+    if (buf.position() > 0) {
+      int pos = buf.position();
+      int lim = buf.limit();
+      buf.flip();
+      int sz = Math.min(2048, buf.capacity());
+      byte[] tmp = new byte[sz];
+      pipe(tmp, out);
+      buf.position(pos).limit(lim);
     }
   }
 
-  /**
-   * Returns the size of the internal buffer.
-   *
-   * @return The size of the internal buffer
-   */
-  final int bufferSize() {
-    return buf.length;
+  private void pipe(byte[] tmp, OutputStream out) throws IOException {
+    while (buf.hasRemaining()) {
+      int len = Math.min(tmp.length, buf.remaining());
+      buf.get(tmp, 0, len);
+      out.write(tmp, 0, len);
+    }
   }
 
-  private final OutputStream openOutputStream() throws IOException {
+  private FileChannel openChannel() throws IOException {
     Check.with(IOException::new, swapFile).is(fileNotExists());
-    return new FileOutputStream(swapFile);
+    return FileChannel.open(swapFile.toPath(), CREATE_NEW, WRITE);
   }
 }

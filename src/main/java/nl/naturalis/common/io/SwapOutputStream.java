@@ -1,8 +1,10 @@
 package nl.naturalis.common.io;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.fileNotExists;
 
 /**
  * An extension of {@code OutputStream} that allows for data written to it to be recalled. Data
@@ -24,12 +26,20 @@ public abstract class SwapOutputStream extends OutputStream {
   final File swapFile;
 
   /**
-   * Creates a new {@code SwapOutputStream} that swaps to the specified file once its internal
-   * buffer fills up
+   * Creates a new {@code SwapOutputStream} with an internal buffer of 64 kB, swapping to the
+   * specified file the buffer starts overflowing
    *
    * @param swapFile The swap file
    */
   public SwapOutputStream(File swapFile) {
+    this.swapFile = Check.notNull(swapFile).ok();
+  }
+
+  /**
+   * @param swapFile The swap file
+   * @param bufSize The size in bytes of the internal buffer
+   */
+  public SwapOutputStream(File swapFile, int bufSize) {
     this.swapFile = Check.notNull(swapFile).ok();
   }
 
@@ -68,9 +78,4 @@ public abstract class SwapOutputStream extends OutputStream {
    * automatically, but it could be used for debug or logging purposes.
    */
   public abstract boolean hasSwapped();
-
-  final OutputStream open() throws IOException {
-    Check.that(swapFile).is(fileNotExists());
-    return new FileOutputStream(swapFile);
-  }
 }
