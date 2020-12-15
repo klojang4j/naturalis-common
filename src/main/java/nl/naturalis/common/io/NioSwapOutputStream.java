@@ -93,10 +93,6 @@ public class NioSwapOutputStream extends SwapOutputStream {
     }
   }
 
-  /** This method does nothing. */
-  @Override
-  public void flush() throws IOException {}
-
   /**
    * If the {@code ArraySwapOutputStream} has started writing to the swap file, any remaining bytes
    * in the internal buffer will be flushed to it and the output stream to the swap file will be
