@@ -6,9 +6,9 @@ import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import static nl.naturalis.common.check.Messages.createMessage;
 
-final class IntCheck<E extends Exception> extends Check<Integer, E> {
+class IntCheck<E extends Exception> extends Check<Integer, E> {
 
-  private final int arg;
+  private int arg;
 
   IntCheck(int arg, String argName, Function<String, E> excFactory) {
     super(argName, excFactory);

@@ -21,7 +21,6 @@ import static nl.naturalis.common.StringMethods.ifBlank;
 import static nl.naturalis.common.check.CommonChecks.endsWith;
 import static nl.naturalis.common.check.CommonChecks.gt;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
-import static nl.naturalis.common.check.CommonChecks.whatever;
 import static nl.naturalis.common.check.CommonGetters.strlen;
 import static nl.naturalis.common.time.FuzzyDateException.cannotCreateFilter;
 import static nl.naturalis.common.time.FuzzyDateException.cannotCreateFormatter;
@@ -172,7 +171,7 @@ class ParseInfoConfig extends Properties {
       Check.with(s -> cannotCreateFormatter(name), name)
           .has(strlen(), gt(), 3)
           .is(endsWith(), ".")
-          .is(whatever(i > 0));
+          .given(i > 0);
       try {
         Class<?> clazz = Class.forName(name.substring(0, i));
         field = clazz.getDeclaredField(name.substring(i + 1));

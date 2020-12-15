@@ -304,6 +304,41 @@ public class CheckTest {
     Check.that(-7).has(abs(), eq(), 7);
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void given01() {
+    byte[] b = new byte[10];
+    int off = -5;
+    int len = 7;
+    // -5 + 7 < 10, but -5 not allowed
+    Check.that(b).is(notNull()).has(length(), gte(), off + len).given(off >= 0, len >= 0);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void given02() {
+    byte[] b = new byte[10];
+    int off = -5;
+    int len = 7;
+    // -5 + 7 < 10, but -5 not allowed
+    Check.that(b)
+        .is(notNull())
+        .has(length(), gte(), off + len)
+        // Without message argument
+        .given("No can do buddy", off >= 0, len >= 0);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void given03() {
+    byte[] b = new byte[10];
+    int off = -5;
+    int len = 7;
+    // -5 + 7 < 10, but -5 not allowed
+    Check.that(b)
+        .is(notNull())
+        .has(length(), gte(), off + len)
+        // With message argument
+        .given("No can do buddy: check condition %d", off >= 0, len >= 0);
+  }
+
   @Test
   public void testNotApplicable01() {
     try {

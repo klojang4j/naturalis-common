@@ -1,2 +1,2 @@
-/** Classes related to functional programming. */
+/** Classes and interfaces related to functional programming. */
 package nl.naturalis.common.function;

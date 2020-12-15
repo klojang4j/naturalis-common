@@ -37,92 +37,6 @@ public class CommonChecks {
 
   private CommonChecks() {}
 
-  /**
-   * Equivalent to {@link Predicate#not(Predicate) Predicate.not(test)}. This is a utility method.
-   * It can be used to transform an argument check, but it is not itself an argument check. It is
-   * not associated with a message.
-   *
-   * @param <X> The type of the argument
-   * @param test The test
-   * @return The negation of the specified {@code Predicate}.
-   */
-  public static <X> Predicate<X> not(Predicate<X> test) {
-    return Predicate.not(test);
-  }
-
-  /**
-   * Returns a {@code Predicate} that ignores its argument and simply evaluates the specified
-   * condition. This is a utility method. It is not associated with a message.
-   *
-   * @param <X> The argument
-   * @param condition The condition to evaluate whatever the argument's value
-   * @return A {@code Predicate} that ignores its argument and simply evaluates the specified
-   *     condition
-   */
-  public static <X> Predicate<X> whatever(boolean condition) {
-    return x -> condition;
-  }
-
-  /**
-   * Returns the negation of the specified {@code Relation}. Equivalent to {@link
-   * Relation#not(Relation) Relation.not(relation)}. This is a utility method. It can be used to
-   * transform an argument check, but it is not itself an argument check. It is not associated with
-   * a message.
-   *
-   * @see Relation#not(Relation)
-   * @param <X> The type of the subject of the original relation
-   * @param <Y> The type of the object of the original relation
-   * @param relation The {@code Relation} to return the negation of
-   * @return The negated {@code Relation}
-   */
-  public static <X, Y> Relation<X, Y> not(Relation<X, Y> relation) {
-    return Relation.not(relation);
-  }
-
-  /**
-   * Returns the negation of the specified {@code IntRelation}. Equivalent to {@link
-   * IntRelation#not(Relation) IntRelation.not(relation)}. This is a utility method. It can be used
-   * to transform an argument check, but it is not itself an argument check. It is not associated
-   * with a message.
-   *
-   * @see IntRelation#not(Relation)
-   * @param relation The {@code IntRelation} to return the negation of
-   * @return The negated {@code IntRelation}
-   */
-  public static IntRelation not(IntRelation relation) {
-    return IntRelation.not(relation);
-  }
-
-  /**
-   * Returns the reverse of the specified {@code Relation}, swapping subject and object of the
-   * relation. Equivalent to {@link Relation#reverse(Relation) Relation.reverse(relation)}. This is
-   * a utility method. It can be used to transform an argument check, but it is not itself an
-   * argument check. It is not associated with a message.
-   *
-   * @see Relation#reverse(Relation)
-   * @param <X> The type of the subject of the original relation
-   * @param <Y> The type of the object of the original relation
-   * @param relation The {@code Relation} to return the reverse of
-   * @return The reverse {@code Relation}
-   */
-  public static <X, Y> Relation<Y, X> reverse(Relation<X, Y> relation) {
-    return Relation.reverse(relation);
-  }
-
-  /**
-   * Returns the reverse of the specified {@code IntRelation}, swapping subject and object of the
-   * relation. Equivalent to {@link IntRelation#reverse(Relation) IntRelation.reverse(relation)}.
-   * This is a utility method. It can be used to transform an argument check, but it is not itself
-   * an argument check. It is not associated with a message.
-   *
-   * @see IntRelation#not(Relation)
-   * @param relation The {@code IntRelation} to return the negation of
-   * @return The negated {@code IntRelation}
-   */
-  public static IntRelation reverse(IntRelation relation) {
-    return IntRelation.not(relation);
-  }
-
   /* ++++++++++++++ Predicate ++++++++++++++ */
 
   /**
@@ -1248,6 +1162,10 @@ public class CommonChecks {
     addMessage(multipleOf(), msgMultipleOf());
     addName(multipleOf(), "multipleOf");
   }
+
+  /* ++++++++++++++ Miscellaneous ++++++++++++++ */
+
+  /* ++++++++++++++ END OF CHECKS ++++++++++++++ */
 
   static {
     messages = new IdentityHashMap<>(tmp0.size());

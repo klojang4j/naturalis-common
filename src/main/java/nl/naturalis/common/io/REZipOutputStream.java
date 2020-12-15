@@ -138,8 +138,8 @@ public class REZipOutputStream extends OutputStream {
       String name = entry.getName();
       Check.that(name)
           .is(notEqualTo(), mainEntry.getName(), DUPLICATE_ENTRY, name)
-          .is(notKeyIn(), sideEntries, DUPLICATE_ENTRY, name);
-      sideEntries.put(name, Tuple.of(entry, out));
+          .is(notKeyIn(), sideEntries, DUPLICATE_ENTRY, name)
+          .then(n -> sideEntries.put(n, Tuple.of(entry, out)));
       return this;
     }
 

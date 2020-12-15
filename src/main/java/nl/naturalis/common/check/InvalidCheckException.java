@@ -82,7 +82,7 @@ public class InvalidCheckException extends RuntimeException {
     return new InvalidCheckException(msg);
   }
 
-  private InvalidCheckException(String message) {
+  InvalidCheckException(String message) {
     super(message);
   }
 }

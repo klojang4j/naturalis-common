@@ -1,5 +1,6 @@
 package nl.naturalis.common.check;
 
+import java.io.OutputStream;
 import java.util.function.*;
 import nl.naturalis.common.NumberMethods;
 import nl.naturalis.common.function.*;
@@ -316,8 +317,8 @@ public abstract class Check<T, E extends Exception> {
   // Instance fields / methods start here
   //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  final String argName;
-  final Function<String, E> excFactory;
+  String argName;
+  Function<String, E> excFactory;
 
   Check(String argName, Function<String, E> exceptionFactory) {
     this.argName = argName;
@@ -390,9 +391,9 @@ public abstract class Check<T, E extends Exception> {
   public abstract Check<T, E> is(IntPredicate test, String message, Object... msgArgs) throws E;
 
   /**
-   * Verifies that there is some relation between the argument and some other value. This method is
-   * especially useful when using the (statically imported) tests in thw {@link CommonChecks} class,
-   * as they have predefined, informative error messages associated with them.
+   * Verifies that the specified relation exists between the argument and some other value. This
+   * method is especially useful when using the (statically imported) tests in thw {@link
+   * CommonChecks} class, as they have predefined, informative error messages associated with them.
    *
    * @param <U> The type of the object of the relationship
    * @param relation The relation to verify between the argument and the specified value ({@code
@@ -410,8 +411,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that there is some relation between the argument and some other value. Allows you to
-   * provide a custom error message.
+   * Verifies that the specified relation exists between the argument and some other value. Allows
+   * you to provide a custom error message.
    *
    * @param <U> The type of the object of the relationship
    * @param relation The relation to verify between the argument and the specified value ({@code
@@ -432,9 +433,9 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that there is some relation between the argument and some other value. This method is
-   * especially useful when using the (statically imported) tests in thw {@link CommonChecks} class,
-   * as they have predefined, informative error messages associated with them.
+   * Verifies that the specified relation exists between the argument and some other value. This
+   * method is especially useful when using the (statically imported) tests in thw {@link
+   * CommonChecks} class, as they have predefined, informative error messages associated with them.
    *
    * @param relation The relation to verify between the argument and the specified value ({@code
    *     relateTo})
@@ -451,8 +452,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that there is some relation between the argument and some other value. Allows you to
-   * provide a custom error message.
+   * Verifies that the specified relation exists between the argument and some other value. Allows
+   * you to provide a custom error message.
    *
    * @param relation The relation to verify between the argument and the specified value ({@code
    *     relateTo})
@@ -472,7 +473,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that there is some relation between the integer argument and some object.
+   * Verifies that the specified relation exists between the integer argument and some object.
    *
    * @param <U> The type of the object of the relationship
    * @param relation The relation to verify between the argument and the specified value ({@code
@@ -484,8 +485,8 @@ public abstract class Check<T, E extends Exception> {
   public abstract <U> Check<T, E> is(IntObjRelation<U> relation, U relateTo) throws E;
 
   /**
-   * Verifies that there is some relation between the integer argument and some object. Allows you
-   * to provide a custom error message.
+   * Verifies that the specified relation exists between the integer argument and some object.
+   * Allows you to provide a custom error message.
    *
    * @param <U> The type of the object of the relationship
    * @param relation The relation to verify between the argument and the specified value ({@code
@@ -500,9 +501,9 @@ public abstract class Check<T, E extends Exception> {
       IntObjRelation<U> relation, U relateTo, String message, Object... msgArgs) throws E;
 
   /**
-   * Verifies that there is some relation between the argument and some other value. This method is
-   * especially useful when using the (statically imported) tests in thw {@link CommonChecks} class,
-   * as they have predefined, informative error messages associated with them.
+   * Verifies that the specified relation exists between the argument and some other value. This
+   * method is especially useful when using the (statically imported) tests in thw {@link
+   * CommonChecks} class, as they have predefined, informative error messages associated with them.
    *
    * @param relation The relation to verify between the argument and the specified integer ({@code
    *     relateTo})
@@ -513,8 +514,8 @@ public abstract class Check<T, E extends Exception> {
   public abstract Check<T, E> is(IntRelation relation, int relateTo) throws E;
 
   /**
-   * Verifies that there is some relation between the argument and some other value. Allows you to
-   * provide a custom error message.
+   * Verifies that the specified relation exists between the argument and some other value. Allows
+   * you to provide a custom error message.
    *
    * @param relation The relation to verify between the argument and the specified integer ({@code
    *     relateTo})
@@ -654,7 +655,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that there is some relation between a property of the argument and some other value.
+   * Verifies that the specified relation exists between a property of the argument and some other
+   * value.
    *
    * @param <U> The type of the property
    * @param <V> The type of the object of the relationship
@@ -678,8 +680,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that there is some relation between a property of the argument and some other value.
-   * Can be used if you pass one of the getters defined in {@link CommonGetters} as these are
+   * Verifies that the specified relation exists between a property of the argument and some other
+   * value. Can be used if you pass one of the getters defined in {@link CommonGetters} as these are
    * already associated with a property name.
    *
    * @param <U> The type of the property
@@ -703,7 +705,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that there is some relation between a property of the argument and some other value.
+   * Verifies that the specified relation exists between a property of the argument and some other
+   * value.
    *
    * @param <U> The type of the property
    * @param <V> The type of the object of the relationship
@@ -728,7 +731,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that there is some relation between a property of the argument and some other value.
+   * Verifies that the specified relation exists between a property of the argument and some other
+   * value.
    *
    * @param <U> The type of the property
    * @param getter A {@code Function} which is given the argument as input and which should return
@@ -751,8 +755,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that there is some relation between a property of the argument and some other value.
-   * Can be used if you pass one of the getters defined in {@link CommonGetters} as these are
+   * Verifies that the specified relation exists between a property of the argument and some other
+   * value. Can be used if you pass one of the getters defined in {@link CommonGetters} as these are
    * already associated with a property name.
    *
    * @param <U> The type of the property
@@ -775,7 +779,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that there is some relation between a property of the argument and some other value.
+   * Verifies that the specified relation exists between a property of the argument and some other
+   * value.
    *
    * @param <U> The type of the property
    * @param getter A {@code Function} which is given the argument as input and which should return
@@ -803,7 +808,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that there is some relation between a property of the argument and some other value.
+   * Verifies that the specified relation exists between a property of the argument and some other
+   * value.
    *
    * @param getter A {@code Function} which is given the argument as input and which should return
    *     the subject of the relationship
@@ -825,8 +831,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that there is some relation between a property of the argument and some other value.
-   * Can be used if you pass one of the getters defined in {@link CommonGetters} as these are
+   * Verifies that the specified relation exists between a property of the argument and some other
+   * value. Can be used if you pass one of the getters defined in {@link CommonGetters} as these are
    * already associated with a property name.
    *
    * @param getter A {@code Function} which is given the argument as input and which should return
@@ -847,7 +853,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that there is some relation between a property of the argument and some other value.
+   * Verifies that the specified relation exists between a property of the argument and some other
+   * value.
    *
    * @param getter A {@code Function} which is given the argument as input and which should return
    *     the subject of the relationship
@@ -871,6 +878,76 @@ public abstract class Check<T, E extends Exception> {
     }
     String msg = String.format(message, msgArgs);
     throw excFactory.apply(msg);
+  }
+
+  /**
+   * Imposes some extra preconditions that may or may not be related to the argument being checked
+   * by this instance. Lazy but practical. For example a precondition check for a typical {@link
+   * OutputStream#write(byte[], int, int) OutputStream.write(b, off, len)} implementation might look
+   * like:
+   *
+   * <p>
+   *
+   * <pre>
+   * write(byte[] b, int off, int len) {
+   *   Check.notNull(b, "b").has(length(), gte(), off + len).given(off >= 0, len >= 0);
+   *   // We're good
+   * }
+   * </pre>
+   *
+   * @param conditions The conditions to evaluate
+   * @return This {@code Check} object
+   * @throws E If any of the conditions evaluate to false
+   */
+  public Check<T, E> given(boolean... conditions) throws E {
+    if (conditions == null || conditions.length == 0) {
+      throw new InvalidCheckException("No conditions provided");
+    }
+    for (int i = 0; i < conditions.length; ++i) {
+      if (!conditions[i]) {
+        String msg = String.format("Given condition %d not satisfied", i + 1);
+        throw excFactory.apply(msg);
+      }
+    }
+    return this;
+  }
+
+  /**
+   * Imposes some extra preconditions that may or may not be related to the argument being checked
+   * by this instance. Lazy but practical. For example a precondition check for a typical {@link
+   * OutputStream#write(byte[], int, int) OutputStream.write(b, off, len)} implementation might look
+   * like:
+   *
+   * <p>
+   *
+   * <pre>
+   * write(byte[] b, int off, int len) {
+   *   Check.that(b, "b")
+   *     .is(notNull())
+   *     .has(length(), gte(), off + len)
+   *     .given("No can do buddy: check condition %d", off >= 0, len >= 0);
+   *   // We're good
+   * }
+   * </pre>
+   *
+   * @param message A custom message that may (but does not have to) contain one %d message
+   *     argument. The message argument is substituted with the one-based number of the first
+   *     condition that failed.
+   * @param conditions The conditions to evaluate
+   * @return This {@code Check} object
+   * @throws E If any of the conditions evaluate to false
+   */
+  public Check<T, E> given(String message, boolean... conditions) throws E {
+    if (conditions == null || conditions.length == 0) {
+      throw new InvalidCheckException("No conditions provided");
+    }
+    for (int i = 0; i < conditions.length; ++i) {
+      if (!conditions[i]) {
+        String msg = String.format(message, i + 1);
+        throw excFactory.apply(msg);
+      }
+    }
+    return this;
   }
 
   /**

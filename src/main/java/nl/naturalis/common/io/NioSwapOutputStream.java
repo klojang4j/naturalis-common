@@ -13,7 +13,9 @@ import static java.nio.file.StandardOpenOption.WRITE;
 import static nl.naturalis.common.IOMethods.createTempFile;
 import static nl.naturalis.common.check.CommonChecks.fileNotExists;
 import static nl.naturalis.common.check.CommonChecks.gt;
+import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonChecks.no;
+import static nl.naturalis.common.check.CommonGetters.length;
 
 /**
  * A {@code SwapOutputStream} that uses {@code java.nio} classes to implement buffering and
@@ -56,10 +58,12 @@ public class NioSwapOutputStream extends SwapOutputStream {
   private FileChannel chan;
   private boolean closed;
 
+  /** See {@link SwapOutputStream#SwapOutputStream(File)}. */
   public NioSwapOutputStream(File swapFile) {
     this(swapFile, 64 * 1024);
   }
 
+  /** See {@link SwapOutputStream#SwapOutputStream(File, int)}. */
   public NioSwapOutputStream(File swapFile, int bufSize) {
     super(swapFile);
     this.buf = Check.that(bufSize).is(gt(), 0).ok(ByteBuffer::allocateDirect);
@@ -80,6 +84,7 @@ public class NioSwapOutputStream extends SwapOutputStream {
    */
   @Override
   public void write(byte[] b, int off, int len) throws IOException {
+    Check.notNull(b, "b").has(length(), gte(), off + len).given(off >= 0, len >= 0);
     // If the incoming byte array is bigger than the internal buffer we don't bother buffering it.
     // We flush the internal buffer and then write the byte array directly to the output stream
     if (len > buf.capacity()) {
