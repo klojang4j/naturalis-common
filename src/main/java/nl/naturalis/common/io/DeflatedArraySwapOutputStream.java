@@ -67,10 +67,8 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
   }
 
   private final Deflater def;
-  // Buffer for the deflator to
+  // Buffer from receiing the output from the defater
   private final byte[] temp = new byte[1024];
-
-  private boolean closed;
 
   /**
    * Creates a new {@code DeflatedArraySwapOutputStream} with an internal buffer of 64 kB, swapping
@@ -139,12 +137,11 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
    * cannot re-use a {@code DeflatedArraySwapOutputStream} once you have called this method.
    */
   public void close() throws IOException {
-    if (!closed) {
+    if (!recalled()) {
       finish();
-      super.close();
       def.end();
-      closed = true;
     }
+    super.close();
   }
 
   private void finish() throws IOException {

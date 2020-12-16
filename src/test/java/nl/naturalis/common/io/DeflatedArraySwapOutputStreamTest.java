@@ -2,6 +2,7 @@ package nl.naturalis.common.io;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import org.junit.Test;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -126,16 +127,89 @@ public class DeflatedArraySwapOutputStreamTest {
     assertFalse(sos.swapFile.exists());
   }
 
-  @Test // Example provided in the class comments of ZipFileSwapOutputStream
-  public void test12() throws IOException {
-    String data = "Is this going to be swapped???";
-    // Create ZipFileSwapOutputStream that swaps to a temp file if more
-    // than 8 bytes are written to it
-    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(8);
-    sos.write(data.getBytes());
+  @Test // Write after recall (1)
+  public void test106() throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    sos.recall(baos);
-    sos.cleanup();
-    assertEquals(data, baos.toString());
+    try (DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance()) {
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append("Hello, world!");
+        sos.recall(baos);
+        pw.append(" How are you?");
+      }
+    }
+    assertEquals("Hello, world! How are you?", baos.toString());
+  }
+
+  @Test // Write after recall (2)
+  public void test107() throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try (DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance()) {
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append("Hello, world!");
+        sos.recall(baos);
+      }
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append(" How are you?");
+      }
+    }
+    assertEquals("Hello, world! How are you?", baos.toString());
+  }
+
+  @Test // Write after recall (3)
+  public void test108() throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try (DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance()) {
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append("Hello, world!");
+      }
+      sos.recall(baos);
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append(" How are you?");
+      }
+    }
+    assertEquals("Hello, world! How are you?", baos.toString());
+  }
+
+  @Test // Write after swap and recall (1)
+  public void test109() throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try (DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(2)) {
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append("Hello, world!");
+        sos.recall(baos);
+        pw.append(" How are you?");
+      }
+    }
+    assertEquals("Hello, world! How are you?", baos.toString());
+  }
+
+  @Test // Write after swap and recall (2)
+  public void test110() throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try (DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(2)) {
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append("Hello, world!");
+        sos.recall(baos);
+      }
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append(" How are you?");
+      }
+    }
+    assertEquals("Hello, world! How are you?", baos.toString());
+  }
+
+  @Test // Write after swap and recall (3)
+  public void test111() throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try (DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(2)) {
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append("Hello, world!");
+      }
+      sos.recall(baos);
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append(" How are you?");
+      }
+    }
+    assertEquals("Hello, world! How are you?", baos.toString());
   }
 }
