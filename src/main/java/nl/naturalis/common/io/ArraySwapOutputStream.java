@@ -43,15 +43,19 @@ public class ArraySwapOutputStream extends SwapOutputStream {
     }
   }
 
+  // The internal buffer
   private final byte buf[];
 
   // The number wriiten to the buffer
   private int cnt;
+
   // The output stream to the swap file before the recall, or the output stream that the recalled
   // data was written to
   private OutputStream out;
+
   // Whether or not we had a buffer flow and thus had to swap to file
   private boolean swapped;
+
   // Whether or not data has been recalled - and hence write actions are now taking place on the
   // output stream that the recalled data was written to
   private boolean recalled;
@@ -127,15 +131,6 @@ public class ArraySwapOutputStream extends SwapOutputStream {
     }
   }
 
-  final void flushBuffer() throws IOException {
-    if (out == null) {
-      out = openSwapFile();
-      swapped = true;
-    }
-    out.write(buf, 0, cnt);
-    cnt = 0;
-  }
-
   /** See {@link SwapOutputStream#hasSwapped()}. */
   public final boolean hasSwapped() {
     return swapped;
@@ -176,8 +171,12 @@ public class ArraySwapOutputStream extends SwapOutputStream {
     return recalled;
   }
 
-  private OutputStream openSwapFile() throws IOException {
-    Check.with(IOException::new, swapFile).is(fileNotExists());
-    return new FileOutputStream(swapFile);
+  private void flushBuffer() throws IOException {
+    if (out == null) {
+      out = Check.with(IOException::new, swapFile).is(fileNotExists()).ok(FileOutputStream::new);
+      swapped = true;
+    }
+    out.write(buf, 0, cnt);
+    cnt = 0;
   }
 }

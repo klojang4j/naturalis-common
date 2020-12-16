@@ -53,9 +53,23 @@ public class NioSwapOutputStream extends SwapOutputStream {
     }
   }
 
+  // The internal buffer
   protected final ByteBuffer buf;
 
+  // FileChannel writing to he swap file
   private FileChannel chan;
+
+  // The output stream to write the recalled data to and the target of all write actions following
+  // the recall
+  private OutputStream out;
+
+  // Whether or not we had a buffer flow and thus had to swap to file
+  private boolean swapped;
+
+  // Whether or not data has been recalled - and hence write actions are now taking place on the
+  // output stream that the recalled data was written to
+  private boolean recalled;
+
   private boolean closed;
 
   /** See {@link SwapOutputStream#SwapOutputStream(File)}. */
@@ -72,10 +86,14 @@ public class NioSwapOutputStream extends SwapOutputStream {
   /** Writes the specified byte to this output stream. */
   @Override
   public void write(int b) throws IOException {
-    if (buf.position() + 1 > buf.capacity()) {
-      swap();
+    if (recalled) {
+      out.write(b);
+    } else {
+      if (buf.position() + 1 > buf.capacity()) {
+        flushBuffer();
+      }
+      buf.put((byte) b);
     }
-    buf.put((byte) b);
   }
 
   /**
@@ -85,14 +103,18 @@ public class NioSwapOutputStream extends SwapOutputStream {
   @Override
   public void write(byte[] b, int off, int len) throws IOException {
     Check.notNull(b, "b").has(length(), gte(), off + len).given(off >= 0, len >= 0);
+    if (recalled) {
+      out.write(b, off, len);
+      return;
+    }
     // If the incoming byte array is bigger than the internal buffer we don't bother buffering it.
     // We flush the internal buffer and then write the byte array directly to the output stream
     if (len > buf.capacity()) {
-      swap();
+      flushBuffer();
       chan.write(ByteBuffer.wrap(b, off, len));
     } else {
       if (buf.position() + len > buf.capacity()) {
-        swap();
+        flushBuffer();
       }
       buf.put(b, off, len);
     }
@@ -109,7 +131,7 @@ public class NioSwapOutputStream extends SwapOutputStream {
     if (!closed) {
       if (chan != null) {
         if (buf.position() > 0) {
-          swap();
+          flushBuffer();
         }
         chan.close();
       }
@@ -118,22 +140,13 @@ public class NioSwapOutputStream extends SwapOutputStream {
   }
 
   /** See {@link SwapOutputStream#recall(OutputStream)}. */
-  public void recall(OutputStream out) throws IOException {
-    Check.notNull(out);
+  public void recall(OutputStream target) throws IOException {
+    Check.notNull(target);
     if (hasSwapped()) {
-      readSwapFile(out);
+      readSwapFile(target);
     } else {
-      readBuffer(out);
+      readBuffer(target);
     }
-  }
-
-  public void swap() throws IOException {
-    if (chan == null) {
-      chan = openChannel();
-    }
-    buf.flip();
-    chan.write(buf);
-    buf.clear();
   }
 
   @Override
@@ -141,21 +154,21 @@ public class NioSwapOutputStream extends SwapOutputStream {
     return chan != null;
   }
 
-  final void readSwapFile(OutputStream out) throws IOException {
+  final void readSwapFile(OutputStream target) throws IOException {
     close();
     try (FileChannel fc = FileChannel.open(swapFile.toPath(), READ)) {
       int sz = Math.min(2048, buf.capacity());
       byte[] tmp = new byte[sz];
       for (int i = fc.read(buf); i > 0; i = fc.read(buf)) {
         buf.flip();
-        pipe(tmp, out);
+        pipe(tmp, target);
         buf.clear();
       }
     }
   }
 
-  final void readBuffer(OutputStream out) throws IOException {
-    Check.notNull(out);
+  final void readBuffer(OutputStream target) throws IOException {
+    Check.notNull(target);
     Check.with(IOException::new, hasSwapped()).is(no(), "Already swapped");
     // The readBuffer in ArraySwapOutputStream (unintentionally) is idempotent; you can read the
     // buffer while you're still writing to it. buf.flip() would disrupt this however. For
@@ -166,7 +179,7 @@ public class NioSwapOutputStream extends SwapOutputStream {
       buf.flip();
       int sz = Math.min(2048, buf.capacity());
       byte[] tmp = new byte[sz];
-      pipe(tmp, out);
+      pipe(tmp, target);
       buf.position(pos).limit(lim);
     }
   }
@@ -179,8 +192,13 @@ public class NioSwapOutputStream extends SwapOutputStream {
     }
   }
 
-  private FileChannel openChannel() throws IOException {
-    Check.with(IOException::new, swapFile).is(fileNotExists());
-    return FileChannel.open(swapFile.toPath(), CREATE_NEW, WRITE);
+  private void flushBuffer() throws IOException {
+    if (chan == null) {
+      Check.with(IOException::new, swapFile).is(fileNotExists());
+      chan = FileChannel.open(swapFile.toPath(), CREATE_NEW, WRITE);
+    }
+    buf.flip();
+    chan.write(buf);
+    buf.clear();
   }
 }

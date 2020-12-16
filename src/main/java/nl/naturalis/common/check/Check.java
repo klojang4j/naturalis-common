@@ -963,14 +963,15 @@ public abstract class Check<T, E extends Exception> {
   public abstract T ok();
 
   /**
-   * Passes the validated argument to the specified {@code Function} and returns the value computed
-   * by the {@code Function}. To be used as the last call after a chain of checks.
+   * Passes the argument to the specified {@code Function} and returns the value it computes. To be
+   * used as the last call after a chain of checks.
    *
    * @param <U> The type of the returned value
    * @param transformer A {@code Function} that transforms the argument into some other value
    * @return The value computed by the {@code Function}
+   * @throws F The exception potentially thrown by the {@code Function}
    */
-  public <U> U ok(Function<T, U> transformer) {
+  public <U, F extends Exception> U ok(ThrowingFunction<T, U, F> transformer) throws F {
     return transformer.apply(ok());
   }
 
