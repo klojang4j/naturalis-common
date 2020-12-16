@@ -8,6 +8,8 @@ import java.util.zip.InflaterOutputStream;
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.IOMethods.createTempFile;
+import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonGetters.length;
 
 /**
  * A {@code SwapOutputStream} that compresses the data as it enters the internal buffer, thereby
@@ -108,27 +110,28 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
 
   @Override
   public void write(int b) throws IOException {
-    write(new byte[] {(byte) (b & 0xff)}, 0, 1);
+    write(new byte[] {(byte) b}, 0, 1);
   }
 
   @Override
   public void write(byte[] b, int off, int len) throws IOException {
-    def.setInput(b, off, len);
-    while (!def.needsInput()) {
-      deflate();
+    if (recalled()) {
+      super.write(b, off, len);
+    } else {
+      Check.notNull(b, "b").has(length(), gte(), off + len).given(off >= 0, len >= 0);
+      def.setInput(b, off, len);
+      while (!def.needsInput()) {
+        deflate();
+      }
     }
   }
 
-  /** See {@link SwapOutputStream#recall(OutputStream)}. */
-  @Override
-  public void recall(OutputStream out) throws IOException {
-    Check.notNull(out);
+  void prepareRecall() throws IOException {
     finish();
-    if (hasSwapped()) {
-      readSwapFile(new InflaterOutputStream(out));
-    } else {
-      readBuffer(new InflaterOutputStream(out));
-    }
+  }
+
+  OutputStream wrapRecallOutputStream(OutputStream target) {
+    return new InflaterOutputStream(target);
   }
 
   /**

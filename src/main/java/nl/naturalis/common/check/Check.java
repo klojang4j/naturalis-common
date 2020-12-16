@@ -891,7 +891,7 @@ public abstract class Check<T, E extends Exception> {
    * <pre>
    * write(byte[] b, int off, int len) {
    *   Check.notNull(b, "b").has(length(), gte(), off + len).given(off >= 0, len >= 0);
-   *   // We're good
+   *   // ...
    * }
    * </pre>
    *
@@ -905,7 +905,8 @@ public abstract class Check<T, E extends Exception> {
     }
     for (int i = 0; i < conditions.length; ++i) {
       if (!conditions[i]) {
-        String msg = String.format("Given condition %d not satisfied", i + 1);
+        String s = argName.equals(DEFAULT_ARG_NAME) ? " " : argName + " ";
+        String msg = String.format("Argument %snot valid given condition %d", s, i + 1);
         throw excFactory.apply(msg);
       }
     }
@@ -922,11 +923,10 @@ public abstract class Check<T, E extends Exception> {
    *
    * <pre>
    * write(byte[] b, int off, int len) {
-   *   Check.that(b, "b")
-   *     .is(notNull())
+   *   Check.notNull(b, "b")
    *     .has(length(), gte(), off + len)
    *     .given("No can do buddy: check condition %d", off >= 0, len >= 0);
-   *   // We're good
+   *   // ...
    * }
    * </pre>
    *

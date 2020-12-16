@@ -45,11 +45,16 @@ public class ArraySwapOutputStream extends SwapOutputStream {
 
   private final byte buf[];
 
-  // The number live bytes in the buffer
+  // The number wriiten to the buffer
   private int cnt;
-  // The output stream to the swap file
+  // The output stream to the swap file before the recall, or the output stream that the recalled
+  // data was written to
   private OutputStream out;
-  private boolean closed;
+  // Whether or not we had a buffer flow and thus had to swap to file
+  private boolean swapped;
+  // Whether or not data has been recalled - and hence write actions are now taking place on the
+  // output stream that the recalled data was written to
+  private boolean recalled;
 
   /** See {@link SwapOutputStream#SwapOutputStream(File)}. */
   public ArraySwapOutputStream(File swapFile) {
@@ -66,7 +71,7 @@ public class ArraySwapOutputStream extends SwapOutputStream {
   @Override
   public void write(int b) throws IOException {
     if (cnt == buf.length) {
-      swap();
+      flushBuffer();
     }
     buf[cnt++] = (byte) b;
   }
@@ -81,11 +86,11 @@ public class ArraySwapOutputStream extends SwapOutputStream {
     // If the incoming byte array is bigger than the internal buffer we don't bother buffering it.
     // We flush the internal buffer and then write the byte array directly to the output stream
     if (len > buf.length) {
-      swap();
+      flushBuffer();
       out.write(b, off, len);
     } else {
       if (cnt + len > buf.length) {
-        swap();
+        flushBuffer();
       }
       System.arraycopy(b, off, buf, cnt, len);
       cnt += len;
@@ -98,7 +103,8 @@ public class ArraySwapOutputStream extends SwapOutputStream {
    */
   @Override
   public void flush() throws IOException {
-    if (out != null) {
+    if (swapped || recalled) {
+      flushBuffer();
       out.flush();
     }
   }
@@ -111,31 +117,20 @@ public class ArraySwapOutputStream extends SwapOutputStream {
    */
   @Override
   public void close() throws IOException {
-    if (!closed) {
-      if (out != null) {
-        if (cnt > 0) {
-          swap();
-        }
-        out.close();
+    if (recalled) {
+      if (cnt > 0) {
+        flushBuffer();
       }
-      closed = true;
+      out.flush();
+    } else if (swapped) {
+      out.close();
     }
   }
 
-  /** See {@link SwapOutputStream#recall(OutputStream)}. */
-  public void recall(OutputStream out) throws IOException {
-    Check.notNull(out);
-    if (hasSwapped()) {
-      readSwapFile(out);
-    } else {
-      readBuffer(out);
-    }
-  }
-
-  /** See {@link SwapOutputStream#swap()}. */
-  public final void swap() throws IOException {
+  final void flushBuffer() throws IOException {
     if (out == null) {
-      out = openOutputStream();
+      out = openSwapFile();
+      swapped = true;
     }
     out.write(buf, 0, cnt);
     cnt = 0;
@@ -143,25 +138,52 @@ public class ArraySwapOutputStream extends SwapOutputStream {
 
   /** See {@link SwapOutputStream#hasSwapped()}. */
   public final boolean hasSwapped() {
-    return out != null;
+    return swapped;
+  }
+
+  /** See {@link SwapOutputStream#recall(OutputStream)}. */
+  public void recall(OutputStream target) throws IOException {
+    Check.notNull(target);
+    Check.with(IOException::new, recalled).is(no(), "Already recalled");
+    prepareRecall();
+    if (swapped) {
+      if (cnt > 0) {
+        flushBuffer();
+      }
+      out.close();
+      readSwapFile(wrapRecallOutputStream(target));
+    } else {
+      readBuffer(wrapRecallOutputStream(target));
+    }
+    this.out = target;
+    this.recalled = true;
+  }
+
+  /** @throws IOException */
+  void prepareRecall() throws IOException {}
+
+  OutputStream wrapRecallOutputStream(OutputStream target) {
+    return target;
   }
 
   void readSwapFile(OutputStream target) throws IOException, FileNotFoundException {
-    close();
     try (FileInputStream fis = new FileInputStream(swapFile)) {
       pipe(fis, target, buf.length);
     }
   }
 
   void readBuffer(OutputStream target) throws IOException {
-    Check.notNull(target);
-    Check.with(IOException::new, hasSwapped()).is(no(), "Already swapped");
     if (cnt > 0) {
       target.write(buf, 0, cnt);
+      cnt = 0;
     }
   }
 
-  private final OutputStream openOutputStream() throws IOException {
+  boolean recalled() {
+    return recalled;
+  }
+
+  private OutputStream openSwapFile() throws IOException {
     Check.with(IOException::new, swapFile).is(fileNotExists());
     return new FileOutputStream(swapFile);
   }

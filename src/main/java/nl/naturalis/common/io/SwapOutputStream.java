@@ -46,10 +46,10 @@ public abstract class SwapOutputStream extends OutputStream {
   /**
    * Collects the data written to this instance and writes it to the specified output stream.
    *
-   * @param output The output stream to which to write the data
+   * @param target The output stream to which to write the data
    * @throws IOException If an I/O error occurs
    */
-  public abstract void recall(OutputStream output) throws IOException;
+  public abstract void recall(OutputStream target) throws IOException;
 
   /**
    * Deletes the swap file. Can be called if, after the data has been recalled, the swap file is no
@@ -63,19 +63,9 @@ public abstract class SwapOutputStream extends OutputStream {
   }
 
   /**
-   * Forces the internal buffer to be flushed to the swap file, even if the internal buffer has not
-   * reached full capacity yet. You should not normally call this method as swapping is intended to
-   * be taken care of transparently. But it might be useful for debug purposes (e.g. to inspect the
-   * contents of a swap file).
-   *
-   * @throws IOException If an I/O error occurs
-   */
-  public abstract void swap() throws IOException;
-
-  /**
-   * Returns whether or not the {@code ArraySwapOutputStream} has started to write to the swap-to
-   * output stream. You should not normally need to call this method as swapping is taken care of
-   * automatically, but it could be used for debug or logging purposes.
+   * Returns whether or not a swap file was created. You should not normally need to call this
+   * method as swapping is taken care of automatically, but it could be used for debug or logging
+   * purposes.
    */
   public abstract boolean hasSwapped();
 }

@@ -127,7 +127,6 @@ public class NioSwapOutputStream extends SwapOutputStream {
     }
   }
 
-  @Override
   public void swap() throws IOException {
     if (chan == null) {
       chan = openChannel();
