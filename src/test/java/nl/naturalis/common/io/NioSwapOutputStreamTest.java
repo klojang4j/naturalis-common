@@ -178,6 +178,92 @@ public class NioSwapOutputStreamTest {
     assertEquals("02", "Hello, world", getContents(sos));
   }
 
+  @Test // Write after recall (1)
+  public void test106() throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try (ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance()) {
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append("Hello, world!");
+        sos.recall(baos);
+        pw.append(" How are you?");
+      }
+    }
+    assertEquals("Hello, world! How are you?", baos.toString());
+  }
+
+  @Test // Write after recall (2)
+  public void test107() throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try (ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance()) {
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append("Hello, world!");
+        sos.recall(baos);
+      }
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append(" How are you?");
+      }
+    }
+    assertEquals("Hello, world! How are you?", baos.toString());
+  }
+
+  @Test // Write after recall (3)
+  public void test108() throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try (ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance()) {
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append("Hello, world!");
+      }
+      sos.recall(baos);
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append(" How are you?");
+      }
+    }
+    assertEquals("Hello, world! How are you?", baos.toString());
+  }
+
+  @Test // Write after swap and recall (1)
+  public void test109() throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try (ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2)) {
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append("Hello, world!");
+        sos.recall(baos);
+        pw.append(" How are you?");
+      }
+    }
+    assertEquals("Hello, world! How are you?", baos.toString());
+  }
+
+  @Test // Write after swap and recall (2)
+  public void test110() throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try (ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2)) {
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append("Hello, world!");
+        sos.recall(baos);
+      }
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append(" How are you?");
+      }
+    }
+    assertEquals("Hello, world! How are you?", baos.toString());
+  }
+
+  @Test // Write after swap and recall (3)
+  public void test111() throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try (ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2)) {
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append("Hello, world!");
+      }
+      sos.recall(baos);
+      try (PrintWriter pw = new PrintWriter(sos)) {
+        pw.append(" How are you?");
+      }
+    }
+    assertEquals("Hello, world! How are you?", baos.toString());
+  }
+
   @Test // Example provided in the class comments of NioSwapOutputStream
   public void example() throws IOException {
     String data = "Will this be swapped or not? It doesn't matter";
