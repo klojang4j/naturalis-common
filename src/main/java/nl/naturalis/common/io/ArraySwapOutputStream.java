@@ -101,13 +101,9 @@ public class ArraySwapOutputStream extends SwapOutputStream {
     }
   }
 
-  /**
-   * Calls {@link OutputStream#flush() flush()} on the swap-to output stream if the {@code
-   * ArraySwapOutputStream} has started writing to it. Otherwise this method does nothing.
-   */
   @Override
   public void flush() throws IOException {
-    if (swapped || recalled) {
+    if (dataInBuffer() && (swapped || recalled)) {
       flushBuffer();
       out.flush();
     }
@@ -122,7 +118,7 @@ public class ArraySwapOutputStream extends SwapOutputStream {
   @Override
   public void close() throws IOException {
     if (recalled) {
-      if (cnt > 0) {
+      if (dataInBuffer()) {
         flushBuffer();
       }
       out.flush();
@@ -139,18 +135,19 @@ public class ArraySwapOutputStream extends SwapOutputStream {
   /** See {@link SwapOutputStream#recall(OutputStream)}. */
   public void recall(OutputStream target) throws IOException {
     Check.notNull(target);
-    Check.with(IOException::new, recalled).is(no(), "Already recalled");
+    Check.with(IOException::new, recalled).is(no(), "Data already recalled");
     prepareRecall();
+    OutputStream wrapped = wrap(target);
     if (swapped) {
-      if (cnt > 0) {
+      if (dataInBuffer()) {
         flushBuffer();
       }
       out.close();
       try (FileInputStream fis = new FileInputStream(swapFile)) {
-        pipe(fis, wrap(target), buf.length);
+        pipe(fis, wrapped, buf.length);
       }
-    } else if (cnt > 0) {
-      wrap(target).write(buf, 0, cnt);
+    } else if (dataInBuffer()) {
+      wrapped.write(buf, 0, cnt);
       cnt = 0;
     }
     this.out = target;
@@ -169,6 +166,10 @@ public class ArraySwapOutputStream extends SwapOutputStream {
 
   boolean recalled() {
     return recalled;
+  }
+
+  private boolean dataInBuffer() {
+    return cnt > 0;
   }
 
   private void flushBuffer() throws IOException {

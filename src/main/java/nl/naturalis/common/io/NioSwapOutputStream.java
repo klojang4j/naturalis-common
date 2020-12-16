@@ -55,6 +55,8 @@ public class NioSwapOutputStream extends SwapOutputStream {
 
   // The internal buffer
   protected final ByteBuffer buf;
+  // Temporary storage when flushing the buffer to an output stream
+  private final byte[] tmp;
 
   // FileChannel writing to he swap file
   private FileChannel chan;
@@ -70,8 +72,6 @@ public class NioSwapOutputStream extends SwapOutputStream {
   // output stream that the recalled data was written to
   private boolean recalled;
 
-  private boolean closed;
-
   /** See {@link SwapOutputStream#SwapOutputStream(File)}. */
   public NioSwapOutputStream(File swapFile) {
     this(swapFile, 64 * 1024);
@@ -81,6 +81,7 @@ public class NioSwapOutputStream extends SwapOutputStream {
   public NioSwapOutputStream(File swapFile, int bufSize) {
     super(swapFile);
     this.buf = Check.that(bufSize).is(gt(), 0).ok(ByteBuffer::allocateDirect);
+    tmp = new byte[Math.min(2048, buf.capacity())];
   }
 
   /** Writes the specified byte to this output stream. */
@@ -88,12 +89,12 @@ public class NioSwapOutputStream extends SwapOutputStream {
   public void write(int b) throws IOException {
     if (recalled) {
       out.write(b);
-    } else {
-      if (buf.position() + 1 > buf.capacity()) {
-        flushBuffer();
-      }
-      buf.put((byte) b);
+      return;
     }
+    if (buf.position() + 1 > buf.capacity()) {
+      sendToSwapFile();
+    }
+    buf.put((byte) b);
   }
 
   /**
@@ -110,13 +111,25 @@ public class NioSwapOutputStream extends SwapOutputStream {
     // If the incoming byte array is bigger than the internal buffer we don't bother buffering it.
     // We flush the internal buffer and then write the byte array directly to the output stream
     if (len > buf.capacity()) {
-      flushBuffer();
+      sendToSwapFile();
       chan.write(ByteBuffer.wrap(b, off, len));
     } else {
       if (buf.position() + len > buf.capacity()) {
-        flushBuffer();
+        sendToSwapFile();
       }
       buf.put(b, off, len);
+    }
+  }
+
+  @Override
+  public void flush() throws IOException {
+    if (dataInBuffer()) {
+      if (recalled) {
+        sendTo(out);
+        out.flush();
+      } else if (swapped) {
+        sendToSwapFile();
+      }
     }
   }
 
@@ -128,77 +141,82 @@ public class NioSwapOutputStream extends SwapOutputStream {
    */
   @Override
   public void close() throws IOException {
-    if (!closed) {
-      if (chan != null) {
-        if (buf.position() > 0) {
-          flushBuffer();
-        }
-        chan.close();
+    if (recalled) {
+      if (dataInBuffer()) {
+        sendTo(out);
+        out.flush();
       }
-      closed = true;
+    } else if (swapped) {
+      chan.close();
     }
   }
 
   /** See {@link SwapOutputStream#recall(OutputStream)}. */
   public void recall(OutputStream target) throws IOException {
     Check.notNull(target);
-    if (hasSwapped()) {
-      readSwapFile(target);
-    } else {
-      readBuffer(target);
+    Check.with(IOException::new, recalled).is(no(), "Data already recalled");
+    prepareRecall();
+    OutputStream wrapped = wrap(target);
+    if (swapped) {
+      if (dataInBuffer()) {
+        sendToSwapFile();
+      }
+      chan.close();
+      try (FileChannel fc = FileChannel.open(swapFile.toPath(), READ)) {
+        for (int i = fc.read(buf); i > 0; i = fc.read(buf)) {
+          sendTo(wrapped);
+        }
+      }
+    } else if (dataInBuffer()) {
+      sendTo(wrapped);
     }
+    this.out = target;
+    this.recalled = true;
   }
 
   @Override
   public boolean hasSwapped() {
-    return chan != null;
+    return swapped;
   }
 
-  final void readSwapFile(OutputStream target) throws IOException {
-    close();
-    try (FileChannel fc = FileChannel.open(swapFile.toPath(), READ)) {
-      int sz = Math.min(2048, buf.capacity());
-      byte[] tmp = new byte[sz];
-      for (int i = fc.read(buf); i > 0; i = fc.read(buf)) {
-        buf.flip();
-        pipe(tmp, target);
-        buf.clear();
-      }
+  // Allow subclasses to flush pending output to the internal buffer.
+  @SuppressWarnings("unused")
+  void prepareRecall() throws IOException {}
+
+  // Allow subclasses to wrap the recall output stream in an outstream that does the reverse of
+  // their write actions (zip/unzip)
+  OutputStream wrap(OutputStream target) {
+    return target;
+  }
+
+  boolean recalled() {
+    return recalled;
+  }
+
+  private boolean dataInBuffer() {
+    return buf.position() > 0;
+  }
+
+  // Empties the contents of the buffer into the swap file
+  private void sendToSwapFile() throws IOException {
+    if (chan == null) {
+      Check.with(IOException::new, swapFile).is(fileNotExists());
+      chan = FileChannel.open(swapFile.toPath(), CREATE_NEW, WRITE);
+      swapped = true;
     }
+    buf.flip();
+    chan.write(buf);
+    buf.clear();
   }
 
-  final void readBuffer(OutputStream target) throws IOException {
-    Check.notNull(target);
-    Check.with(IOException::new, hasSwapped()).is(no(), "Already swapped");
-    // The readBuffer in ArraySwapOutputStream (unintentionally) is idempotent; you can read the
-    // buffer while you're still writing to it. buf.flip() would disrupt this however. For
-    // predictability's sake, let's make this implementation of readBuffer idempotent as well.
-    if (buf.position() > 0) {
-      int pos = buf.position();
-      int lim = buf.limit();
-      buf.flip();
-      int sz = Math.min(2048, buf.capacity());
-      byte[] tmp = new byte[sz];
-      pipe(tmp, target);
-      buf.position(pos).limit(lim);
-    }
-  }
-
-  private void pipe(byte[] tmp, OutputStream out) throws IOException {
+  // Empties the contents of the buffer into the post-recall output stream
+  private void sendTo(OutputStream out) throws IOException {
+    buf.flip();
     while (buf.hasRemaining()) {
       int len = Math.min(tmp.length, buf.remaining());
       buf.get(tmp, 0, len);
       out.write(tmp, 0, len);
     }
-  }
-
-  private void flushBuffer() throws IOException {
-    if (chan == null) {
-      Check.with(IOException::new, swapFile).is(fileNotExists());
-      chan = FileChannel.open(swapFile.toPath(), CREATE_NEW, WRITE);
-    }
-    buf.flip();
-    chan.write(buf);
     buf.clear();
   }
 }
