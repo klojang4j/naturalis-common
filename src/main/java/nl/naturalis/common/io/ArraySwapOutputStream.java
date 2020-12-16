@@ -151,32 +151,25 @@ public class ArraySwapOutputStream extends SwapOutputStream {
         flushBuffer();
       }
       out.close();
-      readSwapFile(wrapRecallOutputStream(target));
-    } else {
-      readBuffer(wrapRecallOutputStream(target));
+      try (FileInputStream fis = new FileInputStream(swapFile)) {
+        pipe(fis, wrap(target), buf.length);
+      }
+    } else if (cnt > 0) {
+      wrap(target).write(buf, 0, cnt);
+      cnt = 0;
     }
     this.out = target;
     this.recalled = true;
   }
 
-  /** @throws IOException */
+  // Allow subclasses to flush pending output to the internal buffer.
+  @SuppressWarnings("unused")
   void prepareRecall() throws IOException {}
 
-  OutputStream wrapRecallOutputStream(OutputStream target) {
+  // Allow subclasses to wrap the recall output stream in an outstream that does the reverse of
+  // their write actions (zip/unzip)
+  OutputStream wrap(OutputStream target) {
     return target;
-  }
-
-  void readSwapFile(OutputStream target) throws IOException, FileNotFoundException {
-    try (FileInputStream fis = new FileInputStream(swapFile)) {
-      pipe(fis, target, buf.length);
-    }
-  }
-
-  void readBuffer(OutputStream target) throws IOException {
-    if (cnt > 0) {
-      target.write(buf, 0, cnt);
-      cnt = 0;
-    }
   }
 
   boolean recalled() {

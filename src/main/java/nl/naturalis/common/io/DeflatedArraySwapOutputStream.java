@@ -6,10 +6,7 @@ import java.io.OutputStream;
 import java.util.zip.Deflater;
 import java.util.zip.InflaterOutputStream;
 import nl.naturalis.common.ExceptionMethods;
-import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.IOMethods.createTempFile;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonGetters.length;
 
 /**
  * A {@code SwapOutputStream} that compresses the data as it enters the internal buffer, thereby
@@ -116,7 +113,6 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
     if (recalled()) {
       super.write(b, off, len);
     } else {
-      Check.notNull(b, "b").has(length(), gte(), off + len).given(off >= 0, len >= 0);
       def.setInput(b, off, len);
       while (!def.needsInput()) {
         deflate();
@@ -124,24 +120,20 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
     }
   }
 
-  void prepareRecall() throws IOException {
-    finish();
-  }
-
-  OutputStream wrapRecallOutputStream(OutputStream target) {
-    return new InflaterOutputStream(target);
-  }
-
-  /**
-   * Closes the {@code DeflatedArraySwapOutputStream} and releases all resources held by it. You
-   * cannot re-use a {@code DeflatedArraySwapOutputStream} once you have called this method.
-   */
   public void close() throws IOException {
     if (!recalled()) {
       finish();
       def.end();
     }
     super.close();
+  }
+
+  void prepareRecall() throws IOException {
+    finish();
+  }
+
+  OutputStream wrap(OutputStream target) {
+    return new InflaterOutputStream(target);
   }
 
   private void finish() throws IOException {
