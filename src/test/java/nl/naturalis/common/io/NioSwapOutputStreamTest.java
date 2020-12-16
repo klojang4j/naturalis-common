@@ -181,7 +181,7 @@ public class NioSwapOutputStreamTest {
   @Test // Write after recall (1)
   public void test106() throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try (ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance()) {
+    try (NioSwapOutputStream sos = NioSwapOutputStream.newInstance()) {
       try (PrintWriter pw = new PrintWriter(sos)) {
         pw.append("Hello, world!");
         sos.recall(baos);
@@ -194,7 +194,7 @@ public class NioSwapOutputStreamTest {
   @Test // Write after recall (2)
   public void test107() throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try (ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance()) {
+    try (NioSwapOutputStream sos = NioSwapOutputStream.newInstance()) {
       try (PrintWriter pw = new PrintWriter(sos)) {
         pw.append("Hello, world!");
         sos.recall(baos);
@@ -209,7 +209,7 @@ public class NioSwapOutputStreamTest {
   @Test // Write after recall (3)
   public void test108() throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try (ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance()) {
+    try (NioSwapOutputStream sos = NioSwapOutputStream.newInstance()) {
       try (PrintWriter pw = new PrintWriter(sos)) {
         pw.append("Hello, world!");
       }
@@ -224,7 +224,7 @@ public class NioSwapOutputStreamTest {
   @Test // Write after swap and recall (1)
   public void test109() throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try (ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2)) {
+    try (NioSwapOutputStream sos = NioSwapOutputStream.newInstance(2)) {
       try (PrintWriter pw = new PrintWriter(sos)) {
         pw.append("Hello, world!");
         sos.recall(baos);
@@ -237,7 +237,7 @@ public class NioSwapOutputStreamTest {
   @Test // Write after swap and recall (2)
   public void test110() throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try (ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2)) {
+    try (NioSwapOutputStream sos = NioSwapOutputStream.newInstance(2)) {
       try (PrintWriter pw = new PrintWriter(sos)) {
         pw.append("Hello, world!");
         sos.recall(baos);
@@ -252,7 +252,7 @@ public class NioSwapOutputStreamTest {
   @Test // Write after swap and recall (3)
   public void test111() throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try (ArraySwapOutputStream sos = ArraySwapOutputStream.newInstance(2)) {
+    try (NioSwapOutputStream sos = NioSwapOutputStream.newInstance(2)) {
       try (PrintWriter pw = new PrintWriter(sos)) {
         pw.append("Hello, world!");
       }
@@ -276,7 +276,7 @@ public class NioSwapOutputStreamTest {
     }
   }
 
-  private static String getContents(NioSwapOutputStream sos) throws IOException {
+  private static String getContents(SwapOutputStream sos) throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sos.recall(baos);
     return new String(baos.toByteArray(), StandardCharsets.UTF_8);

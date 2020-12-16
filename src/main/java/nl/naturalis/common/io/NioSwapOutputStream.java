@@ -141,13 +141,14 @@ public class NioSwapOutputStream extends SwapOutputStream {
    */
   @Override
   public void close() throws IOException {
+    if (chan != null && chan.isOpen()) {
+      chan.close();
+    }
     if (recalled) {
       if (dataInBuffer()) {
         sendTo(out);
         out.flush();
       }
-    } else if (swapped) {
-      chan.close();
     }
   }
 

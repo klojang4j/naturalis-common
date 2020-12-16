@@ -3,10 +3,12 @@ package nl.naturalis.common.io;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import org.junit.Test;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class DeflatedArraySwapOutputStreamTest {
 
@@ -127,6 +129,58 @@ public class DeflatedArraySwapOutputStreamTest {
     assertFalse(sos.swapFile.exists());
   }
 
+  @Test(expected = IllegalArgumentException.class) // null file not allowed
+  public void test100() throws IOException {
+    try (DeflatedArraySwapOutputStream sos = new DeflatedArraySwapOutputStream(null, 10)) {}
+  }
+
+  @Test(expected = IllegalArgumentException.class) // buf size 0 not allowed
+  public void test101() {
+    DeflatedArraySwapOutputStream.newInstance(0);
+  }
+
+  @Test
+  public void test102() throws IOException {
+    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(1);
+    try (PrintWriter pw = new PrintWriter(sos)) {
+      pw.append("Hello, world");
+    }
+    assertTrue("01", sos.hasSwapped());
+    assertEquals("02", "Hello, world", getContents(sos));
+  }
+
+  @Test
+  public void test103() throws IOException {
+    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(2);
+    try (PrintWriter pw = new PrintWriter(sos)) {
+      pw.append("Hello, world");
+    }
+    assertTrue("01", sos.hasSwapped());
+    assertEquals("02", "Hello, world", getContents(sos));
+  }
+
+  @Test
+  public void test104() throws IOException {
+    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(100);
+    try (PrintWriter pw = new PrintWriter(sos)) {
+      pw.append("Hello, world");
+    }
+    assertFalse("01", sos.hasSwapped());
+    assertEquals("02", "Hello, world", getContents(sos));
+  }
+
+  @Test
+  public void test105() throws IOException {
+    int sz = "Hello, world".getBytes(StandardCharsets.UTF_8).length;
+    DeflatedArraySwapOutputStream sos = DeflatedArraySwapOutputStream.newInstance(sz);
+    try (PrintWriter pw = new PrintWriter(sos)) {
+      pw.append("Hello, world");
+    }
+    // Bit hard to tell when data is compressed:
+    // assertFalse("01", sos.hasSwapped());
+    assertEquals("02", "Hello, world", getContents(sos));
+  }
+
   @Test // Write after recall (1)
   public void test106() throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -211,5 +265,23 @@ public class DeflatedArraySwapOutputStreamTest {
       }
     }
     assertEquals("Hello, world! How are you?", baos.toString());
+  }
+
+  @Test // Example provided in the class comments of ArraySwapOutputStream
+  public void example() throws IOException {
+    String data = "Will this be swapped or not? It doesn't matter";
+    try (SwapOutputStream ros = DeflatedArraySwapOutputStream.newInstance()) {
+      ros.write(data.getBytes());
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ros.recall(baos);
+      ros.cleanup(); // delete swap file if created
+      assertEquals(data, baos.toString());
+    }
+  }
+
+  private static String getContents(SwapOutputStream sos) throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    sos.recall(baos);
+    return new String(baos.toByteArray(), StandardCharsets.UTF_8);
   }
 }

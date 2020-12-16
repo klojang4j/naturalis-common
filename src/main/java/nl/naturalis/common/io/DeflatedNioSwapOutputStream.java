@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.util.zip.Deflater;
 import java.util.zip.InflaterOutputStream;
 import nl.naturalis.common.ExceptionMethods;
-import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.IOMethods.createTempFile;
 
 /**
@@ -65,10 +64,8 @@ public class DeflatedNioSwapOutputStream extends NioSwapOutputStream {
   }
 
   private final Deflater def;
-  // Buffer for the deflator to
+  // Bucket for deflated data, written to by the deflater, read by us
   private final byte[] temp = new byte[1024];
-
-  private boolean closed;
 
   /**
    * Creates a new {@code DeflatedArraySwapOutputStream} with an internal buffer of 64 kB, swapping
@@ -108,41 +105,38 @@ public class DeflatedNioSwapOutputStream extends NioSwapOutputStream {
 
   @Override
   public void write(int b) throws IOException {
-    write(new byte[] {(byte) (b & 0xff)}, 0, 1);
+    write(new byte[] {(byte) b}, 0, 1);
   }
 
   @Override
   public void write(byte[] b, int off, int len) throws IOException {
-    def.setInput(b, off, len);
-    while (!def.needsInput()) {
-      deflate();
-    }
-  }
-
-  /** See {@link SwapOutputStream#recall(OutputStream)}. */
-  @Override
-  public void recall(OutputStream out) throws IOException {
-    Check.notNull(out);
-    // Flush any remaining bytes in the Deflater's buffer to the internal buffer
-    finish();
-    if (hasSwapped()) {
-      readSwapFile(new InflaterOutputStream(out));
+    if (recalled()) {
+      super.write(b, off, len);
     } else {
-      readBuffer(new InflaterOutputStream(out));
+      def.setInput(b, off, len);
+      while (!def.needsInput()) {
+        deflate();
+      }
     }
   }
 
-  /**
-   * Closes the {@code DeflatedArraySwapOutputStream} and releases all resources held by it. You
-   * cannot re-use a {@code DeflatedArraySwapOutputStream} once you have called this method.
-   */
+  @Override
   public void close() throws IOException {
-    if (!closed) {
+    if (!recalled()) {
       finish();
-      super.close();
       def.end();
-      closed = true;
     }
+    super.close();
+  }
+
+  @Override
+  void prepareRecall() throws IOException {
+    finish();
+  }
+
+  @Override
+  OutputStream wrap(OutputStream target) {
+    return new InflaterOutputStream(target);
   }
 
   private void finish() throws IOException {

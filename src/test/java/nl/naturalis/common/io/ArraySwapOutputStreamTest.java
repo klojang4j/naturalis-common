@@ -276,7 +276,7 @@ public class ArraySwapOutputStreamTest {
     }
   }
 
-  private static String getContents(ArraySwapOutputStream sos) throws IOException {
+  private static String getContents(SwapOutputStream sos) throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     sos.recall(baos);
     return new String(baos.toByteArray(), StandardCharsets.UTF_8);

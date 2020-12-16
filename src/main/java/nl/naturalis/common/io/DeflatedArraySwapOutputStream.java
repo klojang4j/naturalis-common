@@ -64,7 +64,7 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
   }
 
   private final Deflater def;
-  // Buffer from receiing the output from the defater
+  // Bucket for deflated data, written to by the deflater, read by us
   private final byte[] temp = new byte[1024];
 
   /**
@@ -120,6 +120,7 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
     }
   }
 
+  @Override
   public void close() throws IOException {
     if (!recalled()) {
       finish();
@@ -128,10 +129,12 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
     super.close();
   }
 
+  @Override
   void prepareRecall() throws IOException {
     finish();
   }
 
+  @Override
   OutputStream wrap(OutputStream target) {
     return new InflaterOutputStream(target);
   }
