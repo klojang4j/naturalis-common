@@ -10,19 +10,18 @@ import nl.naturalis.common.check.Check;
 /**
  * An {@code OutputStream} that allows allows you to read back the data that were written to it.
  * Data written to a {@code SwapOutputStream} first fills up an internal buffer. If (and only if)
- * the buffer reaches full capacity, a swap file is created to sink the data into. This ensures that
- * whatever the total size of the data written to the {@code SwapOutputStream}, it can always be
- * recalled. It is transparent to clients whether or not data has actually been swapped out of
- * memory. Clients can recall the data without having to know whether it came from the internal
- * buffer or from the swap file.
- *
- * <p>After you recalled the data you can continue writing data to the {@code SwapOutputStream}. It
- * has in effect become a {@link BufferedOutputStream} around the output stream that you passed to
- * the {@link #recall(OutputStream) recall} method. For this and other reasons it doesn't make sense
- * to wrap a {@code SwapOutputStream} into a {@code BufferedOutputStream}.
+ * the buffer reaches full capacity, a swap file is created to sink the data into. Thus whatever the
+ * amount of data written to the {@code SwapOutputStream}, it can always be recalled. It is
+ * transparent to clients whether or not data has actually been swapped out of memory. Clients can
+ * recall the data without having to know whether it came from the internal buffer or from the swap
+ * file.
  *
  * <p>{@code SwapOutputStream} and its subclasses are not thread-safe. Except for the {@link
- * #cleanup()} method als method calls need to be synchronized using a lock on the entire instance
+ * #cleanup()} method all method calls need to be synchronized using a lock on the entire instance
+ * (or something equivalently exclusive).
+ *
+ * <p>A {@code SwapOutputStream} effectively is a sort of {@link BufferedOutputStream}. Therefore it
+ * makes no sense to wrap a {@code SwapOutputStream} into a {@code BufferedOutputStream}.
  *
  * @author Ayco Holleman
  */
@@ -49,7 +48,10 @@ public abstract class SwapOutputStream extends OutputStream {
   }
 
   /**
-   * Collects the data written to this instance and writes it to the specified output stream.
+   * Collects the data written to this instance and writes it to the specified output stream. You
+   * can continue writing data to the {@code SwapOutputStream} after a recall. The {@code recall}
+   * method swallows the output stream and turns the {@code SwapOutputStream} into a {@code
+   * BufferedOutputStream} wrapping the output stream.
    *
    * @param target The output stream to which to write the data
    * @throws IOException If an I/O error occurs
@@ -68,11 +70,10 @@ public abstract class SwapOutputStream extends OutputStream {
   }
 
   /**
-   * Closes the {@link OutputStream} or {@link FileChannel} (depending on the implementation)
-   * writing to the swap file. It will not close the output stream specified by the {@link
-   * #recall(OutputStream)} method. The {@code SwapOutputStream} will "swallow" this output stream
-   * to turn itself into a {@code BufferedOutputStream} around the output stream. However you don't
-   * have it make use of this, so closing the output stream is left to the user.
+   * If created and still open, this method closes the {@link OutputStream} or {@link FileChannel}
+   * writing to the swap file. Note that the {@link #recall(OutputStream) recall} method implicitly
+   * closes the {@code OutputStream} c.q. {@code FileChannel}. The {@code close} method will not
+   * close the output stream it start writing to <i>after</i> the data has been recalled.
    */
   public abstract void close() throws IOException;
 

@@ -11,7 +11,9 @@ import static nl.naturalis.common.IOMethods.createTempFile;
 /**
  * A {@code SwapOutputStream} that compresses the data as it enters the internal buffer, thereby
  * decreasing the chance that the internal buffer will have to be swapped out to file. The {@link
- * #recall(OutputStream)} method will uncompress the data again.
+ * #recall(OutputStream)} method will uncompress the data again. After the {@code recall} method has
+ * been called, the {@code DeflatedArraySwapOutputStream}, like any {@link SwapOutputStream},
+ * becomes a regular {@code BufferedOutputStream} and it will no longer compress the data.
  *
  * @author Ayco Holleman
  */
