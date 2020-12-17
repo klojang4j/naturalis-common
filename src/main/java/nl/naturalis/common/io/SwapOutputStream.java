@@ -73,7 +73,8 @@ public abstract class SwapOutputStream extends OutputStream {
    * If created and still open, this method closes the {@link OutputStream} or {@link FileChannel}
    * writing to the swap file. Note that the {@link #recall(OutputStream) recall} method implicitly
    * closes the {@code OutputStream} c.q. {@code FileChannel}. The {@code close} method will not
-   * close the output stream it start writing to <i>after</i> the data has been recalled.
+   * close the output stream to which the recalled data was written. Thus you can safely keep using
+   * that output stream outside a <i>try-with-resource</i> block for a {@code SwapOutputStream}.
    */
   public abstract void close() throws IOException;
 

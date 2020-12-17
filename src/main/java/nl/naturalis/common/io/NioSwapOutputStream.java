@@ -18,7 +18,7 @@ import static nl.naturalis.common.check.CommonChecks.no;
 import static nl.naturalis.common.check.CommonGetters.length;
 
 /**
- * A {@code SwapOutputStream} implementation based on the that {@code java.nio} package. This
+ * A {@code SwapOutputStream} implementation based on the {@code java.nio} package. This
  * implementation might give you a performance benefit when writing large amounts of data.
  *
  * @author Ayco Holleman
