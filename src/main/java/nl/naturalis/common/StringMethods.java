@@ -115,6 +115,43 @@ public final class StringMethods {
   }
 
   /**
+   * Returns a human-friendly representation of the duration between the specified start and now.
+   * Example: 540:00:12.630
+   *
+   * @param start The start time
+   * @return A human-friendly representation of the duration between the specified start and now
+   */
+  public static String getDuration(long start) {
+    return duration(start, System.currentTimeMillis());
+  }
+
+  /**
+   * Returns a human-friendly representation of the duration of the specified time interval.
+   * Example: 00:08:07.041
+   *
+   * @param start The start time
+   * @param end The end time
+   * @return A human-friendly representation of the duration of the specified time interval
+   */
+  public static String duration(long start, long end) {
+    Check.that(end).is(atLeast(), start, "Negative time interval");
+    long millis = end - start;
+    long h = millis / (60 * 60 * 1000);
+    millis %= (60 * 60 * 1000);
+    long m = millis / (60 * 1000);
+    millis %= (60 * 1000);
+    long s = millis / 1000;
+    millis %= 1000;
+    return append(
+            new StringBuilder(12),
+            lpad(h, 2, '0', ":"),
+            lpad(m, 2, '0', ":"),
+            lpad(s, 2, '0', "."),
+            lpad(millis, 3, '0'))
+        .toString();
+  }
+
+  /**
    * Whether or not the provided string ends with any of the provided suffixes. They suffixes must
    * not be null or empty.
    *
