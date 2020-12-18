@@ -109,6 +109,11 @@ public class ArraySwapOutputStream extends SwapOutputStream {
     }
   }
 
+  @Override
+  public void forceFlush() throws IOException {
+    flush();
+  }
+
   /**
    * If the {@code ArraySwapOutputStream} has started writing to the swap file, any remaining bytes
    * in the internal buffer will be flushed to it and the output stream to the swap file will be
@@ -155,7 +160,7 @@ public class ArraySwapOutputStream extends SwapOutputStream {
   }
 
   // Allow subclasses to flush pending output to the internal buffer.
-  @SuppressWarnings("unused")
+  /** @throws IOException */
   void prepareRecall() throws IOException {}
 
   // Allow subclasses to wrap the recall output stream in an outstream that does the reverse of
@@ -164,7 +169,7 @@ public class ArraySwapOutputStream extends SwapOutputStream {
     return target;
   }
 
-  boolean recalled() {
+  boolean dataRecalled() {
     return recalled;
   }
 

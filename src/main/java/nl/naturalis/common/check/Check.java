@@ -156,7 +156,7 @@ public abstract class Check<T, E extends Exception> {
    */
   public static <U> Check<U, IllegalArgumentException> notNull(U arg)
       throws IllegalArgumentException {
-    return with(DEFAULT_EXCEPTION, arg, DEFAULT_ARG_NAME).is(CommonChecks.notNull());
+    return notNull(DEFAULT_EXCEPTION, arg, DEFAULT_ARG_NAME);
   }
 
   /**
@@ -171,7 +171,7 @@ public abstract class Check<T, E extends Exception> {
    */
   public static <U> Check<U, IllegalArgumentException> notNull(U arg, String argName)
       throws IllegalArgumentException {
-    return with(DEFAULT_EXCEPTION, arg, argName).is(CommonChecks.notNull());
+    return notNull(DEFAULT_EXCEPTION, arg, argName);
   }
 
   /**
@@ -190,7 +190,7 @@ public abstract class Check<T, E extends Exception> {
    */
   public static <U, F extends Exception> Check<U, F> notNull(Function<String, F> exception, U arg)
       throws F {
-    return with(exception, arg, DEFAULT_ARG_NAME).is(CommonChecks.notNull());
+    return notNull(exception, arg, DEFAULT_ARG_NAME);
   }
 
   /**
@@ -210,7 +210,11 @@ public abstract class Check<T, E extends Exception> {
    */
   public static <U, F extends Exception> Check<U, F> notNull(
       Function<String, F> exception, U arg, String argName) throws F {
-    return with(exception, arg, argName).is(CommonChecks.notNull());
+    if (arg == null) {
+      String msg = createMessage(CommonChecks.notNull(), argName, null);
+      throw exception.apply(msg);
+    }
+    return with(exception, arg, argName);
   }
 
   /**

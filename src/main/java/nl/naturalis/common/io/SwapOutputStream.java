@@ -48,13 +48,14 @@ public abstract class SwapOutputStream extends OutputStream {
   }
 
   /**
-   * Collects the data written to this instance and writes it to the specified output stream. You
-   * can continue writing data to the {@code SwapOutputStream} after a recall. The {@code recall}
-   * method swallows the output stream and turns the {@code SwapOutputStream} into a {@code
-   * BufferedOutputStream} wrapping the output stream.
+   * Collects the data written to this instance and writes it to the specified target. You can
+   * continue writing data to the {@code SwapOutputStream} after a recall. The {@code
+   * SwapOutputStream} swallows the output stream and turns itself into a {@code
+   * BufferedOutputStream} around it. This method can be called only once. Subsequent call result in
+   * an {@link IOException}.
    *
    * @param target The output stream to which to write the data
-   * @throws IOException If an I/O error occurs
+   * @throws IOException If you call this method more than once or if an I/O error occurs
    */
   public abstract void recall(OutputStream target) throws IOException;
 
@@ -70,11 +71,32 @@ public abstract class SwapOutputStream extends OutputStream {
   }
 
   /**
+   * If a swap file had to be created and no recall has taken place yet, this method flushes the
+   * output stream to the swap file. After the data has been recalled this method flushes the output
+   * stream passed in through the {@link #recall(OutputStream) recall} method. The {@code java.nio}
+   * implementations of {@code SwapOutputStream} will <i>not</i> call {@link
+   * FileChannel#force(boolean) force} on the FileChannel writing to the swap file. Call {@link
+   * #forceFlush()} if necessary.
+   */
+  public abstract void flush() throws IOException;
+
+  /**
+   * For the non-{@code java.nio} implementations of {@code SwapOutputStream} this method behaves
+   * exactly like {@link #flush()}. For the {@code java.nio} implementations of {@code
+   * SwapOutputStream} this method will call ileChannel#force(boolean) force(false)} on the
+   * FileChannel writing to the swap file.
+   *
+   * @throws IOException
+   */
+  public abstract void forceFlush() throws IOException;
+
+  /**
    * If created and still open, this method closes the {@link OutputStream} or {@link FileChannel}
-   * writing to the swap file. Note that the {@link #recall(OutputStream) recall} method implicitly
-   * closes the {@code OutputStream} c.q. {@code FileChannel}. The {@code close} method will not
-   * close the output stream to which the recalled data was written. Thus you can safely keep using
-   * that output stream outside a <i>try-with-resource</i> block for a {@code SwapOutputStream}.
+   * writing to the swap file. Note that the {@link #recall(OutputStream) recall} method tacitly
+   * closes the {@code OutputStream} c.q. {@code FileChannel} before it starts reading the swap
+   * file. The {@code close} method will not close the output stream passed in through the {@code
+   * recall} method. Thus you can safely keep using that output stream outside the
+   * <i>try-with-resources</i> block for a {@code SwapOutputStream}.
    */
   public abstract void close() throws IOException;
 

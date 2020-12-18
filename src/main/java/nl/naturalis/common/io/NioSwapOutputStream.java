@@ -133,6 +133,19 @@ public class NioSwapOutputStream extends SwapOutputStream {
     }
   }
 
+  @Override
+  public void forceFlush() throws IOException {
+    if (dataInBuffer()) {
+      if (recalled) {
+        sendTo(out);
+        out.flush();
+      } else if (swapped) {
+        sendToSwapFile();
+        chan.force(false);
+      }
+    }
+  }
+
   /**
    * If the {@code ArraySwapOutputStream} has started writing to the swap file, any remaining bytes
    * in the internal buffer will be flushed to it and the output stream to the swap file will be
@@ -181,7 +194,7 @@ public class NioSwapOutputStream extends SwapOutputStream {
   }
 
   // Allow subclasses to flush pending output to the internal buffer.
-  @SuppressWarnings("unused")
+  /** @throws IOException */
   void prepareRecall() throws IOException {}
 
   // Allow subclasses to wrap the recall output stream in an outstream that does the reverse of
@@ -190,7 +203,7 @@ public class NioSwapOutputStream extends SwapOutputStream {
     return target;
   }
 
-  boolean recalled() {
+  boolean dataRecalled() {
     return recalled;
   }
 
