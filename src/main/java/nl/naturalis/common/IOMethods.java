@@ -2,7 +2,6 @@ package nl.naturalis.common;
 
 import java.io.*;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.fileNotExists;
 
 /**
  * I/O-related methods.
@@ -90,7 +89,8 @@ public class IOMethods {
    * @return A {@code File} object for a new, empty file in the file system's temp directory
    * @throws IOException If an I/O error occurs
    */
-  public static File createTempFile(Class<?> requester, String extension) throws IOException {
+  public static synchronized File createTempFile(Class<?> requester, String extension)
+      throws IOException {
     String path =
         StringMethods.append(
                 new StringBuilder(64),
@@ -102,7 +102,11 @@ public class IOMethods {
                 extension)
             .toString();
     File f = new File(path);
-    return Check.with(IOException::new, f).is(fileNotExists()).ok();
+    if (f.createNewFile()) {
+      return f;
+    }
+    String fmt = "Failed to created temp file %s (already existed)";
+    throw new IOException(String.format(fmt, path));
   }
 
   private static int tempCount = 100000;

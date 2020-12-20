@@ -125,8 +125,8 @@ public class CommonGetters {
    *
    * @return A {@code Function} that returns the length of a {@code String}
    */
-  public static ToIntFunction<String> strlen() {
-    return String::length;
+  public static <T extends CharSequence> ToIntFunction<T> strlen() {
+    return CharSequence::length;
   }
 
   static {
