@@ -1,51 +1,52 @@
 package nl.naturalis.common.check;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.Random;
 import org.junit.Test;
-import nl.naturalis.common.IOMethods;
-import static org.junit.Assert.assertTrue;
 import static nl.naturalis.common.StringMethods.duration;
 import static nl.naturalis.common.check.CommonChecks.lte;
+import static nl.naturalis.common.check.CommonGetters.strlen;
 
 public class PerformanceTests {
 
-  // @Test // Null check only
-  public void test01() throws InterruptedException, IOException {
+  private static final Random random = new Random();
+  private static final int WARMUP_REPEATS = 2 * 1000 * 1000 * 1000;
+  private static final int TEST_REPEATS = 2 * 1000 * 1000 * 1000;
+  private static final int POLL_INTERVAL = 16 * 1024 * 1024;
+
+  @Test // Null check only
+  public void test01() throws InterruptedException {
 
     if (skip()) {
       return;
     }
 
     System.out.println();
-    System.out.println("Null check only");
-
-    int repeats = 20 * 1000 * 1000;
+    System.out.println("****** PLAIN NULL CHECK ******");
 
     // Warm up
     System.out.println("Warming up Check class...");
-    doTest01(repeats, false);
+    System.out.println(doTest01(WARMUP_REPEATS, false));
     System.out.println("Warming up manual check...");
-    doTest01(repeats, true);
+    System.out.println(doTest01(WARMUP_REPEATS, true));
 
-    repeats = 25 * 1000 * 1000;
+    StringBuilder sb;
 
     Thread.sleep(3000);
     System.out.println("Starting precondition testing using Check class ...");
     long start = now();
-    doTest01(repeats, false);
+    sb = doTest01(TEST_REPEATS, false);
     long end = now();
+    System.out.println(sb);
     System.out.println("Duration: " + duration(start, end));
     double time0 = end - start;
 
     Thread.sleep(3000);
     System.out.println("Starting manual precondition testing ...");
     start = now();
-    doTest01(repeats, true);
+    sb = doTest01(TEST_REPEATS, true);
     end = now();
+    System.out.println(sb);
     System.out.println("Duration: " + duration(start, end));
 
     double time1 = end - start;
@@ -55,11 +56,14 @@ public class PerformanceTests {
     DecimalFormat df = new DecimalFormat("0.0%");
     System.out.println("Pct. diff. ...: " + df.format(diff));
 
-    // At most 10% slower
-    assertTrue(diff <= .1);
+    if (diff > .1) {
+      System.out.println("****************************************************************");
+      System.out.println("****  WARNING: Check CLASS MORE THAN 10% SLOWER IN test01    ***");
+      System.out.println("****************************************************************");
+    }
   }
 
-  @Test // Null check + string length check
+  @Test
   public void test02() throws InterruptedException {
 
     if (skip()) {
@@ -67,31 +71,31 @@ public class PerformanceTests {
     }
 
     System.out.println();
-    System.out.println("Null check plus size check");
-
-    int repeats = 50 * 1000 * 1000;
+    System.out.println("****** NULL CHECK + LENGTH CHECK ******");
 
     // Warm up
     System.out.println("Warming up Check class...");
-    doTest02(repeats, false);
+    System.out.println(doTest02(WARMUP_REPEATS, false));
     System.out.println("Warming up manual check...");
-    doTest02(repeats, true);
+    System.out.println(doTest02(WARMUP_REPEATS, true));
 
-    repeats = 100 * 1000 * 1000;
+    StringBuilder sb;
 
     Thread.sleep(3000);
     System.out.println("Starting precondition testing using Check class ...");
     long start = now();
-    doTest02(repeats, false);
+    sb = doTest02(TEST_REPEATS, false);
     long end = now();
+    System.out.println(sb);
     System.out.println("Duration: " + duration(start, end));
     double time0 = end - start;
 
     Thread.sleep(3000);
     System.out.println("Starting manual precondition testing ...");
     start = now();
-    doTest02(repeats, true);
+    sb = doTest02(TEST_REPEATS, true);
     end = now();
+    System.out.println(sb);
     System.out.println("Duration: " + duration(start, end));
 
     double time1 = end - start;
@@ -101,61 +105,58 @@ public class PerformanceTests {
     DecimalFormat df = new DecimalFormat("0.0%");
     System.out.println("Pct. diff. ...: " + df.format(diff));
 
-    // At most 10% slower
-    assertTrue(diff <= .1);
-  }
-
-  private static void doTest01(int repeats, boolean manual) throws IOException {
-    File foo = IOMethods.createTempFile();
-    String s0 = "Hello World, what's up?";
-    String s1;
-    try (FileOutputStream fos = new FileOutputStream(foo); ) {
-      for (int i = 0; i < repeats; ++i) {
-        s1 = foo.length() < 8192 ? s0 : null;
-        if (manual) {
-          if (s1 == null) {
-            throw new IllegalArgumentException("Argument must not be null");
-          }
-        } else {
-          Check.notNull(s1);
-        }
-        if (i % 8388608 == 0) { // 8 * 1024 * 1024
-          fos.write((byte) (i % 31));
-          System.out.print(foo.length());
-        }
-      }
-      System.out.println();
-    } finally {
-      foo.delete();
+    if (diff > .1) {
+      System.out.println("****************************************************************");
+      System.out.println("****  WARNING: Check CLASS MORE THAN 10% SLOWER IN test02    ***");
+      System.out.println("****************************************************************");
     }
   }
 
-  @SuppressWarnings("resource")
-  private static void doTest02(int repeats, boolean manual) {
-    ByteArrayOutputStream b0 = new ByteArrayOutputStream();
-    ByteArrayOutputStream b1;
+  private static StringBuilder doTest01(int repeats, boolean manual) {
+    StringBuilder sb0 = new StringBuilder(256);
+    StringBuilder sb1 = null;
     for (int i = 0; i < repeats; ++i) {
-      b1 = b0.size() < 8192 ? b0 : null;
+      sb1 = sb0.length() < 8192 ? sb0 : null; // Make sure it's always gonna be sb0
       if (manual) {
-        if (b1 == null) {
+        if (sb1 == null) {
           throw new IllegalArgumentException("Argument must not be null");
-        } else if (b1.size() > 10000) {
+        }
+      } else {
+        Check.notNull(sb1);
+      }
+      if (i % POLL_INTERVAL == 0) {
+        // Just append some digit
+        sb1.append((char) (48 + random.nextInt(10)));
+      }
+    }
+    return sb1; // Let it escape so compiler can't compile the whole thing away
+  }
+
+  private static StringBuilder doTest02(int repeats, boolean manual) {
+    StringBuilder sb0 = new StringBuilder();
+    StringBuilder sb1 = null;
+    for (int i = 0; i < repeats; ++i) {
+      sb1 = sb0.length() < 8192 ? sb0 : null;
+      if (manual) {
+        if (sb1 == null) {
+          throw new IllegalArgumentException("Argument must not be null");
+        } else if (sb1.length() > 10000) {
           throw new IllegalArgumentException("Argument.length() must be <= 100");
         }
       } else {
-        Check.notNull(b1).has(x -> x.size(), lte(), 10000);
+        Check.notNull(sb1).has(strlen(), lte(), 10000);
       }
-      if (i % 8388608 == 0) { // 8 * 1024 * 1024
-        b0.write((byte) (i % 31));
-        System.out.print(b0.size());
+      if (i % POLL_INTERVAL == 0) {
+        // Just append some digit
+        sb1.append((char) (48 + random.nextInt(10)));
       }
     }
-    System.out.println();
+    return sb1; // Let it escape so compiler can't compile the whole thing away
   }
 
   private static boolean skip() {
-    String s = System.getProperty("perftests");
-    return s == null || !(s.equals("") || s.equalsIgnoreCase("true"));
+    String s = System.getProperty("perftest.skip");
+    return s != null && (s.equals("") || s.equalsIgnoreCase("true"));
   }
 
   private static long now() {

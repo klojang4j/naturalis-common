@@ -156,7 +156,20 @@ public abstract class Check<T, E extends Exception> {
    */
   public static <U> Check<U, IllegalArgumentException> notNull(U arg)
       throws IllegalArgumentException {
-    return notNull(DEFAULT_EXCEPTION, arg, DEFAULT_ARG_NAME);
+    /*
+     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+     * NB we construct the Check instance right here, rather than calling
+     * another static factory method, e.g. notNull(arg, DEFAULT_ARG_NAME).
+     * In performance tests it turned out that for some reason the JVM had
+     * a hard time inlining these calls, making the notNull check about 20%
+     * slower than a "manual" not null check.
+     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+     */
+    if (arg == null) {
+      String msg = createMessage(CommonChecks.notNull(), DEFAULT_ARG_NAME, null);
+      throw DEFAULT_EXCEPTION.apply(msg);
+    }
+    return new ObjectCheck<>(arg, DEFAULT_ARG_NAME, DEFAULT_EXCEPTION);
   }
 
   /**
@@ -171,7 +184,11 @@ public abstract class Check<T, E extends Exception> {
    */
   public static <U> Check<U, IllegalArgumentException> notNull(U arg, String argName)
       throws IllegalArgumentException {
-    return notNull(DEFAULT_EXCEPTION, arg, argName);
+    if (arg == null) {
+      String msg = createMessage(CommonChecks.notNull(), argName, null);
+      throw DEFAULT_EXCEPTION.apply(msg);
+    }
+    return new ObjectCheck<>(arg, argName, DEFAULT_EXCEPTION);
   }
 
   /**
@@ -190,7 +207,11 @@ public abstract class Check<T, E extends Exception> {
    */
   public static <U, F extends Exception> Check<U, F> notNull(Function<String, F> exception, U arg)
       throws F {
-    return notNull(exception, arg, DEFAULT_ARG_NAME);
+    if (arg == null) {
+      String msg = createMessage(CommonChecks.notNull(), DEFAULT_ARG_NAME, null);
+      throw exception.apply(msg);
+    }
+    return new ObjectCheck<>(arg, DEFAULT_ARG_NAME, exception);
   }
 
   /**
@@ -214,7 +235,7 @@ public abstract class Check<T, E extends Exception> {
       String msg = createMessage(CommonChecks.notNull(), argName, null);
       throw exception.apply(msg);
     }
-    return with(exception, arg, argName);
+    return new ObjectCheck<>(arg, argName, exception);
   }
 
   /**
