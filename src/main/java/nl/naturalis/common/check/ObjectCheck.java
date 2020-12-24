@@ -17,7 +17,7 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   private static final String ERR_NUMBER_TO_INT = ERR_INT_VALUE + " (was %s)";
   private static final String ERR_OBJECT_TO_INT = ERR_INT_VALUE + " (%s)";
 
-  private T arg;
+  private final T arg;
 
   ObjectCheck(T arg, String argName, Function<String, E> excFactory) {
     super(argName, excFactory);

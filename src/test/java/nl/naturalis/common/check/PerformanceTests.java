@@ -5,57 +5,42 @@ import java.util.Random;
 import org.junit.Test;
 import static nl.naturalis.common.StringMethods.duration;
 import static nl.naturalis.common.check.CommonChecks.lte;
+import static nl.naturalis.common.check.CommonChecks.ne;
 import static nl.naturalis.common.check.CommonGetters.strlen;
 
 public class PerformanceTests {
 
   private static final Random random = new Random();
-  private static final int WARMUP_REPEATS = 2 * 1000 * 1000 * 1000;
-  private static final int TEST_REPEATS = 2 * 1000 * 1000 * 1000;
-  private static final int POLL_INTERVAL = 16 * 1024 * 1024;
+  private static final int WARMUP_REPEATS = Integer.MAX_VALUE;
+  private static final int TEST_REPEATS = Integer.MAX_VALUE;
+  private static final int POLL_INTERVAL = 32 * 1024 * 1024;
+  private static final DecimalFormat PERCENTAGE = new DecimalFormat("0.0%");
 
-  @Test // Null check only
+  @Test
   public void test01() throws InterruptedException {
-
     if (skip()) {
       return;
     }
-
     System.out.println();
-    System.out.println("****** PLAIN NULL CHECK ******");
+    System.out.println("****** Plain null check ******");
 
-    // Warm up
     System.out.println("Warming up Check class...");
-    System.out.println(doTest01(WARMUP_REPEATS, false));
+    test01Check(WARMUP_REPEATS);
     System.out.println("Warming up manual check...");
-    System.out.println(doTest01(WARMUP_REPEATS, true));
-
-    StringBuilder sb;
+    test01Manual(WARMUP_REPEATS);
 
     Thread.sleep(3000);
-    System.out.println("Starting precondition testing using Check class ...");
-    long start = now();
-    sb = doTest01(TEST_REPEATS, false);
-    long end = now();
-    System.out.println(sb);
-    System.out.println("Duration: " + duration(start, end));
-    double time0 = end - start;
+    System.out.println("Measuring Check class ...");
+    long time0 = test01Check(TEST_REPEATS);
+    System.out.println("Duration: " + duration(time0));
 
     Thread.sleep(3000);
-    System.out.println("Starting manual precondition testing ...");
-    start = now();
-    sb = doTest01(TEST_REPEATS, true);
-    end = now();
-    System.out.println(sb);
-    System.out.println("Duration: " + duration(start, end));
+    System.out.println("Measuring manual check  ...");
+    long time1 = test01Manual(TEST_REPEATS);
+    System.out.println("Duration: " + duration(time1));
 
-    double time1 = end - start;
-
-    double diff = time0 / time1 - 1;
-
-    DecimalFormat df = new DecimalFormat("0.0%");
-    System.out.println("Pct. diff. ...: " + df.format(diff));
-
+    double diff = (double) time0 / (double) time1 - 1;
+    System.out.println("Pct. diff. ...: " + PERCENTAGE.format(diff));
     if (diff > .1) {
       System.out.println("****************************************************************");
       System.out.println("****  WARNING: Check CLASS MORE THAN 10% SLOWER IN test01    ***");
@@ -65,101 +50,183 @@ public class PerformanceTests {
 
   @Test
   public void test02() throws InterruptedException {
-
     if (skip()) {
       return;
     }
-
     System.out.println();
-    System.out.println("****** NULL CHECK + LENGTH CHECK ******");
+    System.out.println("****** Two checks on StringBuilder object ******");
 
-    // Warm up
     System.out.println("Warming up Check class...");
-    System.out.println(doTest02(WARMUP_REPEATS, false));
+    test02Check(WARMUP_REPEATS);
     System.out.println("Warming up manual check...");
-    System.out.println(doTest02(WARMUP_REPEATS, true));
-
-    StringBuilder sb;
+    test02Manual(WARMUP_REPEATS);
 
     Thread.sleep(3000);
-    System.out.println("Starting precondition testing using Check class ...");
-    long start = now();
-    sb = doTest02(TEST_REPEATS, false);
-    long end = now();
-    System.out.println(sb);
-    System.out.println("Duration: " + duration(start, end));
-    double time0 = end - start;
+    System.out.println("Measuring Check class ...");
+    long time0 = test02Check(TEST_REPEATS);
+    System.out.println("Duration: " + duration(time0));
 
     Thread.sleep(3000);
-    System.out.println("Starting manual precondition testing ...");
-    start = now();
-    sb = doTest02(TEST_REPEATS, true);
-    end = now();
-    System.out.println(sb);
-    System.out.println("Duration: " + duration(start, end));
+    System.out.println("Measuring manual check  ...");
+    long time1 = test02Manual(TEST_REPEATS);
+    System.out.println("Duration: " + duration(time1));
 
-    double time1 = end - start;
-
-    double diff = time0 / time1 - 1;
-
-    DecimalFormat df = new DecimalFormat("0.0%");
-    System.out.println("Pct. diff. ...: " + df.format(diff));
-
+    double diff = (double) time0 / (double) time1 - 1;
+    System.out.println("Pct. diff. ...: " + PERCENTAGE.format(diff));
     if (diff > .1) {
       System.out.println("****************************************************************");
-      System.out.println("****  WARNING: Check CLASS MORE THAN 10% SLOWER IN test02    ***");
+      System.out.println("****  WARNING: Check CLASS MORE THAN 10% SLOWER IN test01    ***");
       System.out.println("****************************************************************");
     }
   }
 
-  private static StringBuilder doTest01(int repeats, boolean manual) {
-    StringBuilder sb0 = new StringBuilder(256);
-    StringBuilder sb1 = null;
-    for (int i = 0; i < repeats; ++i) {
-      sb1 = sb0.length() < 8192 ? sb0 : null; // Make sure it's always gonna be sb0
-      if (manual) {
-        if (sb1 == null) {
-          throw new IllegalArgumentException("Argument must not be null");
-        }
-      } else {
-        Check.notNull(sb1);
-      }
-      if (i % POLL_INTERVAL == 0) {
-        // Just append some digit
-        sb1.append((char) (48 + random.nextInt(10)));
-      }
+  @Test
+  public void test03() throws InterruptedException {
+    if (skip()) {
+      return;
     }
-    return sb1; // Let it escape so compiler can't compile the whole thing away
+    System.out.println();
+    System.out.println("****** Three checks on StringBuilder ******");
+
+    System.out.println("Warming up Check class...");
+    test03Check(WARMUP_REPEATS);
+    System.out.println("Warming up manual check...");
+    test03Manual(WARMUP_REPEATS);
+
+    Thread.sleep(3000);
+    System.out.println("Measuring Check class ...");
+    long time0 = test03Check(TEST_REPEATS);
+    System.out.println("Duration: " + duration(time0));
+
+    Thread.sleep(3000);
+    System.out.println("Measuring manual check  ...");
+    long time1 = test03Manual(TEST_REPEATS);
+    System.out.println("Duration: " + duration(time1));
+
+    double diff = (double) time0 / (double) time1 - 1;
+    System.out.println("Pct. diff. ...: " + PERCENTAGE.format(diff));
+    if (diff > .1) {
+      System.out.println("****************************************************************");
+      System.out.println("****  WARNING: Check CLASS MORE THAN 10% SLOWER IN test01    ***");
+      System.out.println("****************************************************************");
+    }
   }
 
-  private static StringBuilder doTest02(int repeats, boolean manual) {
-    StringBuilder sb0 = new StringBuilder();
+  private static long test01Check(int repeats) {
+    StringBuilder sb0 = new StringBuilder(256);
     StringBuilder sb1 = null;
+    long t = System.currentTimeMillis();
     for (int i = 0; i < repeats; ++i) {
-      sb1 = sb0.length() < 8192 ? sb0 : null;
-      if (manual) {
-        if (sb1 == null) {
-          throw new IllegalArgumentException("Argument must not be null");
-        } else if (sb1.length() > 10000) {
-          throw new IllegalArgumentException("Argument.length() must be <= 100");
-        }
-      } else {
-        Check.notNull(sb1).has(strlen(), lte(), 10000);
-      }
-      if (i % POLL_INTERVAL == 0) {
-        // Just append some digit
+      sb1 = sb0.length() < 8192 ? sb0 : null; // Make sure it's always gonna be sb0
+      Check.notNull(sb1);
+      if (i % POLL_INTERVAL == 0) { // Just append some digit
         sb1.append((char) (48 + random.nextInt(10)));
       }
     }
-    return sb1; // Let it escape so compiler can't compile the whole thing away
+    t = System.currentTimeMillis() - t;
+    System.out.println(sb1); // Print so compiler can't optimize the whole thing away
+    return t;
+  }
+
+  private static long test01Manual(int repeats) {
+    StringBuilder sb0 = new StringBuilder(256);
+    StringBuilder sb1 = null;
+    long t = System.currentTimeMillis();
+    for (int i = 0; i < repeats; ++i) {
+      sb1 = sb0.length() < 8192 ? sb0 : null; // Make sure it's always gonna be sb0
+      if (sb1 == null) {
+        throw new IllegalArgumentException("Argument must not be null");
+      }
+      if (i % POLL_INTERVAL == 0) { // Just append some digit
+        sb1.append((char) (48 + random.nextInt(10)));
+      }
+    }
+    t = System.currentTimeMillis() - t;
+    System.out.println(sb1); // Print so compiler can't optimize the whole thing away
+    return t;
+  }
+
+  private static long test02Check(int repeats) {
+    StringBuilder sb0 = new StringBuilder(256);
+    StringBuilder sb1 = null;
+    long t = System.currentTimeMillis();
+    for (int i = 0; i < repeats; ++i) {
+      sb1 = sb0.length() < 8192 ? sb0 : null; // Make sure it's always gonna be sb0
+      Check.notNull(sb1).has(strlen(), lte(), 10000);
+      if (i % POLL_INTERVAL == 0) { // Just append some digit
+        sb1.append((char) (48 + random.nextInt(10)));
+      }
+    }
+    t = System.currentTimeMillis() - t;
+    System.out.println(sb1); // Print so compiler can't optimize the whole thing away
+    return t;
+  }
+
+  private static long test02Manual(int repeats) {
+    StringBuilder sb0 = new StringBuilder(256);
+    StringBuilder sb1 = null;
+    long t = System.currentTimeMillis();
+    for (int i = 0; i < repeats; ++i) {
+      sb1 = sb0.length() < 8192 ? sb0 : null; // Make sure it's always gonna be sb0
+      if (sb1 == null) {
+        throw new IllegalArgumentException("Argument must not be null");
+      }
+      if (sb1.length() > 10000) {
+        throw new IllegalArgumentException("Argument.length() must be >= 100");
+      }
+      if (i % POLL_INTERVAL == 0) { // Just append some digit
+        sb1.append((char) (48 + random.nextInt(10)));
+      }
+    }
+    t = System.currentTimeMillis() - t;
+    System.out.println(sb1); // Print so compiler can't optimize the whole thing away
+    return t;
+  }
+
+  private static long test03Check(int repeats) {
+    StringBuilder sb0 = new StringBuilder(256).append('0');
+    StringBuilder sb1 = null;
+    long t = System.currentTimeMillis();
+    for (int i = 0; i < repeats; ++i) {
+      sb1 = sb0.length() < 8192 ? sb0 : null; // Make sure it's always gonna be sb0
+      Check.notNull(sb1)
+          .has(strlen(), lte(), 10000)
+          .has(sb -> sb.charAt(sb.length() - 1), ne(), 'A');
+      if (i % POLL_INTERVAL == 0L) { // Just append some digit
+        sb1.append((char) (48 + random.nextInt(10)));
+      }
+    }
+    t = System.currentTimeMillis() - t;
+    System.out.println(sb1); // Print so compiler can't optimize the whole thing away
+    return t;
+  }
+
+  private static long test03Manual(int repeats) {
+    StringBuilder sb0 = new StringBuilder(256).append('0');
+    StringBuilder sb1 = null;
+    long t = System.currentTimeMillis();
+    for (int i = 0; i < repeats; ++i) {
+      sb1 = sb0.length() < 8192 ? sb0 : null; // Make sure it's always gonna be sb0
+      if (sb1 == null) {
+        throw new IllegalArgumentException("Argument must not be null");
+      }
+      if (sb1.length() > 10000) {
+        throw new IllegalArgumentException("Argument.length() must be >= 100");
+      }
+      if (sb1.charAt(sb1.length() - 1) == 'A') {
+        throw new IllegalArgumentException("Argument must not end with A");
+      }
+      if (i % POLL_INTERVAL == 0L) { // Just append some digit
+        sb1.append((char) (48 + random.nextInt(10)));
+      }
+    }
+    t = System.currentTimeMillis() - t;
+    System.out.println(sb1); // Print so compiler can't optimize the whole thing away
+    return t;
   }
 
   private static boolean skip() {
     String s = System.getProperty("perftest.skip");
     return s != null && (s.equals("") || s.equalsIgnoreCase("true"));
-  }
-
-  private static long now() {
-    return System.currentTimeMillis();
   }
 }

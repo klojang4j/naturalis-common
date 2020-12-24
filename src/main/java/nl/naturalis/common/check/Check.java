@@ -16,20 +16,20 @@ import static nl.naturalis.common.check.Messages.createMessage;
  * <p>
  *
  * <pre>
- * this.numChairs = Check.that(numChairs).is(notNegative()).is(lte(), 10).is(even()).ok();
+ * this.numChairs = Check.that(numChairs).is(gt(), 0).is(lte(), 10).is(even()).ok();
  * </pre>
  *
  * <h4>Common checks</h4>
  *
- * <p>The {@link CommonChecks} class contains a number of common checks for arguments. These are
+ * <p>The {@link CommonChecks} class provides a grab bag for common checks for arguments. These are
  * already associated with short, informative error messages, so you don't have to invent them
  * yourself. For example:
  *
  * <p>
  *
  * <pre>
- * Check.that(numChairs, "numChairs").is(gte(), 2);
- * // "numChairs must be >= 2 (was 0)"
+ * Check.that(numChairs, "numChairs").is(gt(), 0);
+ * // Error message "numChairs must be > 0 (was -3)"
  * </pre>
  *
  * <h4>Checking argument properties</h4>
@@ -43,33 +43,40 @@ import static nl.naturalis.common.check.Messages.createMessage;
  * Check.notNull(name, "name").has(String::length, "length", gte(), 10);
  * Check.notNull(employee, "employee").has(Employee::getAge, "age", lt(), 50);
  * Check.notNull(intArray, "intArray").has(Array::getLength, "length", even());
- * Check.notNull(employees, "employees").has(Collection::size, "size", gte(), 100);
+ * Check.notNull(employees, "emps").has(Collection::size, "size", gte(), 100);
  * </pre>
  *
- * <p>The {@link CommonGetters} class defines some common getters that you can use for conciseness:
+ * <p>The {@link CommonGetters} class defines some common getters which, again, are already
+ * associated with a name for the property they expose:
  *
  * <pre>
- * Check.notNull(name, "name").has(strlen(), gte(), 10);
- * Check.notNull(intArray, "intArray").has(length(), even());
- * Check.notNull(employees, "employees").has(size(), gte(), 100);
+ * Check.notNull(employees, "emps").has(size(), gte(), 100);
+ * // Error message "emps.size() must be >= 100 (was 42)"
  * </pre>
  *
  * <h4>Lambdas</h4>
  *
- * <p>Checks are done via the various {@code is(...)} and {@code has(...)} methods. Generally, the
- * compiler has no problem deciding which of the overloaded methods is targeted. When using lambdas,
- * however, the compiler may run into ambiguities. This will result in a compiler error like: <b>The
- * method has [...] is ambigious for type Check [...]</b>. To resolve this, simply specify the type
- * of the parameters in the lambda:
+ * <p>Checks are done via the various {@code is(...)} and {@code has(...)} methods. When you pass a
+ * lambda to these methods, and the lambda is supposed to be a {@link Predicate} or {@link
+ * IntPredicate}, the compiler will not be able to decide which of the two it is. (This problem will
+ * not occur when specifying a method reference or a check from the {@code CommonChecks} class.)
+ * This will result in a compiler error like: <b>The method is(Predicate&lt;String&gt;) is ambigious
+ * for the type Check&lt;String, IllegalArgumentException&gt;</b>
  *
  * <p>
  *
  * <pre>
- * // WILL NOT COMPILE:
- * // Check.notNull(employee, "employee").has(Employee::getId, "id", x -> x > 0);
- * // WILL COMPILE:
- * Check.notNull(employee, "employee").has(Employee::getId, "id", (int x) -> x > 0); // and(IntPredicate)
- * Check.notNull(employee, "employee").has(Employee::getId, "id", (Integer x) -> x > 0); // and(Predicate&lt;Integer&gt;)
+ * Check.that(fullName).is(s -> s.charAt(0) == 'A'); // won't compile
+ * </pre>
+ *
+ * <p>To resolve this you can either explicitly specify the parameter type or rewrite the check
+ * using the {@link Relation} interface:
+ *
+ * <p>
+ *
+ * <pre>
+ * Check.that(fullName).is((String s) -> s.charAt(0) == 'A'); // specify type
+ * Check.that(fullName).has(s -> s.charAt(0), eq(), 'A'); // rewrite
  * </pre>
  *
  * <h4>Changing the Exception type</h4>
@@ -80,11 +87,10 @@ import static nl.naturalis.common.check.Messages.createMessage;
  * <p>
  *
  * <pre>
- * this.query = Check.that(query, "query", InvalidQueryException::new)
- *  .has(QuerySpec::getFrom, "from", nullOr(), 0)
- *  .has(QuerySpec::getSize, "size", gte(), MIN_BATCH_SIZE)
- *  .has(QuerySpec::getSize, "size", lt(), MAX_BATCH_SIZE)
- *  .has(QuerySpec::getSortFields, "sortFields", empty())
+ * this.query = Check.with(InvalidQueryException::new, query, "query")
+ *  .has(Query::getFrom, "from", nullOr(), 0)
+ *  .has(Query::getSize, "size", gte(), 10)
+ *  .has(Query::getSize, "size", lte(), 10000)
  *  .ok();
  * </pre>
  *
@@ -342,8 +348,8 @@ public abstract class Check<T, E extends Exception> {
   // Instance fields / methods start here
   //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  String argName;
-  Function<String, E> excFactory;
+  final String argName;
+  final Function<String, E> excFactory;
 
   Check(String argName, Function<String, E> exceptionFactory) {
     this.argName = argName;

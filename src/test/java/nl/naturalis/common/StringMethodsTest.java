@@ -29,21 +29,21 @@ public class StringMethodsTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void duration01() {
-    String s = duration(1000L, 10001L);
+    String s = interval(1000L, 10001L);
     assertEquals("01", "00:00:09.001", s);
-    s = duration(1000L, 40080L);
+    s = interval(1000L, 40080L);
     assertEquals("02", "00:00:39.080", s);
-    s = duration(1000L, 3641689L);
+    s = interval(1000L, 3641689L);
     assertEquals("03", "01:00:40.689", s);
-    s = duration(1000L, 123641689L);
+    s = interval(1000L, 123641689L);
     assertEquals("04", "34:20:40.689", s);
-    s = duration(1000L, 5123641689L);
+    s = interval(1000L, 5123641689L);
     assertEquals("05", "1423:14:00.689", s);
-    s = duration(1000L, 995123641689L);
+    s = interval(1000L, 995123641689L);
     assertEquals("05", "276423:14:00.689", s);
-    s = duration(1000L, 1000L);
+    s = interval(1000L, 1000L);
     assertEquals("05", "00:00:00.000", s);
-    s = duration(9000L, 1000L); // Negative time interval
+    s = interval(9000L, 1000L); // Negative time interval
   }
 
   @Test

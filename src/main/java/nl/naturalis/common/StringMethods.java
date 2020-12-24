@@ -121,8 +121,8 @@ public final class StringMethods {
    * @param start The start time
    * @return A human-friendly representation of the duration between the specified start and now
    */
-  public static String getDuration(long start) {
-    return duration(start, System.currentTimeMillis());
+  public static String interval(long start) {
+    return interval(start, System.currentTimeMillis());
   }
 
   /**
@@ -133,9 +133,18 @@ public final class StringMethods {
    * @param end The end time
    * @return A human-friendly representation of the duration of the specified time interval
    */
-  public static String duration(long start, long end) {
+  public static String interval(long start, long end) {
     Check.that(end).is(atLeast(), start, "Negative time interval");
-    long millis = end - start;
+    return duration(end - start);
+  }
+
+  /**
+   * Returns a human-friendly representation of the specified duration in milliseconds.
+   *
+   * @param millis The duration in millisecond
+   * @return A human-friendly representation of the specified duration in milliseconds
+   */
+  public static String duration(long millis) {
     long h = millis / (60 * 60 * 1000);
     millis %= (60 * 60 * 1000);
     long m = millis / (60 * 1000);

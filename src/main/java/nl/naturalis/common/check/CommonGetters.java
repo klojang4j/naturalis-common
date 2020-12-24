@@ -120,10 +120,10 @@ public class CommonGetters {
   }
 
   /**
-   * A {@code Function} that returns the length of a {@code String}. Equivalent to {@code
-   * String::length}.
+   * A {@code Function} that returns the length of a {@code CharSequence}. Equivalent to {@code
+   * CharSequence::length}.
    *
-   * @return A {@code Function} that returns the length of a {@code String}
+   * @return A {@code Function} that returns the length of a {@code CharSequence}
    */
   public static <T extends CharSequence> ToIntFunction<T> strlen() {
     return CharSequence::length;
