@@ -20,9 +20,9 @@ public class ClassMethods {
    * forgetting who should be the caller and who the callee with <code>Class.isAssignableFrom</code>
    * method.
    *
-   * @param classToTest
-   * @param superOrInterface
-   * @return
+   * @param classToTest The class to test
+   * @param superOrInterface The class or interface to test the class against
+   * @return Whether the 1st argument extends or implements the 2nd argument
    */
   public static boolean isA(Class<?> classToTest, Class<?> superOrInterface) {
     Check.notNull(classToTest, "classToTest");

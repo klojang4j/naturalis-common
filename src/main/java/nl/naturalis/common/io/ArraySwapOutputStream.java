@@ -22,7 +22,7 @@ public class ArraySwapOutputStream extends SwapOutputStream {
    */
   public static ArraySwapOutputStream newInstance() {
     try {
-      return new ArraySwapOutputStream(createTempFile(ArraySwapOutputStream.class));
+      return new ArraySwapOutputStream(tempFile());
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -37,7 +37,7 @@ public class ArraySwapOutputStream extends SwapOutputStream {
    */
   public static ArraySwapOutputStream newInstance(int bufSize) {
     try {
-      return new ArraySwapOutputStream(createTempFile(ArraySwapOutputStream.class), bufSize);
+      return new ArraySwapOutputStream(tempFile(), bufSize);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -163,8 +163,8 @@ public class ArraySwapOutputStream extends SwapOutputStream {
   /** @throws IOException */
   void prepareRecall() throws IOException {}
 
-  // Allow subclasses to wrap the recall output stream in an outstream that does the reverse of
-  // their write actions (zip/unzip)
+  // Allow subclasses to override this method in order to wrap the recall output stream in another
+  // outstream that does the reverse of their write actions (zip/unzip)
   OutputStream wrap(OutputStream target) {
     return target;
   }
@@ -179,10 +179,14 @@ public class ArraySwapOutputStream extends SwapOutputStream {
 
   private void flushBuffer() throws IOException {
     if (out == null) {
-      out = Check.with(IOException::new, swapFile).is(fileNotExists()).ok(FileOutputStream::new);
+      out = new FileOutputStream(swapFile);
       swapped = true;
     }
     out.write(buf, 0, cnt);
     cnt = 0;
+  }
+
+  private static File tempFile() throws IOException {
+    return createTempFile(ArraySwapOutputStream.class, false);
   }
 }

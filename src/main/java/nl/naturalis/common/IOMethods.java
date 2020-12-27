@@ -43,8 +43,8 @@ public class IOMethods {
   }
 
   /**
-   * Creates a {@code File} object for a new, empty file in the file system's temp directory. The
-   * file extension will be ".tmp".
+   * Creates a new, empty file in the file system's temp directory. Equivalent to <code>
+   * createTempFile(IOMethods.class, ".tmp", true)</code>.
    *
    * @return A {@code File} object for a new, empty file in the file system's temp directory
    * @throws IOException If an I/O error occurs
@@ -54,19 +54,20 @@ public class IOMethods {
   }
 
   /**
-   * Creates a {@code File} object for a new, empty file in the file system's temp directory.
+   * Creates a new, empty file in the file system's temp directory. Equivalent to <code>
+   * createTempFile(IOMethods.class, extension, true)</code>.
    *
    * @param extension The extension to append to the generated file name
    * @return A {@code File} object for a new, empty file in the file system's temp directory
    * @throws IOException If an I/O error occurs
    */
   public static File createTempFile(String extension) throws IOException {
-    return createTempFile(IOMethods.class, extension);
+    return createTempFile(IOMethods.class, extension, true);
   }
 
   /**
-   * Creates a {@code File} object for a new, empty file in the file system's temp directory. The
-   * file extension will be ".tmp".
+   * Creates a new, empty file in the file system's temp directory. Equivalent to <code>
+   * createTempFile(requester ".tmp", true)</code>.
    *
    * @param requester The class requesting the temp file (simple name will become part of the file
    *     name)
@@ -74,23 +75,37 @@ public class IOMethods {
    * @throws IOException If an I/O error occurs
    */
   public static File createTempFile(Class<?> requester) throws IOException {
-    return createTempFile(requester, ".tmp");
+    return createTempFile(requester, true);
   }
 
   /**
-   * Creates a {@code File} object for a new, empty file in the file system's temp directory. Using
-   * {@link File#createTempFile(String, String)} may fail if temporary files are created in rapid
-   * succession as it seems to use only System.currentTimeMillis() to invent a file name. This
-   * method has a 100% chance of generating a unique path.
+   * Creates a {@code File} object with a unique file name, located file system's temp directory.
+   * Equivalent to <code>createTempFile(requester ".tmp", touch)</code>.
+   *
+   * @param requester The class requesting the temp file (simple name will become part of the file
+   *     name)
+   * @return A {@code File} object for a new, empty file in the file system's temp directory
+   * @throws IOException If an I/O error occurs
+   */
+  public static File createTempFile(Class<?> requester, boolean touch) throws IOException {
+    return createTempFile(requester, ".tmp", touch);
+  }
+
+  /**
+   * Creates a {@code File} object with a unique file name, located file system's temp directory.
+   * Using {@link File#createTempFile(String, String)} may fail if temporary files are created in
+   * rapid succession as it seems to use only System.currentTimeMillis() to invent a file name. This
+   * method has a 100% chance of generating a unique file name.
    *
    * @param requester The class requesting the temp file (simple name will become part of the file
    *     name)
    * @param extension The extension to append to the generated file name
+   * @param touch Whether or not to actually create the file on the file system
    * @return A {@code File} object for a new, empty file in the file system's temp directory
    * @throws IOException If an I/O error occurs
    */
-  public static synchronized File createTempFile(Class<?> requester, String extension)
-      throws IOException {
+  public static synchronized File createTempFile(
+      Class<?> requester, String extension, boolean touch) throws IOException {
     String path =
         StringMethods.append(
                 new StringBuilder(64),
@@ -102,11 +117,14 @@ public class IOMethods {
                 extension)
             .toString();
     File f = new File(path);
-    if (f.createNewFile()) {
-      return f;
+    if (touch) {
+      if (f.createNewFile()) {
+        return f;
+      }
+      String fmt = "Failed to created temp file %s (already existed)";
+      throw new IOException(String.format(fmt, path));
     }
-    String fmt = "Failed to created temp file %s (already existed)";
-    throw new IOException(String.format(fmt, path));
+    return f;
   }
 
   private static int tempCount = 100000;

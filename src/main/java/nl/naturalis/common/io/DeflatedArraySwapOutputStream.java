@@ -12,13 +12,14 @@ import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonGetters.length;
 
 /**
- * A {@code SwapOutputStream} that compresses the data as it enters the internal buffer, thereby
- * decreasing the chance that the internal buffer will have to be swapped out to file. The {@link
- * #recall(OutputStream) recall} method will uncompress the data again. After the {@code recall}
- * method has been called, the {@code DeflatedArraySwapOutputStream}, like any {@link
- * SwapOutputStream}, becomes a regular {@code BufferedOutputStream} and it will no longer compress
- * the data.
+ * A {@code SwapOutputStream} that compresses the data as it enters the internal buffer. This will
+ * decrease the chance that the internal buffer will have to be swapped out to file. The {@link
+ * #recall(OutputStream) recall} method will uncompress the data again. Clients can continue to
+ * write to the {@code DeflatedArraySwapOutputStream} even after the data has been recalled.
+ * However, once the {@code recall} method has been called, data will no longer be compressed as it
+ * enters the internal buffer.
  *
+ * @see SwapOutputStream#recall(OutputStream)
  * @author Ayco Holleman
  */
 public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
@@ -30,7 +31,7 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
    */
   public static DeflatedArraySwapOutputStream newInstance() {
     try {
-      return new DeflatedArraySwapOutputStream(createTempFile(DeflatedArraySwapOutputStream.class));
+      return new DeflatedArraySwapOutputStream(tempFile());
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -45,8 +46,7 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
    */
   public static DeflatedArraySwapOutputStream newInstance(int bufSize) {
     try {
-      return new DeflatedArraySwapOutputStream(
-          createTempFile(DeflatedArraySwapOutputStream.class), bufSize);
+      return new DeflatedArraySwapOutputStream(tempFile(), bufSize);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -160,5 +160,9 @@ public class DeflatedArraySwapOutputStream extends ArraySwapOutputStream {
     if (len > 0) {
       super.write(temp, 0, len);
     }
+  }
+
+  private static File tempFile() throws IOException {
+    return createTempFile(DeflatedArraySwapOutputStream.class, false);
   }
 }

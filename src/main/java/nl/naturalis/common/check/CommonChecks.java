@@ -27,7 +27,8 @@ import static nl.naturalis.common.check.Messages.*;
  */
 public class CommonChecks {
 
-  // Stores the error messages associated with the checks (or rather message generators)
+  // Stores the error messages associated with the checks (or rather message
+  // generators)
   static final IdentityHashMap<Object, Formatter> messages;
   // Stores the names of the checks
   static final IdentityHashMap<Object, String> names;
@@ -321,7 +322,7 @@ public class CommonChecks {
    * @param <Y> The type of the object of the relationship
    * @return A {@code Relation}
    */
-  public static <X, Y extends Class<?>> Relation<X, Y> instanceOf() {
+  public static <X> Relation<X, Class<?>> instanceOf() {
     return (x, y) -> y.isInstance(x);
   }
 
@@ -1164,6 +1165,29 @@ public class CommonChecks {
   }
 
   /* ++++++++++++++ Miscellaneous ++++++++++++++ */
+
+  /**
+   * Converts the specified {@code Predicate} into an {@code IntPredicate}. Can be used to force the
+   * compiler to interpret a lambda as an {@code IntPredicate} rather than a {@code Predicate}.
+   *
+   * @param predicate A {@code Predicate}, supposedly in the form of a lambda
+   * @return The {@code IntPredicate} version of the {@code Predicate}
+   */
+  public static IntPredicate asInt(Predicate<Integer> predicate) {
+    return x -> predicate.test(Integer.valueOf(x));
+  }
+
+  /**
+   * Simply returns the argument. Can be used to force the compiler to interpret a lambda as a
+   * {@code Predicate} rather than an {@code IntPredicate}.
+   *
+   * @param <T> The type of the argument being tested
+   * @param predicate A {@code Predicate}, supposedly in the form of a lambda
+   * @return The argument
+   */
+  public static <T> Predicate<T> asObj(Predicate<T> predicate) {
+    return predicate;
+  }
 
   /* ++++++++++++++ END OF CHECKS ++++++++++++++ */
 

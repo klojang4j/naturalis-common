@@ -12,12 +12,14 @@ import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonGetters.length;
 
 /**
- * A {@code SwapOutputStream} that compresses the data as it enters the internal buffer, thereby
- * decreasing the chance that the internal buffer will have to be swapped out to file. The {@link
- * #recall(OutputStream)} method will uncompress the data again. After the {@code recall} method has
- * been called, the {@code DeflatedArraySwapOutputStream}, like any {@link SwapOutputStream},
- * becomes a regular {@code BufferedOutputStream} and it will no longer compress the data.
+ * A {@code SwapOutputStream} that compresses the data as it enters the internal buffer. This will
+ * decrease the chance that the internal buffer will have to be swapped out to file. The {@link
+ * #recall(OutputStream) recall} method will uncompress the data again. Clients can continue to
+ * write to the {@code DeflatedNioSwapOutputStream} even after the data has been recalled. However,
+ * once the {@code recall} method has been called, data will no longer be compressed as it enters
+ * the internal buffer.
  *
+ * @see SwapOutputStream#recall(OutputStream)
  * @author Ayco Holleman
  */
 public class DeflatedNioSwapOutputStream extends NioSwapOutputStream {
@@ -29,7 +31,7 @@ public class DeflatedNioSwapOutputStream extends NioSwapOutputStream {
    */
   public static DeflatedNioSwapOutputStream newInstance() {
     try {
-      return new DeflatedNioSwapOutputStream(createTempFile(DeflatedNioSwapOutputStream.class));
+      return new DeflatedNioSwapOutputStream(tempFile());
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -44,8 +46,7 @@ public class DeflatedNioSwapOutputStream extends NioSwapOutputStream {
    */
   public static DeflatedNioSwapOutputStream newInstance(int bufSize) {
     try {
-      return new DeflatedNioSwapOutputStream(
-          createTempFile(DeflatedNioSwapOutputStream.class), bufSize);
+      return new DeflatedNioSwapOutputStream(tempFile(), bufSize);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -61,8 +62,7 @@ public class DeflatedNioSwapOutputStream extends NioSwapOutputStream {
    */
   public static DeflatedNioSwapOutputStream newInstance(int bufSize, int compressionLevel) {
     try {
-      return new DeflatedNioSwapOutputStream(
-          createTempFile(DeflatedNioSwapOutputStream.class), bufSize, compressionLevel);
+      return new DeflatedNioSwapOutputStream(tempFile(), bufSize, compressionLevel);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -159,5 +159,9 @@ public class DeflatedNioSwapOutputStream extends NioSwapOutputStream {
     if (len > 0) {
       super.write(temp, 0, len);
     }
+  }
+
+  private static File tempFile() throws IOException {
+    return createTempFile(DeflatedNioSwapOutputStream.class, false);
   }
 }

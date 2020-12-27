@@ -32,7 +32,7 @@ public class NioSwapOutputStream extends SwapOutputStream {
    */
   public static NioSwapOutputStream newInstance() {
     try {
-      return new NioSwapOutputStream(createTempFile(NioSwapOutputStream.class));
+      return new NioSwapOutputStream(tempFile());
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -47,7 +47,7 @@ public class NioSwapOutputStream extends SwapOutputStream {
    */
   public static NioSwapOutputStream newInstance(int bufSize) {
     try {
-      return new NioSwapOutputStream(createTempFile(NioSwapOutputStream.class), bufSize);
+      return new NioSwapOutputStream(tempFile(), bufSize);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -197,8 +197,8 @@ public class NioSwapOutputStream extends SwapOutputStream {
   /** @throws IOException */
   void prepareRecall() throws IOException {}
 
-  // Allow subclasses to wrap the recall output stream in an outstream that does the reverse of
-  // their write actions (zip/unzip)
+  // Allow subclasses to override this method in order to wrap the recall output stream in another
+  // outstream that does the reverse of their write actions (zip/unzip)
   OutputStream wrap(OutputStream target) {
     return target;
   }
@@ -232,5 +232,9 @@ public class NioSwapOutputStream extends SwapOutputStream {
       out.write(tmp, 0, len);
     }
     buf.clear();
+  }
+
+  private static File tempFile() throws IOException {
+    return createTempFile(NioSwapOutputStream.class, false);
   }
 }

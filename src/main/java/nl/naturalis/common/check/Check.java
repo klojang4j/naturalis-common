@@ -8,10 +8,9 @@ import static nl.naturalis.common.check.CommonGetters.formatGetterName;
 import static nl.naturalis.common.check.Messages.createMessage;
 
 /**
- * Facilitates the validation of arguments and object state. Validating object state and array
- * indices happens through a single public static method. Validation of arguments happens by means
- * of an actual instance of the {@code Check} class. You obtain an instance through one of the
- * static factory methods. For example:
+ * Facilitates precondition checking. Validation of arguments happens by means of an instance of the
+ * {@code Check} class. You obtain an instance through one of the static factory methods. For
+ * example:
  *
  * <p>
  *
@@ -21,7 +20,7 @@ import static nl.naturalis.common.check.Messages.createMessage;
  *
  * <h4>Common checks</h4>
  *
- * <p>The {@link CommonChecks} class provides a grab bag for common checks for arguments. These are
+ * <p>The {@link CommonChecks} class provides a grab bag of common checks for arguments. These are
  * already associated with short, informative error messages, so you don't have to invent them
  * yourself. For example:
  *
@@ -29,7 +28,7 @@ import static nl.naturalis.common.check.Messages.createMessage;
  *
  * <pre>
  * Check.that(numChairs, "numChairs").is(gt(), 0);
- * // Error message "numChairs must be > 0 (was -3)"
+ * // Error message: "numChairs must be > 0 (was -3)"
  * </pre>
  *
  * <h4>Checking argument properties</h4>
@@ -42,41 +41,58 @@ import static nl.naturalis.common.check.Messages.createMessage;
  * <pre>
  * Check.notNull(name, "name").has(String::length, "length", gte(), 10);
  * Check.notNull(employee, "employee").has(Employee::getAge, "age", lt(), 50);
- * Check.notNull(intArray, "intArray").has(Array::getLength, "length", even());
  * Check.notNull(employees, "emps").has(Collection::size, "size", gte(), 100);
  * </pre>
  *
  * <p>The {@link CommonGetters} class defines some common getters which, again, are already
- * associated with a name for the property they expose:
+ * associated with the name of the property they expose:
  *
  * <pre>
  * Check.notNull(employees, "emps").has(size(), gte(), 100);
- * // Error message "emps.size() must be >= 100 (was 42)"
+ * // Error message: "emps.size() must be >= 100 (was 42)"
  * </pre>
  *
  * <h4>Lambdas</h4>
  *
- * <p>Checks are done via the various {@code is(...)} and {@code has(...)} methods. When you pass a
- * lambda to these methods, and the lambda is supposed to be a {@link Predicate} or {@link
- * IntPredicate}, the compiler will not be able to decide which of the two it is. (This problem will
- * not occur when specifying a method reference or a check from the {@code CommonChecks} class.)
- * This will result in a compiler error like: <b>The method is(Predicate&lt;String&gt;) is ambigious
- * for the type Check&lt;String, IllegalArgumentException&gt;</b>
+ * <p>Checks are done via the various {@code is(...)} and {@code has(...)} methods. These methods
+ * are overloaded to take either a {@link Predicate} or an {@link IntPredicate}. This is not a
+ * problem when passing them a method reference or a check from the {@code CommonChecks} class. When
+ * passing a lambda, however, the compiler will be unable to decide whether it is dealing with a
+ * {@code Predicate} or an {@code IntPredicate} - an unfortunate side effect of the combination of
+ * type erasure and auto-boxing. This will result in a compiler error like:
+ *
+ * <p><i>The method is(Predicate&lt;String&gt;) is ambigious for the type Check&lt;String,
+ * IllegalArgumentException&gt;</i>
  *
  * <p>
  *
  * <pre>
- * Check.that(fullName).is(s -> s.charAt(0) == 'A'); // won't compile
+ * // Won't compile even though it's clear this can't be an IntPredicate:
+ * Check.that(fullName).is(s -> s.charAt(0) == 'A');
  * </pre>
  *
- * <p>To resolve this you can either explicitly specify the parameter type or rewrite the check
- * using the {@link Relation} interface:
+ * <p>To resolve this, simply specify the type of the lambda parameter:
  *
  * <p>
  *
  * <pre>
- * Check.that(fullName).is((String s) -> s.charAt(0) == 'A'); // specify type
- * Check.that(fullName).has(s -> s.charAt(0), eq(), 'A'); // rewrite
+ * Check.that(fullName).is((String s) -> s.charAt(0) == 'A');
+ * </pre>
+ *
+ * <p>Alternatively, you can use the {@link CommonChecks#asObj(Predicate) asObj} and {@link
+ * CommonChecks#asInt(Predicate) asInt} utility methods:
+ *
+ * <pre>
+ * Check.that(numChairs).is(asInt(x -> x <= 10)); // IntPredicate
+ * Check.that(numChairs).is(asObj(x -> x <= 10)); // Predicate&lt;Integer&gt;
+ * </pre>
+ *
+ * <p>Or, as another alternative, every {@code Predicate} can be rewritten as a {@link Relation}:
+ *
+ * <p>
+ *
+ * <pre>
+ * Check.that(fullName).has(s -> s.charAt(0), eq(), 'A');
  * </pre>
  *
  * <h4>Changing the Exception type</h4>

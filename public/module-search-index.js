@@ -1,1 +1,1 @@
-moduleSearchIndex = [{"l":"nl.naturalis.common"}]
+moduleSearchIndex = [{"l":"nl.naturalis.common"}];updateSearchResults();

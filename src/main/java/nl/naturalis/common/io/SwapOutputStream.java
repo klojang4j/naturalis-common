@@ -20,8 +20,9 @@ import nl.naturalis.common.check.Check;
  * #cleanup()} method all method calls need to be synchronized using a lock on the entire instance
  * (or something equivalently exclusive).
  *
- * <p>A {@code SwapOutputStream} effectively is a sort of {@link BufferedOutputStream}. Therefore it
- * makes no sense to wrap a {@code SwapOutputStream} into a {@code BufferedOutputStream}.
+ * <p>{@code SwapOutputStream} and its subclasses effectively are a sort of {@link
+ * BufferedOutputStream}. Therefore, with respect to performance, it is pointless to wrap a {@code
+ * SwapOutputStream} into a {@code BufferedOutputStream}.
  *
  * @author Ayco Holleman
  */
@@ -49,10 +50,11 @@ public abstract class SwapOutputStream extends OutputStream {
 
   /**
    * Collects the data written to this instance and writes it to the specified target. You can
-   * continue writing data to the {@code SwapOutputStream} after a recall. The {@code
-   * SwapOutputStream} swallows the output stream and turns itself into a {@code
-   * BufferedOutputStream} around it. This method can be called only once. Subsequent call result in
-   * an {@link IOException}.
+   * continue writing data to the {@code SwapOutputStream} even after the data has been recalled.
+   * The {@code SwapOutputStream} tacitly closes the output stream to the swap file (if data had to
+   * be swapped out of the internal buffer) and turns itself into a {@code BufferedOutputStream}
+   * around the specified target output stream. This method can be called only once. Subsequent
+   * calls result in an {@link IOException}.
    *
    * @param target The output stream to which to write the data
    * @throws IOException If you call this method more than once or if an I/O error occurs

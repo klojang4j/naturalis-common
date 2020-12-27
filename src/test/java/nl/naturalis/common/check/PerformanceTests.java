@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.Random;
 import org.junit.Test;
 import static nl.naturalis.common.StringMethods.duration;
+import static nl.naturalis.common.check.CommonChecks.lt;
 import static nl.naturalis.common.check.CommonChecks.lte;
 import static nl.naturalis.common.check.CommonChecks.ne;
 import static nl.naturalis.common.check.CommonGetters.strlen;
@@ -112,6 +113,38 @@ public class PerformanceTests {
     }
   }
 
+  @Test
+  public void test04() throws InterruptedException {
+    if (skip()) {
+      return;
+    }
+    System.out.println();
+    System.out.println("****** Single check on int ******");
+
+    System.out.println("Warming up Check class...");
+    test04Check(WARMUP_REPEATS);
+    System.out.println("Warming up manual check...");
+    test04Manual(WARMUP_REPEATS);
+
+    Thread.sleep(3000);
+    System.out.println("Measuring Check class ...");
+    long time0 = test04Check(TEST_REPEATS);
+    System.out.println("Duration: " + duration(time0));
+
+    Thread.sleep(3000);
+    System.out.println("Measuring manual check  ...");
+    long time1 = test04Manual(TEST_REPEATS);
+    System.out.println("Duration: " + duration(time1));
+
+    double diff = (double) time0 / (double) time1 - 1;
+    System.out.println("Pct. diff. ...: " + PERCENTAGE.format(diff));
+    if (diff > .1) {
+      System.out.println("****************************************************************");
+      System.out.println("****  WARNING: Check CLASS MORE THAN 10% SLOWER IN test01    ***");
+      System.out.println("****************************************************************");
+    }
+  }
+
   private static long test01Check(int repeats) {
     StringBuilder sb0 = new StringBuilder(256);
     StringBuilder sb1 = null;
@@ -191,8 +224,8 @@ public class PerformanceTests {
       sb1 = sb0.length() < 8192 ? sb0 : null; // Make sure it's always gonna be sb0
       Check.notNull(sb1)
           .has(strlen(), lte(), 10000)
-          .has(sb -> sb.charAt(sb.length() - 1), ne(), 'A');
-      if (i % POLL_INTERVAL == 0L) { // Just append some digit
+          .has(sb -> sb.charAt(sb.length() - 1), ne(), '?');
+      if (i % POLL_INTERVAL == 0) { // Just append some digit
         sb1.append((char) (48 + random.nextInt(10)));
       }
     }
@@ -213,15 +246,45 @@ public class PerformanceTests {
       if (sb1.length() > 10000) {
         throw new IllegalArgumentException("Argument.length() must be >= 100");
       }
-      if (sb1.charAt(sb1.length() - 1) == 'A') {
-        throw new IllegalArgumentException("Argument must not end with A");
+      if (sb1.charAt(sb1.length() - 1) == '?') {
+        throw new IllegalArgumentException("Argument must not end with ?");
       }
-      if (i % POLL_INTERVAL == 0L) { // Just append some digit
+      if (i % POLL_INTERVAL == 0) { // Just append some digit
         sb1.append((char) (48 + random.nextInt(10)));
       }
     }
     t = System.currentTimeMillis() - t;
     System.out.println(sb1); // Print so compiler can't optimize the whole thing away
+    return t;
+  }
+
+  private static long test04Check(int repeats) {
+    StringBuilder sb0 = new StringBuilder(256);
+    long t = System.currentTimeMillis();
+    for (int i = 0; i < repeats; ++i) {
+      Check.that(sb0.length()).is(lt(), 256);
+      if (i % POLL_INTERVAL == 0) {
+        sb0.append('0');
+      }
+    }
+    t = System.currentTimeMillis() - t;
+    System.out.println(sb0);
+    return t;
+  }
+
+  private static long test04Manual(int repeats) {
+    StringBuilder sb0 = new StringBuilder(256);
+    long t = System.currentTimeMillis();
+    for (int i = 0; i < repeats; ++i) {
+      if (sb0.length() >= 256) {
+        throw new IllegalArgumentException("Argument must be < 256");
+      }
+      if (i % POLL_INTERVAL == 0) {
+        sb0.append('0');
+      }
+    }
+    t = System.currentTimeMillis() - t;
+    System.out.println(sb0);
     return t;
   }
 

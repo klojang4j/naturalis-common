@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"m":"nl.naturalis.common","l":"nl.naturalis.common.function"},{"m":"nl.naturalis.common","l":"nl.naturalis.common.internal"}]
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"m":"nl.naturalis.common","l":"nl.naturalis.common.function"},{"m":"nl.naturalis.common","l":"nl.naturalis.common.internal"}];updateSearchResults();
