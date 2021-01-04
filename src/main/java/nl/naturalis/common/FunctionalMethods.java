@@ -3,10 +3,35 @@ package nl.naturalis.common;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Function;
+import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 
 /** Methods assisting in functional programming */
 public class FunctionalMethods {
+
+  /**
+   * Converts the specified {@code Predicate} into an {@code IntPredicate}. Can be used to force the
+   * compiler to interpret a lambda as an {@code IntPredicate} rather than a {@code Predicate}.
+   *
+   * @param predicate A {@code Predicate}, supposedly in the form of a lambda
+   * @return The {@code IntPredicate} version of the {@code Predicate}
+   */
+  public static IntPredicate asInt(Predicate<Integer> predicate) {
+    return x -> predicate.test(Integer.valueOf(x));
+  }
+
+  /**
+   * Simply returns the argument. Can be used to force the compiler to interpret a lambda as a
+   * {@code Predicate} rather than an {@code IntPredicate}.
+   *
+   * @param <T> The type of the argument being tested
+   * @param predicate A {@code Predicate}, supposedly in the form of a lambda
+   * @return The argument
+   */
+  public static <T> Predicate<T> asObj(Predicate<T> predicate) {
+    return predicate;
+  }
 
   /**
    * Converts the specified function from one that computes a result into one that computes an

@@ -1174,7 +1174,7 @@ public class CommonChecks {
    * @return The {@code IntPredicate} version of the {@code Predicate}
    */
   public static IntPredicate asInt(Predicate<Integer> predicate) {
-    return x -> predicate.test(Integer.valueOf(x));
+    return FunctionalMethods.asInt(predicate);
   }
 
   /**
@@ -1186,7 +1186,7 @@ public class CommonChecks {
    * @return The argument
    */
   public static <T> Predicate<T> asObj(Predicate<T> predicate) {
-    return predicate;
+    return FunctionalMethods.asObj(predicate);
   }
 
   /* ++++++++++++++ END OF CHECKS ++++++++++++++ */
