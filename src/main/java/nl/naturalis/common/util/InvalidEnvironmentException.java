@@ -8,9 +8,14 @@ package nl.naturalis.common.util;
  */
 public class InvalidEnvironmentException extends RuntimeException {
 
-  static final String MISSING_ENV_VAR = "Missing environment variable \"%s\"";
   static final String NOT_CONVERTIBLE =
       "Environment variable \"%s\" not convertible to %s: \"%s\" (Reason: %s)";
+
+  private static final String MISSING_ENV_VAR = "Missing environment variable \"%s\"";
+
+  static InvalidEnvironmentException missingEnvVar(String name) {
+    return new InvalidEnvironmentException(String.format(MISSING_ENV_VAR, name));
+  }
 
   InvalidEnvironmentException(String message, Throwable cause) {
     super(message, cause);

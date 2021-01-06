@@ -18,8 +18,8 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
 import static nl.naturalis.common.util.EnvManager.EmptyValue.DEFAULT;
 import static nl.naturalis.common.util.EnvManager.EmptyValue.EMPTY;
 import static nl.naturalis.common.util.EnvManager.EmptyValue.UNDEFINED;
-import static nl.naturalis.common.util.InvalidEnvironmentException.MISSING_ENV_VAR;
 import static nl.naturalis.common.util.InvalidEnvironmentException.NOT_CONVERTIBLE;
+import static nl.naturalis.common.util.InvalidEnvironmentException.missingEnvVar;
 /**
  * Simple utility class wrapping {@link System#getenv(String) System.getenv()}. {@code EnvManager}
  * instances come in three different flavours, according to how they read environment variables (see
@@ -32,7 +32,7 @@ public class EnvManager {
 
   /**
    * Specifies how to treat environment variables that are present but have no value. In other
-   * words, environment variables that were created like {@code export FOO=}.
+   * words, environment variables that were created like {@code export FOO=} .
    *
    * @author Ayco Holleman
    */
@@ -75,7 +75,8 @@ public class EnvManager {
   }
 
   /**
-   * Returns an {@code EnvManager} instance that uses the specified strategy.
+   * Returns an {@code EnvManager} instance that uses the specified strategy for environment
+   * variables that are present but without value
    *
    * @param ev The strategy to use for environment variables that are present but without value
    * @return An {@code EnvManager} instance
@@ -138,9 +139,7 @@ public class EnvManager {
    */
   public String getRequired(String name) throws InvalidEnvironmentException {
     Check.notNull(name, "name");
-    return empty == UNDEFINED
-        ? check(name).is(notEmpty(), MISSING_ENV_VAR, name).ok()
-        : check(name).is(notNull(), MISSING_ENV_VAR, name).ok();
+    return empty == UNDEFINED ? check(name).is(notEmpty()).ok() : check(name).is(notNull()).ok();
   }
 
   /**
@@ -200,8 +199,8 @@ public class EnvManager {
     Check.notNull(name, "name");
     try {
       return empty == UNDEFINED
-          ? check(name).is(notEmpty(), MISSING_ENV_VAR, name).ok(Integer::parseInt)
-          : check(name).is(notNull(), MISSING_ENV_VAR, name).ok(Integer::parseInt);
+          ? check(name).is(notEmpty()).ok(Integer::parseInt)
+          : check(name).is(notNull()).ok(Integer::parseInt);
     } catch (NumberFormatException e) {
       throw parseError(name, int.class, e.getMessage());
     }
@@ -265,8 +264,8 @@ public class EnvManager {
     Check.notNull(name, "name");
     try {
       return empty == UNDEFINED
-          ? check(name).is(notEmpty(), MISSING_ENV_VAR, name).ok(this::parseBoolean)
-          : check(name).is(notNull(), MISSING_ENV_VAR, name).ok(this::parseBoolean);
+          ? check(name).is(notEmpty()).ok(this::parseBoolean)
+          : check(name).is(notNull()).ok(this::parseBoolean);
     } catch (IllegalArgumentException e) {
       throw parseError(name, boolean.class, e.getMessage());
     }
@@ -283,7 +282,7 @@ public class EnvManager {
   }
 
   private Check<String, InvalidEnvironmentException> check(String name) {
-    return Check.with(InvalidEnvironmentException::new, getenv(name));
+    return Check.with(s -> missingEnvVar(name), getenv(name));
   }
 
   private String getenv(String name) {
