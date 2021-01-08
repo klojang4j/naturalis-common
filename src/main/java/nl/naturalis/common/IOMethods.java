@@ -2,6 +2,7 @@ package nl.naturalis.common;
 
 import java.io.*;
 import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.check.CommonChecks.gt;
 
 /**
  * I/O-related methods.
@@ -12,28 +13,44 @@ public class IOMethods {
 
   private IOMethods() {}
 
+  public static byte[] read(InputStream in) throws IOException {
+    return read(in, 512);
+  }
+
+  public static byte[] read(InputStream in, int chunkSize) throws IOException {
+    ByteArrayOutputStream out = new ByteArrayOutputStream(chunkSize);
+    pipe(in, out, chunkSize);
+    return out.toByteArray();
+  }
+
   /**
    * Reads all bytes from the specified input stream and writes them to the specified output stream.
-   * Bytes are read and written in chunks of {@code bufsize} length. Both the input stream and the
-   * output stream are first wrapped into a {@link BufferedInputStream} c.q. {@link
-   * BufferedOutputStream} if they aren't already instances of those classes. Neither the input
-   * stream nor the output stream is closed when done.
+   * Bytes are read and written in chunks of 512 bytes at a time. Neither the input stream nor the
+   * output stream is closed when done.
    *
    * @param in The input stream
    * @param out The output stream
-   * @param bufsize The buffer size
    * @throws IOException If an I/O error occurs
    */
-  public static void pipe(InputStream in, OutputStream out, int bufsize) throws IOException {
+  public static void pipe(InputStream in, OutputStream out) throws IOException {
+    pipe(in, out, 512);
+  }
+
+  /**
+   * Reads all bytes from the specified input stream and writes them to the specified output stream.
+   * Bytes are read and written in chunks of the specified size. Neither the input stream nor the
+   * output stream is closed when done.
+   *
+   * @param in The input stream
+   * @param out The output stream
+   * @param chunkSize The number of bytes read/written at a time
+   * @throws IOException If an I/O error occurs
+   */
+  public static void pipe(InputStream in, OutputStream out, int chunkSize) throws IOException {
     Check.notNull(in, "in");
     Check.notNull(out, "out");
-    if (!(in instanceof BufferedInputStream || in instanceof ByteArrayInputStream)) {
-      in = new BufferedInputStream(in, bufsize);
-    }
-    if (!(out instanceof BufferedOutputStream || out instanceof ByteArrayOutputStream)) {
-      out = new BufferedOutputStream(out, bufsize);
-    }
-    byte[] data = new byte[bufsize];
+    Check.that(chunkSize, "chunkSize").is(gt(), 0);
+    byte[] data = new byte[chunkSize];
     int n = in.read(data, 0, data.length);
     while (n != -1) {
       out.write(data, 0, n);
