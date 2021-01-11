@@ -1,7 +1,12 @@
 package nl.naturalis.common;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.io.ExposedByteArrayOutputStream;
 import static nl.naturalis.common.check.CommonChecks.gt;
 
 /**
@@ -13,12 +18,20 @@ public class IOMethods {
 
   private IOMethods() {}
 
-  public static byte[] read(InputStream in) throws IOException {
+  public static String toString(InputStream in) {
+    return toString(in, 512);
+  }
+
+  public static String toString(InputStream in, int chunkSize) {
+    return new String(read(in, chunkSize), StandardCharsets.UTF_8);
+  }
+
+  public static byte[] read(InputStream in) {
     return read(in, 512);
   }
 
-  public static byte[] read(InputStream in, int chunkSize) throws IOException {
-    ByteArrayOutputStream out = new ByteArrayOutputStream(chunkSize);
+  public static byte[] read(InputStream in, int chunkSize) {
+    ExposedByteArrayOutputStream out = new ExposedByteArrayOutputStream(chunkSize);
     pipe(in, out, chunkSize);
     return out.toByteArray();
   }
@@ -32,7 +45,7 @@ public class IOMethods {
    * @param out The output stream
    * @throws IOException If an I/O error occurs
    */
-  public static void pipe(InputStream in, OutputStream out) throws IOException {
+  public static void pipe(InputStream in, OutputStream out) {
     pipe(in, out, 512);
   }
 
@@ -44,18 +57,21 @@ public class IOMethods {
    * @param in The input stream
    * @param out The output stream
    * @param chunkSize The number of bytes read/written at a time
-   * @throws IOException If an I/O error occurs
    */
-  public static void pipe(InputStream in, OutputStream out, int chunkSize) throws IOException {
+  public static void pipe(InputStream in, OutputStream out, int chunkSize) {
     Check.notNull(in, "in");
     Check.notNull(out, "out");
     Check.that(chunkSize, "chunkSize").is(gt(), 0);
     byte[] data = new byte[chunkSize];
-    int n = in.read(data, 0, data.length);
-    while (n != -1) {
-      out.write(data, 0, n);
-      out.flush();
-      n = in.read(data, 0, data.length);
+    try {
+      int n = in.read(data, 0, data.length);
+      while (n != -1) {
+        out.write(data, 0, n);
+        out.flush();
+        n = in.read(data, 0, data.length);
+      }
+    } catch (IOException e) {
+      throw ExceptionMethods.uncheck(e);
     }
   }
 

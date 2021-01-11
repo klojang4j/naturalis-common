@@ -14,6 +14,12 @@ import static java.lang.Character.toUpperCase;
  */
 public class CamelToSnakeUpperCase implements UnaryOperator<String> {
 
+  private static final CamelToSnakeUpperCase INSTANCE = new CamelToSnakeUpperCase();
+
+  public static final CamelToSnakeUpperCase camelToSnakeUpperCase() {
+    return INSTANCE;
+  }
+
   @Override
   public String apply(String n) {
     int maxLen = (int) Math.ceil(n.length() * 1.5F);

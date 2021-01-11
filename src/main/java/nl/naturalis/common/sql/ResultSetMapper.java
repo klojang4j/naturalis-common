@@ -105,16 +105,28 @@ public abstract class ResultSetMapper<T> {
   }
 
   /**
-   * Reads all (remaining) rows in the {@code ResultSet} into a list of model beans and returns the
-   * list.
+   * Reads all (remaining) rows from the specified {@code ResultSet} and converts them into model
+   * beans.
    *
    * @param rs The {@code ResultSet}
    * @return A {@code List} of model beans
    */
   public List<T> readAll(ResultSet rs) {
-    List<T> all = new ArrayList<>();
+    return readAll(rs, 10);
+  }
+
+  /**
+   * Reads at most {@code limit} rows from the specified {@code ResultSet} and converts them into
+   * model beans.
+   *
+   * @param rs The {@code ResultSet}
+   * @param limit The maximum number of rows to read from the {@code ResultSet}
+   * @return A {@code List} of model beans
+   */
+  public List<T> readAll(ResultSet rs, int limit) {
+    List<T> all = new ArrayList<>(limit);
     try {
-      while (rs.next()) {
+      for (int i = 0; i < limit && rs.next(); ++i) {
         all.add(read(rs));
       }
     } catch (SQLException e) {

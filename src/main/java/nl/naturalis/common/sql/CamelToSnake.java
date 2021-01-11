@@ -14,7 +14,11 @@ import static java.lang.Character.toLowerCase;
  */
 public class CamelToSnake implements UnaryOperator<String> {
 
-  public static final CamelToSnake INSTANCE = new CamelToSnake();
+  private static final CamelToSnake INSTANCE = new CamelToSnake();
+
+  public static final CamelToSnake camelToSnake() {
+    return INSTANCE;
+  }
 
   @Override
   public String apply(String n) {
