@@ -188,9 +188,10 @@ public abstract class ResultSetMapper<T> {
   /**
    * Provide a string operator that maps field names to result set column labels. By default a
    * straight one-to-one mapping is used. The returned name mapping mechanism will be used for all
-   * instances of {@code ResultSetMapper}.
+   * instances of {@code ResultSetMapper}. Two alternative name mappers are provided in this
+   * package: {@link CamelToSnake} and {@link CamelToSnakeUpperCase}.
    *
-   * @return A string operator that maps fields names to result set column labels
+   * @return A string operator that maps field names to result set column labels
    */
   protected UnaryOperator<String> nameMapper() {
     return x -> x;
