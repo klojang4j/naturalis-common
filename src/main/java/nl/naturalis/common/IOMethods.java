@@ -18,6 +18,18 @@ public class IOMethods {
 
   private IOMethods() {}
 
+  public static String toString(Class<?> resourceClass, String resourcePath) {
+    return toString(resourceClass, resourcePath, 512);
+  }
+
+  public static String toString(Class<?> resourceClass, String resourcePath, int chunkSize) {
+    try (InputStream in = resourceClass.getResourceAsStream(resourcePath)) {
+      return toString(in, chunkSize);
+    } catch (IOException e) {
+      throw ExceptionMethods.uncheck(e);
+    }
+  }
+
   public static String toString(InputStream in) {
     return toString(in, 512);
   }
