@@ -7,5 +7,6 @@ nl.naturalis.common.function
 nl.naturalis.common.internal
 nl.naturalis.common.io
 nl.naturalis.common.path
+nl.naturalis.common.sql
 nl.naturalis.common.time
 nl.naturalis.common.util

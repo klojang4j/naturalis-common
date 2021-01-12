@@ -1,13 +1,10 @@
 package nl.naturalis.common;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.io.ExposedByteArrayOutputStream;
 import static nl.naturalis.common.check.CommonChecks.gt;
+import static nl.naturalis.common.check.CommonChecks.notEmpty;
 
 /**
  * I/O-related methods.
@@ -22,8 +19,10 @@ public class IOMethods {
     return toString(resourceClass, resourcePath, 512);
   }
 
-  public static String toString(Class<?> resourceClass, String resourcePath, int chunkSize) {
-    try (InputStream in = resourceClass.getResourceAsStream(resourcePath)) {
+  public static String toString(Class<?> classpathClass, String resourcePath, int chunkSize) {
+    Check.notNull(classpathClass, "classpathClass");
+    Check.that(resourcePath, "resourcePath").is(notEmpty());
+    try (InputStream in = classpathClass.getResourceAsStream(resourcePath)) {
       return toString(in, chunkSize);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
@@ -43,7 +42,7 @@ public class IOMethods {
   }
 
   public static byte[] read(InputStream in, int chunkSize) {
-    ExposedByteArrayOutputStream out = new ExposedByteArrayOutputStream(chunkSize);
+    ByteArrayOutputStream out = new ByteArrayOutputStream(chunkSize);
     pipe(in, out, chunkSize);
     return out.toByteArray();
   }

@@ -1,0 +1,32 @@
+package nl.naturalis.common.seethru;
+
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class SeeThruIntListTest {
+
+  @Test
+  public void test00() {
+    SeeThruIntList list = new SeeThruIntList(2);
+    assertTrue("01", list.isEmpty());
+    list.add(1);
+    assertEquals("02", 1, list.size());
+    list.addAll(2, 3);
+    assertEquals("03", 3, list.size());
+    assertEquals("04", 4, list.capacity());
+  }
+
+  @Test
+  public void test01() {
+    SeeThruIntList list = new SeeThruIntList(2);
+    list.addAll(42, 42, 7, 8, 13);
+    assertEquals("01", 5, list.size());
+    assertEquals("02", 5, list.capacity());
+    list.add(12);
+    assertEquals("03", 10, list.capacity());
+    assertEquals("04", 42, list.get(1));
+    assertEquals("05", 13, list.get(4));
+    assertEquals("06", 12, list.get(5));
+  }
+}

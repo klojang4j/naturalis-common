@@ -8,7 +8,7 @@ public class IntListTest {
 
   @Test
   public void test00() {
-    ExposedIntList list = new ExposedIntList(2);
+    IntList list = new IntList(2);
     assertTrue("01", list.isEmpty());
     list.add(1);
     assertEquals("02", 1, list.size());
@@ -19,7 +19,7 @@ public class IntListTest {
 
   @Test
   public void test01() {
-    ExposedIntList list = new ExposedIntList(2);
+    IntList list = new IntList(2);
     list.addAll(42, 42, 7, 8, 13);
     assertEquals("01", 5, list.size());
     assertEquals("02", 5, list.capacity());
