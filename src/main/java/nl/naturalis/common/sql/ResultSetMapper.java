@@ -6,7 +6,6 @@ import java.lang.invoke.MethodType;
 import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -87,21 +86,11 @@ public abstract class ResultSetMapper<T> {
    * @return A model bean
    */
   public T read(ResultSet rs) {
-    T bean = instanceFactory.get();
-    List<RWInfo> rwInfo = rwCache.get(bean.getClass());
-    for (RWInfo rwi : rwInfo) {
-      try {
-        Object val = rwi.reader.invoke(rs, rwi.columnName);
-        if (rs.wasNull() && !rwi.fieldType.isPrimitive()) {
-          rwi.writer.set(bean, null);
-        } else if (val != null) {
-          rwi.writer.set(bean, val);
-        }
-      } catch (Throwable t) {
-        throw ExceptionMethods.uncheck(t);
-      }
+    try {
+      return readOne(rs);
+    } catch (Throwable t) {
+      throw ExceptionMethods.uncheck(t);
     }
-    return bean;
   }
 
   /**
@@ -112,7 +101,15 @@ public abstract class ResultSetMapper<T> {
    * @return A {@code List} of model beans
    */
   public List<T> readAll(ResultSet rs) {
-    return readAll(rs, 10);
+    List<T> all = new ArrayList<>();
+    try {
+      while (rs.next()) {
+        all.add(readOne(rs));
+      }
+    } catch (Throwable t) {
+      throw ExceptionMethods.uncheck(t);
+    }
+    return all;
   }
 
   /**
@@ -127,10 +124,10 @@ public abstract class ResultSetMapper<T> {
     List<T> all = new ArrayList<>(limit);
     try {
       for (int i = 0; i < limit && rs.next(); ++i) {
-        all.add(read(rs));
+        all.add(readOne(rs));
       }
-    } catch (SQLException e) {
-      throw ExceptionMethods.uncheck(e);
+    } catch (Throwable t) {
+      throw ExceptionMethods.uncheck(t);
     }
     return all;
   }
@@ -254,5 +251,19 @@ public abstract class ResultSetMapper<T> {
       throw ExceptionMethods.uncheck(e);
     }
     return rwInfo;
+  }
+
+  private T readOne(ResultSet rs) throws Throwable {
+    T bean = instanceFactory.get();
+    List<RWInfo> rwInfo = rwCache.get(bean.getClass());
+    for (RWInfo rwi : rwInfo) {
+      Object val = rwi.reader.invoke(rs, rwi.columnName);
+      if (rs.wasNull() && !rwi.fieldType.isPrimitive()) {
+        rwi.writer.set(bean, null);
+      } else if (val != null) {
+        rwi.writer.set(bean, val);
+      }
+    }
+    return bean;
   }
 }

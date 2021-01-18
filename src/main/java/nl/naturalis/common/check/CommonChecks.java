@@ -89,7 +89,7 @@ public class CommonChecks {
 
   /**
    * Verifies that the argument is true. If the argument is a Boolean rather than a boolean and the
-   * argument might be null, you should not use this check. Use {@link #nullOr() nullOr(true)}.
+   * argument might be null, you should not use this check. Use {@link #nullOr() nullOr(false)}.
    *
    * @return A {@code Predicate}
    */
@@ -409,6 +409,43 @@ public class CommonChecks {
   static {
     addMessage(notIn(), msgNotIn());
     addName(notIn(), "notIn");
+  }
+
+  /**
+   * Verifies that a {@code Collection} argument is a subset of another {@code Collection}.
+   * Equivalent to {@link Collection#containsAll(Collection) Collection::containsAll}.
+   *
+   * @param <E> The type of the elements in the {@code Collection}
+   * @param <C0> The type of the argument (the subject of the {@code Relation})
+   * @param <C1> The type of the object of the {@code Relation}
+   * @return A {@code Relation}
+   */
+  public static <E, C0 extends Collection<? super E>, C1 extends Collection<? super E>>
+      Relation<C0, C1> supersetOf() {
+    return Collection::containsAll;
+  }
+
+  static {
+    addMessage(supersetOf(), msgSupersetOf());
+    addName(supersetOf(), "supersetOf");
+  }
+
+  /**
+   * Verifies that a {@code Collection} argument is a subset of another {@code Collection}.
+   *
+   * @param <E> The type of the elements in the {@code Collection}
+   * @param <C0> The type of the argument (the subject of the {@code Relation})
+   * @param <C1> The type of the object of the {@code Relation}
+   * @return A {@code Relation}
+   */
+  public static <E, C0 extends Collection<? super E>, C1 extends Collection<? super E>>
+      Relation<C0, C1> subsetOf() {
+    return (x, y) -> y.containsAll(x);
+  }
+
+  static {
+    addMessage(subsetOf(), msgSubsetOf());
+    addName(subsetOf(), "subsetOf");
   }
 
   /**

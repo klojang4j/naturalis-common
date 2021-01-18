@@ -45,10 +45,10 @@ public class SeeThruByteArrayOutputStream extends OutputStream {
    * Creates a new {@code SeeThruByteArrayOutputStream}. The buffer initially has the specified
    * number of bytes. When it reaches full capacity its replaced with a buffer twice its size.
    *
-   * @param size The initial buffer capacity
+   * @param capacity The initial buffer capacity
    */
-  public SeeThruByteArrayOutputStream(int size) {
-    this(new byte[size], 0);
+  public SeeThruByteArrayOutputStream(int capacity) {
+    this(new byte[capacity], 0);
   }
 
   /**
@@ -70,7 +70,8 @@ public class SeeThruByteArrayOutputStream extends OutputStream {
    * @param size The initial length of the byte array
    * @param incrementBy incrementBy The amount by which the increase the size of the byte array
    * @param incrementType The type of increase. Whichever {@code IncrementBy} value and {@code
-   *     IncrementType} you choose, the buffer capacity will always be increased by at least 1.
+   *     IncrementType} you choose, the buffer capacity will always be increased enough to sustain
+   *     the {@code write} action.
    */
   public SeeThruByteArrayOutputStream(int size, float incrementBy, IncrementType incrementType) {
     this(new byte[size], 0, incrementBy, incrementType);

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import nl.naturalis.common.ClassMethods;
 import static org.junit.Assert.assertEquals;
@@ -65,6 +66,7 @@ public class MessagesTest {
   }
 
   @Test
+  @Ignore
   public void in01() {
     Object argument = "Hello world, how are you?";
     String argName = "foo";
@@ -80,6 +82,7 @@ public class MessagesTest {
   }
 
   @Test
+  @Ignore
   public void in02() {
     Object argument = new float[7];
     String argName = "foo";

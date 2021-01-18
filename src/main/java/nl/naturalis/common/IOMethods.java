@@ -3,8 +3,9 @@ package nl.naturalis.common;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.seethru.SeeThruByteArrayOutputStream;
 import static nl.naturalis.common.check.CommonChecks.gt;
-import static nl.naturalis.common.check.CommonChecks.notEmpty;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * I/O-related methods.
@@ -23,6 +24,7 @@ public class IOMethods {
     Check.notNull(classpathClass, "classpathClass");
     Check.that(resourcePath, "resourcePath").is(notEmpty());
     try (InputStream in = classpathClass.getResourceAsStream(resourcePath)) {
+      Check.that(in).is(notNull(), "Resource not found: %s", resourcePath);
       return toString(in, chunkSize);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
@@ -34,7 +36,9 @@ public class IOMethods {
   }
 
   public static String toString(InputStream in, int chunkSize) {
-    return new String(read(in, chunkSize), StandardCharsets.UTF_8);
+    SeeThruByteArrayOutputStream out = new SeeThruByteArrayOutputStream(chunkSize);
+    pipe(in, out, chunkSize);
+    return new String(out.toByteArray(), 0, out.count(), StandardCharsets.UTF_8);
   }
 
   public static byte[] read(InputStream in) {

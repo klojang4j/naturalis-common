@@ -1,7 +1,9 @@
 package nl.naturalis.common.check;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import nl.naturalis.common.ClassMethods;
@@ -12,7 +14,7 @@ import nl.naturalis.common.function.Relation;
 import static java.lang.String.format;
 import static nl.naturalis.common.check.CommonChecks.messages;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "unchecked"})
 class Messages {
 
   private static final String ERR_INVALID_VALUE = "Invalid value for %s: %s";
@@ -231,6 +233,22 @@ class Messages {
     return x -> format("%s must not be in %s (was %s)", x[0], argVal(x[2]), argVal(x[1]));
   }
 
+  static Formatter msgSupersetOf() {
+    return x -> {
+      Set set = Set.copyOf((Collection) x[2]);
+      set.removeAll((Collection) x[1]);
+      return format("%s must contain all of %s", x[0], argVal(set));
+    };
+  }
+
+  static Formatter msgSubsetOf() {
+    return x -> {
+      Set set = Set.copyOf((Collection) x[1]);
+      set.removeAll((Collection) x[2]);
+      return format("%s must contain all of %s", x[0], argVal(set));
+    };
+  }
+
   static Formatter msgContainingKey() {
     return x -> format("%s must contain key %s", x[0], argVal(x[2]));
   }
@@ -338,6 +356,8 @@ class Messages {
       return arg.toString();
     } else if (arg instanceof CharSequence) {
       return stringify(arg);
+    } else if (arg instanceof Collection && ((Collection) arg).size() <= 10) {
+      return stringify(arg);
     } else if (arg.getClass() != Object.class) {
       try {
         arg.getClass().getDeclaredMethod("toString");
@@ -350,14 +370,21 @@ class Messages {
 
   private static String stringify(Object arg) {
     StringBuilder sb = new StringBuilder();
-    sb.append(sname(arg)).append('@').append(System.identityHashCode(arg)).append(" \"");
     String s = arg.toString();
-    if (s.length() > 20) {
-      sb.append(s.substring(0, 20)).append("[...]");
+    if (s.length() > 40) {
+      sb.append(s.substring(0, 40)).append("[...]");
     } else {
       sb.append(s);
     }
-    sb.append('"');
+    // sb.append(" ::: ").append(sname(arg)).append('@').append(System.identityHashCode(arg));
+    if (arg instanceof Collection) {
+      Collection c = (Collection) arg;
+      if (c.isEmpty()) {
+        sb.append(" (empty ").append(sname(c)).append(")");
+      } else {
+        sb.append(" (size=").append(c.size()).append(")");
+      }
+    }
     return sb.toString();
   }
 

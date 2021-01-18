@@ -39,6 +39,16 @@ public final class StringMethods {
   }
 
   /**
+   * Concatenates the specified data.
+   *
+   * @param data The data to append (must not be null)
+   * @return The concatenation of the data
+   */
+  public static String concat(Object... data) {
+    return append(new StringBuilder(), data).toString();
+  }
+
+  /**
    * Counts the number of occurrences of {@code substr} within {@code subject}. The string to search
    * for must not be null or empty and is not treated as a regular expression.
    *
