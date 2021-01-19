@@ -89,6 +89,14 @@ class Messages {
     return x -> format("%s must not be null or whitespace-only", x[0]);
   }
 
+  static Formatter msgInteger() {
+    return x -> format("%s must be an integer (was %s)", x[0], x[1]);
+  }
+
+  static Formatter msgValidPortNumber() {
+    return x -> format("%s must be a valid TCP/UDP port number (was %s)", x[0], x[1]);
+  }
+
   static Formatter msgEqualTo() {
     return x -> format("%s must be equal to %s (was %s)", x[0], argVal(x[2]), argVal(x[1]));
   }

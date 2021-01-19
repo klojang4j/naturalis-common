@@ -18,10 +18,10 @@ import static nl.naturalis.common.check.Messages.*;
 /**
  * Defines various common tests for arguments. These tests have short, informative error messages
  * associated with them in case the argument does not pass the test. Many of them are plain,
- * unadorned, method references and they <i>only</i> check what they advertise to be checking.
- * <b>None of them do a preliminary null-check on the argument</b>, except those dedicated to this
- * task (like {@link #notNull()}). They rely upon being embedded within in chain of checks on a
- * {@link Check} object, the first of which should be a <i>not-null</i> check.
+ * unadorned, method references and only check what they advertise to be checking. <b>None of them
+ * do a preliminary null-check on the argument</b>, except those dedicated to this task (like {@link
+ * #notNull()}). They rely upon being embedded within in chain of checks on a {@link Check} object,
+ * the first of which should be a <i>not-null</i> check.
  *
  * @author Ayco Holleman
  */
@@ -179,6 +179,47 @@ public class CommonChecks {
   static {
     addMessage(notBlank(), msgNotBlank());
     addName(notBlank(), "notBlank");
+  }
+
+  /**
+   * Verifies that a {@code String} argument is a valid integer. Equivalent to {@link
+   * NumberMethods#isInteger(String) NumberMethods::isInteger}.
+   *
+   * @return A {@code Predicate}
+   */
+  public static Predicate<String> integer() {
+    return NumberMethods::isInteger;
+  }
+
+  static {
+    addMessage(integer(), msgInteger());
+    addName(integer(), "integer");
+  }
+
+  /**
+   * Verifies that a {@code String} argument is a valid port number. More precisely: that it can be
+   * included as the port segment of a URL. That is: the string must not be blank, it must not start
+   * with '+' or '-' and it must be a short (max 65535). This method implicitly checks for null, so
+   * need not be preceeded by a {@link #notNull()} check.
+   *
+   * @return A {@code Predicate}
+   */
+  public static Predicate<String> validPortNumber() {
+    return str -> {
+      if (StringMethods.isBlank(str)) {
+        return false;
+      }
+      char c = str.charAt(0);
+      if (c == '+' || c == '-') {
+        return false;
+      }
+      return NumberMethods.isShort(str);
+    };
+  }
+
+  static {
+    addMessage(validPortNumber(), msgValidPortNumber());
+    addName(validPortNumber(), "validPortNumber");
   }
 
   /**

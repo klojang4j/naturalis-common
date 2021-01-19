@@ -1,5 +1,6 @@
 package nl.naturalis.common;
 
+import java.math.BigInteger;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ArrayMethods.isOneOf;
 
@@ -22,6 +23,38 @@ public class NumberMethods {
   public static final Short ZERO_SHORT = 0;
   /** Zero as Byte */
   public static final Byte ZERO_BYTE = 0;
+
+  /**
+   * Returns whether or not the specified string is a valid integer.
+   *
+   * @param str The string
+   * @return Whether or not the specified string is a valid integer
+   */
+  public static boolean isInteger(String str) {
+    try {
+      BigInteger bi = new BigInteger(str);
+      bi.intValueExact();
+      return true;
+    } catch (NumberFormatException | ArithmeticException e) {
+      return false;
+    }
+  }
+
+  /**
+   * Returns whether or not the specified string is a valid integer.
+   *
+   * @param str The string
+   * @return Whether or not the specified string is a valid integer
+   */
+  public static boolean isShort(String str) {
+    try {
+      BigInteger bi = new BigInteger(str);
+      bi.shortValueExact();
+      return true;
+    } catch (NumberFormatException | ArithmeticException e) {
+      return false;
+    }
+  }
 
   /**
    * Returns whether or not the specified {@code Number} can be converted into an instance of the
