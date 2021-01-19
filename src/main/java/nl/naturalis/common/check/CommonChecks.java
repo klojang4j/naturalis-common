@@ -3,6 +3,7 @@ package nl.naturalis.common.check;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import nl.naturalis.common.*;
@@ -1253,6 +1254,16 @@ public class CommonChecks {
    */
   public static IntPredicate asInt(Predicate<Integer> predicate) {
     return FunctionalMethods.asInt(predicate);
+  }
+
+  /**
+   * Equivalent to {@link IllegalStateException#IllegalStateException(String)
+   * IllegalStateException::new} but more concise when statically imported.
+   *
+   * @return A {@code Function} produces an {@code IllegalStateException}
+   */
+  public static Function<String, IllegalStateException> illegalState() {
+    return IllegalStateException::new;
   }
 
   /**
