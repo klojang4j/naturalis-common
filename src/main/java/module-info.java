@@ -7,8 +7,6 @@
  */
 module nl.naturalis.common {
   
-  requires java.sql;
-
   exports nl.naturalis.common;
   exports nl.naturalis.common.check;
   exports nl.naturalis.common.collection;
@@ -16,7 +14,6 @@ module nl.naturalis.common {
   exports nl.naturalis.common.function;
   exports nl.naturalis.common.io;
   exports nl.naturalis.common.path;
-  exports nl.naturalis.common.sql;
   exports nl.naturalis.common.time;
   exports nl.naturalis.common.util;
 
