@@ -1,7 +1,6 @@
 package nl.naturalis.common.io;
 
 import org.junit.Test;
-import nl.naturalis.common.io.ExposedByteArrayOutputStream;
 import nl.naturalis.common.util.IncrementType;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
