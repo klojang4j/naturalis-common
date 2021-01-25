@@ -54,10 +54,9 @@ public class PathWalkerTest {
 
   @Test
   public void test06() throws MalformedURLException {
-    Company shell = shell();
-    List<Path> paths = paths("quarterlySales.1");
-    assertTrue(
-        Arrays.equals(new float[] {20, 21, 22, 23}, (float[]) new PathWalker(paths).read(shell)));
+    PathWalker pw = new PathWalker(paths("quarterlySales.1"));
+    Object val = pw.read(shell());
+    assertTrue(Arrays.equals(new float[] {20, 21, 22, 23}, (float[]) val));
   }
 
   @Test
@@ -90,9 +89,9 @@ public class PathWalkerTest {
 
   @Test
   public void test11() throws MalformedURLException {
-    Company shell = shell();
-    List<Path> paths = paths("departments.1.reactiveBingoDates.0.0");
-    assertEquals(2020, (int) new PathWalker(paths).read(shell));
+    PathWalker pw = new PathWalker(paths("departments.1.reactiveBingoDates.0.0"));
+    Object val = pw.read(shell());
+    assertEquals(2020, (int) val);
   }
 
   @Test

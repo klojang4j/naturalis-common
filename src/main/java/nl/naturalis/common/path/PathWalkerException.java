@@ -14,9 +14,9 @@ public class PathWalkerException extends RuntimeException {
     return new PathWalkerException("Invalid path: " + p);
   }
 
-  static PathWalkerException readWriteError(Exception e, Object obj, String segment) {
-    String fmt = "Cannot read/write %s in %s. %s";
-    return new PathWalkerException(format(fmt, segment, getClassName(obj), e));
+  static PathWalkerException readWriteError(Throwable t, Object obj, String segment) {
+    String fmt = "Cannot read/write \"%s\" in class %s: %s";
+    return new PathWalkerException(format(fmt, segment, getClassName(obj), t.getMessage()), t);
   }
 
   static PathWalkerException nullSegmentNotAllowed(Object obj) {
@@ -28,7 +28,7 @@ public class PathWalkerException extends RuntimeException {
     super(message);
   }
 
-  PathWalkerException(Throwable cause) {
-    super(cause);
+  PathWalkerException(String message, Throwable cause) {
+    super(message, cause);
   }
 }

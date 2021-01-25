@@ -1,4 +1,4 @@
-package nl.naturalis.common.seethru;
+package nl.naturalis.common.io;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import static nl.naturalis.common.util.IncrementType.FACTOR;
  *
  * @author Ayco Holleman
  */
-public class SeeThruByteArrayOutputStream extends OutputStream {
+public class ExposedByteArrayOutputStream extends OutputStream {
 
   private final float ib;
   private final IncrementType it;
@@ -37,7 +37,7 @@ public class SeeThruByteArrayOutputStream extends OutputStream {
    * though its size increases if necessary. When it reaches full capacity its replaced with a
    * buffer twice its size.
    */
-  public SeeThruByteArrayOutputStream() {
+  public ExposedByteArrayOutputStream() {
     this(512);
   }
 
@@ -47,7 +47,7 @@ public class SeeThruByteArrayOutputStream extends OutputStream {
    *
    * @param capacity The initial buffer capacity
    */
-  public SeeThruByteArrayOutputStream(int capacity) {
+  public ExposedByteArrayOutputStream(int capacity) {
     this(new byte[capacity], 0);
   }
 
@@ -59,7 +59,7 @@ public class SeeThruByteArrayOutputStream extends OutputStream {
    * @param offset The offset of the first byte to write.The offset may be equal to the byte array's
    *     length (causing write actions to append to what is already in the array) but not greater.
    */
-  public SeeThruByteArrayOutputStream(byte[] buf, int offset) {
+  public ExposedByteArrayOutputStream(byte[] buf, int offset) {
     this(buf, offset, 2F, FACTOR);
   }
 
@@ -73,7 +73,7 @@ public class SeeThruByteArrayOutputStream extends OutputStream {
    *     IncrementType} you choose, the buffer capacity will always be increased enough to sustain
    *     the {@code write} action.
    */
-  public SeeThruByteArrayOutputStream(int size, float incrementBy, IncrementType incrementType) {
+  public ExposedByteArrayOutputStream(int size, float incrementBy, IncrementType incrementType) {
     this(new byte[size], 0, incrementBy, incrementType);
   }
 
@@ -88,7 +88,7 @@ public class SeeThruByteArrayOutputStream extends OutputStream {
    * @param incrementType The type of increase. Whichever {@code IncrementBy} value and {@code
    *     IncrementType} you choose, the buffer capacity will always be increased by at least 1.
    */
-  public SeeThruByteArrayOutputStream(
+  public ExposedByteArrayOutputStream(
       byte[] buf, int offset, float incrementBy, IncrementType incrementType) {
     this.buf = Check.notNull(buf, "buf").has(length(), gt(), 0).ok();
     this.cnt = Check.that(offset, "offset").is(lte(), buf.length).ok();

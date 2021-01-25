@@ -1,15 +1,16 @@
 package nl.naturalis.common.path;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.IntStream;
-import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.invoke.BeanReader;
+import nl.naturalis.common.invoke.BeanWriter;
+import nl.naturalis.common.invoke.NoSuchPropertyException;
 import static nl.naturalis.common.ClassMethods.getArrayTypeSimpleName;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
 import static nl.naturalis.common.check.Check.badArgument;
@@ -223,7 +224,7 @@ public final class PathWalker {
     } else if (isPrimitiveArray(obj)) {
       return readPrimitiveElement(obj, path);
     } else {
-      return readAny(obj, path);
+      return readBean(obj, path);
     }
   }
 
@@ -271,16 +272,19 @@ public final class PathWalker {
     return deadEnd();
   }
 
-  private Object readAny(Object any, Path path) {
-    String segment = path.segment(0);
+  private <T> Object readBean(T bean, Path path) {
+    Class<T> beanClass = (Class<T>) bean.getClass();
+    String property = path.segment(0);
+    BeanReader<T> reader = new BeanReader<>(beanClass, property);
     try {
-      Field f = ClassMethods.getField(segment, any);
-      if (f == null) {
+      try {
+        Object val = reader.get(bean, property);
+        return readObj(val, path.shift());
+      } catch (NoSuchPropertyException e) {
         return deadEnd();
       }
-      return readObj(f.get(any), path.shift());
-    } catch (IllegalAccessException e) {
-      throw readWriteError(e, any, segment);
+    } catch (Throwable e1) {
+      throw readWriteError(e1, bean, path.segment(0));
     }
   }
 
@@ -314,10 +318,10 @@ public final class PathWalker {
           map.put(key, value);
         } else if (!child.isNullSegment()) {
           try {
-            Field f = ClassMethods.getField(child.toString(), parentObject);
-            f.set(parentObject, value);
-          } catch (IllegalAccessException e) {
-            throw readWriteError(e, parentObject, child.toString());
+            BeanWriter bw = new BeanWriter<>(parentObject.getClass());
+            bw.set(parentObject, child.toString(), value);
+          } catch (Throwable T) {
+            throw readWriteError(T, parentObject, child.toString());
           }
         } else {
           throw nullSegmentNotAllowed(parentObject);

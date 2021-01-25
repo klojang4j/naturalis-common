@@ -1018,7 +1018,7 @@ public abstract class Check<T, E extends Exception> {
    * @return The value computed by the {@code Function}
    * @throws F The exception potentially thrown by the {@code Function}
    */
-  public <U, F extends Exception> U ok(ThrowingFunction<T, U, F> transformer) throws F {
+  public <U, F extends Throwable> U ok(ThrowingFunction<T, U, F> transformer) throws F {
     return transformer.apply(ok());
   }
 
@@ -1028,7 +1028,7 @@ public abstract class Check<T, E extends Exception> {
    *
    * @param consumer The {@code Consumer}
    */
-  public <F extends Exception> void then(ThrowingConsumer<T, F> consumer) throws F {
+  public <F extends Throwable> void then(ThrowingConsumer<T, F> consumer) throws F {
     consumer.accept(ok());
   }
 

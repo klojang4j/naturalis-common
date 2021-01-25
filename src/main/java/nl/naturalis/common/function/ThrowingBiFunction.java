@@ -13,7 +13,7 @@ import java.util.function.BiFunction;
  * @param <E> The type of the exception potentially being thrown
  */
 @FunctionalInterface
-public interface ThrowingBiFunction<T, U, R, E extends Exception> {
+public interface ThrowingBiFunction<T, U, R, E extends Throwable> {
 
   /**
    * Calculates a value for the provided argument while potentially throwing an exception of type

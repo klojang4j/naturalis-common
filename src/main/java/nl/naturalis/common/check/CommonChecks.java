@@ -374,6 +374,22 @@ public class CommonChecks {
   }
 
   /**
+   * Verifies that the argument is an intance of a particular class or interface.
+   *
+   * @param <X> The type of the argument
+   * @param <Y> The type of the object of the relationship
+   * @return A {@code Relation}
+   */
+  public static <X> Relation<X, Class<?>> notInstanceOf() {
+    return (x, y) -> !y.isInstance(x);
+  }
+
+  static {
+    addMessage(notInstanceOf(), msgInstanceOf());
+    addName(notInstanceOf(), "notInstanceOf");
+  }
+
+  /**
    * Verifies that the argument is an array.
    *
    * @param <T> The type of the argument

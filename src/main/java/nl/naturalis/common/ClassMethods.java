@@ -1,11 +1,16 @@
 package nl.naturalis.common;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
+import static java.lang.Character.isUpperCase;
+import static java.lang.Character.toLowerCase;
+import static java.lang.reflect.Modifier.isStatic;
+import static java.util.stream.Collectors.joining;
 import static nl.naturalis.common.check.CommonChecks.array;
-
 /**
  * Methods for inspecting types.
  *
@@ -105,34 +110,120 @@ public class ClassMethods {
     return array.getClass().getComponentType().getSimpleName() + "[]";
   }
 
-  @SuppressWarnings("rawtypes")
-  private static final HashMap<Tuple<String, Class>, Field> fields = new HashMap<>();
-
   /**
-   * Returns a {@code Field} object corresponding to the specified field name. If found. the field's
-   * {@code accessible} flag will be set to {@code true}.
+   * Returns the "getter" methods of the specified bean class.
    *
-   * @param fieldName The name of the field
-   * @param obj An object whose class is supposed to declare or inherit the field
-   * @return The {@code Field} or null if the specified field name does not correspond to a {@code
-   *     Field} in the specified object's class
+   * @param beanClass The class from which to retrieve the getters.
+   * @param strict Whether or not to include only methods with JavaBean compliant names ({@code
+   *     isXyz()} for boolean methods; {@code getXyz()} for other methods). If {@code strict} is
+   *     false, all public methods that take no parameters are included in the returned {@code
+   *     List}.
+   * @return
    */
-  @SuppressWarnings("rawtypes")
-  public static Field getField(String fieldName, Object obj) {
-    Tuple<String, Class> key = Tuple.of(fieldName, obj.getClass());
-    Field field = fields.get(key);
-    if (field == null) {
-      LOOP:
-      for (Class c = obj.getClass(); c != Object.class; c = c.getSuperclass()) {
-        for (Field f : c.getDeclaredFields()) {
-          if (f.getName().equals(fieldName)) {
-            f.setAccessible(true);
-            fields.put(key, field = f);
-            break LOOP;
-          }
-        }
+  public static List<Method> getGetters(Class<?> beanClass, boolean strict) {
+    Check.notNull(beanClass, "beanClass");
+    Method[] methods = beanClass.getMethods();
+    List<Method> getters = new ArrayList<>();
+    for (Method m : methods) {
+      if (isStatic(m.getModifiers())) {
+        continue;
+      } else if (m.getParameterCount() != 0) {
+        continue;
+      } else if (m.getReturnType() == void.class) {
+        continue;
+      } else if (strict && !validGetterName(m)) {
+        continue;
+      }
+      getters.add(m);
+    }
+    return getters;
+  }
+
+  public static List<Method> geSetters(Class<?> beanClass) {
+    Check.notNull(beanClass, "beanClass");
+    Method[] methods = beanClass.getMethods();
+    List<Method> setters = new ArrayList<>();
+    for (Method m : methods) {
+      if (isStatic(m.getModifiers())) {
+        continue;
+      } else if (m.getParameterCount() != 1) {
+        continue;
+      } else if (m.getReturnType() != void.class) {
+        continue;
+      } else if (!validSetterName(m)) {
+        continue;
+      }
+      setters.add(m);
+    }
+    return setters;
+  }
+
+  public static String getPropertyNameFromGetter(Method m, boolean strict) {
+    String n = m.getName();
+    if (m.getParameterCount() == 0 && m.getReturnType() != void.class) {
+      if ((m.getReturnType() == boolean.class || m.getReturnType() == Boolean.class)
+          && n.length() > 2
+          && n.startsWith("is")
+          && isUpperCase(n.charAt(2))) {
+        return extractName(n, 2);
+      } else if (n.length() > 3 && n.startsWith("get") && isUpperCase(n.charAt(3))) {
+        return extractName(n, 3);
+      }
+      if (!strict) {
+        return n;
       }
     }
-    return field;
+    String fmt = "Method %s %s(%s) in class %s is not a getter";
+    String returnType = getSimpleClassName(m.getReturnType());
+    String declaringClass = getClassName(m.getDeclaringClass());
+    String params =
+        Arrays.stream(m.getParameterTypes())
+            .map(ClassMethods::getSimpleClassName)
+            .collect(joining(", "));
+    String msg = String.format(fmt, returnType, n, params, declaringClass);
+    throw new IllegalArgumentException(msg);
+  }
+
+  public static String getPropertyNameFromSetter(Method m) {
+    String n = m.getName();
+    if (m.getParameterCount() == 1
+        && m.getReturnType() == void.class
+        && n.length() > 3
+        && n.startsWith("set")
+        && isUpperCase(n.charAt(3))) {
+      return extractName(n, 3);
+    }
+    String fmt = "Method %s %s(%s) in class %s is not a getter";
+    String returnType = getSimpleClassName(m.getReturnType());
+    String declaringClass = getClassName(m.getDeclaringClass());
+    String params =
+        Arrays.stream(m.getParameterTypes())
+            .map(ClassMethods::getSimpleClassName)
+            .collect(joining(", "));
+    String msg = String.format(fmt, returnType, n, params, declaringClass);
+    throw new IllegalArgumentException(msg);
+  }
+
+  private static String extractName(String n, int from) {
+    StringBuilder sb = new StringBuilder(n.length() - 3);
+    sb.append(n.substring(from));
+    sb.setCharAt(0, toLowerCase(sb.charAt(0)));
+    return sb.toString();
+  }
+
+  private static boolean validGetterName(Method m) {
+    String n = m.getName();
+    if (n.length() > 4 && n.startsWith("get") && isUpperCase(n.charAt(3))) {
+      return true;
+    }
+    if (n.length() > 3 && n.startsWith("is") && isUpperCase(n.charAt(2))) {
+      return m.getReturnType() == boolean.class || m.getReturnType() == Boolean.class;
+    }
+    return false;
+  }
+
+  private static boolean validSetterName(Method m) {
+    String n = m.getName();
+    return n.length() > 3 && n.startsWith("set") && isUpperCase(n.charAt(3));
   }
 }

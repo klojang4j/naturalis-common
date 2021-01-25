@@ -25,6 +25,7 @@ public class IntList {
 
   private int hash;
 
+  /** Creates an {@code IntList} with an initial capacity of 10. */
   public IntList() {
     this(10);
   }

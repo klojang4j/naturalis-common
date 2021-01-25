@@ -12,7 +12,7 @@ import java.util.function.Function;
  * @param <E> The type of the exception potentially being thrown
  */
 @FunctionalInterface
-public interface ThrowingFunction<T, R, E extends Exception> {
+public interface ThrowingFunction<T, R, E extends Throwable> {
 
   /**
    * Calculates a value for the provided argument while potentially throwing an exception of type

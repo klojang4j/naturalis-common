@@ -334,6 +334,11 @@ class Messages {
     return x -> format(fmt, x[0], ((Class<?>) x[2]).getName(), cname(x[1]));
   }
 
+  static Formatter msgNotInstanceOf() {
+    String fmt = "%s must not be instance of %s (was %s)";
+    return x -> format(fmt, x[0], ((Class<?>) x[2]).getName(), cname(x[1]));
+  }
+
   static Formatter msgArray() {
     return x -> format("%s must be an array (was %s)", x[0], cname(x[1]));
   }

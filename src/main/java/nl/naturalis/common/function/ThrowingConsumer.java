@@ -11,7 +11,7 @@ import java.util.function.Consumer;
  * @param <E> The type of the exception potentially being thrown by the operation
  */
 @FunctionalInterface
-public interface ThrowingConsumer<T, E extends Exception> {
+public interface ThrowingConsumer<T, E extends Throwable> {
 
   /**
    * Performs this operation on the given argument.

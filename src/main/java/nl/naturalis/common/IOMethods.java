@@ -3,7 +3,7 @@ package nl.naturalis.common;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.seethru.SeeThruByteArrayOutputStream;
+import nl.naturalis.common.io.ExposedByteArrayOutputStream;
 import static nl.naturalis.common.check.CommonChecks.gt;
 import static nl.naturalis.common.check.CommonChecks.*;
 
@@ -36,7 +36,7 @@ public class IOMethods {
   }
 
   public static String toString(InputStream in, int chunkSize) {
-    SeeThruByteArrayOutputStream out = new SeeThruByteArrayOutputStream(chunkSize);
+    ExposedByteArrayOutputStream out = new ExposedByteArrayOutputStream(chunkSize);
     pipe(in, out, chunkSize);
     return new String(out.toByteArray(), 0, out.count(), StandardCharsets.UTF_8);
   }

@@ -11,7 +11,7 @@ import java.util.function.Supplier;
  * @param <E> The type of the exception potentially being thrown
  */
 @FunctionalInterface
-public interface ThrowingSupplier<T, E extends Exception> {
+public interface ThrowingSupplier<T, E extends Throwable> {
 
   /**
    * Produces a value while potentially throwing an exception.
