@@ -14,6 +14,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static nl.naturalis.common.CollectionMethods.newHashMap;
+import static nl.naturalis.common.path.PathWalker.DeadEndAction.*;
 
 public class PathWalkerTest {
 
@@ -70,14 +71,14 @@ public class PathWalkerTest {
   public void test08() throws MalformedURLException {
     Company shell = shell();
     List<Path> paths = paths("quarterlySales.10");
-    assertTrue(PathWalker.DEAD_END == new PathWalker(paths, true).read(shell));
+    assertTrue(PathWalker.DEAD_END == new PathWalker(paths, RETURN_DEAD_END).read(shell));
   }
 
   @Test
   public void test09() throws MalformedURLException {
     Company shell = shell();
     List<Path> paths = paths("quarterlySales.10.foo");
-    assertTrue(PathWalker.DEAD_END == new PathWalker(paths, true).read(shell));
+    assertTrue(PathWalker.DEAD_END == new PathWalker(paths, RETURN_DEAD_END).read(shell));
   }
 
   @Test
@@ -112,7 +113,7 @@ public class PathWalkerTest {
   public void test14() throws MalformedURLException {
     Company shell = shell();
     List<Path> paths = paths("departments.0.employees.0.extraInfo.https://nos^.nl");
-    assertEquals(PathWalker.DEAD_END, new PathWalker(paths, true).read(shell));
+    assertEquals(PathWalker.DEAD_END, new PathWalker(paths, RETURN_DEAD_END).read(shell));
   }
 
   @Test
@@ -122,7 +123,7 @@ public class PathWalkerTest {
     PathWalker pw =
         new PathWalker(
             paths,
-            true,
+            RETURN_DEAD_END,
             (p) -> {
               try {
                 return new URL(p.segment(0));
@@ -141,7 +142,7 @@ public class PathWalkerTest {
     PathWalker pw =
         new PathWalker(
             paths,
-            true,
+            RETURN_DEAD_END,
             (p) -> {
               try {
                 return new URL(p.segment(0));
@@ -156,7 +157,7 @@ public class PathWalkerTest {
   public void test17() throws MalformedURLException {
     Company shell = shell();
     List<Path> paths = paths("departments.0.employees.0.extraInfo.^0");
-    PathWalker pw = new PathWalker(paths, true);
+    PathWalker pw = new PathWalker(paths, RETURN_DEAD_END);
     assertEquals("corrupt entry", pw.read(shell));
   }
 
@@ -164,7 +165,7 @@ public class PathWalkerTest {
   public void test18() throws MalformedURLException {
     Company shell = shell();
     List<Path> paths = paths("departments.0.employees.0.extraInfo.deep stuff.e=mc2");
-    PathWalker pw = new PathWalker(paths, true);
+    PathWalker pw = new PathWalker(paths, RETURN_DEAD_END);
     assertEquals("Einstein", pw.read(shell));
   }
 

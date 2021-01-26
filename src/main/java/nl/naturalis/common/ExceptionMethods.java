@@ -3,6 +3,8 @@ package nl.naturalis.common;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.exception.ExceptionOrigin;
 import nl.naturalis.common.exception.UncheckedException;
@@ -82,11 +84,11 @@ public final class ExceptionMethods {
   }
 
   /**
-   * Returns the provided throwable if it already is a {@link RuntimeException}, else a {@code
+   * Returns the specified throwable if it already is a {@link RuntimeException}, else a {@code
    * RuntimeException} wrapping the throwable.
    *
    * @param exc A checked or unchecked exception
-   * @return The provided throwable or a {@code RuntimeException} wrapping it
+   * @return The specified throwable or a {@code RuntimeException} wrapping it
    */
   public static RuntimeException wrap(Throwable exc) {
     if (Check.notNull(exc, "exc").ok() instanceof RuntimeException) {
@@ -96,31 +98,97 @@ public final class ExceptionMethods {
   }
 
   /**
-   * Returns the provided throwable if it already is a {@link RuntimeException}, else an {@link
-   * UncheckedException} wrapping the throwable.
+   * Returns the specified throwable if it already is a {@link RuntimeException}, else a {@code
+   * RuntimeException} wrapping the throwable.
+   *
+   * @param exc A checked or unchecked exception
+   * @param customMessage A custom message passed on to the {@code RuntimeException} wrapping the
+   *     original exception
+   * @return The specified throwable or a {@code RuntimeException} wrapping it
+   */
+  public static RuntimeException wrap(Throwable exc, String customMessage) {
+    if (Check.notNull(exc, "exc").ok() instanceof RuntimeException) {
+      return (RuntimeException) exc;
+    }
+    Check.notNull(customMessage, "customMessage");
+    return new RuntimeException(customMessage, exc);
+  }
+
+  /**
+   * Returns the specified throwable if it already is a {@link RuntimeException}, else a {@code
+   * RuntimeException} producer by the specified function.
+   *
+   * @param <T> The type of the {@code RuntimeException}
+   * @param exc The exception to be wrapped if it is not a {@code RuntimeException}
+   * @param excProducer The producer of the {@code RuntimeException}, basically reflecting the
+   *     one-argument constructor (Throwable cause) of an {@code Exception}.
+   * @return The specified throwable or a {@code RuntimeException} wrapping it
+   */
+  public static <T extends RuntimeException> RuntimeException wrap(
+      Throwable exc, Function<Throwable, T> excProducer) {
+    if (Check.notNull(exc, "exc").ok() instanceof RuntimeException) {
+      return (RuntimeException) exc;
+    }
+    Check.notNull(excProducer, "excProducer");
+    return excProducer.apply(exc);
+  }
+
+  /**
+   * Returns the specified throwable if it already is a {@link RuntimeException}, else a {@code
+   * RuntimeException} producer by the specified function. For example:
+   *
+   * <p>
+   *
+   * <pre>
+   * try {
+   *  // stuff ...
+   * } catch(Throwable t) {
+   *  throw ExceptionMethods.wrap(t, "Something went wrong", IllegalStateException::new);
+   * }
+   * </pre>
+   *
+   * @param <T> The type of the {@code RuntimeException}
+   * @param exc The exception to be wrapped if it is not a {@code RuntimeException}
+   * @param excProducer The producer of the {@code RuntimeException}, basically reflecting the
+   *     two-argument constructor (String message, Throwable cause) of an {@code Exception}.
+   * @return The specified throwable or a {@code RuntimeException} wrapping it
+   */
+  public static <T extends RuntimeException> RuntimeException wrap(
+      Throwable exc, String customMessage, BiFunction<String, Throwable, T> excProducer) {
+    if (Check.notNull(exc, "exc").ok() instanceof RuntimeException) {
+      return (RuntimeException) exc;
+    }
+    Check.notNull(customMessage, "customMessage");
+    Check.notNull(excProducer, "excProducer");
+    return excProducer.apply(customMessage, exc);
+  }
+
+  /**
+   * Returns the specified throwable if it already is a {@link RuntimeException}, else an {@link
+   * UncheckedException} wrapping the throwable. This method is primarily meant to "uncheck" checked
+   * exceptions that you cannot in practice properly deal with, like some {@code IOException}s
+   * thrown, according to the Javadocs, "if an I/O error occurs", or some of the {@code
+   * SQLException}s thrown from the {@code java.sql} package.
    *
    * @param exc A checked or unchecked exception
    * @param customMessage A custom message to pass to the constructor of {@code UncheckedException}
    * @return The provided {@code Throwable} or an {@code UncheckedException} wrapping it
    */
   public static RuntimeException uncheck(Throwable exc, String customMessage) {
-    if (Check.notNull(exc, "exc").ok() instanceof RuntimeException) {
-      return (RuntimeException) exc;
-    }
-    return new UncheckedException(customMessage, exc);
+    return wrap(exc, customMessage, UncheckedException::new);
   }
 
   /**
-   * Returns the provided throwable if it already is a {@link RuntimeException}, else an {@link
-   * UncheckedException} wrapping the throwable.
+   * Returns the specified throwable if it already is a {@link RuntimeException}, else an {@link
+   * UncheckedException} wrapping the throwable. This method is primarily meant to "uncheck" checked
+   * exceptions that you cannot in practice properly deal with, like some {@code IOException}s
+   * thrown, according to the Javadocs, "if an I/O error occurs", or some of the {@code
+   * SQLException}s thrown from the {@code java.sql} package.
    *
    * @param exc A checked or unchecked exception
    * @return The provided {@code Throwable} or an {@code UncheckedException} wrapping it
    */
   public static RuntimeException uncheck(Throwable exc) {
-    if (Check.notNull(exc, "exc").ok() instanceof RuntimeException) {
-      return (RuntimeException) exc;
-    }
-    return new UncheckedException(exc);
+    return wrap(exc, UncheckedException::new);
   }
 }

@@ -21,24 +21,27 @@ import static nl.naturalis.common.check.CommonGetters.length;
 import static nl.naturalis.common.path.PathWalkerException.invalidPath;
 import static nl.naturalis.common.path.PathWalkerException.nullSegmentNotAllowed;
 import static nl.naturalis.common.path.PathWalkerException.readWriteError;
+import static nl.naturalis.common.path.PathWalker.DeadEndAction.*;
 
 /**
  * Reads/writes objects using {@link Path} objects. The {@code PathWalker} class is useful for
- * reading large batches of sparsely populated objects or maps. It will not throw an exception if a
- * path could not be read for a particular object due to any of the following reasons:
+ * reading large batches of sparsely populated objects or maps. For some of these objects or maps,
+ * the {@code PathWalker} will not be able to follow a path all the way to the end. This can be due
+ * to any of the following reasons:
  *
  * <p>
  *
  * <ul>
- *   <li>one of the intermediate path segments referenced a null value
- *   <li>the path is invalid given the type of the object to read/write
- *   <li>an array index within the path was out of bounds
- *   <li>the path continued after having reached a terminal value within the object (a primitive)
+ *   <li>One of the intermediate path segments references a null value
+ *   <li>The path is invalid given the type of the object to read/write
+ *   <li>An array index within the path was out of bounds
+ *   <li>The path continued after having reached a terminal value within the object (a primitive)
  * </ul>
  *
- * <p>Instead, it will just return null. If you need to distinguish between true null values and the
- * "dead ends" described above, you can instruct the {@code PathWalker} to return a special value,
- * {@link #DEAD_END}, in stead of null.
+ * <p>By default {@code PathWalker} will return null in these cases. If you need to distinguish
+ * between true nulls and the "dead ends" described above, you can instruct the {@code PathWalker}
+ * to return a special value, {@link #DEAD_END}, in stead of null. You can also instruct to throw a
+ * {@link NoSuchPropertyException}. See {@link DeadEndAction}.
  *
  * <p>If the {@code PathWalker} is on a segment that references a {@code Collection} or an array,
  * the next path segment must be an array index (unless it is the {@code Collection} or array itself
@@ -51,13 +54,23 @@ import static nl.naturalis.common.path.PathWalkerException.readWriteError;
 public final class PathWalker {
 
   /**
+   * Symbolic constants for what to do if the {@code PathWalker} hits a dead end for a particular
+   * {@code Path}.
+   */
+  public static enum DeadEndAction {
+    RETURN_NULL,
+    RETURN_DEAD_END,
+    THROW_EXCEPTION;
+  }
+
+  /**
    * A special value indicating that a path could not be walked all the way to the end for the
    * object currently being read.
    */
   public static final Object DEAD_END = new Object();
 
   private final Path[] paths;
-  private final boolean useDeadEnd;
+  private final DeadEndAction deadEndAction;
   private final Function<Path, Object> keyDeser;
 
   /**
@@ -69,7 +82,7 @@ public final class PathWalker {
   public PathWalker(Path... paths) {
     Check.that(paths, "paths").is(notEmpty()).is(noneNull());
     this.paths = Arrays.copyOf(paths, paths.length);
-    this.useDeadEnd = false;
+    this.deadEndAction = RETURN_NULL;
     this.keyDeser = null;
   }
 
@@ -82,7 +95,7 @@ public final class PathWalker {
   public PathWalker(String... paths) {
     Check.that(paths, "paths").is(notEmpty()).is(noneNull());
     this.paths = Arrays.stream(paths).map(Path::new).toArray(Path[]::new);
-    this.useDeadEnd = false;
+    this.deadEndAction = RETURN_NULL;
     this.keyDeser = null;
   }
 
@@ -93,7 +106,7 @@ public final class PathWalker {
    * @param paths
    */
   public PathWalker(List<Path> paths) {
-    this(paths, false, null);
+    this(paths, RETURN_NULL, null);
   }
 
   /**
@@ -102,10 +115,10 @@ public final class PathWalker {
    * If it is important to distinguish between "real" null values and dead ends, pass {@code true}.
    *
    * @param paths
-   * @param useDeadEndValue
+   * @param deadEndAction
    */
-  public PathWalker(List<Path> paths, boolean useDeadEndValue) {
-    this(paths, useDeadEndValue, null);
+  public PathWalker(List<Path> paths, DeadEndAction deadEndAction) {
+    this(paths, deadEndAction, null);
   }
 
   /**
@@ -116,16 +129,15 @@ public final class PathWalker {
    * a function that deserializes a path segment into a map key.
    *
    * @param paths The paths to walk
-   * @param useDeadEndValue Whether to use {@link #DEAD_END} or null for paths that could not be
-   *     walked all the way to the end
+   * @param deadEndAction The action to take if a path could not be walked all the way to the end.
    * @param mapKeyDeserializer A function that converts strings to map keys (may be null if no
    *     deserialization is required)
    */
   public PathWalker(
-      List<Path> paths, boolean useDeadEndValue, Function<Path, Object> mapKeyDeserializer) {
+      List<Path> paths, DeadEndAction deadEndAction, Function<Path, Object> mapKeyDeserializer) {
     Check.that(paths, "paths").is(notEmpty()).is(noneNull());
     this.paths = paths.toArray(Path[]::new);
-    this.useDeadEnd = useDeadEndValue;
+    this.deadEndAction = deadEndAction;
     this.keyDeser = mapKeyDeserializer;
   }
 
@@ -234,7 +246,7 @@ public final class PathWalker {
     if (map.containsKey(key)) {
       return readObj(map.get(key), path.shift());
     }
-    return deadEnd();
+    return deadEnd(new NoSuchPropertyException(path.toString()));
   }
 
   private Object readElement(Collection collection, Path path) {
@@ -245,7 +257,7 @@ public final class PathWalker {
         return readObj(collection.toArray()[idx], path.shift());
       }
     }
-    return deadEnd();
+    return deadEnd(new NoSuchPropertyException(path.toString()));
   }
 
   private Object readElement(Object[] array, Path path) {
@@ -256,7 +268,7 @@ public final class PathWalker {
         return readObj(array[idx], path.shift());
       }
     }
-    return deadEnd();
+    return deadEnd(new NoSuchPropertyException(path.toString()));
   }
 
   private Object readPrimitiveElement(Object array, Path path) {
@@ -269,7 +281,7 @@ public final class PathWalker {
         }
       }
     }
-    return deadEnd();
+    return deadEnd(new NoSuchPropertyException(path.toString()));
   }
 
   private <T> Object readBean(T bean, Path path) {
@@ -281,7 +293,7 @@ public final class PathWalker {
         Object val = reader.get(bean, property);
         return readObj(val, path.shift());
       } catch (NoSuchPropertyException e) {
-        return deadEnd();
+        return deadEnd(e);
       }
     } catch (Throwable e1) {
       throw readWriteError(e1, bean, path.segment(0));
@@ -355,7 +367,15 @@ public final class PathWalker {
     }
   }
 
-  private Object deadEnd() {
-    return useDeadEnd ? DEAD_END : null;
+  private Object deadEnd(NoSuchPropertyException e) {
+    switch (deadEndAction) {
+      case RETURN_NULL:
+        return null;
+      case RETURN_DEAD_END:
+        return DEAD_END;
+      case THROW_EXCEPTION:
+      default:
+        throw e;
+    }
   }
 }

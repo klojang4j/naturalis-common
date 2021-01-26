@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonChecks.noneNull;
+import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
  * A bean reader class that uses the {@code java.lang.invoke} package in stead of reflection to read
@@ -33,7 +34,7 @@ public class BeanReader<T> {
   /**
    * Creates a {@code BeanReader} for the specified class and the specified properties of that
    * class. If you intend to use this {@code BeanReader} to repetitively read just one or two
-   * properties from the provided bean instances, this makes the {@code BeanReader} more efficient.
+   * properties from a lot of bean instances, this makes the {@code BeanReader} more efficient.
    *
    * @param beanClass The bean class
    * @param properties The properties you are interested in
@@ -45,11 +46,11 @@ public class BeanReader<T> {
   /**
    * Creates a {@code BeanReader} for the specified class and the specified properties of that
    * class. If you intend to use this {@code BeanReader} to repetitively read just one or two
-   * properties from the provided bean instances, this makes the {@code BeanReader} more efficient.
+   * properties from a lot of bean instances, this makes the {@code BeanReader} more efficient.
    *
    * @param beanClass The bean class
    * @param exclude Whether to exclude or include the specified properties
-   * @param properties The properties you are, or ar not interested in
+   * @param properties The properties you are, or are not interested in
    */
   public BeanReader(Class<T> beanClass, boolean exclude, String... properties) {
     Check.notNull(beanClass, "beanClass");
