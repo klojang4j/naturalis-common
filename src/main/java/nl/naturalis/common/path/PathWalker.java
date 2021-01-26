@@ -2,13 +2,11 @@ package nl.naturalis.common.path;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.invoke.BeanReader;
 import nl.naturalis.common.invoke.BeanWriter;
 import nl.naturalis.common.invoke.NoSuchPropertyException;
 import static nl.naturalis.common.ClassMethods.getArrayTypeSimpleName;
@@ -18,10 +16,10 @@ import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonChecks.noneNull;
 import static nl.naturalis.common.check.CommonChecks.notEmpty;
 import static nl.naturalis.common.check.CommonGetters.length;
+import static nl.naturalis.common.path.PathWalker.DeadEndAction.RETURN_NULL;
 import static nl.naturalis.common.path.PathWalkerException.invalidPath;
 import static nl.naturalis.common.path.PathWalkerException.nullSegmentNotAllowed;
 import static nl.naturalis.common.path.PathWalkerException.readWriteError;
-import static nl.naturalis.common.path.PathWalker.DeadEndAction.*;
 
 /**
  * Reads/writes objects using {@link Path} objects. The {@code PathWalker} class is useful for
@@ -70,8 +68,8 @@ public final class PathWalker {
   public static final Object DEAD_END = new Object();
 
   private final Path[] paths;
-  private final DeadEndAction deadEndAction;
-  private final Function<Path, Object> keyDeser;
+  private final DeadEndAction dea;
+  private final Function<Path, Object> kds;
 
   /**
    * Creates a {@code PathWalker} for the specified paths, setting the value for paths that could
@@ -82,8 +80,8 @@ public final class PathWalker {
   public PathWalker(Path... paths) {
     Check.that(paths, "paths").is(notEmpty()).is(noneNull());
     this.paths = Arrays.copyOf(paths, paths.length);
-    this.deadEndAction = RETURN_NULL;
-    this.keyDeser = null;
+    this.dea = RETURN_NULL;
+    this.kds = null;
   }
 
   /**
@@ -95,8 +93,8 @@ public final class PathWalker {
   public PathWalker(String... paths) {
     Check.that(paths, "paths").is(notEmpty()).is(noneNull());
     this.paths = Arrays.stream(paths).map(Path::new).toArray(Path[]::new);
-    this.deadEndAction = RETURN_NULL;
-    this.keyDeser = null;
+    this.dea = RETURN_NULL;
+    this.kds = null;
   }
 
   /**
@@ -137,8 +135,8 @@ public final class PathWalker {
       List<Path> paths, DeadEndAction deadEndAction, Function<Path, Object> mapKeyDeserializer) {
     Check.that(paths, "paths").is(notEmpty()).is(noneNull());
     this.paths = paths.toArray(Path[]::new);
-    this.deadEndAction = deadEndAction;
-    this.keyDeser = mapKeyDeserializer;
+    this.dea = deadEndAction;
+    this.kds = mapKeyDeserializer;
   }
 
   /**
@@ -186,12 +184,12 @@ public final class PathWalker {
    * path.
    *
    * @param <T> The type of the object that the path points to
-   * @param obj The object to read the path values from
+   * @param host The object to read the path values from
    * @return
    * @throws PathWalkerException
    */
-  public <T> T read(Object obj) {
-    return (T) readObj(obj, paths[0]);
+  public <T> T read(Object host) {
+    return (T) readObj(host, paths[0]);
   }
 
   /**
@@ -225,79 +223,7 @@ public final class PathWalker {
   }
 
   private Object readObj(Object obj, Path path) {
-    if (path.isEmpty() || obj == null || obj == DEAD_END) {
-      return obj;
-    } else if (obj instanceof Collection) {
-      return readElement((Collection) obj, path);
-    } else if (obj instanceof Object[]) {
-      return readElement((Object[]) obj, path);
-    } else if (obj instanceof Map) {
-      return readMap((Map) obj, path);
-    } else if (isPrimitiveArray(obj)) {
-      return readPrimitiveElement(obj, path);
-    } else {
-      return readBean(obj, path);
-    }
-  }
-
-  private Object readMap(Map map, Path path) {
-    String segment = path.segment(0);
-    Object key = keyDeser == null ? segment : keyDeser.apply(path);
-    if (map.containsKey(key)) {
-      return readObj(map.get(key), path.shift());
-    }
-    return deadEnd(new NoSuchPropertyException(path.toString()));
-  }
-
-  private Object readElement(Collection collection, Path path) {
-    String segment = path.segment(0);
-    if (Path.isArrayIndex(segment)) {
-      int idx = Integer.parseInt(segment);
-      if (idx < collection.size()) {
-        return readObj(collection.toArray()[idx], path.shift());
-      }
-    }
-    return deadEnd(new NoSuchPropertyException(path.toString()));
-  }
-
-  private Object readElement(Object[] array, Path path) {
-    String segment = path.segment(0);
-    if (Path.isArrayIndex(segment)) {
-      int idx = Integer.parseInt(segment);
-      if (idx < array.length) {
-        return readObj(array[idx], path.shift());
-      }
-    }
-    return deadEnd(new NoSuchPropertyException(path.toString()));
-  }
-
-  private Object readPrimitiveElement(Object array, Path path) {
-    if (path.size() == 1) { // primitive *must* be the end of the trail
-      String segment = path.segment(0);
-      if (Path.isArrayIndex(segment)) {
-        int idx = Integer.parseInt(segment);
-        if (idx < Array.getLength(array)) {
-          return readObj(Array.get(array, idx), path.shift());
-        }
-      }
-    }
-    return deadEnd(new NoSuchPropertyException(path.toString()));
-  }
-
-  private <T> Object readBean(T bean, Path path) {
-    Class<T> beanClass = (Class<T>) bean.getClass();
-    String property = path.segment(0);
-    BeanReader<T> reader = new BeanReader<>(beanClass, property);
-    try {
-      try {
-        Object val = reader.get(bean, property);
-        return readObj(val, path.shift());
-      } catch (NoSuchPropertyException e) {
-        return deadEnd(e);
-      }
-    } catch (Throwable e1) {
-      throw readWriteError(e1, bean, path.segment(0));
-    }
+    return new ObjectReader(dea, kds).read(obj, path);
   }
 
   private void write(Object host, Path path, Object value) {
@@ -322,10 +248,10 @@ public final class PathWalker {
           Object key;
           if (child.isNullSegment()) {
             key = null;
-          } else if (keyDeser == null) {
+          } else if (kds == null) {
             key = child.toString();
           } else {
-            key = keyDeser.apply(child);
+            key = kds.apply(child);
           }
           map.put(key, value);
         } else if (!child.isNullSegment()) {
@@ -364,18 +290,6 @@ public final class PathWalker {
       String fmt = "Cannot set value in object of type %s using array index";
       String msg = String.format(fmt, parval.getClass().getName());
       throw new PathWalkerException(msg);
-    }
-  }
-
-  private Object deadEnd(NoSuchPropertyException e) {
-    switch (deadEndAction) {
-      case RETURN_NULL:
-        return null;
-      case RETURN_DEAD_END:
-        return DEAD_END;
-      case THROW_EXCEPTION:
-      default:
-        throw e;
     }
   }
 }

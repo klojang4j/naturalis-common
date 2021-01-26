@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static nl.naturalis.common.CollectionMethods.newHashMap;
-import static nl.naturalis.common.path.PathWalker.DeadEndAction.*;
+import static nl.naturalis.common.path.PathWalker.DeadEndAction.RETURN_DEAD_END;
 
 public class PathWalkerTest {
 
