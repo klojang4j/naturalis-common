@@ -272,6 +272,16 @@ public final class StringMethods {
   }
 
   /**
+   * Whether or not the provided string is null or empty.
+   *
+   * @param subject The string
+   * @return Whether it is null or blank
+   */
+  public static boolean isEmpty(Object subject) {
+    return subject == null || subject.toString().isEmpty();
+  }
+
+  /**
    * Whether or not the provided string is null or blank.
    *
    * @param subject The string
@@ -279,6 +289,16 @@ public final class StringMethods {
    */
   public static boolean isBlank(Object subject) {
     return subject == null || subject.toString().isBlank();
+  }
+
+  /**
+   * Whether or not the provided string neither null nor empty.
+   *
+   * @param object The string to check
+   * @return Whether it is neither null nor blank
+   */
+  public static boolean isNotEmpty(Object object) {
+    return !isEmpty(object);
   }
 
   /**

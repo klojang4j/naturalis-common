@@ -3,8 +3,8 @@ package nl.naturalis.common.path;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.function.Function;
-import nl.naturalis.common.invoke.NoSuchPropertyException;
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
+import static nl.naturalis.common.path.PathWalkerException.arrayIndexExpected;
 
 @SuppressWarnings("rawtypes")
 class CollectionSegmentReader extends SegmentReader<Collection> {
@@ -22,11 +22,11 @@ class CollectionSegmentReader extends SegmentReader<Collection> {
         Iterator iter = collection.iterator();
         for (; idx != 0 && iter.hasNext(); --idx, iter.next()) ;
         if (iter.hasNext()) {
-          Object val = iter.next();
-          return nextSegmentReader().read(val, path.shift());
+          return nextSegmentReader().read(iter.next(), path.shift());
         }
+        return deadEnd(() -> arrayIndexExpected(path));
       }
     }
-    return deadEnd(new NoSuchPropertyException(path.toString()));
+    return deadEnd(() -> arrayIndexExpected(path));
   }
 }

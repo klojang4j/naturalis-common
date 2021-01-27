@@ -3,6 +3,7 @@ package nl.naturalis.common;
 import java.math.BigInteger;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ArrayMethods.isOneOf;
+import static nl.naturalis.common.StringMethods.*;
 
 /**
  * Methods for working with {@code Number} instances.
@@ -31,13 +32,37 @@ public class NumberMethods {
    * @return Whether or not the specified string is a valid integer
    */
   public static boolean isInteger(String str) {
-    try {
-      BigInteger bi = new BigInteger(str);
-      bi.intValueExact();
-      return true;
-    } catch (NumberFormatException | ArithmeticException e) {
-      return false;
+    if (isNotEmpty(str)) {
+      try {
+        BigInteger bi = new BigInteger(str);
+        bi.intValueExact();
+        return true;
+      } catch (NumberFormatException | ArithmeticException e) {
+      }
     }
+    return false;
+  }
+
+  /**
+   * Returns whether or not the specified string consists of digits only, without plus or minus
+   * sign, without leading zeros, and fitting into a 32-bit integer.
+   *
+   * @param str The string
+   * @return Whether or not the specified string is a valid, digit-only integer
+   */
+  public static boolean isPlainInteger(String str) {
+    if (isEmpty(str)) {
+      return false;
+    } else if (str.charAt(0) == '0') {
+      return str.length() == 1;
+    } else if (str.codePoints().allMatch(Character::isDigit)) {
+      try {
+        new BigInteger(str).intValueExact();
+        return true;
+      } catch (ArithmeticException e) {
+      }
+    }
+    return false;
   }
 
   /**
@@ -47,13 +72,38 @@ public class NumberMethods {
    * @return Whether or not the specified string is a valid integer
    */
   public static boolean isShort(String str) {
-    try {
-      BigInteger bi = new BigInteger(str);
-      bi.shortValueExact();
-      return true;
-    } catch (NumberFormatException | ArithmeticException e) {
-      return false;
+    if (!isEmpty(str) && str.codePoints().allMatch(Character::isDigit)) {
+      try {
+        new BigInteger(str).shortValueExact();
+        return true;
+      } catch (NumberFormatException | ArithmeticException e) {
+      }
     }
+    return false;
+  }
+
+  /**
+   * Returns whether or not the specified string consists of digits only, without plus or minus
+   * sign, without leading zeros, and fitting into a 16-bit integer.
+   *
+   * @param str The string
+   * @return Whether or not the specified string is a valid, digit-only integer
+   */
+  public static boolean isPlainShort(String str) {
+    if (isEmpty(str)) {
+      return false;
+    } else if (str.charAt(0) == '+' || str.charAt(0) == '-') {
+      return false;
+    } else if (str.charAt(0) == '0') {
+      return str.length() == 1;
+    } else if (str.codePoints().allMatch(Character::isDigit)) {
+      try {
+        new BigInteger(str).shortValueExact();
+        return true;
+      } catch (ArithmeticException e) {
+      }
+    }
+    return false;
   }
 
   /**

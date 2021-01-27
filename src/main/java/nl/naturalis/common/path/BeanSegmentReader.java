@@ -4,7 +4,8 @@ import java.util.function.Function;
 import nl.naturalis.common.invoke.BeanReader;
 import nl.naturalis.common.invoke.NoSuchPropertyException;
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
-import static nl.naturalis.common.path.PathWalkerException.readWriteError;
+import static nl.naturalis.common.path.PathWalkerException.noSuchProperty;
+import static nl.naturalis.common.path.PathWalkerException.wrap;
 
 class BeanSegmentReader<T> extends SegmentReader<T> {
 
@@ -23,10 +24,10 @@ class BeanSegmentReader<T> extends SegmentReader<T> {
         Object val = reader.get(bean, property);
         return nextSegmentReader().read(val, path.shift());
       } catch (NoSuchPropertyException e) {
-        return deadEnd(e);
+        return deadEnd(() -> noSuchProperty(path, e));
       }
-    } catch (Throwable e1) {
-      throw readWriteError(e1, bean, path.segment(0));
+    } catch (Throwable t) {
+      return deadEnd(() -> wrap(t));
     }
   }
 }

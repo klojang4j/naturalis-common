@@ -1,25 +1,17 @@
 package nl.naturalis.common.path;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.invoke.BeanWriter;
 import nl.naturalis.common.invoke.NoSuchPropertyException;
-import static nl.naturalis.common.ClassMethods.getArrayTypeSimpleName;
-import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
-import static nl.naturalis.common.check.Check.badArgument;
 import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonChecks.noneNull;
 import static nl.naturalis.common.check.CommonChecks.notEmpty;
 import static nl.naturalis.common.check.CommonGetters.length;
 import static nl.naturalis.common.path.PathWalker.DeadEndAction.RETURN_NULL;
-import static nl.naturalis.common.path.PathWalkerException.invalidPath;
-import static nl.naturalis.common.path.PathWalkerException.nullSegmentNotAllowed;
-import static nl.naturalis.common.path.PathWalkerException.readWriteError;
 
 /**
  * Reads/writes objects using {@link Path} objects. The {@code PathWalker} class is useful for
@@ -48,7 +40,7 @@ import static nl.naturalis.common.path.PathWalkerException.readWriteError;
  *
  * @author Ayco Holleman
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"unchecked"})
 public final class PathWalker {
 
   /**
@@ -193,103 +185,44 @@ public final class PathWalker {
   }
 
   /**
-   * Sets the values of all paths within the provided object to the specified values. The number of
-   * values must be greater than or equal to the length as the number of {@code Path} objects
-   * specified through the constructor.
+   * Sets the values of all configured paths to the specified values. This method returns {@code
+   * true} if <i>all</i> values were successfully writen. If the configured {@link DeadEndAction} is
+   * {@code THROW_EXCEPTION}, this method will throw a {@link PathWalkerException} detailing the
+   * error of the write action that failed, otherwise this method returns {@code false}.
    *
    * @param host
    * @param values
+   * @param Whether or not all values were successfully writen.
    */
-  public void writeValues(Object host, Object... values) {
+  public boolean writeValues(Object host, Object... values) {
     Check.notNull(values, "values").has(length(), gte(), paths.length);
+    boolean success = true;
     for (int i = 0; i < paths.length; ++i) {
-      write(host, paths[i], values[i]);
+      success = success && write(host, paths[i], values[i]);
     }
+    return success;
   }
 
   /**
    * Sets the value of the first path within the provided object to the specified value. Useful if
-   * the {@code PathWalker} was created for just one path. This method will not throw an exception
-   * if path's parent does not exist within the provided object, or if the value of the path's
-   * parent is null. It will also not throw an exception when trying to set a value at an index that
-   * is out of bounds for the provided host object. It may throw a {@link ClassCastException},
-   * however.
+   * the {@code PathWalker} was created for just one path. This method will return {@code true} if
+   * the value was successfully written to the host object. If the configured {@link DeadEndAction}
+   * is {@code THROW_EXCEPTION}, this method will throw a {@link PathWalkerException} detailing the
+   * error, otherwise this method will return false.
    *
    * @param host
    * @param value
+   * @return Whether or not the value was successfully written
    */
-  public void write(Object host, Object value) {
-    write(host, paths[0], value);
+  public boolean write(Object host, Object value) {
+    return write(host, paths[0], value);
   }
 
   private Object readObj(Object obj, Path path) {
     return new ObjectReader(dea, kds).read(obj, path);
   }
 
-  private void write(Object host, Path path, Object value) {
-    Path parent = path.parent();
-    Path child = path.subpath(-1);
-    if (Path.isArrayIndex(child.segment(0))) {
-      if (parent.isEmpty()) {
-        throw invalidPath(path);
-      }
-      PathWalker pw = new PathWalker(parent);
-      Object parval = pw.read(host);
-      if (parval != null) {
-        int idx = Integer.parseInt(child.toString());
-        writeElement(parval, idx, value);
-      }
-    } else {
-      PathWalker pw = new PathWalker(parent);
-      Object parentObject = pw.read(host);
-      if (parentObject != null) {
-        if (parentObject instanceof Map) {
-          Map map = (Map) parentObject;
-          Object key;
-          if (child.isNullSegment()) {
-            key = null;
-          } else if (kds == null) {
-            key = child.toString();
-          } else {
-            key = kds.apply(child);
-          }
-          map.put(key, value);
-        } else if (!child.isNullSegment()) {
-          try {
-            BeanWriter bw = new BeanWriter<>(parentObject.getClass());
-            bw.set(parentObject, child.toString(), value);
-          } catch (Throwable T) {
-            throw readWriteError(T, parentObject, child.toString());
-          }
-        } else {
-          throw nullSegmentNotAllowed(parentObject);
-        }
-      }
-    }
-  }
-
-  private static void writeElement(Object parval, int idx, Object value) {
-    if (parval instanceof List) {
-      List list = (List) parval;
-      if (idx < list.size()) {
-        list.set(idx, value);
-      }
-    } else if (parval instanceof Object[]) {
-      Object[] arr = (Object[]) parval;
-      if (idx < arr.length) {
-        arr[idx] = value;
-      }
-    } else if (isPrimitiveArray(parval)) {
-      Check.notNull(
-          badArgument("Cannot assign null to element of %s", getArrayTypeSimpleName(parval)),
-          value);
-      if (idx < Array.getLength(parval)) {
-        Array.set(parval, idx, value);
-      }
-    } else {
-      String fmt = "Cannot set value in object of type %s using array index";
-      String msg = String.format(fmt, parval.getClass().getName());
-      throw new PathWalkerException(msg);
-    }
+  private boolean write(Object host, Path path, Object value) {
+    return new ObjectWriter(dea, kds).write(host, path, value);
   }
 }

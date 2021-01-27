@@ -1,8 +1,8 @@
 package nl.naturalis.common.path;
 
 import java.util.function.Function;
-import nl.naturalis.common.invoke.NoSuchPropertyException;
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
+import static nl.naturalis.common.path.PathWalkerException.arrayIndexExpected;
 
 class ArraySegmentReader extends SegmentReader<Object[]> {
 
@@ -19,6 +19,6 @@ class ArraySegmentReader extends SegmentReader<Object[]> {
         return nextSegmentReader().read(array[idx], path.shift());
       }
     }
-    return deadEnd(new NoSuchPropertyException(path.toString()));
+    return deadEnd(() -> arrayIndexExpected(path));
   }
 }

@@ -1,7 +1,7 @@
 package nl.naturalis.common.path;
 
 import java.util.function.Function;
-import nl.naturalis.common.invoke.NoSuchPropertyException;
+import java.util.function.Supplier;
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
 import static nl.naturalis.common.path.PathWalker.DEAD_END;
 
@@ -17,7 +17,7 @@ abstract class SegmentReader<T> {
 
   abstract Object read(T obj, Path path);
 
-  Object deadEnd(NoSuchPropertyException e) {
+  Object deadEnd(Supplier<PathWalkerException> e) {
     switch (dea) {
       case RETURN_NULL:
         return null;
@@ -25,7 +25,7 @@ abstract class SegmentReader<T> {
         return DEAD_END;
       case THROW_EXCEPTION:
       default:
-        throw e;
+        throw e.get();
     }
   }
 

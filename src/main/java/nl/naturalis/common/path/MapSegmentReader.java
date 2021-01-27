@@ -2,8 +2,8 @@ package nl.naturalis.common.path;
 
 import java.util.Map;
 import java.util.function.Function;
-import nl.naturalis.common.invoke.NoSuchPropertyException;
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
+import static nl.naturalis.common.path.PathWalkerException.noSuchKey;
 
 @SuppressWarnings("rawtypes")
 class MapSegmentReader extends SegmentReader<Map<String, Object>> {
@@ -19,6 +19,6 @@ class MapSegmentReader extends SegmentReader<Map<String, Object>> {
     if (map.containsKey(key)) {
       return nextSegmentReader().read(map.get(key), path.shift());
     }
-    return deadEnd(new NoSuchPropertyException(path.toString()));
+    return deadEnd(() -> noSuchKey(path));
   }
 }

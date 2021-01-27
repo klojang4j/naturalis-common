@@ -2,8 +2,8 @@ package nl.naturalis.common.path;
 
 import java.lang.reflect.Array;
 import java.util.function.Function;
-import nl.naturalis.common.invoke.NoSuchPropertyException;
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
+import static nl.naturalis.common.path.PathWalkerException.pathExtendsBeyondPrimitive;
 
 class PrimitiveArraySegmentReader extends SegmentReader<Object> {
 
@@ -23,6 +23,6 @@ class PrimitiveArraySegmentReader extends SegmentReader<Object> {
         }
       }
     }
-    return deadEnd(new NoSuchPropertyException(path.toString()));
+    return deadEnd(() -> pathExtendsBeyondPrimitive(path));
   }
 }

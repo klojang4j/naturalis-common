@@ -1,15 +1,11 @@
 package nl.naturalis.common.path;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import nl.naturalis.common.ArrayMethods;
-import nl.naturalis.common.Emptyable;
-import nl.naturalis.common.Sizeable;
-import nl.naturalis.common.StringMethods;
+import nl.naturalis.common.*;
 import nl.naturalis.common.check.Check;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
@@ -82,15 +78,8 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
     return sb.toString();
   }
 
-  static boolean isArrayIndex(String s) {
-    if (s != null && !s.isEmpty() && s.codePoints().allMatch(Character::isDigit)) {
-      try {
-        new BigInteger(s).intValueExact();
-        return true;
-      } catch (ArithmeticException e) {
-      }
-    }
-    return false;
+  static boolean isArrayIndex(String segment) {
+    return NumberMethods.isPlainInteger(segment);
   }
 
   private final String[] elems;
@@ -190,19 +179,22 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Return the parent of this {@code Path} or null if this is an empty {@code Path}.
+   * Return the parent of this {@code Path}. If this {@code Path} is empty, this method returns
+   * null. If it consists of a single segment, and empty {@code Path} is returned.
    *
-   * @return
+   * @return The parent of this {@code Path}
    */
   public Path parent() {
-    return elems.length == 0 ? null : new Path(copyOfRange(elems, 0, elems.length - 1));
+    return elems.length == 0
+        ? null
+        : elems.length == 1 ? EMPTY_PATH : new Path(copyOfRange(elems, 0, elems.length - 1));
   }
 
   /**
    * Returns a new {@code Path} containing only the segments of this {@code Path} that are not array
    * indices.
    *
-   * @return
+   * @return A new {@code Path} without any array indices
    */
   public Path getCanonicalPath() {
     return new Path(stream().filter(not(Path::isArrayIndex)).toArray(String[]::new));
