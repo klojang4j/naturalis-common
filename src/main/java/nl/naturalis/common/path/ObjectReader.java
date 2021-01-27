@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.function.Function;
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
-import static nl.naturalis.common.path.PathWalker.*;
+import static nl.naturalis.common.path.PathWalker.DEAD_END;
 
 @SuppressWarnings("rawtypes")
 class ObjectReader {
