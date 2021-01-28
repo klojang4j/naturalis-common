@@ -44,7 +44,7 @@ public enum AugmentationType {
     return Check.that(augment((double) value, amount, (double) minAmount), "New value")
         .is(atMost(), Integer.MAX_VALUE)
         .is(atLeast(), Integer.MIN_VALUE)
-        .ok(int.class::cast);
+        .ok(Double::intValue);
   }
 
   /**
