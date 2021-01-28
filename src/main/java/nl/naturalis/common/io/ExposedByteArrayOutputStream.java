@@ -5,10 +5,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.util.IncrementType;
+import nl.naturalis.common.util.AugmentationType;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.length;
-import static nl.naturalis.common.util.IncrementType.FACTOR;
+import static nl.naturalis.common.util.AugmentationType.MULTIPLY;
 
 /**
  * An output stream in which the data is written into a byte array. The buffer automatically grows
@@ -27,7 +27,7 @@ import static nl.naturalis.common.util.IncrementType.FACTOR;
 public class ExposedByteArrayOutputStream extends OutputStream {
 
   private final float ib;
-  private final IncrementType it;
+  private final AugmentationType it;
 
   private byte[] buf;
   private int cnt;
@@ -60,7 +60,7 @@ public class ExposedByteArrayOutputStream extends OutputStream {
    *     length (causing write actions to append to what is already in the array) but not greater.
    */
   public ExposedByteArrayOutputStream(byte[] buf, int offset) {
-    this(buf, offset, 2F, FACTOR);
+    this(buf, offset, 2F, MULTIPLY);
   }
 
   /**
@@ -73,7 +73,7 @@ public class ExposedByteArrayOutputStream extends OutputStream {
    *     IncrementType} you choose, the buffer capacity will always be increased enough to sustain
    *     the {@code write} action.
    */
-  public ExposedByteArrayOutputStream(int size, float incrementBy, IncrementType incrementType) {
+  public ExposedByteArrayOutputStream(int size, float incrementBy, AugmentationType incrementType) {
     this(new byte[size], 0, incrementBy, incrementType);
   }
 
@@ -89,7 +89,7 @@ public class ExposedByteArrayOutputStream extends OutputStream {
    *     IncrementType} you choose, the buffer capacity will always be increased by at least 1.
    */
   public ExposedByteArrayOutputStream(
-      byte[] buf, int offset, float incrementBy, IncrementType incrementType) {
+      byte[] buf, int offset, float incrementBy, AugmentationType incrementType) {
     this.buf = Check.notNull(buf, "buf").has(length(), gt(), 0).ok();
     this.cnt = Check.that(offset, "offset").is(lte(), buf.length).ok();
     this.ib = Check.that(incrementBy, "incrementBy").is(greaterThan(), 0).ok();
@@ -185,10 +185,10 @@ public class ExposedByteArrayOutputStream extends OutputStream {
   private void increaseCapacity(int minIncrease) {
     long newSize;
     switch (it) {
-      case TERM:
+      case ADD:
         newSize = buf.length + Math.max(minIncrease, (int) ib);
         break;
-      case FACTOR:
+      case MULTIPLY:
         newSize = Math.max(buf.length + minIncrease, buf.length * (int) ib);
         break;
       case PERCENTAGE:

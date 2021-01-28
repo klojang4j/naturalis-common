@@ -1,13 +1,15 @@
 package nl.naturalis.common.collection;
 
-import java.nio.BufferOverflowException;
 import java.util.Arrays;
 import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.util.IncrementType;
-import static nl.naturalis.common.check.CommonChecks.*;
+import nl.naturalis.common.util.AugmentationType;
+import static nl.naturalis.common.check.CommonChecks.greaterThan;
+import static nl.naturalis.common.check.CommonChecks.gt;
+import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonChecks.lt;
 
 /**
  * A {@code List} of {@code int} values. The backing array is exposed via the {@link #toArray()}
@@ -17,27 +19,42 @@ import static nl.naturalis.common.check.CommonChecks.*;
  */
 public class IntList {
 
-  private final float ib;
-  private final IncrementType it;
+  private final float eb;
+  private final AugmentationType at;
 
   private int[] buf;
   private int cnt;
 
   private int hash;
 
-  /** Creates an {@code IntList} with an initial capacity of 10. */
+  /**
+   * Creates an {@code IntList} with an initial capacity of 10 and doubling it each time it fills
+   * up.
+   */
   public IntList() {
     this(10);
   }
 
+  /**
+   * Creates an {@code IntList} with the specified initial capacity and doubling it each time it
+   * fills up.
+   */
   public IntList(int capacity) {
-    this(capacity, 2, IncrementType.FACTOR);
+    this(capacity, 2, AugmentationType.MULTIPLY);
   }
 
-  public IntList(int capacity, float incrementBy, IncrementType incrementType) {
+  /**
+   * Creates an {@code IntList} with the specified initial capacity and enlarging it by the
+   * specified amount of elements each time it fills up.
+   */
+  public IntList(int capacity, int enlargeBy) {
+    this(capacity, enlargeBy, AugmentationType.ADD);
+  }
+
+  public IntList(int capacity, float enlargeBy, AugmentationType incrementType) {
     this.buf = Check.that(capacity, "capacity").is(gt(), 0).ok(int[]::new);
-    this.ib = Check.that(incrementBy, "incrementBy").is(greaterThan(), 0).ok();
-    this.it = Check.notNull(incrementType, "incrementType").ok();
+    this.eb = Check.that(enlargeBy, "incrementBy").is(greaterThan(), 0).ok();
+    this.at = Check.notNull(incrementType, "incrementType").ok();
   }
 
   /**
@@ -47,8 +64,8 @@ public class IntList {
    * @param other The {@code IntList} to copy
    */
   public IntList(IntList other) {
-    this.ib = other.ib;
-    this.it = other.it;
+    this.eb = other.eb;
+    this.at = other.at;
     this.cnt = other.cnt;
     this.buf = new int[cnt];
     System.arraycopy(other.buf, 0, this.buf, 0, cnt);
@@ -62,11 +79,11 @@ public class IntList {
   }
 
   public void addAll(IntList other) {
-    addAll(other.buf);
+    Check.notNull(other).then(o -> addAll(o.buf));
   }
 
   public void addAll(int... integers) {
-    Check.notNull(integers, "integers");
+    Check.notNull(integers);
     int len = integers.length;
     if (cnt + len > buf.length) {
       increaseCapacity(cnt + len - buf.length);
@@ -91,6 +108,10 @@ public class IntList {
     return cnt == 0;
   }
 
+  public void clear() {
+    cnt = 0;
+  }
+
   public int[] toArray() {
     return Arrays.copyOfRange(buf, 0, cnt);
   }
@@ -105,11 +126,8 @@ public class IntList {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    } else if (obj == null || getClass() != obj.getClass()) {
-      return false;
-    }
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
     IntList other = (IntList) obj;
     return cnt == other.cnt && Arrays.equals(buf, 0, cnt, other.buf, 0, cnt);
   }
@@ -129,22 +147,9 @@ public class IntList {
   }
 
   private void increaseCapacity(int minIncrease) {
-    long capacity = calculateCapacity(minIncrease);
-    Check.with(s -> new BufferOverflowException(), capacity).is(atMost(), Integer.MAX_VALUE);
-    int[] newBuf = new int[(int) capacity];
+    int capacity = at.augment(buf.length, eb, minIncrease);
+    int[] newBuf = new int[capacity];
     System.arraycopy(buf, 0, newBuf, 0, cnt);
     buf = newBuf;
-  }
-
-  private long calculateCapacity(int minIncrease) {
-    switch (it) {
-      case TERM:
-        return buf.length + Math.max(minIncrease, (int) ib);
-      case FACTOR:
-        return Math.max(buf.length + minIncrease, buf.length * (int) ib);
-      case PERCENTAGE:
-      default:
-        return Math.max(buf.length + minIncrease, buf.length * ((100 + (int) ib) / 100));
-    }
   }
 }
