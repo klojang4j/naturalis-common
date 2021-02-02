@@ -700,6 +700,16 @@ public class CommonChecks {
     addName(notEqualTo(), "notEqualTo");
   }
 
+  public static Relation<String, List<String>> equalsIgnoreCase() {
+    return (x, y) ->
+        y.stream().filter(notNull()).filter(s -> s.equalsIgnoreCase(x)).findAny().isPresent();
+  }
+
+  static {
+    addMessage(equalsIgnoreCase(), msgEqualsIgnoreCase());
+    addName(equalsIgnoreCase(), "equalsIgnoreCase");
+  }
+
   /**
    * Verifies that the argument references the same object as some other reference.
    *

@@ -105,6 +105,13 @@ class Messages {
     return x -> format("%s must be not be equal to %s", x[0], x[2]);
   }
 
+  static Formatter msgEqualsIgnoreCase() {
+    return x -> {
+      String fmt = "%s must be equal ignoring case to any of %s (was %s)";
+      return format(fmt, x[0], argVal(x[2]), argVal(x[1]));
+    };
+  }
+
   static Formatter msgSameAs() {
     return x -> {
       String id0 = cname(x[1]) + '@' + System.identityHashCode(x[1]);
