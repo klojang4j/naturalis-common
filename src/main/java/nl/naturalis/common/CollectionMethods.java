@@ -1,6 +1,9 @@
 package nl.naturalis.common;
 
+import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ArrayMethods.END_INDEX;
 import static nl.naturalis.common.ArrayMethods.START_INDEX;
@@ -71,8 +74,10 @@ public class CollectionMethods {
   }
 
   /**
-   * Returns {@code collection} if not empty, else the {@code Collection} provided by {@code
-   * alternative}.
+   * Returns {@code collection} if not empty, else the {@code Collection} provided by {@codeimport
+   * com.sun.org.apache.xpath.internal.functions.Function;
+   *
+   * <p><p><p><p><p><p><p>alternative}.
    *
    * @param <T>
    * @param <U>
@@ -82,6 +87,24 @@ public class CollectionMethods {
    */
   public static <T, U extends Collection<T>> U ifEmpty(U collection, U alternative) {
     return ObjectMethods.isEmpty(collection) ? alternative : collection;
+  }
+
+  public static String implode(Collection<?> collection) {
+    return implode(collection, ", ");
+  }
+
+  public static String implode(Collection<?> collection, String separator) {
+    return collection.stream().map(Objects::toString).collect(Collectors.joining(separator));
+  }
+
+  public static <K, V> Map<K, V> toMap(
+      List<V> list, Function<? super V, ? extends K> keyExtractor) {
+    return list.stream().collect(Collectors.toMap(keyExtractor, Function.identity()));
+  }
+
+  public static <K, V> Map<K, V> toUnmodifiableMap(
+      List<V> list, Function<? super V, ? extends K> keyExtractor) {
+    return list.stream().collect(Collectors.toUnmodifiableMap(keyExtractor, Function.identity()));
   }
 
   /**
@@ -281,5 +304,42 @@ public class CollectionMethods {
       from = Check.that(to + length, START_INDEX).is(gte(), 0).intValue();
     }
     return list.subList(from, to);
+  }
+
+  /**
+   * Creates a new, modifiable {@code List} of the specified size with all elements initialized to
+   * {@code null}.
+   *
+   * @param <E> The type of the elements
+   * @param <L> The type of the {@code List}
+   * @param elementType The class of the elements
+   * @param size The desired size of the {@code List}
+   * @return A new, modifiable {@code List} of the specified size with all elements initialized to
+   *     {@code null}
+   */
+  @SuppressWarnings("unchecked")
+  public static <E, L extends List<? super E>> L initializedList(Class<E> elementType, int size) {
+    E[] array = (E[]) Array.newInstance(elementType, size);
+    return (L) new ArrayList<E>(List.of(array));
+  }
+
+  /**
+   * Creates a new, modifiable {@code List} of the specified size with all elements initialized to
+   * the specified value.
+   *
+   * @param <E> The type of the elements
+   * @param <L> The type of the {@code List}
+   * @param elementType The class of the elements
+   * @param initValue the value to initialze the list elements to
+   * @param size The desired size of the {@code List}
+   * @return A new, modifiable {@code List} of the specified size with all elements initialized to
+   *     the specified value.
+   */
+  @SuppressWarnings("unchecked")
+  public static <E, L extends List<? super E>> L initializedList(
+      Class<E> elementType, int size, E initVal) {
+    E[] array = (E[]) Array.newInstance(elementType, size);
+    Arrays.fill(array, initVal);
+    return (L) new ArrayList<E>(List.of(array));
   }
 }

@@ -143,7 +143,7 @@ public final class ExceptionMethods {
    * try {
    *  // stuff ...
    * } catch(Throwable t) {
-   *  throw ExceptionMethods.wrap(t, "Something went wrong", IllegalStateException::new);
+   *  throw ExceptionMethods.wrap(t, "Something went wrong", MyRuntimeException::new);
    * }
    * </pre>
    *

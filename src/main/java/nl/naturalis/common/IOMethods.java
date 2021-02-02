@@ -2,9 +2,11 @@ package nl.naturalis.common;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.io.ExposedByteArrayOutputStream;
 import static nl.naturalis.common.check.CommonChecks.gt;
+import static nl.naturalis.common.check.CommonChecks.notEmpty;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
@@ -26,6 +28,15 @@ public class IOMethods {
     try (InputStream in = classpathClass.getResourceAsStream(resourcePath)) {
       Check.that(in).is(notNull(), "Resource not found: %s", resourcePath);
       return toString(in, chunkSize);
+    } catch (IOException e) {
+      throw ExceptionMethods.uncheck(e);
+    }
+  }
+
+  public static String toString(Path path) {
+    Check.notNull(path).has(Path::isAbsolute, yes(), "Path must be absolute");
+    try (FileInputStream fis = new FileInputStream(path.toFile())) {
+      return toString(fis);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
