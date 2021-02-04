@@ -716,7 +716,7 @@ public class CommonChecks {
    * @param <X> The type of the argument
    * @return A {@code Relation}
    */
-  public static <X> Relation<X, X> sameAs() {
+  public static Relation<?, ?> sameAs() {
     return (x, y) -> x == y;
   }
 
