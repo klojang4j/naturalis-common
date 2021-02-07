@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.IOMethods;
 import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.ArrayMethods.inArray;
 import static nl.naturalis.common.StringMethods.endsWith;
 import static nl.naturalis.common.check.CommonChecks.directory;
 import static nl.naturalis.common.check.CommonChecks.noneNull;
@@ -53,7 +54,9 @@ public class SearchReplace {
   private boolean regexSearch = false;
   private boolean ignoreCase = false;
   private boolean wholeWords = true;
+  private boolean excludeHidden = true;
   private String[] fileExts;
+  private String[] excludeDirs;
 
   public SearchReplace() {}
 
@@ -89,10 +92,11 @@ public class SearchReplace {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
                 throws IOException {
-              if (file.getFileName().toString().startsWith(".")) {
+              String fileName = file.getFileName().toString();
+              if (excludeHidden && fileName.startsWith(".")) {
                 return FileVisitResult.CONTINUE;
               }
-              if (null != endsWith(file.getFileName().toString(), false, fileExts)) {
+              if (null != endsWith(fileName, false, fileExts)) {
                 String contents = IOMethods.toString(file);
                 Matcher matcher = pattern.matcher(contents);
                 long cnt = matcher.results().count();
@@ -111,7 +115,10 @@ public class SearchReplace {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
                 throws IOException {
-              if (dir.getFileName().toString().startsWith(".")) {
+              String dirname = dir.getFileName().toString();
+              if (excludeHidden && dirname.startsWith(".")) {
+                return FileVisitResult.SKIP_SUBTREE;
+              } else if (excludeDirs != null && inArray(dirname, excludeDirs)) {
                 return FileVisitResult.SKIP_SUBTREE;
               }
               return FileVisitResult.CONTINUE;
@@ -132,7 +139,6 @@ public class SearchReplace {
       throw ExceptionMethods.uncheck(e);
     }
     System.out.println("Number of changed files:  " + total);
-    System.out.println();
   }
 
   public String getRootDir() {
@@ -183,11 +189,27 @@ public class SearchReplace {
     this.wholeWords = wholeWords;
   }
 
+  public boolean isExcludeHidden() {
+    return excludeHidden;
+  }
+
+  public void setExcludeHidden(boolean excludeHidden) {
+    this.excludeHidden = excludeHidden;
+  }
+
   public String[] getFileExtensions() {
     return fileExts;
   }
 
   public void setFileExtensions(String... fileExts) {
     this.fileExts = fileExts;
+  }
+
+  public String[] getExcludeDirs() {
+    return excludeDirs;
+  }
+
+  public void setExcludeDirs(String... excludeDirs) {
+    this.excludeDirs = excludeDirs;
   }
 }
