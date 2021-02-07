@@ -73,7 +73,7 @@ public final class Tuple<LEFT, RIGHT> {
    * @param map The {@code Map} to insert the tuple into.
    * @return The previous value associated with key, or null if there was no mapping for key
    */
-  public RIGHT addTo(Map<LEFT, RIGHT> map) {
+  public RIGHT insertInto(Map<LEFT, RIGHT> map) {
     return map.put(left, right);
   }
 

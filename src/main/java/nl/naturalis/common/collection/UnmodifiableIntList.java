@@ -9,39 +9,39 @@ import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonChecks.lt;
 
-public final class ImmutableIntList implements IntList {
+public final class UnmodifiableIntList implements IntList {
 
-  public static ImmutableIntList of(int... ints) {
+  public static UnmodifiableIntList of(int... ints) {
     Check.notNull(ints);
     int[] buf = Arrays.copyOf(ints, ints.length);
-    return new ImmutableIntList(buf);
+    return new UnmodifiableIntList(buf);
   }
 
-  public static ImmutableIntList copyOf(IntList other) {
-    if (other.getClass() == ImmutableIntList.class) {
-      return new ImmutableIntList(((ImmutableIntList) other).buf);
+  public static UnmodifiableIntList copyOf(IntList other) {
+    if (other.getClass() == UnmodifiableIntList.class) {
+      return new UnmodifiableIntList(((UnmodifiableIntList) other).buf);
     } else if (other.getClass() == IntArrayList.class) {
       // With IntArrayList we know for a fact that toArray() always returns a fresh copy of its
       // internal int array; no need to copy it again.
-      return new ImmutableIntList(other.toArray());
+      return new UnmodifiableIntList(other.toArray());
     }
     int[] buf = new int[other.size()];
     System.arraycopy(other.toArray(), 0, buf, 0, buf.length);
-    return new ImmutableIntList(buf);
+    return new UnmodifiableIntList(buf);
   }
 
-  public static ImmutableIntList copyOf(Collection<Integer> c) {
+  public static UnmodifiableIntList copyOf(Collection<Integer> c) {
     int[] buf = new int[c.size()];
     int idx = 0;
     for (Integer val : c) {
       buf[idx++] = val;
     }
-    return new ImmutableIntList(buf);
+    return new UnmodifiableIntList(buf);
   }
 
   private final int[] buf;
 
-  private ImmutableIntList(int[] buf) {
+  private UnmodifiableIntList(int[] buf) {
     this.buf = buf;
   }
 
@@ -106,8 +106,8 @@ public final class ImmutableIntList implements IntList {
   @Override
   public boolean equals(Object obj) {
     if (obj == null) return false;
-    if (obj.getClass() == ImmutableIntList.class) {
-      return this == obj || Arrays.equals(buf, ((ImmutableIntList) obj).buf);
+    if (obj.getClass() == UnmodifiableIntList.class) {
+      return this == obj || Arrays.equals(buf, ((UnmodifiableIntList) obj).buf);
     } else if (obj.getClass() == IntArrayList.class) {
       return Arrays.equals(buf, ((IntArrayList) obj).buf);
     } else if (obj instanceof IntList) {

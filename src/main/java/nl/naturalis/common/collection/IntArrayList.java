@@ -73,7 +73,7 @@ public class IntArrayList implements IntList {
       this.eb = 2F;
       this.at = AugmentationType.MULTIPLY;
       this.cnt = other.size();
-      if (other.getClass() == ImmutableIntList.class) {
+      if (other.getClass() == UnmodifiableIntList.class) {
         this.buf = other.toArray();
       } else {
         this.buf = new int[other.size()];
@@ -164,8 +164,8 @@ public class IntArrayList implements IntList {
   @SuppressWarnings("unlikely-arg-type")
   public boolean equals(Object obj) {
     if (obj == null) return false;
-    if (obj.getClass() == ImmutableIntList.class) {
-      return ((ImmutableIntList) obj).equals(this);
+    if (obj.getClass() == UnmodifiableIntList.class) {
+      return ((UnmodifiableIntList) obj).equals(this);
     } else if (obj.getClass() == IntArrayList.class) {
       if (this == obj) return true;
       IntArrayList that = (IntArrayList) obj;

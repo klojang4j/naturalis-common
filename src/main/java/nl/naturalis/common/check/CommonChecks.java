@@ -103,6 +103,9 @@ public class CommonChecks {
     addName(no(), "no");
   }
 
+  public static Predicate<Boolean> fail() {
+    return x -> false;
+  }
   /**
    * Verifies that the argument is empty. Equivalent to {@link ObjectMethods#isEmpty(Object)
    * ObjectMethods::isEmpty}.
@@ -713,10 +716,11 @@ public class CommonChecks {
   /**
    * Verifies that the argument references the same object as some other reference.
    *
-   * @param <X> The type of the argument
+   * @param <X> The type of the argument (the subject of the {@code Relation})
+   * @param <Y> The type of object of the {@code Relation}
    * @return A {@code Relation}
    */
-  public static Relation<?, ?> sameAs() {
+  public static <X, Y> Relation<X, Y> sameAs() {
     return (x, y) -> x == y;
   }
 
@@ -728,10 +732,11 @@ public class CommonChecks {
   /**
    * Verifies that the argument does not reference the same object than some other reference.
    *
-   * @param <X> The type of the argument
+   * @param <X> The type of the argument (the subject of the {@code Relation})
+   * @param <Y> The type of object of the {@code Relation}
    * @return A {@code Relation}
    */
-  public static <X> Relation<X, X> notSameAs() {
+  public static <X, Y> Relation<X, Y> notSameAs() {
     return (x, y) -> x != y;
   }
 
@@ -1309,8 +1314,8 @@ public class CommonChecks {
   static {
     messages = new IdentityHashMap<>(tmp0.size());
     names = new IdentityHashMap<>(tmp1.size());
-    tmp0.forEach(tuple -> tuple.addTo(messages));
-    tmp1.forEach(tuple -> tuple.addTo(names));
+    tmp0.forEach(tuple -> tuple.insertInto(messages));
+    tmp1.forEach(tuple -> tuple.insertInto(names));
     tmp0 = null;
     tmp1 = null;
   }
