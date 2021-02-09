@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"m":"nl.naturalis.common","l":"nl.naturalis.common.function"},{"m":"nl.naturalis.common","l":"nl.naturalis.common.internal"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"m":"nl.naturalis.common","l":"nl.naturalis.common.function"},{"m":"nl.naturalis.common","l":"nl.naturalis.common.internal"},{"m":"nl.naturalis.common","l":"nl.naturalis.common.invoke"}];updateSearchResults();

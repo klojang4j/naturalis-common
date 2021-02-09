@@ -14,7 +14,9 @@ import static nl.naturalis.common.util.AugmentationType.MULTIPLY;
  * An output stream in which the data is written into a byte array. The buffer automatically grows
  * as data is written to it. Contrary to Java's own {@link ByteArrayOutputStream}, the internal byte
  * array is exposed to the client: calling {@link #toByteArray()} returns the byte array rather than
- * a copy of it.
+ * a copy of it. Note, however, that you must therefore use {@link #toByteArray()} in combination
+ * with the {@link #count()} method to extracte the "live" bytes - e.g <code>
+ * new String(out.toArray(), 0, out.count())</code>.
  *
  * <p>This class also lets you specify how to increase the size of the byte array once it reaches
  * full capacity.
