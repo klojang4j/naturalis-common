@@ -4,6 +4,7 @@ import java.lang.invoke.MethodHandle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
 import static nl.naturalis.common.check.CommonChecks.noneNull;
@@ -65,19 +66,24 @@ public class BeanReader<T> {
   }
 
   /**
-   * Returns the value of the specified property on the specified bean.
+   * Returns the value of the specified property on the specified bean. If the property does not
+   * exist a {@link NoSuchPropertyException} is thrown.
    *
    * @param bean The bean instance
    * @param property The property
    * @return Its value
-   * @throws Throwable Any {@code Throwable} thrown from inside the {@code java.lang.invoke} package
+   * @throws NoSuchPropertyException If the specified property does not exist
    */
-  public Object get(T bean, String property) throws Throwable {
+  public Object get(T bean, String property) throws NoSuchPropertyException {
     ReadInfo ri =
         Check.with(s -> new NoSuchPropertyException(property), property)
             .is(notNull())
             .is(keyIn(), readInfo)
             .ok(readInfo::get);
-    return Check.notNull(bean, "bean").ok(ri.getter::invoke);
+    try {
+      return Check.notNull(bean, "bean").ok(ri.getter::invoke);
+    } catch (Throwable t) {
+      throw ExceptionMethods.uncheck(t);
+    }
   }
 }
