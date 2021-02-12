@@ -87,7 +87,7 @@ public class PathWalkerTest {
     List<Path> paths = paths("quarterlySales.0.3");
     PathWalker pw = new PathWalker(paths);
     float f = (float) pw.read(shell);
-    // assertEquals(13F, f, 0);
+    assertEquals(13F, f, 0);
   }
 
   @Test
@@ -223,7 +223,7 @@ public class PathWalkerTest {
         {40, 41, 42, 43}
       };
 
-  static Company shell() throws MalformedURLException {
+  private static Company shell() throws MalformedURLException {
     Company company = new Company();
     company.setName("Shell");
     company.setSales(new BigDecimal(Integer.MAX_VALUE));
