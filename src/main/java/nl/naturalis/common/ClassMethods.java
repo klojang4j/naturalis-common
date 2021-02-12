@@ -62,21 +62,29 @@ public class ClassMethods {
    * @param obj The object whose class name to return
    * @return The class name
    */
-  public static String getClassName(Object obj) {
-    Class<?> c = Check.notNull(obj).ok(Object::getClass);
-    return c.isArray() ? getArrayTypeName(obj) : c.getName();
+  public static String prettyClassName(Object obj) {
+    return prettyClassName(Check.notNull(obj).ok().getClass());
+  }
+
+  public static String prettyClassName(Class<?> clazz) {
+    Check.notNull(clazz);
+    return clazz.isArray() ? getArrayTypeName(clazz) : clazz.getName();
   }
 
   /**
-   * Returns {@link #getArrayTypeSimpleName(Object)} if the argument is an array, else {@code
-   * obj.getClass().getSimpleName()}.
+   * Returns {@link #getArrayTypeSimpleName(Object)} if the argument is an array, else {@link
+   * Class#getSimpleName()}.
    *
    * @param obj The object whose class name to return
    * @return The class name
    */
-  public static String getSimpleClassName(Object obj) {
-    Class<?> c = Check.notNull(obj).ok(Object::getClass);
-    return c.isArray() ? getArrayTypeSimpleName(obj) : c.getSimpleName();
+  public static String prettySimpleClassName(Object obj) {
+    return getSimpleClassName(Check.notNull(obj).ok().getClass());
+  }
+
+  public static String getSimpleClassName(Class<?> clazz) {
+    Check.notNull(clazz);
+    return clazz.isArray() ? getArrayTypeSimpleName(clazz) : clazz.getSimpleName();
   }
 
   /**
@@ -87,8 +95,12 @@ public class ClassMethods {
    * @return The simple name of the array type
    */
   public static String getArrayTypeName(Object array) {
-    Check.notNull(array).is(array());
-    Class<?> c = array.getClass().getComponentType();
+    return Check.notNull(array).ok(a -> getArrayTypeName(a.getClass()));
+  }
+
+  public static String getArrayTypeName(Class<?> clazz) {
+    Check.notNull(clazz).is(array());
+    Class<?> c = clazz.getComponentType();
     int i = 0;
     for (; c.isArray(); c = c.getComponentType()) {
       ++i;
@@ -108,6 +120,11 @@ public class ClassMethods {
   public static String getArrayTypeSimpleName(Object array) {
     Check.notNull(array).is(array());
     return array.getClass().getComponentType().getSimpleName() + "[]";
+  }
+
+  public static String getArrayTypeSimpleName(Class<?> arrayClass) {
+    Check.notNull(arrayClass).is(array());
+    return arrayClass.getClass().getComponentType().getSimpleName() + "[]";
   }
 
   /**
@@ -175,7 +192,7 @@ public class ClassMethods {
     }
     String fmt = "Method %s %s(%s) in class %s is not a getter";
     String returnType = getSimpleClassName(m.getReturnType());
-    String declaringClass = getClassName(m.getDeclaringClass());
+    String declaringClass = prettyClassName(m.getDeclaringClass());
     String params =
         Arrays.stream(m.getParameterTypes())
             .map(ClassMethods::getSimpleClassName)
@@ -195,7 +212,7 @@ public class ClassMethods {
     }
     String fmt = "Method %s %s(%s) in class %s is not a getter";
     String returnType = getSimpleClassName(m.getReturnType());
-    String declaringClass = getClassName(m.getDeclaringClass());
+    String declaringClass = prettyClassName(m.getDeclaringClass());
     String params =
         Arrays.stream(m.getParameterTypes())
             .map(ClassMethods::getSimpleClassName)

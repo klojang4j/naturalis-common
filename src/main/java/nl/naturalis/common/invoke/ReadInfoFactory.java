@@ -22,7 +22,8 @@ class ReadInfoFactory {
         String property = ClassMethods.getPropertyNameFromGetter(m, STRICT_NAMING);
         info.put(property, new ReadInfo(m));
       }
-      cache.put(beanClass, Map.copyOf(info));
+      info = Map.copyOf(info);
+      cache.put(beanClass, info);
     }
     return info;
   }

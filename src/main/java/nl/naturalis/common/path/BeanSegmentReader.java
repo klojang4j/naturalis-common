@@ -21,7 +21,7 @@ class BeanSegmentReader<T> extends SegmentReader<T> {
     BeanReader<T> reader = new BeanReader<>(beanClass, property);
     try {
       try {
-        Object val = reader.get(bean, property);
+        Object val = reader.read(bean, property);
         return nextSegmentReader().read(val, path.shift());
       } catch (NoSuchPropertyException e) {
         return deadEnd(() -> noSuchProperty(path, e));

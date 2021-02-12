@@ -74,7 +74,7 @@ public class BeanReader<T> {
    * @return Its value
    * @throws NoSuchPropertyException If the specified property does not exist
    */
-  public Object get(T bean, String property) throws NoSuchPropertyException {
+  public Object read(T bean, String property) throws NoSuchPropertyException {
     ReadInfo ri =
         Check.with(s -> new NoSuchPropertyException(property), property)
             .is(notNull())

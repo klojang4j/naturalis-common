@@ -3,6 +3,7 @@ package nl.naturalis.common;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ArrayMethods.END_INDEX;
@@ -14,6 +15,46 @@ import static nl.naturalis.common.check.CommonGetters.length;
 public class CollectionMethods {
 
   private CollectionMethods() {}
+
+  /**
+   * Returns the specified value as a {@code List}. If the value already is a {@code List}, it is
+   * returned as-is. If the value is a {@link Collection} it is converted using {@link
+   * List#copyOf(Collection)}. If it is an array, it is converted using {@link List#of(Object...)}.
+   * Else the value itself is wrapped into a {@link Collections#singletonList(Object) singleton
+   * list}.
+   *
+   * @param val The value to convert
+   * @return The value converted to a {@code List}
+   */
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public static List<?> asList(Object val) {
+    Check.notNull(val);
+    List objs;
+    if (val instanceof List) {
+      objs = (List) val;
+    } else if (val instanceof Collection) {
+      objs = List.copyOf((Collection) val);
+    } else if (val instanceof Object[]) {
+      objs = List.of((Object[]) val);
+    } else if (val.getClass() == int[].class) {
+      objs = List.of((int[]) val);
+    } else if (val.getClass() == double[].class) {
+      objs = List.of((double[]) val);
+    } else if (val.getClass() == byte[].class) {
+      objs = List.of((byte[]) val);
+    } else if (val.getClass() == short[].class) {
+      objs = List.of((short[]) val);
+    } else if (val.getClass() == float[].class) {
+      objs = List.of((float[]) val);
+    } else if (val.getClass() == char[].class) {
+      objs = List.of((char[]) val);
+    } else if (val.getClass() == boolean[].class) {
+      objs = List.of((boolean[]) val);
+    } else {
+      objs = Collections.singletonList(val);
+    }
+    return objs;
+  }
 
   /**
    * Returns the specified list if it is not empty else an immutable list containing only the
@@ -77,7 +118,7 @@ public class CollectionMethods {
    * Returns {@code collection} if not empty, else the {@code Collection} provided by {@codeimport
    * com.sun.org.apache.xpath.internal.functions.Function;
    *
-   * <p><p><p><p><p><p><p>alternative}.
+   * <p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p>alternative}.
    *
    * @param <T>
    * @param <U>
@@ -341,5 +382,15 @@ public class CollectionMethods {
     E[] array = (E[]) Array.newInstance(elementType, size);
     Arrays.fill(array, initVal);
     return (L) new ArrayList<E>(List.of(array));
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  public static <E, L extends List<? super E>> L initializedList(
+      Supplier<E> elementFactory, int size) {
+    ArrayList list = new ArrayList(size);
+    for (int i = 0; i < size; ++i) {
+      list.set(i, elementFactory.get());
+    }
+    return (L) list;
   }
 }

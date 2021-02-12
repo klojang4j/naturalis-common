@@ -337,13 +337,19 @@ class Messages {
   }
 
   static Formatter msgInstanceOf() {
-    String fmt = "%s must be instance of %s (was %s)";
-    return x -> format(fmt, x[0], ((Class<?>) x[2]).getName(), cname(x[1]));
+    return x -> {
+      String cn = cname(x[1]);
+      String fmt = "%s must be instance of %s (was %s)";
+      return format(fmt, x[0], ((Class<?>) x[2]).getName(), cn);
+    };
   }
 
   static Formatter msgNotInstanceOf() {
-    String fmt = "%s must not be instance of %s (was %s)";
-    return x -> format(fmt, x[0], ((Class<?>) x[2]).getName(), cname(x[1]));
+    return x -> {
+      String cn = cname(x[1]);
+      String fmt = "%s must not be instance of %s (was %s)";
+      return format(fmt, x[0], ((Class<?>) x[2]).getName(), cn);
+    };
   }
 
   static Formatter msgArray() {
@@ -409,11 +415,11 @@ class Messages {
   }
 
   private static String cname(Object obj) {
-    return ClassMethods.getClassName(obj);
+    return ClassMethods.prettyClassName(obj);
   }
 
   private static String sname(Object obj) {
-    return ClassMethods.getSimpleClassName(obj);
+    return ClassMethods.prettySimpleClassName(obj);
   }
 
   private static boolean noArgNameProvided(Object[] msgArgs) {

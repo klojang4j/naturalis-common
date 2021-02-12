@@ -11,7 +11,7 @@ import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
-import static nl.naturalis.common.ClassMethods.getSimpleClassName;
+import static nl.naturalis.common.ClassMethods.prettySimpleClassName;
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
 import static nl.naturalis.common.check.InvalidCheckException.notApplicable;
 import static nl.naturalis.common.check.Messages.*;
@@ -361,14 +361,20 @@ public class CommonChecks {
   /* ++++++++++++++ Relation ++++++++++++++ */
 
   /**
-   * Verifies that the argument is an intance of a particular class or interface.
+   * If the argument is a {@link Class} object, this method verifies that it is a subclass or
+   * implementation of the specified class; otherwise that the argument is an intance of it.
    *
    * @param <X> The type of the argument
    * @param <Y> The type of the object of the relationship
    * @return A {@code Relation}
    */
   public static <X> Relation<X, Class<?>> instanceOf() {
-    return (x, y) -> y.isInstance(x);
+    return (x, y) -> {
+      if (x.getClass() == Class.class) {
+        return ClassMethods.isA((Class<?>) x, y);
+      }
+      return y.isInstance(x);
+    };
   }
 
   static {
@@ -377,7 +383,8 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is an intance of a particular class or interface.
+   * If the argument is a {@link Class} object, this method verifies that it is not a subclass or
+   * implementation of the specified class; otherwise that the argument is not an intance of it.
    *
    * @param <X> The type of the argument
    * @param <Y> The type of the object of the relationship
@@ -393,13 +400,14 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is an array.
+   * If the argument is a {@link Class} object, verifies that {@code argument.isArray()} is {code
+   * true}, else verifies that {@code argument.getClass().isArray()} is {@code true}.
    *
    * @param <T> The type of the argument
    * @return A {@code Predicate}
    */
   public static <T> Predicate<T> array() {
-    return x -> x.getClass().isArray();
+    return x -> x.getClass() == Class.class ? ((Class<?>) x).isArray() : x.getClass().isArray();
   }
 
   static {
@@ -1323,27 +1331,27 @@ public class CommonChecks {
   private static final String suffix = "()";
 
   static String nameOf(Predicate<?> test) {
-    return ifNotNull(names.get(test), name -> name + suffix, getSimpleClassName(test));
+    return ifNotNull(names.get(test), name -> name + suffix, prettySimpleClassName(test));
   }
 
   static String nameOf(IntPredicate test) {
-    return ifNotNull(names.get(test), name -> name + suffix, getSimpleClassName(test));
+    return ifNotNull(names.get(test), name -> name + suffix, prettySimpleClassName(test));
   }
 
   static String nameOf(Relation<?, ?> test) {
-    return ifNotNull(names.get(test), name -> name + suffix, getSimpleClassName(test));
+    return ifNotNull(names.get(test), name -> name + suffix, prettySimpleClassName(test));
   }
 
   static String nameOf(IntRelation test) {
-    return ifNotNull(names.get(test), name -> name + suffix, getSimpleClassName(test));
+    return ifNotNull(names.get(test), name -> name + suffix, prettySimpleClassName(test));
   }
 
   static String nameOf(ObjIntRelation<?> test) {
-    return ifNotNull(names.get(test), name -> name + suffix, getSimpleClassName(test));
+    return ifNotNull(names.get(test), name -> name + suffix, prettySimpleClassName(test));
   }
 
   static String nameOf(IntObjRelation<?> test) {
-    return ifNotNull(names.get(test), name -> name + suffix, getSimpleClassName(test));
+    return ifNotNull(names.get(test), name -> name + suffix, prettySimpleClassName(test));
   }
 
   private static void addMessage(Object test, Formatter message) {
