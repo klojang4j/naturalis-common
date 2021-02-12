@@ -8,7 +8,9 @@ import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
 import static nl.naturalis.common.check.CommonChecks.noneNull;
-import static nl.naturalis.common.check.CommonChecks.notNull;
+import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.invoke.NoSuchPropertyException.*;
+import static nl.naturalis.common.invoke.InvokeException.*;
 
 /**
  * A bean reader class that uses the {@code java.lang.invoke} package in stead of reflection to read
@@ -21,6 +23,7 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  */
 public class BeanReader<T> {
 
+  private final Class<? super T> beanClass;
   private final Map<String, ReadInfo> readInfo;
 
   /**
@@ -28,8 +31,9 @@ public class BeanReader<T> {
    *
    * @param beanClass The bean class
    */
-  public BeanReader(Class<T> beanClass) {
-    readInfo = Check.notNull(beanClass).ok(ReadInfoFactory.INSTANCE::getReadInfo);
+  public BeanReader(Class<? super T> beanClass) {
+    this.beanClass = Check.notNull(beanClass, "beanClass").ok();
+    this.readInfo = ReadInfoFactory.INSTANCE.getReadInfo(beanClass);
   }
 
   /**
@@ -40,7 +44,7 @@ public class BeanReader<T> {
    * @param beanClass The bean class
    * @param properties The properties you are interested in
    */
-  public BeanReader(Class<T> beanClass, String... properties) {
+  public BeanReader(Class<? super T> beanClass, String... properties) {
     this(beanClass, false, properties);
   }
 
@@ -53,16 +57,16 @@ public class BeanReader<T> {
    * @param exclude Whether to exclude or include the specified properties
    * @param properties The properties you are, or are not interested in
    */
-  public BeanReader(Class<T> beanClass, boolean exclude, String... properties) {
-    Check.notNull(beanClass, "beanClass");
+  public BeanReader(Class<? super T> beanClass, boolean exclude, String... properties) {
+    this.beanClass = Check.notNull(beanClass, "beanClass").ok();
     Check.that(properties, "properties").is(noneNull());
-    Map<String, ReadInfo> copy = new HashMap<>(ReadInfoFactory.INSTANCE.getReadInfo(beanClass));
+    Map<String, ReadInfo> info = new HashMap<>(ReadInfoFactory.INSTANCE.getReadInfo(beanClass));
     if (exclude) {
-      copy.keySet().removeAll(Set.of(properties));
+      info.keySet().removeAll(Set.of(properties));
     } else {
-      copy.keySet().retainAll(Set.of(properties));
+      info.keySet().retainAll(Set.of(properties));
     }
-    this.readInfo = Map.copyOf(copy);
+    this.readInfo = Map.copyOf(info);
   }
 
   /**
@@ -75,15 +79,23 @@ public class BeanReader<T> {
    * @throws NoSuchPropertyException If the specified property does not exist
    */
   public Object read(T bean, String property) throws NoSuchPropertyException {
-    ReadInfo ri =
-        Check.with(s -> new NoSuchPropertyException(property), property)
-            .is(notNull())
-            .is(keyIn(), readInfo)
-            .ok(readInfo::get);
+    Check.notNull(bean, "bean");
+    Check.notNull(property, "property");
+    Check.with(s -> typeMismatch(this, bean), bean).is(instanceOf(), beanClass);
+    Check.with(s -> noSuchProperty(property), property).is(keyIn(), readInfo);
     try {
-      return Check.notNull(bean, "bean").ok(ri.getter::invoke);
+      return readInfo.get(property).getter.invoke(bean);
     } catch (Throwable t) {
       throw ExceptionMethods.uncheck(t);
     }
+  }
+
+  /**
+   * Returns which type of this {@code BeanReader} can read.
+   *
+   * @return Which type of this {@code BeanReader} can read
+   */
+  public Class<? super T> getBeanClass() {
+    return beanClass;
   }
 }
