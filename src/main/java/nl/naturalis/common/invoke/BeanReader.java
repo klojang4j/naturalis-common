@@ -6,17 +6,18 @@ import java.util.Map;
 import java.util.Set;
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.check.CommonChecks.instanceOf;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
 import static nl.naturalis.common.check.CommonChecks.noneNull;
-import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.invoke.NoSuchPropertyException.*;
-import static nl.naturalis.common.invoke.InvokeException.*;
+import static nl.naturalis.common.invoke.InvokeException.typeMismatch;
+import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 
 /**
- * A bean reader class that uses the {@code java.lang.invoke} package in stead of reflection to read
- * bean properties. Although this class uses {@link MethodHandle} instances to extract values from
- * the bean, it still uses reflection to identify the getter methods on the bean class. Therefore if
- * you use this class within a Java module you must open the module to the naturalis-common module.
+ * Read properties from a predetermined type of Java beans. This class uses the {@code
+ * java.lang.invoke} package in stead of reflection to read bean properties. Although this class
+ * uses {@link MethodHandle} instances to extract values from the bean, it still uses reflection to
+ * identify the getter methods on the bean class. Therefore if you use this class within a Java
+ * module you must open the module to the naturalis-common module.
  *
  * @author Ayco Holleman
  * @param <T> The type of the bean
@@ -38,8 +39,9 @@ public class BeanReader<T> {
 
   /**
    * Creates a {@code BeanReader} for the specified class and the specified properties of that
-   * class. If you intend to use this {@code BeanReader} to repetitively read just one or two
-   * properties from a lot of bean instances, this makes the {@code BeanReader} more efficient.
+   * class. If you intend to use this {@code BeanReader} to repetitively to read just one or two
+   * properties from a lot of bean instances, this makes the {@code BeanReader} more efficient. If
+   * you specify non-existent properties, they will silently be ignored.
    *
    * @param beanClass The bean class
    * @param properties The properties you are interested in
@@ -50,8 +52,9 @@ public class BeanReader<T> {
 
   /**
    * Creates a {@code BeanReader} for the specified class and the specified properties of that
-   * class. If you intend to use this {@code BeanReader} to repetitively read just one or two
-   * properties from a lot of bean instances, this makes the {@code BeanReader} more efficient.
+   * class. If you intend to use this {@code BeanReader} to repetitively to read just one or two
+   * properties from a lot of bean instances, this makes the {@code BeanReader} more efficient. If
+   * you specify non-existent properties, they will silently be ignored.
    *
    * @param beanClass The bean class
    * @param exclude Whether to exclude or include the specified properties
@@ -78,13 +81,13 @@ public class BeanReader<T> {
    * @return Its value
    * @throws NoSuchPropertyException If the specified property does not exist
    */
-  public Object read(T bean, String property) throws NoSuchPropertyException {
+  public <U> U read(T bean, String property) throws NoSuchPropertyException {
     Check.notNull(bean, "bean");
     Check.notNull(property, "property");
     Check.with(s -> typeMismatch(this, bean), bean).is(instanceOf(), beanClass);
-    Check.with(s -> noSuchProperty(property), property).is(keyIn(), readInfo);
+    Check.with(s -> noSuchProperty(bean, property), property).is(keyIn(), readInfo);
     try {
-      return readInfo.get(property).getter.invoke(bean);
+      return (U) readInfo.get(property).getter.invoke(bean);
     } catch (Throwable t) {
       throw ExceptionMethods.uncheck(t);
     }

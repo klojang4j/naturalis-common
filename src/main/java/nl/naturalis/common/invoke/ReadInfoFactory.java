@@ -8,6 +8,8 @@ import nl.naturalis.common.ClassMethods;
 class ReadInfoFactory {
 
   private static final Map<Class<?>, Map<String, ReadInfo>> cache = new HashMap<>();
+  // Might want to make this configurable in the future. Non-strict naming would make any method
+  // that does not return void and has zero parameters a getter.
   private static final Boolean STRICT_NAMING = true;
 
   static final ReadInfoFactory INSTANCE = new ReadInfoFactory();
