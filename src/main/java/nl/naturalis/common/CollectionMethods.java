@@ -3,7 +3,6 @@ package nl.naturalis.common;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ArrayMethods.END_INDEX;
@@ -118,7 +117,7 @@ public class CollectionMethods {
    * Returns {@code collection} if not empty, else the {@code Collection} provided by {@codeimport
    * com.sun.org.apache.xpath.internal.functions.Function;
    *
-   * <p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p>alternative}.
+   * <p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p>alternative}.
    *
    * @param <T>
    * @param <U>
@@ -349,18 +348,37 @@ public class CollectionMethods {
 
   /**
    * Creates a new, modifiable {@code List} of the specified size with all elements initialized to
-   * {@code null}.
+   * specified value (must not be null);
    *
    * @param <E> The type of the elements
    * @param <L> The type of the {@code List}
-   * @param elementType The class of the elements
+   * @param initVal The initial value of the values in the {@code List}
    * @param size The desired size of the {@code List}
    * @return A new, modifiable {@code List} of the specified size with all elements initialized to
-   *     {@code null}
+   *     the specified value
    */
   @SuppressWarnings("unchecked")
-  public static <E, L extends List<? super E>> L initializedList(Class<E> elementType, int size) {
-    E[] array = (E[]) Array.newInstance(elementType, size);
+  public static <E, L extends List<E>> L initializedList(E initVal, int size) {
+    Check.notNull(initVal, "initVal");
+    Check.that(size, "size").is(gte(), 0);
+    E[] array = (E[]) Array.newInstance(initVal.getClass(), size);
+    return (L) new ArrayList<E>(List.of(array));
+  }
+
+  /**
+   * Creates a new, modifiable {@code List} of the specified size with all elements initialized to
+   * null.
+   *
+   * @param <E> The type of the elements
+   * @param <L> The type of the {@code List}
+   * @param clazz The class of the elements
+   * @param size The desired size of the {@code List}
+   * @return A new, modifiable {@code List} of the specified size with all elements initialized to
+   *     null.
+   */
+  @SuppressWarnings("unchecked")
+  public static <E, L extends List<E>> L initializedList(Class<E> clazz, int size) {
+    E[] array = (E[]) Array.newInstance(clazz, size);
     return (L) new ArrayList<E>(List.of(array));
   }
 
@@ -370,27 +388,16 @@ public class CollectionMethods {
    *
    * @param <E> The type of the elements
    * @param <L> The type of the {@code List}
-   * @param elementType The class of the elements
-   * @param initValue the value to initialze the list elements to
+   * @param clazz The class of the elements
+   * @param initValue The initial value of the values in the {@code List}
    * @param size The desired size of the {@code List}
    * @return A new, modifiable {@code List} of the specified size with all elements initialized to
    *     the specified value.
    */
   @SuppressWarnings("unchecked")
-  public static <E, L extends List<? super E>> L initializedList(
-      Class<E> elementType, int size, E initVal) {
-    E[] array = (E[]) Array.newInstance(elementType, size);
+  public static <E, L extends List<E>> L initializedList(Class<E> clazz, int size, E initVal) {
+    E[] array = (E[]) Array.newInstance(clazz, size);
     Arrays.fill(array, initVal);
     return (L) new ArrayList<E>(List.of(array));
-  }
-
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  public static <E, L extends List<? super E>> L initializedList(
-      Supplier<E> elementFactory, int size) {
-    ArrayList list = new ArrayList(size);
-    for (int i = 0; i < size; ++i) {
-      list.set(i, elementFactory.get());
-    }
-    return (L) list;
   }
 }

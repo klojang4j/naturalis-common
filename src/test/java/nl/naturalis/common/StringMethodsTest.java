@@ -259,4 +259,25 @@ public class StringMethodsTest {
     assertEquals("05", ".......|", pad(null, 7, '.', "|"));
     assertEquals("06", "hello|", pad("hello", 0, '.', "|"));
   }
+
+  @Test
+  public void substrFromAfter() {
+    String input = "/home/john/tmp/test.html";
+    assertEquals("01", "home/john/tmp/test.html", substrAfter(input, '/'));
+    assertEquals("02", "home/john/tmp/test.html", substrAfter(input, "/"));
+    assertEquals("03", "john/tmp/test.html", substrFrom(input, 'j'));
+    assertEquals("04", "john/tmp/test.html", substrFrom(input, "john"));
+    assertEquals("05", "ohn/tmp/test.html", substrAfter(input, 'j'));
+    assertEquals("06", "/tmp/test.html", substrAfter(input, "john"));
+    assertEquals("07", "l", substrFrom(input, 'l'));
+    assertEquals("08", "html", substrFrom(input, "html"));
+    assertEquals("09", "", substrAfter(input, 'l'));
+    assertEquals("10", "", substrAfter(input, "html"));
+    assertEquals("11", input, substrAfter(input, 'x'));
+    assertEquals("12", input, substrAfter(input, "x"));
+    assertEquals("13", "test.html", substrAfter(input, '/', true));
+    assertEquals("14", "test.html", substrAfter(input, "/", true));
+    assertEquals("15", "/test.html", substrFrom(input, '/', true));
+    assertEquals("16", "/test.html", substrFrom(input, "/te", true));
+  }
 }

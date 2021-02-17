@@ -722,62 +722,171 @@ public final class StringMethods {
   }
 
   /**
-   * Returns the substring up to the last occurrence of the specified character sequence, or the
-   * entire string if it does not contain that character sequence.
+   * Returns everything from (and including) the first occurrence of the specified character
+   * sequence, or the entire string if it does not contain that character sequence.
    *
-   * @param subject The string to take a substring from
-   * @param to The character sequence up until which to take the substring
+   * @param str The string to take a substring from
+   * @param to The character sequence from which to take the substring
    * @return The substring
    */
-  public static String substringUpTo(Object subject, String to) {
-    return substringUpTo(subject, to, false);
+  public static String substrFrom(String str, String from) {
+    return substrFrom(str, from, false);
   }
 
   /**
-   * Returns the substring up to the first or last occurrence of the specified character sequence,
-   * or the entire string if it does not contain that character sequence.
+   * Returns everything from (and including) the first or last occurrence of the specified character
+   * sequence, or the entire string if it does not contain that character sequence.
    *
-   * @param subject The string to take a substring from
-   * @param to The character sequence up to which to take the substring
-   * @param firstOccurrence Whether to use the first of last occurrence of {@code to}
+   * @param str The string to take a substring from
+   * @param to The character sequence from which to take the substring
+   * @param last Whether to use the first of last occurrence of {@code from}
    * @return The substring
    */
-  public static String substringUpTo(Object subject, String to, boolean firstOccurrence) {
-    if (subject == null) {
-      return EMPTY;
-    }
-    String str = subject.toString();
-    int i = firstOccurrence ? str.indexOf(to) : str.lastIndexOf(to);
+  public static String substrFrom(String str, String from, boolean last) {
+    Check.notNull(str, "str");
+    Check.that(from, "from").is(notEmpty());
+    int i = last ? str.lastIndexOf(from) : str.indexOf(from);
+    return i == -1 ? str : str.substring(i);
+  }
+
+  /**
+   * Returns everything from (and including) the first occurrence of the specified character, or the
+   * entire string if it does not contain that character.
+   *
+   * @param str The string to take a substring from
+   * @param from The character up to which to take the substring
+   * @param last Whether to use the first of last occurrence of {@code to}
+   * @return The substring
+   */
+  public static String substrFrom(String str, char from) {
+    return substrFrom(str, from, false);
+  }
+
+  /**
+   * Returns everything from (and including) the first or last occurrence of the specified
+   * character, or the entire string if it does not contain that character.
+   *
+   * @param str The string to take a substring from
+   * @param from The character up to which to take the substring
+   * @param last Whether to use the first of last occurrence of {@code to}
+   * @return The substring
+   */
+  public static String substrFrom(String str, char from, boolean last) {
+    Check.notNull(str, "str");
+    int i = last ? str.lastIndexOf(from) : str.indexOf(from);
+    return i == -1 ? str : str.substring(i);
+  }
+
+  /**
+   * Returns everything after (and not including) the first occurrence of the specified character
+   * sequence, or the entire string if it does not contain that character sequence.
+   *
+   * @param str The string to take a substring from
+   * @param to The character sequence after which to take the substring
+   * @return The substring
+   */
+  public static String substrAfter(String str, String after) {
+    return substrAfter(str, after, false);
+  }
+
+  /**
+   * Returns everything from (and not including) the first or last occurrence of the specified
+   * character sequence, or the entire string if it does not contain that character sequence.
+   *
+   * @param str The string to take a substring from
+   * @param to The character sequence after which to take the substring (must not be null or empty)
+   * @param last Whether to use the first of last occurrence of {@code after}
+   * @return The substring
+   */
+  public static String substrAfter(String str, String after, boolean last) {
+    Check.notNull(str, "str");
+    Check.that(after, "from").is(notEmpty());
+    int i = last ? str.lastIndexOf(after) : str.indexOf(after);
+    int j = after.length();
+    return i + j == str.length() ? EMPTY : i == -1 ? str : str.substring(i + j);
+  }
+
+  /**
+   * Returns everything from (and not including) the first occurrence of the specified character, or
+   * the entire string if it does not contain that character.
+   *
+   * @param str The string to take a substring from
+   * @param after The character after which to take the substring
+   * @param last Whether to use the first of last occurrence of {@code after}
+   * @return The substring
+   */
+  public static String substrAfter(String str, char after) {
+    return substrAfter(str, after, false);
+  }
+
+  /**
+   * Returns everything after (and not including) the first or last occurrence of the specified
+   * character, or the entire string if it does not contain that character.
+   *
+   * @param str The string to take a substring from
+   * @param after The character after which to take the substring
+   * @param last Whether to use the first of last occurrence of {@code after}
+   * @return The substring
+   */
+  public static String substrAfter(String str, char after, boolean last) {
+    Check.notNull(str, "str");
+    int i = last ? str.lastIndexOf(after) : str.indexOf(after);
+    return i == str.length() - 1 ? EMPTY : i == -1 ? str : str.substring(i + 1);
+  }
+
+  /**
+   * Returns the substring up to the first occurrence of the specified character, or the entire
+   * string if it does not contain that character.
+   *
+   * @param str The string to take a substring from
+   * @param to The character sequence up to which to take the substring
+   * @return The substring
+   */
+  public static String substrTo(String str, String to) {
+    return substrTo(str, to, false);
+  }
+
+  /**
+   * Returns the substring up to the first or last occurrence of the specified character, or the
+   * entire string if it does not contain that character.
+   *
+   * @param str The string to take a substring from
+   * @param to The character sequence up to which to take the substring
+   * @param last Whether to use the first of last occurrence of {@code to}
+   * @return The substring
+   */
+  public static String substrTo(String str, String to, boolean last) {
+    Check.notNull(str, "str");
+    Check.that(to, "to").is(notEmpty());
+    int i = last ? str.lastIndexOf(to) : str.indexOf(to);
     return i == -1 ? str : str.substring(0, i);
   }
 
   /**
-   * Returns everything up to the first or last occurrence of the specified character, or the entire
-   * string if it does not contain that character.
+   * Returns everything up to (and not including) the firstoccurrence of the specified character
+   * within the string, or the entire string if it does not contain that character.
    *
-   * @param subject The string to take a substring from
+   * @param str The string to take a substring from
    * @param to The character up to which to take the substring
+   * @param last Whether to use the first of last occurrence of {@code to}
    * @return The substring
    */
-  public static String substringUpTo(Object subject, char to) {
-    return substringUpTo(subject, to, false);
+  public static String substrTo(String str, char to) {
+    return substrTo(str, to, false);
   }
 
   /**
-   * Returns everything up to the first or last occurrence of the specified character within the
-   * string, or the entire string if it does not contain that character.
+   * Returns everything up to (and not including) the first or last occurrence of the specified
+   * character within the string, or the entire string if it does not contain that character.
    *
-   * @param subject The string to take a substring from
+   * @param str The string to take a substring from
    * @param to The character up to which to take the substring
-   * @param firstOccurrence Whether to use the first of last occurrence of {@code to}
+   * @param last Whether to use the first of last occurrence of {@code to}
    * @return The substring
    */
-  public static String substringUpTo(Object subject, char to, boolean firstOccurrence) {
-    if (subject == null) {
-      return EMPTY;
-    }
-    String str = subject.toString();
-    int i = firstOccurrence ? str.indexOf(to) : str.lastIndexOf(to);
+  public static String substrTo(String str, char to, boolean last) {
+    Check.notNull(str, "str");
+    int i = last ? str.lastIndexOf(to) : str.indexOf(to);
     return i == -1 ? str : str.substring(0, i);
   }
 }
