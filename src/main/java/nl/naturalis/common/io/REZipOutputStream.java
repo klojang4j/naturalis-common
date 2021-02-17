@@ -229,7 +229,7 @@ public class REZipOutputStream extends OutputStream {
       this.active = this.mainOut;
     } else {
       this.active =
-          Check.with(IOException::new, sideEntries.get(name))
+          Check.on(IOException::new, sideEntries.get(name))
               .is(notNull(), NO_SUCH_ENTRY, name)
               .ok(Tuple::getRight);
     }

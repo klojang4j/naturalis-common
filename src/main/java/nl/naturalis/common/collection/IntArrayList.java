@@ -113,13 +113,13 @@ public class IntArrayList implements IntList {
 
   @Override
   public int get(int index) {
-    Check.with(ArrayIndexOutOfBoundsException::new, index).is(gte(), 0).is(lt(), buf.length);
+    Check.on(ArrayIndexOutOfBoundsException::new, index).is(gte(), 0).is(lt(), buf.length);
     return buf[index];
   }
 
   @Override
   public void set(int index, int value) {
-    Check.with(ArrayIndexOutOfBoundsException::new, index).is(gte(), 0).is(lt(), buf.length);
+    Check.on(ArrayIndexOutOfBoundsException::new, index).is(gte(), 0).is(lt(), buf.length);
     buf[index] = value;
   }
 

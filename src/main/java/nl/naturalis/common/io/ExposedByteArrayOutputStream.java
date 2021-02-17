@@ -198,7 +198,7 @@ public class ExposedByteArrayOutputStream extends OutputStream {
         newSize = Math.max(buf.length + minIncrease, buf.length * ((100 + (int) ib) / 100));
         break;
     }
-    Check.with(s -> new BufferOverflowException(), newSize).is(atMost(), Integer.MAX_VALUE);
+    Check.on(s -> new BufferOverflowException(), newSize).is(atMost(), Integer.MAX_VALUE);
     byte[] newBuf = new byte[(int) newSize];
     System.arraycopy(buf, 0, newBuf, 0, cnt);
     buf = newBuf;

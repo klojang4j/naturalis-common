@@ -62,7 +62,7 @@ public final class UnmodifiableIntList implements IntList {
 
   @Override
   public int get(int index) {
-    Check.with(ArrayIndexOutOfBoundsException::new, index).is(gte(), 0).is(lt(), buf.length);
+    Check.on(ArrayIndexOutOfBoundsException::new, index).is(gte(), 0).is(lt(), buf.length);
     return buf[index];
   }
 

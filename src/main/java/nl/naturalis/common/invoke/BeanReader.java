@@ -84,8 +84,8 @@ public class BeanReader<T> {
   public <U> U read(T bean, String property) throws NoSuchPropertyException {
     Check.notNull(bean, "bean");
     Check.notNull(property, "property");
-    Check.with(s -> typeMismatch(this, bean), bean).is(instanceOf(), beanClass);
-    Check.with(s -> noSuchProperty(bean, property), property).is(keyIn(), readInfo);
+    Check.on(s -> typeMismatch(this, bean), bean).is(instanceOf(), beanClass);
+    Check.on(s -> noSuchProperty(bean, property), property).is(keyIn(), readInfo);
     try {
       return (U) readInfo.get(property).getter.invoke(bean);
     } catch (Throwable t) {

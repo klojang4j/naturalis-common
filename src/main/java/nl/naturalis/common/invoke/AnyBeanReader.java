@@ -43,7 +43,7 @@ public class AnyBeanReader {
       mruClass = clazz;
       mruInfo = ReadInfoFactory.INSTANCE.getReadInfo(clazz);
     }
-    Check.with(s -> noSuchProperty(bean, property), property).is(keyIn(), mruInfo);
+    Check.on(s -> noSuchProperty(bean, property), property).is(keyIn(), mruInfo);
     try {
       return (U) mruInfo.get(property).getter.invoke(bean);
     } catch (Throwable t) {

@@ -23,12 +23,12 @@ public class CheckTest {
 
   @Test(expected = IOException.class)
   public void that01() throws IOException {
-    Check.with(IOException::new, 3 > 5).is(yes());
+    Check.on(IOException::new, 3 > 5).is(yes());
   }
 
   @Test(expected = IOException.class)
   public void that02() throws IOException {
-    Check.with(IOException::new, 5 > 3).is(no());
+    Check.on(IOException::new, 5 > 3).is(no());
   }
 
   @Test
@@ -296,7 +296,7 @@ public class CheckTest {
   @Test(expected = IllegalStateException.class)
   public void strlen02() {
     String s = "Hello, world!";
-    Check.with(IllegalStateException::new, s).has(strlen(), lt(), 2);
+    Check.on(IllegalStateException::new, s).has(strlen(), lt(), 2);
   }
 
   @Test

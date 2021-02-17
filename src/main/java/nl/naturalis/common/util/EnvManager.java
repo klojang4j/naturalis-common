@@ -282,7 +282,7 @@ public class EnvManager {
   }
 
   private Check<String, InvalidEnvironmentException> check(String name) {
-    return Check.with(s -> missingEnvVar(name), getenv(name));
+    return Check.on(s -> missingEnvVar(name), getenv(name));
   }
 
   private String getenv(String name) {

@@ -140,7 +140,7 @@ public class ArraySwapOutputStream extends SwapOutputStream {
   /** See {@link SwapOutputStream#recall(OutputStream)}. */
   public void recall(OutputStream target) throws IOException {
     Check.notNull(target);
-    Check.with(IOException::new, recalled).is(no(), "Data already recalled");
+    Check.on(IOException::new, recalled).is(no(), "Data already recalled");
     prepareRecall();
     OutputStream wrapped = wrap(target);
     if (swapped) {

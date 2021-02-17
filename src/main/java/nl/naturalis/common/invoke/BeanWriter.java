@@ -73,7 +73,7 @@ public class BeanWriter<T> {
    */
   public void set(T bean, String property, Object value) throws Throwable {
     WriteInfo wi =
-        Check.with(s -> new NoSuchPropertyException(property), property)
+        Check.on(s -> new NoSuchPropertyException(property), property)
             .is(notNull())
             .is(keyIn(), writeInfo)
             .ok(writeInfo::get);

@@ -168,7 +168,7 @@ public class NioSwapOutputStream extends SwapOutputStream {
   /** See {@link SwapOutputStream#recall(OutputStream)}. */
   public void recall(OutputStream target) throws IOException {
     Check.notNull(target);
-    Check.with(IOException::new, recalled).is(no(), "Data already recalled");
+    Check.on(IOException::new, recalled).is(no(), "Data already recalled");
     prepareRecall();
     OutputStream wrapped = wrap(target);
     if (swapped) {
@@ -214,7 +214,7 @@ public class NioSwapOutputStream extends SwapOutputStream {
   // Empties the contents of the buffer into the swap file
   private void sendToSwapFile() throws IOException {
     if (chan == null) {
-      Check.with(IOException::new, swapFile).is(fileNotExists());
+      Check.on(IOException::new, swapFile).is(fileNotExists());
       chan = FileChannel.open(swapFile.toPath(), CREATE_NEW, WRITE);
       swapped = true;
     }

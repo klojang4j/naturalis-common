@@ -10,9 +10,7 @@ import nl.naturalis.common.check.Check;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
 import static java.util.function.Predicate.not;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.lt;
-import static nl.naturalis.common.check.CommonChecks.lte;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * Specifies a path to a value within an object. Path segments are spearated by '.' (dot). For
@@ -245,7 +243,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    * @return
    */
   public Path shift() {
-    Check.state(elems.length != 0, "cannot shift on empty path");
+    Check.on(illegalState(), elems.length).is(ne(), 0, "cannot shift on empty path");
     if (elems.length == 1) {
       return EMPTY_PATH;
     }
