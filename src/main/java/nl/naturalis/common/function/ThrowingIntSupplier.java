@@ -7,7 +7,6 @@ import java.util.function.IntSupplier;
  * throw a checked exception.
  *
  * @author Ayco Holleman
- * @param <T> The type of the return value
  * @param <E> The type of the exception potentially being thrown
  */
 @FunctionalInterface

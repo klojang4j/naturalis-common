@@ -8,9 +8,7 @@ import static nl.naturalis.common.check.CommonGetters.formatGetterName;
 import static nl.naturalis.common.check.Messages.createMessage;
 
 /**
- * Facilitates precondition checking. Validation of arguments happens by means of an instance of the
- * {@code Check} class. You obtain an instance through one of the static factory methods. For
- * example:
+ * Facilitates precondition checking. For example:
  *
  * <p>
  *
@@ -20,7 +18,7 @@ import static nl.naturalis.common.check.Messages.createMessage;
  *
  * <h4>Common checks</h4>
  *
- * <p>The {@link CommonChecks} class provides a grab bag of common checks for arguments. These are
+ * The {@link CommonChecks} class provides a grab bag of common checks for arguments. These are
  * already associated with short, informative error messages, so you don't have to invent them
  * yourself. For example:
  *
@@ -28,15 +26,13 @@ import static nl.naturalis.common.check.Messages.createMessage;
  *
  * <pre>
  * Check.that(numChairs, "numChairs").is(gt(), 0);
- * // Error message: "numChairs must be > 0 (was -3)"
+ * // Auto-generated error message: "numChairs must be > 0 (was -3)"
  * </pre>
  *
  * <h4>Checking argument properties</h4>
  *
- * <p>A {@code Check} object lets you check not just arguments but also argument properties. For
+ * A {@code Check} object lets you check not just arguments but also argument properties. For
  * example:
- *
- * <p>
  *
  * <pre>
  * Check.notNull(name, "name").has(String::length, "length", gte(), 10);
@@ -49,20 +45,19 @@ import static nl.naturalis.common.check.Messages.createMessage;
  *
  * <pre>
  * Check.notNull(employees, "emps").has(size(), gte(), 100);
- * // Error message: "emps.size() must be >= 100 (was 42)"
+ * // Auto-generated error message: "emps.size() must be >= 100 (was 42)"
  * </pre>
  *
  * <h4>Lambdas</h4>
  *
- * <p>Checks are done via the various {@code is(...)} and {@code has(...)} methods. These methods
- * are overloaded to take either a {@link Predicate} or an {@link IntPredicate}. This is not a
- * problem when passing them a method reference or a check from the {@code CommonChecks} class. When
- * passing a lambda, however, the compiler will be unable to decide whether it is dealing with a
- * {@code Predicate} or an {@code IntPredicate} - an unfortunate side effect of the combination of
- * type erasure and auto-boxing. This will result in a compiler error like:
- *
- * <p><i>The method is(Predicate&lt;String&gt;) is ambigious for the type Check&lt;String,
- * IllegalArgumentException&gt;</i>
+ * Checks are done via the various {@code is(...)} and {@code has(...)} methods. These methods are
+ * overloaded to take either a {@link Predicate} or an {@link IntPredicate}. This is not a problem
+ * when passing them a method reference or a check from the {@code CommonChecks} class. When passing
+ * a lambda, however, the compiler will be unable to decide whether it is dealing with a {@code
+ * Predicate} or an {@code IntPredicate} - an unfortunate side effect of the combination of type
+ * erasure and auto-boxing. This will result in a compiler error like <i>The method
+ * is(Predicate&lt;String&gt;) is ambigious for the type Check&lt;String,
+ * IllegalArgumentException&gt;</i>:
  *
  * <p>
  *
@@ -72,8 +67,6 @@ import static nl.naturalis.common.check.Messages.createMessage;
  * </pre>
  *
  * <p>To resolve this, simply specify the type of the lambda parameter:
- *
- * <p>
  *
  * <pre>
  * Check.that(fullName).is((String s) -> s.charAt(0) == 'A');
@@ -87,9 +80,7 @@ import static nl.naturalis.common.check.Messages.createMessage;
  * Check.that(numChairs).is(asObj(x -> x <= 10)); // Predicate&lt;Integer&gt;
  * </pre>
  *
- * <p>Or, as another alternative, every {@code Predicate} can be rewritten as a {@link Relation}:
- *
- * <p>
+ * <p>Or, as another alternative, every {@code Predicate} can also be written as a {@link Relation}:
  *
  * <pre>
  * Check.that(fullName).has(s -> s.charAt(0), eq(), 'A');
@@ -97,7 +88,7 @@ import static nl.naturalis.common.check.Messages.createMessage;
  *
  * <h4>Changing the Exception type</h4>
  *
- * <p>By default an {@code IllegalArgumentException} is thrown if an argument fails to pass a test.
+ * By default an {@code IllegalArgumentException} is thrown if an argument fails to pass a test.
  * This can be customized through the static factory methods. For example:
  *
  * <p>
@@ -327,78 +318,85 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Static factory method. See {@link #catching(Function, ThrowingIntSupplier, String)} for a full
-   * description.
+   * Static factory method. See {@link #catching(Function, Object, ThrowingFunction, String)} for a
+   * full description.
    *
-   * @param argTransformer The supplier of the value to be checked
+   * @param <U> The type of the argument
+   * @param arg The argument
+   * @param argTransformer A function that takes the argument and transforms it into an {@code int}
+   *     value that you want to test and work with
    * @return A new {@code Check} object
+   * @throws X If the converted argument fails to pass a test, or if the argument conversion fails
    */
-  public static Check<Integer, IllegalArgumentException> catching(
-      ThrowingIntSupplier<?> argTransformer) {
-    return catching(argTransformer, DEF_ARG_NAME);
+  public static <U> Check<Integer, IllegalArgumentException> catching(
+      U arg, ThrowingToIntFunction<U, ?> argTransformer) {
+    return catching(arg, argTransformer, DEF_ARG_NAME);
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object for the integer value supplied by the
-   * specified {@code ThrowingSupplier} <i>if</i> no exception was thrown while supplying the value.
-   * Otherwise an {@code IllegalArgumentException} is thrown with the message of the exception
-   * thrown while supplying the value.
+   * Static factory method. See {@link #catching(Function, Object, ThrowingFunction, String)} for a
+   * full description.
    *
-   * @param argTransformer A {@code ThrowingFunction} that converts the argument into an instance of
-   *     {@code V}.
+   * @param <U> The type of the argument
+   * @param arg The argument
+   * @param argTransformer A function that takes the argument and transforms it into an {@code int}
+   *     value that you want to test and work with
    * @param argName The argument name
    * @return A new {@code Check} object
-   * @throws X If the converted argument fails to pass a test, or if the conversion itself failed
+   * @throws X If the converted argument fails to pass a test, or if the argument conversion fails
    */
-  public static Check<Integer, IllegalArgumentException> catching(
-      ThrowingIntSupplier<?> argTransformer, String argName) {
-    return catching(IllegalArgumentException::new, argTransformer, argName);
+  public static <U> Check<Integer, IllegalArgumentException> catching(
+      U arg, ThrowingToIntFunction<U, ?> argTransformer, String argName) {
+    return catching(DEF_EXC_FACTORY, arg, argTransformer, argName);
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object for the integer value supplied by the
-   * specified {@code ThrowingSupplier} <i>if</i> no exception was thrown while supplying the value.
-   * Otherwise an {@code Exception} of type {@code X} is thrown with the message of the exception
-   * thrown while supplying the value.
+   * Static factory method. See {@link #catching(Function, Object, ThrowingFunction, String)} for a
+   * full description.
    *
+   * @param <U> The type of the argument
    * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test, or if the
    *     argument conversion fails
    * @param excFactory A {@code Function} that will produce the exception if a test fails, or if the
    *     argument conversion fails. The {@code Function} will be passed a {@code String} (the error
    *     message) and must return the {@code Exception} to be thrown.
-   * @param argTransformer A {@code ThrowingFunction} that converts the argument into an instance of
-   *     {@code V}.
+   * @param arg The argument
+   * @param argTransformer A function that takes the argument and transforms it into an {@code int}
+   *     value that you want to test and work with
    * @return A new {@code Check} object
-   * @throws X If the converted argument fails to pass a test, or if the conversion itself failed
+   * @throws X If the converted argument fails to pass a test, or if the argument conversion fails
    */
-  public static <X extends Exception> Check<Integer, X> catching(
-      Function<String, X> excFactory, ThrowingIntSupplier<?> argTransformer) throws X {
-    return catching(excFactory, argTransformer, DEF_ARG_NAME);
+  public static <U, X extends Exception> Check<Integer, X> catching(
+      Function<String, X> excFactory, U arg, ThrowingToIntFunction<U, ?> argTransformer) throws X {
+    return catching(excFactory, arg, argTransformer, DEF_ARG_NAME);
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object for the integer value supplied by the
-   * specified {@code ThrowingSupplier} <i>if</i> no exception was thrown while supplying the value.
-   * Otherwise an {@code IllegalArgumentException} is thrown with the message of exception while
-   * supplying the value.
+   * Static factory method. See {@link #catching(Function, Object, ThrowingFunction, String)} for a
+   * full description.
    *
+   * @param <U> The type of the argument
    * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test, or if the
    *     argument conversion fails
    * @param excFactory A {@code Function} that will produce the exception if a test fails, or if the
    *     argument conversion fails. The {@code Function} will be passed a {@code String} (the error
    *     message) and must return the {@code Exception} to be thrown.
-   * @param argTransformer A {@code ThrowingFunction} that converts the argument into an instance of
-   *     {@code V}.
+   * @param arg The argument
+   * @param argTransformer A function that takes the argument and transforms it into an {@code int}
+   *     value that you want to test and work with
    * @param argName The argument name
    * @return A new {@code Check} object
-   * @throws X If the converted argument fails to pass a test, or if the conversion itself failed
+   * @throws X If the converted argument fails to pass a test, or if the argument conversion fails
    */
   @SuppressWarnings("unchecked")
-  public static <X extends Exception> Check<Integer, X> catching(
-      Function<String, X> excFactory, ThrowingIntSupplier<?> argTransformer, String argName)
+  public static <U, X extends Exception> Check<Integer, X> catching(
+      Function<String, X> excFactory,
+      U arg,
+      ThrowingToIntFunction<U, ?> argTransformer,
+      String argName)
       throws X {
     try {
-      return new IntCheck<>(argTransformer.get(), argName, excFactory);
+      return new IntCheck<>(argTransformer.apply(arg), argName, excFactory);
     } catch (Throwable t) {
       try {
         throw (X) t;
@@ -409,98 +407,110 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object for the value supplied by the
-   * specified {@code ThrowingSupplier} <i>if</i> no exception was thrown while supplying the value.
-   * Otherwise an {@code IllegalArgumentException} is thrown with the message of exception while
-   * supplying the value. For example:
+   * Static factory method. See {@link #catching(Function, Object, ThrowingFunction, String)} for a
+   * full description.
    *
-   * <p>
-   *
-   * <pre>
-   * // May throw FileNotFoundException, which will be converted to an IllegalArgumentException
-   * String contents = Check.catching(()-> new FileInputStream("/some/path").ok(IOMethods::toString);
-   * </pre>
-   *
-   * @param <U> The type of the argument (more likely: the type of the converted argument)
-   * @param argTransformer The supplier of the value to be checked
+   * @param <U> The type of the argument
+   * @param <V> The type of the converted argument
+   * @param arg The argument
+   * @param argTransformer A function that takes the argument and transforms it into the value that
+   *     you want to test and work with
    * @return A new {@code Check} object
+   * @throws X If the converted argument fails to pass a test, or if the argument conversion fails
    */
-  public static <U> Check<U, IllegalArgumentException> catching(
-      ThrowingSupplier<U, ?> argTransformer) {
-    return catching(argTransformer, DEF_ARG_NAME);
+  public static <U, V> Check<V, IllegalArgumentException> catching(
+      U arg, ThrowingFunction<U, V, ?> argTransformer) {
+    return catching(arg, argTransformer, DEF_ARG_NAME);
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object for the value supplied by the
-   * specified {@code ThrowingSupplier} <i>if</i> no exception was thrown while supplying the value.
-   * Otherwise an {@code IllegalArgumentException} is thrown with the message of exception while
-   * supplying the value.
+   * Static factory method. See {@link #catching(Function, Object, ThrowingFunction, String)} for a
+   * full description.
    *
-   * @param <U> The type of the value to be tested
-   * @param argTransformer A {@code ThrowingFunction} that converts the argument into an instance of
-   *     {@code V}.
+   * @param <U> The type of the argument
+   * @param <V> The type of the converted argument
+   * @param arg The argument
+   * @param argTransformer A function that takes the argument and transforms it into the value that
+   *     you want to test and work with
    * @param argName The argument name
    * @return A new {@code Check} object
-   * @throws X If the converted argument fails to pass a test, or if the conversion itself failed
+   * @throws X If the converted argument fails to pass a test, or if the argument conversion fails
    */
-  public static <U> Check<U, IllegalArgumentException> catching(
-      ThrowingSupplier<U, ?> argTransformer, String argName) {
-    return catching(IllegalArgumentException::new, argTransformer, argName);
+  public static <U, V> Check<V, IllegalArgumentException> catching(
+      U arg, ThrowingFunction<U, V, ?> argTransformer, String argName) {
+    return catching(DEF_EXC_FACTORY, arg, argTransformer, argName);
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object for the value supplied by the
-   * specified {@code ThrowingSupplier} <i>if</i> no exception was thrown while supplying the value.
-   * Otherwise an {@code IllegalArgumentException} is thrown with the message of exception while
-   * supplying the value.
+   * Static factory method. See {@link #catching(Function, Object, ThrowingFunction, String)} for a
+   * full description.
    *
-   * @param <U> The type of the value to be tested
+   * @param <U> The type of the argument
+   * @param <V> The type of the converted argument
    * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test, or if the
    *     argument conversion fails
    * @param excFactory A {@code Function} that will produce the exception if a test fails, or if the
    *     argument conversion fails. The {@code Function} will be passed a {@code String} (the error
    *     message) and must return the {@code Exception} to be thrown.
-   * @param argTransformer A {@code ThrowingFunction} that converts the argument into an instance of
-   *     {@code V}.
+   * @param arg The argument
+   * @param argTransformer A function that takes the argument and transforms it into the value that
+   *     you want to test and work with
    * @return A new {@code Check} object
-   * @throws X If the converted argument fails to pass a test, or if the conversion itself failed
+   * @throws X If the converted argument fails to pass a test, or if the argument conversion fails
    */
-  public static <U, X extends Exception> Check<U, X> catching(
-      Function<String, X> excFactory, ThrowingSupplier<U, ?> argTransformer) throws X {
-    return catching(excFactory, argTransformer, DEF_ARG_NAME);
+  public static <U, V, X extends Exception> Check<V, X> catching(
+      Function<String, X> excFactory, U arg, ThrowingFunction<U, V, ?> argTransformer) throws X {
+    return catching(excFactory, arg, argTransformer, DEF_ARG_NAME);
   }
 
   /**
    * Static factory method. The {@code catching(...)} factory methods are different from the other
-   * factory methods in that you don't provide the argument itself, but rather some transformation
-   * on it. The transformation is opaque to the returned {@code Check} object. Hence the {@code
-   * argTransformer} argument is a {@link Supplier} rather than a {@link Function} (a {@link
-   * ThrowingSupplier} to be precise). If the transformed value is successfully supplied by the
-   * supplier, you get back a regular {@code Check} object that you can use to do additional checks
-   * on the transformed value. (If it is the transformation itself that you care about, you can also
-   * just call {@link #ok() ok()} immediately.) If the supplier {@link ThrowingSupplier#get() get()}
-   * method throws an exception, the exception message is passed on to the same exception factory
-   * that is also used for regular checks on the {@code Check} object (thus, in effect, converting
-   * the original exception to an exception of your choosing).
+   * factory methods in that the returned {@code Check} object works on some transformation on the
+   * argument, rather than the argument itself. If the transformation is successful, you get back a
+   * regular {@code Check} object that you can use to do additional checks on the <i>transformed</i>
+   * value (not the original argument). If it is the transformation itself that you care about, you
+   * can also simply call {@link #ok() ok()} immediately. If the transformation function throws an
+   * exception, the exception message is passed on to the same exception factory that is also used
+   * for regular checks on the {@code Check} object (thus, in effect, converting the original
+   * exception to an exception of your choosing).
    *
-   * @param <U> The type of the value to be tested
+   * <p>
+   *
+   * <p><b>Examples</b>
+   *
+   * <p>
+   *
+   * <pre>
+   * int i = Check.catching(System.getEnv("THREAD_COUNT"), Integer::valueOf).ok();
+   * int i = Check.catching(System.getEnv("THREAD_COUNT", Integer::valueOf)
+   *    .is(gt(), 0)
+   *    .is(lte(), 4)
+   *    .ok();
+   * </pre>
+   *
+   * @param <U> The type of the argument
+   * @param <V> The type of the converted argument
    * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test, or if the
    *     argument conversion fails
    * @param excFactory A {@code Function} that will produce the exception if a test fails, or if the
    *     argument conversion fails. The {@code Function} will be passed a {@code String} (the error
    *     message) and must return the {@code Exception} to be thrown.
-   * @param argTransformer A {@code ThrowingFunction} that converts the argument into an instance of
-   *     {@code V}.
+   * @param arg The argument
+   * @param argTransformer A function that takes the argument and transforms it into the value that
+   *     you want to test and work with
    * @param argName The argument name
    * @return A new {@code Check} object
-   * @throws X If the converted argument fails to pass a test, or if the conversion itself failed
+   * @throws X If the converted argument fails to pass a test, or if the argument conversion fails
    */
   @SuppressWarnings("unchecked")
-  public static <U, X extends Exception> Check<U, X> catching(
-      Function<String, X> excFactory, ThrowingSupplier<U, ?> argTransformer, String argName)
+  public static <U, V, X extends Exception> Check<V, X> catching(
+      Function<String, X> excFactory,
+      U arg,
+      ThrowingFunction<U, V, ?> argTransformer,
+      String argName)
       throws X {
     try {
-      return new ObjectCheck<>(argTransformer.get(), argName, excFactory);
+      return new ObjectCheck<>(argTransformer.apply(arg), argName, excFactory);
     } catch (Throwable t) {
       try {
         throw (X) t;

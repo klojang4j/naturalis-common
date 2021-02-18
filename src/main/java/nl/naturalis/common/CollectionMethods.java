@@ -114,34 +114,53 @@ public class CollectionMethods {
   }
 
   /**
-   * Returns {@code collection} if not empty, else the {@code Collection} provided by {@codeimport
-   * com.sun.org.apache.xpath.internal.functions.Function;
+   * PHP-style implode method, concatenating the collection elements with &#34;, &#34; as separator
+   * string.
    *
-   * <p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p><p>alternative}.
-   *
-   * @param <T>
-   * @param <U>
-   * @param collection
-   * @param alternative
-   * @return
+   * @param collection The collection to implode
+   * @return A concatenation of the elements in the collection.
    */
-  public static <T, U extends Collection<T>> U ifEmpty(U collection, U alternative) {
-    return ObjectMethods.isEmpty(collection) ? alternative : collection;
-  }
-
   public static String implode(Collection<?> collection) {
     return implode(collection, ", ");
   }
 
+  /**
+   * PHP-style implode method, concatenating the collection elements using the specified separator
+   * string.
+   *
+   * @param collection The collection to implode
+   * @param separator The separator string
+   * @return A concatenation of the elements in the collection.
+   */
   public static String implode(Collection<?> collection, String separator) {
     return collection.stream().map(Objects::toString).collect(Collectors.joining(separator));
   }
 
+  /**
+   * Shortcut for the ubiquitous <code>
+   * list.stream().collect(Collectors.toMap(keyExtractor, Function.identity()))</code>.
+   *
+   * @param <K> The type of the keys
+   * @param <V> The type of the values and the list elements
+   * @param list The {@code List} to convert.
+   * @param keyExtractor The key-extraction function
+   * @return A modifiable {@code Map}
+   */
   public static <K, V> Map<K, V> toMap(
       List<V> list, Function<? super V, ? extends K> keyExtractor) {
     return list.stream().collect(Collectors.toMap(keyExtractor, Function.identity()));
   }
 
+  /**
+   * Shortcut for the ubiquitous <code>
+   * list.stream().collect(Collectors.toUnmodifiableMap(keyExtractor, Function.identity()))</code>.
+   *
+   * @param <K> The type of the keys
+   * @param <V> The type of the values and the list elements
+   * @param list The {@code List} to convert.
+   * @param keyExtractor The key-extraction function
+   * @return An unmodfiable {@code Map}
+   */
   public static <K, V> Map<K, V> toUnmodifiableMap(
       List<V> list, Function<? super V, ? extends K> keyExtractor) {
     return list.stream().collect(Collectors.toUnmodifiableMap(keyExtractor, Function.identity()));
@@ -389,7 +408,7 @@ public class CollectionMethods {
    * @param <E> The type of the elements
    * @param <L> The type of the {@code List}
    * @param clazz The class of the elements
-   * @param initValue The initial value of the values in the {@code List}
+   * @param initVal The initial value of the values in the {@code List}
    * @param size The desired size of the {@code List}
    * @return A new, modifiable {@code List} of the specified size with all elements initialized to
    *     the specified value.

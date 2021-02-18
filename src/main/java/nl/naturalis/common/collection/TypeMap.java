@@ -17,8 +17,8 @@ import static nl.naturalis.common.ClassMethods.isA;
  * <p>Contrary to ordinary maps it is not permitted to add strictly duplicate keys. In other words,
  * once a type is in the map, you cannot overwrite its value any longer. Also, it is not permitted
  * to add a type if any of its super types has already been added to the map. Therefore you must add
- * the lowest-level classes first and base classes and interfaces last. {@code null} keys and
- * {@null} values are not allowed. It is permitted to add {@code Object.class} but note that {@link
+ * the lowest-level classes first and base classes and interfaces last. {@code null} keys and {@code
+ * null} values are not allowed. It is permitted to add {@code Object.class} but note that {@link
  * Map#containsKey(Object) containsKey()} will then always return true.
  *
  * <p>Contrary to the {@link TreeMap} class (the super class of {@link ModifiableTypeMap} and {@link

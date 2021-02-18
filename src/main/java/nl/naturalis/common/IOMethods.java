@@ -69,7 +69,6 @@ public class IOMethods {
    *
    * @param in The input stream
    * @param out The output stream
-   * @throws IOException If an I/O error occurs
    */
   public static void pipe(InputStream in, OutputStream out) {
     pipe(in, out, 512);
