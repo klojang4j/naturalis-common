@@ -7,7 +7,7 @@ import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
 import static java.lang.String.format;
-import static nl.naturalis.common.check.Check.DEFAULT_ARG_NAME;
+import static nl.naturalis.common.check.Check.DEF_ARG_NAME;
 import static nl.naturalis.common.check.CommonChecks.nameOf;
 
 /**
@@ -23,32 +23,32 @@ public class InvalidCheckException extends RuntimeException {
   private static final String ERR1 = "Error while checking %s: %s cannot be subject of %s";
 
   static InvalidCheckException notApplicable(Predicate test, Object arg) {
-    String msg = format(ERR0, DEFAULT_ARG_NAME, nameOf(test), arg.getClass().getName());
+    String msg = format(ERR0, DEF_ARG_NAME, nameOf(test), arg.getClass().getName());
     return new InvalidCheckException(msg);
   }
 
   static InvalidCheckException notApplicable(IntPredicate test, Object arg) {
-    String msg = format(ERR0, DEFAULT_ARG_NAME, nameOf(test), arg.getClass().getName());
+    String msg = format(ERR0, DEF_ARG_NAME, nameOf(test), arg.getClass().getName());
     return new InvalidCheckException(msg);
   }
 
   static InvalidCheckException notApplicable(Relation test, Object arg) {
-    String msg = format(ERR1, DEFAULT_ARG_NAME, arg.getClass().getName(), nameOf(test));
+    String msg = format(ERR1, DEF_ARG_NAME, arg.getClass().getName(), nameOf(test));
     return new InvalidCheckException(msg);
   }
 
   static InvalidCheckException notApplicable(IntRelation test, Object arg) {
-    String msg = format(ERR1, DEFAULT_ARG_NAME, arg.getClass().getName(), nameOf(test));
+    String msg = format(ERR1, DEF_ARG_NAME, arg.getClass().getName(), nameOf(test));
     return new InvalidCheckException(msg);
   }
 
   static InvalidCheckException notApplicable(ObjIntRelation test, Object arg) {
-    String msg = format(ERR1, DEFAULT_ARG_NAME, arg.getClass().getName(), nameOf(test));
+    String msg = format(ERR1, DEF_ARG_NAME, arg.getClass().getName(), nameOf(test));
     return new InvalidCheckException(msg);
   }
 
   static InvalidCheckException notApplicable(IntObjRelation test, Object arg) {
-    String msg = format(ERR1, DEFAULT_ARG_NAME, arg.getClass().getName(), nameOf(test));
+    String msg = format(ERR1, DEF_ARG_NAME, arg.getClass().getName(), nameOf(test));
     return new InvalidCheckException(msg);
   }
 

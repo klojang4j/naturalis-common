@@ -423,6 +423,6 @@ class Messages {
   }
 
   private static boolean noArgNameProvided(Object[] msgArgs) {
-    return msgArgs[0].equals(Check.DEFAULT_ARG_NAME);
+    return msgArgs[0].equals(Check.DEF_ARG_NAME);
   }
 }

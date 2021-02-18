@@ -116,9 +116,9 @@ import static nl.naturalis.common.check.Messages.createMessage;
  */
 public abstract class Check<T, E extends Exception> {
 
-  static final String DEFAULT_ARG_NAME = "argument";
+  static final String DEF_ARG_NAME = "argument";
 
-  private static final Function<String, IllegalArgumentException> DEFAULT_EXCEPTION =
+  private static final Function<String, IllegalArgumentException> DEF_EXC_FACTORY =
       IllegalArgumentException::new;
 
   /**
@@ -128,7 +128,7 @@ public abstract class Check<T, E extends Exception> {
    * @return A {@code Check} object suitable for testing integers
    */
   public static Check<Integer, IllegalArgumentException> that(int arg) {
-    return new IntCheck<>(arg, DEFAULT_ARG_NAME, DEFAULT_EXCEPTION);
+    return new IntCheck<>(arg, DEF_ARG_NAME, DEF_EXC_FACTORY);
   }
 
   /**
@@ -140,7 +140,7 @@ public abstract class Check<T, E extends Exception> {
    * @return A {@code Check} object suitable for testing the provided argument
    */
   public static <U> Check<U, IllegalArgumentException> that(U arg) {
-    return new ObjectCheck<>(arg, DEFAULT_ARG_NAME, DEFAULT_EXCEPTION);
+    return new ObjectCheck<>(arg, DEF_ARG_NAME, DEF_EXC_FACTORY);
   }
 
   /**
@@ -151,7 +151,7 @@ public abstract class Check<T, E extends Exception> {
    * @return A new {@code Check} object
    */
   public static Check<Integer, IllegalArgumentException> that(int arg, String argName) {
-    return new IntCheck<>(arg, argName, DEFAULT_EXCEPTION);
+    return new IntCheck<>(arg, argName, DEF_EXC_FACTORY);
   }
 
   /**
@@ -164,7 +164,7 @@ public abstract class Check<T, E extends Exception> {
    * @return A new {@code Check} object
    */
   public static <U> Check<U, IllegalArgumentException> that(U arg, String argName) {
-    return new ObjectCheck<>(arg, argName, DEFAULT_EXCEPTION);
+    return new ObjectCheck<>(arg, argName, DEF_EXC_FACTORY);
   }
 
   /**
@@ -188,10 +188,10 @@ public abstract class Check<T, E extends Exception> {
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
     if (arg == null) {
-      String msg = createMessage(CommonChecks.notNull(), DEFAULT_ARG_NAME, null);
-      throw DEFAULT_EXCEPTION.apply(msg);
+      String msg = createMessage(CommonChecks.notNull(), DEF_ARG_NAME, null);
+      throw DEF_EXC_FACTORY.apply(msg);
     }
-    return new ObjectCheck<>(arg, DEFAULT_ARG_NAME, DEFAULT_EXCEPTION);
+    return new ObjectCheck<>(arg, DEF_ARG_NAME, DEF_EXC_FACTORY);
   }
 
   /**
@@ -208,9 +208,9 @@ public abstract class Check<T, E extends Exception> {
       throws IllegalArgumentException {
     if (arg == null) {
       String msg = createMessage(CommonChecks.notNull(), argName, null);
-      throw DEFAULT_EXCEPTION.apply(msg);
+      throw DEF_EXC_FACTORY.apply(msg);
     }
-    return new ObjectCheck<>(arg, argName, DEFAULT_EXCEPTION);
+    return new ObjectCheck<>(arg, argName, DEF_EXC_FACTORY);
   }
 
   /**
@@ -218,8 +218,8 @@ public abstract class Check<T, E extends Exception> {
    * argument. The argument will have already passed the {@link CommonChecks#notNull() notNull}
    * test.
    *
-   * @param exception A {@code Function} that takes a {@code String} (the error message) and returns
-   *     an {@code Exception}
+   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
+   *     returns an {@code Exception}
    * @param arg The argument
    * @param <U> The type of the argument
    * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test
@@ -227,13 +227,13 @@ public abstract class Check<T, E extends Exception> {
    * @throws X If the argument fails to pass the {@code notNull} test or any subsequent tests called
    *     on the returned {@code Check} object
    */
-  public static <U, X extends Exception> Check<U, X> notNull(Function<String, X> exception, U arg)
+  public static <U, X extends Exception> Check<U, X> notNull(Function<String, X> excFactory, U arg)
       throws X {
     if (arg == null) {
-      String msg = createMessage(CommonChecks.notNull(), DEFAULT_ARG_NAME, null);
-      throw exception.apply(msg);
+      String msg = createMessage(CommonChecks.notNull(), DEF_ARG_NAME, null);
+      throw excFactory.apply(msg);
     }
-    return new ObjectCheck<>(arg, DEFAULT_ARG_NAME, exception);
+    return new ObjectCheck<>(arg, DEF_ARG_NAME, excFactory);
   }
 
   /**
@@ -241,8 +241,9 @@ public abstract class Check<T, E extends Exception> {
    * argument. The argument will have already passed the {@link CommonChecks#notNull() notNull}
    * test.
    *
-   * @param exception A {@code Function} that will produce the exception if a test fails. The {@code
-   *     Function} takes a {@code String} (the error message) and returns the {@code Exception}
+   * @param excFactory A {@code Function} that will produce the exception if a test fails. The
+   *     {@code Function} takes a {@code String} (the error message) and returns the {@code
+   *     Exception}
    * @param arg The argument
    * @param argName The name of the argument
    * @param <U> The type of the argument
@@ -252,26 +253,27 @@ public abstract class Check<T, E extends Exception> {
    *     on the returned {@code Check} object
    */
   public static <U, X extends Exception> Check<U, X> notNull(
-      Function<String, X> exception, U arg, String argName) throws X {
+      Function<String, X> excFactory, U arg, String argName) throws X {
     if (arg == null) {
       String msg = createMessage(CommonChecks.notNull(), argName, null);
-      throw exception.apply(msg);
+      throw excFactory.apply(msg);
     }
-    return new ObjectCheck<>(arg, argName, exception);
+    return new ObjectCheck<>(arg, argName, excFactory);
   }
 
   /**
    * Static factory method. Returns a new {@code Check} object suitable for testing integers.
    *
-   * @param exception A {@code Function} that will produce the exception if a test fails. The {@code
-   *     Function} will be passed a {@code String} (the error message) and must return the {@code
-   *     Exception} to be thrown
+   * @param excFactory A {@code Function} that will produce the exception if a test fails. The
+   *     {@code Function} will be passed a {@code String} (the error message) and must return the
+   *     {@code Exception} to be thrown
    * @param arg The argument
    * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test
    * @return A {@code Check} object suitable for testing {@code int} arguments
    */
-  public static <X extends Exception> Check<Integer, X> on(Function<String, X> exception, int arg) {
-    return new IntCheck<>(arg, DEFAULT_ARG_NAME, exception);
+  public static <X extends Exception> Check<Integer, X> on(
+      Function<String, X> excFactory, int arg) {
+    return new IntCheck<>(arg, DEF_ARG_NAME, excFactory);
   }
 
   /**
@@ -280,30 +282,30 @@ public abstract class Check<T, E extends Exception> {
    *
    * @param <U> The type of the argument
    * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test
-   * @param exception A {@code Function} that will produce the exception if a test fails. The {@code
-   *     Function} will be passed a {@code String} (the error message) and must return the {@code
-   *     Exception} to be thrown
+   * @param excFactory A {@code Function} that will produce the exception if a test fails. The
+   *     {@code Function} will be passed a {@code String} (the error message) and must return the
+   *     {@code Exception} to be thrown
    * @param arg The argument
    * @return A {@code Check} object suitable for testing the provided argument
    */
-  public static <U, X extends Exception> Check<U, X> on(Function<String, X> exception, U arg) {
-    return new ObjectCheck<>(arg, DEFAULT_ARG_NAME, exception);
+  public static <U, X extends Exception> Check<U, X> on(Function<String, X> excFactory, U arg) {
+    return new ObjectCheck<>(arg, DEF_ARG_NAME, excFactory);
   }
 
   /**
    * Static factory method. Returns a new {@code Check} object suitable for testing integers.
    *
-   * @param exception A {@code Function} that will produce the exception if a test fails. The {@code
-   *     Function} will be passed a {@code String} (the error message) and must return the {@code
-   *     Exception} to be thrown
+   * @param excFactory A {@code Function} that will produce the exception if a test fails. The
+   *     {@code Function} will be passed a {@code String} (the error message) and must return the
+   *     {@code Exception} to be thrown
    * @param arg The argument
    * @param argName The name of the argument
    * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test
    * @return A new {@code Check} object
    */
   public static <X extends Exception> Check<Integer, X> on(
-      Function<String, X> exception, int arg, String argName) {
-    return new IntCheck<>(arg, argName, exception);
+      Function<String, X> excFactory, int arg, String argName) {
+    return new IntCheck<>(arg, argName, excFactory);
   }
 
   /**
@@ -312,76 +314,66 @@ public abstract class Check<T, E extends Exception> {
    *
    * @param <U> The type of the argument
    * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test
-   * @param exception A {@code Function} that will produce the exception if a test fails. The {@code
-   *     Function} will be passed a {@code String} (the error message) and must return the {@code
-   *     Exception} to be thrown
+   * @param excFactory A {@code Function} that will produce the exception if a test fails. The
+   *     {@code Function} will be passed a {@code String} (the error message) and must return the
+   *     {@code Exception} to be thrown
    * @param arg The argument
    * @param argName The name of the argument
    * @return A new {@code Check} object
    */
   public static <U, X extends Exception> Check<U, X> on(
-      Function<String, X> exception, U arg, String argName) {
-    return new ObjectCheck<>(arg, argName, exception);
+      Function<String, X> excFactory, U arg, String argName) {
+    return new ObjectCheck<>(arg, argName, excFactory);
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object for the integer value supplied by the
-   * specified {@code ThrowingSupplier} <i>if</i> no exception was thrown while supplying the value.
-   * Otherwise an {@code IllegalArgumentException} is thrown with the message of exception while
-   * supplying the value. For example:
+   * Static factory method. See {@link #catching(Function, ThrowingIntSupplier, String)} for a full
+   * description.
    *
-   * <p>
-   *
-   * <pre>
-   * void doSomething(String s) {
-   *  int i = Check.catching(()-> Integer.valueOf(s)).is(lte(), 100).ok();
-   * }
-   * </pre>
-   *
-   * @param argConverter The supplier of the value to be checked
+   * @param argTransformer The supplier of the value to be checked
    * @return A new {@code Check} object
    */
   public static Check<Integer, IllegalArgumentException> catching(
-      ThrowingIntSupplier<?> argConverter) {
-    return catching(argConverter, DEFAULT_ARG_NAME);
+      ThrowingIntSupplier<?> argTransformer) {
+    return catching(argTransformer, DEF_ARG_NAME);
   }
 
   /**
    * Static factory method. Returns a new {@code Check} object for the integer value supplied by the
    * specified {@code ThrowingSupplier} <i>if</i> no exception was thrown while supplying the value.
-   * Otherwise an {@code IllegalArgumentException} is thrown with the message of exception while
-   * supplying the value.
+   * Otherwise an {@code IllegalArgumentException} is thrown with the message of the exception
+   * thrown while supplying the value.
    *
-   * @param argConverter A {@code ThrowingFunction} that converts the argument into an instance of
+   * @param argTransformer A {@code ThrowingFunction} that converts the argument into an instance of
    *     {@code V}.
    * @param argName The argument name
    * @return A new {@code Check} object
    * @throws X If the converted argument fails to pass a test, or if the conversion itself failed
    */
   public static Check<Integer, IllegalArgumentException> catching(
-      ThrowingIntSupplier<?> argConverter, String argName) {
-    return catching(IllegalArgumentException::new, argConverter, argName);
+      ThrowingIntSupplier<?> argTransformer, String argName) {
+    return catching(IllegalArgumentException::new, argTransformer, argName);
   }
 
   /**
    * Static factory method. Returns a new {@code Check} object for the integer value supplied by the
    * specified {@code ThrowingSupplier} <i>if</i> no exception was thrown while supplying the value.
-   * Otherwise an {@code IllegalArgumentException} is thrown with the message of exception while
-   * supplying the value.
+   * Otherwise an {@code Exception} of type {@code X} is thrown with the message of the exception
+   * thrown while supplying the value.
    *
    * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test, or if the
    *     argument conversion fails
-   * @param exception A {@code Function} that will produce the exception if a test fails, or if the
+   * @param excFactory A {@code Function} that will produce the exception if a test fails, or if the
    *     argument conversion fails. The {@code Function} will be passed a {@code String} (the error
    *     message) and must return the {@code Exception} to be thrown.
-   * @param argConverter A {@code ThrowingFunction} that converts the argument into an instance of
+   * @param argTransformer A {@code ThrowingFunction} that converts the argument into an instance of
    *     {@code V}.
    * @return A new {@code Check} object
    * @throws X If the converted argument fails to pass a test, or if the conversion itself failed
    */
   public static <X extends Exception> Check<Integer, X> catching(
-      Function<String, X> exception, ThrowingIntSupplier<?> argConverter) throws X {
-    return catching(exception, argConverter, DEFAULT_ARG_NAME);
+      Function<String, X> excFactory, ThrowingIntSupplier<?> argTransformer) throws X {
+    return catching(excFactory, argTransformer, DEF_ARG_NAME);
   }
 
   /**
@@ -392,10 +384,10 @@ public abstract class Check<T, E extends Exception> {
    *
    * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test, or if the
    *     argument conversion fails
-   * @param exception A {@code Function} that will produce the exception if a test fails, or if the
+   * @param excFactory A {@code Function} that will produce the exception if a test fails, or if the
    *     argument conversion fails. The {@code Function} will be passed a {@code String} (the error
    *     message) and must return the {@code Exception} to be thrown.
-   * @param argConverter A {@code ThrowingFunction} that converts the argument into an instance of
+   * @param argTransformer A {@code ThrowingFunction} that converts the argument into an instance of
    *     {@code V}.
    * @param argName The argument name
    * @return A new {@code Check} object
@@ -403,14 +395,15 @@ public abstract class Check<T, E extends Exception> {
    */
   @SuppressWarnings("unchecked")
   public static <X extends Exception> Check<Integer, X> catching(
-      Function<String, X> exception, ThrowingIntSupplier<?> argConverter, String argName) throws X {
+      Function<String, X> excFactory, ThrowingIntSupplier<?> argTransformer, String argName)
+      throws X {
     try {
-      return new IntCheck<>(argConverter.get(), argName, exception);
+      return new IntCheck<>(argTransformer.get(), argName, excFactory);
     } catch (Throwable t) {
       try {
         throw (X) t;
       } catch (ClassCastException e) {
-        throw exception.apply(t.getMessage());
+        throw excFactory.apply(t.getMessage());
       }
     }
   }
@@ -429,12 +422,12 @@ public abstract class Check<T, E extends Exception> {
    * </pre>
    *
    * @param <U> The type of the argument (more likely: the type of the converted argument)
-   * @param argConverter The supplier of the value to be checked
+   * @param argTransformer The supplier of the value to be checked
    * @return A new {@code Check} object
    */
   public static <U> Check<U, IllegalArgumentException> catching(
-      ThrowingSupplier<U, ?> argConverter) {
-    return catching(argConverter, DEFAULT_ARG_NAME);
+      ThrowingSupplier<U, ?> argTransformer) {
+    return catching(argTransformer, DEF_ARG_NAME);
   }
 
   /**
@@ -444,15 +437,15 @@ public abstract class Check<T, E extends Exception> {
    * supplying the value.
    *
    * @param <U> The type of the value to be tested
-   * @param argConverter A {@code ThrowingFunction} that converts the argument into an instance of
+   * @param argTransformer A {@code ThrowingFunction} that converts the argument into an instance of
    *     {@code V}.
    * @param argName The argument name
    * @return A new {@code Check} object
    * @throws X If the converted argument fails to pass a test, or if the conversion itself failed
    */
   public static <U> Check<U, IllegalArgumentException> catching(
-      ThrowingSupplier<U, ?> argConverter, String argName) {
-    return catching(IllegalArgumentException::new, argConverter, argName);
+      ThrowingSupplier<U, ?> argTransformer, String argName) {
+    return catching(IllegalArgumentException::new, argTransformer, argName);
   }
 
   /**
@@ -464,32 +457,39 @@ public abstract class Check<T, E extends Exception> {
    * @param <U> The type of the value to be tested
    * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test, or if the
    *     argument conversion fails
-   * @param exception A {@code Function} that will produce the exception if a test fails, or if the
+   * @param excFactory A {@code Function} that will produce the exception if a test fails, or if the
    *     argument conversion fails. The {@code Function} will be passed a {@code String} (the error
    *     message) and must return the {@code Exception} to be thrown.
-   * @param argConverter A {@code ThrowingFunction} that converts the argument into an instance of
+   * @param argTransformer A {@code ThrowingFunction} that converts the argument into an instance of
    *     {@code V}.
    * @return A new {@code Check} object
    * @throws X If the converted argument fails to pass a test, or if the conversion itself failed
    */
   public static <U, X extends Exception> Check<U, X> catching(
-      Function<String, X> exception, ThrowingSupplier<U, ?> argConverter) throws X {
-    return catching(exception, argConverter, DEFAULT_ARG_NAME);
+      Function<String, X> excFactory, ThrowingSupplier<U, ?> argTransformer) throws X {
+    return catching(excFactory, argTransformer, DEF_ARG_NAME);
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object for the value supplied by the
-   * specified {@code ThrowingSupplier} <i>if</i> no exception was thrown while supplying the value.
-   * Otherwise an {@code IllegalArgumentException} is thrown with the message of exception while
-   * supplying the value.
+   * Static factory method. The {@code catching(...)} factory methods are different from the other
+   * factory methods in that you don't provide the argument itself, but rather some transformation
+   * on it. The transformation is opaque to the returned {@code Check} object. Hence the {@code
+   * argTransformer} argument is a {@link Supplier} rather than a {@link Function} (a {@link
+   * ThrowingSupplier} to be precise). If the transformed value is successfully supplied by the
+   * supplier, you get back a regular {@code Check} object that you can use to do additional checks
+   * on the transformed value. (If it is the transformation itself that you care about, you can also
+   * just call {@link #ok() ok()} immediately.) If the supplier {@link ThrowingSupplier#get() get()}
+   * method throws an exception, the exception message is passed on to the same exception factory
+   * that is also used for regular checks on the {@code Check} object (thus, in effect, converting
+   * the original exception to an exception of your choosing).
    *
    * @param <U> The type of the value to be tested
    * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test, or if the
    *     argument conversion fails
-   * @param exception A {@code Function} that will produce the exception if a test fails, or if the
+   * @param excFactory A {@code Function} that will produce the exception if a test fails, or if the
    *     argument conversion fails. The {@code Function} will be passed a {@code String} (the error
    *     message) and must return the {@code Exception} to be thrown.
-   * @param argConverter A {@code ThrowingFunction} that converts the argument into an instance of
+   * @param argTransformer A {@code ThrowingFunction} that converts the argument into an instance of
    *     {@code V}.
    * @param argName The argument name
    * @return A new {@code Check} object
@@ -497,14 +497,15 @@ public abstract class Check<T, E extends Exception> {
    */
   @SuppressWarnings("unchecked")
   public static <U, X extends Exception> Check<U, X> catching(
-      Function<String, X> exception, ThrowingSupplier<U, ?> argConverter, String argName) throws X {
+      Function<String, X> excFactory, ThrowingSupplier<U, ?> argTransformer, String argName)
+      throws X {
     try {
-      return new ObjectCheck<>(argConverter.get(), argName, exception);
+      return new ObjectCheck<>(argTransformer.get(), argName, excFactory);
     } catch (Throwable t) {
       try {
         throw (X) t;
       } catch (ClassCastException e) {
-        throw exception.apply(t.getMessage());
+        throw excFactory.apply(t.getMessage());
       }
     }
   }
@@ -1101,7 +1102,7 @@ public abstract class Check<T, E extends Exception> {
     }
     for (int i = 0; i < conditions.length; ++i) {
       if (!conditions[i]) {
-        String s = argName.equals(DEFAULT_ARG_NAME) ? " " : argName + " ";
+        String s = argName.equals(DEF_ARG_NAME) ? " " : argName + " ";
         String msg = String.format("Argument %snot valid given condition %d", s, i + 1);
         throw excFactory.apply(msg);
       }
