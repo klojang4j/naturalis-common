@@ -4,15 +4,14 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
-import java.util.function.Function;
 import nl.naturalis.common.Tuple;
 import static nl.naturalis.common.ClassMethods.isA;
 
 /**
  * A {@code Map} extension that returns a non-null value for a type if either the type itself or any
- * of its super types is present in the map. This is useful if you want to define default values (or
- * fall-back actions if the value type is a {@link Function}) for types that have not been
- * explicitly added to the map.
+ * of its super types is present in the map. This allows you to define fall-back values (or actions
+ * if the value type is a function-like object) for types that have not been explicitly added to the
+ * map.
  *
  * <p>Contrary to ordinary maps it is not permitted to add strictly duplicate keys. In other words,
  * once a type is in the map, you cannot overwrite its value any longer. Also, it is not permitted
@@ -25,8 +24,6 @@ import static nl.naturalis.common.ClassMethods.isA;
  * UnmodifiableTypeMap}) you cannot specify your own {@link Comparator} for sorting the key set. You
  * can, however, specify sort options that will be "appended" to an internally created {@code
  * Comparator}.
- *
- * <p>Obviously this map implementation strongly violates the general {@link Map} contract.
  *
  * @author Ayco Holleman
  * @param <V> The type of the values in the {@code}

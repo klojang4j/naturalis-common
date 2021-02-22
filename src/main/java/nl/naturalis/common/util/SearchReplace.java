@@ -45,7 +45,7 @@ public class SearchReplace {
     sr.setSearch(search);
     sr.setReplace(replace);
     sr.setFileExtensions(exts);
-    sr.searchReplace();
+    sr.searchAndReplace();
   }
 
   private String rootDir;
@@ -60,7 +60,13 @@ public class SearchReplace {
 
   public SearchReplace() {}
 
-  public void searchReplace() {
+  public void searchAndReplace(String search, String replace) {
+    setSearch(search);
+    setReplace(replace);
+    searchAndReplace();
+  }
+
+  public void searchAndReplace() {
     Check.notNull(rootDir, "rootDir");
     Check.notNull(search, "regexSearch");
     Check.notNull(replace, "replace");
