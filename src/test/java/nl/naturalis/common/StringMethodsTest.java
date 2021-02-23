@@ -1,6 +1,7 @@
 package nl.naturalis.common;
 
 import org.junit.Test;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static nl.naturalis.common.StringMethods.*;
@@ -279,5 +280,18 @@ public class StringMethodsTest {
     assertEquals("14", "test.html", substrAfter(input, "/", true));
     assertEquals("15", "/test.html", substrFrom(input, '/', true));
     assertEquals("16", "/test.html", substrFrom(input, "/te", true));
+  }
+
+  @Test
+  public void getLineAndColumn00() {
+    String s = "To be\nOr not to be\nThat is the question\n Whether 't is nobler\nIn the mind";
+    int idx = 0;
+    assertArrayEquals(new int[] {0, 0}, getLineAndColumn(s, idx, "\n"));
+    idx = s.indexOf("not");
+    assertArrayEquals(new int[] {1, 3}, getLineAndColumn(s, idx, "\n"));
+    idx = s.indexOf("is");
+    assertArrayEquals(new int[] {2, 5}, getLineAndColumn(s, idx, "\n"));
+    idx = s.indexOf("\n"); // hmmm ...
+    assertArrayEquals(new int[] {0, 5}, getLineAndColumn(s, idx, "\n"));
   }
 }

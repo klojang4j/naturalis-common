@@ -362,6 +362,42 @@ public final class StringMethods {
   }
 
   /**
+   * Returns the line number and column number of the character at the specified index, given the
+   * system-defined line separator.
+   *
+   * @param str The string to search
+   * @param index The string index to determine the line and column number of
+   * @return A two-element array containing the line line number and column number of the character
+   *     at the specified index
+   */
+  public static int[] getLineAndColumn(String str, int index) {
+    return getLineAndColumn(str, index, System.lineSeparator());
+  }
+
+  /**
+   * Returns the line number and column number of the character at the specified index, given the
+   * specified line separator.
+   *
+   * @param str The string to search
+   * @param index The string index to determine the line and column number of
+   * @param lineSep The line separator
+   * @return A two-element array containing the line number and column number of the character at
+   *     the specified index
+   */
+  public static int[] getLineAndColumn(String str, int index, String lineSep) {
+    Check.notNull(str, "str");
+    Check.that(index, "index").is(gte(), 0).is(lt(), str.length());
+    Check.that(lineSep, "lineSep").is(notEmpty());
+    int line = 0, pos = 0, i = str.indexOf(lineSep);
+    while (i != -1 && i < index) {
+      ++line;
+      pos = i + lineSep.length();
+      i = str.indexOf(lineSep, i + lineSep.length());
+    }
+    return new int[] {line, index - pos};
+  }
+
+  /**
    * Left-pads a string to the specified width using the space character (' ').
    *
    * @param obj An object whose {@code toString()} method produces the string to be padded. Null is
