@@ -2,6 +2,7 @@ image: alpine:latest
 
 stages:
   - check
+  - test
 
 
 check code style:
