@@ -1,5 +1,19 @@
 image: alpine:latest
 
+stages:
+  - check
+  - test
+
+
+check code style:
+  stage: check
+  image: maven:3-jdk-11
+  script:
+    - echo "Checking Code Style"
+    - mvn checkstyle:check -Dcheckstyle.config.location=google_checks.xml
+  allow_failure: true
+
+
 pages:
   stage: test
   script:
