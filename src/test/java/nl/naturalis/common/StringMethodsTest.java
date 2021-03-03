@@ -291,6 +291,8 @@ public class StringMethodsTest {
     assertArrayEquals(new int[] {1, 3}, getLineAndColumn(s, idx, "\n"));
     idx = s.indexOf("is");
     assertArrayEquals(new int[] {2, 5}, getLineAndColumn(s, idx, "\n"));
+    idx = s.indexOf("mind");
+    assertArrayEquals(new int[] {4, 7}, getLineAndColumn(s, idx, "\n"));
     idx = s.indexOf("\n"); // hmmm ...
     assertArrayEquals(new int[] {0, 5}, getLineAndColumn(s, idx, "\n"));
   }

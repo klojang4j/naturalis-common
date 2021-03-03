@@ -6,7 +6,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ArrayMethods.END_INDEX;
-import static nl.naturalis.common.ArrayMethods.START_INDEX;
+import static nl.naturalis.common.ArrayMethods.*;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.length;
 
@@ -16,39 +16,50 @@ public class CollectionMethods {
   private CollectionMethods() {}
 
   /**
-   * Returns the specified value as a {@code List}. If the value already is a {@code List}, it is
-   * returned as-is. If the value is a {@link Collection} it is converted using {@link
-   * List#copyOf(Collection)}. If it is an array, it is converted using {@link List#of(Object...)}.
-   * Else the value itself is wrapped into a {@link Collections#singletonList(Object) singleton
-   * list}.
+   * Returns the specified value as a {@code List}. This method behaves as follows:
+   *
+   * <p>
+   *
+   * <ul>
+   *   <li>If the value is {@code null} it is converted using {@code
+   *       Collections.singletonList(val)}.
+   *   <li>If the value already is a {@code List} it is returned as-is.
+   *   <li>If the value is a {@code Collection} it is converted to an {@code ArrayList}
+   *   <li>If the value is an instance of {@code Object[]} it is converted using {code
+   *       Arrays.asList}.
+   *   <li>If the value is an array of a primitive type it is converted using {@link
+   *       ArrayMethods#asList(int[]) ArrayMethods.asList}.
+   *   <li>In any other case the value is converted using {@code Collections.singletonList(val)}.
+   * </ul>
    *
    * @param val The value to convert
    * @return The value converted to a {@code List}
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   public static List<?> asList(Object val) {
-    Check.notNull(val);
     List objs;
-    if (val instanceof List) {
+    if (val == null) {
+      objs = Collections.singletonList(val);
+    } else if (val instanceof List) {
       objs = (List) val;
     } else if (val instanceof Collection) {
-      objs = List.copyOf((Collection) val);
+      objs = new ArrayList((Collection) val);
     } else if (val instanceof Object[]) {
-      objs = List.of((Object[]) val);
+      objs = Arrays.asList((Object[]) val);
     } else if (val.getClass() == int[].class) {
-      objs = List.of((int[]) val);
+      objs = ArrayMethods.asList((int[]) val);
     } else if (val.getClass() == double[].class) {
-      objs = List.of((double[]) val);
+      objs = ArrayMethods.asList((double[]) val);
     } else if (val.getClass() == byte[].class) {
-      objs = List.of((byte[]) val);
+      objs = ArrayMethods.asList((byte[]) val);
     } else if (val.getClass() == short[].class) {
-      objs = List.of((short[]) val);
+      objs = ArrayMethods.asList((short[]) val);
     } else if (val.getClass() == float[].class) {
-      objs = List.of((float[]) val);
+      objs = ArrayMethods.asList((float[]) val);
     } else if (val.getClass() == char[].class) {
-      objs = List.of((char[]) val);
+      objs = ArrayMethods.asList((char[]) val);
     } else if (val.getClass() == boolean[].class) {
-      objs = List.of((boolean[]) val);
+      objs = ArrayMethods.asList((boolean[]) val);
     } else {
       objs = Collections.singletonList(val);
     }
@@ -152,7 +163,7 @@ public class CollectionMethods {
   }
 
   /**
-   * Shortcut for the ubiquitous <code>
+   * Shortcut for <code>
    * list.stream().collect(Collectors.toUnmodifiableMap(keyExtractor, Function.identity()))</code>.
    *
    * @param <K> The type of the keys

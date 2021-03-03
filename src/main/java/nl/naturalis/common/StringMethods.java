@@ -388,6 +388,9 @@ public final class StringMethods {
     Check.notNull(str, "str");
     Check.that(index, "index").is(gte(), 0).is(lt(), str.length());
     Check.that(lineSep, "lineSep").is(notEmpty());
+    if (index == 0) {
+      return new int[] {0, 0};
+    }
     int line = 0, pos = 0, i = str.indexOf(lineSep);
     while (i != -1 && i < index) {
       ++line;

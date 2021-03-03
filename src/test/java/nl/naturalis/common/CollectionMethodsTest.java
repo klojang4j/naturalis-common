@@ -1,12 +1,27 @@
 package nl.naturalis.common;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static nl.naturalis.common.CollectionMethods.asList;
+import static nl.naturalis.common.CollectionMethods.newLinkedHashSet;
 import static nl.naturalis.common.CollectionMethods.sublist;
 
 public class CollectionMethodsTest {
+
+  @Test
+  public void asList00() {
+    List<?> list = asList(null);
+    assertEquals(1, list.size());
+    list = Arrays.asList("a", "b", null, "d");
+    assertSame(list, asList(list));
+    assertEquals(Arrays.asList("a", "b", null, "d"), asList(newLinkedHashSet("a", "b", null, "d")));
+    assertEquals(List.of(1, 2, 3, 4, 5), asList(new int[] {1, 2, 3, 4, 5}));
+    assertEquals(List.of("Hello World"), asList("Hello World"));
+  }
 
   @Test
   public void sublistA() {

@@ -1,7 +1,9 @@
 package nl.naturalis.common;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
@@ -292,5 +294,117 @@ public class ArrayMethods {
     arraycopy(moreObjs, 0, res, 2, moreObjs.length);
     arraycopy(array, 0, res, 2 + moreObjs.length, array.length);
     return res;
+  }
+
+  /**
+   * Converts an {@code int} array into a {@code List<Integer>} instance. The returned {@code List}
+   * is mutable but tightly sized.
+   *
+   * @param values the array elements.
+   * @return a {@code List} containing the same elements in the same order
+   */
+  public static List<Integer> asList(int[] values) {
+    Check.notNull(values);
+    List<Integer> l = new ArrayList<>(values.length);
+    for (int v : values) l.add(v);
+    return l;
+  }
+
+  /**
+   * Converts an {@code float} array into a {@code List<Float>} instance. The returned {@code List}
+   * is mutable but tightly sized.
+   *
+   * @param values the array elements.
+   * @return a {@code List} containing the same elements in the same order
+   */
+  public static List<Float> asList(float[] values) {
+    Check.notNull(values);
+    List<Float> l = new ArrayList<>(values.length);
+    for (float v : values) l.add(v);
+    return l;
+  }
+
+  /**
+   * Converts an {@code double} array into a {@code List<Double>} instance. The returned {@code
+   * List} is mutable but tightly sized.
+   *
+   * @param values the array elements.
+   * @return a {@code List} containing the same elements in the same order
+   */
+  public static List<Double> asList(double[] values) {
+    Check.notNull(values);
+    List<Double> l = new ArrayList<>(values.length);
+    for (double v : values) l.add(v);
+    return l;
+  }
+
+  /**
+   * Converts an {@code long} array into a {@code List<Long>} instance. The returned {@code List} is
+   * mutable but tightly sized.
+   *
+   * @param values the array elements.
+   * @return a {@code List} containing the same elements in the same order
+   */
+  public static List<Long> asList(long[] values) {
+    Check.notNull(values);
+    List<Long> l = new ArrayList<>(values.length);
+    for (long v : values) l.add(v);
+    return l;
+  }
+
+  /**
+   * Converts an {@code short} array into a {@code List<Short>} instance. The returned {@code List}
+   * is mutable but tightly sized.
+   *
+   * @param values the array elements.
+   * @return a {@code List} containing the same elements in the same order
+   */
+  public static List<Short> asList(short[] values) {
+    Check.notNull(values);
+    List<Short> l = new ArrayList<>(values.length);
+    for (short v : values) l.add(v);
+    return l;
+  }
+
+  /**
+   * Converts an {@code byte} array into a {@code List<Byte>} instance. The returned {@code List} is
+   * mutable but tightly sized.
+   *
+   * @param values the array elements.
+   * @return a {@code List} containing the same elements in the same order
+   */
+  public static List<Byte> asList(byte[] values) {
+    Check.notNull(values);
+    List<Byte> l = new ArrayList<>(values.length);
+    for (byte v : values) l.add(v);
+    return l;
+  }
+
+  /**
+   * Converts an {@code char} array into a {@code List<Character>} instance. The returned {@code
+   * List} is mutable but tightly sized.
+   *
+   * @param values the array elements.
+   * @return a {@code List} containing the same elements in the same order
+   */
+  public static List<Character> asList(char[] values) {
+    Check.notNull(values);
+    List<Character> l = new ArrayList<>(values.length);
+    for (char v : values) l.add(v);
+    return l;
+  }
+
+  /**
+   * Converts an {@code char} array into a {@code List<Character>} instance. The returned {@code
+   * List} is mutable but tightly sized.
+   *
+   * @param values the array elements.
+   * @return a {@code List} containing the same elements in the same order
+   */
+  public static List<Boolean> asList(boolean[] values) {
+    Check.notNull(values);
+    List<Boolean> l = new ArrayList<>(values.length);
+    for (boolean v : values) l.add(v);
+    return l;
   }
 }
