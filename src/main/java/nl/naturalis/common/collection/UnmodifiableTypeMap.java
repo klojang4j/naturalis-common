@@ -40,7 +40,9 @@ public final class UnmodifiableTypeMap<V> extends TreeMap<Class<?>, V> implement
       Check.notNull(key, "key");
       Check.notNull(value, "value");
       Tuple<Class<?>, V> tuple = Tuple.of(key, value);
-      Check.that(tuple).is(notIn(), tempStorage).then(tempStorage::add);
+      Check.that(tuple)
+          .is(notIn(), tempStorage, "Key already added: %s", key)
+          .then(tempStorage::add);
       return this;
     }
 
@@ -51,7 +53,7 @@ public final class UnmodifiableTypeMap<V> extends TreeMap<Class<?>, V> implement
 
     public TypeMap<V> freeze() {
       UnmodifiableTypeMap<V> utm = new UnmodifiableTypeMap<>(sortOptions);
-      tempStorage.forEach(t -> t.insertInto(utm));
+      tempStorage.forEach(t -> utm.putUnchecked(t.getLeft(), t.getRight()));
       return utm;
     }
   }

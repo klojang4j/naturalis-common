@@ -14,28 +14,22 @@ import java.util.Objects;
 public final class Tuple<LEFT, RIGHT> {
 
   /**
-   * Creates a tuple containing the provided values.
+   * Creates a tuple containing the specified values.
    *
    * @param <K> The type of the first element (or key) of the tuple
    * @param <V> The type of the second element (or value) of the tuple
-   * @param left The first element (or key) of the tupl
+   * @param left The first element (or key) of the tuple
    * @param right The second element (or value) of the tuple
-   * @return A tuple containing the provided values
+   * @return A tuple containing the specified values
    */
   public static <K, V> Tuple<K, V> of(K left, V right) {
-    return new Tuple<K, V>(left, right);
+    return new Tuple<>(left, right);
   }
 
   private final LEFT left;
   private final RIGHT right;
 
-  /**
-   * Creates a tuple containing the provided values.
-   *
-   * @param left The first element of the tuple
-   * @param right The second element of the tuple
-   */
-  public Tuple(LEFT left, RIGHT right) {
+  private Tuple(LEFT left, RIGHT right) {
     this.left = left;
     this.right = right;
   }
@@ -59,16 +53,26 @@ public final class Tuple<LEFT, RIGHT> {
   }
 
   /**
+   * Returns a new tuple in which the two elements have swapped places.
+   *
+   * @return A new tuple in which the two elements have swapped places
+   */
+  public Tuple<RIGHT, LEFT> swap() {
+    return Tuple.of(right, left);
+  }
+
+  /**
    * Returns a singleton map with the left element as the key and the right element as the value.
    *
-   * @return
+   * @return A singleton map with the left element as the key and the right element as the value
    */
   public Map<LEFT, RIGHT> toMap() {
     return Collections.singletonMap(left, right);
   }
 
   /**
-   * Inserts this tuple into the specified {@code Map}.
+   * Inserts this tuple into the specified {@code Map} using the left element as key and the right
+   * element as value.
    *
    * @param map The {@code Map} to insert the tuple into.
    * @return The previous value associated with key, or null if there was no mapping for key
@@ -83,7 +87,7 @@ public final class Tuple<LEFT, RIGHT> {
    * @return
    */
   public Map.Entry<LEFT, RIGHT> toEntry() {
-    return new Map.Entry<LEFT, RIGHT>() {
+    return new Map.Entry<>() {
       private final LEFT k = Tuple.this.left;
       private RIGHT v = Tuple.this.right;
 
@@ -121,5 +125,10 @@ public final class Tuple<LEFT, RIGHT> {
     }
     Tuple other = (Tuple) obj;
     return Objects.equals(left, other.left) && Objects.equals(right, other.right);
+  }
+
+  @Override
+  public String toString() {
+    return "[" + Objects.toString(left) + "," + Objects.toString(right) + "]";
   }
 }

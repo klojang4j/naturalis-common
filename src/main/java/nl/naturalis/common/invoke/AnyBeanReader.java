@@ -8,13 +8,16 @@ import static nl.naturalis.common.check.CommonChecks.keyIn;
 import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 
 /**
- * Reads properties of any type of bean. Slightly less efficient than {@link BeanReader} if the
- * {@link #read(Object, String)} method is provided with continuously changing types of objects.
- * This class uses the {@code java.lang.invoke} package in stead of reflection to read bean
- * properties. Although this class uses {@link MethodHandle} instances to extract values from the
- * bean, it still uses reflection to identify the getter methods on the bean class. Therefore if you
- * use this class from within a Java module you must still open the module to the naturalis-common
- * module.
+ * Reads properties of any type of bean. This makes {@code AnyBeanReader} more versatile than the
+ * {@link BeanReader} class. The {@code BeanReader}, on the other hand, allows you to specify
+ * up-front the bean properties you are going to read, which might make it slightly more efficient.
+ * Also {@code AnyBeanReader} becomes slightly less efficient if you read from a wide variety of
+ * continuously changing bean types. Note, however, that the performance difference should be
+ * marginal.
+ *
+ * <p>Although this class uses {@link MethodHandle} instances to extract values from the bean, it
+ * still uses reflection to identify the getter methods on the bean class. Therefore if you use this
+ * class from within a Java module you must still open the module to the naturalis-common module.
  *
  * @author Ayco Holleman
  * @param <T> The type of the bean

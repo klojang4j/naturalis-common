@@ -1,6 +1,7 @@
 package nl.naturalis.common;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.Test;
@@ -16,11 +17,15 @@ public class CollectionMethodsTest {
   public void asList00() {
     List<?> list = asList(null);
     assertEquals(1, list.size());
+    assertEquals(null, list.get(0));
     list = Arrays.asList("a", "b", null, "d");
     assertSame(list, asList(list));
     assertEquals(Arrays.asList("a", "b", null, "d"), asList(newLinkedHashSet("a", "b", null, "d")));
     assertEquals(List.of(1, 2, 3, 4, 5), asList(new int[] {1, 2, 3, 4, 5}));
+    assertEquals(List.of((byte) 1, Byte.valueOf((byte) 2)), asList(new byte[] {1, 2}));
     assertEquals(List.of("Hello World"), asList("Hello World"));
+    Object obj = new Object();
+    assertEquals(Collections.singletonList(obj), asList(obj));
   }
 
   @Test

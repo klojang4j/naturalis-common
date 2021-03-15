@@ -318,206 +318,50 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Static factory method. See {@link #catching(Function, Object, ThrowingFunction, String)} for a
-   * full description.
+   * Throws an {@code IllegalArgumentException} with the specified message and message arguments.
+   * The method is still declared to return a value of type &lt;U&gt; so it can be used as the
+   * expression for a {@code return statement}.
    *
-   * @param <U> The type of the argument
-   * @param arg The argument
-   * @param argTransformer A function that takes the argument and transforms it into an {@code int}
-   *     value that you want to test and work with
-   * @return A new {@code Check} object
-   * @throws X If the converted argument fails to pass a test, or if the argument conversion fails
+   * @param <U> The type of the object that would have been returned if it had passed the checks
+   * @param msg The message
+   * @param msgArgs The message argument
+   * @return Nothing, but allows {@code fail} to be used as the expresion in a {@code return}
+   *     statement
    */
-  public static <U> Check<Integer, IllegalArgumentException> catching(
-      U arg, ThrowingToIntFunction<U, ?> argTransformer) {
-    return catching(arg, argTransformer, DEF_ARG_NAME);
+  public static <U> U fail(String msg, Object... msgArgs) {
+    throw DEF_EXC_FACTORY.apply(String.format(msg, msgArgs));
   }
 
   /**
-   * Static factory method. See {@link #catching(Function, Object, ThrowingFunction, String)} for a
-   * full description.
+   * Throws an exception created by the specified exception factory.
    *
-   * @param <U> The type of the argument
-   * @param arg The argument
-   * @param argTransformer A function that takes the argument and transforms it into an {@code int}
-   *     value that you want to test and work with
-   * @param argName The argument name
-   * @return A new {@code Check} object
-   * @throws X If the converted argument fails to pass a test, or if the argument conversion fails
+   * @param <U> The type of the object that would have been returned if it had passed the checks
+   * @param <X> The type of the exception
+   * @param excFactory
+   * @return Nothing, but allows {@code fail} to be used as the expresion in a {@code return}
+   *     statement
+   * @throws X The exception that is thrown
    */
-  public static <U> Check<Integer, IllegalArgumentException> catching(
-      U arg, ThrowingToIntFunction<U, ?> argTransformer, String argName) {
-    return catching(DEF_EXC_FACTORY, arg, argTransformer, argName);
+  public static <U, X extends Exception> U failOn(Function<String, X> excFactory) throws X {
+    // Message "Invalid argument" likely to be ignored by factory, but why risk an NPE
+    throw excFactory.apply("Invalid argument");
   }
 
   /**
-   * Static factory method. See {@link #catching(Function, Object, ThrowingFunction, String)} for a
-   * full description.
+   * Throws an exception created by the specified exception factory with the specified message and
+   * message arguments.
    *
-   * @param <U> The type of the argument
-   * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test, or if the
-   *     argument conversion fails
-   * @param excFactory A {@code Function} that will produce the exception if a test fails, or if the
-   *     argument conversion fails. The {@code Function} will be passed a {@code String} (the error
-   *     message) and must return the {@code Exception} to be thrown.
-   * @param arg The argument
-   * @param argTransformer A function that takes the argument and transforms it into an {@code int}
-   *     value that you want to test and work with
-   * @return A new {@code Check} object
-   * @throws X If the converted argument fails to pass a test, or if the argument conversion fails
+   * @param <U> The type of the object that would have been returned if it had passed the checks
+   * @param <X> The type of the exception
+   * @param msg The message
+   * @param msgArgs The message argument
+   * @return Nothing, but allows {@code fail} to be used as the expresion in a {@code return}
+   *     statement
+   * @throws X The exception that is thrown
    */
-  public static <U, X extends Exception> Check<Integer, X> catching(
-      Function<String, X> excFactory, U arg, ThrowingToIntFunction<U, ?> argTransformer) throws X {
-    return catching(excFactory, arg, argTransformer, DEF_ARG_NAME);
-  }
-
-  /**
-   * Static factory method. See {@link #catching(Function, Object, ThrowingFunction, String)} for a
-   * full description.
-   *
-   * @param <U> The type of the argument
-   * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test, or if the
-   *     argument conversion fails
-   * @param excFactory A {@code Function} that will produce the exception if a test fails, or if the
-   *     argument conversion fails. The {@code Function} will be passed a {@code String} (the error
-   *     message) and must return the {@code Exception} to be thrown.
-   * @param arg The argument
-   * @param argTransformer A function that takes the argument and transforms it into an {@code int}
-   *     value that you want to test and work with
-   * @param argName The argument name
-   * @return A new {@code Check} object
-   * @throws X If the converted argument fails to pass a test, or if the argument conversion fails
-   */
-  @SuppressWarnings("unchecked")
-  public static <U, X extends Exception> Check<Integer, X> catching(
-      Function<String, X> excFactory,
-      U arg,
-      ThrowingToIntFunction<U, ?> argTransformer,
-      String argName)
-      throws X {
-    try {
-      return new IntCheck<>(argTransformer.apply(arg), argName, excFactory);
-    } catch (Throwable t) {
-      try {
-        throw (X) t;
-      } catch (ClassCastException e) {
-        throw excFactory.apply(t.getMessage());
-      }
-    }
-  }
-
-  /**
-   * Static factory method. See {@link #catching(Function, Object, ThrowingFunction, String)} for a
-   * full description.
-   *
-   * @param <U> The type of the argument
-   * @param <V> The type of the converted argument
-   * @param arg The argument
-   * @param argTransformer A function that takes the argument and transforms it into the value that
-   *     you want to test and work with
-   * @return A new {@code Check} object
-   * @throws X If the converted argument fails to pass a test, or if the argument conversion fails
-   */
-  public static <U, V> Check<V, IllegalArgumentException> catching(
-      U arg, ThrowingFunction<U, V, ?> argTransformer) {
-    return catching(arg, argTransformer, DEF_ARG_NAME);
-  }
-
-  /**
-   * Static factory method. See {@link #catching(Function, Object, ThrowingFunction, String)} for a
-   * full description.
-   *
-   * @param <U> The type of the argument
-   * @param <V> The type of the converted argument
-   * @param arg The argument
-   * @param argTransformer A function that takes the argument and transforms it into the value that
-   *     you want to test and work with
-   * @param argName The argument name
-   * @return A new {@code Check} object
-   * @throws X If the converted argument fails to pass a test, or if the argument conversion fails
-   */
-  public static <U, V> Check<V, IllegalArgumentException> catching(
-      U arg, ThrowingFunction<U, V, ?> argTransformer, String argName) {
-    return catching(DEF_EXC_FACTORY, arg, argTransformer, argName);
-  }
-
-  /**
-   * Static factory method. See {@link #catching(Function, Object, ThrowingFunction, String)} for a
-   * full description.
-   *
-   * @param <U> The type of the argument
-   * @param <V> The type of the converted argument
-   * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test, or if the
-   *     argument conversion fails
-   * @param excFactory A {@code Function} that will produce the exception if a test fails, or if the
-   *     argument conversion fails. The {@code Function} will be passed a {@code String} (the error
-   *     message) and must return the {@code Exception} to be thrown.
-   * @param arg The argument
-   * @param argTransformer A function that takes the argument and transforms it into the value that
-   *     you want to test and work with
-   * @return A new {@code Check} object
-   * @throws X If the converted argument fails to pass a test, or if the argument conversion fails
-   */
-  public static <U, V, X extends Exception> Check<V, X> catching(
-      Function<String, X> excFactory, U arg, ThrowingFunction<U, V, ?> argTransformer) throws X {
-    return catching(excFactory, arg, argTransformer, DEF_ARG_NAME);
-  }
-
-  /**
-   * Static factory method. The {@code catching(...)} factory methods are different from the other
-   * factory methods in that the returned {@code Check} object works on some transformation on the
-   * argument, rather than the argument itself. If the transformation is successful, you get back a
-   * regular {@code Check} object that you can use to do additional checks on the <i>transformed</i>
-   * value (not the original argument). If it is the transformation itself that you care about, you
-   * can also simply call {@link #ok() ok()} immediately. If the transformation function throws an
-   * exception, the exception message is passed on to the same exception factory that is also used
-   * for regular checks on the {@code Check} object (thus, in effect, converting the original
-   * exception to an exception of your choosing).
-   *
-   * <p>
-   *
-   * <p><b>Examples</b>
-   *
-   * <p>
-   *
-   * <pre>
-   * int i = Check.catching(System.getEnv("THREAD_COUNT"), Integer::valueOf).ok();
-   * int i = Check.catching(System.getEnv("THREAD_COUNT", Integer::valueOf)
-   *    .is(gt(), 0)
-   *    .is(lte(), 4)
-   *    .ok();
-   * </pre>
-   *
-   * @param <U> The type of the argument
-   * @param <V> The type of the converted argument
-   * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test, or if the
-   *     argument conversion fails
-   * @param excFactory A {@code Function} that will produce the exception if a test fails, or if the
-   *     argument conversion fails. The {@code Function} will be passed a {@code String} (the error
-   *     message) and must return the {@code Exception} to be thrown.
-   * @param arg The argument
-   * @param argTransformer A function that takes the argument and transforms it into the value that
-   *     you want to test and work with
-   * @param argName The argument name
-   * @return A new {@code Check} object
-   * @throws X If the converted argument fails to pass a test, or if the argument conversion fails
-   */
-  @SuppressWarnings("unchecked")
-  public static <U, V, X extends Exception> Check<V, X> catching(
-      Function<String, X> excFactory,
-      U arg,
-      ThrowingFunction<U, V, ?> argTransformer,
-      String argName)
-      throws X {
-    try {
-      return new ObjectCheck<>(argTransformer.apply(arg), argName, excFactory);
-    } catch (Throwable t) {
-      try {
-        throw (X) t;
-      } catch (ClassCastException e) {
-        throw excFactory.apply(t.getMessage());
-      }
-    }
+  public static <U, X extends Exception> U failOn(
+      Function<String, X> excFactory, String msg, Object... msgArgs) throws X {
+    throw excFactory.apply(String.format(msg, msgArgs));
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////

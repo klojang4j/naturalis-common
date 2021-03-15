@@ -103,9 +103,6 @@ public class CommonChecks {
     addName(no(), "no");
   }
 
-  public static Predicate<Boolean> fail() {
-    return x -> false;
-  }
   /**
    * Verifies that the argument is empty. Equivalent to {@link ObjectMethods#isEmpty(Object)
    * ObjectMethods::isEmpty}.

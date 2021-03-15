@@ -38,10 +38,10 @@ public class BeanReader<T> {
   }
 
   /**
-   * Creates a {@code BeanReader} for the specified class and the specified properties of that
+   * Creates a {@code BeanReader} for the specified class and the specified properties on that
    * class. If you intend to use this {@code BeanReader} to repetitively to read just one or two
-   * properties from a lot of bean instances, this makes the {@code BeanReader} more efficient. If
-   * you specify non-existent properties, they will silently be ignored.
+   * properties from a lot of bulky bean instances, this makes the {@code BeanReader} slightly more
+   * efficient. If you specify non-existent properties, they will silently be ignored.
    *
    * @param beanClass The bean class
    * @param properties The properties you are interested in
@@ -51,10 +51,10 @@ public class BeanReader<T> {
   }
 
   /**
-   * Creates a {@code BeanReader} for the specified class and the specified properties of that
+   * Creates a {@code BeanReader} for the specified class and the specified properties on that
    * class. If you intend to use this {@code BeanReader} to repetitively to read just one or two
-   * properties from a lot of bean instances, this makes the {@code BeanReader} more efficient. If
-   * you specify non-existent properties, they will silently be ignored.
+   * properties from a lot of bulky bean instances, this makes the {@code BeanReader} slightly more
+   * efficient. If you specify non-existent properties, they will silently be ignored.
    *
    * @param beanClass The bean class
    * @param exclude Whether to exclude or include the specified properties

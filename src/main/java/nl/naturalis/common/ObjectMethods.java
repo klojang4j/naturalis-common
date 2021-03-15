@@ -463,6 +463,21 @@ public class ObjectMethods {
   }
 
   /**
+   * Returns {@code alternative} if the specified relation exists between {@code subject} and {@code
+   * object}, else {@code subject}.
+   *
+   * @param <T> The type of the objects involved
+   * @param subject The value to test and possibly return
+   * @param relation The test
+   * @param object The value to to test against
+   * @param alternative The value to return if the
+   * @return either {@code subject} or {@code alternative}
+   */
+  public static <T> T ifTrue(T subject, Relation<T, T> relation, T object, T alternative) {
+    return relation.exists(subject, object) ? alternative : subject;
+  }
+
+  /**
    * Returns the result of the specified operation on {@code value} if the condition evaluates to
    * {@code false}, else {@code value} itself. For example:
    *

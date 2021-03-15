@@ -3,10 +3,13 @@ package nl.naturalis.common;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
+import static java.util.stream.Collectors.toList;
 import static nl.naturalis.common.ArrayMethods.END_INDEX;
-import static nl.naturalis.common.ArrayMethods.*;
+import static nl.naturalis.common.ArrayMethods.START_INDEX;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.length;
 
@@ -378,11 +381,11 @@ public class CollectionMethods {
 
   /**
    * Creates a new, modifiable {@code List} of the specified size with all elements initialized to
-   * specified value (must not be null);
+   * specified value (must not be null).
    *
    * @param <E> The type of the elements
    * @param <L> The type of the {@code List}
-   * @param initVal The initial value of the values in the {@code List}
+   * @param initVal The initial value of the elements (must not be null)
    * @param size The desired size of the {@code List}
    * @return A new, modifiable {@code List} of the specified size with all elements initialized to
    *     the specified value
@@ -392,7 +395,26 @@ public class CollectionMethods {
     Check.notNull(initVal, "initVal");
     Check.that(size, "size").is(gte(), 0);
     E[] array = (E[]) Array.newInstance(initVal.getClass(), size);
-    return (L) new ArrayList<E>(List.of(array));
+    Arrays.fill(array, 0, size, initVal);
+    return (L) asList(array);
+  }
+
+  /**
+   * Creates a new, modifiable {@code List} of the specified size whose elements are initialized
+   * using the specified value generator.
+   *
+   * @param <E> The type of the elements
+   * @param <L> The type of the {@code List}
+   * @param valueGenerator A function that generates a value based on the list index
+   * @param size The desired size of the {@code List}
+   * @return A new, modifiable {@code List} of the specified size whose elements are initialized
+   *     using the specified value generator.
+   */
+  @SuppressWarnings("unchecked")
+  public static <E, L extends List<E>> L initializedList(IntFunction<E> valueGenerator, int size) {
+    Check.notNull(valueGenerator, "valueGenerator");
+    Check.that(size, "size").is(gte(), 0);
+    return (L) IntStream.range(0, size).mapToObj(valueGenerator::apply).collect(toList());
   }
 
   /**
@@ -409,25 +431,6 @@ public class CollectionMethods {
   @SuppressWarnings("unchecked")
   public static <E, L extends List<E>> L initializedList(Class<E> clazz, int size) {
     E[] array = (E[]) Array.newInstance(clazz, size);
-    return (L) new ArrayList<E>(List.of(array));
-  }
-
-  /**
-   * Creates a new, modifiable {@code List} of the specified size with all elements initialized to
-   * the specified value.
-   *
-   * @param <E> The type of the elements
-   * @param <L> The type of the {@code List}
-   * @param clazz The class of the elements
-   * @param initVal The initial value of the values in the {@code List}
-   * @param size The desired size of the {@code List}
-   * @return A new, modifiable {@code List} of the specified size with all elements initialized to
-   *     the specified value.
-   */
-  @SuppressWarnings("unchecked")
-  public static <E, L extends List<E>> L initializedList(Class<E> clazz, int size, E initVal) {
-    E[] array = (E[]) Array.newInstance(clazz, size);
-    Arrays.fill(array, initVal);
-    return (L) new ArrayList<E>(List.of(array));
+    return (L) asList(array);
   }
 }
