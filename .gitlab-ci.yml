@@ -3,7 +3,6 @@ cache:
     - make/.m2/repository
 variables:
     MAVEN_CLI_OPTS: --quiet --batch-mode --settings make/.m2/settings.xml -Dmaven.repo.local=make/.m2/repository
-    APIDOCS_ARTIFACT: target/apidocs
 stages:
 - validate
 - test
