@@ -30,12 +30,15 @@ maven_deploy:
     image: maven:3-jdk-11
     script:
     - mvn deploy $MAVEN_CLI_OPTS -Dcheckstyle.skip -DskipTests
+    - test -f ${APIDOCS_ARTIFACT}
     artifacts:
         expire_in: 3 days
         paths:
         - ${APIDOCS_ARTIFACT}
 pages:
     stage: publish_javadocs
+    before_script:
+    - test -f ${APIDOCS_ARTIFACT} -o echo "Not found: ${APIDOCS_ARTIFACT}"    
     script:
     - echo "Publishing javadocs"
     artifacts:
