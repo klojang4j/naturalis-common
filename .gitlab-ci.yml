@@ -8,11 +8,6 @@ stages:
 - validate
 - test
 - build
-validate_dockerfile:
-    stage: validate
-    image: hadolint/hadolint:latest
-    script:
-    - hadolint make/Dockerfile
 check_style:
     stage: validate
     image: maven:3-jdk-11
