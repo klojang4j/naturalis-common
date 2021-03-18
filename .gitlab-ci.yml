@@ -43,7 +43,7 @@ pages:
     - rm -rf public  
     - mkdir public
     script:
-    - echo "Publishing javadocs"
+    - echo "Publishing javadoc"
     - cp -r ${APIDOCS_ARTIFACT}/* public/.
     artifacts:
         expire_in: 1 day
