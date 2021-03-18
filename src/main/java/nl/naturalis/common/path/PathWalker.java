@@ -192,7 +192,7 @@ public final class PathWalker {
    *
    * @param host
    * @param values
-   * @param Whether or not all values were successfully writen.
+   * @return Whether or not all values were successfully writen.
    */
   public boolean writeValues(Object host, Object... values) {
     Check.notNull(values, "values").has(length(), gte(), paths.length);

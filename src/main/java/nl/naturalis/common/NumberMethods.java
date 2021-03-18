@@ -154,7 +154,7 @@ public class NumberMethods {
    * Returns whether or not the specified {@code Number} can be converted into an instance of the
    * specified {@code Number} class without loss of information.
    *
-   * @param <U> The type of {@code Number} to convert to
+   * @param <T> The type of {@code Number} to convert to
    * @param number The {@code Number} to convert
    * @param targetType The type of {@code Number} to convert to
    * @return Whether or not conversion will be lossless

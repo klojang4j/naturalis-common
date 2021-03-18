@@ -1,25 +1,49 @@
-image: alpine:latest
-
-stages:
-  - check
-  - test
-
-
-check code style:
-  stage: check
-  image: maven:3-jdk-11
-  script:
-    - echo "Checking Code Style"
-    - mvn checkstyle:check -Dcheckstyle.config.location=google_checks.xml
-  allow_failure: true
-
-
-pages:
-  stage: test
-  script:
-  - echo 'Nothing to do'
-  artifacts:
+cache:
     paths:
-    - public
-  only:
-  - master
+    - make/.m2/repository
+variables:
+    MAVEN_CLI_OPTS: --quiet --batch-mode --settings make/.m2/settings.xml -Dmaven.repo.local=make/.m2/repository
+    APIDOCS_ARTIFACT: target/apidocs
+stages:
+- validate
+- test
+- build
+validate_dockerfile:
+    stage: validate
+    image: hadolint/hadolint:latest
+    script:
+    - hadolint make/Dockerfile
+check_style:
+    stage: validate
+    image: maven:3-jdk-11
+    script:
+    - mvn checkstyle:check -Dcheckstyle.config.location=google_checks.xml
+    allow_failure: true
+maven_test:
+    stage: test
+    image: maven:3-jdk-11
+    script:
+    - mvn ${MAVEN_CLI_OPTS} test -Dcheckstyle.skip
+    artifacts:
+        expire_in: 3 days
+        reports:
+            junit:
+            - target/surefire-reports/TEST-*.xml
+maven_deploy:
+    stage: build
+    image: maven:3-jdk-11
+    script:
+    - mvn deploy $MAVEN_CLI_OPTS -Dcheckstyle.skip -DskipTests
+    artifacts:
+        expire_in: 3 days
+        paths:
+        - ${APIDOCS_ARTIFACT}
+pages:
+    stage: build
+    script:
+    - echo "Publishing javadocs"
+    artifacts:
+        paths:
+        - ${APIDOCS_ARTIFACT}
+    only:
+    - master
