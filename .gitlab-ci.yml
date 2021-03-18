@@ -21,7 +21,7 @@ maven_test:
     script:
     - mvn ${MAVEN_CLI_OPTS} test -Dcheckstyle.skip
     artifacts:
-        expire_in: 3 days
+        expire_in: 1 day
         reports:
             junit:
             - target/surefire-reports/TEST-*.xml
@@ -32,19 +32,21 @@ maven_deploy:
     - mvn deploy $MAVEN_CLI_OPTS -Dcheckstyle.skip -DskipTests
     - test -d ${APIDOCS_ARTIFACT}
     artifacts:
-        expire_in: 3 days
+        expire_in: 1 day
         paths:
         - ${APIDOCS_ARTIFACT}
 pages:
     stage: publish_javadocs
     image: alpine:latest
     before_script:
-    - test -d ${APIDOCS_ARTIFACT}   
-    - rm -fr public/*
+    - test -d ${APIDOCS_ARTIFACT}
+    - rm -rf public  
+    - mkdir public
     script:
     - echo "Publishing javadocs"
     - cp -r ${APIDOCS_ARTIFACT}/* public/.
     artifacts:
+        expire_in: 1 day
         paths:
         - ${APIDOCS_ARTIFACT}
     only:
