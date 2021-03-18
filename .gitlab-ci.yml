@@ -40,7 +40,7 @@ pages:
     before_script:
     - test -f ${APIDOCS_ARTIFACT}   
     script:
-    - echo "Publishing javadocs"
+    - echo "Publishing javadoc"
     artifacts:
         paths:
         - ${APIDOCS_ARTIFACT}
