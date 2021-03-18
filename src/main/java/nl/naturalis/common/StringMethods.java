@@ -765,7 +765,7 @@ public final class StringMethods {
    * sequence, or the entire string if it does not contain that character sequence.
    *
    * @param str The string to take a substring from
-   * @param to The character sequence from which to take the substring
+   * @param from The character sequence from which to take the substring
    * @return The substring
    */
   public static String substrFrom(String str, String from) {
@@ -777,7 +777,7 @@ public final class StringMethods {
    * sequence, or the entire string if it does not contain that character sequence.
    *
    * @param str The string to take a substring from
-   * @param to The character sequence from which to take the substring
+   * @param from The character sequence from which to take the substring
    * @param last Whether to use the first of last occurrence of {@code from}
    * @return The substring
    */
@@ -794,7 +794,6 @@ public final class StringMethods {
    *
    * @param str The string to take a substring from
    * @param from The character up to which to take the substring
-   * @param last Whether to use the first of last occurrence of {@code to}
    * @return The substring
    */
   public static String substrFrom(String str, char from) {
@@ -821,7 +820,7 @@ public final class StringMethods {
    * sequence, or the entire string if it does not contain that character sequence.
    *
    * @param str The string to take a substring from
-   * @param to The character sequence after which to take the substring
+   * @param after The character sequence after which to take the substring
    * @return The substring
    */
   public static String substrAfter(String str, String after) {
@@ -833,7 +832,8 @@ public final class StringMethods {
    * character sequence, or the entire string if it does not contain that character sequence.
    *
    * @param str The string to take a substring from
-   * @param to The character sequence after which to take the substring (must not be null or empty)
+   * @param after The character sequence after which to take the substring (must not be null or
+   *     empty)
    * @param last Whether to use the first of last occurrence of {@code after}
    * @return The substring
    */
@@ -851,7 +851,6 @@ public final class StringMethods {
    *
    * @param str The string to take a substring from
    * @param after The character after which to take the substring
-   * @param last Whether to use the first of last occurrence of {@code after}
    * @return The substring
    */
   public static String substrAfter(String str, char after) {
@@ -907,7 +906,6 @@ public final class StringMethods {
    *
    * @param str The string to take a substring from
    * @param to The character up to which to take the substring
-   * @param last Whether to use the first of last occurrence of {@code to}
    * @return The substring
    */
   public static String substrTo(String str, char to) {

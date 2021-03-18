@@ -362,7 +362,6 @@ public class CommonChecks {
    * implementation of the specified class; otherwise that the argument is an intance of it.
    *
    * @param <X> The type of the argument
-   * @param <Y> The type of the object of the relationship
    * @return A {@code Relation}
    */
   public static <X> Relation<X, Class<?>> instanceOf() {
@@ -384,7 +383,6 @@ public class CommonChecks {
    * implementation of the specified class; otherwise that the argument is not an intance of it.
    *
    * @param <X> The type of the argument
-   * @param <Y> The type of the object of the relationship
    * @return A {@code Relation}
    */
   public static <X> Relation<X, Class<?>> notInstanceOf() {

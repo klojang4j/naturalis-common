@@ -10,8 +10,8 @@ import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 /**
  * Reads properties of any type of bean. This makes {@code AnyBeanReader} more versatile than the
  * {@link BeanReader} class. The {@code BeanReader}, on the other hand, allows you to specify
- * up-front the bean properties you are going to read, which might make it slightly more efficient.
- * Also {@code AnyBeanReader} becomes slightly less efficient if you read from a wide variety of
+ * up-front the bean properties you are going to read, making it slightly more efficient. Also
+ * {@code AnyBeanReader} becomes slightly less efficient if you read from a wide variety of
  * continuously changing bean types. Note, however, that the performance difference should be
  * marginal.
  *
@@ -20,7 +20,6 @@ import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
  * class from within a Java module you must still open the module to the naturalis-common module.
  *
  * @author Ayco Holleman
- * @param <T> The type of the bean
  */
 public class AnyBeanReader {
 
