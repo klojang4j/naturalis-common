@@ -42,9 +42,9 @@ pages:
     - test -d target/apidocs
     - rm -rf public  
     - mkdir public
+    - cp -r target/apidocs/* public/.
     script:
     - echo "Publishing javadocs"
-    - cp -r target/apidocs/* public/.
     artifacts:
         expire_in: 2 days
         paths:
