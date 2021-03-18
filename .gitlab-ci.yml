@@ -7,7 +7,8 @@ variables:
 stages:
 - validate
 - test
-- build
+- mvn_deploy
+- publish_javadocs
 check_style:
     stage: validate
     image: maven:3-jdk-11
@@ -25,7 +26,7 @@ maven_test:
             junit:
             - target/surefire-reports/TEST-*.xml
 maven_deploy:
-    stage: build
+    stage: mvn_deploy
     image: maven:3-jdk-11
     script:
     - mvn deploy $MAVEN_CLI_OPTS -Dcheckstyle.skip -DskipTests
@@ -34,7 +35,7 @@ maven_deploy:
         paths:
         - ${APIDOCS_ARTIFACT}
 pages:
-    stage: build
+    stage: publish_javadocs
     script:
     - echo "Publishing javadocs"
     artifacts:
