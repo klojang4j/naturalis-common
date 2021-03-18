@@ -37,10 +37,13 @@ maven_deploy:
         - ${APIDOCS_ARTIFACT}
 pages:
     stage: publish_javadocs
+    image: alpine:latest
     before_script:
     - test -d ${APIDOCS_ARTIFACT}   
+    - rm -fr public/*
     script:
     - echo "Publishing javadocs"
+    - cp -r ${APIDOCS_ARTIFACT}/* public/.
     artifacts:
         paths:
         - ${APIDOCS_ARTIFACT}
