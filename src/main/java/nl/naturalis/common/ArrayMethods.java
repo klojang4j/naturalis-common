@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.collection.UnsafeList;
 import static java.lang.System.arraycopy;
 import static nl.naturalis.common.check.CommonChecks.atMost;
 import static nl.naturalis.common.check.CommonChecks.gte;
@@ -405,6 +406,110 @@ public class ArrayMethods {
     Check.notNull(values);
     List<Boolean> l = new ArrayList<>(values.length);
     for (boolean v : values) l.add(v);
+    return l;
+  }
+
+  /**
+   * Converts an {@code int} array into an {@link UnsafeList<Integer>} instance.
+   *
+   * @param values the array elements.
+   * @return a {@code List} containing the same elements in the same order
+   */
+  public static List<Integer> asUnsafeList(int[] values) {
+    Check.notNull(values);
+    List<Integer> l = new UnsafeList<>(Integer.class, values.length);
+    for (int i = 0; i < values.length; ++i) l.set(i, values[i]);
+    return l;
+  }
+
+  /**
+   * Converts an {@code float} array into an {@link UnsafeList<Float>} instance.
+   *
+   * @param values the array elements.
+   * @return a {@code List} containing the same elements in the same order
+   */
+  public static List<Float> asUnsafeList(float[] values) {
+    Check.notNull(values);
+    List<Float> l = new UnsafeList<>(Float.class, values.length);
+    for (int i = 0; i < values.length; ++i) l.set(i, values[i]);
+    return l;
+  }
+
+  /**
+   * Converts an {@code double} array into an {@link UnsafeList<Double>} instance.
+   *
+   * @param values the array elements.
+   * @return a {@code List} containing the same elements in the same order
+   */
+  public static List<Double> asUnsafeList(double[] values) {
+    Check.notNull(values);
+    List<Double> l = new UnsafeList<>(Double.class, values.length);
+    for (int i = 0; i < values.length; ++i) l.set(i, values[i]);
+    return l;
+  }
+
+  /**
+   * Converts an {@code long} array into an {@link UnsafeList<Long>} instance.
+   *
+   * @param values the array elements.
+   * @return a {@code List} containing the same elements in the same order
+   */
+  public static List<Long> asUnsafeList(long[] values) {
+    Check.notNull(values);
+    List<Long> l = new UnsafeList<>(Long.class, values.length);
+    for (int i = 0; i < values.length; ++i) l.set(i, values[i]);
+    return l;
+  }
+
+  /**
+   * Converts an {@code short} array into an {@link UnsafeList<Short>} instance.
+   *
+   * @param values the array elements.
+   * @return a {@code List} containing the same elements in the same order
+   */
+  public static List<Short> asUnsafeList(short[] values) {
+    Check.notNull(values);
+    List<Short> l = new UnsafeList<>(Short.class, values.length);
+    for (int i = 0; i < values.length; ++i) l.set(i, values[i]);
+    return l;
+  }
+
+  /**
+   * Converts an {@code byte} array into an {@link UnsafeList<Byte>} instance.
+   *
+   * @param values the array elements.
+   * @return a {@code List} containing the same elements in the same order
+   */
+  public static List<Byte> asUnsafeList(byte[] values) {
+    Check.notNull(values);
+    List<Byte> l = new UnsafeList<>(Byte.class, values.length);
+    for (int i = 0; i < values.length; ++i) l.set(i, values[i]);
+    return l;
+  }
+
+  /**
+   * Converts an {@code char} array into an {@link UnsafeList<Character>} instance.
+   *
+   * @param values the array elements.
+   * @return a {@code List} containing the same elements in the same order
+   */
+  public static List<Character> asUnsafeList(char[] values) {
+    Check.notNull(values);
+    List<Character> l = new UnsafeList<>(Character.class, values.length);
+    for (int i = 0; i < values.length; ++i) l.set(i, values[i]);
+    return l;
+  }
+
+  /**
+   * Converts an {@code char} array into an {@link UnsafeList<Character>} instance.
+   *
+   * @param values the array elements.
+   * @return a {@code List} containing the same elements in the same order
+   */
+  public static List<Boolean> asUnsafeList(boolean[] values) {
+    Check.notNull(values);
+    List<Boolean> l = new UnsafeList<>(Boolean.class, values.length);
+    for (int i = 0; i < values.length; ++i) l.set(i, values[i]);
     return l;
   }
 }

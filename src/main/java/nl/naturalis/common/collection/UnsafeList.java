@@ -9,8 +9,10 @@ import static nl.naturalis.common.check.CommonChecks.gte;
 /**
  * A fixed-size, mutable {@code List} that does not perform range checking in its {@code get} and
  * {@code set} methods. Useful for package-private or intra-modular list exchanges with a high
- * number if reads and/or writes on the list. Since this is a fixed-size list the {@code get} and
- * {@code set} methods will "work" straight-away (provided you specify a valid list index).
+ * number if reads and/or writes on the list. Since this is a fixed-size list, you can immediately
+ * get and set values, provided you specify a valid list index.. All {@code add} methods throw an
+ * {@code UnsupportedOperationException}. List manipulation must be done the {@code set} method. The
+ * {@code remove} methods, however, have repurposed to nullify list elements.
  *
  * @author Ayco Holleman
  * @param <E>

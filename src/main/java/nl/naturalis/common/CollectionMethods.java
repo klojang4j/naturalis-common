@@ -7,6 +7,7 @@ import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.collection.UnsafeList;
 import static java.util.stream.Collectors.toList;
 import static nl.naturalis.common.ArrayMethods.END_INDEX;
 import static nl.naturalis.common.ArrayMethods.START_INDEX;
@@ -63,6 +64,56 @@ public class CollectionMethods {
       objs = ArrayMethods.asList((char[]) val);
     } else if (val.getClass() == boolean[].class) {
       objs = ArrayMethods.asList((boolean[]) val);
+    } else {
+      objs = Collections.singletonList(val);
+    }
+    return objs;
+  }
+
+  /**
+   * Returns the specified value as a {@code List}. This method behaves as follows:
+   *
+   * <p>
+   *
+   * <ul>
+   *   <li>If the value is {@code null} it is converted using {@code
+   *       Collections.singletonList(val)}.
+   *   <li>If the value already is a {@code List} it is returned as-is (it is <i>not</i> converted
+   *       to an {@link UnsafeList}).
+   *   <li>If the value is a {@code Collection} it is converted to an {@code UnsafeList}.
+   *   <li>If the value is an instance of {@code Object[]} to an {@code UnsafeList}.
+   *   <li>If the value is an array of a primitive type to an {@code UnsafeList}.
+   *   <li>In any other case the value is converted using {@code Collections.singletonList(val)}.
+   * </ul>
+   *
+   * @param val The value to convert
+   * @return The value converted to a {@code List}
+   */
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public static List<?> asUnsafeList(Object val) {
+    List objs;
+    if (val == null) {
+      objs = Collections.singletonList(val);
+    } else if (val instanceof List) {
+      objs = (List) val;
+    } else if (val instanceof Collection) {
+      objs = new UnsafeList((Collection) val);
+    } else if (val instanceof Object[]) {
+      objs = new UnsafeList((Object[]) val);
+    } else if (val.getClass() == int[].class) {
+      objs = ArrayMethods.asUnsafeList((int[]) val);
+    } else if (val.getClass() == double[].class) {
+      objs = ArrayMethods.asUnsafeList((double[]) val);
+    } else if (val.getClass() == byte[].class) {
+      objs = ArrayMethods.asUnsafeList((byte[]) val);
+    } else if (val.getClass() == short[].class) {
+      objs = ArrayMethods.asUnsafeList((short[]) val);
+    } else if (val.getClass() == float[].class) {
+      objs = ArrayMethods.asUnsafeList((float[]) val);
+    } else if (val.getClass() == char[].class) {
+      objs = ArrayMethods.asUnsafeList((char[]) val);
+    } else if (val.getClass() == boolean[].class) {
+      objs = ArrayMethods.asUnsafeList((boolean[]) val);
     } else {
       objs = Collections.singletonList(val);
     }
