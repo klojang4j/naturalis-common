@@ -2,6 +2,7 @@ package nl.naturalis.common.collection;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.stream.Stream;
 import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.gte;
@@ -10,7 +11,7 @@ import static nl.naturalis.common.check.CommonChecks.gte;
  * A fixed-size, mutable {@code List} that does not perform range checking in its {@code get} and
  * {@code set} methods. Useful for package-private or intra-modular list exchanges with a high
  * number if reads and/or writes on the list. Since this is a fixed-size list, you can immediately
- * get and set values, provided you specify a valid list index.. All {@code add} methods throw an
+ * get and set values, provided you specify a valid list index. All {@code add} methods throw an
  * {@code UnsupportedOperationException}. List manipulation must be done the {@code set} method. The
  * {@code remove} methods, however, have repurposed to nullify list elements.
  *
@@ -55,21 +56,55 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
     this.data = ArrayMethods.fromTemplate(array);
   }
 
+  /** {@inheritDoc} */
+  @Override
+  public E get(int index) {
+    return data[index];
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public E set(int index, E element) {
+    E e = data[index];
+    data[index] = element;
+    return e;
+  }
+
+  /** {@inheritDoc} */
   @Override
   public int size() {
     return data.length;
   }
 
+  /** {@inheritDoc} */
   @Override
   public boolean isEmpty() {
     return data.length == 0;
   }
 
+  /** {@inheritDoc} */
   @Override
   public boolean contains(Object o) {
-    return Arrays.stream(data).anyMatch(obj -> Objects.deepEquals(obj, 0));
+    return Arrays.stream(data).anyMatch(obj -> Objects.deepEquals(obj, o));
   }
 
+  /** {@inheritDoc} */
+  @Override
+  public boolean containsAll(Collection<?> c) {
+    Check.notNull(c);
+    MAIN_LOOP:
+    for (Object obj0 : c) {
+      for (Object obj1 : data) {
+        if (Objects.equals(obj0, obj1)) {
+          continue MAIN_LOOP;
+        }
+      }
+      return false;
+    }
+    return true;
+  }
+
+  /** {@inheritDoc} */
   @Override
   public Iterator<E> iterator() {
     return new Iterator<>() {
@@ -90,6 +125,154 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
     };
   }
 
+  /** Repurposed to nullify the element at the specified index. */
+  @Override
+  public E remove(int index) {
+    if (size() == 0) {
+      return null;
+    }
+    if (data[0].getClass() == Integer.class) {
+      String msg =
+          "remove(int index) not supported for UnsafeList<Integer> because"
+              + "auto-boxing makes it indistinguishable from remove(Object o)";
+      throw new UnsupportedOperationException(msg);
+    }
+    E e = data[index];
+    data[index] = null;
+    return e;
+  }
+
+  /** Repurposed to nullify the first list element that equals specified object. */
+  @Override
+  public boolean remove(Object o) {
+    if (size() == 0) {
+      return false;
+    }
+    if (data[0].getClass() == Integer.class) {
+      String msg =
+          "remove(int index) not supported for UnsafeList<Integer> because"
+              + "auto-unboxing makes it indistinguishable from remove(Object o)";
+      throw new UnsupportedOperationException(msg);
+    }
+    Check.notNull(o);
+    for (int i = 0; i < data.length; ++i) {
+      if (Objects.equals(data[i], o)) {
+        data[i] = null;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Repurposed to nullify all list elements whose value is present in the specified {@code
+   * Collection}.
+   */
+  @Override
+  public boolean removeAll(Collection<?> c) {
+    Check.notNull(c);
+    boolean changed = false;
+    for (Object obj : c) {
+      changed = remove(obj) || changed;
+    }
+    return changed;
+  }
+
+  /**
+   * Repurposed to nullify all list elements whose value is <i>not</i> present in the specified
+   * {@code Collection}.
+   */
+  @Override
+  public boolean retainAll(Collection<?> c) {
+    Check.notNull(c);
+    boolean changed = false;
+    MAIN_LOOP:
+    for (int i = 0; i < data.length; ++i) {
+      for (Object obj : c) {
+        if (Objects.equals(data[i], obj)) {
+          continue MAIN_LOOP;
+        }
+      }
+      data[i] = null;
+      changed = true;
+    }
+    return changed;
+  }
+
+  /** Repurposed to nullify all elements in the list. */
+  @Override
+  public void clear() {
+    Arrays.fill(data, null);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public int indexOf(Object o) {
+    for (int i = 0; i < data.length; ++i) {
+      if (Objects.equals(data[i], o)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public int lastIndexOf(Object o) {
+    for (int i = data.length - 1; i >= 0; --i) {
+      if (Objects.equals(data[i], o)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public List<E> subList(int fromIndex, int toIndex) {
+    E[] elems = ArrayMethods.fromTemplate(data, toIndex - fromIndex);
+    System.arraycopy(data, fromIndex, elems, 0, elems.length);
+    return new UnsafeList<>(elems);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Stream<E> stream() {
+    return Arrays.stream(data);
+  }
+
+  @Override
+  @SuppressWarnings("rawtypes")
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (obj.getClass() == UnsafeList.class) {
+      return Arrays.deepEquals(data, ((UnsafeList) obj).data);
+    } else if (obj instanceof List) {
+      List other = (List) obj;
+      if (size() == other.size()) {
+        int i = 0;
+        for (Object e : other) {
+          if (!Objects.equals(e, data[i++])) {
+            return false;
+          }
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns the backing array of this {@code UnsafeList}.
+   *
+   * @return The backing array of this {@code UnsafeList}
+   */
+  public E[] getArray() {
+    return data;
+  }
+
+  /** {@inheritDoc} */
   @Override
   public Object[] toArray() {
     Object[] objs = new Object[data.length];
@@ -97,6 +280,7 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
     return objs;
   }
 
+  /** {@inheritDoc} */
   @SuppressWarnings("unchecked")
   @Override
   public <T> T[] toArray(T[] a) {
@@ -108,102 +292,15 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
   }
 
   @Override
-  public boolean remove(Object o) {
-    for (int i = 0; i < data.length; ++i) {
-      if (Objects.equals(data[i], o)) {
-        data[i] = null;
-        return true;
-      }
-    }
-    return false;
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + Arrays.deepHashCode(data);
+    return result;
   }
 
-  @Override
-  public boolean containsAll(Collection<?> c) {
-    MAIN_LOOP:
-    for (Object obj0 : c) {
-      for (Object obj1 : data) {
-        if (Objects.equals(obj0, obj1)) {
-          continue MAIN_LOOP;
-        }
-      }
-      return false;
-    }
-    return true;
-  }
-
-  @Override
-  public boolean removeAll(Collection<?> c) {
-    boolean changed = false;
-    for (Object obj : c) {
-      changed = remove(obj) || changed;
-    }
-    return changed;
-  }
-
-  @Override
-  public boolean retainAll(Collection<?> c) {
-    boolean changed = false;
-    for (Object obj : c) {
-      for (int i = 0; i < data.length; ++i) {
-        if (!Objects.equals(data[i], obj)) {
-          data[i] = null;
-          changed = true;
-        }
-      }
-    }
-    return changed;
-  }
-
-  @Override
-  public void clear() {
-    Arrays.fill(data, null);
-  }
-
-  @Override
-  public E get(int index) {
-    return data[index];
-  }
-
-  @Override
-  public E set(int index, E element) {
-    E e = data[index];
-    data[index] = element;
-    return e;
-  }
-
-  @Override
-  public E remove(int index) {
-    E e = data[index];
-    data[index] = null;
-    return e;
-  }
-
-  @Override
-  public int indexOf(Object o) {
-    for (int i = 0; i < data.length; ++i) {
-      if (Objects.equals(data[i], o)) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
-  @Override
-  public int lastIndexOf(Object o) {
-    for (int i = data.length - 1; i >= 0; --i) {
-      if (Objects.equals(data[i], o)) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
-  @Override
-  public List<E> subList(int fromIndex, int toIndex) {
-    E[] elems = ArrayMethods.fromTemplate(data, toIndex - fromIndex);
-    System.arraycopy(data, fromIndex, elems, 0, elems.length);
-    return new UnsafeList<>(elems);
+  public String toString() {
+    return "[" + ArrayMethods.implode(data) + "]";
   }
 
   /**

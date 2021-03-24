@@ -1,10 +1,8 @@
 package nl.naturalis.common;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.collection.UnsafeList;
@@ -184,6 +182,29 @@ public class ArrayMethods {
     Check.notNull(template, "template");
     Check.that(length, "length").is(gte(), 0);
     return (T[]) Array.newInstance(template.getClass().getComponentType(), length);
+  }
+
+  /**
+   * PHP-style implode method, concatenating the array elements with &#34;, &#34; as separator
+   * string.
+   *
+   * @param array The collection to implode
+   * @return A concatenation of the elements in the collection.
+   */
+  public static String implode(Object[] array) {
+    return implode(array, ", ");
+  }
+
+  /**
+   * PHP-style implode method, concatenating the array elements using the specified separator
+   * string.
+   *
+   * @param array The array to implode
+   * @param separator The separator string
+   * @return A concatenation of the elements in the collection.
+   */
+  public static String implode(Object[] array, String separator) {
+    return Arrays.stream(array).map(Objects::toString).collect(Collectors.joining(separator));
   }
 
   /**
