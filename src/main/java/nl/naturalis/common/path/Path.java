@@ -13,7 +13,7 @@ import static java.util.function.Predicate.not;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
- * Specifies a path to a value within an object. Path segments are spearated by '.' (dot). For
+ * Specifies a path to a value within an object. Path segments are separated by '.' (dot). For
  * example: {@code employee.address.street}. Array indices are specified as separate path segments.
  * For example: {@code employees.3.address.street}. Non-numeric segments can be either field names
  * or map keys. Therefore the {@code Path} class does not impose any constraints on what constitutes
@@ -25,7 +25,7 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * character ('^'). (Using the backslash character as an escape character would have made it
  * needlessly cumbersome to write path strings in Java code.) The escape character itself <i>must
  * not</i> be escaped. You can let the {@link #escape(String) escape} method do the escaping for
- * you. Do not escape path segments when passing them individually, in a {@code String} array, to
+ * you. Do not escape path segments when passing them individually (as a {@code String} array) to
  * the constructor. Only escape them when passing a complete path string. So {@code
  * "some.awk^.ward.path^string"} could also be passed in as: {@code new String[] {"some",
  * "awk.ward", "path^string"}}.
@@ -125,17 +125,6 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns true if this {@code Path} consists of a single segment and that segment is null
-   * (meaning that this path can only possibly be valid for map objects that allow null keys).
-   * Otherwise returns false.
-   *
-   * @return
-   */
-  public boolean isNullSegment() {
-    return elems.length == 1 && elems[0] == null;
-  }
-
-  /**
    * Returns the path segment at the specified index. Specify a negative index to count back from
    * the last segment of the {@code Path} (-1 returns the last path segment).
    *
@@ -152,8 +141,8 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    * negative index to count back from the last segment of the {@code Path} (-1 returns the last
    * path segment).
    *
-   * @param from
-   * @return
+   * @param from The index of the first segment of the new {@code Path}
+   * @return A new {@code Path} starting with the segment at the specified array index
    */
   public Path subpath(int from) {
     int i = from < 0 ? elems.length + from : from;
@@ -165,8 +154,10 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    * Returns a new {@code Path} consisting of {@code len} segments starting with segment {@code
    * from}. The 1st argument may be negative to indicate a left-offset from the last segment.
    *
-   * @param from
-   * @return
+   * @param from The index of the first segment of the new {@code Path}
+   * @param len The number of segments in the new {@code Path}
+   * @return A new {@code Path} consisting of {@code len} segments starting with segment {@code
+   *     from}.
    */
   public Path subpath(int from, int len) {
     int i = from < 0 ? elems.length + from : from;
@@ -199,11 +190,12 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns a new {@code Path} consisting of the segments of this {@code Path} plus the segments of
-   * the specified {@code Path}.
+   * Returns a new {@code Path} representing the concatenation of this {@code Path} and the
+   * specified {@code Path}.
    *
-   * @param path
-   * @return
+   * @param path The path to append to this {@code Path}
+   * @return A new {@code Path} representing the concatenation of this {@code Path} and the
+   *     specified {@code Path}
    */
   public Path append(String path) {
     Check.notNull(path, "path");
@@ -260,7 +252,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   @Override
   public Iterator<String> iterator() {
     return new Iterator<>() {
-      private int i = 0;
+      private int i;
 
       public boolean hasNext() {
         return i < elems.length;
@@ -278,7 +270,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   /**
    * Returns a {@code Stream} of path segments.
    *
-   * @return
+   * @return A {@code Stream} of path segments
    */
   public Stream<String> stream() {
     return Arrays.stream(elems);
@@ -287,32 +279,28 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   /**
    * Returns the number of segments in this {@code Path}.
    *
-   * @return
+   * @return The number of segments in this {@code Path}
    */
   @Override
   public int size() {
     return elems.length;
   }
 
-  /** Returns whether or not this path contains any segments. */
+  /** {@inheritDoc} */
   @Override
   public boolean isEmpty() {
     return elems.length == 0;
   }
 
-  /** Overrides {@link Object#equals(Object) Object.equals}. */
+  /** {@inheritDoc} */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null || obj.getClass() != Path.class) {
-      return false;
-    }
+    if (this == obj) return true;
+    if (obj == null || obj.getClass() != Path.class) return false;
     return Arrays.deepEquals(this.elems, ((Path) obj).elems);
   }
 
-  /** Overrides {@link Object#hashCode() Object.hashCode}. */
+  /** {@inheritDoc} */
   @Override
   public int hashCode() {
     if (hash == 0) {
@@ -321,7 +309,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
     return hash;
   }
 
-  /** Implements {@link Comparable#compareTo(Object) Comparable.comparaTo}. */
+  /** {@inheritDoc} */
   @Override
   public int compareTo(Path other) {
     return toString().compareTo(other.toString());
@@ -330,7 +318,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   /**
    * Returns this {@code Path} as a string, properly escaped.
    *
-   * @return
+   * @return This {@code Path} as a string, properly escaped
    */
   @Override
   public String toString() {
