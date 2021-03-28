@@ -1,6 +1,5 @@
 package nl.naturalis.common.path;
 
-import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import nl.naturalis.common.check.Check;
@@ -11,8 +10,10 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
 import static nl.naturalis.common.path.Path.EMPTY_PATH;
 
 /**
- * Provides a way of writing <i>maps-within-maps</i> (<code>Map&lt;String, Object&gt;</code>)
- * objects.
+ * Provides a convenient way of writing <i>maps-within-maps</i> (<code>Map&lt;String, Object&gt;
+ * </code>) objects. It lets you write deeply nested values without having to worry about whether
+ * all the intermediate (<code>Map&lt;String, Object&gt;</code>) objects have been created. If they
+ * are not, they will be tacitly created.
  *
  * <h4>Example 1:</h4>
  *
@@ -90,8 +91,12 @@ public class MapWriter {
   }
 
   public MapWriter write(String path, Object value) {
+    return write(new Path(path), value);
+  }
+
+  public MapWriter write(Path path, Object value) {
     Check.notNull(path);
-    write(this, new Path(path), value);
+    write(this, path, value);
     return this;
   }
 
