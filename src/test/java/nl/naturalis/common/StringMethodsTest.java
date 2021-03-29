@@ -48,6 +48,19 @@ public class StringMethodsTest {
   }
 
   @Test
+  public void ellipsis_01() {
+    assertEquals("Hello W...", ellipsis("Hello World, how are you?", 10));
+    assertEquals("H...", ellipsis("Hello World, how are you?", 4));
+    assertEquals("Hello World, how are you?", ellipsis("Hello World, how are you?", 100));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void ellipsis_02() {
+    // maxWidth must be greater than the length of the ellipsis dots (3)
+    assertEquals("Hello W...", ellipsis("Hello World, how are you?", 3));
+  }
+
+  @Test
   public void endsWith_01() {
     String s = "The cat is both dead and alive";
     assertTrue("01", null != endsWith(s, true, "ALIVE", "test"));

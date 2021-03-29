@@ -125,6 +125,23 @@ public final class StringMethods {
   }
 
   /**
+   * Returns the input string if its length does not exceed {@code maxWidth}, else truncates the
+   * string and appends "...", such that the new string's length does not exceed {@code maxWidth}.
+   *
+   * @param str The string
+   * @param maxWidth The maximum width of the string
+   * @return The string itself or an abbreviated version, suffixed with "..."
+   */
+  public static String ellipsis(String str, int maxWidth) {
+    Check.that(maxWidth, "maxWidth").is(gt(), 3);
+    if (Check.notNull(str, "str").ok().length() <= maxWidth) {
+      return str;
+    }
+    int to = Math.max(0, maxWidth - 3);
+    return str.substring(0, to) + "...";
+  }
+
+  /**
    * Returns a human-friendly representation of the duration between the specified start and now.
    * Example: 540:00:12.630
    *
