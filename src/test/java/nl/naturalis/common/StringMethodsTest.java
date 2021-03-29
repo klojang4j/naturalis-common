@@ -49,9 +49,10 @@ public class StringMethodsTest {
 
   @Test
   public void ellipsis_01() {
-    assertEquals("Hello W...", ellipsis("Hello World, how are you?", 10));
-    assertEquals("H...", ellipsis("Hello World, how are you?", 4));
-    assertEquals("Hello World, how are you?", ellipsis("Hello World, how are you?", 100));
+    String hello = "Hello World, how are you?";
+    assertEquals("Hello W...", ellipsis(hello, 10));
+    assertEquals("H...", ellipsis(hello, 4));
+    assertEquals("Hello World, how are you?", ellipsis(hello, 100));
   }
 
   @Test(expected = IllegalArgumentException.class)

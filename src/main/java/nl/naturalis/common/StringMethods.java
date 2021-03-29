@@ -125,16 +125,29 @@ public final class StringMethods {
   }
 
   /**
-   * Returns the input string if its length does not exceed {@code maxWidth}, else truncates the
-   * string and appends "...", such that the new string's length does not exceed {@code maxWidth}.
+   * Returns {@code subject.toString()} if its length does not exceed {@code maxWidth}, else
+   * truncates the string and appends "...", such that the new string's length does not exceed
+   * {@code maxWidth}.
    *
-   * @param str The string
-   * @param maxWidth The maximum width of the string
+   * <h4>Examples:</h4>
+   *
+   * <p>
+   *
+   * <pre>
+   * String hello = "Hello World, how are you?";
+   * assertEquals("Hello W...", ellipsis(hello, 10));
+   * assertEquals("H...", ellipsis(hello, 4));
+   * assertEquals(hello, ellipsis(hello, 100));
+   * </pre>
+   *
+   * @param subject The string to abbreviate, if necessary
+   * @param maxWidth The maximum width of the string (must be greater than 3)
    * @return The string itself or an abbreviated version, suffixed with "..."
    */
-  public static String ellipsis(String str, int maxWidth) {
+  public static String ellipsis(Object subject, int maxWidth) {
+    String str = Check.notNull(subject, "subject").ok().toString();
     Check.that(maxWidth, "maxWidth").is(gt(), 3);
-    if (Check.notNull(str, "str").ok().length() <= maxWidth) {
+    if (str.length() <= maxWidth) {
       return str;
     }
     int to = Math.max(0, maxWidth - 3);
