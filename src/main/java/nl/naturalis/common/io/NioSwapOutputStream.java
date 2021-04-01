@@ -11,7 +11,7 @@ import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.WRITE;
 import static nl.naturalis.common.IOMethods.createTempFile;
-import static nl.naturalis.common.check.CommonChecks.fileNotExists;
+import static nl.naturalis.common.check.CommonChecks.present;
 import static nl.naturalis.common.check.CommonChecks.gt;
 import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonChecks.no;
@@ -214,7 +214,7 @@ public class NioSwapOutputStream extends SwapOutputStream {
   // Empties the contents of the buffer into the swap file
   private void sendToSwapFile() throws IOException {
     if (chan == null) {
-      Check.on(IOException::new, swapFile).is(fileNotExists());
+      Check.on(IOException::new, swapFile).is(present());
       chan = FileChannel.open(swapFile.toPath(), CREATE_NEW, WRITE);
       swapped = true;
     }

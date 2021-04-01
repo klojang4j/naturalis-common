@@ -12,8 +12,8 @@ import nl.naturalis.common.check.Check;
 import static java.time.temporal.ChronoField.YEAR;
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
 import static nl.naturalis.common.ObjectMethods.isEmpty;
+import static nl.naturalis.common.check.CommonChecks.empty;
 import static nl.naturalis.common.check.CommonChecks.noneNull;
-import static nl.naturalis.common.check.CommonChecks.notEmpty;
 
 /**
  * Parses date strings into {@link FuzzyDate} instances. The minimum requirement for a valid date
@@ -132,7 +132,7 @@ public class FuzzyDateParser {
    * @param parseInfos More {@code ParseInfo} instances
    */
   public FuzzyDateParser(ParseInfo... parseInfos) {
-    this.parseInfos = Check.that(parseInfos).is(notEmpty()).is(noneNull()).ok(List::of);
+    this.parseInfos = Check.that(parseInfos).isNot(empty()).is(noneNull()).ok(List::of);
   }
 
   /**
@@ -142,7 +142,7 @@ public class FuzzyDateParser {
    * @param parseInfos The {@code ParseInfo} instances used to parse date strings
    */
   public FuzzyDateParser(List<ParseInfo> parseInfos) {
-    this.parseInfos = Check.that(parseInfos).is(notEmpty()).is(noneNull()).ok(List::copyOf);
+    this.parseInfos = Check.that(parseInfos).isNot(empty()).is(noneNull()).ok(List::copyOf);
   }
 
   /**

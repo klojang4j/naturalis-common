@@ -10,25 +10,23 @@ package nl.naturalis.common.function;
 public interface IntRelation {
 
   /**
-   * Returns the reverse of the specified relation, swapping subject and object in the relationship.
-   * For example, the reverse of <i>X &gt; Y</i> is <i>Y &gt; X</i> (or <i>X &lt;= Y</i>).
+   * Returns the converse of this relation, swapping subject and object in the relationship. For
+   * example, the converse of <i>X &gt; Y</i> is <i>Y &gt; X</i> (or <i>X &lt;= Y</i>).
    *
-   * @param relation The {@code Relation} to return the reverse of
-   * @return The reverse {@code Relation}
+   * @return The converse of this {@code IntRelation}
    */
-  public static IntRelation reverse(IntRelation relation) {
-    return (x, y) -> relation.exists(y, x);
+  default IntRelation converse() {
+    return (x, y) -> exists(x, y);
   }
 
   /**
-   * Returns the negation of the specified relation. For example, the negation of <i>X &gt; Y</i> is
-   * <i>X &lt;= Y</i>.
+   * Returns the negation of this {@code IntRelation}. For example, the negation of <i>X &gt; Y</i>
+   * is <i>X &lt;= Y</i>.
    *
-   * @param relation The {@code Relation} to return the negation of
-   * @return The negated {@code Relation}
+   * @return The negation of this {@code IntRelation}
    */
-  public static IntRelation not(IntRelation relation) {
-    return (x, y) -> !relation.exists(x, y);
+  default IntRelation negate() {
+    return (x, y) -> !exists(x, y);
   }
 
   /**

@@ -1,7 +1,6 @@
 package nl.naturalis.common.check;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
@@ -11,28 +10,25 @@ import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
-import static nl.naturalis.common.ClassMethods.prettySimpleClassName;
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
-import static nl.naturalis.common.check.InvalidCheckException.notApplicable;
 import static nl.naturalis.common.check.Messages.*;
 
 /**
  * Defines various common tests for arguments. These tests have short, informative error messages
- * associated with them in case the argument does not pass the test. Many of them are plain,
- * unadorned, method references and only check what they advertise to be checking. <b>None of them
- * do a preliminary null-check on the argument</b>, except those dedicated to this task (like {@link
- * #notNull()}). They rely upon being embedded within in chain of checks on a {@link Check} object,
- * the first of which should be a <i>not-null</i> check.
+ * associated with them so you don't have to invent them yourself. Many of them are plain,
+ * unadorned, method references and only check what they advertise to be checking. Unless documented
+ * otherwise, they <i>will not</i> do a preliminary null check. The will throw a raw, unprocessed
+ * {@link NullPointerException} if the argument is null. They rely upon being embedded within in
+ * chain of checks, the first of which should be a null check (most likely {@link #notNull()}).
  *
  * @author Ayco Holleman
  */
 public class CommonChecks {
 
-  // Stores the error messages associated with the checks (or rather message
-  // generators)
-  static final IdentityHashMap<Object, Formatter> messages;
+  // Associates checks with String.format message patterns
+  static final IdentityHashMap<Object, Formatter> MESSAGE_PATTERNS;
   // Stores the names of the checks
-  static final IdentityHashMap<Object, String> names;
+  static final IdentityHashMap<Object, String> CHECK_NAMES;
 
   private static ArrayList<Tuple<Object, Formatter>> tmp0 = new ArrayList<>(50);
   private static ArrayList<Tuple<Object, String>> tmp1 = new ArrayList<>(50);
@@ -53,8 +49,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(nullPointer(), msgNullPointer());
-    addName(nullPointer(), "nullPointer");
+    setMessagePattern(nullPointer(), msgNullPointer());
+    setName(nullPointer(), "nullPointer");
   }
 
   /**
@@ -69,8 +65,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(notNull(), msgNotNull());
-    addName(notNull(), "notNull");
+    setMessagePattern(notNull(), msgNotNull());
+    setName(notNull(), "notNull");
   }
 
   /**
@@ -84,8 +80,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(yes(), msgYes());
-    addName(yes(), "yes");
+    setMessagePattern(yes(), msgYes());
+    setName(yes(), "yes");
   }
 
   /**
@@ -99,13 +95,13 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(no(), msgNo());
-    addName(no(), "no");
+    setMessagePattern(no(), msgNo());
+    setName(no(), "no");
   }
 
   /**
-   * Verifies that the argument is empty. Equivalent to {@link ObjectMethods#isEmpty(Object)
-   * ObjectMethods::isEmpty}.
+   * Verifies that the argument is empty. See {@link ObjectMethods#isEmpty(Object)
+   * ObjectMethods::isEmpty} for what counts as an empty object.
    *
    * @param <T> The type of the argument
    * @return A {@code Predicate}
@@ -115,29 +111,14 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(empty(), msgEmpty());
-    addName(empty(), "empty");
+    setMessagePattern(empty(), msgEmpty());
+    setName(empty(), "empty");
   }
 
   /**
-   * Verifies that the argument is not empty. Equivalent to {@link ObjectMethods#isNotEmpty(Object)
-   * ObjectMethods::isNotEmpty}.
-   *
-   * @param <T> The type of the argument
-   * @return A {@code Predicate}
-   */
-  public static <T> Predicate<T> notEmpty() {
-    return ObjectMethods::isNotEmpty;
-  }
-
-  static {
-    addMessage(notEmpty(), msgNotEmpty());
-    addName(notEmpty(), "notEmpty");
-  }
-
-  /**
-   * Verifies the argument is not null and does not contain any null values. Equivalent to {@link
-   * ObjectMethods#isNoneNull(Object) ObjectMethods::isNoneNull}.
+   * Verifies that the argument is not null and does not contain any null values. Equivalent to
+   * {@link ObjectMethods#isNoneNull(Object) ObjectMethods::isNoneNull}. Especially useful for
+   * validating varargs arguments.
    *
    * @param <T> The type of the argument
    * @return A {@code Predicate}
@@ -147,8 +128,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(noneNull(), msgNoneNull());
-    addName(noneNull(), "noneNull");
+    setMessagePattern(noneNull(), msgNoneNull());
+    setName(noneNull(), "noneNull");
   }
 
   /**
@@ -163,23 +144,24 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(deepNotEmpty(), msgDeepNotEmpty());
-    addName(deepNotEmpty(), "deepNotEmpty");
+    setMessagePattern(deepNotEmpty(), msgDeepNotEmpty());
+    setName(deepNotEmpty(), "deepNotEmpty");
   }
 
   /**
-   * Verifies that a {@code String} argument is not null and not blank. Equivalent to {@link
-   * StringMethods#isNotBlank(Object) StringMethods::isNotBlank}.
+   * Verifies that a {@code String} argument is null or contains whitespace only. Mainly meant to be
+   * called from the {code isNot} methods of the {@code Check} class, in which case it performs an
+   * implicit null check.
    *
    * @return A {@code Predicate}
    */
-  public static Predicate<String> notBlank() {
-    return StringMethods::isNotBlank;
+  public static Predicate<String> blank() {
+    return s -> s == null || s.isBlank();
   }
 
   static {
-    addMessage(notBlank(), msgNotBlank());
-    addName(notBlank(), "notBlank");
+    setMessagePattern(blank(), msgBlank());
+    setName(blank(), "blank");
   }
 
   /**
@@ -193,15 +175,15 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(integer(), msgInteger());
-    addName(integer(), "integer");
+    setMessagePattern(integer(), msgInteger());
+    setName(integer(), "integer");
   }
 
   /**
    * Verifies that a {@code String} argument is a valid port number. More precisely: that it can be
    * included as the port segment of a URL. That is: the string must not be blank, it must not start
-   * with '+' or '-' and it must be a short (max 65535). This method implicitly checks for null, so
-   * need not be preceeded by a {@link #notNull()} check.
+   * with '+' or '-' and it must be a positive {@code short} value (max 65535). This test performs a
+   * preliminary null check.
    *
    * @return A {@code Predicate}
    */
@@ -219,67 +201,67 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(validPortNumber(), msgValidPortNumber());
-    addName(validPortNumber(), "validPortNumber");
+    setMessagePattern(validPortNumber(), msgValidPortNumber());
+    setName(validPortNumber(), "validPortNumber");
   }
 
   /**
    * Verifies that the argument is an existing, regular file. Equivalent to {@link File#isFile()
    * File::isFile}.
    *
-   * @returnn A {@code Predicate}
+   * @return A {@code Predicate}
    */
-  public static Predicate<File> fileExists() {
+  public static Predicate<File> file() {
     return File::isFile;
   }
 
   static {
-    addMessage(fileExists(), msgFileExists());
-    addName(fileExists(), "fileExists");
+    setMessagePattern(file(), msgFile());
+    setName(file(), "file");
   }
 
   /**
    * Verifies that the argument is an existing directory. Equivalent to {@link File#isDirectory()
    * File::isDirectory}.
    *
-   * @returnn A {@code Predicate}
+   * @return A {@code Predicate}
    */
   public static Predicate<File> directory() {
     return File::isDirectory;
   }
 
   static {
-    addMessage(directory(), msgDirectory());
-    addName(directory(), "directory");
+    setMessagePattern(directory(), msgDirectory());
+    setName(directory(), "directory");
   }
 
   /**
-   * Verifies that the argument is not a file of any type.
+   * Verifies that the argument is an existing file of any type.
    *
-   * @returnn A {@code Predicate}
+   * @return A {@code Predicate}
    */
-  public static Predicate<File> fileNotExists() {
+  public static Predicate<File> present() {
     return f -> !f.exists();
   }
 
   static {
-    addMessage(fileNotExists(), msgFileNotExists());
-    addName(fileNotExists(), "fileNotExists");
+    setMessagePattern(present(), msgPresent());
+    setName(present(), "present");
   }
 
   /**
    * Verifies that the argument is a readable file (implies that the file exists). Equivalent to
    * {@link File#canRead() File::canRead}.
    *
-   * @returnn A {@code Predicate}
+   * @return A {@code Predicate}
    */
   public static Predicate<File> readable() {
     return File::canRead;
   }
 
   static {
-    addMessage(readable(), msgReadable());
-    addName(readable(), "readable");
+    setMessagePattern(readable(), msgReadable());
+    setName(readable(), "readable");
   }
 
   /**
@@ -293,8 +275,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(writable(), msgWritable());
-    addName(writable(), "writable");
+    setMessagePattern(writable(), msgWritable());
+    setName(writable(), "writable");
   }
 
   /* ++++++++++++++ IntPredicate ++++++++++++++ */
@@ -309,8 +291,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(even(), msgEven());
-    addName(even(), "even");
+    setMessagePattern(even(), msgEven());
+    setName(even(), "even");
   }
 
   /**
@@ -323,8 +305,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(odd(), msgOdd());
-    addName(odd(), "odd");
+    setMessagePattern(odd(), msgOdd());
+    setName(odd(), "odd");
   }
 
   /**
@@ -337,8 +319,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(positive(), msgPositive());
-    addName(positive(), "positive");
+    setMessagePattern(positive(), msgPositive());
+    setName(positive(), "positive");
   }
 
   /**
@@ -351,8 +333,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(negative(), msgNegative());
-    addName(negative(), "negative");
+    setMessagePattern(negative(), msgNegative());
+    setName(negative(), "negative");
   }
 
   /* ++++++++++++++ Relation ++++++++++++++ */
@@ -374,24 +356,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(instanceOf(), msgInstanceOf());
-    addName(instanceOf(), "instanceOf");
-  }
-
-  /**
-   * If the argument is a {@link Class} object, this method verifies that it is not a subclass or
-   * implementation of the specified class; otherwise that the argument is not an intance of it.
-   *
-   * @param <X> The type of the argument
-   * @return A {@code Relation}
-   */
-  public static <X> Relation<X, Class<?>> notInstanceOf() {
-    return (x, y) -> !y.isInstance(x);
-  }
-
-  static {
-    addMessage(notInstanceOf(), msgInstanceOf());
-    addName(notInstanceOf(), "notInstanceOf");
+    setMessagePattern(instanceOf(), msgInstanceOf());
+    setName(instanceOf(), "instanceOf");
   }
 
   /**
@@ -406,8 +372,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(array(), msgArray());
-    addName(array(), "array");
+    setMessagePattern(array(), msgArray());
+    setName(array(), "array");
   }
 
   /**
@@ -423,24 +389,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(containing(), msgContaining());
-    addName(containing(), "containing");
-  }
-
-  /**
-   * Verifies that a {@code Collection} does not contain a particular value.
-   *
-   * @param <E> The type of the elements in the {@code Collection}
-   * @param <C> The type of the argument
-   * @return A {@code Relation}
-   */
-  public static <E, C extends Collection<? super E>> Relation<C, E> notContaining() {
-    return (x, y) -> !x.contains(y);
-  }
-
-  static {
-    addMessage(notContaining(), msgNotContaining());
-    addName(notContaining(), "notContaining");
+    setMessagePattern(containing(), msgContaining());
+    setName(containing(), "containing");
   }
 
   /**
@@ -455,24 +405,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(in(), msgIn());
-    addName(in(), "in");
-  }
-
-  /**
-   * Verifies the absence of an element within a {@code Collection}.
-   *
-   * @param <E> The type of the argument
-   * @param <C> The type of the {@code Collection}
-   * @return A {@code Relation}
-   */
-  public static <E, C extends Collection<? super E>> Relation<E, C> notIn() {
-    return (x, y) -> !y.contains(x);
-  }
-
-  static {
-    addMessage(notIn(), msgNotIn());
-    addName(notIn(), "notIn");
+    setMessagePattern(in(), msgIn());
+    setName(in(), "in");
   }
 
   /**
@@ -490,8 +424,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(supersetOf(), msgSupersetOf());
-    addName(supersetOf(), "supersetOf");
+    setMessagePattern(supersetOf(), msgSupersetOf());
+    setName(supersetOf(), "supersetOf");
   }
 
   /**
@@ -508,8 +442,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(subsetOf(), msgSubsetOf());
-    addName(subsetOf(), "subsetOf");
+    setMessagePattern(subsetOf(), msgSubsetOf());
+    setName(subsetOf(), "subsetOf");
   }
 
   /**
@@ -525,24 +459,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(containingKey(), msgContainingKey());
-    addName(containingKey(), "containingKey");
-  }
-
-  /**
-   * Verifies that a {@code Map} does not contain a key.
-   *
-   * @param <K> The type of the keys within the map
-   * @param <M> The Type of the {@code Map}
-   * @return A {@code Relation}
-   */
-  public static <K, M extends Map<? super K, ?>> Relation<M, K> notContainingKey() {
-    return (x, y) -> !x.containsKey(y);
-  }
-
-  static {
-    addMessage(notContainingKey(), msgNotContainingKey());
-    addName(notContainingKey(), "notContainingKey");
+    setMessagePattern(containingKey(), msgContainingKey());
+    setName(containingKey(), "containingKey");
   }
 
   /**
@@ -557,24 +475,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(keyIn(), msgKeyIn());
-    addName(keyIn(), "keyIn");
-  }
-
-  /**
-   * Verifies the absence of a key withinin a {@code Map}.
-   *
-   * @param <K> The type of the keys within the map
-   * @param <M> The Type of the {@code Map}
-   * @return A {@code Relation}
-   */
-  public static <K, M extends Map<? super K, ?>> Relation<K, M> notKeyIn() {
-    return (x, y) -> !y.containsKey(x);
-  }
-
-  static {
-    addMessage(notKeyIn(), msgNotKeyIn());
-    addName(notKeyIn(), "notKeyIn");
+    setMessagePattern(keyIn(), msgKeyIn());
+    setName(keyIn(), "keyIn");
   }
 
   /**
@@ -590,24 +492,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(containingValue(), msgContainingValue());
-    addName(containingValue(), "containingValue");
-  }
-
-  /**
-   * Verifies that a {@code Map} does not contain a value.
-   *
-   * @param <V> The type of the values within the map
-   * @param <M> The Type of the {@code Map}
-   * @return A {@code Relation}
-   */
-  public static <V, M extends Map<?, ? super V>> Relation<M, V> notContainingValue() {
-    return (x, y) -> !x.containsValue(y);
-  }
-
-  static {
-    addMessage(notContainingValue(), msgNotContainingValue());
-    addName(notContainingValue(), "notContainingValue");
+    setMessagePattern(containingValue(), msgContainingValue());
+    setName(containingValue(), "containingValue");
   }
 
   /**
@@ -622,24 +508,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(valueIn(), msgValueIn());
-    addName(valueIn(), "valueIn");
-  }
-
-  /**
-   * Verifies the absence of a value withinin a {@code Map}.
-   *
-   * @param <K> The type of the keys within the map
-   * @param <M> The Type of the {@code Map}
-   * @return A {@code Relation}
-   */
-  public static <K, M extends Map<? super K, ?>> Relation<K, M> notValueIn() {
-    return (x, y) -> !y.containsValue(x);
-  }
-
-  static {
-    addMessage(notValueIn(), msgNotValueIn());
-    addName(notValueIn(), "notValueIn");
+    setMessagePattern(valueIn(), msgValueIn());
+    setName(valueIn(), "valueIn");
   }
 
   /**
@@ -655,24 +525,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(inArray(), msgIn()); // recycle message
-    addName(inArray(), "inArray");
-  }
-
-  /**
-   * Verifies the absence of an element within an array.
-   *
-   * @param <X> The type of the argument
-   * @param <Y> The component type of the array
-   * @return A {@code Relation}
-   */
-  public static <Y, X extends Y> Relation<X, Y[]> notInArray() {
-    return (x, y) -> !ArrayMethods.inArray(x, y);
-  }
-
-  static {
-    addMessage(notInArray(), msgNotIn());
-    addName(notInArray(), "notInArray");
+    setMessagePattern(inArray(), msgIn()); // recycle message
+    setName(inArray(), "inArray");
   }
 
   /**
@@ -687,33 +541,22 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(equalTo(), msgEqualTo());
-    addName(equalTo(), "equalTo");
+    setMessagePattern(equalTo(), msgEqualTo());
+    setName(equalTo(), "equalTo");
   }
 
   /**
-   * Verifies that the argument is not equal to a particular value.
+   * Verifies that a {@code String} is present, ignoring case, in a {@code List} of strings.
    *
-   * @param <X> The type of the argument
-   * @return A {@code Relation}
+   * @return
    */
-  public static <X> Relation<X, X> notEqualTo() {
-    return (x, y) -> !Objects.equals(x, y);
-  }
-
-  static {
-    addMessage(notEqualTo(), msgNotEqualTo());
-    addName(notEqualTo(), "notEqualTo");
-  }
-
   public static Relation<String, List<String>> equalsIgnoreCase() {
-    return (x, y) ->
-        y.stream().filter(notNull()).filter(s -> s.equalsIgnoreCase(x)).findAny().isPresent();
+    return (x, y) -> y.stream().anyMatch(s -> s.equalsIgnoreCase(x));
   }
 
   static {
-    addMessage(equalsIgnoreCase(), msgEqualsIgnoreCase());
-    addName(equalsIgnoreCase(), "equalsIgnoreCase");
+    setMessagePattern(equalsIgnoreCase(), msgEqualsIgnoreCase());
+    setName(equalsIgnoreCase(), "equalsIgnoreCase");
   }
 
   /**
@@ -728,24 +571,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(sameAs(), msgSameAs());
-    addName(sameAs(), "sameAs");
-  }
-
-  /**
-   * Verifies that the argument does not reference the same object than some other reference.
-   *
-   * @param <X> The type of the argument (the subject of the {@code Relation})
-   * @param <Y> The type of object of the {@code Relation}
-   * @return A {@code Relation}
-   */
-  public static <X, Y> Relation<X, Y> notSameAs() {
-    return (x, y) -> x != y;
-  }
-
-  static {
-    addMessage(notSameAs(), msgNotSameAs());
-    addName(notSameAs(), "notSameAs");
+    setMessagePattern(sameAs(), msgSameAs());
+    setName(sameAs(), "sameAs");
   }
 
   /**
@@ -759,25 +586,27 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(nullOr(), msgNullOr());
-    addName(nullOr(), "nullOr");
+    setMessagePattern(nullOr(), msgNullOr());
+    setName(nullOr(), "nullOr");
   }
 
   /**
-   * Verifies that the argument is greater than a particular value, widening both to {@code double}
-   * before comparing them.
+   * Verifies that a {@code Number} is greater than another {@code Number} , widening both to {@code
+   * Double} before comparing them. Use when testing any type of numbers besides {@code int} or
+   * {@code Integer}.
    *
+   * @see #gt()
    * @param <X> The type of the argument
    * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> greaterThan() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> GT() {
     return (x, y) -> x.doubleValue() > y.doubleValue();
   }
 
   static {
-    addMessage(greaterThan(), msgGt()); // recycle message
-    addName(greaterThan(), "greaterThan");
+    setMessagePattern(GT(), msgGt()); // recycle message
+    setName(GT(), "GT");
   }
 
   /**
@@ -788,13 +617,13 @@ public class CommonChecks {
    * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> atLeast() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> GTE() {
     return (x, y) -> x.doubleValue() >= y.doubleValue();
   }
 
   static {
-    addMessage(atLeast(), msgGte()); // recycle message
-    addName(atLeast(), "atLeast");
+    setMessagePattern(GTE(), msgGte()); // recycle message
+    setName(GTE(), "GTE");
   }
 
   /**
@@ -803,13 +632,13 @@ public class CommonChecks {
    *
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> lessThan() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> LT() {
     return (x, y) -> x.doubleValue() < y.doubleValue();
   }
 
   static {
-    addMessage(lessThan(), msgLt()); // recycle message
-    addName(lessThan(), "lessThan");
+    setMessagePattern(LT(), msgLt()); // recycle message
+    setName(LT(), "LT");
   }
 
   /**
@@ -820,13 +649,13 @@ public class CommonChecks {
    * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> atMost() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> LTE() {
     return (x, y) -> x.doubleValue() <= y.doubleValue();
   }
 
   static {
-    addMessage(atMost(), msgLte()); // recycle message
-    addName(atMost(), "atMost");
+    setMessagePattern(LTE(), msgLte()); // recycle message
+    setName(LTE(), "LTE");
   }
 
   /**
@@ -840,26 +669,12 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(endsWith(), msgEndsWith());
-    addName(endsWith(), "endsWith");
+    setMessagePattern(endsWith(), msgEndsWith());
+    setName(endsWith(), "endsWith");
   }
 
   /**
-   * Verifies that the argument does not end with a particular character sequence.
-   *
-   * @return A {@code Relation}
-   */
-  public static Relation<String, String> notEndsWith() {
-    return (x, y) -> !x.endsWith(y);
-  }
-
-  static {
-    addMessage(notEndsWith(), msgNotEndsWith());
-    addName(notEndsWith(), "notEndsWith");
-  }
-
-  /**
-   * Verifies that the argument contains a particular character sequence. Equivalent to {@link
+   * Verifies that a {@code String} contains a {@code CharSequence}. Equivalent to {@link
    * String#contains(CharSequence) String::contains}.
    *
    * @return A {@code Relation}
@@ -869,276 +684,120 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(hasSubstr(), msgHasSubstr());
-    addName(hasSubstr(), "hasSubstr");
-  }
-
-  /**
-   * Verifies that the argument does not contain a particular character sequence.
-   *
-   * @return A {@code Relation}
-   */
-  public static <T extends CharSequence> Relation<String, T> notHasSubstr() {
-    return (x, y) -> !x.contains(y);
-  }
-
-  static {
-    addMessage(notHasSubstr(), msgNotHasSubstr());
-    addName(notHasSubstr(), "notHasSubstr");
+    setMessagePattern(hasSubstr(), msgHasSubstr());
+    setName(hasSubstr(), "hasSubstr");
   }
 
   /* ++++++++++++++ ObjIntRelation ++++++++++++++ */
 
   /**
-   * Verifies that the argument's length or size is equal to a particular value. The type of
-   * argument must be one of:
+   * Verifies that that {@code Collection} has a size equal to some integer value. Mainly meant to
+   * be called from the {@code has} methods of the {@code Check} class. In other words, when testing
+   * a {@code Collection}-type property of the argument rather than the argument itself. If the
+   * argument is itself a {@code Collection}, you can test this more concicely using {@code
+   * Check.that(myCollection).has(size(), eq(), 42)}.
    *
-   * <p>
-   *
-   * <ul>
-   *   <li>an array
-   *   <li>a {@link CharSequence}
-   *   <li>a {@link Collection}
-   *   <li>a {@link Map}
-   *   <li>a {@link Sizeable}
-   * </ul>
-   *
-   * <p>For any other type of argument this method throws an {@link InvalidCheckException}.
-   *
-   * @param <X> The type of the argument
-   * @return A {@code Relation}
+   * @see CommonGetters#size()
+   * @see #eq()
+   * @param <E> The type of the elements of the collection
+   * @param <C> The type of the collection
+   * @return An {@code ObjIntRelation} that expresses the described test
    */
-  @SuppressWarnings("rawtypes")
-  public static <X> ObjIntRelation<X> sizeEquals() {
-    return (x, y) -> {
-      if (x instanceof CharSequence) {
-        return ((CharSequence) x).length() == y;
-      } else if (x instanceof Collection) {
-        return ((Collection) x).size() == y;
-      } else if (x instanceof Map) {
-        return ((Map) x).size() == y;
-      } else if (x.getClass().isArray()) {
-        return Array.getLength(x) == y;
-      } else if (x instanceof Sizeable) {
-        return ((Sizeable) x).size() == y;
-      }
-      throw notApplicable(sizeEquals(), x);
-    };
+  public static <E, C extends Collection<? super E>> ObjIntRelation<C> sizeEquals() {
+    return (x, y) -> x.size() == y;
   }
 
   static {
-    addMessage(sizeEquals(), msgSizeEquals());
-    addName(sizeEquals(), "sizeEquals");
+    setMessagePattern(sizeEquals(), msgSizeEquals());
+    setName(sizeEquals(), "sizeEquals");
   }
 
   /**
-   * Verifies that the argument's length or size is not equal to a particular value. The type of
-   * argument must be one of:
+   * Verifies that that {@code Collection} has a size greater than some integer value. Mainly meant
+   * to be called from the {@code has} methods of the {@code Check} class. In other words, when
+   * testing a {@code Collection}-type property of the argument rather than the argument itself. If
+   * the argument is itself a {@code Collection}, you can test this more concicely using {@code
+   * Check.that(myCollection).has(size(), gt(), 42)}.
    *
-   * <p>
-   *
-   * <ul>
-   *   <li>an array
-   *   <li>a {@link CharSequence}
-   *   <li>a {@link Collection}
-   *   <li>a {@link Map}
-   *   <li>a {@link Sizeable}
-   * </ul>
-   *
-   * <p>For any other type of argument this method throws an {@link InvalidCheckException}.
-   *
-   * @param <X> The type of the argument
-   * @return A {@code Relation}
+   * @see CommonGetters#size()
+   * @see #gt()
+   * @param <E> The type of the elements of the collection
+   * @param <C> The type of the collection
+   * @return An {@code ObjIntRelation} that expresses the described test
    */
-  @SuppressWarnings("rawtypes")
-  public static <X> ObjIntRelation<X> sizeNotEquals() {
-    return (x, y) -> {
-      if (x instanceof CharSequence) {
-        return ((CharSequence) x).length() != y;
-      } else if (x instanceof Collection) {
-        return ((Collection) x).size() != y;
-      } else if (x instanceof Map) {
-        return ((Map) x).size() != y;
-      } else if (x.getClass().isArray()) {
-        return Array.getLength(x) != y;
-      } else if (x instanceof Sizeable) {
-        return ((Sizeable) x).size() != y;
-      }
-      throw notApplicable(sizeNotEquals(), x);
-    };
+  public static <E, C extends Collection<? super E>> ObjIntRelation<C> sizeGT() {
+    return (x, y) -> x.size() > y;
   }
 
   static {
-    addMessage(sizeNotEquals(), msgSizeNotEquals());
-    addName(sizeNotEquals(), "sizeNotEquals");
+    setMessagePattern(sizeGT(), msgSizeGT());
+    setName(sizeGT(), "sizeGT");
   }
 
   /**
-   * Verifies that the argument's length or size is greater than a particular value. The type of
-   * argument must be one of:
+   * Verifies that that {@code Collection} has a size equal to, or greater than some integer value.
+   * Mainly meant to be called from the {@code has} methods of the {@code Check} class. In other
+   * words, when testing a {@code Collection}-type property of the argument rather than the argument
+   * itself. If the argument is itself a {@code Collection}, you can test this more concicely using
+   * {@code Check.that(myCollection).has(size(), gte(), 42)}.
    *
-   * <p>
-   *
-   * <ul>
-   *   <li>an array
-   *   <li>a {@link CharSequence}
-   *   <li>a {@link Collection}
-   *   <li>a {@link Map}
-   *   <li>a {@link Sizeable}
-   * </ul>
-   *
-   * <p>For any other type of argument this method throws an {@link InvalidCheckException}.
-   *
-   * @param <X> The type of the argument
-   * @return A {@code Relation}
+   * @see CommonGetters#size()
+   * @see #gte()
+   * @param <E> The type of the elements of the collection
+   * @param <C> The type of the collection
+   * @return An {@code ObjIntRelation} that expresses the described test
    */
-  @SuppressWarnings("rawtypes")
-  public static <X> ObjIntRelation<X> sizeGreaterThan() {
-    return (x, y) -> {
-      if (x instanceof CharSequence) {
-        return ((CharSequence) x).length() > y;
-      } else if (x instanceof Collection) {
-        return ((Collection) x).size() > y;
-      } else if (x instanceof Map) {
-        return ((Map) x).size() > y;
-      } else if (x.getClass().isArray()) {
-        return Array.getLength(x) > y;
-      } else if (x instanceof Sizeable) {
-        return ((Sizeable) x).size() > y;
-      }
-      throw notApplicable(sizeGreaterThan(), x);
-    };
+  public static <E, C extends Collection<? super E>> ObjIntRelation<C> sizeGTE() {
+    return (x, y) -> x.size() >= y;
   }
 
   static {
-    addMessage(sizeGreaterThan(), msgSizeGreaterThan());
-    addName(sizeGreaterThan(), "sizeGreaterThan");
+    setMessagePattern(sizeGTE(), msgSizeGTE());
+    setName(sizeGTE(), "sizeGTE");
   }
 
   /**
-   * Verifies that the argument's length or size is greater than or equal to a particular value. The
-   * type of argument must be one of:
+   * Verifies that that {@code Collection} has a size less than some integer value. Mainly meant to
+   * be called from the {@code has} methods of the {@code Check} class. In other words, when testing
+   * a {@code Collection}-type property of the argument rather than the argument itself. If the
+   * argument is itself a {@code Collection}, you can test this more concicely using {@code
+   * Check.that(myCollection).has(size(), lt(), 42)}.
    *
-   * <p>
-   *
-   * <ul>
-   *   <li>an array
-   *   <li>a {@link CharSequence}
-   *   <li>a {@link Collection}
-   *   <li>a {@link Map}
-   *   <li>a {@link Sizeable}
-   * </ul>
-   *
-   * <p>For any other type of argument this method throws an {@link InvalidCheckException}.
-   *
-   * @param <X> The type of the argument
-   * @return A {@code Relation}
+   * @see CommonGetters#size()
+   * @see #lt()
+   * @param <E> The type of the elements of the collection
+   * @param <C> The type of the collection
+   * @return An {@code ObjIntRelation} that expresses the described test
    */
-  @SuppressWarnings("rawtypes")
-  public static <X> ObjIntRelation<X> sizeAtLeast() {
-    return (x, y) -> {
-      if (x instanceof CharSequence) {
-        return ((CharSequence) x).length() >= y;
-      } else if (x instanceof Collection) {
-        return ((Collection) x).size() >= y;
-      } else if (x instanceof Map) {
-        return ((Map) x).size() >= y;
-      } else if (x.getClass().isArray()) {
-        return Array.getLength(x) >= y;
-      } else if (x instanceof Sizeable) {
-        return ((Sizeable) x).size() >= y;
-      }
-      throw notApplicable(sizeAtLeast(), x);
-    };
+  public static <E, C extends Collection<? super E>> ObjIntRelation<C> sizeLT() {
+    return (x, y) -> x.size() < y;
   }
 
   static {
-    addMessage(sizeAtLeast(), msgSizeAtLeast());
-    addName(sizeAtLeast(), "sizeAtLeast");
+    setMessagePattern(sizeLT(), msgSizeLT());
+    setName(sizeLT(), "sizeLT");
   }
 
   /**
-   * Verifies that the argument's length or size is less than a particular value. The type of
-   * argument must be one of:
+   * Verifies that that {@code Collection} has a size less than, or equal to some integer value.
+   * Mainly meant to be called from the {@code has} methods of the {@code Check} class. In other
+   * words, when testing a {@code Collection}-type property of the argument rather than the argument
+   * itself. If the argument is itself a {@code Collection}, you can test this more concicely using
+   * {@code Check.that(myCollection).has(size(), eq(), 42)}.
    *
-   * <p>
-   *
-   * <ul>
-   *   <li>an array
-   *   <li>a {@link CharSequence}
-   *   <li>a {@link Collection}
-   *   <li>a {@link Map}
-   *   <li>a {@link Sizeable}
-   * </ul>
-   *
-   * <p>For any other type of argument this method throws an {@link InvalidCheckException}.
-   *
-   * @param <X> The type of the argument
-   * @return A {@code Relation}
+   * @see CommonGetters#size()
+   * @see #lte()
+   * @param <E> The type of the elements of the collection
+   * @param <C> The type of the collection
+   * @return An {@code ObjIntRelation} that expresses the described test
    */
-  @SuppressWarnings("rawtypes")
-  public static <X> ObjIntRelation<X> sizeLessThan() {
-    return (x, y) -> {
-      if (x instanceof CharSequence) {
-        return ((CharSequence) x).length() < y;
-      } else if (x instanceof Collection) {
-        return ((Collection) x).size() < y;
-      } else if (x instanceof Map) {
-        return ((Map) x).size() < y;
-      } else if (x.getClass().isArray()) {
-        return Array.getLength(x) < y;
-      } else if (x instanceof Sizeable) {
-        return ((Sizeable) x).size() < y;
-      }
-      throw notApplicable(sizeLessThan(), x);
-    };
+  public static <E, C extends Collection<? super E>> ObjIntRelation<C> sizeLTE() {
+    return (x, y) -> x.size() <= y;
   }
 
   static {
-    addMessage(sizeLessThan(), msgSizeLessThan());
-    addName(sizeLessThan(), "sizeLessThan");
-  }
-
-  /**
-   * Verifies that the argument's length or size is less than a particular value. The type of
-   * argument must be one of:
-   *
-   * <p>
-   *
-   * <ul>
-   *   <li>an array
-   *   <li>a {@link CharSequence}
-   *   <li>a {@link Collection}
-   *   <li>a {@link Map}
-   *   <li>a {@link Sizeable}
-   * </ul>
-   *
-   * <p>For any other type of argument this method throws an {@link InvalidCheckException}.
-   *
-   * @param <X> The type of the argument
-   * @return A {@code Relation}
-   */
-  @SuppressWarnings("rawtypes")
-  public static <X> ObjIntRelation<X> sizeAtMost() {
-    return (x, y) -> {
-      if (x instanceof CharSequence) {
-        return ((CharSequence) x).length() <= y;
-      } else if (x instanceof Collection) {
-        return ((Collection) x).size() <= y;
-      } else if (x instanceof Map) {
-        return ((Map) x).size() <= y;
-      } else if (x.getClass().isArray()) {
-        return Array.getLength(x) <= y;
-      } else if (x instanceof Sizeable) {
-        return ((Sizeable) x).size() <= y;
-      }
-      throw notApplicable(sizeGreaterThan(), x);
-    };
-  }
-
-  static {
-    addMessage(sizeAtMost(), msgSizeAtMost());
-    addName(sizeAtMost(), "sizeAtMost");
+    setMessagePattern(sizeLTE(), msgSizeLTE());
+    setName(sizeLTE(), "sizeLTE");
   }
 
   /* ++++++++++++++ IntObjRelation ++++++++++++++ */
@@ -1157,8 +816,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(indexOf(), msgIndexOf());
-    addName(indexOf(), "indexOf");
+    setMessagePattern(indexOf(), msgIndexOf());
+    setName(indexOf(), "indexOf");
   }
 
   /**
@@ -1173,8 +832,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(toIndexOf(), msgToIndexOf());
-    addName(toIndexOf(), "toIndexOf");
+    setMessagePattern(toIndexOf(), msgToIndexOf());
+    setName(toIndexOf(), "toIndexOf");
   }
 
   /* ++++++++++++++ IntRelation ++++++++++++++ */
@@ -1189,8 +848,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(eq(), msgEq());
-    addName(eq(), "eq");
+    setMessagePattern(eq(), msgEq());
+    setName(eq(), "eq");
   }
 
   /**
@@ -1203,8 +862,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(ne(), msgNe());
-    addName(ne(), "ne");
+    setMessagePattern(ne(), msgNe());
+    setName(ne(), "ne");
   }
 
   /**
@@ -1217,8 +876,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(gt(), msgGt());
-    addName(gt(), "gt");
+    setMessagePattern(gt(), msgGt());
+    setName(gt(), "gt");
   }
 
   /**
@@ -1231,8 +890,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(gte(), msgGte());
-    addName(gte(), "gte");
+    setMessagePattern(gte(), msgGte());
+    setName(gte(), "gte");
   }
 
   /**
@@ -1245,8 +904,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(lt(), msgLt());
-    addName(lt(), "lt");
+    setMessagePattern(lt(), msgLt());
+    setName(lt(), "lt");
   }
 
   /**
@@ -1259,8 +918,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(lte(), msgLte());
-    addName(lte(), "lte");
+    setMessagePattern(lte(), msgLte());
+    setName(lte(), "lte");
   }
 
   /**
@@ -1273,8 +932,8 @@ public class CommonChecks {
   }
 
   static {
-    addMessage(multipleOf(), msgMultipleOf());
-    addName(multipleOf(), "multipleOf");
+    setMessagePattern(multipleOf(), msgMultipleOf());
+    setName(multipleOf(), "multipleOf");
   }
 
   /* ++++++++++++++ Miscellaneous ++++++++++++++ */
@@ -1315,10 +974,10 @@ public class CommonChecks {
   /* ++++++++++++++ END OF CHECKS ++++++++++++++ */
 
   static {
-    messages = new IdentityHashMap<>(tmp0.size());
-    names = new IdentityHashMap<>(tmp1.size());
-    tmp0.forEach(tuple -> tuple.insertInto(messages));
-    tmp1.forEach(tuple -> tuple.insertInto(names));
+    MESSAGE_PATTERNS = new IdentityHashMap<>(tmp0.size());
+    CHECK_NAMES = new IdentityHashMap<>(tmp1.size());
+    tmp0.forEach(tuple -> tuple.insertInto(MESSAGE_PATTERNS));
+    tmp1.forEach(tuple -> tuple.insertInto(CHECK_NAMES));
     tmp0 = null;
     tmp1 = null;
   }
@@ -1326,34 +985,38 @@ public class CommonChecks {
   private static final String suffix = "()";
 
   static String nameOf(Predicate<?> test) {
-    return ifNotNull(names.get(test), name -> name + suffix, prettySimpleClassName(test));
+    return ifNotNull(CHECK_NAMES.get(test), name -> name + suffix, Predicate.class.getSimpleName());
   }
 
   static String nameOf(IntPredicate test) {
-    return ifNotNull(names.get(test), name -> name + suffix, prettySimpleClassName(test));
+    return ifNotNull(
+        CHECK_NAMES.get(test), name -> name + suffix, IntPredicate.class.getSimpleName());
   }
 
   static String nameOf(Relation<?, ?> test) {
-    return ifNotNull(names.get(test), name -> name + suffix, prettySimpleClassName(test));
+    return ifNotNull(CHECK_NAMES.get(test), name -> name + suffix, Relation.class.getSimpleName());
   }
 
   static String nameOf(IntRelation test) {
-    return ifNotNull(names.get(test), name -> name + suffix, prettySimpleClassName(test));
+    return ifNotNull(
+        CHECK_NAMES.get(test), name -> name + suffix, IntRelation.class.getSimpleName());
   }
 
   static String nameOf(ObjIntRelation<?> test) {
-    return ifNotNull(names.get(test), name -> name + suffix, prettySimpleClassName(test));
+    return ifNotNull(
+        CHECK_NAMES.get(test), name -> name + suffix, ObjIntRelation.class.getSimpleName());
   }
 
   static String nameOf(IntObjRelation<?> test) {
-    return ifNotNull(names.get(test), name -> name + suffix, prettySimpleClassName(test));
+    return ifNotNull(
+        CHECK_NAMES.get(test), name -> name + suffix, IntObjRelation.class.getSimpleName());
   }
 
-  private static void addMessage(Object test, Formatter message) {
+  private static void setMessagePattern(Object test, Formatter message) {
     tmp0.add(Tuple.of(test, message));
   }
 
-  private static void addName(Object test, String name) {
+  private static void setName(Object test, String name) {
     tmp1.add(Tuple.of(test, name));
   }
 }

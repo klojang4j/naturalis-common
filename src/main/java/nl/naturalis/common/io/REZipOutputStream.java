@@ -9,8 +9,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import nl.naturalis.common.Tuple;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.notEqualTo;
-import static nl.naturalis.common.check.CommonChecks.notKeyIn;
+import static nl.naturalis.common.check.CommonChecks.equalTo;
+import static nl.naturalis.common.check.CommonChecks.keyIn;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
@@ -137,8 +137,8 @@ public class REZipOutputStream extends OutputStream {
       Check.notNull(out, "out");
       String name = entry.getName();
       Check.that(name)
-          .is(notEqualTo(), mainEntry.getName(), DUPLICATE_ENTRY, name)
-          .is(notKeyIn(), sideEntries, DUPLICATE_ENTRY, name)
+          .isNot(equalTo(), mainEntry.getName(), DUPLICATE_ENTRY, name)
+          .isNot(keyIn(), sideEntries, DUPLICATE_ENTRY, name)
           .then(n -> sideEntries.put(n, Tuple.of(entry, out)));
       return this;
     }

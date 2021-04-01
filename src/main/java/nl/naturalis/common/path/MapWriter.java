@@ -3,9 +3,8 @@ package nl.naturalis.common.path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.check.CommonChecks.empty;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
-import static nl.naturalis.common.check.CommonChecks.notEmpty;
-import static nl.naturalis.common.check.CommonChecks.notInstanceOf;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 import static nl.naturalis.common.path.Path.EMPTY_PATH;
 
@@ -86,7 +85,7 @@ public class MapWriter {
   }
 
   public MapWriter in(String path) {
-    Check.that(path, "path").is(notEmpty());
+    Check.that(path, "path").isNot(empty());
     return in(this, new Path(path));
   }
 
@@ -130,7 +129,7 @@ public class MapWriter {
 
   private static void write(MapWriter writer, Path relPath, Object value) {
     if (value != null) {
-      Check.that(value, "value").is(notInstanceOf(), Map.class);
+      Check.that(value, "value").isNot(instanceOf(), Map.class);
     }
     if (relPath.size() == 1) {
       writer.index.put(relPath.toString(), value);

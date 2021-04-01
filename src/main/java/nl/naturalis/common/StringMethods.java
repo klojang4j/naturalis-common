@@ -71,7 +71,7 @@ public final class StringMethods {
    * @return The number of occurrences of {@code substr} within {@code subject}
    */
   public static int count(Object subject, String substr, boolean ignoreCase) {
-    Check.that(substr, "substr").is(notEmpty());
+    Check.that(substr, "substr").isNot(empty());
     if (subject == null) {
       return 0;
     }
@@ -109,7 +109,7 @@ public final class StringMethods {
    * @return The number of non-overlapping occurrences of {@code substr} within {@code subject}
    */
   public static int countDiscrete(Object subject, String substr, boolean ignoreCase) {
-    Check.that(substr, "substr").is(notEmpty());
+    Check.that(substr, "substr").isNot(empty());
     if (subject == null) {
       return 0;
     }
@@ -174,7 +174,7 @@ public final class StringMethods {
    * @return A human-friendly representation of the duration of the specified time interval
    */
   public static String interval(long start, long end) {
-    Check.that(end).is(atLeast(), start, "Negative time interval");
+    Check.that(end).is(GTE(), start, "Negative time interval");
     return duration(end - start);
   }
 
@@ -417,7 +417,7 @@ public final class StringMethods {
   public static int[] getLineAndColumn(String str, int index, String lineSep) {
     Check.notNull(str, "str");
     Check.that(index, "index").is(gte(), 0).is(lt(), str.length());
-    Check.that(lineSep, "lineSep").is(notEmpty());
+    Check.that(lineSep, "lineSep").isNot(empty());
     if (index == 0) {
       return new int[] {0, 0};
     }
@@ -510,7 +510,7 @@ public final class StringMethods {
    *     specified characters
    */
   public static String ltrim(Object subject, String chars) {
-    Check.that(chars, "chars").is(notEmpty());
+    Check.that(chars, "chars").isNot(empty());
     if (subject == null) {
       return EMPTY;
     }
@@ -712,7 +712,7 @@ public final class StringMethods {
    *     specified characters
    */
   public static String rtrim(Object subject, String chars) {
-    Check.that(chars, "chars").is(notEmpty());
+    Check.that(chars, "chars").isNot(empty());
     if (subject == null) {
       return EMPTY;
     }
@@ -813,7 +813,7 @@ public final class StringMethods {
    */
   public static String substrFrom(String str, String from, boolean last) {
     Check.notNull(str, "str");
-    Check.that(from, "from").is(notEmpty());
+    Check.that(from, "from").isNot(empty());
     int i = last ? str.lastIndexOf(from) : str.indexOf(from);
     return i == -1 ? str : str.substring(i);
   }
@@ -869,7 +869,7 @@ public final class StringMethods {
    */
   public static String substrAfter(String str, String after, boolean last) {
     Check.notNull(str, "str");
-    Check.that(after, "from").is(notEmpty());
+    Check.that(after, "from").isNot(empty());
     int i = last ? str.lastIndexOf(after) : str.indexOf(after);
     int j = after.length();
     return i + j == str.length() ? EMPTY : i == -1 ? str : str.substring(i + j);
@@ -925,7 +925,7 @@ public final class StringMethods {
    */
   public static String substrTo(String str, String to, boolean last) {
     Check.notNull(str, "str");
-    Check.that(to, "to").is(notEmpty());
+    Check.that(to, "to").isNot(empty());
     int i = last ? str.lastIndexOf(to) : str.indexOf(to);
     return i == -1 ? str : str.substring(0, i);
   }

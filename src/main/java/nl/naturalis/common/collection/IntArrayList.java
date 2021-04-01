@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.util.AugmentationType;
-import static nl.naturalis.common.check.CommonChecks.greaterThan;
+import static nl.naturalis.common.check.CommonChecks.GT;
 import static nl.naturalis.common.check.CommonChecks.gt;
 import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonChecks.lt;
@@ -51,7 +51,7 @@ public class IntArrayList implements IntList {
 
   public IntArrayList(int capacity, float enlargeBy, AugmentationType incrementType) {
     this.buf = Check.that(capacity, "capacity").is(gt(), 0).ok(int[]::new);
-    this.eb = Check.that(enlargeBy, "incrementBy").is(greaterThan(), 0).ok();
+    this.eb = Check.that(enlargeBy, "incrementBy").is(GT(), 0).ok();
     this.at = Check.notNull(incrementType, "incrementType").ok();
   }
 

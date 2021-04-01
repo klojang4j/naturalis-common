@@ -20,10 +20,10 @@ public class MessagesTest {
   public void gte01() {
     int argument = 2;
     String argName = "foo";
-    int target = 5;
+    int object = 5;
     String expected = "foo must be >= 5 (was 2)";
     System.out.println(expected);
-    String actual = Messages.createMessage(gte(), argName, argument, target);
+    String actual = Messages.createMessage(gte(), false, argName, argument, object);
     System.out.println(actual);
     assertEquals(expected, actual);
   }
@@ -32,10 +32,10 @@ public class MessagesTest {
   public void atLeast01() {
     Double argument = 2.0;
     String argName = "foo";
-    Short target = 5;
+    Short object = 5;
     String expected = "foo must be >= 5 (was 2.0)";
     System.out.println(expected);
-    String actual = Messages.createMessage(atLeast(), argName, argument, target);
+    String actual = Messages.createMessage(GTE(), false, argName, argument, object);
     System.out.println(actual);
     assertEquals(expected, actual);
   }
@@ -44,10 +44,10 @@ public class MessagesTest {
   public void greaterThan01() {
     Long argument = 4L;
     String argName = "foo";
-    Float target = 5F;
+    Float object = 5F;
     String expected = "foo must be > 5.0 (was 4)";
     System.out.println(expected);
-    String actual = Messages.createMessage(greaterThan(), argName, argument, target);
+    String actual = Messages.createMessage(GT(), false, argName, argument, object);
     System.out.println(actual);
     assertEquals(expected, actual);
   }
@@ -56,11 +56,11 @@ public class MessagesTest {
   public void contains01() {
     Collection<Object> argument = new ArrayList<>();
     String argName = "foo";
-    Object target = new Object();
-    String s = target.getClass().getSimpleName() + "@" + System.identityHashCode(target);
+    Object object = new Object();
+    String s = object.getClass().getSimpleName() + "@" + System.identityHashCode(object);
     String expected = "foo must contain " + s;
     System.out.println(expected);
-    String actual = Messages.createMessage(containing(), argName, argument, target);
+    String actual = Messages.createMessage(containing(), false, argName, argument, object);
     System.out.println(actual);
     assertEquals(expected, actual);
   }
@@ -70,13 +70,13 @@ public class MessagesTest {
   public void in01() {
     Object argument = "Hello world, how are you?";
     String argName = "foo";
-    LinkedHashSet<?> target = new LinkedHashSet<>();
-    String s1 = target.getClass().getSimpleName() + "@" + System.identityHashCode(target);
+    LinkedHashSet<?> object = new LinkedHashSet<>();
+    String s1 = object.getClass().getSimpleName() + "@" + System.identityHashCode(object);
     String s2 = argument.getClass().getSimpleName() + "@" + System.identityHashCode(argument);
     String expected =
         String.format("foo must be in %s (was %s \"Hello world, how are[...]\")", s1, s2);
     System.out.println(expected);
-    String actual = Messages.createMessage(in(), argName, argument, target);
+    String actual = Messages.createMessage(in(), false, argName, argument, object);
     System.out.println(actual);
     assertEquals(expected, actual);
   }
@@ -86,13 +86,13 @@ public class MessagesTest {
   public void in02() {
     Object argument = new float[7];
     String argName = "foo";
-    LinkedHashSet<?> target = new LinkedHashSet<>();
+    LinkedHashSet<?> object = new LinkedHashSet<>();
     String s0 =
         ClassMethods.getArrayTypeSimpleName(argument) + "@" + System.identityHashCode(argument);
-    String s1 = target.getClass().getSimpleName() + "@" + System.identityHashCode(target);
+    String s1 = object.getClass().getSimpleName() + "@" + System.identityHashCode(object);
     String expected = String.format("foo must be in %s (was %s)", s1, s0);
     System.out.println(expected);
-    String actual = Messages.createMessage(in(), argName, argument, target);
+    String actual = Messages.createMessage(in(), false, argName, argument, object);
     System.out.println(actual);
     assertEquals(expected, actual);
   }
@@ -101,10 +101,10 @@ public class MessagesTest {
   public void instanceOf01() {
     Collection<Object> argument = new ArrayList<>();
     String argName = "foo";
-    Object target = AutoCloseable.class;
+    Object object = AutoCloseable.class;
     String expected = "foo must be instance of java.lang.AutoCloseable (was java.util.ArrayList)";
     System.out.println(expected);
-    String actual = Messages.createMessage(instanceOf(), argName, argument, target);
+    String actual = Messages.createMessage(instanceOf(), false, argName, argument, object);
     System.out.println(actual);
     assertEquals(expected, actual);
   }

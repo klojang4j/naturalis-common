@@ -13,31 +13,22 @@ package nl.naturalis.common.function;
 public interface Relation<T, U> {
 
   /**
-   * Returns the reverse of the specified relation, swapping subject and object in the relationship.
-   * For example, the reverse of <i>X contains Y</i> is <i>Y contains X</i> (or <i>X element-of
-   * Y</i>).
+   * Returns the converse of this relation, swapping subject and object in the relationship. For
+   * example, the converse of <i>X contains Y</i> is <i>Y contains X</i> (or <i>X element-of Y</i>).
    *
-   * @param <X> The type of the subject of the original relation (and the object of the returned
-   *     {@code Relation})
-   * @param <Y> The type of the object of the original relation (and the subject of the returned
-   *     {@code Relation})
-   * @param relation The {@code Relation} to return the reverse of
-   * @return The reverse {@code Relation}
+   * @return The converse of this {@code Relation}
    */
-  public static <X, Y> Relation<Y, X> reverse(Relation<X, Y> relation) {
-    return (x, y) -> relation.exists(y, x);
+  default Relation<U, T> converse() {
+    return (x, y) -> exists(y, x);
   }
 
   /**
-   * Returns the negation of the specified relation.
+   * Returns the negation of the this relation.
    *
-   * @param <X> The type of the subject of the specified {@code Relation}
-   * @param <Y> The type of the object of the original relation
-   * @param relation The {@code Relation} to return the negation of
-   * @return The negated {@code Relation}
+   * @return The negation of the this relation
    */
-  public static <X, Y> Relation<X, Y> not(Relation<X, Y> relation) {
-    return (x, y) -> !relation.exists(x, y);
+  default Relation<T, U> negate() {
+    return (x, y) -> !exists(x, y);
   }
 
   /**

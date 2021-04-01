@@ -11,33 +11,26 @@ package nl.naturalis.common.function;
 public interface IntObjRelation<T> {
 
   /**
-   * Returns the reverse of the specified relation, swapping subject and object in the relationship.
+   * Returns the converse of this relation, swapping subject and object in the relationship.
    *
-   * @param <X> The type of the object of the original relation (and the subject of the returned
-   *     {@code ObjIntRelation})
-   * @param relation The {@code IntObjRelation} to return the reverse of
-   * @return An {@code ObjIntRelation} that is the reverse of the specified {@code IntObjRelation}.
+   * @return An {@code ObjIntRelation} that is the converse of this {@code IntObjRelation}.
    */
-  public static <X> ObjIntRelation<X> reverse(IntObjRelation<X> relation) {
-    return (y, x) -> relation.exists(x, y);
+  default ObjIntRelation<T> converse() {
+    return (x, y) -> exists(y, x);
   }
 
   /**
-   * Returns the negation of the specified relation.
+   * Returns the negation of this {@code IntObjRelation}.
    *
-   * @param <X> The type of the object of the original relation
-   * @param relation The {@code IntObjRelation} to return the negation of
-   * @return The negated {@code IntObjRelation}
+   * @return The negation of this {@code IntObjRelation}
    */
-  public static <X> IntObjRelation<X> not(IntObjRelation<X> relation) {
-    return (y, x) -> !relation.exists(y, x);
+  default IntObjRelation<T> negate() {
+    return (x, y) -> !exists(x, y);
   }
 
   /**
-   * Whether or not the relationship between {@code subject} and {@code object} exists.
+   * Returns whether or not the relationship between {@code subject} and {@code object} exists.
    *
-   * @param subject The subject of the relation (the entity from which the relationship extends)
-   * @param object The object of the relation (the entity to which the relationship extends)
    * @return {@code true} if the relation exists, {@code false} otherwise.
    */
   boolean exists(int subject, T object);

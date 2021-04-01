@@ -36,10 +36,24 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   @Override
   public Check<T, E> is(IntPredicate test) throws E {
     if (applicable()) {
-      if (test.test(((Number) arg).intValue())) {
+      int i = (((Number) arg).intValue());
+      if (test.test(i)) {
         return this;
       }
-      String msg = createMessage(test, argName, arg);
+      String msg = createMessage(test, false, argName, i);
+      throw excFactory.apply(msg);
+    }
+    throw notApplicable(test, arg, argName);
+  }
+
+  @Override
+  public Check<T, E> isNot(IntPredicate test) throws E {
+    if (applicable()) {
+      int i = (((Number) arg).intValue());
+      if (!test.test(i)) {
+        return this;
+      }
+      String msg = createMessage(test, true, argName, i);
       throw excFactory.apply(msg);
     }
     throw notApplicable(test, arg, argName);
@@ -48,7 +62,8 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   @Override
   public Check<T, E> is(IntPredicate test, String message, Object... msgArgs) throws E {
     if (applicable()) {
-      if (test.test(((Number) arg).intValue())) {
+      int i = (((Number) arg).intValue());
+      if (test.test(i)) {
         return this;
       }
       String msg = String.format(message, msgArgs);
@@ -58,51 +73,79 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   }
 
   @Override
-  public <U> Check<T, E> is(IntObjRelation<U> relation, U relateTo) throws E {
+  public <U> Check<T, E> is(IntObjRelation<U> test, U object) throws E {
     if (applicable()) {
-      if (relation.exists(((Number) arg).intValue(), relateTo)) {
+      int i = (((Number) arg).intValue());
+      if (test.exists(i, object)) {
         return this;
       }
-      String msg = createMessage(relation, argName, arg, relateTo);
+      String msg = createMessage(test, false, argName, i, object);
       throw excFactory.apply(msg);
     }
-    throw notApplicable(relation, arg, argName);
+    throw notApplicable(test, arg, argName);
   }
 
   @Override
-  public <U> Check<T, E> is(
-      IntObjRelation<U> relation, U relateTo, String message, Object... msgArgs) throws E {
+  public <U> Check<T, E> isNot(IntObjRelation<U> test, U object) throws E {
     if (applicable()) {
-      if (relation.exists(((Number) arg).intValue(), relateTo)) {
+      int i = (((Number) arg).intValue());
+      if (!test.exists(i, object)) {
+        return this;
+      }
+      String msg = createMessage(test, true, argName, i, object);
+      throw excFactory.apply(msg);
+    }
+    throw notApplicable(test, arg, argName);
+  }
+
+  @Override
+  public <U> Check<T, E> is(IntObjRelation<U> test, U object, String message, Object... msgArgs)
+      throws E {
+    if (applicable()) {
+      int i = (((Number) arg).intValue());
+      if (test.exists(i, object)) {
         return this;
       }
       String msg = String.format(message, msgArgs);
       throw excFactory.apply(msg);
     }
-    throw notApplicable(relation, arg, argName);
+    throw notApplicable(test, arg, argName);
   }
 
   @Override
-  public Check<T, E> is(IntRelation relation, int relateTo) throws E {
+  public Check<T, E> is(IntRelation test, int object) throws E {
     if (applicable()) {
-      if (relation.exists(((Number) arg).intValue(), relateTo)) {
+      int i = (((Number) arg).intValue());
+      if (test.exists(i, object)) {
         return this;
       }
-      throw excFactory.apply(createMessage(relation, argName, arg, relateTo));
+      throw excFactory.apply(createMessage(test, false, argName, i, object));
     }
-    throw notApplicable(relation, arg, argName);
+    throw notApplicable(test, arg, argName);
   }
 
   @Override
-  public Check<T, E> is(IntRelation relation, int relateTo, String message, Object... msgArgs)
-      throws E {
+  public Check<T, E> isNot(IntRelation test, int object) throws E {
     if (applicable()) {
-      if (relation.exists(((Number) arg).intValue(), relateTo)) {
+      int i = (((Number) arg).intValue());
+      if (!test.exists(i, object)) {
+        return this;
+      }
+      throw excFactory.apply(createMessage(test, true, argName, i, object));
+    }
+    throw notApplicable(test, arg, argName);
+  }
+
+  @Override
+  public Check<T, E> is(IntRelation test, int object, String message, Object... msgArgs) throws E {
+    if (applicable()) {
+      int i = (((Number) arg).intValue());
+      if (test.exists(i, object)) {
         return this;
       }
       throw excFactory.apply(String.format(message, msgArgs));
     }
-    throw notApplicable(relation, arg, argName);
+    throw notApplicable(test, arg, argName);
   }
 
   @Override

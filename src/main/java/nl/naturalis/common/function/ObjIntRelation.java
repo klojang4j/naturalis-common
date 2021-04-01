@@ -12,26 +12,21 @@ package nl.naturalis.common.function;
 public interface ObjIntRelation<T> {
 
   /**
-   * Returns the reverse of the specified relation, swapping subject and object in the relationship.
+   * Returns the converse of this relation, swapping subject and object in the relationship.
    *
-   * @param <X> The type of the object of the specified {@code ObjIntRelation} (and the subject of
-   *     the returned {@code IntObjRelation})
-   * @param relation The {@code IntObjRelation} to return the reverse of
-   * @return An {@code ObjIntRelation} that is the reverse of the specified {@code IntObjRelation}.
+   * @return An {@code IntObjRelation} that is the converse of this {@code ObjIntRelation}.
    */
-  public static <X> IntObjRelation<X> reverse(ObjIntRelation<X> relation) {
-    return (y, x) -> relation.exists(x, y);
+  default IntObjRelation<T> converse() {
+    return (x, y) -> exists(y, x);
   }
 
   /**
-   * Returns the negation of the specified relation.
+   * Returns the negation of the this {@code ObjIntRelation}.
    *
-   * @param <X> The type of the subject of the original relation
-   * @param relation The {@code ObjIntRelation} to return the negation of
-   * @return The negated {@code ObjIntRelation}
+   * @return The negation of the this {@code ObjIntRelation}
    */
-  public static <X> ObjIntRelation<X> not(ObjIntRelation<X> relation) {
-    return (x, y) -> !relation.exists(x, y);
+  default ObjIntRelation<T> negate() {
+    return (x, y) -> !exists(x, y);
   }
 
   /**

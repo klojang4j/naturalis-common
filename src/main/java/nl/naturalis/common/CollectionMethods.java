@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.collection.UnsafeList;
 import static java.util.stream.Collectors.toList;
@@ -28,18 +29,16 @@ public class CollectionMethods {
    *   <li>If the value is {@code null} it is converted using {@code
    *       Collections.singletonList(val)}.
    *   <li>If the value already is a {@code List} it is returned as-is.
-   *   <li>If the value is a {@code Collection} it is converted to an {@code ArrayList}
-   *   <li>If the value is an instance of {@code Object[]} it is converted using {code
-   *       Arrays.asList}.
-   *   <li>If the value is an array of a primitive type it is converted using {@link
-   *       ArrayMethods#asList(int[]) ArrayMethods.asList}.
+   *   <li>If the value is a {@code Collection} it is converted to a fixed-size, but mutable {@code
+   *       List}
+   *   <li>If the value is an array it is converted to a fixed-size, but mutable {@code List}
    *   <li>In any other case the value is converted using {@code Collections.singletonList(val)}.
    * </ul>
    *
    * @param val The value to convert
    * @return The value converted to a {@code List}
    */
-  @SuppressWarnings({"rawtypes", "unchecked"})
+  @SuppressWarnings({"rawtypes"})
   public static List<?> asList(Object val) {
     List objs;
     if (val == null) {
@@ -47,7 +46,7 @@ public class CollectionMethods {
     } else if (val instanceof List) {
       objs = (List) val;
     } else if (val instanceof Collection) {
-      objs = new ArrayList((Collection) val);
+      objs = Arrays.asList(((Collection) val).toArray());
     } else if (val instanceof Object[]) {
       objs = Arrays.asList((Object[]) val);
     } else if (val.getClass() == int[].class) {
@@ -198,7 +197,28 @@ public class CollectionMethods {
    * @return A concatenation of the elements in the collection.
    */
   public static String implode(Collection<?> collection, String separator) {
-    return collection.stream().map(Objects::toString).collect(Collectors.joining(separator));
+    return implode(collection, separator, -1);
+  }
+
+  /**
+   * PHP-style implode method, concatenating the collection elements using the specified separator
+   * string.
+   *
+   * @param collection The collection to implode
+   * @param separator The separator string
+   * @param limit The maximum number of elements to collect. Specify -1 for no maximum. Any other
+   *     negative integer results in an {@link IllegalArgumentException}.
+   * @return A concatenation of the elements in the collection.
+   */
+  public static String implode(Collection<?> collection, String separator, int limit) {
+    Check.notNull(collection, "collection");
+    Check.notNull(separator, "separator");
+    Check.that(limit, "limit").is(gte(), -1);
+    Stream<?> stream = collection.stream();
+    if (limit != -1 || limit < collection.size()) {
+      stream = stream.limit(limit);
+    }
+    return stream.map(Objects::toString).collect(Collectors.joining(separator));
   }
 
   /**
@@ -361,7 +381,7 @@ public class CollectionMethods {
    * @return A sublist containing all but the last {@code by} elements of the provided list
    */
   public static <T> List<T> shrink(List<T> list, int by) {
-    Check.that(list, "list").is(notEmpty());
+    Check.that(list, "list").isNot(empty());
     Check.that(by, "by").is(toIndexOf(), list);
     int sz = list.size();
     return sz == by ? Collections.emptyList() : list.subList(0, sz - by);
@@ -389,7 +409,7 @@ public class CollectionMethods {
    * @return
    */
   public static <T> List<T> shift(List<T> list, int by) {
-    int sz = Check.that(list, "list").is(notEmpty()).ok().size();
+    int sz = Check.that(list, "list").isNot(empty()).ok().size();
     Check.that(by, "by").is(toIndexOf(), list);
     return sz == by ? Collections.emptyList() : list.subList(by, sz);
   }

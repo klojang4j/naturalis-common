@@ -11,10 +11,7 @@ import nl.naturalis.common.function.Relation;
 import nl.naturalis.common.function.ThrowingSupplier;
 import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
-import static nl.naturalis.common.check.CommonChecks.inArray;
-import static nl.naturalis.common.check.CommonChecks.notEmpty;
-import static nl.naturalis.common.check.CommonChecks.notInArray;
-import static nl.naturalis.common.check.CommonChecks.notNull;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * General methods applicable to objects of any type.
@@ -420,7 +417,7 @@ public class ObjectMethods {
    * @return a non-empty value
    */
   public static <T> T ifEmpty(T value, T dfault) {
-    return isEmpty(value) ? Check.that(dfault, "dfault").is(notEmpty()).ok() : value;
+    return isEmpty(value) ? Check.that(dfault, "dfault").isNot(empty()).ok() : value;
   }
 
   /**
@@ -439,7 +436,7 @@ public class ObjectMethods {
       throws E {
     Check.notNull(supplier, "supplier");
     if (isEmpty(value)) {
-      return Check.that(supplier.get()).is(notEmpty(), "Supplier must not supply empty value").ok();
+      return Check.that(supplier.get()).isNot(empty(), "Supplier must not supply empty value").ok();
     }
     return value;
   }
@@ -527,7 +524,7 @@ public class ObjectMethods {
    */
   @SuppressWarnings("unchecked")
   public static <T> T nullUnless(T arg0, T... values) {
-    return nullUnless(arg0, notInArray(), values);
+    return (T) nullUnless(arg0, inArray().negate(), values);
   }
 
   /**

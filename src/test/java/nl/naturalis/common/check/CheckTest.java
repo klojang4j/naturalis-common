@@ -1,6 +1,5 @@
 package nl.naturalis.common.check;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -52,13 +51,13 @@ public class CheckTest {
   // greaterThan() works with Number instances, not ints, but the compiler is fine with it
   @Test(expected = IllegalArgumentException.class)
   public void greaterThan01() {
-    Check.that(2, "fooArg").is(greaterThan(), 4);
+    Check.that(2, "fooArg").is(GT(), 4);
     assertTrue(true);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void greaterThan02() {
-    Check.that(2, "fooArg").is(greaterThan(), Integer.valueOf(4));
+    Check.that(2, "fooArg").is(GT(), Integer.valueOf(4));
     assertTrue(true);
   }
 
@@ -90,56 +89,10 @@ public class CheckTest {
     assertTrue(true);
   }
 
-  /*
-   * The sizeXXX checks are special because they work on weakly typed arguments (Object) and
-   * validate them programmatically
-   */
-  @Test(expected = InvalidCheckException.class)
-  public void size01a() {
-    Check.that(new Object(), "fooArg").is(sizeGreaterThan(), 5);
-  }
-
-  @Test
-  public void size01b() {
-    try {
-      Check.that(new ByteArrayOutputStream(), "fooArg").is(sizeAtLeast(), 5);
-    } catch (InvalidCheckException e) {
-      System.out.println(e.getMessage());
-      assertEquals(
-          "Error while checking argument: java.io.ByteArrayOutputStream cannot be subject of sizeAtLeast()",
-          e.getMessage());
-      return;
-    }
-    fail();
-  }
-
-  @Test
-  public void size02() {
-    Check.that("Hello, World!", "fooArg").is(sizeGreaterThan(), 6);
-    assertTrue(true);
-  }
-
-  @Test
-  public void size03() {
-    Check.that("Hello, World!", "fooArg").is(sizeGreaterThan(), Integer.valueOf(6));
-    assertTrue(true);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void size04() {
-    Check.that("Hello, World!", "fooArg").is(sizeGreaterThan(), 100);
-    assertTrue(true);
-  }
-
   @Test
   public void size05() {
-    Check.that(List.of("a", "b", "c", "d", "e"), "fooArg").is(sizeAtLeast(), 3);
+    Check.that(List.of("a", "b", "c", "d", "e"), "fooArg").is(sizeGTE(), 3);
     assertTrue(true);
-  }
-
-  @Test
-  public void size06() {
-    Check.that("Hello, World!", "fooArg").is(sizeAtLeast(), 3);
   }
 
   @Test
@@ -180,7 +133,7 @@ public class CheckTest {
         .has(Employee::getHobbies, (x, y) -> x.contains(y), "Skating", "Skating is not optional")
         .has(Employee::getFullName, "fullName", s -> s.length() < 200)
         .has(Employee::getAge, gte(), 16, "Employee must be at least %d", 16)
-        .has(Employee::getAge, atLeast(), 16, "Employee must be at least %d", 16)
+        .has(Employee::getAge, GTE(), 16, "Employee must be at least %d", 16)
         .ok();
     assertTrue(true);
   }
@@ -248,16 +201,6 @@ public class CheckTest {
     fail();
   }
 
-  @Test
-  public void has08() {
-    Employee employee = new Employee();
-    employee.setScores(new float[] {3.2F, 103.2F, 0.8F});
-    Check.notNull(employee, "employee")
-        .has(Employee::getScores, "scores", sizeLessThan(), 100)
-        .has(Employee::getScores, "scores", x -> x.length != 100);
-    assertTrue(true);
-  }
-
   /*
    * Again note the forced typing of lambda parameters. It doesn't even really matter whether you
    * choose int or Integer. The compiler must apparently just get a starting point from where it can
@@ -270,11 +213,11 @@ public class CheckTest {
     Check.notNull(emp, "employee")
         .has(Employee::getId, "id", (Integer x) -> x != 2)
         .has(Employee::getId, (Integer x) -> x != 2, "id must not be 2")
-        .has(Employee::getId, notEqualTo(), 2, "id must not be 2")
+        .has(Employee::getId, equalTo().negate(), 2, "id must not be 2")
         .has(Employee::getId, (int x) -> x > 0, "Id must be positive")
         .has(Employee::getId, "id", positive())
         .has(Employee::getId, "id", ne(), 2)
-        .has(Employee::getId, "id", notEqualTo(), 2);
+        .has(Employee::getId, "id", equalTo().negate(), 2);
     assertTrue(true);
   }
 

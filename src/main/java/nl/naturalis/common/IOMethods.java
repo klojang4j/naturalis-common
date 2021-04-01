@@ -5,9 +5,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.io.ExposedByteArrayOutputStream;
+import static nl.naturalis.common.check.CommonChecks.empty;
 import static nl.naturalis.common.check.CommonChecks.gt;
-import static nl.naturalis.common.check.CommonChecks.notEmpty;
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonChecks.notNull;
+import static nl.naturalis.common.check.CommonChecks.yes;
 
 /**
  * I/O-related methods.
@@ -24,7 +25,7 @@ public class IOMethods {
 
   public static String toString(Class<?> classpathClass, String resourcePath, int chunkSize) {
     Check.notNull(classpathClass, "classpathClass");
-    Check.that(resourcePath, "resourcePath").is(notEmpty());
+    Check.that(resourcePath, "resourcePath").isNot(empty());
     try (InputStream in = classpathClass.getResourceAsStream(resourcePath)) {
       Check.that(in).is(notNull(), "Resource not found: %s", resourcePath);
       return toString(in, chunkSize);

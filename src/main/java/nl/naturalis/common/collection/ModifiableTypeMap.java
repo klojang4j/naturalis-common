@@ -6,9 +6,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ClassMethods.isA;
-import static nl.naturalis.common.check.CommonChecks.notContainingKey;
-import static nl.naturalis.common.check.CommonChecks.notContainingValue;
-import static nl.naturalis.common.check.CommonChecks.notKeyIn;
+import static nl.naturalis.common.check.CommonChecks.containingKey;
+import static nl.naturalis.common.check.CommonChecks.containingValue;
+import static nl.naturalis.common.check.CommonChecks.keyIn;
 
 /**
  * A modifiable {@link TypeMap} implementation. Although instances of this class are modifiable, the
@@ -88,7 +88,7 @@ public class ModifiableTypeMap<V> extends TreeMap<Class<?>, V> implements TypeMa
     if (source instanceof TypeMap && sortOptions.isEmpty()) {
       source.forEach((k, v) -> ModifiableTypeMap.super.put(k, v));
     } else {
-      Check.that(source, "source").is(notContainingKey(), null).is(notContainingValue(), null);
+      Check.that(source, "source").isNot(containingKey(), null).isNot(containingValue(), null);
       Set<Map.Entry<Class<?>, V>> temp = new TreeSet<>(TypeMap.ENTRY_COMPARATOR);
       temp.addAll(source.entrySet());
       temp.forEach(e -> ModifiableTypeMap.super.put(e.getKey(), e.getValue()));
@@ -97,7 +97,7 @@ public class ModifiableTypeMap<V> extends TreeMap<Class<?>, V> implements TypeMa
 
   @Override
   public V put(Class<?> key, V value) {
-    Check.notNull(key, "key").is(notKeyIn(), this, ERR_DUPLICATE, key.getName());
+    Check.notNull(key, "key").isNot(keyIn(), this, ERR_DUPLICATE, key.getName());
     Check.notNull(value, "value");
     return super.put(key, value);
   }

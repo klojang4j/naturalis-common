@@ -13,7 +13,7 @@ import static nl.naturalis.common.ObjectMethods.ifEmpty;
 import static nl.naturalis.common.ObjectMethods.ifNotEmpty;
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
 import static nl.naturalis.common.ObjectMethods.ifNull;
-import static nl.naturalis.common.check.CommonChecks.notEmpty;
+import static nl.naturalis.common.check.CommonChecks.empty;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 import static nl.naturalis.common.util.EnvManager.EmptyValue.DEFAULT;
 import static nl.naturalis.common.util.EnvManager.EmptyValue.EMPTY;
@@ -139,7 +139,7 @@ public class EnvManager {
    */
   public String getRequired(String name) throws InvalidEnvironmentException {
     Check.notNull(name, "name");
-    return empty == UNDEFINED ? check(name).is(notEmpty()).ok() : check(name).is(notNull()).ok();
+    return empty == UNDEFINED ? check(name).isNot(empty()).ok() : check(name).is(notNull()).ok();
   }
 
   /**
@@ -199,7 +199,7 @@ public class EnvManager {
     Check.notNull(name, "name");
     try {
       return empty == UNDEFINED
-          ? check(name).is(notEmpty()).ok(Integer::parseInt)
+          ? check(name).isNot(empty()).ok(Integer::parseInt)
           : check(name).is(notNull()).ok(Integer::parseInt);
     } catch (NumberFormatException e) {
       throw parseError(name, int.class, e.getMessage());
@@ -264,7 +264,7 @@ public class EnvManager {
     Check.notNull(name, "name");
     try {
       return empty == UNDEFINED
-          ? check(name).is(notEmpty()).ok(this::parseBoolean)
+          ? check(name).isNot(empty()).ok(this::parseBoolean)
           : check(name).is(notNull()).ok(this::parseBoolean);
     } catch (IllegalArgumentException e) {
       throw parseError(name, boolean.class, e.getMessage());

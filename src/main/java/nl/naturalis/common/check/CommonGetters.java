@@ -242,7 +242,7 @@ public class CommonGetters {
   /*            End of getter definitions                    */
   /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
-  static String formatGetterName(String argName, Object getter) {
+  static String formatProperty(String argName, Object getter) {
     return ifNotNull(names.get(getter), fmt -> String.format(fmt, argName), argName + ".?");
   }
 

@@ -11,10 +11,9 @@ import nl.naturalis.common.Tuple;
 import nl.naturalis.common.check.Check;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
+import static nl.naturalis.common.check.CommonChecks.containingValue;
+import static nl.naturalis.common.check.CommonChecks.empty;
 import static nl.naturalis.common.check.CommonChecks.ne;
-import static nl.naturalis.common.check.CommonChecks.notContainingKey;
-import static nl.naturalis.common.check.CommonChecks.notContainingValue;
-import static nl.naturalis.common.check.CommonChecks.notEmpty;
 import static nl.naturalis.common.check.CommonGetters.enumConstants;
 
 /**
@@ -82,7 +81,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
   public EnumToIntMap(Class<K> enumClass, int keyAbsentValue, ToIntFunction<K> initializer) {
     this.keys =
         Check.notNull(enumClass, "enumClass")
-            .has(enumConstants(), notEmpty(), "Empty enum not supported")
+            .hasNot(enumConstants(), empty(), "Empty enum not supported")
             .ok(Class::getEnumConstants);
     this.data = new int[keys.length];
     this.kav = keyAbsentValue;
@@ -217,8 +216,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
    */
   public void putAll(Map<K, Integer> other) {
     Check.notNull(other, "other")
-        .is(notContainingKey(), null)
-        .is(notContainingValue(), kav)
+        .isNot(containingValue(), kav)
         .then(m -> m.entrySet().forEach(e -> assign(e.getKey(), e.getValue())));
   }
 

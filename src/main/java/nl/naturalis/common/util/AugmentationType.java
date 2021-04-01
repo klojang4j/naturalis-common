@@ -1,8 +1,8 @@
 package nl.naturalis.common.util;
 
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.atLeast;
-import static nl.naturalis.common.check.CommonChecks.atMost;
+import static nl.naturalis.common.check.CommonChecks.GTE;
+import static nl.naturalis.common.check.CommonChecks.LTE;
 
 /**
  * Defines ways to increment a number.
@@ -42,8 +42,8 @@ public enum AugmentationType {
    */
   public int augment(int value, double amount, int minAmount) {
     return Check.that(augment((double) value, amount, (double) minAmount), "New value")
-        .is(atMost(), Integer.MAX_VALUE)
-        .is(atLeast(), Integer.MIN_VALUE)
+        .is(LTE(), Integer.MAX_VALUE)
+        .is(GTE(), Integer.MIN_VALUE)
         .ok(Double::intValue);
   }
 

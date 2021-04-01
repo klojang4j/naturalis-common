@@ -4,7 +4,7 @@ import java.io.OutputStream;
 import java.util.function.*;
 import nl.naturalis.common.NumberMethods;
 import nl.naturalis.common.function.*;
-import static nl.naturalis.common.check.CommonGetters.formatGetterName;
+import static nl.naturalis.common.check.CommonGetters.formatProperty;
 import static nl.naturalis.common.check.Messages.createMessage;
 
 /**
@@ -41,7 +41,7 @@ import static nl.naturalis.common.check.Messages.createMessage;
  * </pre>
  *
  * <p>The {@link CommonGetters} class defines some common getters which, again, are already
- * associated with the name of the property they expose:
+ * associated with the name of the name they expose:
  *
  * <pre>
  * Check.notNull(employees, "emps").has(size(), gte(), 100);
@@ -94,11 +94,8 @@ import static nl.naturalis.common.check.Messages.createMessage;
  * <p>
  *
  * <pre>
- * this.query = Check.with(InvalidQueryException::new, query, "query")
- *  .has(Query::getFrom, "from", nullOr(), 0)
- *  .has(Query::getSize, "size", gte(), 10)
- *  .has(Query::getSize, "size", lte(), 10000)
- *  .ok();
+ * this.query = Check.with(InvalidQueryException::new, query, "query").has(Query::getFrom, "from", nullOr(), 0).has(Query::getSize, "size", gte(), 10).has(
+ *     Query::getSize, "size", lte(), 10000).ok();
  * </pre>
  *
  * @author Ayco Holleman
@@ -170,16 +167,15 @@ public abstract class Check<T, E extends Exception> {
   public static <U> Check<U, IllegalArgumentException> notNull(U arg)
       throws IllegalArgumentException {
     /*
-     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-     * NB we construct the Check instance right here, rather than calling
-     * another static factory method, e.g. notNull(arg, DEFAULT_ARG_NAME).
-     * In performance tests it turned out that for some reason the JVM had
-     * a hard time inlining these calls, making the notNull check about 20%
-     * slower than a "manual" not null check.
+     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ NB we
+     * construct the Check instance right here, rather than calling another static
+     * factory method, e.g. notNull(arg, DEFAULT_ARG_NAME). In performance tests it
+     * turned out that for some reason the JVM had a hard time inlining these calls,
+     * making the notNull check about 20% slower than a "manual" not null check.
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
     if (arg == null) {
-      String msg = createMessage(CommonChecks.notNull(), DEF_ARG_NAME, null);
+      String msg = createMessage(CommonChecks.notNull(), false, DEF_ARG_NAME, null);
       throw DEF_EXC_FACTORY.apply(msg);
     }
     return new ObjectCheck<>(arg, DEF_ARG_NAME, DEF_EXC_FACTORY);
@@ -198,7 +194,7 @@ public abstract class Check<T, E extends Exception> {
   public static <U> Check<U, IllegalArgumentException> notNull(U arg, String argName)
       throws IllegalArgumentException {
     if (arg == null) {
-      String msg = createMessage(CommonChecks.notNull(), argName, null);
+      String msg = createMessage(CommonChecks.notNull(), false, argName, null);
       throw DEF_EXC_FACTORY.apply(msg);
     }
     return new ObjectCheck<>(arg, argName, DEF_EXC_FACTORY);
@@ -221,7 +217,7 @@ public abstract class Check<T, E extends Exception> {
   public static <U, X extends Exception> Check<U, X> notNull(Function<String, X> excFactory, U arg)
       throws X {
     if (arg == null) {
-      String msg = createMessage(CommonChecks.notNull(), DEF_ARG_NAME, null);
+      String msg = createMessage(CommonChecks.notNull(), false, DEF_ARG_NAME, null);
       throw excFactory.apply(msg);
     }
     return new ObjectCheck<>(arg, DEF_ARG_NAME, excFactory);
@@ -246,7 +242,7 @@ public abstract class Check<T, E extends Exception> {
   public static <U, X extends Exception> Check<U, X> notNull(
       Function<String, X> excFactory, U arg, String argName) throws X {
     if (arg == null) {
-      String msg = createMessage(CommonChecks.notNull(), argName, null);
+      String msg = createMessage(CommonChecks.notNull(), false, argName, null);
       throw excFactory.apply(msg);
     }
     return new ObjectCheck<>(arg, argName, excFactory);
@@ -343,7 +339,8 @@ public abstract class Check<T, E extends Exception> {
    * @throws X The exception that is thrown
    */
   public static <U, X extends Exception> U failOn(Function<String, X> excFactory) throws X {
-    // Message "Invalid argument" likely to be ignored by factory, but why risk an NPE
+    // Message "Invalid argument" likely to be ignored by factory, but why risk an
+    // NPE
     throw excFactory.apply("Invalid argument");
   }
 
@@ -386,11 +383,11 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Submits the argument to the specified test. This method is especially useful when using the
-   * (statically imported) tests in the {@link CommonChecks} class, as they have predefined,
-   * informative error messages associated with them.
+   * Verifies that the argument passes the test expressed through the specified {@code Predicate}.
+   * Although not required this method is meant to be used with a {@code Predicate} from the {@link
+   * CommonChecks} class so that an informative error message is generated upon failure.
    *
-   * @param test The test
+   * @param test A {@code Predicate} expressing the test
    * @return This {@code Check} object
    * @throws E If the test fails
    */
@@ -398,14 +395,32 @@ public abstract class Check<T, E extends Exception> {
     if (test.test(ok())) {
       return this;
     }
-    String msg = createMessage(test, argName, ok());
+    String msg = createMessage(test, false, argName, ok());
     throw excFactory.apply(msg);
   }
 
   /**
-   * Submits the argument to the specified test. Allows you to provide a custom error message.
+   * Verifies that the argument ducks the test expressed through the specified {@code Predicate}.
+   * Although not required this method is meant to be used with a {@code Predicate} from the {@link
+   * CommonChecks} class so that an informative error message is generated upon failure.
    *
-   * @param test The test
+   * @param test A {@code Predicate} expressing the test
+   * @return This {@code Check} object
+   * @throws E If the test fails
+   */
+  public Check<T, E> isNot(Predicate<T> test) throws E {
+    if (!test.test(ok())) {
+      return this;
+    }
+    String msg = createMessage(test, true, argName, ok());
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that the argument passes the test expressed through the specified {@code Predicate}.
+   * Allows you to provide a custom error message.
+   *
+   * @param test A {@code Predicate} expressing the test
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
@@ -420,20 +435,47 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Submits the argument to the specified test. This method is especially useful when using the
-   * (statically imported) tests in thw {@link CommonChecks} class, as they have predefined,
-   * informative error messages associated with them.
+   * Verifies that the argument ducks the test expressed through the specified {@code Predicate}.
+   * Allows you to provide a custom error message.
    *
-   * @param test The test
+   * @param test A {@code Predicate} expressing the test
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the test fails
+   */
+  public Check<T, E> isNot(Predicate<T> test, String message, Object... msgArgs) throws E {
+    return is(test.negate(), message, msgArgs);
+  }
+
+  /**
+   * Verifies that the argument passes the test expressed through the specified {@code
+   * IntPredicate}. Although not required this method is meant to be used with an {@code
+   * IntPredicate} from the {@link CommonChecks} class so that an informative error message is
+   * generated upon failure.
+   *
+   * @param test An {@code Predicate} expressing the test
    * @return This {@code Check} object
    * @throws E If the test fails
    */
   public abstract Check<T, E> is(IntPredicate test) throws E;
 
   /**
-   * Submits the argument to the specified test. Allows you to provide a custom error message.
+   * Verifies that the argument ducks the test expressed through the specified {@code IntPredicate}.
+   * Although not required this method is meant to be used with an {@code IntPredicate} from the
+   * {@link CommonChecks} class so that an informative error message is generated upon failure.
    *
-   * @param test The test
+   * @param test An {@code IntPredicate} expressing the test
+   * @return This {@code Check} object
+   * @throws E If the test fails
+   */
+  public abstract Check<T, E> isNot(IntPredicate test) throws E;
+
+  /**
+   * Verifies that the argument passes the test expressed through the specified {@code
+   * IntPredicate}. Allows you to provide a custom error message.
+   *
+   * @param test An {@code IntPredicate} expressing the test
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
@@ -442,200 +484,409 @@ public abstract class Check<T, E extends Exception> {
   public abstract Check<T, E> is(IntPredicate test, String message, Object... msgArgs) throws E;
 
   /**
-   * Verifies that the specified relation exists between the argument and some other value. This
-   * method is especially useful when using the (statically imported) tests in thw {@link
-   * CommonChecks} class, as they have predefined, informative error messages associated with them.
+   * Verifies that the argument ducks the test expressed through the specified {@code IntPredicate}.
+   * Allows you to provide a custom error message.
    *
-   * @param <U> The type of the object of the relationship
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
+   * @param test An {@code IntPredicate} expressing the test
+   * @param message The error message
+   * @param msgArgs The message arguments
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public <U> Check<T, E> is(Relation<T, U> relation, U relateTo) throws E {
-    if (relation.exists(ok(), relateTo)) {
-      return this;
-    }
-    String msg = createMessage(relation, argName, ok(), relateTo);
-    throw excFactory.apply(msg);
+  public Check<T, E> isNot(IntPredicate test, String message, Object... msgArgs) throws E {
+    return is(test.negate(), message, msgArgs);
   }
 
   /**
-   * Verifies that the specified relation exists between the argument and some other value. Allows
-   * you to provide a custom error message.
+   * Verifies that the argument passes the test expressed through the specified {@code Relation}.
+   * Although not required this method is meant to be used with a {@code Relation} from the {@link
+   * CommonChecks} class so that an informative error message is generated upon failure.
    *
    * @param <U> The type of the object of the relationship
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @param message The error message
-   * @param msgArgs The message arguments
+   * @param test The relation to verify between the argument (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
    * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
+   * @throws E If the test fails
    */
-  public <U> Check<T, E> is(Relation<T, U> relation, U relateTo, String message, Object... msgArgs)
-      throws E {
-    if (relation.exists(ok(), relateTo)) {
+  public <U> Check<T, E> is(Relation<T, U> test, U object) throws E {
+    if (test.exists(ok(), object)) {
       return this;
     }
-    String msg = String.format(message, msgArgs);
+    String msg = createMessage(test, false, argName, ok(), object);
     throw excFactory.apply(msg);
   }
 
   /**
-   * Verifies that the specified relation exists between the argument and some other value. This
-   * method is especially useful when using the (statically imported) tests in thw {@link
-   * CommonChecks} class, as they have predefined, informative error messages associated with them.
-   *
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
-   */
-  public Check<T, E> is(ObjIntRelation<T> relation, int relateTo) throws E {
-    if (relation.exists(ok(), relateTo)) {
-      return this;
-    }
-    String msg = createMessage(relation, argName, ok(), relateTo);
-    throw excFactory.apply(msg);
-  }
-
-  /**
-   * Verifies that the specified relation exists between the argument and some other value. Allows
-   * you to provide a custom error message.
-   *
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @param message The error message
-   * @param msgArgs The message arguments
-   * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
-   */
-  public Check<T, E> is(ObjIntRelation<T> relation, int relateTo, String message, Object... msgArgs)
-      throws E {
-    if (relation.exists(ok(), relateTo)) {
-      return this;
-    }
-    String msg = String.format(message, msgArgs);
-    throw excFactory.apply(msg);
-  }
-
-  /**
-   * Verifies that the specified relation exists between the integer argument and some object.
+   * Verifies that the argument ducks the test expressed through the specified {@code Relation}.
+   * Although not required this method is meant to be used with a {@code Relation} from the {@link
+   * CommonChecks} class so that an informative error message is generated upon failure.
    *
    * @param <U> The type of the object of the relationship
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
+   * @param test The relation to verify between the argument (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
    * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
+   * @throws E If the test fails
    */
-  public abstract <U> Check<T, E> is(IntObjRelation<U> relation, U relateTo) throws E;
+  public <U> Check<T, E> isNot(Relation<T, U> test, U object) throws E {
+    if (!test.exists(ok(), object)) {
+      return this;
+    }
+    String msg = createMessage(test, true, argName, ok(), object);
+    throw excFactory.apply(msg);
+  }
 
   /**
-   * Verifies that the specified relation exists between the integer argument and some object.
+   * Verifies that the argument passes the test expressed through the specified {@code Relation}.
    * Allows you to provide a custom error message.
    *
    * @param <U> The type of the object of the relationship
-   * @param relation The relation to verify between the argument and the specified value ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
+   * @param test The relation to verify between the argument (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public <U> Check<T, E> is(Relation<T, U> test, U object, String message, Object... msgArgs)
+      throws E {
+    if (test.exists(ok(), object)) {
+      return this;
+    }
+    String msg = String.format(message, msgArgs);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that the argument ducks the test expressed through the specified {@code Relation}.
+   * Allows you to provide a custom error message.
+   *
+   * @param <U> The type of the object of the relationship
+   * @param test The relation to verify between the argument (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public <U> Check<T, E> isNot(Relation<T, U> test, U object, String message, Object... msgArgs)
+      throws E {
+    return is(test.negate(), object, message, msgArgs);
+  }
+
+  /**
+   * Verifies that the argument passes the test expressed through the specified {@code
+   * ObjIntRelation}. Although not required this method is meant to be used with an {@code
+   * ObjIntRelation} from the {@link CommonChecks} class so that an informative error message is
+   * generated upon failure.
+   *
+   * @param test The relation to verify between the argument (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public Check<T, E> is(ObjIntRelation<T> test, int object) throws E {
+    if (test.exists(ok(), object)) {
+      return this;
+    }
+    String msg = createMessage(test, false, argName, ok(), object);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that the argument ducks the test expressed through the specified {@code
+   * ObjIntRelation}. Although not required this method is meant to be used with an {@code
+   * ObjIntRelation} from the {@link CommonChecks} class so that an informative error message is
+   * generated upon failure.
+   *
+   * @param test The relation to verify between the argument (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public Check<T, E> isNot(ObjIntRelation<T> test, int object) throws E {
+    if (!test.exists(ok(), object)) {
+      return this;
+    }
+    String msg = createMessage(test, true, argName, ok(), object);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that the argument passes the test expressed through the specified {@code
+   * ObjIntRelation}. Allows you to provide a custom error message.
+   *
+   * @param test The relation to verify between the argument (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public Check<T, E> is(ObjIntRelation<T> test, int object, String message, Object... msgArgs)
+      throws E {
+    if (test.exists(ok(), object)) {
+      return this;
+    }
+    String msg = String.format(message, msgArgs);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that the argument ducks the test expressed through the specified {@code
+   * ObjIntRelation}. Allows you to provide a custom error message.
+   *
+   * @param test The relation to verify between the argument (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public Check<T, E> isNot(ObjIntRelation<T> test, int object, String message, Object... msgArgs)
+      throws E {
+    return is(test.negate(), object, message, msgArgs);
+  }
+
+  /**
+   * Verifies that the argument passes the test expressed through the specified {@code
+   * IntObjRelation}. Although not required this method is meant to be used with an {@code
+   * IntObjRelation} from the {@link CommonChecks} class so that an informative error message is
+   * generated upon failure.
+   *
+   * @param <U> The type of the object of the relationship
+   * @param test The relation to verify between the argument (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public abstract <U> Check<T, E> is(IntObjRelation<U> test, U object) throws E;
+
+  /**
+   * Verifies that the argument ducks the test expressed through the specified {@code
+   * IntObjRelation}. Although not required this method is meant to be used with an {@code
+   * IntObjRelation} from the {@link CommonChecks} class so that an informative error message is
+   * generated upon failure.
+   *
+   * @param <U> The type of the object of the relationship
+   * @param test The relation to verify between the argument (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public abstract <U> Check<T, E> isNot(IntObjRelation<U> test, U object) throws E;
+
+  /**
+   * Verifies that the argument passes the test expressed through the specified {@code
+   * IntObjRelation}. Allows you to provide a custom error message.
+   *
+   * @param <U> The type of the object of the relationship
+   * @param test The relation to verify between the argument (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
    */
   public abstract <U> Check<T, E> is(
-      IntObjRelation<U> relation, U relateTo, String message, Object... msgArgs) throws E;
+      IntObjRelation<U> test, U object, String message, Object... msgArgs) throws E;
 
   /**
-   * Verifies that the specified relation exists between the argument and some other value. This
-   * method is especially useful when using the (statically imported) tests in thw {@link
-   * CommonChecks} class, as they have predefined, informative error messages associated with them.
+   * Verifies that the argument ducks the test expressed through the specified {@code
+   * IntObjRelation}. Allows you to provide a custom error message.
    *
-   * @param relation The relation to verify between the argument and the specified integer ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
-   * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
-   */
-  public abstract Check<T, E> is(IntRelation relation, int relateTo) throws E;
-
-  /**
-   * Verifies that the specified relation exists between the argument and some other value. Allows
-   * you to provide a custom error message.
-   *
-   * @param relation The relation to verify between the argument and the specified integer ({@code
-   *     relateTo})
-   * @param relateTo The object of the relationship
+   * @param <U> The type of the object of the relationship
+   * @param test The relation to verify between the argument (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
+   * @throws E If the specified test does not exist between subject and object
    */
-  public abstract Check<T, E> is(
-      IntRelation relation, int relateTo, String message, Object... msgArgs) throws E;
+  public <U> Check<T, E> isNot(IntObjRelation<U> test, U object, String message, Object... msgArgs)
+      throws E {
+    return is(test.negate(), object, message, msgArgs);
+  }
 
   /**
-   * Submits a property of the argument to the specified test.
+   * Verifies that the argument passes the test expressed through the specified {@code IntRelation}.
+   * Although not required this method is meant to be used with an {@code IntRelation} from the
+   * {@link CommonChecks} class so that an informative error message is generated upon failure.
+   *
+   * @param test The relation to verify between the argument (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public abstract Check<T, E> is(IntRelation test, int object) throws E;
+
+  /**
+   * Verifies that the argument ducks the test expressed through the specified {@code IntRelation}.
+   * Although not required this method is meant to be used with an {@code IntRelation} from the
+   * {@link CommonChecks} class so that an informative error message is generated upon failure.
+   *
+   * @param test The relation to verify between the argument (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public abstract Check<T, E> isNot(IntRelation test, int object) throws E;
+
+  /**
+   * Verifies that the argument passes the test expressed through the specified {@code IntRelation}.
+   * Allows you to provide a custom error message.
+   *
+   * @param test The relation to verify between the argument (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public abstract Check<T, E> is(IntRelation test, int object, String message, Object... msgArgs)
+      throws E;
+
+  /**
+   * Verifies that the argument ducks the test expressed through the specified {@code IntRelation}.
+   * Allows you to provide a custom error message.
+   *
+   * @param test The relation to verify between the argument (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public Check<T, E> isNot(IntRelation test, int object, String message, Object... msgArgs)
+      throws E {
+    return is(test.negate(), object, message, msgArgs);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code Function},
+   * passes the test expressed through the specified {@code Predicate}. Although not required this
+   * method is meant to be used with a {@code Predicate} from the {@link CommonChecks} class so that
+   * an informative error message is generated upon failure.
    *
    * @param <U> The type of the property
-   * @param getter A {@code Function} which is given the argument as input and which should return
-   *     the value to be tested
-   * @param property The name of the property
-   * @param test The test
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param name The name of the property
+   * @param test A {@code Predicate} expressing the test
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public <U> Check<T, E> has(Function<T, U> getter, String property, Predicate<U> test) throws E {
-    U value = getter.apply(ok());
+  public <U> Check<T, E> has(Function<T, U> property, String name, Predicate<U> test) throws E {
+    U value = property.apply(ok());
     if (test.test(value)) {
       return this;
     }
-    String name = getFullyQualified(property);
-    String msg = createMessage(test, name, value);
+    String msg = createMessage(test, false, fqn(name), value);
     throw excFactory.apply(msg);
   }
 
   /**
-   * Submits a property of the argument to the specified test. Can be used if you pass one of the
-   * getters defined in {@link CommonGetters} as these are already associated with a property name.
+   * Verifies that a property of the argument, retrieved through the specified {@code Function},
+   * ducks the test expressed through the specified {@code Predicate}. Although not required this
+   * method is meant to be used with a {@code Predicate} from the {{@link CommonChecks} class so
+   * that an informative error message is generated upon failure.
    *
    * @param <U> The type of the property
-   * @param getter A {@code Function} which is given the argument as input and which should return
-   *     the value to be tested
-   * @param test The test
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param name The name of the property
+   * @param test A {@code Predicate} expressing the test
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public <U> Check<T, E> has(Function<T, U> getter, Predicate<U> test) throws E {
-    U value = getter.apply(ok());
-    if (test.test(value)) {
+  public <U> Check<T, E> hasNot(Function<T, U> property, String name, Predicate<U> test) throws E {
+    U value = property.apply(ok());
+    if (!test.test(value)) {
       return this;
     }
-    String name = formatGetterName(argName, getter);
-    String msg = createMessage(test, name, value);
+    String msg = createMessage(test, true, fqn(name), value);
     throw excFactory.apply(msg);
   }
 
   /**
-   * Submits a property of the argument to the specified test.
+   * Verifies that a property of the argument, retrieved through the specified {@code Function},
+   * passes the test expressed through the specified {@code Predicate}. Although not required this
+   * method is meant to be used with a {@code Predicate} from the {@link CommonChecks} class
+   * <i>and</i> a {@code Function} from the {@link CommonGetters} class so that an informative error
+   * message is generated upon failure.
    *
    * @param <U> The type of the property
-   * @param getter A {@code Function} which is given the argument as input and which should return
-   *     the value to be tested
-   * @param test The test
+   * @param name A function which is given the argument as input and returns the value to be tested
+   * @param test A {@code Predicate} expressing the test
+   * @return This {@code Check} object
+   * @throws E If the test fails
+   */
+  public <U> Check<T, E> has(Function<T, U> property, Predicate<U> test) throws E {
+    U value = property.apply(ok());
+    if (test.test(value)) {
+      return this;
+    }
+    String name = formatProperty(argName, property);
+    String msg = createMessage(test, false, name, value);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code Function},
+   * ducks the test expressed through the specified {@code Predicate}. Although not required this
+   * method is meant to be used with a {@code Predicate} from the {@link CommonChecks} class
+   * <i>and</i> a {@code Function} from the {@link CommonGetters} class so that an informative error
+   * message is generated upon failure.
+   *
+   * @param <U> The type of the property
+   * @param name A function which is given the argument as input and returns the value to be tested
+   * @param test A {@code Predicate} expressing the test
+   * @return This {@code Check} object
+   * @throws E If the test fails
+   */
+  public <U> Check<T, E> hasNot(Function<T, U> property, Predicate<U> test) throws E {
+    U value = property.apply(ok());
+    if (!test.test(value)) {
+      return this;
+    }
+    String name = formatProperty(argName, property);
+    String msg = createMessage(test, true, name, value);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code Function},
+   * passes the test expressed through the specified {@code Predicate}. Allows you to provide a
+   * custom error message.
+   *
+   * @param <U> The type of the property
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
    * @throws E If the test fails
    */
   public <U> Check<T, E> has(
-      Function<T, U> getter, Predicate<U> test, String message, Object... msgArgs) throws E {
-    U value = getter.apply(ok());
+      Function<T, U> property, Predicate<U> test, String message, Object... msgArgs) throws E {
+    U value = property.apply(ok());
     if (test.test(value)) {
       return this;
     }
@@ -644,60 +895,136 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Submits an integer property of the argument to the specified test.
+   * Verifies that a property of the argument, retrieved through the specified {@code Function},
+   * ducks the test expressed through the specified {@code Predicate}. Allows you to provide a
+   * custom error message.
    *
-   * @param getter A {@code Function} which is given the argument as input and which should return
-   *     the value to be tested
-   * @param property The name of the property
-   * @param test The test
+   * @param <U> The type of the property
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param message The error message
+   * @param msgArgs The message arguments
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> has(ToIntFunction<T> getter, String property, IntPredicate test) throws E {
-    int value = getter.applyAsInt(ok());
+  public <U> Check<T, E> hasNot(
+      Function<T, U> property, Predicate<U> test, String message, Object... msgArgs) throws E {
+    return has(property, test.negate(), message, msgArgs);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code
+   * ToIntFunction}, passes the test expressed through the specified {@code Predicate}. Although not
+   * required this method is meant to be used with an {@code IntPredicate} from the {@link
+   * CommonChecks} class so that an informative error message is generated upon failure.
+   *
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param name The name of the property
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @return This {@code Check} object
+   * @throws E If the test fails
+   */
+  public Check<T, E> has(ToIntFunction<T> property, String name, IntPredicate test) throws E {
+    int value = property.applyAsInt(ok());
     if (test.test(value)) {
       return this;
     }
-    String name = getFullyQualified(property);
-    String msg = createMessage(test, name, value);
+    String msg = createMessage(test, false, fqn(name), value);
     throw excFactory.apply(msg);
   }
 
   /**
-   * Submits an integer property of the argument to the specified test. Can be used if you pass one
-   * of the getters defined in {@link CommonGetters} as these are already associated with a property
-   * name.
+   * Verifies that a property of the argument, retrieved through the specified {@code
+   * ToIntFunction}, ducks the test expressed through the specified {@code Predicate}. Although not
+   * required this method is meant to be used with an {@code IntPredicate} from the {@link
+   * CommonChecks} class so that an informative error message is generated upon failure.
    *
-   * @param getter A {@code Function} which is given the argument as input and which should return
-   *     the value to be tested
-   * @param test The test
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param name The name of the property
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> has(ToIntFunction<T> getter, IntPredicate test) throws E {
-    int value = getter.applyAsInt(ok());
-    if (test.test(value)) {
+  public Check<T, E> hasNot(ToIntFunction<T> property, String name, IntPredicate test) throws E {
+    int value = property.applyAsInt(ok());
+    if (!test.test(value)) {
       return this;
     }
-    String name = formatGetterName(argName, getter);
-    String msg = createMessage(test, name, value);
+    String msg = createMessage(test, true, fqn(name), value);
     throw excFactory.apply(msg);
   }
 
   /**
-   * Submits an {@code int} property of the argument to the specified test.
+   * Verifies that a property of the argument, retrieved through the specified {@code
+   * ToIntFunction}, passes the test expressed through the specified {@code IntPredicate}. Although
+   * not required this method is meant to be used with an {@code IntPredicate} from the {@link
+   * CommonChecks} class <i>and</i> a {@code ToIntFunction} from the {@link CommonGetters} class so
+   * that an informative error message is generated upon failure.
    *
-   * @param getter A {@code Function} which is given the argument as input and which should return
-   *     the value to be tested
-   * @param test The test
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @return This {@code Check} object
+   * @throws E If the test fails
+   */
+  public Check<T, E> has(ToIntFunction<T> property, IntPredicate test) throws E {
+    int value = property.applyAsInt(ok());
+    if (test.test(value)) {
+      return this;
+    }
+    String name = formatProperty(argName, property);
+    String msg = createMessage(test, false, name, value);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code
+   * ToIntFunction}, ducks the test expressed through the specified {@code IntPredicate}. Although
+   * not required this method is meant to be used with an {@code IntPredicate} from the {@link
+   * CommonChecks} class <i>and</i> a {@code ToIntFunction} from the {@link CommonGetters} class so
+   * that an informative error message is generated upon failure.
+   *
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @return This {@code Check} object
+   * @throws E If the test fails
+   */
+  public Check<T, E> hasNot(ToIntFunction<T> property, IntPredicate test) throws E {
+    int value = property.applyAsInt(ok());
+    if (!test.test(value)) {
+      return this;
+    }
+    String name = formatProperty(argName, property);
+    String msg = createMessage(test, true, name, value);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code
+   * ToIntFunction}, passes the test expressed through the specified {@code Predicate}. Allows you
+   * to provide a custom error message.
+   *
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
    * @throws E If the test fails
    */
   public Check<T, E> has(
-      ToIntFunction<T> getter, IntPredicate test, String message, Object... msgArgs) throws E {
-    int value = getter.applyAsInt(ok());
+      ToIntFunction<T> property, IntPredicate test, String message, Object... msgArgs) throws E {
+    int value = property.applyAsInt(ok());
     if (test.test(value)) {
       return this;
     }
@@ -706,75 +1033,155 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the specified relation exists between a property of the argument and some other
-   * value.
+   * Verifies that a property of the argument, retrieved through the specified {@code
+   * ToIntFunction}, ducks the test expressed through the specified {@code Predicate}. Allows you to
+   * provide a custom error message.
    *
-   * @param <U> The type of the property
-   * @param <V> The type of the object of the relationship
-   * @param getter A {@code Function} which is given the argument as input and which should return
-   *     the subject of the relationship
-   * @param property The name of the property
-   * @param relation The relation to verify between subject and object
-   * @param relateTo The object of the relationship
-   * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
-   */
-  public <U, V> Check<T, E> has(
-      Function<T, U> getter, String property, Relation<U, V> relation, V relateTo) throws E {
-    U value = getter.apply(ok());
-    if (relation.exists(value, relateTo)) {
-      return this;
-    }
-    String name = getFullyQualified(property);
-    String msg = createMessage(relation, name, value, relateTo);
-    throw excFactory.apply(msg);
-  }
-
-  /**
-   * Verifies that the specified relation exists between a property of the argument and some other
-   * value. Can be used if you pass one of the getters defined in {@link CommonGetters} as these are
-   * already associated with a property name.
-   *
-   * @param <U> The type of the property
-   * @param <V> The type of the object of the relationship
-   * @param getter A {@code Function} which is given the argument as input and which should return
-   *     the subject of the relationship
-   * @param relation The relation to verify between subject and object
-   * @param relateTo The object of the relationship
-   * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
-   */
-  public <U, V> Check<T, E> has(Function<T, U> getter, Relation<U, V> relation, V relateTo)
-      throws E {
-    U value = getter.apply(ok());
-    if (relation.exists(value, relateTo)) {
-      return this;
-    }
-    String name = formatGetterName(argName, getter);
-    String msg = createMessage(relation, name, value, relateTo);
-    throw excFactory.apply(msg);
-  }
-
-  /**
-   * Verifies that the specified relation exists between a property of the argument and some other
-   * value.
-   *
-   * @param <U> The type of the property
-   * @param <V> The type of the object of the relationship
-   * @param getter A {@code Function} which is given the argument as input and which should return
-   *     the subject of the relationship
-   * @param relation The relation to verify between subject and object
-   * @param relateTo The object of the relationship
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
+   * @throws E If the test fails
+   */
+  public Check<T, E> hasNot(
+      ToIntFunction<T> property, IntPredicate test, String message, Object... msgArgs) throws E {
+    return has(property, test.negate(), message, msgArgs);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code Function},
+   * passes the test expressed through the specified {@code Predicate}. Although not required this
+   * method is meant to be used with a {@code Relation} from the {@link CommonChecks} class so that
+   * an informative error message is generated upon failure.
+   *
+   * @param <U> The type of the property
+   * @param <V> The type of the object of the relationship
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param name The name of the property
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public <U, V> Check<T, E> has(Function<T, U> property, String name, Relation<U, V> test, V object)
+      throws E {
+    U value = property.apply(ok());
+    if (test.exists(value, object)) {
+      return this;
+    }
+    String msg = createMessage(test, false, fqn(name), value, object);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code Function},
+   * ducks the test expressed through the specified {@code Relation}. Although not required this
+   * method is meant to be used with a {@code Relation} from the {@link CommonChecks} class so that
+   * an informative error message is generated upon failure.
+   *
+   * @param <U> The type of the property
+   * @param <V> The type of the object of the relationship
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param name The name of the property
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public <U, V> Check<T, E> hasNot(
+      Function<T, U> property, String name, Relation<U, V> test, V object) throws E {
+    U value = property.apply(ok());
+    if (!test.exists(value, object)) {
+      return this;
+    }
+    String msg = createMessage(test, true, fqn(name), value, object);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code Function},
+   * passes the test expressed through the specified {@code Relation}. Although not required this
+   * method is meant to be used with a {@code Relation} from the {@link CommonChecks} class
+   * <i>and</i> a {@code Function} from the {@link CommonGetters} class so that an informative error
+   * message is generated upon failure.
+   *
+   * @param <U> The type of the property
+   * @param <V> The type of the object of the relationship
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public <U, V> Check<T, E> has(Function<T, U> property, Relation<U, V> test, V object) throws E {
+    U value = property.apply(ok());
+    if (test.exists(value, object)) {
+      return this;
+    }
+    String name = formatProperty(argName, property);
+    String msg = createMessage(test, false, name, value, object);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code Function},
+   * ducks the test expressed through the specified {@code Relation}. Although not required this
+   * method is meant to be used with a {@code Relation} from the {@link CommonChecks} class
+   * <i>and</i> a {@code Function} from the {@link CommonGetters} class so that an informative error
+   * message is generated upon failure.
+   *
+   * @param <U> The type of the property
+   * @param <V> The type of the object of the relationship
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public <U, V> Check<T, E> hasNot(Function<T, U> property, Relation<U, V> test, V object)
+      throws E {
+    U value = property.apply(ok());
+    if (!test.exists(value, object)) {
+      return this;
+    }
+    String name = formatProperty(argName, property);
+    String msg = createMessage(test, true, name, value, object);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code Function},
+   * passes the test expressed through the specified {@code Predicate}. Allows you to provide a
+   * custom error message.
+   *
+   * @param <U> The type of the property
+   * @param <V> The type of the object of the relationship
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
    */
   public <U, V> Check<T, E> has(
-      Function<T, U> getter, Relation<U, V> relation, V relateTo, String message, Object... msgArgs)
+      Function<T, U> property, Relation<U, V> test, V object, String message, Object... msgArgs)
       throws E {
-    U value = getter.apply(ok());
-    if (relation.exists(value, relateTo)) {
+    U value = property.apply(ok());
+    if (test.exists(value, object)) {
       return this;
     }
     String msg = String.format(message, msgArgs);
@@ -782,76 +1189,158 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the specified relation exists between a property of the argument and some other
-   * value.
+   * Verifies that a property of the argument, retrieved through the specified {@code Function},
+   * ducks the test expressed through the specified {@code Predicate}. Allows you to provide a
+   * custom error message.
    *
    * @param <U> The type of the property
-   * @param getter A {@code Function} which is given the argument as input and which should return
-   *     the subject of the relationship
-   * @param property The name of the property
-   * @param relation The relation to verify between subject and object
-   * @param relateTo The object of the relationship
-   * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
-   */
-  public <U> Check<T, E> has(
-      Function<T, U> getter, String property, ObjIntRelation<U> relation, int relateTo) throws E {
-    U value = getter.apply(ok());
-    if (relation.exists(value, relateTo)) {
-      return this;
-    }
-    String name = getFullyQualified(property);
-    String msg = createMessage(relation, name, value, relateTo);
-    throw excFactory.apply(msg);
-  }
-
-  /**
-   * Verifies that the specified relation exists between a property of the argument and some other
-   * value. Can be used if you pass one of the getters defined in {@link CommonGetters} as these are
-   * already associated with a property name.
-   *
-   * @param <U> The type of the property
-   * @param getter A {@code Function} which is given the argument as input and which should return
-   *     the subject of the relationship
-   * @param relation The relation to verify between subject and object
-   * @param relateTo The object of the relationship
-   * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
-   */
-  public <U> Check<T, E> has(Function<T, U> getter, ObjIntRelation<U> relation, int relateTo)
-      throws E {
-    U value = getter.apply(ok());
-    if (relation.exists(value, relateTo)) {
-      return this;
-    }
-    String name = formatGetterName(argName, getter);
-    String msg = createMessage(relation, name, value, relateTo);
-    throw excFactory.apply(msg);
-  }
-
-  /**
-   * Verifies that the specified relation exists between a property of the argument and some other
-   * value.
-   *
-   * @param <U> The type of the property
-   * @param getter A {@code Function} which is given the argument as input and which should return
-   *     the subject of the relationship
-   * @param relation The relation to verify between subject and object
-   * @param relateTo The object of the relationship
+   * @param <V> The type of the object of the relationship
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public <U, V> Check<T, E> hasNot(
+      Function<T, U> property, Relation<U, V> test, V object, String message, Object... msgArgs)
+      throws E {
+    return has(property, test.negate(), object, message, msgArgs);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code Function},
+   * passes the test expressed through the specified {@code ObjIntRelation}. Although not required
+   * this method is meant to be used with the {@link CommonChecks} class so that an informative
+   * error message is generated upon failure.
+   *
+   * @param <U> The type of the property
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param name The name of the property
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
    */
   public <U> Check<T, E> has(
-      Function<T, U> getter,
-      ObjIntRelation<U> relation,
-      int relateTo,
+      Function<T, U> property, String name, ObjIntRelation<U> test, int object) throws E {
+    U value = property.apply(ok());
+    if (test.exists(value, object)) {
+      return this;
+    }
+    String msg = createMessage(test, false, fqn(name), value, object);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code Function},
+   * ducks the test expressed through the specified {@code ObjIntRelation}. Although not required
+   * this method is meant to be used with the {@link CommonChecks} class so that an informative
+   * error message is generated upon failure.
+   *
+   * @param <U> The type of the property
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param name The name of the property
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public <U> Check<T, E> hasNot(
+      Function<T, U> property, String name, ObjIntRelation<U> test, int object) throws E {
+    U value = property.apply(ok());
+    if (!test.exists(value, object)) {
+      return this;
+    }
+    String msg = createMessage(test, true, fqn(name), value, object);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code Function},
+   * passes the test expressed through the specified {@code ObjIntRelation}. Although not required
+   * this method is meant to be used with a {@code ObjIntRelation} from the {@link CommonChecks}
+   * class <i>and</i> a {@code Function} from the {@link CommonGetters} class so that an informative
+   * error message is generated upon failure.
+   *
+   * @param <U> The type of the property
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public <U> Check<T, E> has(Function<T, U> property, ObjIntRelation<U> test, int object) throws E {
+    U value = property.apply(ok());
+    if (test.exists(value, object)) {
+      return this;
+    }
+    String name = formatProperty(argName, property);
+    String msg = createMessage(test, false, name, value, object);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code Function},
+   * ducks the test expressed through the specified {@code ObjIntRelation}. Although not required
+   * this method is meant to be used with a {@code ObjIntRelation} from the {@link CommonChecks}
+   * class <i>and</i> a {@code Function} from the {@link CommonGetters} class so that an informative
+   * error message is generated upon failure.
+   *
+   * @param <U> The type of the property
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public <U> Check<T, E> hasNot(Function<T, U> property, ObjIntRelation<U> test, int object)
+      throws E {
+    U value = property.apply(ok());
+    if (!test.exists(value, object)) {
+      return this;
+    }
+    String name = formatProperty(argName, property);
+    String msg = createMessage(test, true, name, value, object);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified function, passes the
+   * test expressed through the specified {@code ObjIntRelation}. Allows you to provide a custom
+   * error message.
+   *
+   * @param <U> The type of the property
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public <U> Check<T, E> has(
+      Function<T, U> property,
+      ObjIntRelation<U> test,
+      int object,
       String message,
       Object... msgArgs)
       throws E {
-    U value = getter.apply(ok());
-    if (relation.exists(value, relateTo)) {
+    U value = property.apply(ok());
+    if (test.exists(value, object)) {
       return this;
     }
     String msg = String.format(message, msgArgs);
@@ -859,72 +1348,151 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Verifies that the specified relation exists between a property of the argument and some other
-   * value.
+   * Verifies that a property of the argument, retrieved through the specified function, ducks the
+   * test expressed through the specified {@code ObjIntRelation}. Allows you to provide a custom
+   * error message.
    *
-   * @param getter A {@code Function} which is given the argument as input and which should return
-   *     the subject of the relationship
-   * @param property The name of the property
-   * @param relation The relation to verify between subject and object
-   * @param relateTo The object of the relationship
-   * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
-   */
-  public Check<T, E> has(
-      ToIntFunction<T> getter, String property, IntRelation relation, int relateTo) throws E {
-    int value = getter.applyAsInt(ok());
-    if (relation.exists(value, relateTo)) {
-      return this;
-    }
-    String name = getFullyQualified(property);
-    String msg = createMessage(relation, name, value, relateTo);
-    throw excFactory.apply(msg);
-  }
-
-  /**
-   * Verifies that the specified relation exists between a property of the argument and some other
-   * value. Can be used if you pass one of the getters defined in {@link CommonGetters} as these are
-   * already associated with a property name.
-   *
-   * @param getter A {@code Function} which is given the argument as input and which should return
-   *     the subject of the relationship
-   * @param relation The relation to verify between subject and object
-   * @param relateTo The object of the relationship
-   * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
-   */
-  public Check<T, E> has(ToIntFunction<T> getter, IntRelation relation, int relateTo) throws E {
-    int value = getter.applyAsInt(ok());
-    if (relation.exists(value, relateTo)) {
-      return this;
-    }
-    String name = formatGetterName(argName, getter);
-    String msg = createMessage(relation, name, value, relateTo);
-    throw excFactory.apply(msg);
-  }
-
-  /**
-   * Verifies that the specified relation exists between a property of the argument and some other
-   * value.
-   *
-   * @param getter A {@code Function} which is given the argument as input and which should return
-   *     the subject of the relationship
-   * @param relation The relation to verify between subject and object
-   * @param relateTo The object of the relationship
+   * @param <U> The type of the property
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
    * @param message The error message
    * @param msgArgs The message arguments
    * @return This {@code Check} object
-   * @throws E If the specified relation does not exist between subject and object
+   * @throws E If the specified test does not exist between subject and object
    */
-  public Check<T, E> has(
-      ToIntFunction<T> getter,
-      IntRelation relation,
-      int relateTo,
+  public <U> Check<T, E> hasNot(
+      Function<T, U> property,
+      ObjIntRelation<U> test,
+      int object,
       String message,
       Object... msgArgs)
       throws E {
-    int value = getter.applyAsInt(ok());
-    if (relation.exists(value, relateTo)) {
+    return has(property, test, object, message, msgArgs);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code
+   * ToIntFunction}, passes the test expressed through the specified {@code IntRelation}. Although
+   * not required this method is meant to be used with the {@link CommonChecks} class so that an
+   * informative error message is generated upon failure.
+   *
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param name The name of the property
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public Check<T, E> has(ToIntFunction<T> property, String name, IntRelation test, int object)
+      throws E {
+    int value = property.applyAsInt(ok());
+    if (test.exists(value, object)) {
+      return this;
+    }
+    String msg = createMessage(test, false, fqn(name), value, object);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code
+   * ToIntFunction}, ducks the test expressed through the specified {@code IntRelation}. Although
+   * not required this method is meant to be used with the {@link CommonChecks} class so that an
+   * informative error message is generated upon failure.
+   *
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param name The name of the property
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public Check<T, E> hasNot(ToIntFunction<T> property, String name, IntRelation test, int object)
+      throws E {
+    int value = property.applyAsInt(ok());
+    if (!test.exists(value, object)) {
+      return this;
+    }
+    String msg = createMessage(test, true, fqn(name), value, object);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code
+   * ToIntFunction}, passes the test expressed through the specified {@code IntRelation}. Although
+   * not required this method is meant to be used with a {@code IntRelation} from the {@link
+   * CommonChecks} class <i>and</i> a {@code ToIntFunction} from the {@link CommonGetters} class so
+   * that an informative error message is generated upon failure.
+   *
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public Check<T, E> has(ToIntFunction<T> property, IntRelation test, int object) throws E {
+    int value = property.applyAsInt(ok());
+    if (test.exists(value, object)) {
+      return this;
+    }
+    String name = formatProperty(argName, property);
+    String msg = createMessage(test, false, name, value, object);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified {@code
+   * ToIntFunction}, ducks the test expressed through the specified {@code IntRelation}. Although
+   * not required this method is meant to be used with a {@code IntRelation} from the {@link
+   * CommonChecks} class <i>and</i> a {@code ToIntFunction} from the {@link CommonGetters} class so
+   * that an informative error message is generated upon failure.
+   *
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public Check<T, E> hasNot(ToIntFunction<T> property, IntRelation test, int object) throws E {
+    int value = property.applyAsInt(ok());
+    if (!test.exists(value, object)) {
+      return this;
+    }
+    String name = formatProperty(argName, property);
+    String msg = createMessage(test, true, name, value, object);
+    throw excFactory.apply(msg);
+  }
+
+  /**
+   * Verifies that a property of the argument, retrieved through the specified function, passes the
+   * test expressed through the specified {@code IntRelation}. Allows you to provide a custom error
+   * message.
+   *
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public Check<T, E> has(
+      ToIntFunction<T> property, IntRelation test, int object, String message, Object... msgArgs)
+      throws E {
+    int value = property.applyAsInt(ok());
+    if (test.exists(value, object)) {
       return this;
     }
     String msg = String.format(message, msgArgs);
@@ -932,10 +1500,30 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Imposes some extra preconditions that may or may not be related to the argument being checked
-   * by this instance. Lazy but practical. For example a precondition check for a typical {@link
-   * OutputStream#write(byte[], int, int) OutputStream.write(b, off, len)} implementation might look
-   * like:
+   * Verifies that a property of the argument, retrieved through the specified function, ducks the
+   * test expressed through the specified {@code IntRelation}. Allows you to provide a custom error
+   * message.
+   *
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
+   * @param test The relation to verify between the property (as the subject of the relationship)
+   *     and the specified value (as the object of the relationship)
+   * @param object The object of the relationship
+   * @param message The error message
+   * @param msgArgs The message arguments
+   * @return This {@code Check} object
+   * @throws E If the specified test does not exist between subject and object
+   */
+  public Check<T, E> hasNot(
+      ToIntFunction<T> property, IntRelation test, int object, String message, Object... msgArgs)
+      throws E {
+    return has(property, test.negate(), object, message, msgArgs);
+  }
+
+  /**
+   * Imposes extra preconditions that may or may not be related to the argument being checked by
+   * this instance. For example a precondition check for a typical {@link OutputStream#write(byte[],
+   * int, int) OutputStream.write(b, off, len)} implementation might look like this:
    *
    * <p>
    *
@@ -965,8 +1553,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Imposes some extra preconditions that may or may not be related to the argument being checked
-   * by this instance. Lazy but practical. For example a precondition check for a typical {@link
+   * Imposes extra preconditions that may or may not be related to the argument being checked by
+   * this instance. Lazy but practical. For example a precondition check for a typical {@link
    * OutputStream#write(byte[], int, int) OutputStream.write(b, off, len)} implementation might look
    * like:
    *
@@ -974,9 +1562,7 @@ public abstract class Check<T, E extends Exception> {
    *
    * <pre>
    * write(byte[] b, int off, int len) {
-   *   Check.notNull(b, "b")
-   *     .has(length(), gte(), off + len)
-   *     .given("No can do buddy: check condition %d", off >= 0, len >= 0);
+   *   Check.notNull(b, "b").has(length(), gte(), off + len).given("No can do buddy: check condition %d", off >= 0, len >= 0);
    *   // ...
    * }
    * </pre>
@@ -1057,7 +1643,8 @@ public abstract class Check<T, E extends Exception> {
     return transformer.apply(intValue());
   }
 
-  private String getFullyQualified(String property) {
-    return argName + "." + property;
+  /* Returns fully-qualified name of the property with the specified name */
+  private String fqn(String name) {
+    return argName + "." + name;
   }
 }

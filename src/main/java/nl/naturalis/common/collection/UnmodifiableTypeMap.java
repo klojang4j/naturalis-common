@@ -6,9 +6,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import nl.naturalis.common.Tuple;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.notContainingKey;
-import static nl.naturalis.common.check.CommonChecks.notContainingValue;
-import static nl.naturalis.common.check.CommonChecks.notIn;
+import static nl.naturalis.common.check.CommonChecks.containingKey;
+import static nl.naturalis.common.check.CommonChecks.containingValue;
+import static nl.naturalis.common.check.CommonChecks.in;
 import static nl.naturalis.common.collection.ModifiableTypeMap.createComparator;
 /**
  * An unmodifiable {@link TypeMap} implementation.
@@ -41,7 +41,7 @@ public final class UnmodifiableTypeMap<V> extends TreeMap<Class<?>, V> implement
       Check.notNull(value, "value");
       Tuple<Class<?>, V> tuple = Tuple.of(key, value);
       Check.that(tuple)
-          .is(notIn(), tempStorage, "Key already added: %s", key)
+          .isNot(in(), tempStorage, "Key already added: %s", key)
           .then(tempStorage::add);
       return this;
     }
@@ -73,7 +73,7 @@ public final class UnmodifiableTypeMap<V> extends TreeMap<Class<?>, V> implement
       source.forEach((k, v) -> utm.putUnchecked(k, v));
       return utm;
     }
-    Check.that(source, "source").is(notContainingKey(), null).is(notContainingValue(), null);
+    Check.that(source, "source").isNot(containingKey(), null).isNot(containingValue(), null);
     TreeSet<Map.Entry<Class<?>, V>> temp = new TreeSet<>(TypeMap.ENTRY_COMPARATOR);
     temp.addAll(source.entrySet());
     UnmodifiableTypeMap<V> utm = new UnmodifiableTypeMap<>(sortOptions);
