@@ -14,6 +14,25 @@ import static nl.naturalis.common.CollectionMethods.sublist;
 public class CollectionMethodsTest {
 
   @Test
+  public void fromToIndex00() {
+    List<Integer> l = List.of(0, 1, 2);
+    assertEquals(Collections.emptyList(), l.subList(2, 2));
+  }
+
+  @Test
+  public void fromToIndex01() {
+    List<Integer> l = List.of(0, 1, 2);
+    // One position past the end of the list - still allowed with subXXXXX methods in the JDK
+    assertEquals(Collections.emptyList(), l.subList(3, 3));
+  }
+
+  @Test(expected = IndexOutOfBoundsException.class)
+  public void fromToIndex03() {
+    List<Integer> l = List.of(0, 1, 2);
+    l.subList(3, 4);
+  }
+
+  @Test
   public void asList00() {
     List<?> list = asList(null);
     assertEquals(1, list.size());

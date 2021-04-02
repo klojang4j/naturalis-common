@@ -215,7 +215,7 @@ public class CheckTest {
         .has(Employee::getId, (Integer x) -> x != 2, "id must not be 2")
         .has(Employee::getId, equalTo().negate(), 2, "id must not be 2")
         .has(Employee::getId, (int x) -> x > 0, "Id must be positive")
-        .has(Employee::getId, "id", positive())
+        .has(Employee::getId, "id", gt(), 0)
         .has(Employee::getId, "id", ne(), 2)
         .has(Employee::getId, "id", equalTo().negate(), 2);
     assertTrue(true);

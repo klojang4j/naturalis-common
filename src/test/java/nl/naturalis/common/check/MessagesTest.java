@@ -110,6 +110,18 @@ public class MessagesTest {
   }
 
   @Test
+  public void instanceOf02() {
+    Collection<Object> argument = new ArrayList<>();
+    String argName = "foo";
+    Object object = AutoCloseable.class;
+    String expected = "foo must not be instance of java.lang.AutoCloseable";
+    System.out.println(expected);
+    String actual = Messages.createMessage(instanceOf(), true, argName, argument, object);
+    System.out.println(actual);
+    assertEquals(expected, actual);
+  }
+
+  @Test
   public void size01() {
     Collection<Object> argument = new ArrayList<>();
     String expected = "list.size() must be equal to 3 (was 0)";

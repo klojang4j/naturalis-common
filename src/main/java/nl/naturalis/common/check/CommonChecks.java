@@ -44,13 +44,13 @@ public class CommonChecks {
    * @param <T> The type of the argument
    * @return A {@code Predicate}
    */
-  public static <T> Predicate<T> nullPointer() {
+  public static <T> Predicate<T> NULL() {
     return Objects::isNull;
   }
 
   static {
-    setMessagePattern(nullPointer(), msgNullPointer());
-    setName(nullPointer(), "nullPointer");
+    setMessagePattern(NULL(), msgNull());
+    setName(NULL(), "NULL");
   }
 
   /**
@@ -307,34 +307,6 @@ public class CommonChecks {
   static {
     setMessagePattern(odd(), msgOdd());
     setName(odd(), "odd");
-  }
-
-  /**
-   * Verifies that the argument is positive.
-   *
-   * @return An {@code IntPredicate}
-   */
-  public static IntPredicate positive() {
-    return x -> x > 0;
-  }
-
-  static {
-    setMessagePattern(positive(), msgPositive());
-    setName(positive(), "positive");
-  }
-
-  /**
-   * Verifies that the argument is negative.
-   *
-   * @return An {@code IntPredicate}
-   */
-  public static IntPredicate negative() {
-    return x -> x < 0;
-  }
-
-  static {
-    setMessagePattern(negative(), msgNegative());
-    setName(negative(), "negative");
   }
 
   /* ++++++++++++++ Relation ++++++++++++++ */
@@ -821,19 +793,35 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is a valid "to" index for a {@code List} operation like {@link
-   * List#subList(int, int) List.sublist}. In other words, that the argument is greater than or
-   * equal to zero and less than or equal to the size of the list.
+   * Verifies that the argument is a valid "from" index for a {@code List} operation like {@link
+   * List#subList(int, int) List.sublist}. In the case the index may actually be one position past
+   * the end of the {@code List}.
    *
    * @return An {@code IntObjRelation}
    */
-  public static <E, L extends List<? super E>> IntObjRelation<L> toIndexOf() {
+  public static <E, L extends List<? super E>> IntObjRelation<L> validFromIndex() {
     return (x, y) -> x >= 0 && x <= y.size();
   }
 
   static {
-    setMessagePattern(toIndexOf(), msgToIndexOf());
-    setName(toIndexOf(), "toIndexOf");
+    setMessagePattern(validFromIndex(), msgValidFromIndex());
+    setName(validFromIndex(), "msgValidFromIndex");
+  }
+
+  /**
+   * Verifies that the argument is a valid "to" index for a {@code List} operation like {@link
+   * List#subList(int, int) List.sublist}. This is, in fact, the same test as {@link
+   * #validFromIndex()}, but it codes more intuitively when testing "to" indices.
+   *
+   * @return An {@code IntObjRelation}
+   */
+  public static <E, L extends List<? super E>> IntObjRelation<L> validToIndex() {
+    return validFromIndex();
+  }
+
+  static {
+    setMessagePattern(validToIndex(), msgValidFromIndex()); // recycle message
+    setName(validToIndex(), "validToIndex");
   }
 
   /* ++++++++++++++ IntRelation ++++++++++++++ */

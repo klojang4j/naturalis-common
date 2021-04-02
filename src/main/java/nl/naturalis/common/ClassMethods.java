@@ -63,7 +63,11 @@ public class ClassMethods {
    * @return The class name
    */
   public static String prettyClassName(Object obj) {
-    return prettyClassName(Check.notNull(obj).ok().getClass());
+    Check.notNull(obj);
+    if (obj.getClass() == Class.class) {
+      return prettyClassName((Class<?>) obj);
+    }
+    return prettyClassName(obj.getClass());
   }
 
   public static String prettyClassName(Class<?> clazz) {
@@ -79,7 +83,11 @@ public class ClassMethods {
    * @return The class name
    */
   public static String prettySimpleClassName(Object obj) {
-    return getSimpleClassName(Check.notNull(obj).ok().getClass());
+    Check.notNull(obj);
+    if (obj.getClass() == Class.class) {
+      return getSimpleClassName((Class<?>) obj);
+    }
+    return getSimpleClassName(obj.getClass());
   }
 
   public static String getSimpleClassName(Class<?> clazz) {

@@ -9,6 +9,31 @@ import static nl.naturalis.common.StringMethods.*;
 public class StringMethodsTest {
 
   @Test
+  public void fromToIndex00() {
+    String s = "012";
+    assertEquals("", s.substring(2, 2));
+  }
+
+  @Test
+  public void fromToIndex01() {
+    String s = "012";
+    // One position past the end of the string - still allowed with subXXXXX methods in the JDK
+    assertEquals("", s.substring(3, 3));
+  }
+
+  @Test
+  public void fromToIndex02() {
+    String s = "012";
+    assertEquals("", s.substring(3));
+  }
+
+  @Test(expected = StringIndexOutOfBoundsException.class)
+  public void fromToIndex03() {
+    String s = "012";
+    s.substring(3, 4);
+  }
+
+  @Test
   public void count01() {
     String s = "This is This is This is BLISS!";
     assertEquals("01", 3, count(s, "This is"));

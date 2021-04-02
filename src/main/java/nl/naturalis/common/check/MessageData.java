@@ -64,7 +64,20 @@ class MessageData {
     this.object = object;
   }
 
-  Object getCheck() {
+  private MessageData(
+      Object check, boolean negated, String argName, Object argument, Object object) {
+    this.check = check;
+    this.negated = negated;
+    this.argName = argName;
+    this.argument = argument;
+    this.object = object;
+  }
+
+  MessageData flip() {
+    return new MessageData(check, !negated, argName, argument, object);
+  }
+
+  Object check() {
     return check;
   }
 

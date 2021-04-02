@@ -1,13 +1,14 @@
 package nl.naturalis.common.collection;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import nl.naturalis.common.collection.Treparator.Position;
-import static nl.naturalis.common.collection.Treparator.Position.*;
-import static nl.naturalis.common.collection.Tree.Traversal.*;
+import static nl.naturalis.common.collection.Tree.Traversal.DEPTH_FIRST;
+import static nl.naturalis.common.collection.Treparator.Position.EQUAL;
+import static nl.naturalis.common.collection.Treparator.Position.LEFT;
+import static nl.naturalis.common.collection.Treparator.Position.PARENT;
 
 // UNDER CONSTRUCTION. NOT FINISHED
+@SuppressWarnings("unused")
 public class Tree<K, V> {
 
   public static enum Traversal {
