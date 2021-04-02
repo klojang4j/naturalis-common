@@ -814,7 +814,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public <U> Check<T, E> hasNot(Function<T, U> property, String name, Predicate<U> test) throws E {
+  public <U> Check<T, E> notHas(Function<T, U> property, String name, Predicate<U> test) throws E {
     U value = property.apply(ok());
     if (!test.test(value)) {
       return this;
@@ -859,7 +859,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public <U> Check<T, E> hasNot(Function<T, U> property, Predicate<U> test) throws E {
+  public <U> Check<T, E> notHas(Function<T, U> property, Predicate<U> test) throws E {
     U value = property.apply(ok());
     if (!test.test(value)) {
       return this;
@@ -909,7 +909,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public <U> Check<T, E> hasNot(
+  public <U> Check<T, E> notHas(
       Function<T, U> property, Predicate<U> test, String message, Object... msgArgs) throws E {
     return has(property, test.negate(), message, msgArgs);
   }
@@ -951,7 +951,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> hasNot(ToIntFunction<T> property, String name, IntPredicate test) throws E {
+  public Check<T, E> notHas(ToIntFunction<T> property, String name, IntPredicate test) throws E {
     int value = property.applyAsInt(ok());
     if (!test.test(value)) {
       return this;
@@ -998,7 +998,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> hasNot(ToIntFunction<T> property, IntPredicate test) throws E {
+  public Check<T, E> notHas(ToIntFunction<T> property, IntPredicate test) throws E {
     int value = property.applyAsInt(ok());
     if (!test.test(value)) {
       return this;
@@ -1046,7 +1046,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the test fails
    */
-  public Check<T, E> hasNot(
+  public Check<T, E> notHas(
       ToIntFunction<T> property, IntPredicate test, String message, Object... msgArgs) throws E {
     return has(property, test.negate(), message, msgArgs);
   }
@@ -1095,7 +1095,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified test does not exist between subject and object
    */
-  public <U, V> Check<T, E> hasNot(
+  public <U, V> Check<T, E> notHas(
       Function<T, U> property, String name, Relation<U, V> test, V object) throws E {
     U value = property.apply(ok());
     if (!test.exists(value, object)) {
@@ -1149,7 +1149,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified test does not exist between subject and object
    */
-  public <U, V> Check<T, E> hasNot(Function<T, U> property, Relation<U, V> test, V object)
+  public <U, V> Check<T, E> notHas(Function<T, U> property, Relation<U, V> test, V object)
       throws E {
     U value = property.apply(ok());
     if (!test.exists(value, object)) {
@@ -1205,7 +1205,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified test does not exist between subject and object
    */
-  public <U, V> Check<T, E> hasNot(
+  public <U, V> Check<T, E> notHas(
       Function<T, U> property, Relation<U, V> test, V object, String message, Object... msgArgs)
       throws E {
     return has(property, test.negate(), object, message, msgArgs);
@@ -1253,7 +1253,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified test does not exist between subject and object
    */
-  public <U> Check<T, E> hasNot(
+  public <U> Check<T, E> notHas(
       Function<T, U> property, String name, ObjIntRelation<U> test, int object) throws E {
     U value = property.apply(ok());
     if (!test.exists(value, object)) {
@@ -1305,7 +1305,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified test does not exist between subject and object
    */
-  public <U> Check<T, E> hasNot(Function<T, U> property, ObjIntRelation<U> test, int object)
+  public <U> Check<T, E> notHas(Function<T, U> property, ObjIntRelation<U> test, int object)
       throws E {
     U value = property.apply(ok());
     if (!test.exists(value, object)) {
@@ -1363,7 +1363,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified test does not exist between subject and object
    */
-  public <U> Check<T, E> hasNot(
+  public <U> Check<T, E> notHas(
       Function<T, U> property,
       ObjIntRelation<U> test,
       int object,
@@ -1413,7 +1413,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified test does not exist between subject and object
    */
-  public Check<T, E> hasNot(ToIntFunction<T> property, String name, IntRelation test, int object)
+  public Check<T, E> notHas(ToIntFunction<T> property, String name, IntRelation test, int object)
       throws E {
     int value = property.applyAsInt(ok());
     if (!test.exists(value, object)) {
@@ -1463,7 +1463,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified test does not exist between subject and object
    */
-  public Check<T, E> hasNot(ToIntFunction<T> property, IntRelation test, int object) throws E {
+  public Check<T, E> notHas(ToIntFunction<T> property, IntRelation test, int object) throws E {
     int value = property.applyAsInt(ok());
     if (!test.exists(value, object)) {
       return this;
@@ -1514,7 +1514,7 @@ public abstract class Check<T, E extends Exception> {
    * @return This {@code Check} object
    * @throws E If the specified test does not exist between subject and object
    */
-  public Check<T, E> hasNot(
+  public Check<T, E> notHas(
       ToIntFunction<T> property, IntRelation test, int object, String message, Object... msgArgs)
       throws E {
     return has(property, test.negate(), object, message, msgArgs);

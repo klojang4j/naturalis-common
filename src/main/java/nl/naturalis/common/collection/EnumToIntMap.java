@@ -81,7 +81,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
   public EnumToIntMap(Class<K> enumClass, int keyAbsentValue, ToIntFunction<K> initializer) {
     this.keys =
         Check.notNull(enumClass, "enumClass")
-            .hasNot(enumConstants(), empty(), "Empty enum not supported")
+            .notHas(enumConstants(), empty(), "Empty enum not supported")
             .ok(Class::getEnumConstants);
     this.data = new int[keys.length];
     this.kav = keyAbsentValue;
