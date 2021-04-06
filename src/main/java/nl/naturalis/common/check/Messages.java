@@ -357,6 +357,20 @@ class Messages {
     };
   }
 
+  static Formatter msgPositive() {
+    return md -> {
+      String not = md.negated() ? "not " : "";
+      return format("%s must %sbe positive (was %d)", not, md.argName(), md.argument());
+    };
+  }
+
+  static Formatter msgNegative() {
+    return md -> {
+      String not = md.negated() ? "not " : "";
+      return format("%s must %sbe negative (was %d)", not, md.argName(), md.argument());
+    };
+  }
+
   static Formatter msgNullOr() {
     return md -> {
       if (md.negated()) {

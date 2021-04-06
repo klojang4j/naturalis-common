@@ -309,6 +309,34 @@ public class CommonChecks {
     setName(odd(), "odd");
   }
 
+  /**
+   * Verifies that the argument is greater than zero.
+   *
+   * @return An {@code IntPredicate}
+   */
+  public static IntPredicate positive() {
+    return x -> x > 0;
+  }
+
+  static {
+    setMessagePattern(positive(), msgPositive());
+    setName(positive(), "positive");
+  }
+
+  /**
+   * Verifies that the argument is greater than zero.
+   *
+   * @return An {@code IntPredicate}
+   */
+  public static IntPredicate negative() {
+    return x -> x < 0;
+  }
+
+  static {
+    setMessagePattern(negative(), msgNegative());
+    setName(negative(), "negative");
+  }
+
   /* ++++++++++++++ Relation ++++++++++++++ */
 
   /**
