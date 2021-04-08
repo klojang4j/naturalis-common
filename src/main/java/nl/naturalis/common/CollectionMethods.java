@@ -1,5 +1,7 @@
 package nl.naturalis.common;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
@@ -326,6 +328,18 @@ public class CollectionMethods {
     HashMap<K, V> copy = new HashMap<>(map.size() + 1, 1F);
     copy.putAll(map);
     return copy;
+  }
+
+  /**
+   * Prints the specified {@code Map} to the specified {@code OutputStream}. Each key-value pair is
+   * on a new line.
+   *
+   * @param map The map to print
+   * @param out The {@code OutputStream} to print to
+   */
+  public static void printMap(Map<?, ?> map, OutputStream out) {
+    PrintStream ps = out.getClass() == PrintStream.class ? (PrintStream) out : new PrintStream(out);
+    map.forEach((k, v) -> ps.printf("%5d : %s%n", k, v));
   }
 
   /**

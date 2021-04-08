@@ -11,8 +11,8 @@ import static nl.naturalis.common.path.Path.EMPTY_PATH;
 /**
  * Provides a convenient way of writing <i>maps-within-maps</i> (<code>Map&lt;String, Object&gt;
  * </code>) objects. It lets you write deeply nested values without having to worry about whether
- * all the intermediate (<code>Map&lt;String, Object&gt;</code>) objects have been created. If they
- * are not, they will be tacitly created.
+ * all the intermediate (<code>Map&lt;String, Object&gt;</code>) objects have been created yet. If
+ * they are not, they will be tacitly created.
  *
  * <h4>Example 1:</h4>
  *
