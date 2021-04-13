@@ -360,8 +360,31 @@ public final class StringMethods {
    * @param ignoreCase
    * @param prefixes
    */
+  public static String lchop(Object subject, Collection<String> prefixes) {
+    return lchop(subject, false, prefixes);
+  }
+
+  /**
+   * Removes all occurrences of the provided prefixes from the start of a string. The returned
+   * string will no longer start with any of the provided prefixes.
+   *
+   * @param subject
+   * @param ignoreCase
+   * @param prefixes
+   */
   public static String lchop(Object subject, boolean ignoreCase, Collection<String> prefixes) {
-    return lchop(subject, ignoreCase, prefixes.toArray(new String[prefixes.size()]));
+    return lchop(subject, ignoreCase, prefixes.toArray(String[]::new));
+  }
+
+  /**
+   * Removes all occurrences of the provided prefixes from the start of a string. The returned
+   * string will no longer start with any of the provided prefixes.
+   *
+   * @param subject The string to remove the prefixes from
+   * @param prefixes The prefixes to remove
+   */
+  public static String lchop(Object subject, String... prefixes) {
+    return lchop(subject, false, prefixes);
   }
 
   /**
@@ -373,7 +396,7 @@ public final class StringMethods {
    * @param prefixes The prefixes to remove
    */
   public static String lchop(Object subject, boolean ignoreCase, String... prefixes) {
-    Check.that(prefixes, "prefixes").is(noneNull());
+    Check.that(prefixes, "prefixes").is(neverNull());
     if (subject == null) {
       return EMPTY;
     }
@@ -593,11 +616,34 @@ public final class StringMethods {
    * will no longer end with any of the provided suffixes.
    *
    * @param subject
+   * @param suffixes
+   */
+  public static String rchop(Object subject, Collection<String> suffixes) {
+    return rchop(subject, false, suffixes);
+  }
+
+  /**
+   * Removes all occurrences of the provided suffixes from the end of a string. The returned string
+   * will no longer end with any of the provided suffixes.
+   *
+   * @param subject
    * @param ignoreCase
    * @param suffixes
    */
   public static String rchop(Object subject, boolean ignoreCase, Collection<String> suffixes) {
-    return rchop(subject, ignoreCase, suffixes.toArray(new String[suffixes.size()]));
+    return rchop(subject, ignoreCase, suffixes.toArray(String[]::new));
+  }
+
+  /**
+   * Removes all occurrences of the provided suffixes from the end of a string. The returned string
+   * will no longer end with any of the provided suffixes.
+   *
+   * @param subject
+   * @param ignoreCase
+   * @param suffixes
+   */
+  public static String rchop(Object subject, String... suffixes) {
+    return rchop(subject, false, suffixes);
   }
 
   /**
@@ -609,7 +655,7 @@ public final class StringMethods {
    * @param suffixes
    */
   public static String rchop(Object subject, boolean ignoreCase, String... suffixes) {
-    Check.notNull(suffixes, "suffixes");
+    Check.that(suffixes, "suffixes").is(neverNull());
     if (subject == null) {
       return EMPTY;
     }
@@ -903,8 +949,8 @@ public final class StringMethods {
   }
 
   /**
-   * Returns the substring up to the first occurrence of the specified character, or the entire
-   * string if it does not contain that character.
+   * Returns the substring up to (and not including) the first occurrence of the specified
+   * character, or the entire string if it does not contain that character.
    *
    * @param str The string to take a substring from
    * @param to The character sequence up to which to take the substring
@@ -915,8 +961,8 @@ public final class StringMethods {
   }
 
   /**
-   * Returns the substring up to the first or last occurrence of the specified character, or the
-   * entire string if it does not contain that character.
+   * Returns the substring up to (and not including) the first or last occurrence of the specified
+   * character, or the entire string if it does not contain that character.
    *
    * @param str The string to take a substring from
    * @param to The character sequence up to which to take the substring
@@ -931,7 +977,7 @@ public final class StringMethods {
   }
 
   /**
-   * Returns everything up to (and not including) the firstoccurrence of the specified character
+   * Returns everything up to (and not including) the first occurrence of the specified character
    * within the string, or the entire string if it does not contain that character.
    *
    * @param str The string to take a substring from

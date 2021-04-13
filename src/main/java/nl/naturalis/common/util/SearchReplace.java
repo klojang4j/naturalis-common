@@ -13,7 +13,7 @@ import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ArrayMethods.inArray;
 import static nl.naturalis.common.StringMethods.endsWith;
 import static nl.naturalis.common.check.CommonChecks.directory;
-import static nl.naturalis.common.check.CommonChecks.noneNull;
+import static nl.naturalis.common.check.CommonChecks.neverNull;
 import static nl.naturalis.common.check.CommonChecks.yes;
 
 public class SearchReplace {
@@ -70,7 +70,7 @@ public class SearchReplace {
     Check.notNull(rootDir, "rootDir");
     Check.notNull(search, "regexSearch");
     Check.notNull(replace, "replace");
-    Check.that(fileExts).is(noneNull(), "At least one file extension required");
+    Check.that(fileExts).is(neverNull(), "At least one file extension required");
     Path root = Path.of(rootDir);
     Check.that(root)
         .has(Path::isAbsolute, yes(), "rootDir must be absolute path")

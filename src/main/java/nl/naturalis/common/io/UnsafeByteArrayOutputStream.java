@@ -26,7 +26,7 @@ import static nl.naturalis.common.util.AugmentationType.MULTIPLY;
  *
  * @author Ayco Holleman
  */
-public class ExposedByteArrayOutputStream extends OutputStream {
+public class UnsafeByteArrayOutputStream extends OutputStream {
 
   private final float ib;
   private final AugmentationType it;
@@ -35,38 +35,38 @@ public class ExposedByteArrayOutputStream extends OutputStream {
   private int cnt;
 
   /**
-   * Creates a new {@code SeeThruByteArrayOutputStream}. The buffer capacity is initially 512 bytes,
+   * Creates a new {@code UnsafeByteArrayOutputStream}. The buffer capacity is initially 512 bytes,
    * though its size increases if necessary. When it reaches full capacity its replaced with a
    * buffer twice its size.
    */
-  public ExposedByteArrayOutputStream() {
+  public UnsafeByteArrayOutputStream() {
     this(512);
   }
 
   /**
-   * Creates a new {@code SeeThruByteArrayOutputStream}. The buffer initially has the specified
+   * Creates a new {@code UnsafeByteArrayOutputStream}. The buffer initially has the specified
    * number of bytes. When it reaches full capacity its replaced with a buffer twice its size.
    *
    * @param capacity The initial buffer capacity
    */
-  public ExposedByteArrayOutputStream(int capacity) {
+  public UnsafeByteArrayOutputStream(int capacity) {
     this(new byte[capacity], 0);
   }
 
   /**
-   * Creates a new {@code SeeThruByteArrayOutputStream} that wraps around the specified byte array.
+   * Creates a new {@code UnsafeByteArrayOutputStream} that wraps around the specified byte array.
    * When it reaches full capacity its replaced with a buffer twice its size.
    *
    * @param buf The initial byte array to write to
    * @param offset The offset of the first byte to write.The offset may be equal to the byte array's
    *     length (causing write actions to append to what is already in the array) but not greater.
    */
-  public ExposedByteArrayOutputStream(byte[] buf, int offset) {
+  public UnsafeByteArrayOutputStream(byte[] buf, int offset) {
     this(buf, offset, 2F, MULTIPLY);
   }
 
   /**
-   * Creates a new {@code SeeThruByteArrayOutputStream}. The buffer capacity is initially {@code
+   * Creates a new {@code UnsafeByteArrayOutputStream}. The buffer capacity is initially {@code
    * size} bytes, though its size increases if necessary.
    *
    * @param size The initial length of the byte array
@@ -75,12 +75,12 @@ public class ExposedByteArrayOutputStream extends OutputStream {
    *     IncrementType} you choose, the buffer capacity will always be increased enough to sustain
    *     the {@code write} action.
    */
-  public ExposedByteArrayOutputStream(int size, float incrementBy, AugmentationType incrementType) {
+  public UnsafeByteArrayOutputStream(int size, float incrementBy, AugmentationType incrementType) {
     this(new byte[size], 0, incrementBy, incrementType);
   }
 
   /**
-   * Creates a new {@code SeeThruByteArrayOutputStream} that wraps around the specified byte array.
+   * Creates a new {@code UnsafeByteArrayOutputStream} that wraps around the specified byte array.
    *
    * @param buf The initial byte array to write to
    * @param offset The offset of the first byte to write. The offset may be equal to the byte
@@ -90,7 +90,7 @@ public class ExposedByteArrayOutputStream extends OutputStream {
    * @param incrementType The type of increase. Whichever {@code IncrementBy} value and {@code
    *     IncrementType} you choose, the buffer capacity will always be increased by at least 1.
    */
-  public ExposedByteArrayOutputStream(
+  public UnsafeByteArrayOutputStream(
       byte[] buf, int offset, float incrementBy, AugmentationType incrementType) {
     this.buf = Check.notNull(buf, "buf").has(length(), gt(), 0).ok();
     this.cnt = Check.that(offset, "offset").is(lte(), buf.length).ok();

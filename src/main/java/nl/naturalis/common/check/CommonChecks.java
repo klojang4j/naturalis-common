@@ -116,20 +116,20 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is not null and does not contain any null values. Equivalent to
-   * {@link ObjectMethods#isNoneNull(Object) ObjectMethods::isNoneNull}. Especially useful for
-   * validating varargs arguments.
+   * Verifies that the argument is not null and, in case of an array {@code Collection} or {@code
+   * Map}, does not contain any null values. Equivalent to {@link ObjectMethods#isNoneNull(Object)
+   * ObjectMethods::isNoneNull}. Especially useful for validating varargs arguments.
    *
    * @param <T> The type of the argument
    * @return A {@code Predicate}
    */
-  public static <T> Predicate<T> noneNull() {
+  public static <T> Predicate<T> neverNull() {
     return ObjectMethods::isNoneNull;
   }
 
   static {
-    setMessagePattern(noneNull(), msgNoneNull());
-    setName(noneNull(), "noneNull");
+    setMessagePattern(neverNull(), msgNeverNull());
+    setName(neverNull(), "neverNull");
   }
 
   /**

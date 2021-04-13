@@ -8,7 +8,7 @@ import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
-import static nl.naturalis.common.check.CommonChecks.noneNull;
+import static nl.naturalis.common.check.CommonChecks.neverNull;
 import static nl.naturalis.common.invoke.InvokeException.typeMismatch;
 import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 
@@ -62,7 +62,7 @@ public class BeanReader<T> {
    */
   public BeanReader(Class<? super T> beanClass, boolean exclude, String... properties) {
     this.beanClass = Check.notNull(beanClass, "beanClass").ok();
-    Check.that(properties, "properties").is(noneNull());
+    Check.that(properties, "properties").is(neverNull());
     Map<String, ReadInfo> info = new HashMap<>(ReadInfoFactory.INSTANCE.getReadInfo(beanClass));
     if (exclude) {
       info.keySet().removeAll(Set.of(properties));

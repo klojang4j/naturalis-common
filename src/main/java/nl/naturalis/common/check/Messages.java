@@ -96,7 +96,7 @@ class Messages {
     };
   }
 
-  static Formatter msgNoneNull() {
+  static Formatter msgNeverNull() {
     return md -> {
       if (md.negated()) { // Negation is nonsense, but OK
         format("%s must be null or contain one or more null values", md.argName());

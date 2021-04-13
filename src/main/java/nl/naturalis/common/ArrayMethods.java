@@ -11,7 +11,7 @@ import static java.lang.System.arraycopy;
 import static nl.naturalis.common.check.CommonChecks.LTE;
 import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonChecks.lt;
-import static nl.naturalis.common.check.CommonChecks.noneNull;
+import static nl.naturalis.common.check.CommonChecks.neverNull;
 import static nl.naturalis.common.check.CommonGetters.length;
 
 /** Methods for working with arrays. */
@@ -127,7 +127,7 @@ public class ArrayMethods {
     Check.notNull(arr0, "arr0");
     Check.notNull(arr1, "arr1");
     Check.notNull(arr2, "arr2");
-    Check.that(moreArrays, "moreArrays").is(noneNull());
+    Check.that(moreArrays, "moreArrays").is(neverNull());
     long x = Arrays.stream(moreArrays).flatMap(Arrays::stream).count();
     long y = arr0.length + arr1.length + arr2.length + x;
     Check.that(y).is(LTE(), Integer.MAX_VALUE, "Concatenated array too large");

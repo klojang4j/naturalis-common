@@ -9,7 +9,7 @@ import nl.naturalis.common.check.Check;
 import nl.naturalis.common.invoke.NoSuchPropertyException;
 import static nl.naturalis.common.check.CommonChecks.empty;
 import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.noneNull;
+import static nl.naturalis.common.check.CommonChecks.neverNull;
 import static nl.naturalis.common.check.CommonGetters.length;
 import static nl.naturalis.common.path.PathWalker.DeadEndAction.RETURN_NULL;
 
@@ -70,7 +70,7 @@ public final class PathWalker {
    * @param paths
    */
   public PathWalker(Path... paths) {
-    Check.that(paths, "paths").isNot(empty()).is(noneNull());
+    Check.that(paths, "paths").isNot(empty()).is(neverNull());
     this.paths = Arrays.copyOf(paths, paths.length);
     this.dea = RETURN_NULL;
     this.kds = null;
@@ -83,7 +83,7 @@ public final class PathWalker {
    * @param paths
    */
   public PathWalker(String... paths) {
-    Check.that(paths, "paths").isNot(empty()).is(noneNull());
+    Check.that(paths, "paths").isNot(empty()).is(neverNull());
     this.paths = Arrays.stream(paths).map(Path::new).toArray(Path[]::new);
     this.dea = RETURN_NULL;
     this.kds = null;
@@ -125,7 +125,7 @@ public final class PathWalker {
    */
   public PathWalker(
       List<Path> paths, DeadEndAction deadEndAction, Function<Path, Object> mapKeyDeserializer) {
-    Check.that(paths, "paths").isNot(empty()).is(noneNull());
+    Check.that(paths, "paths").isNot(empty()).is(neverNull());
     this.paths = paths.toArray(Path[]::new);
     this.dea = deadEndAction;
     this.kds = mapKeyDeserializer;

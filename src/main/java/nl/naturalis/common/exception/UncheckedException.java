@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import nl.naturalis.common.ExceptionMethods;
+import nl.naturalis.common.check.Check;
 
 /**
  * A subclass of {@code RuntimeException} that behaves just like {@link Exception} it wraps. All
@@ -26,7 +27,7 @@ public class UncheckedException extends RuntimeException {
    * @param cause
    */
   public UncheckedException(Throwable cause) {
-    this(cause.getMessage(), cause);
+    this(Check.notNull(cause).ok().toString(), cause);
   }
 
   /**
@@ -36,7 +37,7 @@ public class UncheckedException extends RuntimeException {
    * @param cause
    */
   public UncheckedException(String message, Throwable cause) {
-    super(message, cause);
+    super(Check.notNull(message, "message").ok(), Check.notNull(cause, "cause").ok());
   }
 
   /** Prints the stack trace of the wrapped {@code Exception}. */

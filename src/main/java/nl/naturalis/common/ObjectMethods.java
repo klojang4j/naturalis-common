@@ -266,9 +266,10 @@ public class ObjectMethods {
   }
 
   /**
-   * Verifies that the argument is not null and, if it is a {@link Collection}, {@link Map} or
-   * {@code Object[]}, does not contain any null values. It may still be an empty collection, map or
-   * array, however.
+   * Verifies that the argument is not null and, in case of an array, {@link Collection} or {@link
+   * Map}, does not contain any null values.It may still be an empty array, {@code Collection} or
+   * {@code Map}, however. If the argument is a {@code Map}, the check is only done on its values,
+   * not its keys.
    *
    * @param arg The object to be tested
    * @return Whether or not it is not null and does not contain any null values

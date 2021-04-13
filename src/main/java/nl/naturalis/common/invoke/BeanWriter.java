@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
-import static nl.naturalis.common.check.CommonChecks.noneNull;
+import static nl.naturalis.common.check.CommonChecks.neverNull;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
@@ -54,7 +54,7 @@ public class BeanWriter<T> {
    */
   public BeanWriter(Class<T> beanClass, boolean exclude, String... properties) {
     Check.notNull(beanClass, "beanClass");
-    Check.that(properties, "properties").is(noneNull());
+    Check.that(properties, "properties").is(neverNull());
     Map<String, WriteInfo> copy = new HashMap<>(WriteInfoFactory.INSTANCE.getWriteInfo(beanClass));
     if (exclude) {
       copy.keySet().removeAll(Set.of(properties));

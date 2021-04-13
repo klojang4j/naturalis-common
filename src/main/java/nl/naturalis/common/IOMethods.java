@@ -4,7 +4,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.io.ExposedByteArrayOutputStream;
+import nl.naturalis.common.io.UnsafeByteArrayOutputStream;
 import static nl.naturalis.common.check.CommonChecks.empty;
 import static nl.naturalis.common.check.CommonChecks.gt;
 import static nl.naturalis.common.check.CommonChecks.notNull;
@@ -17,17 +17,19 @@ import static nl.naturalis.common.check.CommonChecks.yes;
  */
 public class IOMethods {
 
+  public static final String RESOURCE_NOT_FOUND = "Resource not found: \"%s\"";
+
   private IOMethods() {}
 
-  public static String toString(Class<?> resourceClass, String resourcePath) {
-    return toString(resourceClass, resourcePath, 512);
+  public static String toString(Class<?> clazz, String path) {
+    return toString(clazz, path, 512);
   }
 
-  public static String toString(Class<?> classpathClass, String resourcePath, int chunkSize) {
-    Check.notNull(classpathClass, "classpathClass");
-    Check.that(resourcePath, "resourcePath").isNot(empty());
-    try (InputStream in = classpathClass.getResourceAsStream(resourcePath)) {
-      Check.that(in).is(notNull(), "Resource not found: %s", resourcePath);
+  public static String toString(Class<?> clazz, String path, int chunkSize) {
+    Check.notNull(clazz, "clazz");
+    Check.that(path, "path").isNot(empty());
+    try (InputStream in = clazz.getResourceAsStream(path)) {
+      Check.that(in).is(notNull(), RESOURCE_NOT_FOUND, path);
       return toString(in, chunkSize);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
@@ -48,7 +50,7 @@ public class IOMethods {
   }
 
   public static String toString(InputStream in, int chunkSize) {
-    ExposedByteArrayOutputStream out = new ExposedByteArrayOutputStream(chunkSize);
+    UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(chunkSize);
     pipe(in, out, chunkSize);
     return new String(out.toByteArray(), 0, out.count(), StandardCharsets.UTF_8);
   }

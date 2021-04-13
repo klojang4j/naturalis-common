@@ -308,7 +308,7 @@ public class CollectionMethods {
   public static <K extends Enum<K>, V, M extends EnumMap<K, ? super V>> M saturatedEnumMap(
       Class<K> enumClass, V... values) throws IllegalArgumentException {
     K[] consts = Check.notNull(enumClass, "enumClass").ok().getEnumConstants();
-    Check.that(values, "values").is(noneNull()).has(length(), eq(), consts.length);
+    Check.that(values, "values").is(neverNull()).has(length(), eq(), consts.length);
     EnumMap<K, ? super V> map = new EnumMap<>(enumClass);
     for (int i = 0; i < consts.length; ++i) {
       map.put(consts[i], values[i]);
@@ -339,7 +339,7 @@ public class CollectionMethods {
    */
   public static void printMap(Map<?, ?> map, OutputStream out) {
     PrintStream ps = out.getClass() == PrintStream.class ? (PrintStream) out : new PrintStream(out);
-    map.forEach((k, v) -> ps.printf("%5d : %s%n", k, v));
+    map.forEach((k, v) -> ps.printf("%20s : %s%n", k, v));
   }
 
   /**
