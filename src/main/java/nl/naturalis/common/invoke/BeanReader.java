@@ -41,7 +41,7 @@ public class BeanReader<T> {
    * Creates a {@code BeanReader} for the specified class and the specified properties on that
    * class. If you intend to use this {@code BeanReader} to repetitively to read just one or two
    * properties from a lot of bulky bean instances, this makes the {@code BeanReader} slightly more
-   * efficient. If you specify non-existent properties, they will silently be ignored.
+   * efficient. Specifying non-existent properties has no effect; they will be ignored silently.
    *
    * @param beanClass The bean class
    * @param properties The properties you are interested in
@@ -54,7 +54,7 @@ public class BeanReader<T> {
    * Creates a {@code BeanReader} for the specified class and the specified properties on that
    * class. If you intend to use this {@code BeanReader} to repetitively to read just one or two
    * properties from a lot of bulky bean instances, this makes the {@code BeanReader} slightly more
-   * efficient. If you specify non-existent properties, they will silently be ignored.
+   * efficient. Specifying non-existent properties has no effect; they will be ignored silently.
    *
    * @param beanClass The bean class
    * @param exclude Whether to exclude or include the specified properties
@@ -100,5 +100,14 @@ public class BeanReader<T> {
    */
   public Class<? super T> getBeanClass() {
     return beanClass;
+  }
+
+  /**
+   * Returns all properties of the bean class that will actually be read by this {@code BeanReader}.
+   *
+   * @return All properties of the bean class that will actually be read by this {@code BeanReader}
+   */
+  public Set<String> getUsedProperties() {
+    return readInfo.keySet();
   }
 }
