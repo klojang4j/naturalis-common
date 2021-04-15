@@ -116,38 +116,8 @@ public class NumberMethods {
    * @param targetType The class of the target type
    * @return An instance of the target type
    */
-  @SuppressWarnings("unchecked")
-  public static <T extends Number, U extends Number> U valueOf(T number, Class<U> targetType) {
-    Class<T> myType = (Class<T>) Check.notNull(number, "number").ok(Object::getClass);
-    Check.notNull(targetType, "targetType");
-    if (myType == targetType) {
-      return (U) number;
-    } else if (targetType == Double.class) {
-      return (U) Double.valueOf(number.doubleValue());
-    }
-    double d = number.doubleValue();
-    if (targetType == Long.class) {
-      check(d, Long.class, Long.MIN_VALUE, Long.MAX_VALUE);
-      return (U) Long.valueOf(number.longValue());
-    } else if (targetType == Float.class) {
-      check(d, Float.class, Float.MIN_VALUE, Float.MAX_VALUE);
-      return (U) Float.valueOf(number.floatValue());
-    } else if (targetType == Integer.class) {
-      check(d, Integer.class, Integer.MIN_VALUE, Integer.MAX_VALUE);
-      return (U) Integer.valueOf(number.intValue());
-    } else if (targetType == Short.class) {
-      check(d, Short.class, Short.MIN_VALUE, Short.MAX_VALUE);
-      return (U) Short.valueOf(number.shortValue());
-    }
-    check(d, Byte.class, Byte.MIN_VALUE, Byte.MAX_VALUE);
-    return (U) Byte.valueOf(number.byteValue());
-  }
-
-  private static <T extends Number> void check(
-      double d, Class<T> targetType, double min, double max) {
-    if (d < min || d > max) {
-      throw new IllegalArgumentException(d + " does not fit " + targetType.getName());
-    }
+  public static <T extends Number, U extends Number> U convert(T number, Class<U> targetType) {
+    return new NumberConverter<>(targetType).convert(number);
   }
 
   /**
