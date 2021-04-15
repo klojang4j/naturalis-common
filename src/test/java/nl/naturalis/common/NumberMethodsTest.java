@@ -80,4 +80,70 @@ public class NumberMethodsTest {
     Float f1 = NumberMethods.convert(f0, Float.class);
     assertSame(f0, f1);
   }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void convert06() {
+    NumberMethods.convert(.3D, Short.class);
+  }
+
+  @Test
+  public void convert07() {
+    short s = NumberMethods.convert(3D, Short.class);
+    assertEquals((short) 3, s);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void convert08() {
+    NumberMethods.convert(Integer.MIN_VALUE, Short.class);
+  }
+
+  @Test
+  public void convert09() {
+    int i = NumberMethods.convert(0, Integer.class);
+    assertEquals(0, i);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void parse01() {
+    NumberMethods.parse("300345", Byte.class);
+  }
+
+  @Test
+  public void parse02() {
+    byte b = NumberMethods.parse("123", Byte.class);
+    assertEquals((byte) 123, b);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void parse04() {
+    NumberMethods.parse("123.02", Byte.class);
+  }
+
+  @Test
+  public void parse05() {
+    Float f1 = NumberMethods.parse("0.9", Float.class);
+    assertEquals((Float) .9F, f1);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void parse06() {
+    NumberMethods.parse(".3", Short.class);
+  }
+
+  @Test
+  public void parse07() {
+    short s = NumberMethods.parse("3", Short.class);
+    assertEquals((short) 3, s);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void parse08() {
+    NumberMethods.parse(String.valueOf(Integer.MIN_VALUE), Short.class);
+  }
+
+  @Test
+  public void parse09() {
+    int i = NumberMethods.parse("0", Integer.class);
+    assertEquals(0, i);
+  }
 }

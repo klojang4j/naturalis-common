@@ -108,7 +108,7 @@ public class NumberMethods {
 
   /**
    * Converts the specified number into a number of the specified type. Throws an {@link
-   * IllegalArgumentException} if the number is too big to fit the target type.
+   * IllegalArgumentException} if the number is too big to fit into the target type.
    *
    * @param <T> The type of the number to be converted
    * @param <U> The target type
@@ -118,6 +118,21 @@ public class NumberMethods {
    */
   public static <T extends Number, U extends Number> U convert(T number, Class<U> targetType) {
     return new NumberConverter<>(targetType).convert(number);
+  }
+
+  /**
+   * Parses the specified string into a number of the specified type. Throws an {@link
+   * IllegalArgumentException} if the string is not a number or if the number is too big to fit into
+   * the target type.
+   *
+   * @param <T> The type of the number to be converted
+   * @param <U> The target type
+   * @param s The string to be parsed
+   * @param targetType The class of the target type
+   * @return An instance of the target type
+   */
+  public static <T extends Number, U extends Number> U parse(String s, Class<U> targetType) {
+    return new NumberParser<>(targetType).parse(s);
   }
 
   /**
