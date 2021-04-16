@@ -2,6 +2,7 @@ package nl.naturalis.common.invoke;
 
 import java.lang.invoke.MethodHandle;
 import java.util.Map;
+import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
@@ -19,15 +20,36 @@ import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
  * still uses reflection to identify the getter methods on the bean class. Therefore if you use this
  * class from within a Java module you must still open the module to the naturalis-common module.
  *
+ * <p>This class is not thread-safe.
+ *
  * @author Ayco Holleman
  */
 public class AnyBeanReader {
 
-  private Class<?> mruClass;
-  private Map<String, ReadInfo> mruInfo;
+  private final boolean strict;
 
-  /** Creates a new {@code AnyBeanReader} */
-  public AnyBeanReader() {}
+  private Class<?> mruClass;
+  private Map<String, GetInvoker> mruInfo;
+
+  /**
+   * Creates a new {@code AnyBeanReader}. Strict naming conventions will be applied to what
+   * qualifies as a getter. See {@link
+   * ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method, boolean)}.
+   */
+  public AnyBeanReader() {
+    this(true);
+  }
+
+  /**
+   * Creates a new {@code AnyBeanReader}.
+   *
+   * @param strictNaming hether or not to apply strict naming conventions for what counts as a
+   *     getter. See {@link ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method,
+   *     boolean)}.
+   */
+  public AnyBeanReader(boolean strictNaming) {
+    this.strict = strictNaming;
+  }
 
   /**
    * Returns the value of the specified property on the specified bean. If the property does not
@@ -44,7 +66,7 @@ public class AnyBeanReader {
     Class<?> clazz = bean.getClass();
     if (clazz != mruClass) {
       mruClass = clazz;
-      mruInfo = ReadInfoFactory.INSTANCE.getReadInfo(clazz);
+      mruInfo = GetInvokerFactory.INSTANCE.getInvokers(clazz, strict);
     }
     Check.on(s -> noSuchProperty(bean, property), property).is(keyIn(), mruInfo);
     try {

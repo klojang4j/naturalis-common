@@ -4,6 +4,7 @@ import java.lang.invoke.MethodHandle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
@@ -25,51 +26,67 @@ import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 public class BeanReader<T> {
 
   private final Class<? super T> beanClass;
-  private final Map<String, ReadInfo> readInfo;
+  private final Map<String, GetInvoker> readInfo;
 
   /**
-   * Creates a {@code BeanReader} for the specified class.
+   * Creates a {@code BeanReader} for the specified class. The specified properties will be included
+   * rather than excluded from the list of properties you intend to read. Strict naming conventions
+   * will be applied to what qualifies as a getter. See {@link
+   * ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method, boolean)}.
    *
    * @param beanClass The bean class
-   */
-  public BeanReader(Class<? super T> beanClass) {
-    this.beanClass = Check.notNull(beanClass, "beanClass").ok();
-    this.readInfo = ReadInfoFactory.INSTANCE.getReadInfo(beanClass);
-  }
-
-  /**
-   * Creates a {@code BeanReader} for the specified class and the specified properties on that
-   * class. If you intend to use this {@code BeanReader} to repetitively to read just one or two
-   * properties from a lot of bulky bean instances, this makes the {@code BeanReader} slightly more
-   * efficient. Specifying non-existent properties has no effect; they will be ignored silently.
-   *
-   * @param beanClass The bean class
-   * @param properties The properties you are interested in
+   * @param properties The properties you intend to read (may be {@code null} or zero-length)
    */
   public BeanReader(Class<? super T> beanClass, String... properties) {
-    this(beanClass, false, properties);
+    this(beanClass, true, false, properties);
   }
 
   /**
-   * Creates a {@code BeanReader} for the specified class and the specified properties on that
-   * class. If you intend to use this {@code BeanReader} to repetitively to read just one or two
-   * properties from a lot of bulky bean instances, this makes the {@code BeanReader} slightly more
-   * efficient. Specifying non-existent properties has no effect; they will be ignored silently.
+   * Creates a {@code BeanReader} for the specified class. Strict naming conventions will be applied
+   * to what qualifies what counts as a getter. See {@link
+   * ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method, boolean)}.
    *
    * @param beanClass The bean class
    * @param exclude Whether to exclude or include the specified properties
-   * @param properties The properties you are, or are not interested in
+   * @param properties The properties you intend to read (may be {@code null} or zero-length)
    */
   public BeanReader(Class<? super T> beanClass, boolean exclude, String... properties) {
+    this(beanClass, true, exclude, properties);
+  }
+
+  /**
+   * Creates a {@code BeanReader} for the specified class and the specified properties on that
+   * class. If you intend to use this {@code BeanReader} to repetitively to read just one or two
+   * properties from bulky bean types, explicitly specifying the properties you intend to read might
+   * make the {@code BeanReader} slightly more efficient. Otherwise you may specify {@code null} or
+   * a zero-length array to indicate that you intend to read all properties.
+   *
+   * <p>Specifying non-existent properties (names that cannot be traced back to getters) has no
+   * effect. It will not cause an exception to be thrown. Instead they will be ignored silently.
+   *
+   * @param beanClass The bean class
+   * @param strictNaming Whether or not to apply strict naming conventions to what qualifies as a
+   *     getter. See {@link ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method,
+   *     boolean)}.
+   * @param exclude Whether to exclude or include the specified properties
+   * @param properties The properties you intend to read (may be {@code null} or zero-length)
+   */
+  public BeanReader(
+      Class<? super T> beanClass, boolean strictNaming, boolean exclude, String... properties) {
     this.beanClass = Check.notNull(beanClass, "beanClass").ok();
     Check.that(properties, "properties").is(neverNull());
-    Map<String, ReadInfo> info = new HashMap<>(ReadInfoFactory.INSTANCE.getReadInfo(beanClass));
-    if (exclude) {
-      info.keySet().removeAll(Set.of(properties));
+    if (properties == null || properties.length == 0) {
+      this.readInfo = GetInvokerFactory.INSTANCE.getInvokers(beanClass, strictNaming);
     } else {
-      info.keySet().retainAll(Set.of(properties));
+      GetInvokerFactory gif = GetInvokerFactory.INSTANCE;
+      Map<String, GetInvoker> info = new HashMap<>(gif.getInvokers(beanClass, strictNaming));
+      if (exclude) {
+        info.keySet().removeAll(Set.of(properties));
+      } else {
+        info.keySet().retainAll(Set.of(properties));
+      }
+      this.readInfo = Map.copyOf(info);
     }
-    this.readInfo = Map.copyOf(info);
   }
 
   /**

@@ -136,14 +136,12 @@ public class ClassMethods {
   }
 
   /**
-   * Returns the "getter" methods of the specified bean class.
+   * Returns all methods of the specified bean class than can be identified as setters. See {@link
+   * #getPropertyNameFromGetter(Method, boolean)} for an explanation of the {@code strict}
+   * parameter.
    *
-   * @param beanClass The class from which to retrieve the getters.
-   * @param strict Whether or not to include only methods with JavaBean compliant names ({@code
-   *     isXyz()} for boolean methods; {@code getXyz()} for other methods). If {@code strict} is
-   *     false, all public methods that take no parameters are included in the returned {@code
-   *     List}.
-   * @return
+   * @param beanClass The bean class from which to extract the getter methods
+   * @return The getters on the specified bean class
    */
   public static List<Method> getGetters(Class<?> beanClass, boolean strict) {
     Check.notNull(beanClass, "beanClass");
@@ -164,6 +162,13 @@ public class ClassMethods {
     return getters;
   }
 
+  /**
+   * Returns all methods of the specified bean class than can be identified as setters.
+   *
+   * @see #getPropertyNameFromSetter(Method)
+   * @param beanClass The bean class from which to extract the setter methods
+   * @return The setters on the specified bean class
+   */
   public static List<Method> geSetters(Class<?> beanClass) {
     Check.notNull(beanClass, "beanClass");
     Method[] methods = beanClass.getMethods();
@@ -183,6 +188,18 @@ public class ClassMethods {
     return setters;
   }
 
+  /**
+   * Returns the property name corresponding to the specified method, which is assumed to be a
+   * getter. If the method cannot be identified as a getter, an {@link IllegalArgumentException} is
+   * thrown. If {@code strict} equals {@code false}, any method that has a zero-length parameter
+   * list and that does not return {@code void} is taken to be a getter. Otherwise the JavaBeans
+   * naming conventions are applied, with the exception that methods returning a {@link Boolean}
+   * (rather than {@code boolean}) and whose name starts with "is" will also qualify as getters.
+   *
+   * @param m The method from which to extract a property name
+   * @param strict Whether or not to be strict as regards the method name
+   * @return The name of the property corresponding to the method
+   */
   public static String getPropertyNameFromGetter(Method m, boolean strict) {
     String n = m.getName();
     if (m.getParameterCount() == 0 && m.getReturnType() != void.class) {
@@ -198,17 +215,17 @@ public class ClassMethods {
         return n;
       }
     }
-    String fmt = "Method %s %s(%s) in class %s is not a getter";
-    String returnType = getSimpleClassName(m.getReturnType());
-    String declaringClass = prettyClassName(m.getDeclaringClass());
-    String params =
-        Arrays.stream(m.getParameterTypes())
-            .map(ClassMethods::getSimpleClassName)
-            .collect(joining(", "));
-    String msg = String.format(fmt, returnType, n, params, declaringClass);
-    throw new IllegalArgumentException(msg);
+    throw notAProperty(m, true);
   }
 
+  /**
+   * Returns the property name corresponding to the specified method, which is assumed to be a
+   * setter. If the method cannot be identified as a setter, an {@link IllegalArgumentException} is
+   * thrown.
+   *
+   * @param m The method from which to extract a property name
+   * @return The name of the property corresponding to the method
+   */
   public static String getPropertyNameFromSetter(Method m) {
     String n = m.getName();
     if (m.getParameterCount() == 1
@@ -218,15 +235,7 @@ public class ClassMethods {
         && isUpperCase(n.charAt(3))) {
       return extractName(n, 3);
     }
-    String fmt = "Method %s %s(%s) in class %s is not a getter";
-    String returnType = getSimpleClassName(m.getReturnType());
-    String declaringClass = prettyClassName(m.getDeclaringClass());
-    String params =
-        Arrays.stream(m.getParameterTypes())
-            .map(ClassMethods::getSimpleClassName)
-            .collect(joining(", "));
-    String msg = String.format(fmt, returnType, n, params, declaringClass);
-    throw new IllegalArgumentException(msg);
+    throw notAProperty(m, false);
   }
 
   private static String extractName(String n, int from) {
@@ -234,6 +243,19 @@ public class ClassMethods {
     sb.append(n.substring(from));
     sb.setCharAt(0, toLowerCase(sb.charAt(0)));
     return sb.toString();
+  }
+
+  private static IllegalArgumentException notAProperty(Method m, boolean asGetter) {
+    String fmt = "Method %s %s(%s) in class %s is not a %s";
+    String rt = getSimpleClassName(m.getReturnType());
+    String clazz = prettyClassName(m.getDeclaringClass());
+    String params =
+        Arrays.stream(m.getParameterTypes())
+            .map(ClassMethods::getSimpleClassName)
+            .collect(joining(", "));
+    String type = asGetter ? "getter" : "setter";
+    String msg = String.format(fmt, rt, m.getName(), params, clazz, type);
+    return new IllegalArgumentException(msg);
   }
 
   private static boolean validGetterName(Method m) {

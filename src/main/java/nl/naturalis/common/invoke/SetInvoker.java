@@ -5,12 +5,12 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import nl.naturalis.common.ExceptionMethods;
 
-class WriteInfo {
+class SetInvoker {
 
   final Class<?> paramType;
   final MethodHandle setter;
 
-  WriteInfo(Method method) {
+  SetInvoker(Method method) {
     paramType = method.getParameterTypes()[0];
     try {
       setter = MethodHandles.lookup().unreflect(method);

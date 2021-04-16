@@ -6,12 +6,12 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 import nl.naturalis.common.ExceptionMethods;
 
-class ReadInfo {
+class GetInvoker {
 
   final Class<?> returnType;
   final MethodHandle getter;
 
-  ReadInfo(Method method) {
+  GetInvoker(Method method) {
     returnType = method.getReturnType();
     try {
       getter = MethodHandles.lookup().unreflect(method);
@@ -34,7 +34,7 @@ class ReadInfo {
     } else if (getClass() != obj.getClass()) {
       return false;
     }
-    ReadInfo other = (ReadInfo) obj;
+    GetInvoker other = (GetInvoker) obj;
     return getter == other.getter && returnType == other.returnType;
   }
 }

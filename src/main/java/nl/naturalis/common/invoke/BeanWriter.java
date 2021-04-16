@@ -20,7 +20,7 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  */
 public class BeanWriter<T> {
 
-  private final Map<String, WriteInfo> writeInfo;
+  private final Map<String, SetInvoker> writeInfo;
 
   /**
    * Creates a {@code BeanReader} for the specified class.
@@ -28,7 +28,7 @@ public class BeanWriter<T> {
    * @param beanClass The bean class
    */
   public BeanWriter(Class<T> beanClass) {
-    writeInfo = Check.notNull(beanClass).ok(WriteInfoFactory.INSTANCE::getWriteInfo);
+    writeInfo = Check.notNull(beanClass).ok(SetInvokerFactory.INSTANCE::getInvokers);
   }
 
   /**
@@ -55,7 +55,7 @@ public class BeanWriter<T> {
   public BeanWriter(Class<T> beanClass, boolean exclude, String... properties) {
     Check.notNull(beanClass, "beanClass");
     Check.that(properties, "properties").is(neverNull());
-    Map<String, WriteInfo> copy = new HashMap<>(WriteInfoFactory.INSTANCE.getWriteInfo(beanClass));
+    Map<String, SetInvoker> copy = new HashMap<>(SetInvokerFactory.INSTANCE.getInvokers(beanClass));
     if (exclude) {
       copy.keySet().removeAll(Set.of(properties));
     } else {
@@ -72,7 +72,7 @@ public class BeanWriter<T> {
    * @throws Throwable Any {@code Throwable} thrown from inside the {@code java.lang.invoke} package
    */
   public void set(T bean, String property, Object value) throws Throwable {
-    WriteInfo wi =
+    SetInvoker wi =
         Check.on(s -> new NoSuchPropertyException(property), property)
             .is(notNull())
             .is(keyIn(), writeInfo)
