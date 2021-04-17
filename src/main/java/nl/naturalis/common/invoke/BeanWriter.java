@@ -20,7 +20,7 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  */
 public class BeanWriter<T> {
 
-  private final Map<String, SetInvoker> writeInfo;
+  private final Map<String, Setter<?>> setters;
 
   /**
    * Creates a {@code BeanReader} for the specified class.
@@ -28,25 +28,25 @@ public class BeanWriter<T> {
    * @param beanClass The bean class
    */
   public BeanWriter(Class<T> beanClass) {
-    writeInfo = Check.notNull(beanClass).ok(SetInvokerFactory.INSTANCE::getInvokers);
+    setters = Check.notNull(beanClass).ok(SetterFactory.INSTANCE::getSetters);
   }
 
   /**
-   * Creates a {@code BeanReader} for the specified class and the specified properties of that
-   * class. If you intend to use this {@code BeanReader} to repetitively read just one or two
-   * properties from the provided bean instances, this makes the {@code BeanReader} more efficient.
+   * Creates a {@code BeanReader} for the specified class and the specified properties.
    *
    * @param beanClass The bean class
-   * @param properties The properties you are interested in
+   * @param properties The properties you intend to write
    */
   public BeanWriter(Class<T> beanClass, String... properties) {
     this(beanClass, false, properties);
   }
 
   /**
-   * Creates a {@code BeanReader} for the specified class and the specified properties of that
-   * class. If you intend to use this {@code BeanReader} to repetitively read just one or two
-   * properties from the provided bean instances, this makes the {@code BeanReader} more efficient.
+   * Creates a {@code BeanWriter} for the specified class and the specified properties of that
+   * class. If you intend to use this {@code BeanWriter} to repetitively to read just one or two
+   * properties from bulky bean types, explicitly specifying the properties you intend to read might
+   * make the {@code BeanReader} slightly more efficient. Otherwise you may specify {@code null} or
+   * a zero-length array to indicate that you intend to read all properties.
    *
    * @param beanClass The bean class
    * @param exclude Whether to exclude or include the specified properties
@@ -54,14 +54,18 @@ public class BeanWriter<T> {
    */
   public BeanWriter(Class<T> beanClass, boolean exclude, String... properties) {
     Check.notNull(beanClass, "beanClass");
-    Check.that(properties, "properties").is(neverNull());
-    Map<String, SetInvoker> copy = new HashMap<>(SetInvokerFactory.INSTANCE.getInvokers(beanClass));
-    if (exclude) {
-      copy.keySet().removeAll(Set.of(properties));
+    if (properties == null || properties.length == 0) {
+      setters = SetterFactory.INSTANCE.getSetters(beanClass);
     } else {
-      copy.keySet().retainAll(Set.of(properties));
+      Check.that(properties, "properties").is(neverNull());
+      Map<String, Setter<?>> copy = new HashMap<>(SetterFactory.INSTANCE.getSetters(beanClass));
+      if (exclude) {
+        copy.keySet().removeAll(Set.of(properties));
+      } else {
+        copy.keySet().retainAll(Set.of(properties));
+      }
+      this.setters = Map.copyOf(copy);
     }
-    this.writeInfo = Map.copyOf(copy);
   }
 
   /**
@@ -72,14 +76,14 @@ public class BeanWriter<T> {
    * @throws Throwable Any {@code Throwable} thrown from inside the {@code java.lang.invoke} package
    */
   public void set(T bean, String property, Object value) throws Throwable {
-    SetInvoker wi =
+    Setter<?> setter =
         Check.on(s -> new NoSuchPropertyException(property), property)
             .is(notNull())
-            .is(keyIn(), writeInfo)
-            .ok(writeInfo::get);
-    if (wi != null) {
+            .is(keyIn(), setters)
+            .ok(setters::get);
+    if (setter != null) {
       Check.notNull(bean, "bean");
-      wi.setter.invoke(bean, value);
+      setter.getMethod().invoke(bean, value);
     }
   }
 }

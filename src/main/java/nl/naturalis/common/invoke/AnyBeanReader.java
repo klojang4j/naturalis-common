@@ -29,7 +29,7 @@ public class AnyBeanReader {
   private final boolean strict;
 
   private Class<?> mruClass;
-  private Map<String, GetInvoker> mruInfo;
+  private Map<String, Getter<?>> mruGetters;
 
   /**
    * Creates a new {@code AnyBeanReader}. Strict naming conventions will be applied to what
@@ -66,11 +66,11 @@ public class AnyBeanReader {
     Class<?> clazz = bean.getClass();
     if (clazz != mruClass) {
       mruClass = clazz;
-      mruInfo = GetInvokerFactory.INSTANCE.getInvokers(clazz, strict);
+      mruGetters = GetterFactory.INSTANCE.getGetters(clazz, strict);
     }
-    Check.on(s -> noSuchProperty(bean, property), property).is(keyIn(), mruInfo);
+    Check.on(s -> noSuchProperty(bean, property), property).is(keyIn(), mruGetters);
     try {
-      return (U) mruInfo.get(property).getter.invoke(bean);
+      return (U) mruGetters.get(property).getMethod().invoke(bean);
     } catch (Throwable t) {
       throw ExceptionMethods.uncheck(t);
     }

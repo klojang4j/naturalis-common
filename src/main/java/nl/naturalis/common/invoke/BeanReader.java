@@ -26,7 +26,7 @@ import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 public class BeanReader<T> {
 
   private final Class<? super T> beanClass;
-  private final Map<String, GetInvoker> readInfo;
+  private final Map<String, Getter<?>> readInfo;
 
   /**
    * Creates a {@code BeanReader} for the specified class. The specified properties will be included
@@ -76,10 +76,10 @@ public class BeanReader<T> {
     this.beanClass = Check.notNull(beanClass, "beanClass").ok();
     Check.that(properties, "properties").is(neverNull());
     if (properties == null || properties.length == 0) {
-      this.readInfo = GetInvokerFactory.INSTANCE.getInvokers(beanClass, strictNaming);
+      this.readInfo = GetterFactory.INSTANCE.getGetters(beanClass, strictNaming);
     } else {
-      GetInvokerFactory gif = GetInvokerFactory.INSTANCE;
-      Map<String, GetInvoker> info = new HashMap<>(gif.getInvokers(beanClass, strictNaming));
+      GetterFactory gif = GetterFactory.INSTANCE;
+      Map<String, Getter<?>> info = new HashMap<>(gif.getGetters(beanClass, strictNaming));
       if (exclude) {
         info.keySet().removeAll(Set.of(properties));
       } else {
@@ -104,7 +104,7 @@ public class BeanReader<T> {
     Check.on(s -> typeMismatch(this, bean), bean).is(instanceOf(), beanClass);
     Check.on(s -> noSuchProperty(bean, property), property).is(keyIn(), readInfo);
     try {
-      return (U) readInfo.get(property).getter.invoke(bean);
+      return (U) readInfo.get(property).getMethod().invoke(bean);
     } catch (Throwable t) {
       throw ExceptionMethods.uncheck(t);
     }

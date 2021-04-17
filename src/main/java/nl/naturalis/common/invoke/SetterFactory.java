@@ -5,21 +5,23 @@ import java.util.HashMap;
 import java.util.Map;
 import nl.naturalis.common.ClassMethods;
 
-class SetInvokerFactory {
+public class SetterFactory {
 
-  private static final Map<Class<?>, Map<String, SetInvoker>> cache = new HashMap<>();
+  public static final SetterFactory INSTANCE = new SetterFactory();
 
-  static final SetInvokerFactory INSTANCE = new SetInvokerFactory();
+  private final Map<Class<?>, Map<String, Setter<?>>> cache;
 
-  private SetInvokerFactory() {}
+  private SetterFactory() {
+    cache = new HashMap<>();
+  }
 
-  Map<String, SetInvoker> getInvokers(Class<?> beanClass) {
-    Map<String, SetInvoker> info = cache.get(beanClass);
+  public Map<String, Setter<?>> getSetters(Class<?> beanClass) {
+    Map<String, Setter<?>> info = cache.get(beanClass);
     if (info == null) {
       info = new HashMap<>();
       for (Method m : ClassMethods.geSetters(beanClass)) {
         String property = ClassMethods.getPropertyNameFromSetter(m);
-        info.put(property, new SetInvoker(m));
+        info.put(property, new Setter<>(m));
       }
       cache.put(beanClass, Map.copyOf(info));
     }

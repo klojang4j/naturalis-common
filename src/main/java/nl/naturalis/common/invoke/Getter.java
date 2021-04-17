@@ -6,26 +6,36 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 import nl.naturalis.common.ExceptionMethods;
 
-class GetInvoker {
+public class Getter<T> {
 
-  final Class<?> returnType;
-  final MethodHandle getter;
+  private final MethodHandle method;
+  private final Class<T> returnType;
 
-  GetInvoker(Method method) {
-    returnType = method.getReturnType();
+  @SuppressWarnings("unchecked")
+  Getter(Method method) {
+    returnType = (Class<T>) method.getReturnType();
     try {
-      getter = MethodHandles.lookup().unreflect(method);
+      this.method = MethodHandles.lookup().unreflect(method);
     } catch (IllegalAccessException e) {
       throw ExceptionMethods.uncheck(e);
     }
   }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(getter, returnType);
+  public MethodHandle getMethod() {
+    return method;
+  }
+
+  public Class<T> getReturnType() {
+    return returnType;
   }
 
   @Override
+  public int hashCode() {
+    return Objects.hash(method, returnType);
+  }
+
+  @Override
+  @SuppressWarnings("rawtypes")
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;
@@ -34,7 +44,7 @@ class GetInvoker {
     } else if (getClass() != obj.getClass()) {
       return false;
     }
-    GetInvoker other = (GetInvoker) obj;
-    return getter == other.getter && returnType == other.returnType;
+    Getter other = (Getter) obj;
+    return method == other.method && returnType == other.returnType;
   }
 }
