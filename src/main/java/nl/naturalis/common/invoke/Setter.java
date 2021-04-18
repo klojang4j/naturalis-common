@@ -5,14 +5,13 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import nl.naturalis.common.ExceptionMethods;
 
-public class Setter<T> {
+public class Setter {
 
   private final MethodHandle method;
-  private final Class<T> paramType;
+  private final Class<?> paramType;
 
-  @SuppressWarnings("unchecked")
   Setter(Method method) {
-    paramType = (Class<T>) method.getParameterTypes()[0];
+    paramType = method.getParameterTypes()[0];
     try {
       this.method = MethodHandles.lookup().unreflect(method);
     } catch (IllegalAccessException e) {
@@ -24,7 +23,7 @@ public class Setter<T> {
     return method;
   }
 
-  public Class<T> getParamType() {
+  public Class<?> getParamType() {
     return paramType;
   }
 }

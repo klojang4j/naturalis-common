@@ -9,19 +9,19 @@ public class SetterFactory {
 
   public static final SetterFactory INSTANCE = new SetterFactory();
 
-  private final Map<Class<?>, Map<String, Setter<?>>> cache;
+  private final Map<Class<?>, Map<String, Setter>> cache;
 
   private SetterFactory() {
     cache = new HashMap<>();
   }
 
-  public Map<String, Setter<?>> getSetters(Class<?> beanClass) {
-    Map<String, Setter<?>> info = cache.get(beanClass);
+  public Map<String, Setter> getSetters(Class<?> beanClass) {
+    Map<String, Setter> info = cache.get(beanClass);
     if (info == null) {
       info = new HashMap<>();
       for (Method m : ClassMethods.geSetters(beanClass)) {
         String property = ClassMethods.getPropertyNameFromSetter(m);
-        info.put(property, new Setter<>(m));
+        info.put(property, new Setter(m));
       }
       cache.put(beanClass, Map.copyOf(info));
     }

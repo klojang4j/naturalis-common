@@ -29,7 +29,7 @@ public class AnyBeanReader {
   private final boolean strict;
 
   private Class<?> mruClass;
-  private Map<String, Getter<?>> mruGetters;
+  private Map<String, Getter> mruGetters;
 
   /**
    * Creates a new {@code AnyBeanReader}. Strict naming conventions will be applied to what

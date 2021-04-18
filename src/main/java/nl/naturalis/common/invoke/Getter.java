@@ -6,14 +6,13 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 import nl.naturalis.common.ExceptionMethods;
 
-public class Getter<T> {
+public class Getter {
 
   private final MethodHandle method;
-  private final Class<T> returnType;
+  private final Class<?> returnType;
 
-  @SuppressWarnings("unchecked")
   Getter(Method method) {
-    returnType = (Class<T>) method.getReturnType();
+    returnType = method.getReturnType();
     try {
       this.method = MethodHandles.lookup().unreflect(method);
     } catch (IllegalAccessException e) {
@@ -25,7 +24,7 @@ public class Getter<T> {
     return method;
   }
 
-  public Class<T> getReturnType() {
+  public Class<?> getReturnType() {
     return returnType;
   }
 
@@ -35,7 +34,6 @@ public class Getter<T> {
   }
 
   @Override
-  @SuppressWarnings("rawtypes")
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;

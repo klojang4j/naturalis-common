@@ -26,7 +26,7 @@ import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 public class BeanReader<T> {
 
   private final Class<? super T> beanClass;
-  private final Map<String, Getter<?>> readInfo;
+  private final Map<String, Getter> getters;
 
   /**
    * Creates a {@code BeanReader} for the specified class. The specified properties will be included
@@ -76,16 +76,16 @@ public class BeanReader<T> {
     this.beanClass = Check.notNull(beanClass, "beanClass").ok();
     Check.that(properties, "properties").is(neverNull());
     if (properties == null || properties.length == 0) {
-      this.readInfo = GetterFactory.INSTANCE.getGetters(beanClass, strictNaming);
+      this.getters = GetterFactory.INSTANCE.getGetters(beanClass, strictNaming);
     } else {
       GetterFactory gif = GetterFactory.INSTANCE;
-      Map<String, Getter<?>> info = new HashMap<>(gif.getGetters(beanClass, strictNaming));
+      Map<String, Getter> copy = new HashMap<>(gif.getGetters(beanClass, strictNaming));
       if (exclude) {
-        info.keySet().removeAll(Set.of(properties));
+        copy.keySet().removeAll(Set.of(properties));
       } else {
-        info.keySet().retainAll(Set.of(properties));
+        copy.keySet().retainAll(Set.of(properties));
       }
-      this.readInfo = Map.copyOf(info);
+      this.getters = Map.copyOf(copy);
     }
   }
 
@@ -102,9 +102,9 @@ public class BeanReader<T> {
     Check.notNull(bean, "bean");
     Check.notNull(property, "property");
     Check.on(s -> typeMismatch(this, bean), bean).is(instanceOf(), beanClass);
-    Check.on(s -> noSuchProperty(bean, property), property).is(keyIn(), readInfo);
+    Check.on(s -> noSuchProperty(bean, property), property).is(keyIn(), getters);
     try {
-      return (U) readInfo.get(property).getMethod().invoke(bean);
+      return (U) getters.get(property).getMethod().invoke(bean);
     } catch (Throwable t) {
       throw ExceptionMethods.uncheck(t);
     }
@@ -125,6 +125,6 @@ public class BeanReader<T> {
    * @return All properties of the bean class that will actually be read by this {@code BeanReader}
    */
   public Set<String> getUsedProperties() {
-    return readInfo.keySet();
+    return getters.keySet();
   }
 }

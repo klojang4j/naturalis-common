@@ -20,7 +20,7 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  */
 public class BeanWriter<T> {
 
-  private final Map<String, Setter<?>> setters;
+  private final Map<String, Setter> setters;
 
   /**
    * Creates a {@code BeanReader} for the specified class.
@@ -58,7 +58,7 @@ public class BeanWriter<T> {
       setters = SetterFactory.INSTANCE.getSetters(beanClass);
     } else {
       Check.that(properties, "properties").is(neverNull());
-      Map<String, Setter<?>> copy = new HashMap<>(SetterFactory.INSTANCE.getSetters(beanClass));
+      Map<String, Setter> copy = new HashMap<>(SetterFactory.INSTANCE.getSetters(beanClass));
       if (exclude) {
         copy.keySet().removeAll(Set.of(properties));
       } else {
@@ -76,7 +76,7 @@ public class BeanWriter<T> {
    * @throws Throwable Any {@code Throwable} thrown from inside the {@code java.lang.invoke} package
    */
   public void set(T bean, String property, Object value) throws Throwable {
-    Setter<?> setter =
+    Setter setter =
         Check.on(s -> new NoSuchPropertyException(property), property)
             .is(notNull())
             .is(keyIn(), setters)
