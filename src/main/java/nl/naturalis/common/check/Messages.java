@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import nl.naturalis.common.ArrayMethods;
-import nl.naturalis.common.CollectionMethods;
 import nl.naturalis.common.StringMethods;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
@@ -603,7 +602,7 @@ class Messages {
           c.size(),
           "]@ [",
           System.identityHashCode(val),
-          CollectionMethods.implode(c, ", ", 10),
+          StringMethods.implode(c, ", ", 10),
           "]");
     } else if (val.getClass().isArray()) {
       Object[] a = asArray(val);

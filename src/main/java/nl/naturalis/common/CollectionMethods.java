@@ -8,7 +8,6 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.collection.UnsafeList;
 import static java.util.stream.Collectors.toList;
@@ -177,50 +176,6 @@ public class CollectionMethods {
   @SafeVarargs
   public static <T> Set<T> ifEmpty(Set<T> set, T e0, T e1, T... moreElems) {
     return ObjectMethods.isEmpty(set) ? Set.of(ArrayMethods.prefix(moreElems, e0, e1)) : set;
-  }
-
-  /**
-   * PHP-style implode method, concatenating the collection elements with &#34;, &#34; as separator
-   * string.
-   *
-   * @param collection The collection to implode
-   * @return A concatenation of the elements in the collection.
-   */
-  public static String implode(Collection<?> collection) {
-    return implode(collection, ", ");
-  }
-
-  /**
-   * PHP-style implode method, concatenating the collection elements using the specified separator
-   * string.
-   *
-   * @param collection The collection to implode
-   * @param separator The separator string
-   * @return A concatenation of the elements in the collection.
-   */
-  public static String implode(Collection<?> collection, String separator) {
-    return implode(collection, separator, -1);
-  }
-
-  /**
-   * PHP-style implode method, concatenating the collection elements using the specified separator
-   * string.
-   *
-   * @param collection The collection to implode
-   * @param separator The separator string
-   * @param limit The maximum number of elements to collect. Specify -1 for no maximum. Any other
-   *     negative integer results in an {@link IllegalArgumentException}.
-   * @return A concatenation of the elements in the collection.
-   */
-  public static String implode(Collection<?> collection, String separator, int limit) {
-    Check.notNull(collection, "collection");
-    Check.notNull(separator, "separator");
-    Check.that(limit, "limit").is(gte(), -1);
-    Stream<?> stream = collection.stream();
-    if (limit != -1 || limit < collection.size()) {
-      stream = stream.limit(limit);
-    }
-    return stream.map(Objects::toString).collect(Collectors.joining(separator));
   }
 
   /**
