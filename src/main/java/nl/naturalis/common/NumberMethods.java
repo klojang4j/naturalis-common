@@ -1,5 +1,6 @@
 package nl.naturalis.common;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.StringMethods.isEmpty;
@@ -104,6 +105,25 @@ public class NumberMethods {
       }
     }
     return false;
+  }
+
+  /**
+   * Converts a {@code Number} of unspecified type to a {@code BigDecimal}.
+   *
+   * @param n The number
+   * @return The {@code BigDecimal} representing the number
+   */
+  public static BigDecimal toBigDecimal(Number n) {
+    Class<? extends Number> t = n.getClass();
+    return t == BigDecimal.class
+        ? (BigDecimal) n
+        : t == BigInteger.class
+            ? new BigDecimal((BigInteger) n)
+            : t == Double.class
+                ? new BigDecimal((Double) n)
+                : t == Long.class
+                    ? new BigDecimal((Long) n)
+                    : t == Float.class ? new BigDecimal((Float) n) : new BigDecimal(n.intValue());
   }
 
   /**

@@ -17,26 +17,30 @@ class NumberConverter<T extends Number> {
   @SuppressWarnings("unchecked")
   <U extends Number> T convert(U n) {
     Class<U> myType = (Class<U>) Check.notNull(n).ok(Object::getClass);
-    if (myType == targetType) {
+    Class<T> tt = targetType;
+    if (myType == tt) {
       return (T) n;
-    } else if (targetType == Double.class) {
-      return (T) (Double) n.doubleValue();
-    } else if (targetType == Float.class) {
-      if (myType == Double.class) {
-        double d = n.doubleValue();
-        if (d >= Float.MIN_NORMAL && d <= Float.MAX_VALUE) {
-          return (T) (Float) (float) d;
-        }
-        return Check.fail(ERR0, n, targetType.getSimpleName());
+    }
+    BigDecimal bd = NumberMethods.toBigDecimal(n);
+    if (tt == Double.class) {
+      double d = bd.doubleValue();
+      if (d == Double.POSITIVE_INFINITY || d == Double.NEGATIVE_INFINITY) {
+        // myType is BigDecimal or BigInteger
+        return Check.fail(ERR0, n, tt.getSimpleName());
       }
-      return (T) (Float) n.floatValue();
+      return (T) (Double) d;
+    } else if (tt == Float.class) {
+      float f = bd.floatValue();
+      if (f == Float.POSITIVE_INFINITY || f == Float.NEGATIVE_INFINITY) {
+        return Check.fail(ERR0, n, tt.getSimpleName());
+      }
+      return (T) (Float) f;
     } else {
-      BigDecimal bd = new BigDecimal(n.doubleValue());
-      MethodHandle mh = ValueExact.INSTANCE.forType(targetType);
+      MethodHandle mh = ValueExact.INSTANCE.forType(tt);
       try {
         return (T) mh.invoke(bd);
       } catch (ArithmeticException e) {
-        return Check.fail(ERR0, n, targetType.getSimpleName());
+        return Check.fail(ERR0, n, tt.getSimpleName());
       } catch (Throwable e) {
         throw ExceptionMethods.uncheck(e);
       }
