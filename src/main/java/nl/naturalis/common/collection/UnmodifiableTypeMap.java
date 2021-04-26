@@ -64,6 +64,10 @@ public final class UnmodifiableTypeMap<V> extends TreeMap<Class<?>, V> implement
     return new Builder<>();
   }
 
+  public static <V> TypeMap<V> copyOf(Map<Class<?>, V> source) {
+    return copyOf(source, Collections.emptyList());
+  }
+
   public static <V> TypeMap<V> copyOf(
       Map<Class<?>, V> source, List<Predicate<Class<?>>> sortOptions) {
     Check.notNull(source, "source");

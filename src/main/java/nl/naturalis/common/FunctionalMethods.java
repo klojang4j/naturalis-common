@@ -2,10 +2,7 @@ package nl.naturalis.common;
 
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.function.Function;
-import java.util.function.IntPredicate;
-import java.util.function.Predicate;
-import java.util.function.ToIntFunction;
+import java.util.function.*;
 
 /** Methods assisting in functional programming */
 public class FunctionalMethods {
@@ -57,6 +54,20 @@ public class FunctionalMethods {
    */
   public static <T> Function<T, OptionalInt> asOptionalInt(ToIntFunction<? super T> fnc) {
     return x -> OptionalInt.of(fnc.applyAsInt(x));
+  }
+
+  /**
+   * Converts the specified {@code Function} to a {@code BiFunction} whose second argument is
+   * ignored.
+   *
+   * @param <T> The type of the (first) argument of the {@code Function} and {@code Bifunction}
+   * @param <U> The type of the second argument of the {@code Bifunction}
+   * @param <R> The return type
+   * @param fnc The {@code Function} to be converted
+   * @return The resulting {@code BiFunction}
+   */
+  public static <T, U, R> BiFunction<T, U, R> toBiFunction(Function<T, R> fnc) {
+    return (arg0, arg1) -> fnc.apply(arg0);
   }
 
   private FunctionalMethods() {}

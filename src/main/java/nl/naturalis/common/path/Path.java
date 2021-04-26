@@ -77,7 +77,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   static boolean isArrayIndex(String segment) {
-    return NumberMethods.isPlainInteger(segment);
+    return NumberMethods.isPlainInt(segment);
   }
 
   private final String[] elems;

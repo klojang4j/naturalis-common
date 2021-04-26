@@ -51,7 +51,7 @@ public class NumberMethods {
    * @param str The string
    * @return Whether or not the specified string is a valid, digit-only integer
    */
-  public static boolean isPlainInteger(String str) {
+  public static boolean isPlainInt(String str) {
     if (isEmpty(str)) {
       return false;
     } else if (str.charAt(0) == '0') {
