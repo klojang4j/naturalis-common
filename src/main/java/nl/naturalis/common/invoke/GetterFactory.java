@@ -7,13 +7,13 @@ import nl.naturalis.common.ClassMethods;
 
 public class GetterFactory {
 
-  private static final Map<Class<?>, Map<String, Getter>> cache = new HashMap<>();
+  public static final GetterFactory INSTANCE = new GetterFactory();
 
-  static final GetterFactory INSTANCE = new GetterFactory();
+  private final Map<Class<?>, Map<String, Getter>> cache = new HashMap<>();
 
   private GetterFactory() {}
 
-  Map<String, Getter> getGetters(Class<?> beanClass, boolean strict) {
+  public Map<String, Getter> getGetters(Class<?> beanClass, boolean strict) {
     Map<String, Getter> info = cache.get(beanClass);
     if (info == null) {
       info = new HashMap<>();

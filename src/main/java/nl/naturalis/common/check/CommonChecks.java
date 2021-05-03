@@ -820,6 +820,15 @@ public class CommonChecks {
     setName(indexOf(), "indexOf");
   }
 
+  public static <T> IntObjRelation<T[]> arrayIndexOf() {
+    return (x, y) -> x >= 0 && x < y.length;
+  }
+
+  static {
+    setMessagePattern(arrayIndexOf(), msgIndexOf()); // recycle message
+    setName(arrayIndexOf(), "arrayIndexOf");
+  }
+
   /**
    * Verifies that the argument is a valid "from" index for a {@code List} operation like {@link
    * List#subList(int, int) List.sublist}. In the case the index may actually be one position past

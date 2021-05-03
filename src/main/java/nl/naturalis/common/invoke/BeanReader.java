@@ -127,4 +127,14 @@ public class BeanReader<T> {
   public Set<String> getUsedProperties() {
     return getters.keySet();
   }
+
+  /**
+   * Returns all {@link Getter getters} used to read bean properties. The returned {@code Map} maps
+   * the name of a property to the {@code Getter} used to read it.
+   *
+   * @return All getters used to read bean properties.
+   */
+  public Map<String, Getter> getUsedGetters() {
+    return getters;
+  }
 }

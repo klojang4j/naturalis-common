@@ -1,17 +1,18 @@
 package nl.naturalis.common;
 
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.collection.UnsafeList;
 import static java.lang.System.arraycopy;
-import static nl.naturalis.common.check.CommonChecks.LTE;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.lt;
-import static nl.naturalis.common.check.CommonChecks.neverNull;
+import static nl.naturalis.common.ObjectMethods.ifNull;
+import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.length;
 
 /** Methods for working with arrays. */
@@ -532,6 +533,31 @@ public class ArrayMethods {
    */
   public static List<Boolean> asUnsafeList(boolean[] values) {
     return new UnsafeList<>(asWrapperArray(values));
+  }
+
+  private static final String ERR_NO_NULLS = "Array must not contain null values";
+
+  public static int[] asPrimitiveArray(Integer[] values, int dfault) {
+    Check.notNull(values);
+    int[] vals = new int[values.length];
+    IntStream.range(0, values.length).forEach(i -> vals[i] = ifNull(values[i], dfault));
+    return vals;
+  }
+
+  /**
+   * Converts the specified specified {@code Integer} array to an {@code int} array. The {@code
+   * Integer} array must not contain null values.
+   *
+   * @param values The {@code Integer} array
+   * @return The {@code int} array
+   */
+  public static int[] asPrimitiveArray(Integer[] values) {
+    Check.notNull(values);
+    int[] vals = new int[values.length];
+    for (int i = 0; i < values.length; ++i) {
+      vals[i] = Check.that(values[i]).is(notNull(), ERR_NO_NULLS).ok();
+    }
+    return vals;
   }
 
   /**

@@ -4,13 +4,16 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
 import static java.lang.Character.isUpperCase;
 import static java.lang.Character.toLowerCase;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.stream.Collectors.joining;
+import static nl.naturalis.common.CollectionMethods.swapUnique;
 import static nl.naturalis.common.check.CommonChecks.array;
+import static nl.naturalis.common.check.CommonChecks.keyIn;
 /**
  * Methods for inspecting types.
  *
@@ -53,6 +56,41 @@ public class ClassMethods {
             || c == float[].class
             || c == boolean[].class
             || c == short[].class);
+  }
+
+  // primitive-to-wrappper
+  private static final Map<Class<?>, Class<?>> p2w =
+      Map.of(
+          double.class,
+          Double.class,
+          float.class,
+          Float.class,
+          long.class,
+          Long.class,
+          int.class,
+          Integer.class,
+          char.class,
+          Character.class,
+          short.class,
+          Short.class,
+          byte.class,
+          Byte.class,
+          boolean.class,
+          Boolean.class);
+
+  // wrappper-to-primitve
+  private static final Map<Class<?>, Class<?>> w2p = Map.copyOf(swapUnique(p2w));
+
+  public static Class<?> getWrapperClass(Class<?> primitiveClass) {
+    return Check.that(primitiveClass)
+        .is(keyIn(), p2w, "Not a primitive class: %s", primitiveClass)
+        .ok(p2w::get);
+  }
+
+  public static Class<?> getPrimitiveClass(Class<?> wrapperClass) {
+    return Check.that(wrapperClass)
+        .is(keyIn(), w2p, "Not a wrapper class: %s", wrapperClass)
+        .ok(w2p::get);
   }
 
   /**
@@ -193,8 +231,8 @@ public class ClassMethods {
    * getter. If the method cannot be identified as a getter, an {@link IllegalArgumentException} is
    * thrown. If {@code strict} equals {@code false}, any method that has a zero-length parameter
    * list and that does not return {@code void} is taken to be a getter. Otherwise the JavaBeans
-   * naming conventions are applied, with the exception that methods returning a {@link Boolean}
-   * (rather than {@code boolean}) and whose name starts with "is" will also qualify as getters.
+   * naming conventions are followed strictly, with the exception that methods returning a {@link
+   * Boolean} (rather than {@code boolean}) are allowed to have a name starting with "is".
    *
    * @param m The method from which to extract a property name
    * @param strict Whether or not to be strict as regards the method name

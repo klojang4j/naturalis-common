@@ -15,6 +15,7 @@ import static nl.naturalis.common.ArrayMethods.END_INDEX;
 import static nl.naturalis.common.ArrayMethods.START_INDEX;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.length;
+import static nl.naturalis.common.check.CommonGetters.mapSize;
 
 /** Methods extending the Java Collection framework. */
 public class CollectionMethods {
@@ -118,6 +119,25 @@ public class CollectionMethods {
       objs = Collections.singletonList(val);
     }
     return objs;
+  }
+
+  private static final String ERR_NO_NULLS = "List must not contain null values";
+
+  /**
+   * Converts the specified {@code List} to an {@code int} array. The {@code List} must not contain
+   * null values.
+   *
+   * @param list The {@code List}
+   * @return An {@code int} array
+   */
+  public static int[] asIntArray(List<Integer> list) {
+    Check.notNull(list);
+    int[] arr = new int[list.size()];
+    int i = 0;
+    for (Integer e : list) {
+      arr[i++] = Check.that(e).is(notNull(), ERR_NO_NULLS).ok();
+    }
+    return arr;
   }
 
   /**
@@ -472,5 +492,37 @@ public class CollectionMethods {
   public static <E, L extends List<E>> L initializedList(Class<E> clazz, int size) {
     E[] array = (E[]) Array.newInstance(clazz, size);
     return (L) asList(array);
+  }
+
+  /**
+   * Returns a new {@code Map} where keys and values are swapped. The specified {@code Map} must not
+   * contain duplicate values. An {@link IllegalArgumentException} is thrown if it does.
+   *
+   * @param <K> The type of the keys in the original map, and of the values in the returned map
+   * @param <V> The type of the values in the original map, and of the keys in the returned map
+   * @param map The source map
+   * @return A new {@code Map} where keys and values are swapped
+   */
+  public static <K, V> Map<V, K> swapUnique(Map<K, V> map) {
+    return swapUnique(map, HashMap::new);
+  }
+
+  /**
+   * Returns a new {@code Map} where keys and values are swapped. The specified {@code Map} must not
+   * contain duplicate values. An {@link IllegalArgumentException} is thrown if it does.
+   *
+   * @param <K> The type of the keys in the original map, and of the values in the returned map
+   * @param <V> The type of the values in the original map, and of the keys in the returned map
+   * @param map The source map
+   * @param mapFactory A function that produces an instance of the {@code Map} that will be returned
+   * @return A new {@code Map} where keys and values are swapped
+   */
+  public static <K, V> Map<V, K> swapUnique(
+      Map<K, V> map, IntFunction<? extends Map<V, K>> mapFactory) {
+    Check.notNull(map, "map");
+    Check.notNull(mapFactory, "mapFactory");
+    Map<V, K> out = mapFactory.apply(map.size());
+    map.forEach((k, v) -> out.put(v, k));
+    return Check.that(out).has(mapSize(), eq(), map.size(), "Map values must be uniqe").ok();
   }
 }

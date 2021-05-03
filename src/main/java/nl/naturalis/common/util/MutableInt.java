@@ -14,28 +14,36 @@ public class MutableInt {
     return i;
   }
 
-  public void plusplus() {
-    ++i;
+  public int ipp() {
+    return i++;
   }
 
-  public void minmin() {
-    --i;
+  public int ppi() {
+    return ++i;
   }
 
-  public void plusIs(int j) {
-    i += j;
+  public int mmi() {
+    return i--;
   }
 
-  public void minIs(int j) {
-    i -= j;
+  public int imm() {
+    return --i;
   }
 
-  public void set(int j) {
-    i = j;
+  public int plusIs(int j) {
+    return i += j;
   }
 
-  public void reset() {
-    i = 0;
+  public int minIs(int j) {
+    return i -= j;
+  }
+
+  public int set(int j) {
+    return i = j;
+  }
+
+  public int reset() {
+    return i = 0;
   }
 
   public boolean eq(int j) {

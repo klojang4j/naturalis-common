@@ -1,8 +1,7 @@
 package nl.naturalis.common;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import nl.naturalis.common.check.Check;
 
 /**
  * Generic, immutable Tuple class.
@@ -24,6 +23,20 @@ public final class Tuple<LEFT, RIGHT> {
    */
   public static <K, V> Tuple<K, V> of(K left, V right) {
     return new Tuple<>(left, right);
+  }
+
+  public static <K, V> Map<K, V> toMap(Tuple<K, V>[] tuples) {
+    Check.notNull(tuples);
+    Map<K, V> map = new HashMap<>(tuples.length);
+    Arrays.stream(tuples).forEach(t -> t.insertInto(map));
+    return map;
+  }
+
+  public static <K, V> Map<K, V> toLinkedMap(Tuple<K, V>[] tuples) {
+    Check.notNull(tuples);
+    Map<K, V> map = new LinkedHashMap<>(tuples.length);
+    Arrays.stream(tuples).forEach(t -> t.insertInto(map));
+    return map;
   }
 
   private final LEFT left;

@@ -111,7 +111,7 @@ public class SearchReplace {
                   String es = cnt == 1 ? "" : "es";
                   System.out.println("+  " + relative + ": " + cnt + " match" + es);
                   contents = matcher.replaceAll(replace);
-                  total.plusplus();
+                  total.ipp();
                   Files.writeString(file, contents, StandardOpenOption.TRUNCATE_EXISTING);
                 }
               }
