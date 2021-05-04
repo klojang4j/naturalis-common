@@ -28,7 +28,7 @@ import static nl.naturalis.common.ClassMethods.isA;
  * @author Ayco Holleman
  * @param <V> The type of the values in the {@code}
  */
-public interface TypeMap<V> extends NavigableMap<Class<?>, V> {
+interface TypeMap<V> extends NavigableMap<Class<?>, V> {
 
   static final Comparator<Map.Entry<Class<?>, ?>> ENTRY_COMPARATOR =
       (e1, e2) -> {

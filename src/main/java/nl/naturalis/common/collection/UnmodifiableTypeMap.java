@@ -6,8 +6,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import nl.naturalis.common.Tuple;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.containingKey;
-import static nl.naturalis.common.check.CommonChecks.containingValue;
 import static nl.naturalis.common.check.CommonChecks.in;
 import static nl.naturalis.common.collection.ModifiableTypeMap.createComparator;
 /**
@@ -15,7 +13,7 @@ import static nl.naturalis.common.collection.ModifiableTypeMap.createComparator;
  *
  * @author Ayco Holleman
  */
-public final class UnmodifiableTypeMap<V> extends TreeMap<Class<?>, V> implements TypeMap<V> {
+public final class UnmodifiableTypeMap<V> extends TreeMap<Class<?>, V> {
 
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   //                      BUILDER CLASS
@@ -51,7 +49,7 @@ public final class UnmodifiableTypeMap<V> extends TreeMap<Class<?>, V> implement
       return this;
     }
 
-    public TypeMap<V> freeze() {
+    public UnmodifiableTypeMap<V> freeze() {
       UnmodifiableTypeMap<V> utm = new UnmodifiableTypeMap<>(sortOptions);
       tempStorage.forEach(t -> utm.putUnchecked(t.getLeft(), t.getRight()));
       return utm;
@@ -61,28 +59,22 @@ public final class UnmodifiableTypeMap<V> extends TreeMap<Class<?>, V> implement
   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   public static <V> Builder<V> build() {
+    // Class argument just here to soothe the compiler.
+    // Otherwise clients would have to make an ugly call
+    // like: UnmodifiableTypeMap.<Integer>builder()
     return new Builder<>();
   }
 
-  public static <V> TypeMap<V> copyOf(Map<Class<?>, V> source) {
-    return copyOf(source, Collections.emptyList());
+  @SuppressWarnings("unused")
+  public static <V> Builder<V> build(Class<V> c) {
+    // Class argument just here to soothe the compiler.
+    // Otherwise clients would have to make an ugly call
+    // like: UnmodifiableTypeMap.<Integer>builder()
+    return new Builder<>();
   }
 
-  public static <V> TypeMap<V> copyOf(
-      Map<Class<?>, V> source, List<Predicate<Class<?>>> sortOptions) {
-    Check.notNull(source, "source");
-    Check.notNull(sortOptions, "sortOptions");
-    if (source instanceof TypeMap && sortOptions.isEmpty()) {
-      UnmodifiableTypeMap<V> utm = new UnmodifiableTypeMap<>(sortOptions);
-      source.forEach((k, v) -> utm.putUnchecked(k, v));
-      return utm;
-    }
-    Check.that(source, "source").isNot(containingKey(), null).isNot(containingValue(), null);
-    TreeSet<Map.Entry<Class<?>, V>> temp = new TreeSet<>(TypeMap.ENTRY_COMPARATOR);
-    temp.addAll(source.entrySet());
-    UnmodifiableTypeMap<V> utm = new UnmodifiableTypeMap<>(sortOptions);
-    temp.forEach(e -> utm.putUnchecked(e.getKey(), e.getValue()));
-    return utm;
+  private UnmodifiableTypeMap() {
+    super(createComparator(Collections.emptyList()));
   }
 
   private UnmodifiableTypeMap(List<Predicate<Class<?>>> sortOptions) {

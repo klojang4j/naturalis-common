@@ -19,7 +19,7 @@ import static nl.naturalis.common.check.CommonChecks.keyIn;
  * @author Ayco Holleman
  * @param <V> The value type
  */
-public class ModifiableTypeMap<V> extends TreeMap<Class<?>, V> implements TypeMap<V> {
+public class ModifiableTypeMap<V> extends TreeMap<Class<?>, V> {
 
   static final String ERR_DUPLICATE =
       "Class %s or one of its superclasses or interfaces has already been added "
@@ -85,7 +85,9 @@ public class ModifiableTypeMap<V> extends TreeMap<Class<?>, V> implements TypeMa
   public ModifiableTypeMap(Map<Class<?>, V> source, List<Predicate<Class<?>>> sortOptions) {
     super(createComparator(Check.notNull(sortOptions, "sortOptions").ok()));
     Check.notNull(source, "source");
-    if (source instanceof TypeMap && sortOptions.isEmpty()) {
+    if ((source.getClass() == ModifiableTypeMap.class
+            || source.getClass() == UnmodifiableTypeMap.class)
+        && sortOptions.isEmpty()) {
       source.forEach((k, v) -> ModifiableTypeMap.super.put(k, v));
     } else {
       Check.that(source, "source").isNot(containingKey(), null).isNot(containingValue(), null);
