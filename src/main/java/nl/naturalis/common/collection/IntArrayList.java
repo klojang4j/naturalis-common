@@ -5,6 +5,7 @@ import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.function.ThrowingIntConsumer;
 import nl.naturalis.common.util.AugmentationType;
 import static nl.naturalis.common.check.CommonChecks.GT;
 import static nl.naturalis.common.check.CommonChecks.gt;
@@ -158,6 +159,13 @@ public class IntArrayList implements IntList {
   @Override
   public void forEach(IntConsumer action) {
     stream().forEach(action);
+  }
+
+  @Override
+  public <E extends Throwable> void forEachThrowing(ThrowingIntConsumer<E> action) throws E {
+    for (int i : buf) {
+      action.accept(i);
+    }
   }
 
   @Override

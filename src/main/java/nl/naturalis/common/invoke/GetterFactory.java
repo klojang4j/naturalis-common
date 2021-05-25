@@ -1,9 +1,14 @@
 package nl.naturalis.common.invoke;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import nl.naturalis.common.ClassMethods;
+import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.check.CommonChecks.empty;
+import static nl.naturalis.common.check.CommonChecks.yes;
+import static nl.naturalis.common.invoke.InvokeException.*;
 
 public class GetterFactory {
 
@@ -13,16 +18,20 @@ public class GetterFactory {
 
   private GetterFactory() {}
 
-  public Map<String, Getter> getGetters(Class<?> beanClass, boolean strict) {
-    Map<String, Getter> info = cache.get(beanClass);
+  public Map<String, Getter> getGetters(Class<?> clazz, boolean strict) {
+    Check.on(notPublic(clazz), clazz.getModifiers()).has(Modifier::isPublic, yes());
+    Map<String, Getter> info = cache.get(clazz);
     if (info == null) {
       info = new HashMap<>();
-      for (Method m : ClassMethods.getGetters(beanClass, strict)) {
-        String property = ClassMethods.getPropertyNameFromGetter(m, strict);
-        info.put(property, new Getter(m));
+      for (Method m : ClassMethods.getGetters(clazz, strict)) {
+        if (!m.getName().equals("getClass")) {
+          String property = ClassMethods.getPropertyNameFromGetter(m, strict);
+          info.put(property, new Getter(m));
+        }
       }
+      Check.on(noPublicGetters(clazz), info).isNot(empty());
       info = Map.copyOf(info);
-      cache.put(beanClass, info);
+      cache.put(clazz, info);
     }
     return info;
   }

@@ -76,14 +76,11 @@ public class BeanWriter<T> {
    * @throws Throwable Any {@code Throwable} thrown from inside the {@code java.lang.invoke} package
    */
   public void set(T bean, String property, Object value) throws Throwable {
-    Setter setter =
-        Check.on(s -> new NoSuchPropertyException(property), property)
-            .is(notNull())
-            .is(keyIn(), setters)
-            .ok(setters::get);
-    if (setter != null) {
-      Check.notNull(bean, "bean");
-      setter.getMethod().invoke(bean, value);
-    }
+    Check.notNull(bean, "bean");
+    Check.notNull(property, "property");
+    Check.on(NoSuchPropertyException::new, property).is(keyIn(), setters, property);
+    Setter setter = setters.get(property);
+    Check.on(NoSuchPropertyException::new, setter).is(notNull(), property);
+    setter.getMethod().invoke(bean, value);
   }
 }

@@ -18,8 +18,5 @@ public class BeanReaderTest {
     assertEquals("John", s);
     s = br.read(fb, "lastName");
     assertEquals("Smith", s);
-    // Yes, we got getClass() for free!
-    Class<FooBean> c = br.read(fb, "class");
-    assertEquals(FooBean.class, c);
   }
 }

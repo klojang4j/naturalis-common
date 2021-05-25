@@ -2,7 +2,11 @@ package nl.naturalis.common;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.io.UnsafeByteArrayOutputStream;
 import static nl.naturalis.common.check.CommonChecks.empty;
@@ -189,4 +193,34 @@ public class IOMethods {
   }
 
   private static int tempCount = 100000;
+
+  /**
+   * Deletes the file or directory denoted by the specified path. Directories need not be empty. If
+   * the file or directory does not exist, this method returns quietly.
+   *
+   * @param path The path of the file/directory to be deleted
+   * @throws IOException Thrown from {@link Files#walkFileTree(Path, java.nio.file.FileVisitor)}
+   */
+  public static void rm(String path) throws IOException {
+    Path p = Path.of(path);
+    if (!Files.exists(p)) {
+      return;
+    }
+    Files.walkFileTree(
+        p,
+        new SimpleFileVisitor<Path>() {
+          @Override
+          public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+            Files.delete(dir);
+            return FileVisitResult.CONTINUE;
+          }
+
+          @Override
+          public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+              throws IOException {
+            Files.delete(file);
+            return FileVisitResult.CONTINUE;
+          }
+        });
+  }
 }

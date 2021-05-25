@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
@@ -524,5 +525,26 @@ public class CollectionMethods {
     Map<V, K> out = mapFactory.apply(map.size());
     map.forEach((k, v) -> out.put(v, k));
     return Check.that(out).has(mapSize(), eq(), map.size(), "Map values must be uniqe").ok();
+  }
+
+  /**
+   * Returns an unmodifiable {@code Map} where the values of the input {@code Map} have been
+   * converted using the specified {@code Function}.
+   *
+   * @param <K> The type of the keys of the input and output {@code Map}
+   * @param <V> The type of the values of the input {@code Map}
+   * @param <W> The type of the values of the output {@code Map}
+   * @param source The input {@code Map}
+   * @param converter A {@code Function} that converts the values of the input {@code Map}
+   * @return An unmodifiable {@code Map} where the values of the input {@code Map} have been
+   *     converted using the specified {@code Function}
+   */
+  public static <K, V, W> Map<K, W> convertValuesAndFreeze(
+      Map<K, V> source, Function<? super V, ? extends W> converter) {
+    return source
+        .entrySet()
+        .stream()
+        .map(e -> Map.entry(e.getKey(), converter.apply(e.getValue())))
+        .collect(Collectors.toUnmodifiableMap(Entry::getKey, Entry::getValue));
   }
 }

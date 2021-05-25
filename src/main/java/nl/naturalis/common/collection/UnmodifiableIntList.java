@@ -1,47 +1,19 @@
 package nl.naturalis.common.collection;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.function.ThrowingIntConsumer;
 import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonChecks.lt;
 
-public final class UnmodifiableIntList implements IntList {
+final class UnmodifiableIntList implements IntList {
 
-  public static UnmodifiableIntList of(int... ints) {
-    Check.notNull(ints);
-    int[] buf = Arrays.copyOf(ints, ints.length);
-    return new UnmodifiableIntList(buf);
-  }
+  final int[] buf;
 
-  public static UnmodifiableIntList copyOf(IntList other) {
-    if (other.getClass() == UnmodifiableIntList.class) {
-      return new UnmodifiableIntList(((UnmodifiableIntList) other).buf);
-    } else if (other.getClass() == IntArrayList.class) {
-      // With IntArrayList we know for a fact that toArray() always returns a fresh copy of its
-      // internal int array; no need to copy it again.
-      return new UnmodifiableIntList(other.toArray());
-    }
-    int[] buf = new int[other.size()];
-    System.arraycopy(other.toArray(), 0, buf, 0, buf.length);
-    return new UnmodifiableIntList(buf);
-  }
-
-  public static UnmodifiableIntList copyOf(Collection<Integer> c) {
-    int[] buf = new int[c.size()];
-    int idx = 0;
-    for (Integer val : c) {
-      buf[idx++] = val;
-    }
-    return new UnmodifiableIntList(buf);
-  }
-
-  private final int[] buf;
-
-  private UnmodifiableIntList(int[] buf) {
+  UnmodifiableIntList(int[] buf) {
     this.buf = buf;
   }
 
@@ -100,7 +72,14 @@ public final class UnmodifiableIntList implements IntList {
 
   @Override
   public void forEach(IntConsumer action) {
-    stream().forEach(action);
+    stream().forEach(Check.notNull(action).ok());
+  }
+
+  @Override
+  public <E extends Throwable> void forEachThrowing(ThrowingIntConsumer<E> action) throws E {
+    for (int i : buf) {
+      action.accept(i);
+    }
   }
 
   @Override
