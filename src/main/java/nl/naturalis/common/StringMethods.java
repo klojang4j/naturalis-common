@@ -204,14 +204,14 @@ public final class StringMethods {
   }
 
   /**
-   * Whether or not the provided string ends with any of the provided suffixes. They suffixes must
+   * Whether or not the specified string ends with any of the specified suffixes. They suffixes must
    * not be null or empty.
    *
    * @param subject The string to test
    * @param ignoreCase Whether or not to ignore case
    * @param suffixes The suffixes to test
    * @return The first suffix found to be equal to the end of the string, or null if the string
-   *     ended in none of the provided suffixes
+   *     ended in none of the specified suffixes
    */
   public static String endsWith(Object subject, boolean ignoreCase, Collection<String> suffixes) {
     Check.notNull(suffixes, "suffixes");
@@ -219,15 +219,15 @@ public final class StringMethods {
   }
 
   /**
-   * Whether or not {@code subject} ends with any of the provided suffixes. They suffixes must not
+   * Whether or not {@code subject} ends with any of the specified suffixes. They suffixes must not
    * be null or empty. Returns the first suffix found to be equal to the end of the string, or null
-   * if the string ended in none of the provided suffixes.
+   * if the string ended in none of the specified suffixes.
    *
    * @param subject The string to test
    * @param ignoreCase Whether or not to ignore case
    * @param suffixes The suffixes to test
    * @return The first suffix found to be equal to the end of the string, or null if the string
-   *     ended in none of the provided suffixes
+   *     ended in none of the specified suffixes
    */
   public static String endsWith(Object subject, boolean ignoreCase, String... suffixes) {
     Check.that(suffixes, "suffixes").is(deepNotEmpty());
@@ -243,7 +243,7 @@ public final class StringMethods {
   }
 
   /**
-   * Prefixes to provided prefix to {@code subject} if it did not already have that prefix. If
+   * Prefixes to specified prefix to {@code subject} if it did not already have that prefix. If
    * {@code subject} is null, {@code prefix} is returned.
    *
    * @param subject The {@code String} to which to append the suffix
@@ -260,7 +260,7 @@ public final class StringMethods {
   }
 
   /**
-   * Prefixes to provided prefix to {@code subject} if it did not already have that prefix. If
+   * Prefixes to specified prefix to {@code subject} if it did not already have that prefix. If
    * {@code subject} is null, {@code prefix} is returned.
    *
    * @param subject The {@code String} to which to append the suffix
@@ -275,8 +275,8 @@ public final class StringMethods {
   }
 
   /**
-   * Appends to provided suffix to {@code subject} if it did not already have that suffix. If {@code
-   * subject} is null, {@code suffix} is returned.
+   * Appends to specified suffix to {@code subject} if it did not already have that suffix. If
+   * {@code subject} is null, {@code suffix} is returned.
    *
    * @param subject The {@code String} to which to append the suffix
    * @param suffix The suffix
@@ -291,7 +291,7 @@ public final class StringMethods {
   }
 
   /**
-   * Appends to provided suffix to {@code str} if it did not already have that suffix.
+   * Appends to specified suffix to {@code str} if it did not already have that suffix.
    *
    * @param subject The {@code String} to which to append the suffix
    * @param suffix The suffix
@@ -305,7 +305,7 @@ public final class StringMethods {
   }
 
   /**
-   * Whether or not the provided string is null or empty.
+   * Whether or not the specified string is null or empty.
    *
    * @param subject The string
    * @return Whether it is null or blank
@@ -315,7 +315,7 @@ public final class StringMethods {
   }
 
   /**
-   * Whether or not the provided string is null or blank.
+   * Whether or not the specified string is null or blank.
    *
    * @param subject The string
    * @return Whether it is null or blank
@@ -325,7 +325,7 @@ public final class StringMethods {
   }
 
   /**
-   * Whether or not the provided string neither null nor empty.
+   * Whether or not the specified string neither null nor empty.
    *
    * @param object The string to check
    * @return Whether it is neither null nor blank
@@ -335,7 +335,7 @@ public final class StringMethods {
   }
 
   /**
-   * Whether or not the provided string neither null nor blank.
+   * Whether or not the specified string neither null nor blank.
    *
    * @param object The string to check
    * @return Whether it is neither null nor blank
@@ -356,8 +356,8 @@ public final class StringMethods {
   }
 
   /**
-   * Removes all occurrences of the provided prefixes from the start of a string. The returned
-   * string will no longer start with any of the provided prefixes.
+   * Removes all occurrences of the specified prefixes from the start of a string. The returned
+   * string will no longer start with any of the specified prefixes.
    *
    * @param subject
    * @param ignoreCase
@@ -368,8 +368,8 @@ public final class StringMethods {
   }
 
   /**
-   * Removes all occurrences of the provided prefixes from the start of a string. The returned
-   * string will no longer start with any of the provided prefixes.
+   * Removes all occurrences of the specified prefixes from the start of a string. The returned
+   * string will no longer start with any of the specified prefixes.
    *
    * @param subject
    * @param ignoreCase
@@ -380,8 +380,8 @@ public final class StringMethods {
   }
 
   /**
-   * Removes all occurrences of the provided prefixes from the start of a string. The returned
-   * string will no longer start with any of the provided prefixes.
+   * Removes all occurrences of the specified prefixes from the start of a string. The returned
+   * string will no longer start with any of the specified prefixes.
    *
    * @param subject The string to remove the prefixes from
    * @param prefixes The prefixes to remove
@@ -391,8 +391,8 @@ public final class StringMethods {
   }
 
   /**
-   * Removes all occurrences of the provided prefixes from the start of a string. The returned
-   * string will no longer start with any of the provided prefixes.
+   * Removes all occurrences of the specified prefixes from the start of a string. The returned
+   * string will no longer start with any of the specified prefixes.
    *
    * @param subject The string to remove the prefixes from
    * @param ignoreCase Whether or not to ignore case
@@ -558,7 +558,7 @@ public final class StringMethods {
   }
 
   /**
-   * Left-trims the provided string. The resulting string will not start with the specified
+   * Left-trims the specified string. The resulting string will not start with the specified
    * character.
    *
    * @param subject The {@code String} to trim
@@ -571,7 +571,7 @@ public final class StringMethods {
   }
 
   /**
-   * Left-trims all characters contained in {@code chars} from the provided provided string. The
+   * Left-trims all characters contained in {@code chars} from the specified specified string. The
    * resulting string will not start with any of the charachters contained in {@code chars}.
    *
    * @param subject The {@code String} to trim
@@ -659,8 +659,8 @@ public final class StringMethods {
   }
 
   /**
-   * Removes all occurrences of the provided suffixes from the end of a string. The returned string
-   * will no longer end with any of the provided suffixes.
+   * Removes all occurrences of the specified suffixes from the end of a string. The returned string
+   * will no longer end with any of the specified suffixes.
    *
    * @param subject
    * @param suffixes
@@ -670,8 +670,8 @@ public final class StringMethods {
   }
 
   /**
-   * Removes all occurrences of the provided suffixes from the end of a string. The returned string
-   * will no longer end with any of the provided suffixes.
+   * Removes all occurrences of the specified suffixes from the end of a string. The returned string
+   * will no longer end with any of the specified suffixes.
    *
    * @param subject
    * @param ignoreCase
@@ -682,8 +682,8 @@ public final class StringMethods {
   }
 
   /**
-   * Removes all occurrences of the provided suffixes from the end of a string. The returned string
-   * will no longer end with any of the provided suffixes.
+   * Removes all occurrences of the specified suffixes from the end of a string. The returned string
+   * will no longer end with any of the specified suffixes.
    *
    * @param subject
    * @param ignoreCase
@@ -694,8 +694,8 @@ public final class StringMethods {
   }
 
   /**
-   * Removes all occurrences of the provided suffixes from the end of a string. The returned string
-   * will no longer end with any of the provided suffixes.
+   * Removes all occurrences of the specified suffixes from the end of a string. The returned string
+   * will no longer end with any of the specified suffixes.
    *
    * @param subject
    * @param ignoreCase
@@ -771,19 +771,7 @@ public final class StringMethods {
   }
 
   /**
-   * Trims the specified character off both sides of the specified {@code String}. This method
-   * returns an empty String if the specified {@code String} is null.
-   *
-   * @param subject The {@code String} to trim
-   * @param c The character to trim off the {@code String}
-   * @return The trimmed {@code String}.
-   */
-  public static String trim(Object subject, char c) {
-    return ltrim(rtrim(subject, c), c);
-  }
-
-  /**
-   * Right-trims the provided string. The resulting string will not end with the specified
+   * Right-trims the specified string. The resulting string will not end with the specified
    * character.
    *
    * @param subject The {@code String} to trim
@@ -796,7 +784,7 @@ public final class StringMethods {
   }
 
   /**
-   * Right-trims all characters contained in {@code chars} from the provided provided string. The
+   * Right-trims all characters contained in {@code chars} from the specified specified string. The
    * resulting string will not end with any of the charachters contained in {@code chars}.
    *
    * @param subject The {@code String} to trim
@@ -1048,5 +1036,29 @@ public final class StringMethods {
     Check.notNull(str, "str");
     int i = last ? str.lastIndexOf(to) : str.indexOf(to);
     return i == -1 ? str : str.substring(0, i);
+  }
+
+  /**
+   * Left and right-trims the specified string. The resulting string will neither start nor end with
+   * the specified character.
+   *
+   * @param subject The {@code String} to trim
+   * @param c The character to trim off the {@code String}
+   * @return The trimmed {@code String}.
+   */
+  public static String trim(Object subject, char c) {
+    return rtrim(ltrim(subject, c), c);
+  }
+
+  /**
+   * Left and right-trims the specified string. The resulting string will neither start nor end with
+   * any of the specified characters.
+   *
+   * @param subject The {@code String} to trim
+   * @param chars The character to trim off the {@code String}
+   * @return The trimmed {@code String}.
+   */
+  public static String trim(Object subject, String chars) {
+    return rtrim(ltrim(subject, chars), chars);
   }
 }

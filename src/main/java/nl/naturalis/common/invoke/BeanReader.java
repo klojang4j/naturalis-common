@@ -29,9 +29,8 @@ public class BeanReader<T> {
   private final Map<String, Getter> getters;
 
   /**
-   * Creates a {@code BeanReader} for the specified class. The specified properties will be included
-   * rather than excluded from the list of properties you intend to read. Strict naming conventions
-   * will be applied to what qualifies as a getter. See {@link
+   * Creates a {@code BeanReader} for the specified properties of the specified class. Strict naming
+   * conventions will be applied to what qualifies as a getter. See {@link
    * ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method, boolean)}.
    *
    * @param beanClass The bean class
@@ -58,11 +57,11 @@ public class BeanReader<T> {
    * Creates a {@code BeanReader} for the specified class and the specified properties on that
    * class. If you intend to use this {@code BeanReader} to repetitively to read just one or two
    * properties from bulky bean types, explicitly specifying the properties you intend to read might
-   * make the {@code BeanReader} slightly more efficient. Otherwise you may specify {@code null} or
-   * a zero-length array to indicate that you intend to read all properties.
+   * make the {@code BeanReader} more efficient. Otherwise you may specify {@code null} or a
+   * zero-length array to indicate that you intend to read all properties.
    *
-   * <p>Specifying non-existent properties (names that cannot be traced back to getters) has no
-   * effect. It will not cause an exception to be thrown. Instead they will be ignored silently.
+   * <p>Specifying non-existent properties (names that do not correspond to getter methods) has no
+   * effect. They will be ignored silently. It will not cause an exception to be thrown.
    *
    * @param beanClass The bean class
    * @param strictNaming Whether or not to apply strict naming conventions to what qualifies as a

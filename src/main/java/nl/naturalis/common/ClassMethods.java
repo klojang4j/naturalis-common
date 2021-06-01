@@ -25,8 +25,8 @@ public class ClassMethods {
 
   /**
    * Tests whether the 1st argument extends or implements the 2nd argument. In case you keep
-   * forgetting who should be the caller and who the callee with <code>Class.isAssignableFrom</code>
-   * method.
+   * forgetting what "assign from" even means. Equivalent to <code>
+   * superOrInterface.isAssignableFrom(classToTest)</code>.
    *
    * @param classToTest The class to test
    * @param superOrInterface The class or interface to test the class against
@@ -36,6 +36,20 @@ public class ClassMethods {
     Check.notNull(classToTest, "classToTest");
     Check.notNull(superOrInterface, "superOrInterface");
     return superOrInterface.isAssignableFrom(classToTest);
+  }
+
+  /**
+   * Tests whether the 1st argument is an instance of the 2nd argument. Equivalent to <code>
+   * superOrInterface.isInstance(objectToTest)</code>.
+   *
+   * @param objectToTest The object to test
+   * @param superOrInterface The class or interface to test the object against
+   * @return Whether the 1st argument is an instance of the 2nd argument
+   */
+  public static boolean isA(Object objectToTest, Class<?> superOrInterface) {
+    Check.notNull(objectToTest, "objectToTest");
+    Check.notNull(superOrInterface, "superOrInterface");
+    return superOrInterface.isInstance(objectToTest);
   }
 
   /**
