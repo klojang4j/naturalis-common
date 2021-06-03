@@ -53,6 +53,171 @@ public class ClassMethods {
   }
 
   /**
+   * Returns {@code true} if both arguments are classes and the 1st argument directly or indirectly
+   * extends the 2nd argument.
+   *
+   * @param classToTest The class to test
+   * @param baseClass The ancestor (or not) of the class to test
+   * @return Whether the 1st argument directly or indirectly extends the 2nd argument
+   */
+  public static boolean isDescendant(Class<?> classToTest, Class<?> baseClass) {
+    Check.notNull(classToTest, "classToTest");
+    Check.notNull(baseClass, "baseClass");
+    if (baseClass.isInterface() || baseClass.isPrimitive() || baseClass.isAnnotation()) {
+      return false;
+    }
+    for (Class<?> c = classToTest.getSuperclass(); c != null; c = c.getSuperclass()) {
+      if (c == baseClass) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns {@code true} if the first argument is a class and the second an interface, and the
+   * class has the interface among its declared interfaces.
+   *
+   * @param classToTest The class to test
+   * @param interfaceClass The interface directly implemented (or not) by the class to test
+   * @return Whether or not the 1st argument directly implements the 2nd argument
+   */
+  public static boolean implementsDirectly(Class<?> classToTest, Class<?> interfaceClass) {
+    Check.notNull(classToTest, "classToTest");
+    Check.notNull(interfaceClass, "interfaceClass");
+    return implementsDirectly0(classToTest, interfaceClass);
+  }
+
+  /**
+   * Returns {@code true} if any of the ancestors of the specified class directly implement the
+   * specified interface. The specified class itself is not inspected.
+   *
+   * @param classToTest The class to test
+   * @param interfaceClass The interface directly implemented (or not) by the class to test
+   * @return Whether or not the 1st argument indirectly implements the 2nd argument
+   */
+  public static boolean implementsIndirectly(Class<?> classToTest, Class<?> interfaceClass) {
+    Check.notNull(classToTest, "classToTest");
+    Check.notNull(interfaceClass, "interfaceClass");
+    for (Class<?> c = classToTest.getSuperclass(); c != null; c = c.getSuperclass()) {
+      if (implementsDirectly0(classToTest, interfaceClass)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean implementsDirectly0(Class<?> c0, Class<?> c1) {
+    if (c0.isInterface()
+        || c0.isPrimitive()
+        || c0.isAnnotation()
+        || c0.isEnum()
+        || !c1.isInterface()) {
+      return false;
+    }
+    for (Class<?> c : c0.getInterfaces()) {
+      if (c == c1) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns {@code true} if the specified class implements the specified interface by virtue of it
+   * implementing a more specific interface.
+   *
+   * @param classToTest The class to test
+   * @param ancestorInterface The ancestor interface (or not) of one of the interfaces directly
+   *     implemented by the class to test
+   * @return Whether or not the specified class implements the specified interface by virtue of it
+   *     implementing a more specific interface
+   */
+  public static boolean implementsByDefault(Class<?> classToTest, Class<?> ancestorInterface) {
+    Check.notNull(classToTest, "classToTest");
+    Check.notNull(ancestorInterface, "ancestorInterface");
+    return implementsByDefault0(classToTest, ancestorInterface);
+  }
+
+  /**
+   * Returns {@code true} if the specified class implements the specified interface by virtue of one
+   * of its ancestors implementing a more specific interface.
+   *
+   * @param classToTest The class to test
+   * @param ancestorInterface The ancestor interface (or not) of an interface implemented by one of
+   *     the ancestors of the specified class
+   * @return Whether or not the specified class implements the specified interface by virtue of one
+   *     of its ancestors implementing a more specific interface
+   */
+  public static boolean indirectlyImplementsByDefault(
+      Class<?> classToTest, Class<?> ancestorInterface) {
+    Check.notNull(classToTest, "classToTest");
+    Check.notNull(ancestorInterface, "ancestorInterface");
+    for (Class<?> c = classToTest.getSuperclass(); c != null; c = c.getSuperclass()) {
+      if (implementsByDefault0(c, ancestorInterface)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean implementsByDefault0(Class<?> c0, Class<?> c1) {
+    if (c0.isInterface()
+        || c0.isPrimitive()
+        || c0.isAnnotation()
+        || c0.isEnum()
+        || !c1.isInterface()) {
+      return false;
+    }
+    for (Class<?> c : c0.getInterfaces()) {
+      if (isDescendantInterface(c, c1)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns {@code true} if both arguments are interfaces and the 2nd argument is a direct parent
+   * of the 1st argument. By implication method returns <i>false</i> if the two arguments are
+   * identical.
+   *
+   * @param interfaceToTest The interface to test
+   * @param parentInterface The parent interface (or not) of the interface to test
+   * @return Whether or not the 2nd argument is a direct parent of the 1st argument
+   */
+  public static boolean isSubInterface(Class<?> interfaceToTest, Class<?> parentInterface) {
+    Check.notNull(interfaceToTest, "interfaceToTest");
+    Check.notNull(parentInterface, "parentInterface");
+    if (!interfaceToTest.isInterface() || !parentInterface.isInterface()) {
+      return false;
+    }
+    for (Class<?> c : interfaceToTest.getInterfaces()) {
+      if (c == parentInterface) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns {@code true} if both arguments are interfaces and the 2nd argument is an ancestor of
+   * the 1st argument. By implication method returns <i>false</i> if the two arguments are
+   * identical.
+   *
+   * @param interfaceToTest The interface to test
+   * @param parentInterface The ancestor interface (or not) of the interface to test
+   * @return Whether or not the 2nd argument is an ancestor of the 1st argument
+   */
+  public static boolean isDescendantInterface(
+      Class<?> interfaceToTest, Class<?> ancestorInterface) {
+    return interfaceToTest.isInterface()
+        && ancestorInterface.isInterface()
+        && interfaceToTest != ancestorInterface
+        && isA(interfaceToTest, ancestorInterface);
+  }
+
+  /**
    * Returns whether or not the argument is an array of primitives without using reflection.
    * Null-safe.
    *

@@ -996,7 +996,7 @@ public final class StringMethods {
   }
 
   /**
-   * Returns the substring up to (and not including) the first or last occurrence of the specified
+   * Returns the substring up to (not including) the first or last occurrence of the specified
    * character, or the entire string if it does not contain that character.
    *
    * @param str The string to take a substring from
@@ -1012,8 +1012,8 @@ public final class StringMethods {
   }
 
   /**
-   * Returns everything up to (and not including) the first occurrence of the specified character
-   * within the string, or the entire string if it does not contain that character.
+   * Returns everything up to (not including) the first occurrence of the specified character within
+   * the string, or the entire string if it does not contain that character.
    *
    * @param str The string to take a substring from
    * @param to The character up to which to take the substring

@@ -1,5 +1,7 @@
 package nl.naturalis.common;
 
+import java.io.BufferedOutputStream;
+import java.io.OutputStream;
 import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.*;
@@ -39,5 +41,10 @@ public class ClassMethodsTest {
   @Test
   public void getArrayTypeSimpleName_01() {
     assertEquals("String[][][]", ClassMethods.getArrayTypeSimpleName(new String[0][0][0]));
+  }
+
+  @Test
+  public void isDecendant00() {
+    assertTrue(ClassMethods.isDescendant(BufferedOutputStream.class, OutputStream.class));
   }
 }
