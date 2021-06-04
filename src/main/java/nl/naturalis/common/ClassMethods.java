@@ -53,12 +53,25 @@ public class ClassMethods {
   }
 
   /**
-   * Returns {@code true} if both arguments are classes and the 1st argument directly or indirectly
-   * extends the 2nd argument.
+   * Returns {@code true} if both arguments are classes and the first class <i>indirectly</i>
+   * extends the second class. Equivalent to <code>classToTest.getSuperclass() == superClass</code>.
+   *
+   * @param classToTest The class to test
+   * @param superClass The parent class (or not) of the class to test
+   * @return Whether the 1st argument directly extends the 2nd argument
+   */
+  public static boolean isSubclass(Class<?> classToTest, Class<?> superClass) {
+    return classToTest.getSuperclass() == superClass;
+  }
+
+  /**
+   * Returns {@code true} if both arguments are classes and the first class <i>indirectly</i>
+   * extends the second class. In other words, the first class is not a direct child of the second
+   * class, but it is a descendant.
    *
    * @param classToTest The class to test
    * @param baseClass The ancestor (or not) of the class to test
-   * @return Whether the 1st argument directly or indirectly extends the 2nd argument
+   * @return Whether the 1st argument indirectly extends the 2nd argument
    */
   public static boolean isDescendant(Class<?> classToTest, Class<?> baseClass) {
     Check.notNull(classToTest, "classToTest");
@@ -89,8 +102,8 @@ public class ClassMethods {
   }
 
   /**
-   * Returns {@code true} if any of the ancestors of the specified class directly implement the
-   * specified interface. The specified class itself is not inspected.
+   * Returns {@code true} if any of the ancestors of the specified class directly implements the
+   * specified interface.
    *
    * @param classToTest The class to test
    * @param interfaceClass The interface directly implemented (or not) by the class to test
@@ -179,7 +192,7 @@ public class ClassMethods {
 
   /**
    * Returns {@code true} if both arguments are interfaces and the 2nd argument is a direct parent
-   * of the 1st argument. By implication method returns <i>false</i> if the two arguments are
+   * of the 1st argument. By implication this method returns <i>false</i> if the two arguments are
    * identical.
    *
    * @param interfaceToTest The interface to test
@@ -202,7 +215,7 @@ public class ClassMethods {
 
   /**
    * Returns {@code true} if both arguments are interfaces and the 2nd argument is an ancestor of
-   * the 1st argument. By implication method returns <i>false</i> if the two arguments are
+   * the 1st argument. By implication method this returns <i>false</i> if the two arguments are
    * identical.
    *
    * @param interfaceToTest The interface to test

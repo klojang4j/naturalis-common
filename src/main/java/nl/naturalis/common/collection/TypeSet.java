@@ -17,51 +17,50 @@ public class TypeSet extends TreeSet<Class<?>> {
 
   private static Comparator<Class<?>> cmp =
       (c1, c2) -> {
-        int i = Integer.MIN_VALUE;
-        int j = Integer.MAX_VALUE;
-        Class<?> c3;
+        int min = Integer.MIN_VALUE;
+        int max = Integer.MAX_VALUE;
         if (c1 == c2) {
           return 0;
-        } else if (c1 == Object.class) {
-          return j--;
         } else if (c2 == Object.class) {
-          return i++;
-        } else if (!c1.isInterface() && c2.isInterface()) {
-          return i++;
+          return -1;
+        } else if (c1 == Object.class) {
+          return +1;
+        } else if (c2.isInterface() && !c1.isInterface()) {
+          return -1;
         } else if (c1.isInterface() && !c2.isInterface()) {
-          return j--;
-        } else if ((c3 = c1.getSuperclass()) != null && c3 == c2) {
-          return i++;
-        } else if ((c3 = c2.getSuperclass()) != null && c3 == c1) {
-          return j--;
+          return +1;
+          //        } else if (isSubclass(c1, c2)) {
+          //          return -1;
+          //        } else if (isSubclass(c2, c1)) {
+          //          return 1;
+          //        } else if (isDescendant(c1, c2)) {
+          //          return -1;
+          //        } else if (isDescendant(c2, c1)) {
+          //          return 1;
+          //        } else if (implementsDirectly(c1, c2)) {
+          //          return -1;
+          //        } else if (implementsDirectly(c2, c1)) {
+          //          return 1;
+          //        } else if (implementsIndirectly(c1, c2)) {
+          //          return -1;
+          //        } else if (implementsIndirectly(c2, c1)) {
+          //          return 1;
+          //        } else if (isDescendantInterface(c1, c2)) {
+          //          return -1;
+          //        } else if (isDescendantInterface(c2, c1)) {
+          //          return +1;
+          //        } else if (isSubInterface(c1, c2)) {
+          //          return -1;
+          //        } else if (isSubInterface(c2, c1)) {
+          //          return +1;
+        } else if (isSubclass(c1, c2)) {
+          return -1;
+        } else if (isSubclass(c2, c1)) {
+          return +1;
         } else if (isDescendant(c1, c2)) {
-          return i++;
+          return -1;
         } else if (isDescendant(c2, c1)) {
-          return j--;
-        } else if (implementsDirectly(c1, c2)) {
-          return i++;
-        } else if (implementsDirectly(c2, c1)) {
-          return j--;
-        } else if (implementsIndirectly(c1, c2)) {
-          return i++;
-        } else if (implementsIndirectly(c2, c1)) {
-          return j--;
-        } else if (implementsByDefault(c1, c2)) {
-          return i++;
-        } else if (implementsByDefault(c2, c1)) {
-          return j--;
-        } else if (indirectlyImplementsByDefault(c1, c2)) {
-          return i++;
-        } else if (indirectlyImplementsByDefault(c2, c1)) {
-          return j--;
-        } else if (isSubInterface(c1, c2)) {
-          return i++;
-        } else if (isSubInterface(c2, c1)) {
-          return j--;
-        } else if (isDescendantInterface(c1, c2)) {
-          return i++;
-        } else if (isDescendantInterface(c2, c1)) {
-          return j--;
+          return +1;
         }
         return c1.hashCode() - c2.hashCode();
       };

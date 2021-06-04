@@ -494,7 +494,7 @@ public final class StringMethods {
     Check.notNull(separator, "separator");
     Check.that(limit, "limit").is(gte(), -1);
     Stream<?> stream = collection.stream();
-    if (limit != -1 || limit < collection.size()) {
+    if (limit != -1 && limit < collection.size()) {
       stream = stream.limit(limit);
     }
     return stream.map(Objects::toString).collect(Collectors.joining(separator));
