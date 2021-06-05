@@ -17,20 +17,20 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  * @author Ayco Holleman
  * @param <V> The type of the values in the {@code}
  */
-public class FlatTypeMap<V> extends HashMap<Class<?>, V> {
+public class TypeMap<V> extends HashMap<Class<?>, V> {
 
-  public FlatTypeMap() {}
+  public TypeMap() {}
 
-  public FlatTypeMap(int initialCapacity) {
+  public TypeMap(int initialCapacity) {
     super(initialCapacity);
   }
 
-  public FlatTypeMap(Map<? extends Class<?>, ? extends V> m) {
+  public TypeMap(Map<? extends Class<?>, ? extends V> m) {
     this(m.size());
     putAll(m);
   }
 
-  public FlatTypeMap(int initialCapacity, float loadFactor) {
+  public TypeMap(int initialCapacity, float loadFactor) {
     super(initialCapacity, loadFactor);
   }
 
