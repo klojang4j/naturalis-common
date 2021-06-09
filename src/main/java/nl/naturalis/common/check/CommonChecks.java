@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import nl.naturalis.common.*;
+import nl.naturalis.common.collection.IntList;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
@@ -801,6 +802,46 @@ public class CommonChecks {
   }
 
   /* ++++++++++++++ IntObjRelation ++++++++++++++ */
+
+  /**
+   * Verifies that an integer is between to values, the first one included, the second one excluded.
+   * The provided {@link IntList} must contain exactly two integers.
+   *
+   * @return An {@code IntObjRelation} that expresses the described test
+   */
+  public static IntObjRelation<IntList> between() {
+    return (x, y) -> {
+      if (y.size() != 2) {
+        throw new InvalidCheckException("IntList must contain exactly 2 integers");
+      }
+      return x >= y.get(0) && x < y.get(1);
+    };
+  }
+
+  static {
+    setMessagePattern(between(), msgBetween());
+    setName(between(), "between");
+  }
+
+  /**
+   * Verifies that an integer is between to values, both included. The provided {@link IntList} must
+   * contain exactly two integers.
+   *
+   * @return An {@code IntObjRelation} that expresses the described test
+   */
+  public static IntObjRelation<IntList> inRangeClosed() {
+    return (x, y) -> {
+      if (y.size() != 2) {
+        throw new InvalidCheckException("IntList must contain exactly 2 integers");
+      }
+      return x >= y.get(0) && x <= y.get(1);
+    };
+  }
+
+  static {
+    setMessagePattern(inRangeClosed(), msgInRangeClosed());
+    setName(inRangeClosed(), "inRangeClosed");
+  }
 
   /**
    * Verifies that the argument is a valid index for a {@code List} operation like {@link

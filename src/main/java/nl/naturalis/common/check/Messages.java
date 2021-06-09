@@ -6,6 +6,7 @@ import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.StringMethods;
+import nl.naturalis.common.collection.IntList;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
@@ -236,6 +237,32 @@ class Messages {
       }
       String fmt = "%s.size() must be <= %s (was %s)";
       return format(fmt, md.argName(), md.object(), ((Collection) md.argument()).size());
+    };
+  }
+
+  static Formatter msgBetween() {
+    return md -> {
+      IntList il = (IntList) md.object();
+      String fmt;
+      if (md.negated()) {
+        fmt = "%s must be < %d or >= %d (was %d)";
+      } else {
+        fmt = "%s must be >= %d and < %d (was %d)";
+      }
+      return format(fmt, md.argName(), il.get(0), il.get(1), md.argument());
+    };
+  }
+
+  static Formatter msgInRangeClosed() {
+    return md -> {
+      IntList il = (IntList) md.object();
+      String fmt;
+      if (md.negated()) {
+        fmt = "%s must be <= %d or >= %d (was %d)";
+      } else {
+        fmt = "%s must be >= %d and <= %d (was %d)";
+      }
+      return format(fmt, md.argName(), il.get(0), il.get(1), md.argument());
     };
   }
 
