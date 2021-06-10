@@ -1016,16 +1016,6 @@ public class CommonChecks {
   }
 
   /**
-   * Equivalent to {@link IllegalStateException#IllegalStateException(String)
-   * IllegalStateException::new} but more concise when statically imported.
-   *
-   * @return A {@code Function} produces an {@code IllegalStateException}
-   */
-  public static Function<String, IllegalStateException> illegalState() {
-    return IllegalStateException::new;
-  }
-
-  /**
    * Simply returns the argument. Can be used to force the compiler to interpret a lambda as a
    * {@code Predicate} rather than an {@code IntPredicate}.
    *
@@ -1035,6 +1025,27 @@ public class CommonChecks {
    */
   public static <T> Predicate<T> asObj(Predicate<T> predicate) {
     return FunctionalMethods.asObj(predicate);
+  }
+
+  /**
+   * Shortcut for {@link IllegalStateException#IllegalStateException(String)
+   * IllegalStateException::new}. Can be used in combination with {@link Check#on(Function, Object)
+   * Check.on(...)}. For example: <code>Check.on(illegalState(), out.isClosed()).is(no())</code>.
+   *
+   * @return A {@code Function} produces an {@code IllegalStateException}
+   */
+  public static Function<String, IllegalStateException> illegalState() {
+    return IllegalStateException::new;
+  }
+
+  /**
+   * Shortcut for {@link IndexOutOfBoundsException#IndexOutOfBoundsException(String)
+   * IndexOutOfBoundsException::new}.
+   *
+   * @return A {@code Function} produces an {@code IndexOutOfBoundsException}
+   */
+  public static Function<String, IndexOutOfBoundsException> index() {
+    return IndexOutOfBoundsException::new;
   }
 
   /* ++++++++++++++ END OF CHECKS ++++++++++++++ */

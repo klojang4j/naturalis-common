@@ -15,7 +15,7 @@ import static nl.naturalis.common.util.AugmentationType.MULTIPLY;
  * as data is written to it. Contrary to Java's own {@link ByteArrayOutputStream}, the internal byte
  * array is exposed to the client: calling {@link #toByteArray()} returns the byte array rather than
  * a copy of it. Note, however, that you must therefore use {@link #toByteArray()} in combination
- * with the {@link #count()} method to extracte the "live" bytes - e.g <code>
+ * with the {@link #byteCount()} method to extracte the "live" bytes - e.g <code>
  * new String(out.toArray(), 0, out.count())</code>.
  *
  * <p>This class also lets you specify how to increase the size of the byte array once it reaches
@@ -153,7 +153,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
 
   /**
    * Returns the backing array for this instance (not a copy of it). Note that you must use this
-   * method <i>in combination with</i>the {@link #count()} method to retrieve the valid bytes only.
+   * method <i>in combination with</i>the {@link #byteCount()} method to retrieve the valid bytes only.
    *
    * @return
    */
@@ -166,7 +166,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    *
    * @return
    */
-  public int count() {
+  public int byteCount() {
     return cnt;
   }
 

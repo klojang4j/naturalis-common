@@ -13,7 +13,7 @@ public class ExposedByteArrayOutputStreamTest {
     out.write(new byte[0]);
     byte[] arr = out.toByteArray();
     assertEquals("01", 2, arr.length);
-    assertEquals("02", 0, out.count());
+    assertEquals("02", 0, out.byteCount());
   }
 
   @Test
