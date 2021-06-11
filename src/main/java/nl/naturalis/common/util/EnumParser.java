@@ -2,13 +2,16 @@ package nl.naturalis.common.util;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 import nl.naturalis.common.CollectionMethods;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.containingKey;
+import static nl.naturalis.common.check.CommonChecks.in;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
 import static nl.naturalis.common.check.CommonChecks.notNull;
+import static nl.naturalis.common.check.CommonGetters.type;
 
 /**
  * Parses strings into enum constants. Internally {@code EnumParser} maintains a string-to-enum map
@@ -37,7 +40,7 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
 public class EnumParser<T extends Enum<T>> {
 
   private static final String BAD_KEY = "Non-unique key: %s";
-  private static final String BAD_VAL = "Invalid value: %s";
+  private static final String BAD_VALUE = "Invalid value: %s";
 
   /**
    * The default normalization function. Removes spaces, hyphens and underscores and returns an
@@ -92,17 +95,21 @@ public class EnumParser<T extends Enum<T>> {
   }
 
   /**
-   * Parses the specified value into an enum constant.
+   * Parses the specified value into an enum constant. The argument must be either an {@code
+   * Integer} specifying the enum constant's ordinal value or a {@code String} corresponding to the
+   * enum constant's name or {@code toString()} value.
    *
-   * @param value The string to be parsed into an enum constant.
+   * @param value The ordinal value or string to be parsed into an enum constant.
    * @return The enum constant
    * @throws IllegalArgumentException If the string could not be mapped to one of the enum's
    *     constants.
    */
   public T parse(Object value) throws IllegalArgumentException {
-    Check.that(value).is(notNull(), "Cannot parse null into enum constant");
+    Check.that(value)
+        .is(notNull(), "Cannot parse null into enum constant")
+        .has(type(), in(), List.of(String.class, Integer.class));
     return Check.that(normalizer.apply(value.toString()))
-        .is(keyIn(), lookups, BAD_VAL, value)
+        .is(keyIn(), lookups, BAD_VALUE, value)
         .ok(lookups::get);
   }
 }
