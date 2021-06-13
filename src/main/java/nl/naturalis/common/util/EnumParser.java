@@ -2,16 +2,12 @@ package nl.naturalis.common.util;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
-import nl.naturalis.common.CollectionMethods;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.containingKey;
-import static nl.naturalis.common.check.CommonChecks.in;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
 import static nl.naturalis.common.check.CommonChecks.notNull;
-import static nl.naturalis.common.check.CommonGetters.type;
 
 /**
  * Parses strings into enum constants. Internally {@code EnumParser} maintains a string-to-enum map
@@ -40,7 +36,7 @@ import static nl.naturalis.common.check.CommonGetters.type;
 public class EnumParser<T extends Enum<T>> {
 
   private static final String BAD_KEY = "Non-unique key: %s";
-  private static final String BAD_VALUE = "Invalid value: %s";
+  private static final String BAD_VALUE = "Cannot parse %s into enum constant of %s";
 
   /**
    * The default normalization function. Removes spaces, hyphens and underscores and returns an
@@ -49,6 +45,7 @@ public class EnumParser<T extends Enum<T>> {
   public static final UnaryOperator<String> DEFAULT_NORMALIZER =
       s -> Check.notNull(s).ok().replaceAll("[-_ ]", "").toLowerCase();
 
+  private final Class<T> enumClass;
   private final UnaryOperator<String> normalizer;
   private final Map<String, T> lookups;
 
@@ -70,7 +67,7 @@ public class EnumParser<T extends Enum<T>> {
    * @param normalizer The normalization function
    */
   public EnumParser(Class<T> enumClass, UnaryOperator<String> normalizer) {
-    Check.notNull(enumClass, "enumClass");
+    this.enumClass = Check.notNull(enumClass, "enumClass").ok();
     this.normalizer = Check.notNull(normalizer, "normalizer").ok();
     HashMap<String, T> map = new HashMap<>(enumClass.getEnumConstants().length);
     Arrays.stream(enumClass.getEnumConstants())
@@ -91,7 +88,7 @@ public class EnumParser<T extends Enum<T>> {
                 map.put(key1, e);
               }
             });
-    this.lookups = CollectionMethods.tightHashMap(map);
+    this.lookups = Map.copyOf(map);
   }
 
   /**
@@ -105,11 +102,9 @@ public class EnumParser<T extends Enum<T>> {
    *     constants.
    */
   public T parse(Object value) throws IllegalArgumentException {
-    Check.that(value)
-        .is(notNull(), "Cannot parse null into enum constant")
-        .has(type(), in(), List.of(String.class, Integer.class));
+    Check.that(value).is(notNull(), BAD_VALUE, enumClass.getName());
     return Check.that(normalizer.apply(value.toString()))
-        .is(keyIn(), lookups, BAD_VALUE, value)
+        .is(keyIn(), lookups, BAD_VALUE, value, enumClass.getName())
         .ok(lookups::get);
   }
 }
