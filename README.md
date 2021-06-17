@@ -11,4 +11,3 @@ Java module containing basic language extensions and utility classes.
 The javadocs can be found [here](https://naturalis.gitlab.io/lib/java/naturalis-common/nl.naturalis.common/module-summary.html)
 
 
-
