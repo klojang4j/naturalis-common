@@ -16,6 +16,12 @@ import static nl.naturalis.common.check.CommonChecks.directory;
 import static nl.naturalis.common.check.CommonChecks.neverNull;
 import static nl.naturalis.common.check.CommonChecks.yes;
 
+/**
+ * Global search-and-replace utility that can be used stand-alone (it has a main method) or from
+ * within another program.
+ *
+ * @author Ayco Holleman
+ */
 public class SearchReplace {
   private static final String USAGE =
       "USAGE: SearchReplace <rootDir> <search> <replace> <fileExts...>\n\n"
