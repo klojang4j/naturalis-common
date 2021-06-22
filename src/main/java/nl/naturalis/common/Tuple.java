@@ -4,7 +4,7 @@ import java.util.*;
 import nl.naturalis.common.check.Check;
 
 /**
- * Generic, immutable Tuple class.
+ * Generic, immutable Tuple class. Both the "left" and the "right" element of the tuple may be null.
  *
  * @author Ayco Holleman
  * @param <LEFT> The type of the first element (or key) of the tuple
@@ -25,6 +25,14 @@ public final class Tuple<LEFT, RIGHT> {
     return new Tuple<>(left, right);
   }
 
+  /**
+   * Returns a {@code Map} containing the specified tuples.
+   *
+   * @param <K> The key type
+   * @param <V> The value type
+   * @param tuples The tuples
+   * @return A {@code Map} containing the specified tuples.
+   */
   public static <K, V> Map<K, V> toMap(Tuple<K, V>[] tuples) {
     Check.notNull(tuples);
     Map<K, V> map = new HashMap<>(tuples.length);
@@ -32,7 +40,15 @@ public final class Tuple<LEFT, RIGHT> {
     return map;
   }
 
-  public static <K, V> Map<K, V> toLinkedMap(Tuple<K, V>[] tuples) {
+  /**
+   * Returns a {@link LinkedHashMap} containing the specified tuples.
+   *
+   * @param <K> The key type
+   * @param <V> The value type
+   * @param tuples The tuples
+   * @return A {@code LinkedHashMap} containing the specified tuples.
+   */
+  public static <K, V> Map<K, V> toLinkedHashMap(Tuple<K, V>[] tuples) {
     Check.notNull(tuples);
     Map<K, V> map = new LinkedHashMap<>(tuples.length);
     Arrays.stream(tuples).forEach(t -> t.insertInto(map));
@@ -100,27 +116,7 @@ public final class Tuple<LEFT, RIGHT> {
    * @return
    */
   public Map.Entry<LEFT, RIGHT> toEntry() {
-    return new Map.Entry<>() {
-      private final LEFT k = Tuple.this.left;
-      private RIGHT v = Tuple.this.right;
-
-      @Override
-      public LEFT getKey() {
-        return k;
-      }
-
-      @Override
-      public RIGHT getValue() {
-        return v;
-      }
-
-      @Override
-      public RIGHT setValue(RIGHT value) {
-        RIGHT old = this.v;
-        this.v = value;
-        return old;
-      }
-    };
+    return Map.entry(left, right);
   }
 
   @Override

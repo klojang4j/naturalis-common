@@ -7,10 +7,13 @@ import nl.naturalis.common.check.Check;
 
 /**
  * Converts values from various non-boolean types to boolean values. Where applicable, {@code null}
- * is accepted as an argument and evaluates to {@code false}. Both the set of values evaluating to
- * {@code true} and set of values evaluating to {@code false} will be bounded, rather than (for
- * example) 1 counting as {@code true} and anything else as {@code false}. If an argument is neither
- * a {@code true} value nor a {@code false} value, an {@link IllegalArgumentException} is thrown.
+ * is accepted as an argument and evaluates to {@code false}. Values evaluating to {@code true} and
+ * values evaluating to {@code false} will both be tightly defined, rather than (for example) 1
+ * counting as {@code true} and anything else as {@code false}. If an argument is neither a {@code
+ * true} value nor a {@code false} value, an {@link IllegalArgumentException} is thrown. The static
+ * method use the {@link #TRUE_STRINGS} and {@link #FALSE_STRINGS} sets to determine if a {@code
+ * String} is true-ish or falsy. You can also instantiate the {@code Bool} class with your own
+ * {@code true} strings and {@code false} strings.
  *
  * @author Ayco Holleman
  */
