@@ -26,7 +26,7 @@ public final class Tuple<LEFT, RIGHT> {
   }
 
   /**
-   * Returns a {@code Map} containing the specified tuples.
+   * Returns a modifiable {@code Map} containing the specified tuples.
    *
    * @param <K> The key type
    * @param <V> The value type
@@ -41,7 +41,7 @@ public final class Tuple<LEFT, RIGHT> {
   }
 
   /**
-   * Returns a {@link LinkedHashMap} containing the specified tuples.
+   * Returns a modifiable {@link LinkedHashMap} containing the specified tuples.
    *
    * @param <K> The key type
    * @param <V> The value type

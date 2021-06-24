@@ -12,7 +12,7 @@ import static nl.naturalis.common.check.CommonChecks.positive;
 
 abstract class AbstractTinyMap<K, V> implements Map<K, V> {
 
-  protected final Object[][] entries;
+  final Object[][] entries;
   int sz;
 
   public AbstractTinyMap(int size) {

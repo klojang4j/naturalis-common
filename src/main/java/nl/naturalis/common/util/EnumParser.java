@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.collection.IntList;
+import static nl.naturalis.common.check.CommonChecks.between;
 import static nl.naturalis.common.check.CommonChecks.containingKey;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
 import static nl.naturalis.common.check.CommonChecks.notNull;
@@ -37,6 +39,7 @@ public class EnumParser<T extends Enum<T>> {
 
   private static final String BAD_KEY = "Non-unique key: %s";
   private static final String BAD_VALUE = "Cannot parse %s into enum constant of %s";
+  private static final String BAD_ORDINAL = "Invalid ordinal value for enum %s: %d";
 
   /**
    * The default normalization function. Removes spaces, hyphens and underscores and returns an
@@ -103,6 +106,13 @@ public class EnumParser<T extends Enum<T>> {
    */
   public T parse(Object value) throws IllegalArgumentException {
     Check.that(value).is(notNull(), BAD_VALUE, enumClass.getName());
+    if (value.getClass() == Integer.class) {
+      int i = (Integer) value;
+      T[] consts = enumClass.getEnumConstants();
+      Check.that(i)
+          .is(between(), IntList.of(0, consts.length), BAD_ORDINAL, enumClass.getName(), i);
+      return consts[i];
+    }
     return Check.that(normalizer.apply(value.toString()))
         .is(keyIn(), lookups, BAD_VALUE, value, enumClass.getName())
         .ok(lookups::get);
