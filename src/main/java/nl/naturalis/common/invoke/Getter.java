@@ -9,10 +9,12 @@ import nl.naturalis.common.ExceptionMethods;
 public class Getter {
 
   private final MethodHandle method;
+  private final String property;
   private final Class<?> returnType;
 
-  Getter(Method method) {
-    returnType = method.getReturnType();
+  Getter(Method method, String property) {
+    this.property = property;
+    this.returnType = method.getReturnType();
     try {
       this.method = MethodHandles.lookup().unreflect(method);
     } catch (IllegalAccessException e) {
@@ -22,6 +24,10 @@ public class Getter {
 
   public MethodHandle getMethod() {
     return method;
+  }
+
+  public String getProperty() {
+    return property;
   }
 
   public Class<?> getReturnType() {

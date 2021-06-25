@@ -4,7 +4,6 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
@@ -12,6 +11,7 @@ import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.collection.UnsafeList;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 import static nl.naturalis.common.ArrayMethods.END_INDEX;
 import static nl.naturalis.common.ArrayMethods.START_INDEX;
 import static nl.naturalis.common.check.CommonChecks.*;
@@ -539,12 +539,77 @@ public class CollectionMethods {
    * @return An unmodifiable {@code Map} where the values of the input {@code Map} have been
    *     converted using the specified {@code Function}
    */
-  public static <K, V, W> Map<K, W> convertValuesAndFreeze(
+  @SuppressWarnings("unchecked")
+  public static <K, V, W> Map<K, W> convertAndFreeze(
       Map<K, V> source, Function<? super V, ? extends W> converter) {
-    return source
-        .entrySet()
-        .stream()
-        .map(e -> Map.entry(e.getKey(), converter.apply(e.getValue())))
-        .collect(Collectors.toUnmodifiableMap(Entry::getKey, Entry::getValue));
+    return Map.ofEntries(
+        source
+            .entrySet()
+            .stream()
+            .map(e -> Map.entry(e.getKey(), converter.apply(e.getValue())))
+            .toArray(Map.Entry[]::new));
+  }
+
+  /**
+   * Returns an unmodifiable {@code List} containing the values that result from applying the
+   * specified function to the source list's elements.
+   *
+   * @param <T> The type of the elements in the source list
+   * @param <U> The type of the elements in the returned list
+   * @param source The source list
+   * @param converter The conversion function
+   * @return An unmodifiable {@code List} containing the values that result from applying the
+   *     specified function to the source list's elements
+   */
+  public static <T, U> List<U> convertAndFreeze(
+      List<? extends T> source, Function<? super T, ? extends U> converter) {
+    return source.stream().map(converter::apply).collect(toUnmodifiableList());
+  }
+
+  /**
+   * Returns an unmodifiable {@code Set} containing the values that result from applying the
+   * specified function to the source set's elements.
+   *
+   * @param <T> The type of the elements in the source set
+   * @param <U> The type of the elements in the returned set
+   * @param source The source set
+   * @param converter The conversion function
+   * @return An unmodifiable {@code Set} containing the values that result from applying the
+   */
+  public static <T, U> Set<U> convertAndFreeze(
+      Set<? extends T> source, Function<? super T, ? extends U> converter) {
+    return source.stream().map(converter::apply).collect(toUnmodifiableSet());
+  }
+
+  /**
+   * Returns an unmodifiable {@code List} containing the values that result from applying the
+   * specified function to the source collection's elements.
+   *
+   * @param <T> The type of the elements in the source set
+   * @param <U> The type of the elements in the returned list
+   * @param source The source list
+   * @param converter The conversion function
+   * @return An unmodifiable {@code List} containing the values that result from applying the
+   *     specified function to the source collection's elements
+   */
+  public static <T, U> List<U> freezeIntoList(
+      Collection<? extends T> source, Function<? super T, ? extends U> converter) {
+    return source.stream().map(converter::apply).collect(toUnmodifiableList());
+  }
+
+  /**
+   * Returns an unmodifiable {@code Set} containing the values that result from applying the
+   * specified function to the source collection's elements.
+   *
+   * @param <T> The type of the elements in the source set
+   * @param <U> The type of the elements in the returned list
+   * @param source The source list
+   * @param converter The conversion function
+   * @return An unmodifiable {@code Set} containing the values that result from applying the
+   *     specified function to the source collection's elements
+   */
+  public static <T, U> Set<U> freezeIntoSet(
+      Collection<? extends T> source, Function<? super T, ? extends U> converter) {
+    return source.stream().map(converter::apply).collect(toUnmodifiableSet());
   }
 }

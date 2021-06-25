@@ -26,7 +26,7 @@ public class GetterFactory {
       for (Method m : ClassMethods.getGetters(clazz, strict)) {
         if (!m.getName().equals("getClass")) {
           String property = ClassMethods.getPropertyNameFromGetter(m, strict);
-          info.put(property, new Getter(m));
+          info.put(property, new Getter(m, property));
         }
       }
       Check.on(noPublicGetters(clazz), info).isNot(empty());
