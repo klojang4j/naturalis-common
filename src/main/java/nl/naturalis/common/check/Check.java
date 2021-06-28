@@ -333,15 +333,13 @@ public abstract class Check<T, E extends Exception> {
    *
    * @param <U> The type of the object that would have been returned if it had passed the checks
    * @param <X> The type of the exception
-   * @param excFactory
+   * @param excFactory The exception supplier
    * @return Nothing, but allows {@code fail} to be used as the expresion in a {@code return}
    *     statement
    * @throws X The exception that is thrown
    */
-  public static <U, X extends Exception> U failOn(Function<String, X> excFactory) throws X {
-    // Message "Invalid argument" likely to be ignored by factory, but why risk an
-    // NPE
-    throw excFactory.apply("Invalid argument");
+  public static <U, X extends Exception> U fail(Supplier<X> excFactory) throws X {
+    throw excFactory.get();
   }
 
   /**
@@ -356,7 +354,7 @@ public abstract class Check<T, E extends Exception> {
    *     statement
    * @throws X The exception that is thrown
    */
-  public static <U, X extends Exception> U failOn(
+  public static <U, X extends Exception> U fail(
       Function<String, X> excFactory, String msg, Object... msgArgs) throws X {
     throw excFactory.apply(String.format(msg, msgArgs));
   }
