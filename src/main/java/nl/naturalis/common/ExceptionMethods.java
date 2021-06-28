@@ -46,6 +46,30 @@ public final class ExceptionMethods {
   }
 
   /**
+   * Returns the stack trace of the root cause of {@code exc} as a {@code String} using the
+   * specified filter string the filter stack trace elements. If the {@link
+   * StackTraceElement#getClassName() class name} of the stack trace element contains the filter
+   * string, the stack trace element will be included in the output.
+   *
+   * @param exc The exception
+   * @param filter The string used to filter stack trace elements
+   * @return The root stack trace as a string
+   */
+  public static String getRootStackTraceAsString(Throwable exc, String filter) {
+    Check.notNull(exc, "exc");
+    Check.notNull(filter, "filter");
+    ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+    PrintStream pw = new PrintStream(baos);
+    pw.println(exc);
+    for (StackTraceElement ste : getRootCause(exc).getStackTrace()) {
+      if (ste.getClassName().contains(filter)) {
+        pw.println("\tat " + ste);
+      }
+    }
+    return baos.toString(StandardCharsets.UTF_8);
+  }
+
+  /**
    * Returns a detailed exception message that includes the class, method and line number of the
    * absolute origin of the provided exception. Equivalent to {@code new
    * ExceptionSource(getRootCause(t)).getDetailedMessage()}.
