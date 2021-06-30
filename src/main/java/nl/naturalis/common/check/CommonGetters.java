@@ -51,12 +51,12 @@ public class CommonGetters {
    * @param <T> The type of the object on which to call {@code toString{}}.
    * @return A {@code Function} that returns the result of calling {@code toString()} on the object.
    */
-  public static <T> Function<T, String> stringValue() {
+  public static <T> Function<T, String> toStr() {
     return Object::toString;
   }
 
   static {
-    tmp.put(stringValue(), "%s.toString()");
+    tmp.put(toStr(), "%s.toString()");
   }
 
   /**
@@ -81,12 +81,12 @@ public class CommonGetters {
    * @param <T> The enum class
    * @return A {@code Function} that returns all enum constants of an {@code Enum} class
    */
-  public static <T extends Enum<T>> Function<Class<T>, T[]> enumConstants() {
+  public static <T extends Enum<T>> Function<Class<T>, T[]> constants() {
     return Class::getEnumConstants;
   }
 
   static {
-    tmp.put(enumConstants(), "%s.getEnumConstants()");
+    tmp.put(constants(), "%s.getEnumConstants()");
   }
 
   /**
@@ -96,12 +96,12 @@ public class CommonGetters {
    * @param <T> The type of the enum class
    * @return A {@code Function} that returns the name of the enum constant
    */
-  public static <T extends Enum<T>> Function<T, String> name() {
+  public static <T extends Enum<T>> Function<T, String> enumName() {
     return Enum::name;
   }
 
   static {
-    tmp.put(name(), "%s.name()");
+    tmp.put(enumName(), "%s.name()");
   }
 
   /**
@@ -174,7 +174,7 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(mapSize(), tmp.get(size()));
+    tmp.put(mapSize(), tmp.get(size())); // recycle
   }
 
   /**
@@ -236,6 +236,38 @@ public class CommonGetters {
 
   static {
     tmp.put(absoluteValue(), tmp.get(abs()));
+  }
+
+  /**
+   * A {@code Function} that returns the key of a {@code Map} entry. Equivalent to {@code
+   * Map.Entry::getKey}.
+   *
+   * @param <K> The type of the key of the entry
+   * @param <V> The type of the value of the entry
+   * @return A {@code Function} that returns the key of a {@code Map} entry
+   */
+  public static <K, V> Function<Map.Entry<K, V>, K> key() {
+    return Map.Entry::getKey;
+  }
+
+  static {
+    tmp.put(key(), "%s.getKey()");
+  }
+
+  /**
+   * A {@code Function} that returns the value of a {@code Map} entry. Equivalent to {@code
+   * Map.Entry::getValue}.
+   *
+   * @param <K> The type of the key of the entry
+   * @param <V> The type of the value of the entry
+   * @return A {@code Function} that returns the value of a {@code Map} entry
+   */
+  public static <K, V> Function<Map.Entry<K, V>, V> value() {
+    return Map.Entry::getValue;
+  }
+
+  static {
+    tmp.put(value(), "%s.getValue()");
   }
 
   /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++ */

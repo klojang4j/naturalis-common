@@ -14,7 +14,7 @@ import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.check.CommonChecks.containingValue;
 import static nl.naturalis.common.check.CommonChecks.empty;
 import static nl.naturalis.common.check.CommonChecks.ne;
-import static nl.naturalis.common.check.CommonGetters.enumConstants;
+import static nl.naturalis.common.check.CommonGetters.constants;
 
 /**
  * A fast enum-to-int Map implementation. The map is backed by a simple int array with the same
@@ -81,7 +81,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
   public EnumToIntMap(Class<K> enumClass, int keyAbsentValue, ToIntFunction<K> initializer) {
     this.keys =
         Check.notNull(enumClass, "enumClass")
-            .notHas(enumConstants(), empty(), "Empty enum not supported")
+            .notHas(constants(), empty(), "Empty enum not supported")
             .ok(Class::getEnumConstants);
     this.data = new int[keys.length];
     this.kav = keyAbsentValue;

@@ -673,8 +673,8 @@ public class ObjectMethods {
    * @param arg An argument of type {@code String}
    * @return The argument or the default value of the corresponding primitive type
    */
-  public static String n2e(String arg) {
-    return ifNull(arg, StringMethods.EMPTY);
+  public static String n2e(Object arg) {
+    return ifNotNull(arg, Object::toString, StringMethods.EMPTY);
   }
 
   /**

@@ -1,16 +1,17 @@
 package nl.naturalis.common;
 
 import java.util.*;
+import java.util.function.Supplier;
 import nl.naturalis.common.check.Check;
 
 /**
- * Generic, immutable Tuple class. Both the "left" and the "right" element of the tuple may be null.
+ * Generic, immutable Tuple class.
  *
  * @author Ayco Holleman
- * @param <LEFT> The type of the first element (or key) of the tuple
- * @param <RIGHT> The type of the second element (or value) of the tuple
+ * @param <T> The type of the first element (or key) of the tuple
+ * @param <U> The type of the second element (or value) of the tuple
  */
-public final class Tuple<LEFT, RIGHT> {
+public final class Tuple<T, U> {
 
   /**
    * Creates a tuple containing the specified values.
@@ -41,24 +42,27 @@ public final class Tuple<LEFT, RIGHT> {
   }
 
   /**
-   * Returns a modifiable {@link LinkedHashMap} containing the specified tuples.
+   * Returns the {@code Map} produced by the specified function and filled with the specified
+   * tuples.
    *
    * @param <K> The key type
    * @param <V> The value type
    * @param tuples The tuples
-   * @return A {@code LinkedHashMap} containing the specified tuples.
+   * @param mapFactory A function providing the map into which to insert the tuples. The function is
+   *     given the length of the tuples array as input.
+   * @return A {@code Map} containing the specified tuples.
    */
-  public static <K, V> Map<K, V> toLinkedHashMap(Tuple<K, V>[] tuples) {
+  public static <K, V> Map<K, V> toMap(Tuple<K, V>[] tuples, Supplier<Map<K, V>> mapFactory) {
     Check.notNull(tuples);
-    Map<K, V> map = new LinkedHashMap<>(tuples.length);
+    Map<K, V> map = mapFactory.get();
     Arrays.stream(tuples).forEach(t -> t.insertInto(map));
     return map;
   }
 
-  private final LEFT left;
-  private final RIGHT right;
+  private final T left;
+  private final U right;
 
-  private Tuple(LEFT left, RIGHT right) {
+  private Tuple(T left, U right) {
     this.left = left;
     this.right = right;
   }
@@ -68,7 +72,7 @@ public final class Tuple<LEFT, RIGHT> {
    *
    * @return
    */
-  public LEFT getLeft() {
+  public T getLeft() {
     return left;
   }
 
@@ -77,7 +81,7 @@ public final class Tuple<LEFT, RIGHT> {
    *
    * @return
    */
-  public RIGHT getRight() {
+  public U getRight() {
     return right;
   }
 
@@ -86,7 +90,7 @@ public final class Tuple<LEFT, RIGHT> {
    *
    * @return A new tuple in which the two elements have swapped places
    */
-  public Tuple<RIGHT, LEFT> swap() {
+  public Tuple<U, T> swap() {
     return Tuple.of(right, left);
   }
 
@@ -95,7 +99,7 @@ public final class Tuple<LEFT, RIGHT> {
    *
    * @return A singleton map with the left element as the key and the right element as the value
    */
-  public Map<LEFT, RIGHT> toMap() {
+  public Map<T, U> toMap() {
     return Collections.singletonMap(left, right);
   }
 
@@ -106,7 +110,7 @@ public final class Tuple<LEFT, RIGHT> {
    * @param map The {@code Map} to insert the tuple into.
    * @return The previous value associated with key, or null if there was no mapping for key
    */
-  public RIGHT insertInto(Map<LEFT, RIGHT> map) {
+  public U insertInto(Map<T, U> map) {
     return map.put(left, right);
   }
 
@@ -115,7 +119,7 @@ public final class Tuple<LEFT, RIGHT> {
    *
    * @return
    */
-  public Map.Entry<LEFT, RIGHT> toEntry() {
+  public Map.Entry<T, U> toEntry() {
     return Map.entry(left, right);
   }
 
