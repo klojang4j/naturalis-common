@@ -491,6 +491,16 @@ class Messages {
     };
   }
 
+  static Formatter msgZero() {
+    return md -> {
+      if (md.negated()) {
+        return format("%s must not be zero", md.argName());
+      }
+      String fmt = "%s must be zero (was %s)";
+      return format(fmt, md.argName(), md.argument());
+    };
+  }
+
   static Formatter msgEq() {
     return md -> {
       if (md.negated()) {

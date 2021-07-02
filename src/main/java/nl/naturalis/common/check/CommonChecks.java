@@ -902,6 +902,22 @@ public class CommonChecks {
     setName(validToIndex(), "validToIndex");
   }
 
+  /* ++++++++++++++ IntPredicate ++++++++++++++ */
+
+  /**
+   * Verifies that the argument is 0 (zero).
+   *
+   * @return An {@code IntPredicate} establishing that the argument is equal to zero
+   */
+  public static IntPredicate zero() {
+    return (x) -> x == 0;
+  }
+
+  static {
+    setMessagePattern(eq(), msgZero());
+    setName(zero(), "zero");
+  }
+
   /* ++++++++++++++ IntRelation ++++++++++++++ */
 
   /**
