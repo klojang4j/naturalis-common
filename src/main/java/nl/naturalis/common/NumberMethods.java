@@ -27,10 +27,10 @@ public class NumberMethods {
   public static final Byte ZERO_BYTE = 0;
 
   /**
-   * Returns whether or not the specified string is a valid integer.
+   * Returns whether or not the specified string represents a valid integer.
    *
    * @param str The string
-   * @return Whether or not the specified string is a valid integer
+   * @return Whether or not the specified string represents a valid integer
    */
   public static boolean isInteger(String str) {
     if (isNotEmpty(str)) {
@@ -67,10 +67,10 @@ public class NumberMethods {
   }
 
   /**
-   * Returns whether or not the specified string is a valid integer.
+   * Returns whether or not the specified string represents a valid {@code short}.
    *
    * @param str The string
-   * @return Whether or not the specified string is a valid integer
+   * @return Whether or not the specified string represents a valid {@code short}.
    */
   public static boolean isShort(String str) {
     if (!isEmpty(str) && str.codePoints().allMatch(Character::isDigit)) {
@@ -141,17 +141,29 @@ public class NumberMethods {
   }
 
   /**
+   * Parses the specified string into an {@code Integer}. Throws an {@link IllegalArgumentException}
+   * if the string is not a number or if the number is too big to fit into an {@code Integer}. This
+   * method delegates to {@link BigDecimal#intValueExact()} and is therefore more strict than {@link
+   * Integer#parseInt(String)}.
+   *
+   * @param s The string to be parsed
+   * @return The {@code Integer} representation of the string
+   */
+  public static Integer parseInt(String s) {
+    return parse(s, Integer.class);
+  }
+
+  /**
    * Parses the specified string into a number of the specified type. Throws an {@link
    * IllegalArgumentException} if the string is not a number or if the number is too big to fit into
    * the target type.
    *
-   * @param <T> The type of the number to be converted
-   * @param <U> The target type
+   * @param <T> The type of {@code Number} to convert the string to
    * @param s The string to be parsed
-   * @param targetType The class of the target type
-   * @return An instance of the target type
+   * @param targetType The class of the {@code Number} type
+   * @return A {@code Number} of the specified type
    */
-  public static <T extends Number, U extends Number> U parse(String s, Class<U> targetType) {
+  public static <T extends Number> T parse(String s, Class<T> targetType) {
     return new NumberParser<>(targetType).parse(s);
   }
 

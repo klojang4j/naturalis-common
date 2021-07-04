@@ -60,8 +60,9 @@ public final class ExceptionMethods {
     Check.notNull(filter, "filter");
     ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
     PrintStream pw = new PrintStream(baos);
-    pw.println(exc);
-    for (StackTraceElement ste : getRootCause(exc).getStackTrace()) {
+    Throwable t = getRootCause(exc);
+    pw.println(t);
+    for (StackTraceElement ste : t.getStackTrace()) {
       if (ste.getClassName().contains(filter)) {
         pw.println("\tat " + ste);
       }

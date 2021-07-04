@@ -27,7 +27,7 @@ public class UncheckedException extends RuntimeException {
    * @param cause
    */
   public UncheckedException(Throwable cause) {
-    this(Check.notNull(cause).ok().toString(), cause);
+    super(Check.notNull(cause).ok());
   }
 
   /**
