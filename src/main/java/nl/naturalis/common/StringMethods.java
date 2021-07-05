@@ -48,7 +48,8 @@ public final class StringMethods {
    * @return The concatenation of the data
    */
   public static String concat(Object... data) {
-    return append(new StringBuilder(32), data).toString();
+    Check.notNull(data);
+    return append(new StringBuilder(10 * data.length), data).toString();
   }
 
   /**
