@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.IOMethods;
+import nl.naturalis.common.StringMethods;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ArrayMethods.inArray;
 import static nl.naturalis.common.StringMethods.endsWith;
@@ -82,18 +83,22 @@ public class SearchReplace {
         .has(Path::isAbsolute, yes(), "rootDir must be absolute path")
         .has(Path::toFile, directory(), "No such directory", root);
 
-    Pattern pattern;
+    final Pattern pattern;
     if (isRegexSearch()) {
       pattern = Pattern.compile(search);
     } else {
-      search = Pattern.quote(search);
       if (wholeWords) {
-        search = "\\b" + search + "\\b";
-      }
-      if (ignoreCase) {
+        search = "\\b" + Pattern.quote(search) + "\\b";
+        if (ignoreCase) {
+          pattern = Pattern.compile(search, Pattern.CASE_INSENSITIVE);
+        } else {
+          pattern = Pattern.compile(search);
+        }
+      } else if (ignoreCase) {
+        search = Pattern.quote(search);
         pattern = Pattern.compile(search, Pattern.CASE_INSENSITIVE);
       } else {
-        pattern = Pattern.compile(search);
+        pattern = null;
       }
     }
     MutableInt total = new MutableInt();
@@ -110,15 +115,27 @@ public class SearchReplace {
               }
               if (null != endsWith(fileName, false, fileExts)) {
                 String contents = IOMethods.toString(file);
-                Matcher matcher = pattern.matcher(contents);
-                long cnt = matcher.results().count();
-                if (cnt > 0) {
-                  Path relative = root.relativize(file);
-                  String es = cnt == 1 ? "" : "es";
-                  System.out.println("+  " + relative + ": " + cnt + " match" + es);
-                  contents = matcher.replaceAll(replace);
-                  total.ipp();
-                  Files.writeString(file, contents, StandardOpenOption.TRUNCATE_EXISTING);
+                if (pattern != null) {
+                  Matcher matcher = pattern.matcher(contents);
+                  long cnt = matcher.results().count();
+                  if (cnt > 0) {
+                    Path relative = root.relativize(file);
+                    String es = cnt == 1 ? "" : "es";
+                    System.out.println("+  " + relative + ": " + cnt + " match" + es);
+                    contents = matcher.replaceAll(replace);
+                    total.ipp();
+                    Files.writeString(file, contents, StandardOpenOption.TRUNCATE_EXISTING);
+                  }
+                } else {
+                  int cnt = StringMethods.countDiscrete(contents, search);
+                  if (cnt > 0) {
+                    Path relative = root.relativize(file);
+                    String es = cnt == 1 ? "" : "es";
+                    System.out.println("+  " + relative + ": " + cnt + " match" + es);
+                    contents = contents.replace(search, replace);
+                    total.ipp();
+                    Files.writeString(file, contents, StandardOpenOption.TRUNCATE_EXISTING);
+                  }
                 }
               }
               return FileVisitResult.CONTINUE;
