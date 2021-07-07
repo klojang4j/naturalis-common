@@ -2,6 +2,8 @@ package nl.naturalis.common.collection;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 
@@ -10,15 +12,20 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  * of its super types is present in the map. This allows you to define fall-back values for types
  * that have not been explicitly added to the map. If the requested type is not present in the map,
  * but one of its super types is, a new entry is automatically created, associating the requested
- * type with the super type's value. When searching for a super type within the map, superclasses
- * will take precedence over interfaces. Keys and values must not be null.
+ * type with the same value as the super type's value. When searching for a super type within the
+ * map, superclasses will take precedence over interfaces. Keys and values must not be null. All
+ * map-altering methods except {@code put} and {@code putAll} throw an {@link
+ * UnsupportedOperationException}. The same applies to all {@code compute} methods as well as {@code
+ * getOrDefault}.
  *
  * @author Ayco Holleman
  * @param <V> The type of the values in the {@code}
  */
 public class TypeMap<V> extends HashMap<Class<?>, V> {
 
-  public TypeMap() {}
+  public TypeMap() {
+    super();
+  }
 
   public TypeMap(int initialCapacity) {
     super(initialCapacity);
@@ -35,7 +42,7 @@ public class TypeMap<V> extends HashMap<Class<?>, V> {
 
   @Override
   public V get(Object key) {
-    Check.notNull(key);
+    Check.notNull(key, "key");
     return containsKey(key) ? super.get(key) : null;
   }
 
@@ -102,7 +109,60 @@ public class TypeMap<V> extends HashMap<Class<?>, V> {
   }
 
   @Override
+  public V getOrDefault(Object key, V defaultValue) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public V putIfAbsent(Class<?> key, V value) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean replace(Class<?> key, V oldValue, V newValue) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public V replace(Class<?> key, V value) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public V computeIfAbsent(Class<?> key, Function<? super Class<?>, ? extends V> mappingFunction) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public V computeIfPresent(
+      Class<?> key, BiFunction<? super Class<?>, ? super V, ? extends V> remappingFunction) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public V compute(
+      Class<?> key, BiFunction<? super Class<?>, ? super V, ? extends V> remappingFunction) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public V merge(
+      Class<?> key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public V remove(Object key) {
+    return super.remove(key);
+  }
+
+  @Override
+  public boolean remove(Object key, Object value) {
+    return super.remove(key, value);
+  }
+
+  @Override
+  public void replaceAll(BiFunction<? super Class<?>, ? super V, ? extends V> function) {
     throw new UnsupportedOperationException();
   }
 }
