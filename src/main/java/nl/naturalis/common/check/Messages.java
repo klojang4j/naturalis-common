@@ -298,7 +298,7 @@ class Messages {
         return format("%s must not be a directory (was %s)", md.argName(), f.getAbsolutePath());
       }
       // File not present at all
-      return format("Missing file: %s", ((File) md.argument()).getAbsolutePath());
+      return format("File not found: %s", ((File) md.argument()).getAbsolutePath());
     };
   }
 
