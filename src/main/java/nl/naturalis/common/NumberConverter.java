@@ -16,6 +16,9 @@ class NumberConverter<T extends Number> {
 
   @SuppressWarnings("unchecked")
   <U extends Number> T convert(U n) {
+    if (n == null) {
+      return (T) n;
+    }
     Class<U> myType = (Class<U>) Check.notNull(n).ok(Object::getClass);
     Class<T> tt = targetType;
     if (myType == tt) {
