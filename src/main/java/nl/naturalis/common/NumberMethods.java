@@ -5,6 +5,8 @@ import java.math.BigInteger;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.StringMethods.isEmpty;
 import static nl.naturalis.common.StringMethods.isNotEmpty;
+import static nl.naturalis.common.check.CommonChecks.negative;
+import static nl.naturalis.common.check.CommonChecks.positive;
 
 /**
  * Methods for working with {@code Number} instances.
@@ -251,6 +253,71 @@ public class NumberMethods {
       return number.shortValue() >= 0 ? number : (T) Short.valueOf((short) -number.shortValue());
     }
     return number.byteValue() >= 0 ? number : (T) Byte.valueOf((byte) -number.byteValue());
+  }
+
+  /**
+   * Here, once and for all, for those who suffer mental blackouts when engaging with zero-based
+   * counting and exclusive upper boundaries, the first of four Winnie-the-Pooh methods.
+   *
+   * <p>Returns the zero-based number (a.k.a. index) of the last page.
+   *
+   * @param rowCount The total number of rows (or elements) to divide up into pages (or slices)
+   * @param pageSize The maximum number of rows per page (or elements per slice)
+   * @return The zero-based (a.k.a. index) number of the last page
+   */
+  public static int getLastPage(int rowCount, int pageSize) {
+    Check.that(rowCount).isNot(negative());
+    Check.that(pageSize).is(positive());
+    if (rowCount == 0) {
+      return 0;
+    }
+    return ((rowCount - 1) / pageSize);
+  }
+
+  /**
+   * Here, once and for all, for those who suffer mental blackouts when engaging with zero-based
+   * counting and exclusive upper boundaries, the second of four Winnie-the-Pooh methods.
+   *
+   * <p>Returns the total number of pages you need for the specified row count (a.k.a. the {@code
+   * to} index).
+   *
+   * @param rowCount The total number of rows (or elements) to divide up into pages (or slices)
+   * @param pageSize The maximum number of rows per page (or elements per slice)
+   * @return The total number of pages you need for the specified row count
+   */
+  public static int getPageCount(int rowCount, int pageSize) {
+    return getLastPage(rowCount, pageSize) + 1;
+  }
+
+  /**
+   * Here, once and for all, for those who suffer mental blackouts when engaging with zero-based
+   * counting and exclusive upper boundaries, the third of four Winnie-the-Pooh methods.
+   *
+   * <p>Returns the number of rows in the last page, for those who have really been thinking about
+   * it for way too long.
+   *
+   * @param rowCount
+   * @param pageSize
+   * @return The number of rows in the last page
+   */
+  public static int getRowCountInLastPage(int rowCount, int pageSize) {
+    Check.that(rowCount).isNot(negative());
+    Check.that(pageSize).is(positive());
+    return rowCount % pageSize;
+  }
+
+  /**
+   * Here, once and for all, for those who suffer mental blackouts when engaging with zero-based
+   * counting and exclusive upper boundaries, the last of four Winnie-the-Pooh methods.
+   *
+   * <p>Returns the number of unoccupied rows in the last page.
+   *
+   * @param rowCount
+   * @param pageSize
+   * @return The number of unoccupied rows in the last page
+   */
+  public static int countEmptyRowsInLastPage(int rowCount, int pageSize) {
+    return pageSize - getRowCountInLastPage(rowCount, pageSize);
   }
 
   private NumberMethods() {}

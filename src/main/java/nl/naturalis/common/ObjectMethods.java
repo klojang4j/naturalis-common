@@ -2,16 +2,18 @@ package nl.naturalis.common;
 
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.check.CommonChecks;
+import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.Relation;
 import nl.naturalis.common.function.ThrowingSupplier;
 import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonChecks.empty;
+import static nl.naturalis.common.check.CommonChecks.inArray;
+import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
  * General methods applicable to objects of any type.
@@ -82,9 +84,7 @@ public class ObjectMethods {
    * @return Whether or not it is empty or contains an empty object
    */
   public static boolean isEmpty(Optional arg) {
-    if (arg == null) {
-      throw new IllegalArgumentException(ERR_NULL_OPTIONAL);
-    }
+    Check.that(arg).is(notNull(), ERR_NULL_OPTIONAL);
     return arg.isEmpty() || isEmpty(arg.get());
   }
 
@@ -476,6 +476,49 @@ public class ObjectMethods {
   }
 
   /**
+   * Returns {@code alternative} if the specified relation exists between {@code subject} and {@code
+   * object}, else {@code subject}.
+   *
+   * @param subject The value to test and possibly return
+   * @param relation The test
+   * @param object The value to to test against
+   * @param alternative The value to return if the
+   * @return either {@code subject} or {@code alternative}
+   */
+  public static int ifTrue(int subject, IntRelation relation, int object, int alternative) {
+    return relation.exists(subject, object) ? alternative : subject;
+  }
+
+  /**
+   * Returns {@code alternative} if the specified relation does <i>not</i> between {@code subject}
+   * and {@code object}, else {@code subject}.
+   *
+   * @param <T> The type of the objects involved
+   * @param subject The value to test and possibly return
+   * @param relation The test
+   * @param object The value to to test against
+   * @param alternative The value to return if the
+   * @return either {@code subject} or {@code alternative}
+   */
+  public static <T> T ifFalse(T subject, Relation<T, T> relation, T object, T alternative) {
+    return !relation.exists(subject, object) ? alternative : subject;
+  }
+
+  /**
+   * Returns {@code alternative} if the specified relation exists between {@code subject} and {@code
+   * object}, else {@code subject}.
+   *
+   * @param subject The value to test and possibly return
+   * @param relation The test
+   * @param object The value to to test against
+   * @param alternative The value to return if the
+   * @return either {@code subject} or {@code alternative}
+   */
+  public static int ifFalse(int subject, IntRelation relation, int object, int alternative) {
+    return !relation.exists(subject, object) ? alternative : subject;
+  }
+
+  /**
    * Returns the result of the specified operation on {@code value} if the condition evaluates to
    * {@code false}, else {@code value} itself. For example:
    *
@@ -622,48 +665,6 @@ public class ObjectMethods {
    */
   public static <T, U> U ifNotEmpty(T arg, Function<T, U> then, U dfault) {
     return isNotEmpty(arg) ? then.apply(arg) : dfault;
-  }
-
-  /**
-   * Executes the specified {@code Runnable} if the specified condition evaluates to {@code true},
-   * else does nothing.
-   *
-   * @param condition The condition to evaluate
-   * @param then The action to execute
-   */
-  public static void doIf(boolean condition, Runnable then) {
-    if (condition) {
-      then.run();
-    }
-  }
-
-  /**
-   * Executes the first {@code Runnable} if the specified condition evaluates to {@code true}, else
-   * the second.
-   *
-   * @param condition The condition to evaluate
-   * @param then The action to execute if the condition to evaluates to {@code true}
-   * @param otherwise The action to execute if the condition to evaluates to {@code false}
-   */
-  public static void doIf(boolean condition, Runnable then, Runnable otherwise) {
-    if (condition) {
-      then.run();
-    } else {
-      otherwise.run();
-    }
-  }
-
-  /**
-   * Passes the specified argument to the specified {@code consumer} if not null, else does nothing.
-   *
-   * @param <T> The type of the object to test
-   * @param arg The value to test
-   * @param consumer The {@code Consumer} whose {@code accewpt} method to call
-   */
-  public static <T> void doIfNotNull(T arg, Consumer<T> consumer) {
-    if (arg != null) {
-      consumer.accept(arg);
-    }
   }
 
   /**

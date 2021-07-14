@@ -234,7 +234,7 @@ public class ArrayMethods {
    *
    * @param array The array to implode
    * @param separator The separator string
-   * @return A concatenation of the elements in the collection.
+   * @return A concatenation of the elements in the array.
    */
   public static String implode(Object[] array, String separator) {
     return Arrays.stream(array).map(Objects::toString).collect(Collectors.joining(separator));
@@ -248,7 +248,7 @@ public class ArrayMethods {
    * @param separator The separator string
    * @param limit The maximum number of elements to collect. Specify -1 for no maximum. Any other
    *     negative integer results in an {@link IllegalArgumentException}.
-   * @return A concatenation of the elements in the collection.
+   * @return A concatenation of the elements in the array.
    */
   public static String implode(Object[] array, String separator, int limit) {
     Check.notNull(array, "array");
@@ -259,6 +259,26 @@ public class ArrayMethods {
       stream = stream.limit(limit);
     }
     return Arrays.stream(array).map(Objects::toString).collect(Collectors.joining(separator));
+  }
+
+  /**
+   * PHP-style implode method, concatenating the array elements using the specified separator
+   * string.
+   *
+   * @param array The array to implode
+   * @param separator The separator string
+   * @param from The index of the element to begin the concatenation with (inclusive)
+   * @param to The index of the element to end the concatenation with (exclusive)
+   * @return A concatenation of the elements in the array.
+   */
+  public static String implode(Object[] array, String separator, int from, int to) {
+    Check.notNull(array, "array");
+    Check.notNull(separator, "separator");
+    Check.that(from, "from").is(gte(), 0).is(lte(), array.length);
+    Check.that(to, "to").is(gte(), from).is(lte(), array.length);
+    return Arrays.stream(array, from, to)
+        .map(Objects::toString)
+        .collect(Collectors.joining(separator));
   }
 
   /**
