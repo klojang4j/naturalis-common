@@ -1,6 +1,5 @@
 package nl.naturalis.common.invoke;
 
-import java.lang.invoke.MethodHandle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -14,11 +13,10 @@ import static nl.naturalis.common.invoke.InvokeException.typeMismatch;
 import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 
 /**
- * Read properties from a predetermined type of Java beans. This class uses the {@code
- * java.lang.invoke} package in stead of reflection to read bean properties. Although this class
- * uses {@link MethodHandle} instances to extract values from the bean, it still uses reflection to
- * identify the getter methods on the bean class. Therefore if you use this class from within a Java
- * module you must still open the module to the naturalis-common module.
+ * Reads properties from a predetermined type of JavaBean. This class uses the {@code
+ * java.lang.invoke} package in stead of reflection to read bean properties. Yet it still uses
+ * reflection to identify getter methods on the bean class. Therefore if you use this class from
+ * within a Java module you must still open the module to the naturalis-common module.
  *
  * @author Ayco Holleman
  * @param <T> The type of the bean
@@ -60,8 +58,9 @@ public class BeanReader<T> {
    * make the {@code BeanReader} more efficient. Otherwise you may specify {@code null} or a
    * zero-length array to indicate that you intend to read all properties.
    *
-   * <p>Specifying non-existent properties (names that do not correspond to getter methods) has no
-   * effect. They will be ignored silently. It will not cause an exception to be thrown.
+   * <p>Specifying non-existent properties (names that do not correspond to getter methods) will
+   * <i>not</i> result in an exception being thrown.has no effect. Instead they will just be
+   * silently ignored.
    *
    * @param beanClass The bean class
    * @param strictNaming Whether or not to apply strict naming conventions to what qualifies as a
@@ -77,8 +76,8 @@ public class BeanReader<T> {
     if (properties == null || properties.length == 0) {
       this.getters = GetterFactory.INSTANCE.getGetters(beanClass, strictNaming);
     } else {
-      GetterFactory gif = GetterFactory.INSTANCE;
-      Map<String, Getter> copy = new HashMap<>(gif.getGetters(beanClass, strictNaming));
+      GetterFactory gf = GetterFactory.INSTANCE;
+      Map<String, Getter> copy = new HashMap<>(gf.getGetters(beanClass, strictNaming));
       if (exclude) {
         copy.keySet().removeAll(Set.of(properties));
       } else {
@@ -110,26 +109,26 @@ public class BeanReader<T> {
   }
 
   /**
-   * Returns which type of this {@code BeanReader} can read.
+   * Returns the type of the objects this {@code BeanReader} can read.
    *
-   * @return Which type of this {@code BeanReader} can read
+   * @return The type of the objects {@code BeanReader} can read
    */
   public Class<? super T> getBeanClass() {
     return beanClass;
   }
 
   /**
-   * Returns all properties of the bean class that will actually be read by this {@code BeanReader}.
+   * Returns the bean properties that will actually be read by this {@code BeanReader}.
    *
-   * @return All properties of the bean class that will actually be read by this {@code BeanReader}
+   * @return The bean properties that will actually be read by this {@code BeanReader}
    */
   public Set<String> getUsedProperties() {
     return getters.keySet();
   }
 
   /**
-   * Returns all {@link Getter getters} used to read bean properties. The returned {@code Map} maps
-   * the name of a property to the {@code Getter} used to read it.
+   * Returns the {@link Getter getters} used by the {@code BeanReader} to read bean properties. The
+   * returned {@code Map} maps the name of a property to the {@code Getter} used to read it.
    *
    * @return All getters used to read bean properties.
    */

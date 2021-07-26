@@ -25,7 +25,7 @@ import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 public class AnyBeanReader {
 
   private final boolean strict;
-  private final LinkedHashMap<Tuple<Object, String>, Object> valueCache;
+  private final LinkedHashMap<Tuple<Integer, String>, Object> valueCache;
 
   /**
    * Creates a new {@code AnyBeanReader}. Strict naming conventions will be applied to what
@@ -72,10 +72,10 @@ public class AnyBeanReader {
    */
   public AnyBeanReader(int valueCacheSize, boolean strictNaming) {
     this.valueCache =
-        new LinkedHashMap<>(valueCacheSize + 2, 1F) {
+        new LinkedHashMap<>((valueCacheSize * 4) / 3 + 1) {
 
           @Override
-          protected boolean removeEldestEntry(Entry<Tuple<Object, String>, Object> eldest) {
+          protected boolean removeEldestEntry(Entry<Tuple<Integer, String>, Object> eldest) {
             return size() > valueCacheSize;
           }
         };
@@ -95,16 +95,14 @@ public class AnyBeanReader {
   public <U> U read(Object bean, String property) throws NoSuchPropertyException {
     Check.notNull(bean, "bean");
     Check.notNull(property, "property");
-    Tuple<Object, String> t = Tuple.of(bean, property);
     if (valueCache != null) {
-      return (U) valueCache.computeIfAbsent(t, this::doRead);
+      Tuple<Integer, String> key = Tuple.of(System.identityHashCode(bean), property);
+      return (U) valueCache.computeIfAbsent(key, k -> doRead(bean, property));
     }
-    return doRead(t);
+    return doRead(bean, property);
   }
 
-  private <U> U doRead(Tuple<Object, String> t) {
-    Object bean = t.getLeft();
-    String prop = t.getRight();
+  private <U> U doRead(Object bean, String prop) {
     Map<String, Getter> getters = GetterFactory.INSTANCE.getGetters(bean.getClass(), strict);
     Check.on(x -> noSuchProperty(bean, prop), prop).is(keyIn(), getters);
     try {

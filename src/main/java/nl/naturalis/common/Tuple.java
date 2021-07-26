@@ -42,6 +42,20 @@ public final class Tuple<T, U> {
   }
 
   /**
+   * Returns a modifiable {@code Map} containing the specified tuples.
+   *
+   * @param <K> The key type
+   * @param <V> The value type
+   * @param tuples The tuples
+   * @return A {@code Map} containing the specified tuples.
+   */
+  @SuppressWarnings("unchecked")
+  public static <K, V> Map<K, V> toUnmodifiableMap(Tuple<K, V>[] tuples) {
+    Check.notNull(tuples);
+    return Map.ofEntries(Arrays.stream(tuples).map(Tuple::toEntry).toArray(Map.Entry[]::new));
+  }
+
+  /**
    * Returns the {@code Map} produced by the specified function and filled with the specified
    * tuples.
    *
