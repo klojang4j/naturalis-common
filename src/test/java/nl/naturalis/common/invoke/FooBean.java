@@ -1,10 +1,13 @@
 package nl.naturalis.common.invoke;
 
+import java.time.LocalDate;
+
 public class FooBean {
 
   private int id;
   private String firstName;
   private String lastName;
+  private LocalDate date;
 
   public int getId() {
     return id;
@@ -28,5 +31,13 @@ public class FooBean {
 
   public void setLastName(String lastName) {
     this.lastName = lastName;
+  }
+
+  public LocalDate lastModified() {
+    return date;
+  }
+
+  public void setDate(LocalDate date) {
+    this.date = date;
   }
 }

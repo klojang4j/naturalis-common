@@ -6,26 +6,33 @@ import java.util.Map;
 import java.util.Map.Entry;
 import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.ExceptionMethods;
-import nl.naturalis.common.Tuple;
 import nl.naturalis.common.check.Check;
+import static java.lang.System.identityHashCode;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
 import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 
 /**
- * Reads properties of any type of bean. This makes {@code AnyBeanReader} more versatile than the
+ * Reads properties of any type of bean. This makes {@code AnyBeanReader} easier to use than the
  * {@link BeanReader} class. The {@code BeanReader}, on the other hand, allows you to specify
- * up-front the bean properties you are going to read, possibly making it slightly more efficient.
+ * up-front the bean properties you are going to read, making it slightly more efficient. Then
+ * again, {@code AnyBeanReader} will create an internally maintained cache of oft-read properties,
+ * if you specify it to do so. This can improve performance if you expect the same few properties to
+ * be read over and over again from the same few beans.
  *
  * <p>Although this class uses {@link MethodHandle} instances to extract values from the bean, it
  * still uses reflection to identify the getter methods on the bean class. Therefore if you use this
  * class from within a Java module you must still open the module to the naturalis-common module.
+ *
+ * <p>This class caches relevant data about the bean class such that after the first time you create
+ * an instance of a {@code BeanReader} for a particular bean class, subsequent instantiations are
+ * essentially for free (no matter which constructor you use).
  *
  * @author Ayco Holleman
  */
 public class AnyBeanReader {
 
   private final boolean strict;
-  private final LinkedHashMap<Tuple<Integer, String>, Object> valueCache;
+  private final LinkedHashMap<int[], Object> valueCache;
 
   /**
    * Creates a new {@code AnyBeanReader}. Strict naming conventions will be applied to what
@@ -41,7 +48,7 @@ public class AnyBeanReader {
    *
    * @param strictNaming hether or not to apply strict naming conventions for what counts as a
    *     getter. See {@link ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method,
-   *     boolean)}
+   *     boolean)}.
    */
   public AnyBeanReader(boolean strictNaming) {
     this.valueCache = null;
@@ -61,9 +68,9 @@ public class AnyBeanReader {
   /**
    * Creates a new {@code AnyBeanReader} that maintains a small cache of values read previously.
    * This is useful if you expect the same few properties to be read over and over again from the
-   * same (as per {@code equals}}) few beans. The cache size should be small in order to be more
-   * effective than not using cache at all, but large enough to contain all the properties of all
-   * the bean you intend to read.
+   * same few beans. The cache size should be small in order to be more effective than not using
+   * cache at all. That cache is queried using reference comparisons only. Using {@code equals}
+   * comparisons would also nullify the benefits of using a cache at all.
    *
    * @param valueCacheSize The size of the value cache
    * @param strictNaming hether or not to apply strict naming conventions for what counts as a
@@ -72,10 +79,10 @@ public class AnyBeanReader {
    */
   public AnyBeanReader(int valueCacheSize, boolean strictNaming) {
     this.valueCache =
-        new LinkedHashMap<>((valueCacheSize * 4) / 3 + 1) {
+        new LinkedHashMap<>((valueCacheSize * 4) / 3 + 1, .75F, true) {
 
           @Override
-          protected boolean removeEldestEntry(Entry<Tuple<Integer, String>, Object> eldest) {
+          protected boolean removeEldestEntry(Entry<int[], Object> eldest) {
             return size() > valueCacheSize;
           }
         };
@@ -96,7 +103,7 @@ public class AnyBeanReader {
     Check.notNull(bean, "bean");
     Check.notNull(property, "property");
     if (valueCache != null) {
-      Tuple<Integer, String> key = Tuple.of(System.identityHashCode(bean), property);
+      int[] key = new int[] {identityHashCode(bean), identityHashCode(property)};
       return (U) valueCache.computeIfAbsent(key, k -> doRead(bean, property));
     }
     return doRead(bean, property);

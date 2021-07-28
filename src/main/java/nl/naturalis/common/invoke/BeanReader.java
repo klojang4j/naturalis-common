@@ -18,6 +18,10 @@ import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
  * reflection to identify getter methods on the bean class. Therefore if you use this class from
  * within a Java module you must still open the module to the naturalis-common module.
  *
+ * <p>This class caches relevant data about the bean class such that after the first time you create
+ * an instance of a {@code BeanReader} for a particular bean class, subsequent instantiations are
+ * essentially for free (no matter which constructor you use).
+ *
  * @author Ayco Holleman
  * @param <T> The type of the bean
  */

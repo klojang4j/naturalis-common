@@ -178,11 +178,11 @@ class Messages {
   static Formatter msgSameAs() {
     return md -> {
       if (md.negated()) {
-        String fmt = "%s must not reference same object as %s";
+        String fmt = "%s must not be %s";
         String id0 = prettyClassName(md.object()) + '@' + System.identityHashCode(md.object());
         return format(fmt, md.argName(), id0);
       }
-      String fmt = "%s must reference same object as %s (was %s)";
+      String fmt = "%s must be %s (was %s)";
       String id0 = prettyClassName(md.object()) + '@' + System.identityHashCode(md.object());
       String id1 = prettyClassName(md.argument()) + '@' + System.identityHashCode(md.argument());
       return format(fmt, md.argName(), id0, id1);

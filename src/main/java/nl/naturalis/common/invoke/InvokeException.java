@@ -5,11 +5,19 @@ import nl.naturalis.common.ClassMethods;
 
 public class InvokeException extends RuntimeException {
 
+  private static final String ERR_NOT_READABLE =
+      "Cannot read beans of type %s (bean type must be/extend %s)";
+
   static <T> InvokeException typeMismatch(BeanReader<? super T> reader, T bean) {
-    String fmt = "Cannot read beans of type %s (am BeanReader for ? extends %s)";
     String name0 = ClassMethods.prettyClassName(bean);
     String name1 = ClassMethods.prettyClassName(reader.getBeanClass());
-    return new InvokeException(fmt, name0, name1);
+    return new InvokeException(ERR_NOT_READABLE, name0, name1);
+  }
+
+  static <T> InvokeException typeMismatch(SaveBeanReader<? super T> reader, T bean) {
+    String name0 = ClassMethods.prettyClassName(bean);
+    String name1 = ClassMethods.prettyClassName(reader.getBeanClass());
+    return new InvokeException(ERR_NOT_READABLE, name0, name1);
   }
 
   static Function<String, InvokeException> notPublic(Class<?> clazz) {

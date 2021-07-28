@@ -1,10 +1,11 @@
 package nl.naturalis.common.invoke;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import nl.naturalis.common.ExceptionMethods;
+import static java.lang.invoke.MethodHandles.lookup;
+import static java.lang.invoke.MethodType.methodType;
 
 public class Getter {
 
@@ -16,7 +17,18 @@ public class Getter {
     this.property = property;
     this.returnType = method.getReturnType();
     try {
-      this.method = MethodHandles.lookup().unreflect(method);
+      this.method = lookup().unreflect(method);
+    } catch (IllegalAccessException e) {
+      throw ExceptionMethods.uncheck(e);
+    }
+  }
+
+  Getter(Class<?> beanClass, String methodName, Class<?> returnType, String property)
+      throws NoSuchMethodException {
+    this.property = property;
+    this.returnType = returnType;
+    try {
+      this.method = lookup().findVirtual(beanClass, methodName, methodType(returnType));
     } catch (IllegalAccessException e) {
       throw ExceptionMethods.uncheck(e);
     }
