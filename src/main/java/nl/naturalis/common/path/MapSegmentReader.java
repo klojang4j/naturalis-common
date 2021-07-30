@@ -1,9 +1,10 @@
 package nl.naturalis.common.path;
 
+import static nl.naturalis.common.path.PathWalkerException.noSuchKey;
+
 import java.util.Map;
 import java.util.function.Function;
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
-import static nl.naturalis.common.path.PathWalkerException.noSuchKey;
 
 @SuppressWarnings("rawtypes")
 class MapSegmentReader extends SegmentReader<Map<String, Object>> {

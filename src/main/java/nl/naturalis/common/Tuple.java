@@ -1,6 +1,10 @@
 package nl.naturalis.common;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 import nl.naturalis.common.check.Check;
 

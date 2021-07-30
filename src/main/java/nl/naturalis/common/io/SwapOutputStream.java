@@ -8,13 +8,11 @@ import java.nio.channels.FileChannel;
 import nl.naturalis.common.check.Check;
 
 /**
- * An {@code OutputStream} that allows allows you to read back the data that were written to it.
- * Data written to a {@code SwapOutputStream} first fills up an internal buffer. If (and only if)
- * the buffer reaches full capacity, a swap file is created to sink the data into. Thus whatever the
- * amount of data written to the {@code SwapOutputStream}, it can always be recalled. It is
- * transparent to clients whether or not data has actually been swapped out of memory. Clients can
- * recall the data without having to know whether it came from the internal buffer or from the swap
- * file.
+ * An {@code OutputStream} that can read back the data that were written to it. Data written to a
+ * {@code SwapOutputStream} first fills up an internal buffer. If (and only if) the buffer reaches
+ * full capacity, a swap file is created to sink the data into. Thus, whatever the amount of data
+ * written to the {@code SwapOutputStream}, it can always be recalled. It is transparent to clients
+ * whether data has actually been swapped out of memory.
  *
  * <p>{@code SwapOutputStream} and its subclasses are not thread-safe. Except for the {@link
  * #cleanup()} method all method calls need to be synchronized using a lock on the entire instance
@@ -49,12 +47,11 @@ public abstract class SwapOutputStream extends OutputStream {
   }
 
   /**
-   * Collects the data written to this instance and writes it to the specified target. You can
-   * continue writing data to the {@code SwapOutputStream} even after the data has been recalled.
-   * The {@code SwapOutputStream} tacitly closes the output stream to the swap file (if data had to
-   * be swapped out of the internal buffer) and turns itself into a {@code BufferedOutputStream}
-   * around the specified target output stream. This method can be called only once. Subsequent
-   * calls result in an {@link IOException}.
+   * Collects the data written to this instance and writes it to the specified output stream. This
+   * method may be called only once. Subsequent calls result in an {@link IOException}. You can
+   * still write data to the {@code SwapOutputStream} after having called this method. The {@code
+   * SwapOutputStream} tacitly closes the output stream to the swap file (if it had to be created)
+   * and turns itself into a {@code BufferedOutputStream} around the specified output stream.
    *
    * @param target The output stream to which to write the data
    * @throws IOException If you call this method more than once or if an I/O error occurs

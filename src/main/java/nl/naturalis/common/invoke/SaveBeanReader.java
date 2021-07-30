@@ -1,10 +1,5 @@
 package nl.naturalis.common.invoke;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import nl.naturalis.common.ExceptionMethods;
-import nl.naturalis.common.check.Check;
 import static java.lang.Character.toUpperCase;
 import static nl.naturalis.common.check.CommonChecks.empty;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
@@ -12,6 +7,12 @@ import static nl.naturalis.common.check.CommonChecks.keyIn;
 import static nl.naturalis.common.check.CommonChecks.sameAs;
 import static nl.naturalis.common.invoke.InvokeException.typeMismatch;
 import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import nl.naturalis.common.ExceptionMethods;
+import nl.naturalis.common.check.Check;
 
 /**
  * A bean reader that does not use reflection at all in order to read properties off JavaBeans. This
@@ -140,13 +141,14 @@ public class SaveBeanReader<T> {
    * @return Its value
    * @throws NoSuchPropertyException If the specified property does not exist
    */
+  @SuppressWarnings("unchecked")
   public <U> U read(T bean, String property) throws NoSuchPropertyException {
     Check.notNull(bean, "bean");
     Check.notNull(property, "property");
     Check.on(s -> typeMismatch(this, bean), bean).is(instanceOf(), beanClass);
     Check.on(s -> noSuchProperty(bean, property), property).is(keyIn(), getters);
     try {
-      return (U) getters.get(property).getMethod().invoke(bean);
+      return (U) getters.get(property).read(bean);
     } catch (Throwable t) {
       throw ExceptionMethods.uncheck(t);
     }

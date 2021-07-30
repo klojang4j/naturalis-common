@@ -1,5 +1,9 @@
 package nl.naturalis.common.io;
 
+import static nl.naturalis.common.check.CommonChecks.equalTo;
+import static nl.naturalis.common.check.CommonChecks.keyIn;
+import static nl.naturalis.common.check.CommonChecks.notNull;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
@@ -9,9 +13,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import nl.naturalis.common.Tuple;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.equalTo;
-import static nl.naturalis.common.check.CommonChecks.keyIn;
-import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
  * An alternative to {@link ZipOutputStream} that lets you write multiple zip entries at the same

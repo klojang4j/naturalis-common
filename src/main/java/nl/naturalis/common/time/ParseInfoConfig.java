@@ -1,20 +1,5 @@
 package nl.naturalis.common.time;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.ResolverStyle;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAccessor;
-import java.time.temporal.TemporalQuery;
-import java.util.*;
-import java.util.function.UnaryOperator;
-import nl.naturalis.common.ClassMethods;
-import nl.naturalis.common.ExceptionMethods;
-import nl.naturalis.common.check.Check;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 import static nl.naturalis.common.StringMethods.ifBlank;
@@ -26,6 +11,31 @@ import static nl.naturalis.common.time.FuzzyDateException.cannotCreateFilter;
 import static nl.naturalis.common.time.FuzzyDateException.cannotCreateFormatter;
 import static nl.naturalis.common.time.FuzzyDateException.noSuchResolverStyle;
 import static nl.naturalis.common.time.FuzzyDateException.unsupportedDateTimeClass;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.ResolverStyle;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalQuery;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.function.UnaryOperator;
+import nl.naturalis.common.ClassMethods;
+import nl.naturalis.common.ExceptionMethods;
+import nl.naturalis.common.check.Check;
 
 /**
  * An extension of {@link Properties} dedicated to reading configurations for the {@link

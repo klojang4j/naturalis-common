@@ -1,10 +1,11 @@
 package nl.naturalis.common.check;
 
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+
 import java.lang.reflect.Array;
 import java.util.function.Function;
 import org.junit.Test;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
 
 @SuppressWarnings("rawtypes")
 public class CommonGettersTest {

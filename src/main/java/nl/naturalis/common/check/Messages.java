@@ -1,5 +1,12 @@
 package nl.naturalis.common.check;
 
+import static java.lang.String.format;
+import static nl.naturalis.common.ArrayMethods.asArray;
+import static nl.naturalis.common.ClassMethods.getPrettyClassName;
+import static nl.naturalis.common.ClassMethods.getPrettySimpleClassName;
+import static nl.naturalis.common.StringMethods.concat;
+import static nl.naturalis.common.check.CommonChecks.MESSAGE_PATTERNS;
+
 import java.io.File;
 import java.util.Collection;
 import java.util.function.IntPredicate;
@@ -11,12 +18,6 @@ import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
-import static java.lang.String.format;
-import static nl.naturalis.common.ArrayMethods.asArray;
-import static nl.naturalis.common.ClassMethods.prettyClassName;
-import static nl.naturalis.common.ClassMethods.prettySimpleClassName;
-import static nl.naturalis.common.StringMethods.concat;
-import static nl.naturalis.common.check.CommonChecks.MESSAGE_PATTERNS;
 
 @SuppressWarnings({"rawtypes"})
 class Messages {
@@ -139,7 +140,7 @@ class Messages {
         return format("%s must not be an integer (was %s)", md.argName(), md.argument());
       }
       String fmt = "%s must be an integer (was %s)";
-      return format(fmt, md.argName(), md.argument(), prettyClassName(md.argument()));
+      return format(fmt, md.argName(), md.argument(), getPrettyClassName(md.argument()));
     };
   }
 
@@ -179,12 +180,12 @@ class Messages {
     return md -> {
       if (md.negated()) {
         String fmt = "%s must not be %s";
-        String id0 = prettyClassName(md.object()) + '@' + System.identityHashCode(md.object());
+        String id0 = getPrettyClassName(md.object()) + '@' + System.identityHashCode(md.object());
         return format(fmt, md.argName(), id0);
       }
       String fmt = "%s must be %s (was %s)";
-      String id0 = prettyClassName(md.object()) + '@' + System.identityHashCode(md.object());
-      String id1 = prettyClassName(md.argument()) + '@' + System.identityHashCode(md.argument());
+      String id0 = getPrettyClassName(md.object()) + '@' + System.identityHashCode(md.object());
+      String id1 = getPrettyClassName(md.argument()) + '@' + System.identityHashCode(md.argument());
       return format(fmt, md.argName(), id0, id1);
     };
   }
@@ -587,11 +588,11 @@ class Messages {
     return md -> {
       if (md.negated()) {
         String fmt = "%s must not be instance of %s";
-        return format(fmt, md.argName(), prettyClassName(md.object()));
+        return format(fmt, md.argName(), getPrettyClassName(md.object()));
       }
       String fmt = "%s must be instance of %s (was %s)";
-      String cn0 = prettyClassName(md.object());
-      String cn1 = prettyClassName(md.argument());
+      String cn0 = getPrettyClassName(md.object());
+      String cn1 = getPrettyClassName(md.argument());
       return format(fmt, md.argName(), cn0, cn1);
     };
   }
@@ -600,10 +601,10 @@ class Messages {
     return md -> {
       if (md.negated()) {
         String fmt = "%s must not be an array (was %s)";
-        return format(fmt, md.argName(), prettyClassName(md.argument()));
+        return format(fmt, md.argName(), getPrettyClassName(md.argument()));
       }
       String fmt = "%s must be an array (was %s)";
-      return format(fmt, md.argName(), prettyClassName(md.argument()));
+      return format(fmt, md.argName(), getPrettyClassName(md.argument()));
     };
   }
 
@@ -634,7 +635,7 @@ class Messages {
     } else if (val instanceof Collection) {
       Collection c = (Collection) val;
       return concat(
-          prettySimpleClassName(val),
+          getPrettySimpleClassName(val),
           "[",
           c.size(),
           "]@ [",
@@ -644,7 +645,7 @@ class Messages {
     } else if (val.getClass().isArray()) {
       Object[] a = asArray(val);
       return concat(
-          prettySimpleClassName(val),
+          getPrettySimpleClassName(val),
           "[",
           a.length,
           "]@ [",
@@ -659,6 +660,6 @@ class Messages {
       } catch (Exception e) {
       }
     }
-    return prettySimpleClassName(val) + '@' + System.identityHashCode(val);
+    return getPrettySimpleClassName(val) + '@' + System.identityHashCode(val);
   }
 }

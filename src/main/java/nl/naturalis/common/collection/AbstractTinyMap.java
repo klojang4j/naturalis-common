@@ -1,14 +1,15 @@
 package nl.naturalis.common.collection;
 
+import static java.util.stream.Collectors.toUnmodifiableSet;
+import static nl.naturalis.common.check.CommonChecks.index;
+import static nl.naturalis.common.check.CommonChecks.ne;
+import static nl.naturalis.common.check.CommonChecks.positive;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import nl.naturalis.common.check.Check;
-import static java.util.stream.Collectors.toUnmodifiableSet;
-import static nl.naturalis.common.check.CommonChecks.index;
-import static nl.naturalis.common.check.CommonChecks.ne;
-import static nl.naturalis.common.check.CommonChecks.positive;
 
 abstract class AbstractTinyMap<K, V> implements Map<K, V> {
 

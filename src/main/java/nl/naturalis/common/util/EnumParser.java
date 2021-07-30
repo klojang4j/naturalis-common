@@ -1,15 +1,16 @@
 package nl.naturalis.common.util;
 
+import static nl.naturalis.common.check.CommonChecks.between;
+import static nl.naturalis.common.check.CommonChecks.containingKey;
+import static nl.naturalis.common.check.CommonChecks.keyIn;
+import static nl.naturalis.common.check.CommonChecks.notNull;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.collection.IntList;
-import static nl.naturalis.common.check.CommonChecks.between;
-import static nl.naturalis.common.check.CommonChecks.containingKey;
-import static nl.naturalis.common.check.CommonChecks.keyIn;
-import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
  * Parses strings into enum constants. Internally {@code EnumParser} maintains a string-to-enum map

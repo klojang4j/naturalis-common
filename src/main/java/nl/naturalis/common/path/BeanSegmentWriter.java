@@ -1,11 +1,12 @@
 package nl.naturalis.common.path;
 
-import java.util.function.Function;
-import nl.naturalis.common.invoke.BeanWriter;
-import nl.naturalis.common.path.PathWalker.DeadEndAction;
 import static nl.naturalis.common.StringMethods.isEmpty;
 import static nl.naturalis.common.path.PathWalkerException.emptySegment;
 import static nl.naturalis.common.path.PathWalkerException.wrap;
+
+import java.util.function.Function;
+import nl.naturalis.common.invoke.BeanWriter;
+import nl.naturalis.common.path.PathWalker.DeadEndAction;
 
 class BeanSegmentWriter<T> extends SegmentWriter<T> {
 

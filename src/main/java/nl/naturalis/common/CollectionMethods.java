@@ -1,22 +1,41 @@
 package nl.naturalis.common;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toUnmodifiableList;
+import static java.util.stream.Collectors.toUnmodifiableSet;
+import static nl.naturalis.common.ArrayMethods.END_INDEX;
+import static nl.naturalis.common.ArrayMethods.START_INDEX;
+import static nl.naturalis.common.check.CommonChecks.empty;
+import static nl.naturalis.common.check.CommonChecks.eq;
+import static nl.naturalis.common.check.CommonChecks.even;
+import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonChecks.lte;
+import static nl.naturalis.common.check.CommonChecks.neverNull;
+import static nl.naturalis.common.check.CommonChecks.notNull;
+import static nl.naturalis.common.check.CommonChecks.validToIndex;
+import static nl.naturalis.common.check.CommonGetters.length;
+import static nl.naturalis.common.check.CommonGetters.mapSize;
+
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.collection.UnsafeList;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.*;
-import static nl.naturalis.common.ArrayMethods.END_INDEX;
-import static nl.naturalis.common.ArrayMethods.START_INDEX;
-import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.check.CommonGetters.length;
-import static nl.naturalis.common.check.CommonGetters.mapSize;
 
 /** Methods extending the Java Collection framework. */
 public class CollectionMethods {
@@ -543,9 +562,7 @@ public class CollectionMethods {
   public static <K, V, W> Map<K, W> convertAndFreeze(
       Map<K, V> source, Function<? super V, ? extends W> converter) {
     return Map.ofEntries(
-        source
-            .entrySet()
-            .stream()
+        source.entrySet().stream()
             .map(e -> Map.entry(e.getKey(), converter.apply(e.getValue())))
             .toArray(Map.Entry[]::new));
   }

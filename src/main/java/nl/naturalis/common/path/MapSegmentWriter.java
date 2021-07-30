@@ -1,9 +1,10 @@
 package nl.naturalis.common.path;
 
+import static nl.naturalis.common.path.PathWalkerException.invalidType;
+
 import java.util.Map;
 import java.util.function.Function;
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
-import static nl.naturalis.common.path.PathWalkerException.invalidType;
 
 @SuppressWarnings("rawtypes")
 class MapSegmentWriter extends SegmentWriter<Map> {

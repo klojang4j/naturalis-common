@@ -1,5 +1,12 @@
 package nl.naturalis.common.path;
 
+import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
+import static nl.naturalis.common.check.CommonChecks.gt;
+import static nl.naturalis.common.path.PathWalker.DEAD_END;
+import static nl.naturalis.common.path.PathWalkerException.cannotWrite;
+import static nl.naturalis.common.path.PathWalkerException.cannotWriteToDeadEnd;
+import static nl.naturalis.common.path.PathWalkerException.cannotWriteToNullObject;
+
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
@@ -9,10 +16,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
-import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
-import static nl.naturalis.common.check.CommonChecks.gt;
-import static nl.naturalis.common.path.PathWalkerException.*;
-import static nl.naturalis.common.path.PathWalker.*;
 
 @SuppressWarnings("rawtypes")
 class ObjectWriter {

@@ -1,11 +1,12 @@
 package nl.naturalis.common.collection;
 
+import static nl.naturalis.common.check.CommonChecks.notNull;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
  * A {@code Map} extension that returns a non-null value for a type if either the type itself or any

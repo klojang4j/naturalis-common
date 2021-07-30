@@ -1,14 +1,15 @@
 package nl.naturalis.common.check;
 
+import static nl.naturalis.common.ArrayMethods.isOneOf;
+import static nl.naturalis.common.check.InvalidCheckException.notApplicable;
+import static nl.naturalis.common.check.Messages.createMessage;
+
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import nl.naturalis.common.NumberMethods;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
-import static nl.naturalis.common.ArrayMethods.isOneOf;
-import static nl.naturalis.common.check.InvalidCheckException.notApplicable;
-import static nl.naturalis.common.check.Messages.createMessage;
 
 class ObjectCheck<T, E extends Exception> extends Check<T, E> {
 

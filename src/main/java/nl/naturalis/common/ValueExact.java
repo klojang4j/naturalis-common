@@ -1,12 +1,13 @@
 package nl.naturalis.common;
 
+import static java.lang.invoke.MethodHandles.lookup;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
-import static java.lang.invoke.MethodHandles.lookup;
 
 class ValueExact {
 

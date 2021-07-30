@@ -2,7 +2,11 @@ package nl.naturalis.common;
 
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.function.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.IntPredicate;
+import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 
 /** Methods assisting in functional programming */
 public class FunctionalMethods {

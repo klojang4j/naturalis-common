@@ -1,8 +1,9 @@
 package nl.naturalis.common.invoke;
 
+import static org.junit.Assert.assertEquals;
+
 import java.time.LocalDate;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
 
 public class SaveBeanReaderTest {
   @Test

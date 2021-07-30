@@ -1,13 +1,14 @@
 package nl.naturalis.common.util;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static nl.naturalis.common.util.EnvManager.EmptyValue.DEFAULT;
 import static nl.naturalis.common.util.EnvManager.EmptyValue.EMPTY;
 import static nl.naturalis.common.util.EnvManager.EmptyValue.UNDEFINED;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.HashMap;
+import java.util.Map;
+import org.junit.Test;
 
 public class EnvManagerTest {
 

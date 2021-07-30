@@ -1,5 +1,10 @@
 package nl.naturalis.common.collection;
 
+import static nl.naturalis.common.check.CommonChecks.GT;
+import static nl.naturalis.common.check.CommonChecks.gt;
+import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonChecks.lt;
+
 import java.util.Arrays;
 import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
@@ -7,10 +12,6 @@ import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.ThrowingIntConsumer;
 import nl.naturalis.common.util.AugmentationType;
-import static nl.naturalis.common.check.CommonChecks.GT;
-import static nl.naturalis.common.check.CommonChecks.gt;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.lt;
 
 /**
  * A {@code List} of {@code int} values. The backing array is exposed via the {@link #toArray()}

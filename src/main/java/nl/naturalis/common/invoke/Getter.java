@@ -2,7 +2,6 @@ package nl.naturalis.common.invoke;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Method;
-import java.util.Objects;
 import nl.naturalis.common.ExceptionMethods;
 import static java.lang.invoke.MethodHandles.lookup;
 import static java.lang.invoke.MethodType.methodType;
@@ -34,10 +33,6 @@ public class Getter {
     }
   }
 
-  public MethodHandle getMethod() {
-    return method;
-  }
-
   public String getProperty() {
     return property;
   }
@@ -46,21 +41,7 @@ public class Getter {
     return returnType;
   }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(method, returnType);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    } else if (obj == null) {
-      return false;
-    } else if (getClass() != obj.getClass()) {
-      return false;
-    }
-    Getter other = (Getter) obj;
-    return method == other.method && returnType == other.returnType;
+  public Object read(Object bean) throws Throwable {
+    return method.invoke(bean);
   }
 }

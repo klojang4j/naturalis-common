@@ -1,5 +1,11 @@
 package nl.naturalis.common.path;
 
+import static nl.naturalis.common.check.CommonChecks.empty;
+import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonChecks.neverNull;
+import static nl.naturalis.common.check.CommonGetters.length;
+import static nl.naturalis.common.path.PathWalker.DeadEndAction.RETURN_NULL;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -7,11 +13,6 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.invoke.NoSuchPropertyException;
-import static nl.naturalis.common.check.CommonChecks.empty;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.neverNull;
-import static nl.naturalis.common.check.CommonGetters.length;
-import static nl.naturalis.common.path.PathWalker.DeadEndAction.RETURN_NULL;
 
 /**
  * Reads/writes objects using {@link Path} objects. The {@code PathWalker} class is useful for

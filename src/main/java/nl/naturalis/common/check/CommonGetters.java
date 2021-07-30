@@ -1,11 +1,17 @@
 package nl.naturalis.common.check;
 
+import static nl.naturalis.common.ObjectMethods.ifNotNull;
+
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import nl.naturalis.common.NumberMethods;
-import static nl.naturalis.common.ObjectMethods.ifNotNull;
 
 /**
  * Defines various functions that retrieve some oft-used property of a well-known class. For

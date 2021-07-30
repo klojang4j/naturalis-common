@@ -1,8 +1,9 @@
 package nl.naturalis.common.util;
 
-import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.GTE;
 import static nl.naturalis.common.check.CommonChecks.LTE;
+
+import nl.naturalis.common.check.Check;
 
 /**
  * Defines ways to increment a number.

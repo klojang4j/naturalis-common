@@ -1,5 +1,9 @@
 package nl.naturalis.common.invoke;
 
+import static java.lang.System.identityHashCode;
+import static nl.naturalis.common.check.CommonChecks.keyIn;
+import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
+
 import java.lang.invoke.MethodHandle;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -7,9 +11,6 @@ import java.util.Map.Entry;
 import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
-import static java.lang.System.identityHashCode;
-import static nl.naturalis.common.check.CommonChecks.keyIn;
-import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 
 /**
  * Reads properties of any type of bean. This makes {@code AnyBeanReader} easier to use than the
@@ -109,11 +110,12 @@ public class AnyBeanReader {
     return doRead(bean, property);
   }
 
+  @SuppressWarnings("unchecked")
   private <U> U doRead(Object bean, String prop) {
     Map<String, Getter> getters = GetterFactory.INSTANCE.getGetters(bean.getClass(), strict);
     Check.on(x -> noSuchProperty(bean, prop), prop).is(keyIn(), getters);
     try {
-      return (U) getters.get(prop).getMethod().invoke(bean);
+      return (U) getters.get(prop).read(bean);
     } catch (Throwable exc) {
       throw ExceptionMethods.uncheck(exc);
     }

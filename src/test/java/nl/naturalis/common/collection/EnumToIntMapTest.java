@@ -1,13 +1,18 @@
 package nl.naturalis.common.collection;
 
+import static nl.naturalis.common.collection.EnumToIntMapTest.TestEnum.BLACK;
+import static nl.naturalis.common.collection.EnumToIntMapTest.TestEnum.BLUE;
+import static nl.naturalis.common.collection.EnumToIntMapTest.TestEnum.GREEN;
+import static nl.naturalis.common.collection.EnumToIntMapTest.TestEnum.ORANGE;
+import static nl.naturalis.common.collection.EnumToIntMapTest.TestEnum.RED;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static nl.naturalis.common.collection.EnumToIntMapTest.TestEnum.*;
 
 public class EnumToIntMapTest {
 

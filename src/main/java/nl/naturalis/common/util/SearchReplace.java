@@ -1,7 +1,17 @@
 package nl.naturalis.common.util;
 
+import static nl.naturalis.common.ArrayMethods.inArray;
+import static nl.naturalis.common.StringMethods.endsWith;
+import static nl.naturalis.common.check.CommonChecks.directory;
+import static nl.naturalis.common.check.CommonChecks.neverNull;
+import static nl.naturalis.common.check.CommonChecks.yes;
+
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.List;
@@ -11,11 +21,6 @@ import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.IOMethods;
 import nl.naturalis.common.StringMethods;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.ArrayMethods.inArray;
-import static nl.naturalis.common.StringMethods.endsWith;
-import static nl.naturalis.common.check.CommonChecks.directory;
-import static nl.naturalis.common.check.CommonChecks.neverNull;
-import static nl.naturalis.common.check.CommonChecks.yes;
 
 /**
  * Global search-and-replace utility that can be used stand-alone (it has a main method) or from

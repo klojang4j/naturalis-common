@@ -1,22 +1,31 @@
 package nl.naturalis.common.collection;
 
+import static nl.naturalis.common.check.CommonChecks.gte;
+
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.RandomAccess;
 import java.util.stream.Stream;
 import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.gte;
 
 /**
  * A fixed-size, mutable {@code List} implementation that does not perform range checking and
- * exposes its backing array. Useful for in-method, package-private and/or intra-modular list
- * exchanges with a high number if reads and/or writes on the list. Since this is a fixed-size list,
- * you can immediately get and set values, provided you specify a valid list index. All {@code add}
- * methods throw an {@code UnsupportedOperationException}. List manipulation must be done the {@code
- * set} method. The {@code remove} methods, however, have repurposed to nullify list elements.
+ * exposes its backing array. Useful for package-private and/or intra-modular list exchanges with a
+ * high number if reads and/or writes on the list. Since this is a fixed-size list, you can
+ * immediately {@code get} and {@code set} values, provided you specify a valid list index. All
+ * {@code add} methods throw an {@code UnsupportedOperationException}; list manipulation must be
+ * done via the {@code set} method. The {@code remove} methods, however, have been repurposed to
+ * nullify list elements.
  *
+ * @param <E> The type of the list elements
  * @author Ayco Holleman
- * @param <E>
  */
 public class UnsafeList<E> implements List<E>, RandomAccess {
 
@@ -125,7 +134,12 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
     };
   }
 
-  /** Repurposed to nullify the element at the specified index. */
+  /**
+   * Repurposed to nullify the element at the specified index. Note, however, that this method will
+   * throw an {@link UnsupportedOperationException} if the type parameter for this {@UnsafeList} is
+   * {@code Integer}, because Java's auto-boxing/auto-unboxing would make the method
+   * indistinguishable from {@code remove(Object o)}.
+   */
   @Override
   public E remove(int index) {
     if (size() == 0) {
@@ -142,7 +156,12 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
     return e;
   }
 
-  /** Repurposed to nullify the first list element that equals specified object. */
+  /**
+   * Repurposed to nullify the first list element that equals specified object. Note, however, that
+   * this method will throw an {@link UnsupportedOperationException} if the type parameter for this
+   * {@UnsafeList} is {@code Integer}, because Java's auto-boxing/auto-unboxing would make the
+   * method indistinguishable from {@code remove(int index)}.
+   */
   @Override
   public boolean remove(Object o) {
     if (size() == 0) {
@@ -244,8 +263,12 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
   @Override
   @SuppressWarnings("rawtypes")
   public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
     if (obj.getClass() == UnsafeList.class) {
       return Arrays.deepEquals(data, ((UnsafeList) obj).data);
     } else if (obj instanceof List) {

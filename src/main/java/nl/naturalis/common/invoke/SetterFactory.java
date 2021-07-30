@@ -20,8 +20,8 @@ public class SetterFactory {
     if (info == null) {
       info = new HashMap<>();
       for (Method m : ClassMethods.geSetters(beanClass)) {
-        String property = ClassMethods.getPropertyNameFromSetter(m);
-        info.put(property, new Setter(m));
+        String prop = ClassMethods.getPropertyNameFromSetter(m);
+        info.put(prop, new Setter(m, prop));
       }
       cache.put(beanClass, Map.copyOf(info));
     }

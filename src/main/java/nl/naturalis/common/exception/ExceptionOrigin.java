@@ -1,11 +1,12 @@
 package nl.naturalis.common.exception;
 
-import nl.naturalis.common.ExceptionMethods;
-import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ObjectMethods.isEmpty;
 import static nl.naturalis.common.ObjectMethods.isNotEmpty;
 import static nl.naturalis.common.StringMethods.append;
 import static nl.naturalis.common.StringMethods.rtrim;
+
+import nl.naturalis.common.ExceptionMethods;
+import nl.naturalis.common.check.Check;
 
 /**
  * Provides detailed information about the origin of an exception. Useful for tracing back an

@@ -1,9 +1,10 @@
 package nl.naturalis.common.io;
 
-import org.junit.Test;
-import nl.naturalis.common.util.AugmentationType;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+
+import nl.naturalis.common.util.AugmentationType;
+import org.junit.Test;
 
 public class ExposedByteArrayOutputStreamTest {
   @Test

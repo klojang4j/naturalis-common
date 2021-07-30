@@ -1,11 +1,12 @@
 package nl.naturalis.common.exception;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
 import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.StringMethods;
 import nl.naturalis.common.path.Path;
-import static org.junit.Assert.assertEquals;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class ExceptionOriginTest {
 

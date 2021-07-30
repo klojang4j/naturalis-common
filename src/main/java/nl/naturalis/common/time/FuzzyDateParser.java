@@ -1,5 +1,11 @@
 package nl.naturalis.common.time;
 
+import static java.time.temporal.ChronoField.YEAR;
+import static nl.naturalis.common.ObjectMethods.ifNotNull;
+import static nl.naturalis.common.ObjectMethods.isEmpty;
+import static nl.naturalis.common.check.CommonChecks.empty;
+import static nl.naturalis.common.check.CommonChecks.neverNull;
+
 import java.io.InputStream;
 import java.time.DateTimeException;
 import java.time.Instant;
@@ -9,11 +15,6 @@ import java.time.temporal.TemporalQuery;
 import java.util.List;
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
-import static java.time.temporal.ChronoField.YEAR;
-import static nl.naturalis.common.ObjectMethods.ifNotNull;
-import static nl.naturalis.common.ObjectMethods.isEmpty;
-import static nl.naturalis.common.check.CommonChecks.empty;
-import static nl.naturalis.common.check.CommonChecks.neverNull;
 
 /**
  * Parses date strings into {@link FuzzyDate} instances. The minimum requirement for a valid date

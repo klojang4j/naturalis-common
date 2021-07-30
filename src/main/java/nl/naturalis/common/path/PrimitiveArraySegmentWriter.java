@@ -1,11 +1,12 @@
 package nl.naturalis.common.path;
 
-import java.lang.reflect.Array;
-import java.util.function.Function;
-import nl.naturalis.common.path.PathWalker.DeadEndAction;
 import static nl.naturalis.common.path.PathWalkerException.arrayIndexExpected;
 import static nl.naturalis.common.path.PathWalkerException.arrayIndexOutOfBounds;
 import static nl.naturalis.common.path.PathWalkerException.nullInvalidForPrimitiveArray;
+
+import java.lang.reflect.Array;
+import java.util.function.Function;
+import nl.naturalis.common.path.PathWalker.DeadEndAction;
 
 class PrimitiveArraySegmentWriter extends SegmentWriter<Object> {
 

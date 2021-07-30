@@ -1,8 +1,9 @@
 package nl.naturalis.common;
 
+import static nl.naturalis.common.check.CommonChecks.notNull;
+
 import java.math.BigDecimal;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.notNull;
 
 class NumberParser<T extends Number> {
 

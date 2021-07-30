@@ -1,9 +1,10 @@
 package nl.naturalis.common.exception;
 
+import static nl.naturalis.common.ExceptionMethods.getRootCause;
+
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import nl.naturalis.common.ExceptionMethods;
-import static nl.naturalis.common.ExceptionMethods.getRootCause;
 
 /**
  * A subclass of {@code RuntimeException} that behaves just like the root cause of the exception it

@@ -1,14 +1,16 @@
 package nl.naturalis.common.invoke;
 
+import static nl.naturalis.common.check.CommonChecks.empty;
+import static nl.naturalis.common.check.CommonChecks.yes;
+import static nl.naturalis.common.invoke.InvokeException.noPublicGetters;
+import static nl.naturalis.common.invoke.InvokeException.notPublic;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.empty;
-import static nl.naturalis.common.check.CommonChecks.yes;
-import static nl.naturalis.common.invoke.InvokeException.*;
 
 public class GetterFactory {
 

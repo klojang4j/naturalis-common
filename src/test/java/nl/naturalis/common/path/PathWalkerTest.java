@@ -1,5 +1,12 @@
 package nl.naturalis.common.path;
 
+import static nl.naturalis.common.CollectionMethods.newHashMap;
+import static nl.naturalis.common.path.PathWalker.DeadEndAction.RETURN_DEAD_END;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -7,14 +14,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.Test;
 import nl.naturalis.common.ExceptionMethods;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static nl.naturalis.common.CollectionMethods.newHashMap;
-import static nl.naturalis.common.path.PathWalker.DeadEndAction.RETURN_DEAD_END;
+import org.junit.Test;
 
 public class PathWalkerTest {
 

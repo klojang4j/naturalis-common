@@ -1,17 +1,25 @@
 package nl.naturalis.common;
 
+import static nl.naturalis.common.ArrayMethods.END_INDEX;
+import static nl.naturalis.common.ArrayMethods.START_INDEX;
+import static nl.naturalis.common.ObjectMethods.ifNotNull;
+import static nl.naturalis.common.ObjectMethods.ifNull;
+import static nl.naturalis.common.ObjectMethods.ifTrue;
+import static nl.naturalis.common.check.CommonChecks.GTE;
+import static nl.naturalis.common.check.CommonChecks.deepNotEmpty;
+import static nl.naturalis.common.check.CommonChecks.empty;
+import static nl.naturalis.common.check.CommonChecks.gt;
+import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonChecks.lt;
+import static nl.naturalis.common.check.CommonChecks.lte;
+import static nl.naturalis.common.check.CommonChecks.neverNull;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.ArrayMethods.END_INDEX;
-import static nl.naturalis.common.ArrayMethods.START_INDEX;
-import static nl.naturalis.common.ObjectMethods.ifNotNull;
-import static nl.naturalis.common.ObjectMethods.ifNull;
-import static nl.naturalis.common.ObjectMethods.ifTrue;
-import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * Methods for working with strings. Most methods are friendly towards batch-wise print jobs, trying

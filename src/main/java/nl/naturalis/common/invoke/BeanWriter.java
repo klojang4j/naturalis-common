@@ -7,7 +7,7 @@ import java.util.Set;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
 import static nl.naturalis.common.check.CommonChecks.neverNull;
-import static nl.naturalis.common.check.CommonChecks.notNull;
+import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 
 /**
  * A bean writer class that uses the {@code java.lang.invoke} package in stead of reflection to set
@@ -78,9 +78,8 @@ public class BeanWriter<T> {
   public void set(T bean, String property, Object value) throws Throwable {
     Check.notNull(bean, "bean");
     Check.notNull(property, "property");
-    Check.on(NoSuchPropertyException::new, property).is(keyIn(), setters, property);
+    Check.on(s -> noSuchProperty(bean, property), property).is(keyIn(), setters);
     Setter setter = setters.get(property);
-    Check.on(NoSuchPropertyException::new, setter).is(notNull(), property);
-    setter.getMethod().invoke(bean, value);
+    setter.write(bean, value);
   }
 }

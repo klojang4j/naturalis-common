@@ -1,21 +1,26 @@
 package nl.naturalis.common.io;
 
+import static nl.naturalis.common.check.CommonChecks.GT;
+import static nl.naturalis.common.check.CommonChecks.LTE;
+import static nl.naturalis.common.check.CommonChecks.gt;
+import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonChecks.lte;
+import static nl.naturalis.common.check.CommonGetters.length;
+import static nl.naturalis.common.util.AugmentationType.MULTIPLY;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.util.AugmentationType;
-import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.check.CommonGetters.length;
-import static nl.naturalis.common.util.AugmentationType.MULTIPLY;
 
 /**
  * An output stream in which the data is written into a byte array. The buffer automatically grows
  * as data is written to it. Contrary to Java's own {@link ByteArrayOutputStream}, the internal byte
  * array is exposed to the client: calling {@link #toByteArray()} returns the byte array rather than
  * a copy of it. Note, however, that you must therefore use {@link #toByteArray()} in combination
- * with the {@link #byteCount()} method to extracte the "live" bytes - e.g <code>
+ * with the {@link #byteCount()} method to extract the "live" bytes - e.g <code>
  * new String(out.toArray(), 0, out.count())</code>.
  *
  * <p>This class also lets you specify how to increase the size of the byte array once it reaches
@@ -153,7 +158,8 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
 
   /**
    * Returns the backing array for this instance (not a copy of it). Note that you must use this
-   * method <i>in combination with</i>the {@link #byteCount()} method to retrieve the valid bytes only.
+   * method <i>in combination with</i>the {@link #byteCount()} method to retrieve the valid bytes
+   * only.
    *
    * @return
    */

@@ -1,15 +1,22 @@
 package nl.naturalis.common.check;
 
+import static nl.naturalis.common.check.CommonChecks.GT;
+import static nl.naturalis.common.check.CommonChecks.GTE;
+import static nl.naturalis.common.check.CommonChecks.containing;
+import static nl.naturalis.common.check.CommonChecks.eq;
+import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonChecks.in;
+import static nl.naturalis.common.check.CommonChecks.instanceOf;
+import static nl.naturalis.common.check.CommonGetters.size;
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import nl.naturalis.common.ClassMethods;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import nl.naturalis.common.ClassMethods;
-import static org.junit.Assert.assertEquals;
-import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.check.CommonGetters.size;
 
 /*
  * These tests are especially meant to verify that the IdentityHashMap in Messages works as intended

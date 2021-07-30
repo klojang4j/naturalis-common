@@ -1,16 +1,17 @@
 package nl.naturalis.common.invoke;
 
+import static nl.naturalis.common.check.CommonChecks.instanceOf;
+import static nl.naturalis.common.check.CommonChecks.keyIn;
+import static nl.naturalis.common.check.CommonChecks.neverNull;
+import static nl.naturalis.common.invoke.InvokeException.typeMismatch;
+import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.instanceOf;
-import static nl.naturalis.common.check.CommonChecks.keyIn;
-import static nl.naturalis.common.check.CommonChecks.neverNull;
-import static nl.naturalis.common.invoke.InvokeException.typeMismatch;
-import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 
 /**
  * Reads properties from a predetermined type of JavaBean. This class uses the {@code
@@ -100,13 +101,14 @@ public class BeanReader<T> {
    * @return Its value
    * @throws NoSuchPropertyException If the specified property does not exist
    */
+  @SuppressWarnings("unchecked")
   public <U> U read(T bean, String property) throws NoSuchPropertyException {
     Check.notNull(bean, "bean");
     Check.notNull(property, "property");
     Check.on(s -> typeMismatch(this, bean), bean).is(instanceOf(), beanClass);
     Check.on(s -> noSuchProperty(bean, property), property).is(keyIn(), getters);
     try {
-      return (U) getters.get(property).getMethod().invoke(bean);
+      return (U) getters.get(property).read(bean);
     } catch (Throwable t) {
       throw ExceptionMethods.uncheck(t);
     }

@@ -1,9 +1,13 @@
 package nl.naturalis.common.path;
 
+import static nl.naturalis.common.StringMethods.isEmpty;
+import static nl.naturalis.common.path.PathWalkerException.arrayIndexExpected;
+import static nl.naturalis.common.path.PathWalkerException.arrayIndexOutOfBounds;
+import static nl.naturalis.common.path.PathWalkerException.emptySegment;
+import static nl.naturalis.common.path.PathWalkerException.invalidType;
+
 import java.util.function.Function;
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
-import static nl.naturalis.common.StringMethods.isEmpty;
-import static nl.naturalis.common.path.PathWalkerException.*;
 
 class ArraySegmentWriter extends SegmentWriter<Object[]> {
 

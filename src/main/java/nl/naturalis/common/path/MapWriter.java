@@ -1,12 +1,13 @@
 package nl.naturalis.common.path;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.check.CommonChecks.empty;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 import static nl.naturalis.common.path.Path.EMPTY_PATH;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import nl.naturalis.common.check.Check;
 
 /**
  * Provides a convenient way of writing <i>maps-within-maps</i> (<code>Map&lt;String, Object&gt;

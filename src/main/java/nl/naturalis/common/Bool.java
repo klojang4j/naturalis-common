@@ -1,6 +1,7 @@
 package nl.naturalis.common;
 
-import static java.lang.Boolean.*;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 import java.util.Set;
 import nl.naturalis.common.check.Check;
@@ -169,7 +170,7 @@ public class Bool {
   /**
    * Converts the specified {@code String} to a {@code Boolean} value.
    *
-   * @param n The argument
+   * @param s The argument
    * @return The corresponding {@code Boolean} value
    */
   public Boolean getBoolean(String s) {

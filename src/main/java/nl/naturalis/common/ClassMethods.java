@@ -1,12 +1,5 @@
 package nl.naturalis.common;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.IntStream;
-import nl.naturalis.common.check.Check;
 import static java.lang.Character.isUpperCase;
 import static java.lang.Character.toLowerCase;
 import static java.lang.reflect.Modifier.isStatic;
@@ -14,6 +7,14 @@ import static java.util.stream.Collectors.joining;
 import static nl.naturalis.common.CollectionMethods.swapUnique;
 import static nl.naturalis.common.check.CommonChecks.array;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
+import nl.naturalis.common.check.Check;
 /**
  * Methods for inspecting types.
  *
@@ -114,15 +115,22 @@ public class ClassMethods {
    * @param obj The object whose class name to return
    * @return The class name
    */
-  public static String prettyClassName(Object obj) {
+  public static String getPrettyClassName(Object obj) {
     Check.notNull(obj);
     if (obj.getClass() == Class.class) {
-      return prettyClassName((Class<?>) obj);
+      return getPrettyClassName((Class<?>) obj);
     }
-    return prettyClassName(obj.getClass());
+    return getPrettyClassName(obj.getClass());
   }
 
-  public static String prettyClassName(Class<?> clazz) {
+  /**
+   * Returns {@link #getArrayTypeName(Object)} if the argument is an array type, else {@code
+   * clazz.getName()}.
+   *
+   * @param clazz The class whose name to return
+   * @return The class name
+   */
+  public static String getPrettyClassName(Class<?> clazz) {
     Check.notNull(clazz);
     return clazz.isArray() ? getArrayTypeName(clazz) : clazz.getName();
   }
@@ -134,7 +142,7 @@ public class ClassMethods {
    * @param obj The object whose class name to return
    * @return The class name
    */
-  public static String prettySimpleClassName(Object obj) {
+  public static String getPrettySimpleClassName(Object obj) {
     Check.notNull(obj);
     if (obj.getClass() == Class.class) {
       return getSimpleClassName((Class<?>) obj);
@@ -148,19 +156,26 @@ public class ClassMethods {
   }
 
   /**
-   * Returns a friendly description of the type of the specified array. For example {@code
-   * getArrayTypeName(new String[0][0])} will return {@code java.lang.String[][]}.
+   * Returns a less arcane description of the type of the specified array. For example {@code
+   * getArrayTypeName(new String[0][0])} will return {@code java.lang.String[][]}, which is a lot
+   * friendlier than what comes back from {@code (new String[0][0]).getClass().getName()}.
    *
    * @param array The array
-   * @return The simple name of the array type
+   * @return An intuitive description of the array's type
    */
   public static String getArrayTypeName(Object array) {
     return Check.notNull(array).ok(a -> getArrayTypeName(a.getClass()));
   }
 
-  public static String getArrayTypeName(Class<?> clazz) {
-    Check.notNull(clazz).is(array());
-    Class<?> c = clazz.getComponentType();
+  /**
+   * Returns a less arcane description of the type of the specified array type.
+   *
+   * @param arrayClass The array type
+   * @return An intuitive description of the array type
+   */
+  public static String getArrayTypeName(Class<?> arrayClass) {
+    Check.notNull(arrayClass).is(array());
+    Class<?> c = arrayClass.getComponentType();
     int i = 0;
     for (; c.isArray(); c = c.getComponentType()) {
       ++i;
@@ -171,7 +186,7 @@ public class ClassMethods {
   }
 
   /**
-   * Returns a friendly description of the type of the specified array. For example {@code
+   * Returns a less arcane description of the type of the specified array. For example {@code
    * getArrayTypeName(new String[0][0])} will return {@code String[][]}.
    *
    * @param array The array
@@ -182,6 +197,12 @@ public class ClassMethods {
     return array.getClass().getComponentType().getSimpleName() + "[]";
   }
 
+  /**
+   * Returns a less arcane description of the type of the specified array type.
+   *
+   * @param arrayClass The array type
+   * @return An intuitive description of the array type
+   */
   public static String getArrayTypeSimpleName(Class<?> arrayClass) {
     Check.notNull(arrayClass).is(array());
     return arrayClass.getClass().getComponentType().getSimpleName() + "[]";
@@ -215,7 +236,7 @@ public class ClassMethods {
   }
 
   /**
-   * Returns all methods of the specified bean class than can be identified as setters.
+   * Returns all methods of the specified bean class that can be identified as setters.
    *
    * @see #getPropertyNameFromSetter(Method)
    * @param beanClass The bean class from which to extract the setter methods
@@ -300,7 +321,7 @@ public class ClassMethods {
   private static IllegalArgumentException notAProperty(Method m, boolean asGetter) {
     String fmt = "Method %s %s(%s) in class %s is not a %s";
     String rt = getSimpleClassName(m.getReturnType());
-    String clazz = prettyClassName(m.getDeclaringClass());
+    String clazz = getPrettyClassName(m.getDeclaringClass());
     String params =
         Arrays.stream(m.getParameterTypes())
             .map(ClassMethods::getSimpleClassName)

@@ -1,11 +1,5 @@
 package nl.naturalis.common.util;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalInt;
-import nl.naturalis.common.check.Check;
-import nl.naturalis.common.internal.VisibleForTesting;
 import static nl.naturalis.common.CollectionMethods.saturatedEnumMap;
 import static nl.naturalis.common.FunctionalMethods.asOptional;
 import static nl.naturalis.common.FunctionalMethods.asOptionalInt;
@@ -20,6 +14,13 @@ import static nl.naturalis.common.util.EnvManager.EmptyValue.EMPTY;
 import static nl.naturalis.common.util.EnvManager.EmptyValue.UNDEFINED;
 import static nl.naturalis.common.util.InvalidEnvironmentException.NOT_CONVERTIBLE;
 import static nl.naturalis.common.util.InvalidEnvironmentException.missingEnvVar;
+
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
+import nl.naturalis.common.check.Check;
+import nl.naturalis.common.internal.VisibleForTesting;
 /**
  * Simple utility class wrapping {@link System#getenv(String) System.getenv()}. {@code EnvManager}
  * instances come in three different flavours, according to how they read environment variables (see

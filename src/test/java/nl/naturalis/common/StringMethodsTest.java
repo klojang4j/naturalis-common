@@ -1,10 +1,26 @@
 package nl.naturalis.common;
 
-import org.junit.Test;
+import static nl.naturalis.common.StringMethods.count;
+import static nl.naturalis.common.StringMethods.countDiscrete;
+import static nl.naturalis.common.StringMethods.ellipsis;
+import static nl.naturalis.common.StringMethods.endsWith;
+import static nl.naturalis.common.StringMethods.getLineAndColumn;
+import static nl.naturalis.common.StringMethods.interval;
+import static nl.naturalis.common.StringMethods.lchop;
+import static nl.naturalis.common.StringMethods.lpad;
+import static nl.naturalis.common.StringMethods.ltrim;
+import static nl.naturalis.common.StringMethods.pad;
+import static nl.naturalis.common.StringMethods.rchop;
+import static nl.naturalis.common.StringMethods.rpad;
+import static nl.naturalis.common.StringMethods.rtrim;
+import static nl.naturalis.common.StringMethods.substrAfter;
+import static nl.naturalis.common.StringMethods.substrFrom;
+import static nl.naturalis.common.StringMethods.substring;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static nl.naturalis.common.StringMethods.*;
+
+import org.junit.Test;
 
 public class StringMethodsTest {
 

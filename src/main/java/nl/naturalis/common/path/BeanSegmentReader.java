@@ -1,11 +1,12 @@
 package nl.naturalis.common.path;
 
+import static nl.naturalis.common.path.PathWalkerException.noSuchProperty;
+import static nl.naturalis.common.path.PathWalkerException.wrap;
+
 import java.util.function.Function;
 import nl.naturalis.common.invoke.BeanReader;
 import nl.naturalis.common.invoke.NoSuchPropertyException;
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
-import static nl.naturalis.common.path.PathWalkerException.noSuchProperty;
-import static nl.naturalis.common.path.PathWalkerException.wrap;
 
 class BeanSegmentReader<T> extends SegmentReader<T> {
 

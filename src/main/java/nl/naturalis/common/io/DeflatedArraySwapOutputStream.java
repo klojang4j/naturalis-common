@@ -1,5 +1,9 @@
 package nl.naturalis.common.io;
 
+import static nl.naturalis.common.IOMethods.createTempFile;
+import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonGetters.length;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -7,9 +11,6 @@ import java.util.zip.Deflater;
 import java.util.zip.InflaterOutputStream;
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.IOMethods.createTempFile;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonGetters.length;
 
 /**
  * A {@code SwapOutputStream} that compresses the data as it enters the internal buffer. This will

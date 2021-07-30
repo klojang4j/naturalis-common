@@ -1,5 +1,12 @@
 package nl.naturalis.common.collection;
 
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
+import static nl.naturalis.common.check.CommonChecks.containingValue;
+import static nl.naturalis.common.check.CommonChecks.empty;
+import static nl.naturalis.common.check.CommonChecks.ne;
+import static nl.naturalis.common.check.CommonGetters.constants;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -9,12 +16,6 @@ import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 import nl.naturalis.common.Tuple;
 import nl.naturalis.common.check.Check;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
-import static nl.naturalis.common.check.CommonChecks.containingValue;
-import static nl.naturalis.common.check.CommonChecks.empty;
-import static nl.naturalis.common.check.CommonChecks.ne;
-import static nl.naturalis.common.check.CommonGetters.constants;
 
 /**
  * A fast enum-to-int Map implementation. The map is backed by a simple int array with the same

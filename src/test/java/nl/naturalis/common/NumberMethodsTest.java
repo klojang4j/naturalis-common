@@ -1,9 +1,10 @@
 package nl.naturalis.common;
 
-import org.junit.Test;
+import static nl.naturalis.common.NumberMethods.fitsInto;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertTrue;
-import static nl.naturalis.common.NumberMethods.*;
+
+import org.junit.Test;
 
 public class NumberMethodsTest {
 

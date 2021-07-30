@@ -1,14 +1,15 @@
 package nl.naturalis.common.check;
 
+import static java.lang.String.format;
+import static nl.naturalis.common.check.Check.DEF_ARG_NAME;
+import static nl.naturalis.common.check.CommonChecks.nameOf;
+
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
-import static java.lang.String.format;
-import static nl.naturalis.common.check.Check.DEF_ARG_NAME;
-import static nl.naturalis.common.check.CommonChecks.nameOf;
 
 /**
  * Thrown if a check on an argument cannot actually be applied to that argument, or if the check

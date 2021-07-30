@@ -1,11 +1,22 @@
 package nl.naturalis.common.check;
 
-import java.io.OutputStream;
-import java.util.function.*;
-import nl.naturalis.common.NumberMethods;
-import nl.naturalis.common.function.*;
 import static nl.naturalis.common.check.CommonGetters.formatProperty;
 import static nl.naturalis.common.check.Messages.createMessage;
+
+import java.io.OutputStream;
+import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.IntPredicate;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.function.ToIntFunction;
+import nl.naturalis.common.NumberMethods;
+import nl.naturalis.common.function.IntObjRelation;
+import nl.naturalis.common.function.IntRelation;
+import nl.naturalis.common.function.ObjIntRelation;
+import nl.naturalis.common.function.Relation;
+import nl.naturalis.common.function.ThrowingConsumer;
+import nl.naturalis.common.function.ThrowingFunction;
 
 /**
  * Facilitates precondition checking. For example:

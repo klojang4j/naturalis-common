@@ -1,12 +1,13 @@
 package nl.naturalis.common;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.StringMethods.isEmpty;
 import static nl.naturalis.common.StringMethods.isNotEmpty;
 import static nl.naturalis.common.check.CommonChecks.negative;
 import static nl.naturalis.common.check.CommonChecks.positive;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import nl.naturalis.common.check.Check;
 
 /**
  * Methods for working with {@code Number} instances.

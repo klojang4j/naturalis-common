@@ -1,15 +1,37 @@
 package nl.naturalis.common.check;
 
+import static nl.naturalis.common.check.CommonChecks.GT;
+import static nl.naturalis.common.check.CommonChecks.GTE;
+import static nl.naturalis.common.check.CommonChecks.array;
+import static nl.naturalis.common.check.CommonChecks.asInt;
+import static nl.naturalis.common.check.CommonChecks.asObj;
+import static nl.naturalis.common.check.CommonChecks.eq;
+import static nl.naturalis.common.check.CommonChecks.equalTo;
+import static nl.naturalis.common.check.CommonChecks.gt;
+import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonChecks.indexOf;
+import static nl.naturalis.common.check.CommonChecks.instanceOf;
+import static nl.naturalis.common.check.CommonChecks.lt;
+import static nl.naturalis.common.check.CommonChecks.lte;
+import static nl.naturalis.common.check.CommonChecks.ne;
+import static nl.naturalis.common.check.CommonChecks.no;
+import static nl.naturalis.common.check.CommonChecks.notNull;
+import static nl.naturalis.common.check.CommonChecks.sizeGTE;
+import static nl.naturalis.common.check.CommonChecks.yes;
+import static nl.naturalis.common.check.CommonGetters.abs;
+import static nl.naturalis.common.check.CommonGetters.length;
+import static nl.naturalis.common.check.CommonGetters.size;
+import static nl.naturalis.common.check.CommonGetters.strlen;
+import static nl.naturalis.common.check.CommonGetters.toStr;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.check.CommonGetters.*;
 
 /**
  * NB A lot of these tests don't make any assertion, but just verify that we can code them as we do

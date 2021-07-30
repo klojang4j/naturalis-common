@@ -1,13 +1,14 @@
 package nl.naturalis.common;
 
-import java.io.File;
-import java.util.Optional;
-import org.junit.Test;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
 import static nl.naturalis.common.OptionalMethods.contentsOf;
 import static nl.naturalis.common.OptionalMethods.narrow;
 import static nl.naturalis.common.OptionalMethods.widen;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+
+import java.io.File;
+import java.util.Optional;
+import org.junit.Test;
 
 public class OptionalMethodsTest {
 

@@ -1,15 +1,21 @@
 package nl.naturalis.common.io;
 
-import java.io.*;
+import static org.junit.Assert.assertArrayEquals;
+
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import nl.naturalis.common.IOMethods;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import nl.naturalis.common.IOMethods;
-import static org.junit.Assert.assertArrayEquals;
 
 public class REZipOutputStreamTest {
 

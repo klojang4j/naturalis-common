@@ -1,16 +1,25 @@
 package nl.naturalis.common.path;
 
+import static java.lang.System.arraycopy;
+import static java.util.Arrays.copyOfRange;
+import static java.util.function.Predicate.not;
+import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonChecks.illegalState;
+import static nl.naturalis.common.check.CommonChecks.lt;
+import static nl.naturalis.common.check.CommonChecks.lte;
+import static nl.naturalis.common.check.CommonChecks.ne;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import nl.naturalis.common.*;
+import nl.naturalis.common.ArrayMethods;
+import nl.naturalis.common.Emptyable;
+import nl.naturalis.common.NumberMethods;
+import nl.naturalis.common.Sizeable;
+import nl.naturalis.common.StringMethods;
 import nl.naturalis.common.check.Check;
-import static java.lang.System.arraycopy;
-import static java.util.Arrays.copyOfRange;
-import static java.util.function.Predicate.not;
-import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * Specifies a path to a value within an object. Path segments are separated by '.' (dot). For

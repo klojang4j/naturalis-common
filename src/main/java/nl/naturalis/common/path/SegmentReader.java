@@ -1,9 +1,10 @@
 package nl.naturalis.common.path;
 
+import static nl.naturalis.common.path.PathWalker.DEAD_END;
+
 import java.util.function.Function;
 import java.util.function.Supplier;
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
-import static nl.naturalis.common.path.PathWalker.DEAD_END;
 
 abstract class SegmentReader<T> {
 

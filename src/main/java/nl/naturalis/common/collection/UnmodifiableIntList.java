@@ -1,13 +1,14 @@
 package nl.naturalis.common.collection;
 
+import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonChecks.lt;
+
 import java.util.Arrays;
 import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.ThrowingIntConsumer;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.lt;
 
 final class UnmodifiableIntList implements IntList {
 

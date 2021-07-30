@@ -1,9 +1,10 @@
 package nl.naturalis.common.path;
 
+import static nl.naturalis.common.path.PathWalkerException.pathExtendsBeyondPrimitive;
+
 import java.lang.reflect.Array;
 import java.util.function.Function;
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
-import static nl.naturalis.common.path.PathWalkerException.pathExtendsBeyondPrimitive;
 
 class PrimitiveArraySegmentReader extends SegmentReader<Object> {
 

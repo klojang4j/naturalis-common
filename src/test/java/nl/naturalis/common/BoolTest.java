@@ -1,9 +1,10 @@
 package nl.naturalis.common;
 
-import java.io.ByteArrayOutputStream;
-import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.io.ByteArrayOutputStream;
+import org.junit.Test;
 
 public class BoolTest {
 

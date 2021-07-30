@@ -1,13 +1,14 @@
 package nl.naturalis.common.check;
 
-import java.text.DecimalFormat;
-import java.util.Random;
-import org.junit.Test;
 import static nl.naturalis.common.StringMethods.duration;
 import static nl.naturalis.common.check.CommonChecks.lt;
 import static nl.naturalis.common.check.CommonChecks.lte;
 import static nl.naturalis.common.check.CommonChecks.ne;
 import static nl.naturalis.common.check.CommonGetters.strlen;
+
+import java.text.DecimalFormat;
+import java.util.Random;
+import org.junit.Test;
 
 public class PerformanceTests {
 

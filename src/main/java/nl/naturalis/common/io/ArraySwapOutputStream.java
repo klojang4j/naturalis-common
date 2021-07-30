@@ -1,12 +1,19 @@
 package nl.naturalis.common.io;
 
-import java.io.*;
-import nl.naturalis.common.ExceptionMethods;
-import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.IOMethods.createTempFile;
 import static nl.naturalis.common.IOMethods.pipe;
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonChecks.gt;
+import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonChecks.no;
 import static nl.naturalis.common.check.CommonGetters.length;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import nl.naturalis.common.ExceptionMethods;
+import nl.naturalis.common.check.Check;
 
 /**
  * A {@code SwapOutputStream} that uses a byte array as internal buffer.
