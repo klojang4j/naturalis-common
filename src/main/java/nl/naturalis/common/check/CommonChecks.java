@@ -1,81 +1,19 @@
 package nl.naturalis.common.check;
 
-import static nl.naturalis.common.ObjectMethods.ifNotNull;
-import static nl.naturalis.common.check.Messages.msgArray;
-import static nl.naturalis.common.check.Messages.msgBetween;
-import static nl.naturalis.common.check.Messages.msgBlank;
-import static nl.naturalis.common.check.Messages.msgContaining;
-import static nl.naturalis.common.check.Messages.msgContainingKey;
-import static nl.naturalis.common.check.Messages.msgContainingValue;
-import static nl.naturalis.common.check.Messages.msgDeepNotEmpty;
-import static nl.naturalis.common.check.Messages.msgDirectory;
-import static nl.naturalis.common.check.Messages.msgEmpty;
-import static nl.naturalis.common.check.Messages.msgEndsWith;
-import static nl.naturalis.common.check.Messages.msgEq;
-import static nl.naturalis.common.check.Messages.msgEqualTo;
-import static nl.naturalis.common.check.Messages.msgEqualsIgnoreCase;
-import static nl.naturalis.common.check.Messages.msgEven;
-import static nl.naturalis.common.check.Messages.msgFile;
-import static nl.naturalis.common.check.Messages.msgGt;
-import static nl.naturalis.common.check.Messages.msgGte;
-import static nl.naturalis.common.check.Messages.msgHasSubstr;
-import static nl.naturalis.common.check.Messages.msgIn;
-import static nl.naturalis.common.check.Messages.msgInRangeClosed;
-import static nl.naturalis.common.check.Messages.msgIndexOf;
-import static nl.naturalis.common.check.Messages.msgInstanceOf;
-import static nl.naturalis.common.check.Messages.msgInteger;
-import static nl.naturalis.common.check.Messages.msgKeyIn;
-import static nl.naturalis.common.check.Messages.msgLt;
-import static nl.naturalis.common.check.Messages.msgLte;
-import static nl.naturalis.common.check.Messages.msgMultipleOf;
-import static nl.naturalis.common.check.Messages.msgNe;
-import static nl.naturalis.common.check.Messages.msgNegative;
-import static nl.naturalis.common.check.Messages.msgNeverNull;
-import static nl.naturalis.common.check.Messages.msgNo;
-import static nl.naturalis.common.check.Messages.msgNotNull;
-import static nl.naturalis.common.check.Messages.msgNull;
-import static nl.naturalis.common.check.Messages.msgNullOr;
-import static nl.naturalis.common.check.Messages.msgOdd;
-import static nl.naturalis.common.check.Messages.msgPositive;
-import static nl.naturalis.common.check.Messages.msgPresent;
-import static nl.naturalis.common.check.Messages.msgReadable;
-import static nl.naturalis.common.check.Messages.msgSameAs;
-import static nl.naturalis.common.check.Messages.msgSizeEquals;
-import static nl.naturalis.common.check.Messages.msgSizeGT;
-import static nl.naturalis.common.check.Messages.msgSizeGTE;
-import static nl.naturalis.common.check.Messages.msgSizeLT;
-import static nl.naturalis.common.check.Messages.msgSizeLTE;
-import static nl.naturalis.common.check.Messages.msgSubsetOf;
-import static nl.naturalis.common.check.Messages.msgSupersetOf;
-import static nl.naturalis.common.check.Messages.msgValidFromIndex;
-import static nl.naturalis.common.check.Messages.msgValidPortNumber;
-import static nl.naturalis.common.check.Messages.msgValueIn;
-import static nl.naturalis.common.check.Messages.msgWritable;
-import static nl.naturalis.common.check.Messages.msgYes;
-import static nl.naturalis.common.check.Messages.msgZero;
-
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
-import nl.naturalis.common.ArrayMethods;
-import nl.naturalis.common.ClassMethods;
-import nl.naturalis.common.FunctionalMethods;
-import nl.naturalis.common.NumberMethods;
-import nl.naturalis.common.ObjectMethods;
-import nl.naturalis.common.StringMethods;
-import nl.naturalis.common.Tuple;
+import nl.naturalis.common.*;
 import nl.naturalis.common.collection.IntList;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
+import static nl.naturalis.common.ArrayMethods.isOneOf;
+import static nl.naturalis.common.ObjectMethods.ifNotNull;
+import static nl.naturalis.common.check.Messages.*;
 
 /**
  * Defines various common tests for arguments. These tests have short, informative error messages
@@ -244,6 +182,26 @@ public class CommonChecks {
   }
 
   /**
+   * If the argument is a {@code Class} object, verify that it either extends {@link Number} or is
+   * one of the primitive number types. Otherwise verify that {@code argument.getClass()} either
+   * extends {@link Number} or is one of the primitive number types.
+   *
+   * @return A {@code Predicate}
+   */
+  public static <T> Predicate<T> number() {
+    return x -> {
+      Class<?> c = x.getClass() == Class.class ? (Class<?>) x : x.getClass();
+      return x instanceof Number
+          || isOneOf(c, int.class, long.class, byte.class, double.class, float.class, short.class);
+    };
+  }
+
+  static {
+    setMessagePattern(number(), msgNumber());
+    setName(number(), "number");
+  }
+
+  /**
    * Verifies that a {@code String} argument is a valid port number. More precisely: that it can be
    * included as the port segment of a URL. That is: the string must not be blank, it must not start
    * with '+' or '-' and it must be a positive {@code short} value (max 65535). This test performs a
@@ -251,7 +209,7 @@ public class CommonChecks {
    *
    * @return A {@code Predicate}
    */
-  public static Predicate<String> validPortNumber() {
+  public static Predicate<String> validPort() {
     return str -> {
       if (StringMethods.isBlank(str)) {
         return false;
@@ -260,13 +218,13 @@ public class CommonChecks {
       if (c == '+' || c == '-') {
         return false;
       }
-      return NumberMethods.isShort(str);
+      return NumberMethods.isPlainShort(str);
     };
   }
 
   static {
-    setMessagePattern(validPortNumber(), msgValidPortNumber());
-    setName(validPortNumber(), "validPortNumber");
+    setMessagePattern(validPort(), msgValidPort());
+    setName(validPort(), "validPort");
   }
 
   /**

@@ -29,6 +29,7 @@ class ValueExact {
 
       MethodType mt = MethodType.methodType(int.class);
       MethodHandle mh = lookup().findVirtual(BigDecimal.class, "intValueExact", mt);
+      tmp.put(int.class, mh);
       tmp.put(Integer.class, mh);
 
       mt = MethodType.methodType(BigInteger.class);
@@ -37,14 +38,17 @@ class ValueExact {
 
       mt = MethodType.methodType(long.class);
       mh = lookup().findVirtual(BigDecimal.class, "longValueExact", mt);
+      tmp.put(long.class, mh);
       tmp.put(Long.class, mh);
 
       mt = MethodType.methodType(short.class);
       mh = lookup().findVirtual(BigDecimal.class, "shortValueExact", mt);
+      tmp.put(short.class, mh);
       tmp.put(Short.class, mh);
 
       mt = MethodType.methodType(byte.class);
       mh = lookup().findVirtual(BigDecimal.class, "byteValueExact", mt);
+      tmp.put(byte.class, mh);
       tmp.put(Byte.class, mh);
 
     } catch (Exception e) {

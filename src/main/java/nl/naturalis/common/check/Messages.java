@@ -144,7 +144,17 @@ class Messages {
     };
   }
 
-  static Formatter msgValidPortNumber() {
+  static Formatter msgNumber() {
+    return md -> {
+      if (md.negated()) {
+        return format("%s must not be a number (was %s)", md.argName(), md.argument());
+      }
+      String fmt = "%s must be a number (was %s)";
+      return format(fmt, md.argName(), md.argument(), getPrettyClassName(md.argument()));
+    };
+  }
+
+  static Formatter msgValidPort() {
     return md -> {
       if (md.negated()) { // Must be an interesting application
         String fmt = "%s must not be valid TCP/UDP port (was %s)";
