@@ -1,15 +1,5 @@
 package nl.naturalis.common;
 
-import static java.lang.System.arraycopy;
-import static nl.naturalis.common.ObjectMethods.ifNull;
-import static nl.naturalis.common.check.CommonChecks.LTE;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.lt;
-import static nl.naturalis.common.check.CommonChecks.lte;
-import static nl.naturalis.common.check.CommonChecks.neverNull;
-import static nl.naturalis.common.check.CommonChecks.notNull;
-import static nl.naturalis.common.check.CommonGetters.length;
-
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,6 +10,10 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.collection.UnsafeList;
+import static java.lang.System.arraycopy;
+import static nl.naturalis.common.ObjectMethods.ifNull;
+import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonGetters.length;
 
 /** Methods for working with arrays. */
 public class ArrayMethods {
@@ -75,13 +69,32 @@ public class ArrayMethods {
     return res;
   }
 
+  /**
+   * Returns the specified value <i>in</i> or <i>as</i> an array.
+   *
+   * <p>
+   *
+   * <ul>
+   *   <li>If the value is {@code null}, a one-element array is returned with {@code null} as the
+   *       value of the element
+   *   <li>If the value is a {@code Collection}, the collection is converted to an array using
+   *       {@link Collection#toArray()}
+   *   <li>If the value is an array of a non-primitive type, it is returned as-is
+   *   <li>If the value is an array of a primitive type, an array of the corresponding wrapper type
+   *       is returned
+   *   <li>Otherwise a one-element array is returned with the specified value as the value of the
+   *       element
+   * </ul>
+   *
+   * @param <T> The type of the elements in the returned array
+   * @param val The value to convert
+   * @return The pecified value <i>in</i> or <i>as</i> an array
+   */
   @SuppressWarnings({"rawtypes", "unchecked"})
   public static <T> T[] asArray(Object val) {
     T[] objs;
     if (val == null) {
       objs = (T[]) new Object[1];
-    } else if (val.getClass() == UnsafeList.class) {
-      return (T[]) (((UnsafeList) val).getArray());
     } else if (val instanceof Collection) {
       objs = (T[]) ((Collection) val).toArray();
     } else if (val instanceof Object[]) {
@@ -134,7 +147,7 @@ public class ArrayMethods {
     Check.notNull(arr0, "arr0");
     Check.notNull(arr1, "arr1");
     Check.notNull(arr2, "arr2");
-    Check.that(moreArrays, "moreArrays").is(neverNull());
+    Check.notNull(moreArrays, "moreArrays");
     long x = Arrays.stream(moreArrays).flatMap(Arrays::stream).count();
     long y = arr0.length + arr1.length + arr2.length + x;
     Check.that(y).is(LTE(), Integer.MAX_VALUE, "Concatenated array too large");
@@ -149,6 +162,7 @@ public class ArrayMethods {
     if (moreArrays.length != 0) {
       i += arr2.length;
       for (T[] arr : moreArrays) {
+        Check.that(arr).is(notNull(), "moreArrays must not contain null values");
         arraycopy(arr, 0, all, i, arr.length);
         i += arr.length;
       }
@@ -563,6 +577,14 @@ public class ArrayMethods {
 
   private static final String ERR_NO_NULLS = "Array must not contain null values";
 
+  /**
+   * Converts the specified {@code Integer} array to an {@code int} array, substituting the
+   * specified default value for {@code null} values in the source array.
+   *
+   * @param values The {@code Integer} array
+   * @param dfault The {@code int} value to use for {@code null} values in the {@code Integer} array
+   * @return The {@code int} array
+   */
   public static int[] asPrimitiveArray(Integer[] values, int dfault) {
     Check.notNull(values);
     int[] vals = new int[values.length];

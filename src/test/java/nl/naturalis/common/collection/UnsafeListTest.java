@@ -28,7 +28,7 @@ public class UnsafeListTest {
 
   @Test(expected = ArrayIndexOutOfBoundsException.class)
   public void testInit02() {
-    UnsafeList<Integer> list = new UnsafeList<>(Integer.class, 4);
+    UnsafeList<Integer> list = new UnsafeList<>(Integer[]::new, 4);
     list.set(-1, 8);
   }
 
@@ -42,7 +42,7 @@ public class UnsafeListTest {
 
   @Test
   public void testInit04() {
-    UnsafeList<Integer> list = new UnsafeList<>(Integer.class, 4);
+    UnsafeList<Integer> list = new UnsafeList<>(Integer[]::new, 4);
     list.set(0, 8);
     list.set(2, 4);
     assertTrue(list.contains(null));
@@ -71,7 +71,7 @@ public class UnsafeListTest {
 
   @Test
   public void testInit05c() {
-    UnsafeList<Long> list = new UnsafeList<>(Long.class, 4);
+    UnsafeList<Long> list = new UnsafeList<>(Long[]::new, 4);
     list.set(0, 8L);
     list.set(2, 4L);
     list.remove(8L);
@@ -98,7 +98,7 @@ public class UnsafeListTest {
 
   @Test
   public void testInit07() {
-    UnsafeList<String> list = new UnsafeList<>(String.class, 4);
+    UnsafeList<String> list = new UnsafeList<>(String[]::new, 4);
     list.set(0, "Hello");
     list.set(2, "World");
     list.removeAll(List.of("a", "b", "World"));
@@ -126,7 +126,7 @@ public class UnsafeListTest {
 
   @Test
   public void testInit10() {
-    UnsafeList<String> list = new UnsafeList<>(String.class, 4);
+    UnsafeList<String> list = new UnsafeList<>(String[]::new, 4);
     list.set(0, "Hello");
     list.set(1, "Foo");
     list.set(2, "World");

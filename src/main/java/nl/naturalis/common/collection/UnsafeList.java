@@ -1,19 +1,12 @@
 package nl.naturalis.common.collection;
 
-import static nl.naturalis.common.check.CommonChecks.gte;
-
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.RandomAccess;
+import java.util.*;
+import java.util.function.IntFunction;
 import java.util.stream.Stream;
 import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.check.CommonChecks.gte;
 
 /**
  * A fixed-size, mutable {@code List} implementation that does not perform range checking and
@@ -43,6 +36,19 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
     Check.notNull(clazz, "clazz");
     Check.that(size, "size").is(gte(), 0);
     this.data = (E[]) Array.newInstance(clazz, size);
+  }
+
+  /**
+   * Creates a new {@code UnsafeList} using the specified function the create a backing array of the
+   * specified size.
+   *
+   * @param constructor A function that produces the backing array
+   * @param size The size of the backing array
+   */
+  public UnsafeList(IntFunction<E[]> constructor, int size) {
+    Check.notNull(constructor, "constructor");
+    Check.that(size, "size").is(gte(), 0);
+    this.data = constructor.apply(size);
   }
 
   /**

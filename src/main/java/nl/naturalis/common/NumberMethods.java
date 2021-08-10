@@ -257,6 +257,31 @@ public class NumberMethods {
   }
 
   /**
+   * Returns whether or not {@code subject} lies within the specified range.
+   *
+   * @param subject The integer to test
+   * @param lowerBoundInclusive The lower bound of the range (inclusive)
+   * @param upperBoundExclusive The upper bound of the range (exclusive)
+   * @return Whether or not {@code subject} lies within the specified range
+   */
+  public static boolean isBetween(int subject, int lowerBoundInclusive, int upperBoundExclusive) {
+    return subject >= lowerBoundInclusive && subject < upperBoundExclusive;
+  }
+
+  /**
+   * Returns whether or not {@code subject} lies within the specified range.
+   *
+   * @param subject The integer to test
+   * @param lowerBoundInclusive The lower bound of the range (inclusive)
+   * @param upperBoundInclusive The upper bound of the range (inclusive)
+   * @return Whether or not {@code subject} lies within the specified range
+   */
+  public static boolean inRangeClosed(
+      int subject, int lowerBoundInclusive, int upperBoundInclusive) {
+    return subject >= lowerBoundInclusive && subject <= upperBoundInclusive;
+  }
+
+  /**
    * Here, once and for all, for those who suffer mental blackouts when engaging with zero-based
    * counting and exclusive upper boundaries, the first of four Winnie-the-Pooh methods.
    *
