@@ -17,7 +17,7 @@ import nl.naturalis.common.invoke.NoSuchPropertyException;
 /**
  * Reads/writes objects using {@link Path} objects. The {@code PathWalker} class is useful for
  * reading large batches of sparsely populated objects or maps. For some of these objects or maps,
- * the {@code PathWalker} will not be able to follow a path all the way to the end. This can be due
+ * the {@code PathWalker} may not be able to follow a path all the way to the end. This can be due
  * to any of the following reasons:
  *
  * <p>
@@ -49,7 +49,12 @@ public final class PathWalker {
    * {@code Path}.
    */
   public static enum DeadEndAction {
+    /** Instructs the {@code PathWalker} to return {@code null} if it reaches a dead end. */
     RETURN_NULL,
+    /**
+     * Instructs the {@code PathWalker} to return the special value {@link PathWalker#DEAD_END} if
+     * it reaches a dead end. Use a reference comparison to check for this value.
+     */
     RETURN_DEAD_END,
     THROW_EXCEPTION;
   }
@@ -164,7 +169,7 @@ public final class PathWalker {
    * path-to-value map.
    *
    * @param host The object from which to read the values
-   * @param output An {@code Map} into which to put the values
+   * @param output The {@code Map} into which to put the values
    * @throws PathWalkerException
    */
   public void readValues(Object host, Map<Path, Object> output) throws PathWalkerException {
@@ -176,9 +181,9 @@ public final class PathWalker {
    * Returns the value of the first path. Useful if the {@code PathWalker} was created with just one
    * path.
    *
-   * @param <T> The type of the object that the path points to
-   * @param host The object to read the path values from
-   * @return
+   * @param <T> The type of the value being returned
+   * @param host The object to walk
+   * @return The value referenced by the first path
    * @throws PathWalkerException
    */
   public <T> T read(Object host) {
@@ -191,9 +196,9 @@ public final class PathWalker {
    * {@code THROW_EXCEPTION}, this method will throw a {@link PathWalkerException} detailing the
    * error of the write action that failed, otherwise this method returns {@code false}.
    *
-   * @param host
-   * @param values
-   * @return Whether or not all values were successfully writen.
+   * @param host The object into which to write the values
+   * @param values The values to write
+   * @return Whether or not all values were successfully written.
    */
   public boolean writeValues(Object host, Object... values) {
     Check.notNull(values, "values").has(length(), gte(), paths.length);
@@ -206,13 +211,13 @@ public final class PathWalker {
 
   /**
    * Sets the value of the first path within the provided object to the specified value. Useful if
-   * the {@code PathWalker} was created for just one path. This method will return {@code true} if
+   * the {@code PathWalker} was created with just one path. This method will return {@code true} if
    * the value was successfully written to the host object. If the configured {@link DeadEndAction}
    * is {@code THROW_EXCEPTION}, this method will throw a {@link PathWalkerException} detailing the
    * error, otherwise this method will return false.
    *
-   * @param host
-   * @param value
+   * @param host The object into which to write the value
+   * @param value The value to write
    * @return Whether or not the value was successfully written
    */
   public boolean write(Object host, Object value) {

@@ -1,4 +1,4 @@
-package nl.naturalis.common.path;
+package nl.naturalis.common.util;
 
 import static nl.naturalis.common.check.CommonChecks.empty;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
@@ -8,16 +8,18 @@ import static nl.naturalis.common.path.Path.EMPTY_PATH;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.path.Path;
 
 /**
- * Provides a convenient way of writing <i>maps-within-maps</i> (<code>Map&lt;String, Object&gt;
- * </code>) objects. It lets you write deeply nested values without having to worry about whether
- * all the intermediate (<code>Map&lt;String, Object&gt;</code>) objects have been created yet. If
- * they are not, they will be tacitly created.
+ * Provides a convenient way of writing <i>maps-within-maps</i> ({@code Map<String, Object>}
+ * objects). It lets you write deeply nested values without having to create the intermediate maps
+ * first. If they are missing, they will be tacitly created.
  *
  * <h4>Example 1:</h4>
  *
- * <pre>
+ * <blockquote>
+ *
+ * <pre>{@code
  * MapWriter mw = new MapWriter();
  * mw.write("person.address.street", "12 Revolutionay Rd.")
  *  .write("person.address.state", "CA")
@@ -25,13 +27,17 @@ import nl.naturalis.common.check.Check;
  *  .write("person.lastName", "Smith")
  *  .write("person.born", LocalDate.of(1967, 4, 4));
  * Map<String, Object> map = mw.getMap();
- * </pre>
+ * }</pre>
+ *
+ * </blockquote>
  *
  * <p>
  *
  * <h4>Example 2:</h4>
  *
- * <pre>
+ * <blockquote>
+ *
+ * <pre>{@code
  * MapWriter mw = new MapWriter();
  * mw.in("person")
  *  .write("firstName", "John")
@@ -41,7 +47,9 @@ import nl.naturalis.common.check.Check;
  *  .write("street", "12 Revolutionay Rd.")
  *  .write("state", "CA");
  * Map<String, Object> map = mw.getMap();
- * </pre>
+ * }</pre>
+ *
+ * </blockquote>
  *
  * @author Ayco Holleman
  */

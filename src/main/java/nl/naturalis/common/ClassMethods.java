@@ -1,13 +1,5 @@
 package nl.naturalis.common;
 
-import static java.lang.Character.isUpperCase;
-import static java.lang.Character.toLowerCase;
-import static java.lang.reflect.Modifier.isStatic;
-import static java.util.stream.Collectors.joining;
-import static nl.naturalis.common.CollectionMethods.swapUnique;
-import static nl.naturalis.common.check.CommonChecks.array;
-import static nl.naturalis.common.check.CommonChecks.keyIn;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
+import static java.lang.Character.isUpperCase;
+import static java.lang.Character.toLowerCase;
+import static java.lang.reflect.Modifier.isStatic;
+import static java.util.stream.Collectors.joining;
+import static nl.naturalis.common.CollectionMethods.swap;
+import static nl.naturalis.common.check.CommonChecks.array;
+import static nl.naturalis.common.check.CommonChecks.keyIn;
 /**
  * Methods for inspecting types.
  *
@@ -64,12 +63,12 @@ public class ClassMethods {
     Class<?> c;
     return arg != null
         && ((c = arg.getClass()) == int[].class
+            || c == boolean[].class
             || c == byte[].class
             || c == double[].class
-            || c == char[].class
             || c == long[].class
             || c == float[].class
-            || c == boolean[].class
+            || c == char[].class
             || c == short[].class);
   }
 
@@ -94,7 +93,7 @@ public class ClassMethods {
           Boolean.class);
 
   // wrappper-to-primitve
-  private static final Map<Class<?>, Class<?>> w2p = Map.copyOf(swapUnique(p2w));
+  private static final Map<Class<?>, Class<?>> w2p = Map.copyOf(swap(p2w));
 
   public static Class<?> getWrapperClass(Class<?> primitiveClass) {
     return Check.that(primitiveClass)

@@ -1,44 +1,29 @@
 package nl.naturalis.common;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toUnmodifiableList;
-import static java.util.stream.Collectors.toUnmodifiableSet;
-import static nl.naturalis.common.ArrayMethods.END_INDEX;
-import static nl.naturalis.common.ArrayMethods.START_INDEX;
-import static nl.naturalis.common.check.CommonChecks.empty;
-import static nl.naturalis.common.check.CommonChecks.eq;
-import static nl.naturalis.common.check.CommonChecks.even;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.lte;
-import static nl.naturalis.common.check.CommonChecks.neverNull;
-import static nl.naturalis.common.check.CommonChecks.notNull;
-import static nl.naturalis.common.check.CommonChecks.validToIndex;
-import static nl.naturalis.common.check.CommonGetters.length;
-import static nl.naturalis.common.check.CommonGetters.mapSize;
-
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.collection.UnsafeList;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toUnmodifiableList;
+import static java.util.stream.Collectors.toUnmodifiableSet;
+import static nl.naturalis.common.ArrayMethods.END_INDEX;
+import static nl.naturalis.common.ArrayMethods.START_INDEX;
+import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonGetters.length;
+import static nl.naturalis.common.check.CommonGetters.mapSize;
+import static nl.naturalis.common.check.CommonGetters.size;
 
 /** Methods extending the Java Collection framework. */
 public class CollectionMethods {
+
+  private static final String ERR_MAP_VALUES_NON_UNIQUE = "Map values must be unique";
 
   private CollectionMethods() {}
 
@@ -369,7 +354,7 @@ public class CollectionMethods {
 
   /**
    * Returns a sublist containing all but the last element of the provided list. The returned list
-   * is backed the original list, so changing its elements will affect the original list as well.
+   * is backed by the original list, so changing its elements will affect the original list as well.
    *
    * @param <T> The type of the elements in the list
    * @param list The list to shrink
@@ -397,12 +382,12 @@ public class CollectionMethods {
   }
 
   /**
-   * Left-shifts the provided list by one element. The returned list is backed the original list, so
-   * changing its elements will affect the original list as well.
+   * Left-shifts the provided list by one element. The returned list is backed by the original list,
+   * so changing its elements will affect the original list as well.
    *
-   * @param <T>
-   * @param list
-   * @return
+   * @param <T> The type of the elements in the list
+   * @param list The {@code List} whose elements to shift
+   * @return A sublist containing all but the first element of the provided list
    */
   public static <T> List<T> shift(List<T> list) {
     return shift(list, 1);
@@ -410,12 +395,12 @@ public class CollectionMethods {
 
   /**
    * Left-shifts the provided list by the specified number of elements. The returned list is backed
-   * the original list, so changing its elements will affect the original list as well.
+   * by the original list, so changing its elements will affect the original list as well.
    *
-   * @param <T>
-   * @param list
-   * @param by
-   * @return
+   * @param <T> The type of the elements in the list
+   * @param list The {@code List} whose elements to shift
+   * @param by The number of elements to removed from the list
+   * @return A sublist containing all but the first {@code by} elements of the provided list
    */
   public static <T> List<T> shift(List<T> list, int by) {
     int sz = Check.that(list, "list").isNot(empty()).ok().size();
@@ -523,8 +508,8 @@ public class CollectionMethods {
    * @param map The source map
    * @return A new {@code Map} where keys and values are swapped
    */
-  public static <K, V> Map<V, K> swapUnique(Map<K, V> map) {
-    return swapUnique(map, HashMap::new);
+  public static <K, V> Map<V, K> swap(Map<K, V> map) {
+    return swap(map, HashMap::new);
   }
 
   /**
@@ -537,13 +522,32 @@ public class CollectionMethods {
    * @param mapFactory A function that produces an instance of the {@code Map} that will be returned
    * @return A new {@code Map} where keys and values are swapped
    */
-  public static <K, V> Map<V, K> swapUnique(
-      Map<K, V> map, IntFunction<? extends Map<V, K>> mapFactory) {
+  public static <K, V> Map<V, K> swap(Map<K, V> map, IntFunction<? extends Map<V, K>> mapFactory) {
     Check.notNull(map, "map");
     Check.notNull(mapFactory, "mapFactory");
     Map<V, K> out = mapFactory.apply(map.size());
     map.forEach((k, v) -> out.put(v, k));
-    return Check.that(out).has(mapSize(), eq(), map.size(), "Map values must be uniqe").ok();
+    return Check.that(out).has(mapSize(), eq(), map.size(), ERR_MAP_VALUES_NON_UNIQUE).ok();
+  }
+
+  /**
+   * Returns a new {@code Map} where keys and values are swapped. The specified {@code Map} must not
+   * contain duplicate values. An {@link IllegalArgumentException} is thrown if it does.
+   *
+   * @param <K> The type of the keys in the original map, and of the values in the returned map
+   * @param <V> The type of the values in the original map, and of the keys in the returned map
+   * @param map The source map
+   * @return A new {@code Map} where keys and values are swapped
+   */
+  @SuppressWarnings("unchecked")
+  public static <K, V> Map<V, K> swapAndFreeze(Map<K, V> map) {
+    Check.notNull(map);
+    Check.that(map.values()).has(size(), eq(), map.size(), ERR_MAP_VALUES_NON_UNIQUE);
+    return Map.ofEntries(
+        map.entrySet()
+            .stream()
+            .map(e -> Map.entry(e.getValue(), e.getKey()))
+            .toArray(Map.Entry[]::new));
   }
 
   /**
@@ -562,7 +566,9 @@ public class CollectionMethods {
   public static <K, V, W> Map<K, W> convertAndFreeze(
       Map<K, V> source, Function<? super V, ? extends W> converter) {
     return Map.ofEntries(
-        source.entrySet().stream()
+        source
+            .entrySet()
+            .stream()
             .map(e -> Map.entry(e.getKey(), converter.apply(e.getValue())))
             .toArray(Map.Entry[]::new));
   }

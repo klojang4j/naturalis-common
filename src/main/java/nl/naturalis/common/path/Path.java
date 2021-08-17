@@ -22,27 +22,27 @@ import nl.naturalis.common.StringMethods;
 import nl.naturalis.common.check.Check;
 
 /**
- * Specifies a path to a value within an object. Path segments are separated by '.' (dot). For
- * example: {@code employee.address.street}. Array indices are specified as separate path segments.
- * For example: {@code employees.3.address.street}. Non-numeric segments can be either field names
- * or map keys. Therefore the {@code Path} class does not impose any constraints on what constitutes
- * a valid path segment, since a map key can be anything (including null or an empty string).
+ * Specifies a path to a possibly deeply nested value within an object. Path segments are separated
+ * by '.' (dot). For example: {@code employee.address.street}. Array indices are specified as
+ * separate path segments. For example: {@code employees.3.address.street}. Non-numeric segments can
+ * be either field names or map keys. Therefore the {@code Path} class does not impose any
+ * constraints on what constitutes a valid path segment, since a map key can be anything (including
+ * null or an empty string).
  *
  * <h4>Escaping</h4>
  *
- * <p>If a path segment contains the segment separator, it must be escaped using the circumflex
- * character ('^'). (Using the backslash character as an escape character would have made it
- * needlessly cumbersome to write path strings in Java code.) The escape character itself <i>must
- * not</i> be escaped. You can let the {@link #escape(String) escape} method do the escaping for
- * you. Do not escape path segments when passing them individually (as a {@code String} array) to
- * the constructor. Only escape them when passing a complete path string. So {@code
- * "some.awk^.ward.path^string"} could also be passed in as: {@code new String[] {"some",
- * "awk.ward", "path^string"}}.
+ * <p>If a path segment represents a map key that happens to contain the segment separator, it must
+ * be escaped using the circumflex character ('^'). (Using the backslash character as an escape
+ * character would have made it very cumbersome to write path strings in Java code.) So a map key
+ * named {@code my.awkward.map.key} would become {@code my^.awkward^.map^.key}. The escape character
+ * itself <i>must not</i> be escaped. You can let the {@link #escape(String) escape} method do the
+ * escaping for you. Do not escape path segments when passing them individually (as a {@code String}
+ * array) to the constructor. Only escape them when passing a complete path string.
  *
  * <p>In case you need to reference the {@code null} key of a {@code Map}, use {@code "^0"}. So
  * {@code "lookups.^0.name"} references the {@code name} field of an object stored under key {@code
- * null} in the {@code lookups} map. And you could also pass this in as: {@code new String[]
- * {"lookups", null, "name"}}.
+ * null} in the {@code lookups} map. You could also pass this in as: {@code new String[] {"lookups",
+ * null, "name"}}.
  *
  * @author Ayco Holleman
  */
@@ -51,17 +51,17 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   /** The empty path (containing zero path segments). */
   public static Path EMPTY_PATH = new Path();
 
-  /** The segment separator within a path: &#39;&#46;&#39; (dot). */
+  /** The segment separator within a path: '.' (dot). */
   public static final char SEP = '.';
-  /** The escape character: &#39;^&#39; (circumflex). */
+  /** The escape character: '^' (circumflex). */
   public static final char ESC = '^';
-  /** The character sequence to use for {@code null} keys. */
+  /** The character sequence to use for {@code null} keys: "^0" */
   public static final String NULL_SEGMENT = "^0";
 
   /**
-   * Applies escaping to a path segment. Can be used to construct complete path strings. Do not use
-   * when passing individual path segments as a {@code String} array to the {@link #Path(String[])
-   * constructor}.
+   * Applies escaping to a path segment. Can be used to construct complete path strings. Do
+   * <i>not</i> use when passing individual path segments as a {@code String} array to the {@link
+   * #Path(String[]) constructor}.
    *
    * @param segment The path segment to escape
    * @return The escaped version of the segment
@@ -215,8 +215,9 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    * Returns a new {@code Path} consisting of the segments of this {@code Path} plus the segments of
    * the specified {@code Path}.
    *
-   * @param other
-   * @return
+   * @param other The {@code Path} to append to this {@code Path}.
+   * @return A new {@code Path} consisting of the segments of this {@code Path} plus the segments of
+   *     the specified {@code Path}
    */
   public Path append(Path other) {
     Check.notNull(other, "other");
@@ -229,7 +230,8 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    *
    * @param index
    * @param newValue
-   * @return
+   * @return A new {@code Path} with the path segment at the specified array index set to the new
+   *     value
    */
   public Path replace(int index, String newValue) {
     Check.that(index, "index").is(gte(), 0).is(lte(), elems.length);
