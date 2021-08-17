@@ -11,7 +11,7 @@ import static java.lang.Character.isUpperCase;
 import static java.lang.Character.toLowerCase;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.stream.Collectors.joining;
-import static nl.naturalis.common.CollectionMethods.swap;
+import static nl.naturalis.common.CollectionMethods.swapAndFreeze;
 import static nl.naturalis.common.check.CommonChecks.array;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
 /**
@@ -93,7 +93,7 @@ public class ClassMethods {
           Boolean.class);
 
   // wrappper-to-primitve
-  private static final Map<Class<?>, Class<?>> w2p = Map.copyOf(swap(p2w));
+  private static final Map<Class<?>, Class<?>> w2p = swapAndFreeze(p2w);
 
   public static Class<?> getWrapperClass(Class<?> primitiveClass) {
     return Check.that(primitiveClass)
