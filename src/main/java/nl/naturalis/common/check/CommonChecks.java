@@ -613,7 +613,7 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that a {@code Number} is greater than another {@code Number} , widening both to {@code
+   * Verifies that a {@code Number} is greater than another {@code Number}, widening both to {@code
    * Double} before comparing them. Use when testing any type of numbers besides {@code int} or
    * {@code Integer}.
    *
@@ -622,62 +622,70 @@ public class CommonChecks {
    * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> GT() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> greaterThan() {
     return (x, y) -> x.doubleValue() > y.doubleValue();
   }
 
   static {
-    setMessagePattern(GT(), msgGt()); // recycle message
-    setName(GT(), "GT");
+    setMessagePattern(greaterThan(), msgGreaterThan()); // recycle message
+    setName(greaterThan(), "greaterThan");
   }
 
   /**
-   * Verifies that the argument is greater than or equal to a particular value, widening both to
-   * {@code double} before comparing them.
+   * Verifies that a {@code Number} is greater than or equal to another {@code Number}, widening
+   * both to {@code Double} before comparing them. Use when testing any type of numbers besides
+   * {@code int} or {@code Integer}.
    *
+   * @see #gte()
    * @param <X> The type of the argument
    * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> GTE() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> atLeast() {
     return (x, y) -> x.doubleValue() >= y.doubleValue();
   }
 
   static {
-    setMessagePattern(GTE(), msgGte()); // recycle message
-    setName(GTE(), "GTE");
+    setMessagePattern(atLeast(), msgAtLeast()); // recycle message
+    setName(atLeast(), "atLeast");
   }
 
   /**
-   * Verifies that the argument is less than a particular value, widening both to {@code double}
-   * before comparing them.
+   * Verifies that a {@code Number} is less than another {@code Number}, widening both to {@code
+   * Double} before comparing them. Use when testing any type of numbers besides {@code int} or
+   * {@code Integer}.
    *
-   * @return A {@code Relation}
-   */
-  public static <X extends Number, Y extends Number> Relation<X, Y> LT() {
-    return (x, y) -> x.doubleValue() < y.doubleValue();
-  }
-
-  static {
-    setMessagePattern(LT(), msgLt()); // recycle message
-    setName(LT(), "LT");
-  }
-
-  /**
-   * Verifies that the argument is less than or equal to a particular value, widening both to {@code
-   * double} before comparing them.
-   *
+   * @see #lt()
    * @param <X> The type of the argument
    * @param <Y> The type of the value to compare the argument to
    * @return A {@code Relation}
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> LTE() {
+  public static <X extends Number, Y extends Number> Relation<X, Y> lessThan() {
+    return (x, y) -> x.doubleValue() < y.doubleValue();
+  }
+
+  static {
+    setMessagePattern(lessThan(), msgLessThan()); // recycle message
+    setName(lessThan(), "lessThan");
+  }
+
+  /**
+   * Verifies that a {@code Number} is less than or equal to another {@code Number}, widening both
+   * to {@code Double} before comparing them. Use when testing any type of numbers besides {@code
+   * int} or {@code Integer}.
+   *
+   * @see #lte()
+   * @param <X> The type of the argument
+   * @param <Y> The type of the value to compare the argument to
+   * @return A {@code Relation}
+   */
+  public static <X extends Number, Y extends Number> Relation<X, Y> atMost() {
     return (x, y) -> x.doubleValue() <= y.doubleValue();
   }
 
   static {
-    setMessagePattern(LTE(), msgLte()); // recycle message
-    setName(LTE(), "LTE");
+    setMessagePattern(atMost(), msgAtMost()); // recycle message
+    setName(atMost(), "atMost");
   }
 
   /**
@@ -979,7 +987,7 @@ public class CommonChecks {
   }
 
   static {
-    setMessagePattern(gt(), msgGt());
+    setMessagePattern(gt(), msgGreaterThan());
     setName(gt(), "gt");
   }
 
@@ -993,7 +1001,7 @@ public class CommonChecks {
   }
 
   static {
-    setMessagePattern(gte(), msgGte());
+    setMessagePattern(gte(), msgAtLeast());
     setName(gte(), "gte");
   }
 
@@ -1007,7 +1015,7 @@ public class CommonChecks {
   }
 
   static {
-    setMessagePattern(lt(), msgLt());
+    setMessagePattern(lt(), msgLessThan());
     setName(lt(), "lt");
   }
 
@@ -1021,7 +1029,7 @@ public class CommonChecks {
   }
 
   static {
-    setMessagePattern(lte(), msgLte());
+    setMessagePattern(lte(), msgAtMost());
     setName(lte(), "lte");
   }
 

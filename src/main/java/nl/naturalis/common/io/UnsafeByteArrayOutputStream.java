@@ -1,7 +1,7 @@
 package nl.naturalis.common.io;
 
-import static nl.naturalis.common.check.CommonChecks.GT;
-import static nl.naturalis.common.check.CommonChecks.LTE;
+import static nl.naturalis.common.check.CommonChecks.greaterThan;
+import static nl.naturalis.common.check.CommonChecks.atMost;
 import static nl.naturalis.common.check.CommonChecks.gt;
 import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonChecks.lte;
@@ -99,7 +99,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
       byte[] buf, int offset, float incrementBy, AugmentationType incrementType) {
     this.buf = Check.notNull(buf, "buf").has(length(), gt(), 0).ok();
     this.cnt = Check.that(offset, "offset").is(lte(), buf.length).ok();
-    this.ib = Check.that(incrementBy, "incrementBy").is(GT(), 0).ok();
+    this.ib = Check.that(incrementBy, "incrementBy").is(greaterThan(), 0).ok();
     this.it = Check.notNull(incrementType, "incrementType").ok();
   }
 
@@ -204,7 +204,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
         newSize = Math.max(buf.length + minIncrease, buf.length * ((100 + (int) ib) / 100));
         break;
     }
-    Check.on(s -> new BufferOverflowException(), newSize).is(LTE(), Integer.MAX_VALUE);
+    Check.on(s -> new BufferOverflowException(), newSize).is(atMost(), Integer.MAX_VALUE);
     byte[] newBuf = new byte[(int) newSize];
     System.arraycopy(buf, 0, newBuf, 0, cnt);
     buf = newBuf;

@@ -474,11 +474,11 @@ class Messages {
   static Formatter msgKeyIn() {
     return md -> {
       if (md.negated()) {
-        String fmt = "%s must not be key in %s (was %s)";
-        return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+        String fmt = "%s must not be key in %s (parameter \"%s\")";
+        return format(fmt, toStr(md.argument()), toStr(md.object()), md.argName());
       }
-      String fmt = "%s must be key in %s (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+      String fmt = "%s must be key in %s (parameter \"%s\")";
+      return format(fmt, toStr(md.argument()), toStr(md.object()), md.argName());
     };
   }
 
@@ -532,40 +532,40 @@ class Messages {
     };
   }
 
-  static Formatter msgGt() {
+  static Formatter msgGreaterThan() {
     return md -> {
       if (md.negated()) {
-        return msgLte().apply(md.flip());
+        return msgAtMost().apply(md.flip());
       }
       String fmt = "%s must be > %s (was %s)";
       return format(fmt, md.argName(), md.object(), md.argument());
     };
   }
 
-  static Formatter msgGte() {
+  static Formatter msgAtLeast() {
     return md -> {
       if (md.negated()) {
-        return msgLt().apply(md.flip());
+        return msgLessThan().apply(md.flip());
       }
       String fmt = "%s must be >= %s (was %s)";
       return format(fmt, md.argName(), md.object(), md.argument());
     };
   }
 
-  static Formatter msgLt() {
+  static Formatter msgLessThan() {
     return md -> {
       if (md.negated()) {
-        return msgGte().apply(md.flip());
+        return msgAtLeast().apply(md.flip());
       }
       String fmt = "%s must be < %s (was %s)";
       return format(fmt, md.argName(), md.object(), md.argument());
     };
   }
 
-  static Formatter msgLte() {
+  static Formatter msgAtMost() {
     return md -> {
       if (md.negated()) {
-        return msgGt().apply(md.flip());
+        return msgGreaterThan().apply(md.flip());
       }
       String fmt = "%s must be <= %s (was %s)";
       return format(fmt, md.argName(), md.object(), md.argument());

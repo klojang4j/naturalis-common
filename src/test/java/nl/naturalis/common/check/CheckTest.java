@@ -1,7 +1,7 @@
 package nl.naturalis.common.check;
 
-import static nl.naturalis.common.check.CommonChecks.GT;
-import static nl.naturalis.common.check.CommonChecks.GTE;
+import static nl.naturalis.common.check.CommonChecks.greaterThan;
+import static nl.naturalis.common.check.CommonChecks.atLeast;
 import static nl.naturalis.common.check.CommonChecks.array;
 import static nl.naturalis.common.check.CommonChecks.asInt;
 import static nl.naturalis.common.check.CommonChecks.asObj;
@@ -73,13 +73,13 @@ public class CheckTest {
   // greaterThan() works with Number instances, not ints, but the compiler is fine with it
   @Test(expected = IllegalArgumentException.class)
   public void greaterThan01() {
-    Check.that(2, "fooArg").is(GT(), 4);
+    Check.that(2, "fooArg").is(greaterThan(), 4);
     assertTrue(true);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void greaterThan02() {
-    Check.that(2, "fooArg").is(GT(), Integer.valueOf(4));
+    Check.that(2, "fooArg").is(greaterThan(), Integer.valueOf(4));
     assertTrue(true);
   }
 
@@ -155,7 +155,7 @@ public class CheckTest {
         .has(Employee::getHobbies, (x, y) -> x.contains(y), "Skating", "Skating is not optional")
         .has(Employee::getFullName, "fullName", s -> s.length() < 200)
         .has(Employee::getAge, gte(), 16, "Employee must be at least %d", 16)
-        .has(Employee::getAge, GTE(), 16, "Employee must be at least %d", 16)
+        .has(Employee::getAge, atLeast(), 16, "Employee must be at least %d", 16)
         .ok();
     assertTrue(true);
   }

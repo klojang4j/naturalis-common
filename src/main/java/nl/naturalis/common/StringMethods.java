@@ -5,7 +5,7 @@ import static nl.naturalis.common.ArrayMethods.START_INDEX;
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
 import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.ObjectMethods.ifTrue;
-import static nl.naturalis.common.check.CommonChecks.GTE;
+import static nl.naturalis.common.check.CommonChecks.atLeast;
 import static nl.naturalis.common.check.CommonChecks.deepNotEmpty;
 import static nl.naturalis.common.check.CommonChecks.empty;
 import static nl.naturalis.common.check.CommonChecks.gt;
@@ -36,16 +36,133 @@ public final class StringMethods {
 
   private StringMethods() {}
 
-  /**
-   * Appends data to the specified {@code StringBuilder}.
-   *
-   * @param sb The {@code StringBuilder} (must not be null)
-   * @param data The data to append (must not be null)
-   * @return The {@code StringBuilder} with the appended data
-   */
-  public static StringBuilder append(StringBuilder sb, Object... data) {
+  public static StringBuilder append(StringBuilder sb, Object data0) {
     Check.notNull(sb, "sb");
-    Check.notNull(data, "data").ok(Arrays::stream).forEach(sb::append);
+    return sb.append(data0);
+  }
+
+  public static StringBuilder append(StringBuilder sb, Object data0, Object data1) {
+    Check.notNull(sb, "sb");
+    return sb.append(data0).append(data1);
+  }
+
+  public static StringBuilder append(StringBuilder sb, Object data0, Object data1, Object data2) {
+    Check.notNull(sb, "sb");
+    return sb.append(data0).append(data1).append(data2);
+  }
+
+  public static StringBuilder append(
+      StringBuilder sb, Object data0, Object data1, Object data2, Object data3) {
+    Check.notNull(sb, "sb");
+    return sb.append(data0).append(data1).append(data2).append(data3);
+  }
+
+  public static StringBuilder append(
+      StringBuilder sb, Object data0, Object data1, Object data2, Object data3, Object data4) {
+    Check.notNull(sb, "sb");
+    return sb.append(data0).append(data1).append(data2).append(data3).append(data4);
+  }
+
+  public static StringBuilder append(
+      StringBuilder sb,
+      Object data0,
+      Object data1,
+      Object data2,
+      Object data3,
+      Object data4,
+      Object data5) {
+    Check.notNull(sb, "sb");
+    return sb.append(data0).append(data1).append(data2).append(data3).append(data4).append(data5);
+  }
+
+  public static StringBuilder append(
+      StringBuilder sb,
+      Object data0,
+      Object data1,
+      Object data2,
+      Object data3,
+      Object data4,
+      Object data5,
+      Object data6) {
+    Check.notNull(sb, "sb");
+    return sb.append(data0)
+        .append(data1)
+        .append(data2)
+        .append(data3)
+        .append(data4)
+        .append(data5)
+        .append(data6);
+  }
+
+  public static StringBuilder append(
+      StringBuilder sb,
+      Object data0,
+      Object data1,
+      Object data2,
+      Object data3,
+      Object data4,
+      Object data5,
+      Object data6,
+      Object data7) {
+    Check.notNull(sb, "sb");
+    return sb.append(data0)
+        .append(data1)
+        .append(data2)
+        .append(data3)
+        .append(data4)
+        .append(data5)
+        .append(data6)
+        .append(data7);
+  }
+
+  public static StringBuilder append(
+      StringBuilder sb,
+      Object data0,
+      Object data1,
+      Object data2,
+      Object data3,
+      Object data4,
+      Object data5,
+      Object data6,
+      Object data7,
+      Object data8) {
+    Check.notNull(sb, "sb");
+    return sb.append(data0)
+        .append(data1)
+        .append(data2)
+        .append(data3)
+        .append(data4)
+        .append(data5)
+        .append(data6)
+        .append(data7)
+        .append(data8);
+  }
+
+  public static StringBuilder append(
+      StringBuilder sb,
+      Object data0,
+      Object data1,
+      Object data2,
+      Object data3,
+      Object data4,
+      Object data5,
+      Object data6,
+      Object data7,
+      Object data8,
+      Object data9,
+      Object... moreData) {
+    Check.notNull(sb, "sb");
+    sb.append(data0)
+        .append(data1)
+        .append(data2)
+        .append(data3)
+        .append(data4)
+        .append(data5)
+        .append(data6)
+        .append(data7)
+        .append(data8)
+        .append(data9);
+    Check.notNull(moreData, "data").ok(Arrays::stream).forEach(sb::append);
     return sb;
   }
 
@@ -186,7 +303,7 @@ public final class StringMethods {
    * @return A human-friendly representation of the duration of the specified time interval
    */
   public static String interval(long start, long end) {
-    Check.that(end).is(GTE(), start, "Negative time interval");
+    Check.that(end).is(atLeast(), start, "Negative time interval");
     return duration(end - start);
   }
 

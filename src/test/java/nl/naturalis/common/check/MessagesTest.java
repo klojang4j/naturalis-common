@@ -1,7 +1,7 @@
 package nl.naturalis.common.check;
 
-import static nl.naturalis.common.check.CommonChecks.GT;
-import static nl.naturalis.common.check.CommonChecks.GTE;
+import static nl.naturalis.common.check.CommonChecks.greaterThan;
+import static nl.naturalis.common.check.CommonChecks.atLeast;
 import static nl.naturalis.common.check.CommonChecks.containing;
 import static nl.naturalis.common.check.CommonChecks.eq;
 import static nl.naturalis.common.check.CommonChecks.gte;
@@ -42,7 +42,7 @@ public class MessagesTest {
     Short object = 5;
     String expected = "foo must be >= 5 (was 2.0)";
     System.out.println(expected);
-    String actual = Messages.createMessage(GTE(), false, argName, argument, object);
+    String actual = Messages.createMessage(atLeast(), false, argName, argument, object);
     System.out.println(actual);
     assertEquals(expected, actual);
   }
@@ -54,7 +54,7 @@ public class MessagesTest {
     Float object = 5F;
     String expected = "foo must be > 5.0 (was 4)";
     System.out.println(expected);
-    String actual = Messages.createMessage(GT(), false, argName, argument, object);
+    String actual = Messages.createMessage(greaterThan(), false, argName, argument, object);
     System.out.println(actual);
     assertEquals(expected, actual);
   }

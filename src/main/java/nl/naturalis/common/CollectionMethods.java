@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
@@ -570,6 +571,31 @@ public class CollectionMethods {
             .entrySet()
             .stream()
             .map(e -> Map.entry(e.getKey(), converter.apply(e.getValue())))
+            .toArray(Map.Entry[]::new));
+  }
+
+  /**
+   * Returns an unmodifiable {@code Map} where the values of the input {@code Map} have been
+   * converted using the specified {@code BiFunction}. This method passes both the key and the value
+   * to the converter function so you can make the conversion key-dependent, or so mention the key
+   * when the conversion fails.
+   *
+   * @param <K> The type of the keys of the input and output {@code Map}
+   * @param <V> The type of the values of the input {@code Map}
+   * @param <W> The type of the values of the output {@code Map}
+   * @param source The input {@code Map}
+   * @param converter A {@code Function} that converts the values of the input {@code Map}
+   * @return An unmodifiable {@code Map} where the values of the input {@code Map} have been
+   *     converted using the specified {@code Function}
+   */
+  @SuppressWarnings("unchecked")
+  public static <K, V, W> Map<K, W> convertAndFreeze(
+      Map<K, V> source, BiFunction<? super K, ? super V, ? extends W> converter) {
+    return Map.ofEntries(
+        source
+            .entrySet()
+            .stream()
+            .map(e -> Map.entry(e.getKey(), converter.apply(e.getKey(), e.getValue())))
             .toArray(Map.Entry[]::new));
   }
 

@@ -1,7 +1,7 @@
 package nl.naturalis.common.util;
 
-import static nl.naturalis.common.check.CommonChecks.GTE;
-import static nl.naturalis.common.check.CommonChecks.LTE;
+import static nl.naturalis.common.check.CommonChecks.atLeast;
+import static nl.naturalis.common.check.CommonChecks.atMost;
 
 import nl.naturalis.common.check.Check;
 
@@ -43,8 +43,8 @@ public enum AugmentationType {
    */
   public int augment(int value, double amount, int minAmount) {
     return Check.that(augment((double) value, amount, (double) minAmount), "New value")
-        .is(LTE(), Integer.MAX_VALUE)
-        .is(GTE(), Integer.MIN_VALUE)
+        .is(atMost(), Integer.MAX_VALUE)
+        .is(atLeast(), Integer.MIN_VALUE)
         .ok(Double::intValue);
   }
 

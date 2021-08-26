@@ -1,11 +1,9 @@
 package nl.naturalis.common.util;
 
-import static org.junit.Assert.assertEquals;
-
 import java.time.LocalDate;
 import org.junit.Test;
-import nl.naturalis.common.util.MapWriter;
 import nl.naturalis.common.util.MapWriter.PathBlockedException;
+import static org.junit.Assert.assertEquals;
 
 public class MapWriterTest {
 

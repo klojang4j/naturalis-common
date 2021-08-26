@@ -150,7 +150,7 @@ public class ArrayMethods {
     Check.notNull(moreArrays, "moreArrays");
     long x = Arrays.stream(moreArrays).flatMap(Arrays::stream).count();
     long y = arr0.length + arr1.length + arr2.length + x;
-    Check.that(y).is(LTE(), Integer.MAX_VALUE, "Concatenated array too large");
+    Check.that(y).is(atMost(), Integer.MAX_VALUE, "Concatenated array too large");
     int i = (int) y;
     T[] all = fromTemplate(arr0, i);
     i = 0;
