@@ -1,23 +1,25 @@
 package nl.naturalis.common.check;
 
-import static java.lang.String.format;
-import static nl.naturalis.common.ArrayMethods.asArray;
-import static nl.naturalis.common.ClassMethods.getPrettyClassName;
-import static nl.naturalis.common.ClassMethods.getPrettySimpleClassName;
-import static nl.naturalis.common.StringMethods.concat;
-import static nl.naturalis.common.check.CommonChecks.MESSAGE_PATTERNS;
-
 import java.io.File;
 import java.util.Collection;
+import java.util.Set;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.StringMethods;
 import nl.naturalis.common.collection.IntList;
+import nl.naturalis.common.collection.TypeSet;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
+import static java.lang.String.format;
+import static nl.naturalis.common.ArrayMethods.asArray;
+import static nl.naturalis.common.ClassMethods.getPrettyClassName;
+import static nl.naturalis.common.ClassMethods.getPrettySimpleClassName;
+import static nl.naturalis.common.StringMethods.concat;
+import static nl.naturalis.common.StringMethods.ellipsis;
+import static nl.naturalis.common.check.CommonChecks.MESSAGE_PATTERNS;
 
 @SuppressWarnings({"rawtypes"})
 class Messages {
@@ -603,7 +605,7 @@ class Messages {
       String fmt = "%s must be instance of %s (was %s)";
       String cn0 = getPrettyClassName(md.object());
       String cn1 = getPrettyClassName(md.argument());
-      return format(fmt, md.argName(), cn0, cn1);
+      return format(fmt, md.argName(), cn0, cn1, toStr(md.argument()));
     };
   }
 
@@ -629,27 +631,23 @@ class Messages {
     };
   }
 
+  private static final Set<Class<?>> STRINGIFIABLES =
+      new TypeSet(Number.class, Boolean.class, Character.class, Enum.class);
+
   private static String toStr(Object val) {
     if (val == null) {
       return "null";
-    } else if (val instanceof Number) {
-      return val.toString();
-    } else if (val == Boolean.class) {
-      return val.toString();
-    } else if (val == Character.class) {
-      return val.toString();
-    } else if (val instanceof Enum) {
+    } else if (STRINGIFIABLES.contains(val.getClass())) {
       return val.toString();
     } else if (val instanceof CharSequence) {
-      return StringMethods.ellipsis(val.toString(), 40);
+      return ellipsis(val.toString(), 40);
     } else if (val instanceof Collection) {
       Collection c = (Collection) val;
       return concat(
           getPrettySimpleClassName(val),
           "[",
           c.size(),
-          "]@ [",
-          System.identityHashCode(val),
+          "] of [",
           StringMethods.implode(c, ", ", 10),
           "]");
     } else if (val.getClass().isArray()) {
@@ -658,8 +656,7 @@ class Messages {
           getPrettySimpleClassName(val),
           "[",
           a.length,
-          "]@ [",
-          System.identityHashCode(val),
+          "] of [",
           ArrayMethods.implode(a, ", ", 10),
           "]");
     } else if (val.getClass() != Object.class) {

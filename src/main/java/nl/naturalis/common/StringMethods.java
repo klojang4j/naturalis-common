@@ -174,7 +174,9 @@ public final class StringMethods {
    */
   public static String concat(Object... data) {
     Check.notNull(data);
-    return append(new StringBuilder(10 * data.length), data).toString();
+    StringBuilder sb = new StringBuilder(10 * data.length);
+    Arrays.stream(data).forEach(sb::append);
+    return sb.toString();
   }
 
   /**
@@ -624,6 +626,23 @@ public final class StringMethods {
       stream = stream.limit(limit);
     }
     return stream.map(Objects::toString).collect(Collectors.joining(separator));
+  }
+
+  /**
+   * Uppercases the first character of {@code subject}.
+   *
+   * @param subject An object to call {@code toString()} on
+   * @return The resulting string with the first character converted to upper case
+   */
+  public static String initCap(Object subject) {
+    Check.notNull(subject);
+    String s = subject.toString();
+    if (s.isBlank()) {
+      return s;
+    }
+    char[] chars = s.toCharArray();
+    chars[0] = Character.toUpperCase(chars[0]);
+    return String.valueOf(chars);
   }
 
   /**

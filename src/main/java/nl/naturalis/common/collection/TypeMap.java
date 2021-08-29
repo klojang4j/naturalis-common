@@ -1,21 +1,33 @@
 package nl.naturalis.common.collection;
 
-import static nl.naturalis.common.check.CommonChecks.notNull;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import nl.naturalis.common.Tuple;
 import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.check.CommonChecks.greaterThan;
+import static nl.naturalis.common.check.CommonChecks.negative;
+import static nl.naturalis.common.check.CommonChecks.notNull;
+import static nl.naturalis.common.check.CommonChecks.sameAs;
+import static nl.naturalis.common.check.CommonGetters.type;
 
 /**
- * A {@code Map} extension that returns a non-null value for a type if either the type itself or any
- * of its super types is present in the map. This allows you to define fall-back values for types
- * that have not been explicitly added to the map. If the requested type is not present in the map,
- * but one of its super types is, a new entry is automatically created, associating the requested
- * type with the same value as the super type's value. When searching for a super type within the
- * map, superclasses will take precedence over interfaces. Keys and values must not be null. All
- * map-altering methods except {@code put} and {@code putAll} throw an {@link
+ * A {@link HashMap} extension that returns a non-null value for a type if either the type itself or
+ * any of its super types is present in the map. For example, suppose the map contains two entries:
+ * one for {@code Integer.class} and one for {@code Number.class}. If the client requests the value
+ * associated with {@code Integer.class}, then the value of the {@code Integer.class} entry is
+ * returned. But if the client requests the value associated with {@code Short.class}, then the
+ * value of the {@code Number.class} entry is returned. Thus this {@code Map} implementation is
+ * useful if you want to define fall-back values for types that have not been explicitly added to
+ * the map.
+ *
+ * <p>Note that as, in the above example, the value of the{@code Number.class} entry is returned, a
+ * new entry for {@code Short.class} is tacitly created so that next time round the client will hit
+ * that key directly. Keep this in mind when sizing the map. You can suppress this behaviour via the
+ * constructors.
+ *
+ * <p>All map-altering methods except {@code put} and {@code putAll} throw an {@link
  * UnsupportedOperationException}. The same applies to all {@code compute} methods as well as {@code
  * getOrDefault}.
  *
@@ -24,77 +36,107 @@ import nl.naturalis.common.check.Check;
  */
 public class TypeMap<V> extends HashMap<Class<?>, V> {
 
+  private final boolean autoExpand;
+
   public TypeMap() {
-    super();
+    this(16);
   }
 
   public TypeMap(int initialCapacity) {
-    super(initialCapacity);
+    this(initialCapacity, .75F, true);
   }
 
   public TypeMap(Map<? extends Class<?>, ? extends V> m) {
-    this(m.size());
+    this(m, true);
+  }
+
+  public TypeMap(Map<? extends Class<?>, ? extends V> m, boolean autoGrow) {
+    this(capacity(m, autoGrow), 0.75F, autoGrow);
     putAll(m);
   }
 
-  public TypeMap(int initialCapacity, float loadFactor) {
-    super(initialCapacity, loadFactor);
+  private static <V0> int capacity(Map<? extends Class<?>, ? extends V0> m, boolean autoExpand) {
+    Check.notNull(m);
+    int i = 1 + ((4 * m.size()) / 3);
+    // If autoGrow, reserve some extra space for tacit additions
+    return autoExpand ? (int) (1.25 * i) : i;
+  }
+
+  public TypeMap(int initialCapacity, float loadFactor, boolean autoExpand) {
+    super(
+        Check.that(initialCapacity, "initialCapacity").isNot(negative()).intValue(),
+        Check.that(loadFactor, "loadFactor").is(greaterThan(), 0).ok());
+    this.autoExpand = autoExpand;
   }
 
   @Override
   public V get(Object key) {
-    Check.notNull(key, "key");
-    return containsKey(key) ? super.get(key) : null;
+    Check.notNull(key, "key").has(type(), sameAs(), Class.class);
+    Class<?> type = (Class<?>) key;
+    Tuple<Class<?>, V> entry = find(type);
+    if (entry == null) {
+      return null;
+    }
+    if (autoExpand && type != entry.getLeft()) {
+      super.put(type, entry.getRight());
+    }
+    return entry.getRight();
   }
 
   @Override
-  @SuppressWarnings("rawtypes")
   public boolean containsKey(Object key) {
-    Check.notNull(key);
-    if (super.containsKey(key)) {
-      return true;
-    }
-    final Class clazz = (Class) key;
-    if (clazz.isInterface()) {
-      V v = climbInterfaces(clazz);
-      if (v != null) {
-        super.put(clazz, v);
-        return true;
-      }
+    Check.notNull(key).has(type(), sameAs(), Class.class);
+    Class<?> type = (Class<?>) key;
+    Tuple<Class<?>, V> entry = find(type);
+    if (entry == null) {
       return false;
     }
-    for (Class c = clazz.getSuperclass(); c != null; c = c.getSuperclass()) {
-      V v = super.get(c);
-      if (v != null) {
-        super.put(clazz, v);
-        return true;
-      }
+    if (autoExpand && type != entry.getLeft()) {
+      super.put(type, entry.getRight());
     }
-    for (Class c = clazz; c != null; c = c.getSuperclass()) {
-      V v = climbInterfaces(clazz);
-      if (v != null) {
-        super.put(clazz, v);
-        return true;
-      }
-    }
-    return false;
+    return true;
   }
 
-  @SuppressWarnings({"rawtypes"})
-  private V climbInterfaces(Class clazz) {
-    for (Class c : clazz.getInterfaces()) {
-      V v = super.get(c);
-      if (v != null) {
-        return v;
+  private Tuple<Class<?>, V> find(Class<?> k) {
+    V v = super.get(k);
+    if (v != null) {
+      return Tuple.of(k, v);
+    }
+    if (k.isInterface()) {
+      Tuple<Class<?>, V> t = climbInterfaces(k);
+      if (t != null) {
+        return t;
       }
     }
-    for (Class c : clazz.getInterfaces()) {
-      V v = climbInterfaces(c);
-      if (v != null) {
-        return v;
+    for (Class<?> c = k.getSuperclass(); c != null; c = c.getSuperclass()) {
+      if (null != (v = super.get(c))) {
+        return Tuple.of(c, v);
       }
     }
-    return super.get(Object.class);
+    for (Class<?> c = k; c != null; c = c.getSuperclass()) {
+      Tuple<Class<?>, V> t = climbInterfaces(c);
+      if (t != null) {
+        return t;
+      }
+    }
+    return null;
+  }
+
+  private Tuple<Class<?>, V> climbInterfaces(Class<?> clazz) {
+    V v;
+    for (Class<?> c : clazz.getInterfaces()) {
+      if (null != (v = super.get(c))) {
+        return Tuple.of(c, v);
+      }
+    }
+    for (Class<?> c : clazz.getInterfaces()) {
+      Tuple<Class<?>, V> t = climbInterfaces(c);
+      if (t != null) {
+        return t;
+      }
+    }
+    v = super.get(Object.class);
+    return v == null ? null : Tuple.of(Object.class, v);
   }
 
   @Override
