@@ -1,4 +1,4 @@
-package nl.naturalis.common.collection;
+package nl.naturalis.common.unsafe;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -297,7 +297,7 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
    *
    * @return The backing array of this {@code UnsafeList}
    */
-  public E[] getArray() {
+  public E[] getBackingArray() {
     return data;
   }
 

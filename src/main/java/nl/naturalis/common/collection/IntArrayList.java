@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.ThrowingIntConsumer;
-import nl.naturalis.common.util.AugmentationType;
+import nl.naturalis.common.util.ExpansionType;
 
 /**
  * A {@code List} of {@code int} values. The backing array is exposed via the {@link #toArray()}
@@ -22,7 +22,7 @@ import nl.naturalis.common.util.AugmentationType;
 public class IntArrayList implements IntList {
 
   private final float eb;
-  private final AugmentationType at;
+  private final ExpansionType et;
 
   int[] buf;
   int cnt;
@@ -40,7 +40,7 @@ public class IntArrayList implements IntList {
    * fills up.
    */
   public IntArrayList(int capacity) {
-    this(capacity, 2, AugmentationType.MULTIPLY);
+    this(capacity, 2, ExpansionType.MULTIPLY);
   }
 
   /**
@@ -48,13 +48,13 @@ public class IntArrayList implements IntList {
    * specified amount of elements each time it fills up.
    */
   public IntArrayList(int capacity, int enlargeBy) {
-    this(capacity, enlargeBy, AugmentationType.ADD);
+    this(capacity, enlargeBy, ExpansionType.ADD);
   }
 
-  public IntArrayList(int capacity, float enlargeBy, AugmentationType incrementType) {
+  public IntArrayList(int capacity, float enlargeBy, ExpansionType expansionType) {
     this.buf = Check.that(capacity, "capacity").is(gt(), 0).ok(int[]::new);
     this.eb = Check.that(enlargeBy, "incrementBy").is(greaterThan(), 0).ok();
-    this.at = Check.notNull(incrementType, "incrementType").ok();
+    this.et = Check.notNull(expansionType, "expansionType").ok();
   }
 
   /**
@@ -67,13 +67,13 @@ public class IntArrayList implements IntList {
     if (other.getClass() == IntArrayList.class) {
       IntArrayList that = (IntArrayList) other;
       this.eb = that.eb;
-      this.at = that.at;
+      this.et = that.et;
       this.cnt = that.cnt;
       this.buf = new int[cnt];
       System.arraycopy(that.buf, 0, this.buf, 0, cnt);
     } else {
       this.eb = 2F;
-      this.at = AugmentationType.MULTIPLY;
+      this.et = ExpansionType.MULTIPLY;
       this.cnt = other.size();
       if (other.getClass() == UnmodifiableIntList.class) {
         this.buf = other.toArray();
@@ -203,7 +203,7 @@ public class IntArrayList implements IntList {
   }
 
   private void increaseCapacity(int minIncrease) {
-    int capacity = at.augment(buf.length, eb, minIncrease);
+    int capacity = et.increaseCapacity(buf.length, eb, minIncrease);
     int[] newBuf = new int[capacity];
     System.arraycopy(buf, 0, newBuf, 0, cnt);
     buf = newBuf;

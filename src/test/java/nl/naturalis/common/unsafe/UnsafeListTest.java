@@ -1,9 +1,10 @@
-package nl.naturalis.common.collection;
+package nl.naturalis.common.unsafe;
 
 import static org.junit.Assert.*;
 
 import java.util.List;
 import org.junit.Test;
+import nl.naturalis.common.unsafe.UnsafeList;
 
 public class UnsafeListTest {
 
@@ -66,7 +67,7 @@ public class UnsafeListTest {
     list.set(0, 8L);
     list.set(2, 4L);
     list.remove(2);
-    assertArrayEquals(new Long[] {8L, null, null, null}, list.getArray());
+    assertArrayEquals(new Long[] {8L, null, null, null}, list.getBackingArray());
   }
 
   @Test
@@ -75,7 +76,7 @@ public class UnsafeListTest {
     list.set(0, 8L);
     list.set(2, 4L);
     list.remove(8L);
-    assertArrayEquals(new Long[] {null, null, 4L, null}, list.getArray());
+    assertArrayEquals(new Long[] {null, null, 4L, null}, list.getBackingArray());
   }
 
   @Test
@@ -84,7 +85,7 @@ public class UnsafeListTest {
     list.set(0, (short) 8);
     list.set(2, (short) 4);
     list.remove(2);
-    assertArrayEquals(new Short[] {8, null, null, null}, list.getArray());
+    assertArrayEquals(new Short[] {8, null, null, null}, list.getBackingArray());
   }
 
   @Test
@@ -93,7 +94,7 @@ public class UnsafeListTest {
     list.set(0, "Hello");
     list.set(2, "World");
     list.remove("World");
-    assertArrayEquals(new String[] {"Hello", null, null, null}, list.getArray());
+    assertArrayEquals(new String[] {"Hello", null, null, null}, list.getBackingArray());
   }
 
   @Test
@@ -102,7 +103,7 @@ public class UnsafeListTest {
     list.set(0, "Hello");
     list.set(2, "World");
     list.removeAll(List.of("a", "b", "World"));
-    assertArrayEquals(new String[] {"Hello", null, null, null}, list.getArray());
+    assertArrayEquals(new String[] {"Hello", null, null, null}, list.getBackingArray());
   }
 
   @Test
@@ -111,7 +112,7 @@ public class UnsafeListTest {
     list.set(0, "Hello");
     list.set(2, "World");
     list.removeAll(List.of("a", "b", "World", "Hello"));
-    assertArrayEquals(new String[] {null, null, null, null}, list.getArray());
+    assertArrayEquals(new String[] {null, null, null, null}, list.getBackingArray());
   }
 
   @Test
@@ -121,7 +122,7 @@ public class UnsafeListTest {
     list.set(2, "World");
     list.set(3, "World");
     list.remove("World");
-    assertArrayEquals(new String[] {"Hello", null, null, "World"}, list.getArray());
+    assertArrayEquals(new String[] {"Hello", null, null, "World"}, list.getBackingArray());
   }
 
   @Test
@@ -132,6 +133,6 @@ public class UnsafeListTest {
     list.set(2, "World");
     list.set(3, "Bar");
     list.retainAll(List.of("Foo", "Bar"));
-    assertArrayEquals(new String[] {null, "Foo", null, "Bar"}, list.getArray());
+    assertArrayEquals(new String[] {null, "Foo", null, "Bar"}, list.getBackingArray());
   }
 }

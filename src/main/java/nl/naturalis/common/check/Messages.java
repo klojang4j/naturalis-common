@@ -6,8 +6,8 @@ import java.util.Set;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import nl.naturalis.common.ArrayMethods;
+import nl.naturalis.common.Pair;
 import nl.naturalis.common.StringMethods;
-import nl.naturalis.common.collection.IntList;
 import nl.naturalis.common.collection.TypeSet;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
@@ -255,27 +255,27 @@ class Messages {
 
   static Formatter msgBetween() {
     return md -> {
-      IntList il = (IntList) md.object();
+      Pair pair = (Pair) md.object();
       String fmt;
       if (md.negated()) {
-        fmt = "%s must be < %d or >= %d (was %d)";
+        fmt = "%s must be < %s or >= %s (was %s)";
       } else {
-        fmt = "%s must be >= %d and < %d (was %d)";
+        fmt = "%s must be >= %s and < %s (was %s)";
       }
-      return format(fmt, md.argName(), il.get(0), il.get(1), md.argument());
+      return format(fmt, md.argName(), pair.getFirst(), pair.getSecond(), md.argument());
     };
   }
 
   static Formatter msgInRangeClosed() {
     return md -> {
-      IntList il = (IntList) md.object();
+      Pair pair = (Pair) md.object();
       String fmt;
       if (md.negated()) {
-        fmt = "%s must be <= %d or >= %d (was %d)";
+        fmt = "%s must be < %s or > %s (was %s)";
       } else {
-        fmt = "%s must be >= %d and <= %d (was %d)";
+        fmt = "%s must be >= %s and <= %s (was %s)";
       }
-      return format(fmt, md.argName(), il.get(0), il.get(1), md.argument());
+      return format(fmt, md.argName(), pair.getFirst(), pair.getSecond(), md.argument());
     };
   }
 

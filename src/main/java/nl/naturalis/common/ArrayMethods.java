@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.collection.UnsafeList;
+import nl.naturalis.common.unsafe.UnsafeList;
 import static java.lang.System.arraycopy;
 import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.check.CommonChecks.*;

@@ -1,27 +1,24 @@
-package nl.naturalis.common.io;
-
-import static nl.naturalis.common.check.CommonChecks.greaterThan;
-import static nl.naturalis.common.check.CommonChecks.atMost;
-import static nl.naturalis.common.check.CommonChecks.gt;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.lte;
-import static nl.naturalis.common.check.CommonGetters.length;
-import static nl.naturalis.common.util.AugmentationType.MULTIPLY;
+package nl.naturalis.common.unsafe;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.util.AugmentationType;
+import nl.naturalis.common.util.ExpansionType;
+import static nl.naturalis.common.check.CommonChecks.atMost;
+import static nl.naturalis.common.check.CommonChecks.greaterThan;
+import static nl.naturalis.common.check.CommonChecks.gt;
+import static nl.naturalis.common.check.CommonChecks.lte;
+import static nl.naturalis.common.check.CommonGetters.length;
+import static nl.naturalis.common.util.ExpansionType.MULTIPLY;
 
 /**
  * An output stream in which the data is written into a byte array. The buffer automatically grows
  * as data is written to it. Contrary to Java's own {@link ByteArrayOutputStream}, the internal byte
- * array is exposed to the client: calling {@link #toByteArray()} returns the byte array rather than
- * a copy of it. Note, however, that you must therefore use {@link #toByteArray()} in combination
- * with the {@link #byteCount()} method to extract the "live" bytes - e.g <code>
- * new String(out.toArray(), 0, out.count())</code>.
+ * array is exposed to the client via {@link #getBackingArray()}. Note, however, that you must
+ * therefore use {@code getBackingArray()} in combination with the {@link #size()} method to extract
+ * the "live" bytes - e.g {@code new String(out.toArray(), 0, out.count())}.
  *
  * <p>This class also lets you specify how to increase the size of the byte array once it reaches
  * full capacity.
@@ -34,7 +31,7 @@ import nl.naturalis.common.util.AugmentationType;
 public class UnsafeByteArrayOutputStream extends OutputStream {
 
   private final float ib;
-  private final AugmentationType it;
+  private final ExpansionType et;
 
   private byte[] buf;
   private int cnt;
@@ -80,7 +77,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    *     IncrementType} you choose, the buffer capacity will always be increased enough to sustain
    *     the {@code write} action.
    */
-  public UnsafeByteArrayOutputStream(int size, float incrementBy, AugmentationType incrementType) {
+  public UnsafeByteArrayOutputStream(int size, float incrementBy, ExpansionType incrementType) {
     this(new byte[size], 0, incrementBy, incrementType);
   }
 
@@ -96,11 +93,11 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    *     IncrementType} you choose, the buffer capacity will always be increased by at least 1.
    */
   public UnsafeByteArrayOutputStream(
-      byte[] buf, int offset, float incrementBy, AugmentationType incrementType) {
+      byte[] buf, int offset, float incrementBy, ExpansionType incrementType) {
     this.buf = Check.notNull(buf, "buf").has(length(), gt(), 0).ok();
     this.cnt = Check.that(offset, "offset").is(lte(), buf.length).ok();
     this.ib = Check.that(incrementBy, "incrementBy").is(greaterThan(), 0).ok();
-    this.it = Check.notNull(incrementType, "incrementType").ok();
+    this.et = Check.notNull(incrementType, "incrementType").ok();
   }
 
   /**
@@ -136,7 +133,6 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    * @param len the number of bytes to write
    */
   public void write(byte[] b, int off, int len) {
-    Check.notNull(b, "b").has(length(), gte(), off + len).given(off >= 0, len >= 0);
     if (cnt + len > buf.length) {
       increaseCapacity(cnt + len - buf.length);
     }
@@ -158,13 +154,24 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
 
   /**
    * Returns the backing array for this instance (not a copy of it). Note that you must use this
-   * method <i>in combination with</i>the {@link #byteCount()} method to retrieve the valid bytes
-   * only.
+   * method <i>in combination with</i>the {@link #size()} method to retrieve the bytes that were
+   * actually written to this instance.
+   *
+   * @return
+   */
+  public byte[] getBackingArray() {
+    return buf;
+  }
+
+  /**
+   * Returns the bytes that were written to this instance in a new byte array.
    *
    * @return
    */
   public byte[] toByteArray() {
-    return buf;
+    byte[] copy = new byte[cnt];
+    System.arraycopy(buf, 0, copy, 0, cnt);
+    return copy;
   }
 
   /**
@@ -172,7 +179,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    *
    * @return
    */
-  public int byteCount() {
+  public int size() {
     return cnt;
   }
 
@@ -192,7 +199,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
 
   private void increaseCapacity(int minIncrease) {
     long newSize;
-    switch (it) {
+    switch (et) {
       case ADD:
         newSize = buf.length + Math.max(minIncrease, (int) ib);
         break;

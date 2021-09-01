@@ -1,12 +1,12 @@
 package nl.naturalis.common.check;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import nl.naturalis.common.*;
-import nl.naturalis.common.collection.IntList;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
@@ -833,17 +833,52 @@ public class CommonChecks {
   /* ++++++++++++++ IntObjRelation ++++++++++++++ */
 
   /**
-   * Verifies that an integer is between to values, the first one included, the second one excluded.
-   * The provided {@link IntList} must contain exactly two integers.
+   * Verifies that a number lies between two other numbers, the first one included, the second one
+   * excluded. If the type of the numbers in the {@code Pair} is different from the type of the
+   * number to be tested, all numbers are first converted to double instances, unless one of the
+   * types is {@link BigDecimal}, in which case the comparison is scaled up to a {@code BigDecimal}
+   * comparison.
    *
-   * @return An {@code IntObjRelation} that expresses the described test
+   * @return A {@code Relation} that implements the test described above
    */
-  public static IntObjRelation<IntList> between() {
+  public static <T extends Number, U extends Number> Relation<T, Pair<U>> between() {
     return (x, y) -> {
-      if (y.size() != 2) {
-        throw new InvalidCheckException("IntList must contain exactly 2 integers");
+      if (x.getClass() != y.getFirst().getClass()) {
+        if (x.getClass() == BigDecimal.class || y.getFirst().getClass() == BigDecimal.class) {
+          BigDecimal bd0 = NumberMethods.convert(x, BigDecimal.class);
+          BigDecimal bd1 = NumberMethods.convert(y.getFirst(), BigDecimal.class);
+          BigDecimal bd2 = NumberMethods.convert(y.getSecond(), BigDecimal.class);
+          return bd0.compareTo(bd1) >= 0 && bd0.compareTo(bd2) < 0;
+        }
+        double d0 = x.doubleValue();
+        double d1 = y.getFirst().doubleValue();
+        double d2 = y.getSecond().doubleValue();
+        return d0 >= d1 && d0 < d2;
       }
-      return x >= y.get(0) && x < y.get(1);
+      if (x.getClass() == Integer.class) {
+        int n = (Integer) x;
+        return n >= (Integer) y.getFirst() && n < (Integer) y.getSecond();
+      } else if (x.getClass() == Double.class) {
+        double n = (Double) x;
+        return n >= (Double) y.getFirst() && n < (Double) y.getSecond();
+      } else if (x.getClass() == Long.class) {
+        long n = (Long) x;
+        return n >= (Long) y.getFirst() && n < (Long) y.getSecond();
+      } else if (x.getClass() == Byte.class) {
+        byte n = (Byte) x;
+        return n >= (Byte) y.getFirst() && n < (Float) y.getSecond();
+      } else if (x.getClass() == Float.class) {
+        float n = (Float) x;
+        return n >= (Float) y.getFirst() && n < (Float) y.getSecond();
+      } else if (x.getClass() == Short.class) {
+        short n = (Short) x;
+        return n >= (Short) y.getFirst() && n < (Short) y.getSecond();
+      } else if (x.getClass() == BigDecimal.class) {
+        BigDecimal n = (BigDecimal) x;
+        return n.compareTo((BigDecimal) y.getFirst()) >= 0
+            && n.compareTo((BigDecimal) y.getSecond()) < 0;
+      }
+      return Check.fail("Ouch, a new type of number: %s", x.getClass());
     };
   }
 
@@ -853,17 +888,48 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that an integer is between to values, both included. The provided {@link IntList} must
-   * contain exactly two integers.
+   * Verifies that a number lies between two other numbers, both included.
    *
-   * @return An {@code IntObjRelation} that expresses the described test
+   * @return A {@code Relation} that implements the test described above
    */
-  public static IntObjRelation<IntList> inRangeClosed() {
+  public static <T extends Number> Relation<T, Pair<T>> inRangeClosed() {
     return (x, y) -> {
-      if (y.size() != 2) {
-        throw new InvalidCheckException("IntList must contain exactly 2 integers");
+      if (x.getClass() != y.getFirst().getClass()) {
+        if (x.getClass() == BigDecimal.class || y.getFirst().getClass() == BigDecimal.class) {
+          BigDecimal bd0 = NumberMethods.convert(x, BigDecimal.class);
+          BigDecimal bd1 = NumberMethods.convert(y.getFirst(), BigDecimal.class);
+          BigDecimal bd2 = NumberMethods.convert(y.getSecond(), BigDecimal.class);
+          return bd0.compareTo(bd1) >= 0 && bd0.compareTo(bd2) <= 0;
+        }
+        double d0 = x.doubleValue();
+        double d1 = y.getFirst().doubleValue();
+        double d2 = y.getSecond().doubleValue();
+        return d0 >= d1 && d0 <= d2;
       }
-      return x >= y.get(0) && x <= y.get(1);
+      if (x.getClass() == Integer.class) {
+        int n = (Integer) x;
+        return n >= (Integer) y.getFirst() && n <= (Integer) y.getSecond();
+      } else if (x.getClass() == Double.class) {
+        double n = (Double) x;
+        return n >= (Double) y.getFirst() && n <= (Double) y.getSecond();
+      } else if (x.getClass() == Long.class) {
+        long n = (Long) x;
+        return n >= (Long) y.getFirst() && n <= (Long) y.getSecond();
+      } else if (x.getClass() == Byte.class) {
+        byte n = (Byte) x;
+        return n >= (Byte) y.getFirst() && n <= (Float) y.getSecond();
+      } else if (x.getClass() == Float.class) {
+        float n = (Float) x;
+        return n >= (Float) y.getFirst() && n <= (Float) y.getSecond();
+      } else if (x.getClass() == Short.class) {
+        short n = (Short) x;
+        return n >= (Short) y.getFirst() && n <= (Short) y.getSecond();
+      } else if (x.getClass() == BigDecimal.class) {
+        BigDecimal n = (BigDecimal) x;
+        return n.compareTo((BigDecimal) y.getFirst()) >= 0
+            && n.compareTo((BigDecimal) y.getSecond()) <= 0;
+      }
+      return Check.fail("Ouch, a new type of number: %s", x.getClass());
     };
   }
 

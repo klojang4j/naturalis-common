@@ -18,7 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.io.UnsafeByteArrayOutputStream;
+import nl.naturalis.common.unsafe.UnsafeByteArrayOutputStream;
 
 /**
  * I/O-related methods.
@@ -62,7 +62,7 @@ public class IOMethods {
   public static String toString(InputStream in, int chunkSize) {
     UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(chunkSize);
     pipe(in, out, chunkSize);
-    return new String(out.toByteArray(), 0, out.byteCount(), StandardCharsets.UTF_8);
+    return new String(out.toByteArray(), 0, out.size(), StandardCharsets.UTF_8);
   }
 
   public static byte[] read(InputStream in) {

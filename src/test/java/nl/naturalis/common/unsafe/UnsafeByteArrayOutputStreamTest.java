@@ -1,20 +1,19 @@
-package nl.naturalis.common.io;
+package nl.naturalis.common.unsafe;
 
+import org.junit.Test;
+import nl.naturalis.common.util.ExpansionType;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import nl.naturalis.common.util.AugmentationType;
-import org.junit.Test;
-
-public class ExposedByteArrayOutputStreamTest {
+public class UnsafeByteArrayOutputStreamTest {
   @Test
   public void test00() {
     @SuppressWarnings("resource")
     UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(2);
     out.write(new byte[0]);
-    byte[] arr = out.toByteArray();
+    byte[] arr = out.getBackingArray();
     assertEquals("01", 2, arr.length);
-    assertEquals("02", 0, out.byteCount());
+    assertEquals("02", 0, out.size());
   }
 
   @Test
@@ -22,9 +21,9 @@ public class ExposedByteArrayOutputStreamTest {
     @SuppressWarnings("resource")
     UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(2);
     out.write(new byte[] {123});
-    byte[] arr = out.toByteArray();
+    byte[] arr = out.getBackingArray();
     assertEquals("01", 2, arr.length);
-    assertArrayEquals("02", new byte[] {123, 0}, out.toByteArray());
+    assertArrayEquals("02", new byte[] {123, 0}, out.getBackingArray());
   }
 
   @Test
@@ -40,7 +39,7 @@ public class ExposedByteArrayOutputStreamTest {
   @Test
   public void test03() {
     @SuppressWarnings("resource")
-    UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(2, 1, AugmentationType.ADD);
+    UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(2, 1, ExpansionType.ADD);
     out.write(new byte[] {123, 7, 22});
     byte[] arr = out.toByteArray();
     assertEquals("01", 3, arr.length);
@@ -50,7 +49,7 @@ public class ExposedByteArrayOutputStreamTest {
   @Test
   public void test04() {
     @SuppressWarnings("resource")
-    UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(2, 1, AugmentationType.ADD);
+    UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(2, 1, ExpansionType.ADD);
     out.write(new byte[] {123, 7, 22, 16});
     byte[] arr = out.toByteArray();
     assertEquals("01", 4, arr.length);
@@ -60,7 +59,7 @@ public class ExposedByteArrayOutputStreamTest {
   @Test
   public void test05() {
     @SuppressWarnings("resource")
-    UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(2, 1, AugmentationType.ADD);
+    UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(2, 1, ExpansionType.ADD);
     out.write(33);
     out.write(new byte[] {123, 7, 22, 16});
     byte[] arr = out.toByteArray();
@@ -71,7 +70,7 @@ public class ExposedByteArrayOutputStreamTest {
   @Test
   public void test06() {
     @SuppressWarnings("resource")
-    UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(2, 1, AugmentationType.ADD);
+    UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(2, 1, ExpansionType.ADD);
     out.write(33);
     out.write(34);
     out.write(new byte[] {123, 7, 22, 16});
@@ -83,7 +82,7 @@ public class ExposedByteArrayOutputStreamTest {
   @Test
   public void test07() {
     @SuppressWarnings("resource")
-    UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(2, 1, AugmentationType.ADD);
+    UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(2, 1, ExpansionType.ADD);
     out.write(33);
     out.write(34);
     out.write(35);
@@ -96,7 +95,7 @@ public class ExposedByteArrayOutputStreamTest {
   @Test
   public void test08() {
     @SuppressWarnings("resource")
-    UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(2, 1, AugmentationType.ADD);
+    UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(2, 1, ExpansionType.ADD);
     out.write(33);
     out.write(new byte[] {123, 7, 22, 16});
     out.write(34);
