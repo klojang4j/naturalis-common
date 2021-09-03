@@ -62,7 +62,7 @@ public class IOMethods {
   public static String toString(InputStream in, int chunkSize) {
     UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(chunkSize);
     pipe(in, out, chunkSize);
-    return new String(out.toByteArray(), 0, out.size(), StandardCharsets.UTF_8);
+    return new String(out.getBackingArray(), 0, out.size(), StandardCharsets.UTF_8);
   }
 
   public static byte[] read(InputStream in) {

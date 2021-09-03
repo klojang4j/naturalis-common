@@ -1,10 +1,8 @@
 package nl.naturalis.common;
 
+import java.util.Set;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
-
-import java.util.Set;
-import nl.naturalis.common.check.Check;
 
 /**
  * Converts values from various non-boolean types to boolean values. Where applicable, {@code null}
@@ -180,7 +178,7 @@ public class Bool {
     if (trueStrings.contains(s.toLowerCase())) {
       return TRUE;
     }
-    return Check.fail("Cannot parse \"%s\" into Boolean", s);
+    throw new TypeConversionException(s, Boolean.class);
   }
 
   /**
@@ -258,6 +256,6 @@ public class Bool {
   }
 
   private static Boolean noCanDo(Object obj) {
-    return Check.fail("Cannot convert %s to Boolean", obj);
+    throw new TypeConversionException(obj, Boolean.class);
   }
 }

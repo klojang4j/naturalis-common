@@ -53,7 +53,7 @@ public class NumberMethodsTest {
     assertTrue(fitsInto(3.0000000000000001D, Integer.class));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = TypeConversionException.class)
   public void convert01() {
     NumberMethods.convert(300345, Byte.class);
   }
@@ -70,7 +70,7 @@ public class NumberMethodsTest {
     assertEquals((byte) 123, b);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = TypeConversionException.class)
   public void convert04() {
     NumberMethods.convert(123.02F, Byte.class);
   }
@@ -82,7 +82,7 @@ public class NumberMethodsTest {
     assertSame(f0, f1);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = TypeConversionException.class)
   public void convert06() {
     NumberMethods.convert(.3D, Short.class);
   }
@@ -93,7 +93,7 @@ public class NumberMethodsTest {
     assertEquals((short) 3, s);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = TypeConversionException.class)
   public void convert08() {
     NumberMethods.convert(Integer.MIN_VALUE, Short.class);
   }
@@ -104,7 +104,7 @@ public class NumberMethodsTest {
     assertEquals(0, i);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = TypeConversionException.class)
   public void parse01() {
     NumberMethods.parse("300345", Byte.class);
   }
@@ -115,7 +115,7 @@ public class NumberMethodsTest {
     assertEquals((byte) 123, b);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = TypeConversionException.class)
   public void parse04() {
     NumberMethods.parse("123.02", Byte.class);
   }
@@ -126,7 +126,7 @@ public class NumberMethodsTest {
     assertEquals((Float) .9F, f1);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = TypeConversionException.class)
   public void parse06() {
     NumberMethods.parse(".3", Short.class);
   }
@@ -137,7 +137,7 @@ public class NumberMethodsTest {
     assertEquals((short) 3, s);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = TypeConversionException.class)
   public void parse08() {
     NumberMethods.parse(String.valueOf(Integer.MIN_VALUE), Short.class);
   }

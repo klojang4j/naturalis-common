@@ -168,7 +168,7 @@ public class SaveBeanReader<T> {
    *
    * @return The bean properties that will actually be read by this {@code BeanReader}
    */
-  public Set<String> getUsedProperties() {
+  public Set<String> getIncludedProperties() {
     return getters.keySet();
   }
 
@@ -178,7 +178,7 @@ public class SaveBeanReader<T> {
    *
    * @return All getters used to read bean properties.
    */
-  public Map<String, Getter> getUsedGetters() {
+  public Map<String, Getter> getIncludedGetters() {
     return getters;
   }
 }

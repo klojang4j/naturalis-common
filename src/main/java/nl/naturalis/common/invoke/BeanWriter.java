@@ -4,9 +4,13 @@ import java.lang.invoke.MethodHandle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import nl.naturalis.common.Loose;
+import nl.naturalis.common.TypeConversionException;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.function.ThrowingBiFunction;
+import static nl.naturalis.common.check.CommonChecks.deepNotEmpty;
+import static nl.naturalis.common.check.CommonChecks.empty;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
-import static nl.naturalis.common.check.CommonChecks.neverNull;
 import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 
 /**
@@ -20,51 +24,121 @@ import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
  */
 public class BeanWriter<T> {
 
+  private static final String ERR_NO_PUBLIC_SETTERS_LEFT =
+      "No public setters left after property inclusion/exclusion";
+  private static final String ERR_NO_PUBLIC_SETTERS =
+      "Class %s does not contain any public setters";
+
+  /**
+   * Returns a {@code BeanWriter} that allows for "loose typing" of the values to be assigned to the
+   * bean's properties. A {@link Loose} object will be used to morph the values to the type of the
+   * property for which they are destined.
+   *
+   * @param <U> The type of the bean
+   * @param beanClass The bean class
+   * @return A @code BeanWriter} for the specified class that uses a {@link Loose} to convert values
+   *     to the type of the property for which they are destined
+   */
+  public static <U> BeanWriter<U> loose(Class<U> beanClass) {
+    return new BeanWriter<>(beanClass, (obj, type) -> Loose.convert(obj, type), false);
+  }
+
+  private final Class<T> beanClass;
+  private final ThrowingBiFunction<Object, Class<?>, Object, Throwable> converter;
   private final Map<String, Setter> setters;
 
   /**
-   * Creates a {@code BeanReader} for the specified class.
+   * Creates a {@code BeanWriter} for the specified properties of the specified class. You can
+   * optionally specify an array of properties that you intend to write. Specifying {@code null} or
+   * a zero-length array will allow you to write <i>all</i> of the bean's properties.
    *
    * @param beanClass The bean class
-   */
-  public BeanWriter(Class<T> beanClass) {
-    setters = Check.notNull(beanClass).ok(SetterFactory.INSTANCE::getSetters);
-  }
-
-  /**
-   * Creates a {@code BeanReader} for the specified class and the specified properties.
-   *
-   * @param beanClass The bean class
-   * @param properties The properties you intend to write
+   * @param properties The properties you intend to write (may be {@code null} or zero-length)
    */
   public BeanWriter(Class<T> beanClass, String... properties) {
     this(beanClass, false, properties);
   }
 
+  public BeanWriter(
+      Class<T> beanClass, ThrowingBiFunction<Object, Class<?>, Object, Throwable> converter) {
+    this(beanClass, converter, true);
+  }
+
   /**
-   * Creates a {@code BeanWriter} for the specified class and the specified properties of that
-   * class. If you intend to use this {@code BeanWriter} to repetitively to read just one or two
-   * properties from bulky bean types, explicitly specifying the properties you intend to read might
-   * make the {@code BeanReader} slightly more efficient. Otherwise you may specify {@code null} or
-   * a zero-length array to indicate that you intend to read all properties.
+   * Creates a {@code BeanWriter} for the specified class. You can optionally specify an array of
+   * properties that you intend or do <i>not</i> intend to write. Specifying {@code null} or a
+   * zero-length array will allow you to write <i>all</i> of the bean's properties.
    *
    * @param beanClass The bean class
    * @param exclude Whether to exclude or include the specified properties
-   * @param properties The properties you are, or ar not interested in
+   * @param properties The properties you intend to read (may be {@code null} or zero-length)
    */
   public BeanWriter(Class<T> beanClass, boolean exclude, String... properties) {
-    Check.notNull(beanClass, "beanClass");
+    this(beanClass, (obj, type) -> obj, exclude, properties);
+  }
+
+  /**
+   * Creates a {@code BeanWriter} for the specified class. You can optionally specify an array of
+   * properties that you intend or do <i>not</i> intend to write. Specifying {@code null} or a
+   * zero-length array will allow you to write <i>all</i> of the bean's properties. If you intend to
+   * use this {@code BeanWriter} to repetitively to write just one or two properties from bulky bean
+   * types, explicitly specifying the properties you intend to write might make the {@code
+   * BeanWriter} marginally more efficient. In addition you can also specify a function that
+   * converts the values passed to the {@link #set(Object, String, Object) set} method to the type
+   * of the property for which they are destined.
+   *
+   * @see Loose
+   * @param beanClass The bean class
+   * @param converter A function that takes the value passed to the {@link #set(Object, String,
+   *     Object) set} method (first parameter) and the target type (second parameter) and produces
+   *     the value that is actually going to be assigned to the property
+   * @param exclude Whether to exclude or include the specified properties
+   * @param properties The properties you intend to read (may be {@code null} or zero-length)
+   */
+  public BeanWriter(
+      Class<T> beanClass,
+      ThrowingBiFunction<Object, Class<?>, Object, Throwable> converter,
+      boolean exclude,
+      String... properties) {
+    this.beanClass = Check.notNull(beanClass, "beanClass").ok();
+    this.converter = converter;
+    Map<String, Setter> tmp = SetterFactory.INSTANCE.getSetters(beanClass);
+    Check.that(tmp).isNot(empty(), ERR_NO_PUBLIC_SETTERS, beanClass.getName());
     if (properties == null || properties.length == 0) {
-      setters = SetterFactory.INSTANCE.getSetters(beanClass);
+      this.setters = tmp;
     } else {
-      Check.that(properties, "properties").is(neverNull());
-      Map<String, Setter> copy = new HashMap<>(SetterFactory.INSTANCE.getSetters(beanClass));
+      Check.that(properties, "properties").is(deepNotEmpty());
+      Map<String, Setter> copy = new HashMap<>(tmp);
       if (exclude) {
         copy.keySet().removeAll(Set.of(properties));
       } else {
         copy.keySet().retainAll(Set.of(properties));
       }
+      Check.that(copy).isNot(empty(), ERR_NO_PUBLIC_SETTERS_LEFT);
       this.setters = Map.copyOf(copy);
+    }
+  }
+
+  /**
+   * Populates the provided JavaBean with the values in the specified {@code Map}. Map keys that do
+   * not correspond to bean properties are ignored.
+   *
+   * @param bean The JavaBean to populate
+   * @param data The {@code Map} providing the data for the JavaBean
+   * @throws Throwable Any {@code Throwable} thrown from inside the {@code java.lang.invoke} package
+   *     or a {@link TypeConversionException} if loose typing was specified through the constructor
+   *     and one or more values in the {@code Map} could not be converted to the appropriate type
+   */
+  public void set(T bean, Map<String, Object> data) throws Throwable {
+    Check.notNull(bean, "bean");
+    Check.notNull(data, "data");
+    for (Map.Entry<String, Object> e : data.entrySet()) {
+      String k = e.getKey();
+      if (k != null && setters.containsKey(k)) {
+        Object v = e.getValue();
+        Setter setter = setters.get(k);
+        setter.write(bean, converter.apply(v, setter.getParamType()));
+      }
     }
   }
 
@@ -74,12 +148,44 @@ public class BeanWriter<T> {
    * @param bean The bean instance
    * @param property The property @Param value The value to set it to
    * @throws Throwable Any {@code Throwable} thrown from inside the {@code java.lang.invoke} package
+   *     or a {@link TypeConversionException} if loose typing was specified through the constructor
+   *     and one or more values in the {@code Map} could not be converted to the appropriate type
    */
   public void set(T bean, String property, Object value) throws Throwable {
     Check.notNull(bean, "bean");
     Check.notNull(property, "property");
     Check.on(s -> noSuchProperty(bean, property), property).is(keyIn(), setters);
     Setter setter = setters.get(property);
-    setter.write(bean, value);
+    setter.write(bean, converter.apply(value, setter.getParamType()));
+  }
+
+  /**
+   * Returns the type of the objects this {@code BeanReader} can read.
+   *
+   * @return The type of the objects {@code BeanReader} can read
+   */
+  public Class<? super T> getBeanClass() {
+    return beanClass;
+  }
+
+  /**
+   * Returns the bean properties that can be set by this {@code BeanWriter}, which may not be all of
+   * the bean's properties, depending on which constructor was used to instantiate the {@code
+   * BeanWriter}.
+   *
+   * @return The bean properties that can be set by this {@code BeanWriter}
+   */
+  public Set<String> getIncludedProperties() {
+    return setters.keySet();
+  }
+
+  /**
+   * Returns the {@link Setter setters} used by the {@code BeanWriter} to write bean properties. The
+   * returned {@code Map} maps the name of a property to the {@code Setter} used to write it.
+   *
+   * @return The {@link Setter setters} used by the {@code BeanWriter} to write bean properties.
+   */
+  public Map<String, Setter> getIncludedSetters() {
+    return setters;
   }
 }

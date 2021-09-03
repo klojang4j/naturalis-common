@@ -11,6 +11,7 @@ import static java.lang.Character.isUpperCase;
 import static java.lang.Character.toLowerCase;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.stream.Collectors.joining;
+import static nl.naturalis.common.ArrayMethods.isOneOf;
 import static nl.naturalis.common.CollectionMethods.swapAndFreeze;
 import static nl.naturalis.common.check.CommonChecks.array;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
@@ -40,7 +41,9 @@ public class ClassMethods {
 
   /**
    * Tests whether the 1st argument is an instance of the 2nd argument. Equivalent to <code>
-   * superOrInterface.isInstance(objectToTest)</code>.
+   * superOrInterface.isInstance(objectToTest)</code>. Note that, since this method is overloaded
+   * with {@code Class} as the type of the first parameter, you cannot and should not use this
+   * method to figure out if a {@code Class} object is an instance of some interface or super class.
    *
    * @param objectToTest The object to test
    * @param superOrInterface The class or interface to test the object against
@@ -50,6 +53,11 @@ public class ClassMethods {
     Check.notNull(objectToTest, "objectToTest");
     Check.notNull(superOrInterface, "superOrInterface");
     return superOrInterface.isInstance(objectToTest);
+  }
+
+  public static final boolean isPrimitiveNumberClass(Class<?> classToTest) {
+    return isOneOf(
+        classToTest, int.class, double.class, long.class, byte.class, float.class, short.class);
   }
 
   /**
@@ -95,8 +103,20 @@ public class ClassMethods {
   // wrappper-to-primitve
   private static final Map<Class<?>, Class<?>> w2p = swapAndFreeze(p2w);
 
+  public static boolean isPrimitiveClassOf(Class<?> primitiveClass, Class<?> classToTest) {
+    Check.notNull(primitiveClass);
+    Check.notNull(classToTest);
+    return p2w.get(primitiveClass) == classToTest;
+  }
+
+  public static boolean isWrapperClassOf(Class<?> wrapperClass, Class<?> classToTest) {
+    Check.notNull(wrapperClass);
+    Check.notNull(classToTest);
+    return w2p.get(wrapperClass) == classToTest;
+  }
+
   public static Class<?> getWrapperClass(Class<?> primitiveClass) {
-    return Check.that(primitiveClass)
+    return Check.notNull(primitiveClass)
         .is(keyIn(), p2w, "Not a primitive class: %s", primitiveClass)
         .ok(p2w::get);
   }

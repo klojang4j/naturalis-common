@@ -16,19 +16,6 @@ import nl.naturalis.common.check.Check;
  */
 public class NumberMethods {
 
-  /** Zero as Integer */
-  public static final Integer ZERO_INT = 0;
-  /** Zero as Double */
-  public static final Double ZERO_DOUBLE = 0D;
-  /** Zero as Long */
-  public static final Long ZERO_LONG = 0L;
-  /** Zero as Float */
-  public static final Float ZERO_FLOAT = 0F;
-  /** Zero as Short */
-  public static final Short ZERO_SHORT = 0;
-  /** Zero as Byte */
-  public static final Byte ZERO_BYTE = 0;
-
   /**
    * Returns whether or not the specified string represents a valid integer.
    *

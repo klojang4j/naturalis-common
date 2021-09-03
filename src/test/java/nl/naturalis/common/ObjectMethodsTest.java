@@ -1,11 +1,6 @@
 package nl.naturalis.common;
 
-import static nl.naturalis.common.NumberMethods.ZERO_BYTE;
-import static nl.naturalis.common.NumberMethods.ZERO_DOUBLE;
-import static nl.naturalis.common.NumberMethods.ZERO_FLOAT;
-import static nl.naturalis.common.NumberMethods.ZERO_INT;
-import static nl.naturalis.common.NumberMethods.ZERO_LONG;
-import static nl.naturalis.common.NumberMethods.ZERO_SHORT;
+import static nl.naturalis.common.NumberMethods.*;
 import static nl.naturalis.common.ObjectMethods.e2nDeepEquals;
 import static nl.naturalis.common.ObjectMethods.ifEmpty;
 import static nl.naturalis.common.ObjectMethods.ifFalse;
@@ -191,12 +186,12 @@ public class ObjectMethodsTest {
 
   @Test
   public void n2e01() {
-    assertTrue(ObjectMethods.n2e((Integer) null) == ZERO_INT);
-    assertTrue(ObjectMethods.n2e((Double) null) == ZERO_DOUBLE);
-    assertTrue(ObjectMethods.n2e((Long) null) == ZERO_LONG);
-    assertTrue(ObjectMethods.n2e((Float) null) == ZERO_FLOAT);
-    assertTrue(ObjectMethods.n2e((Short) null) == ZERO_SHORT);
-    assertTrue(ObjectMethods.n2e((Byte) null) == ZERO_BYTE);
+    assertTrue(ObjectMethods.n2e((Integer) null) == ObjectMethods.ZERO_INT);
+    assertTrue(ObjectMethods.n2e((Double) null) == ObjectMethods.ZERO_DOUBLE);
+    assertTrue(ObjectMethods.n2e((Long) null) == ObjectMethods.ZERO_LONG);
+    assertTrue(ObjectMethods.n2e((Float) null) == ObjectMethods.ZERO_FLOAT);
+    assertTrue(ObjectMethods.n2e((Short) null) == ObjectMethods.ZERO_SHORT);
+    assertTrue(ObjectMethods.n2e((Byte) null) == ObjectMethods.ZERO_BYTE);
     assertTrue(ObjectMethods.n2e(2) == 2);
     assertTrue(ObjectMethods.n2e(2.0) == 2D);
     assertTrue(ObjectMethods.n2e(2L) == 2L);

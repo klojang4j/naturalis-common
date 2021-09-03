@@ -32,7 +32,9 @@ public class BeanReader<T> {
   private final Map<String, Getter> getters;
 
   /**
-   * Creates a {@code BeanReader} for the specified properties of the specified class. Strict naming
+   * Creates a {@code BeanReader} for the specified properties of the specified class. You can
+   * optionally specify an array of properties that you intend to read. Specifying {@code null} or a
+   * zero-length array will allow you to read <i>all</i> of the bean's properties. Strict naming
    * conventions will be applied to what qualifies as a getter. See {@link
    * ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method, boolean)}.
    *
@@ -44,8 +46,10 @@ public class BeanReader<T> {
   }
 
   /**
-   * Creates a {@code BeanReader} for the specified class. Strict naming conventions will be applied
-   * to what qualifies what counts as a getter. See {@link
+   * Creates a {@code BeanReader} for the specified class. You can optionally specify an array of
+   * properties that you intend or do <i>not</i> intend to read. Specifying {@code null} or a
+   * zero-length array will allow you to read <i>all</i> of the bean's properties. Strict naming
+   * conventions will be applied to what qualifies what counts as a getter. See {@link
    * ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method, boolean)}.
    *
    * @param beanClass The bean class
@@ -58,14 +62,14 @@ public class BeanReader<T> {
 
   /**
    * Creates a {@code BeanReader} for the specified class and the specified properties on that
-   * class. If you intend to use this {@code BeanReader} to repetitively to read just one or two
-   * properties from bulky bean types, explicitly specifying the properties you intend to read might
-   * make the {@code BeanReader} more efficient. Otherwise you may specify {@code null} or a
-   * zero-length array to indicate that you intend to read all properties.
+   * class. You can optionally specify an array of properties that you intend or do <i>not</i>
+   * intend to read. Specifying {@code null} or a zero-length array will allow you to read
+   * <i>all</i> of the bean's properties. If you intend to use this {@code BeanReader} to
+   * repetitively to read just one or two properties from bulky bean types, explicitly specifying
+   * the properties you intend to read might make the {@code BeanReader} marginally more efficient.
    *
-   * <p>Specifying non-existent properties (names that do not correspond to getter methods) will
-   * <i>not</i> result in an exception being thrown.has no effect. Instead they will just be
-   * silently ignored.
+   * <p>Specifying non-existent properties (names that do not correspond to getters) will have no
+   * effect. They will silently be ignored.
    *
    * @param beanClass The bean class
    * @param strictNaming Whether or not to apply strict naming conventions to what qualifies as a
@@ -128,7 +132,7 @@ public class BeanReader<T> {
    *
    * @return The bean properties that will actually be read by this {@code BeanReader}
    */
-  public Set<String> getUsedProperties() {
+  public Set<String> getIncludedProperties() {
     return getters.keySet();
   }
 
@@ -138,7 +142,7 @@ public class BeanReader<T> {
    *
    * @return All getters used to read bean properties.
    */
-  public Map<String, Getter> getUsedGetters() {
+  public Map<String, Getter> getIncludedGetters() {
     return getters;
   }
 }

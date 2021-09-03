@@ -1,29 +1,22 @@
 package nl.naturalis.common;
 
-import static nl.naturalis.common.check.CommonChecks.notNull;
-
 import java.math.BigDecimal;
-import nl.naturalis.common.check.Check;
 
 class NumberParser<T extends Number> {
-
-  private static final String ERR0 = "%s not parsable into %s";
 
   private final Class<T> targetType;
 
   NumberParser(Class<T> targetType) {
-    this.targetType = Check.notNull(targetType).ok();
+    this.targetType = targetType;
   }
 
   T parse(String s) {
-    Class<T> tt = targetType;
-    Check.that(s).is(notNull(), ERR0, s, tt.getSimpleName());
     BigDecimal bd;
     try {
       bd = new BigDecimal(s);
     } catch (NumberFormatException e) {
-      return Check.fail(ERR0, s, tt.getSimpleName());
+      throw new TypeConversionException(s, targetType);
     }
-    return new NumberConverter<>(tt).convert(bd);
+    return new NumberConverter<>(targetType).convert(bd);
   }
 }

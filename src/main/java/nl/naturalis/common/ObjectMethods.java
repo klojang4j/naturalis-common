@@ -53,6 +53,50 @@ public class ObjectMethods {
 
   private static final String ERR_NULL_OPTIONAL = "Optional must not be null";
 
+  /** Zero as Integer */
+  public static final Integer ZERO_INT = 0;
+
+  /** Zero as Double */
+  public static final Double ZERO_DOUBLE = 0D;
+
+  /** Zero as Long */
+  public static final Long ZERO_LONG = 0L;
+
+  /** Zero as Float */
+  public static final Float ZERO_FLOAT = 0F;
+
+  /** Zero as Short */
+  public static final Short ZERO_SHORT = (short) 0;
+
+  /** Zero as Byte */
+  public static final Byte ZERO_BYTE = (byte) 0;
+
+  /** Zero as Character */
+  public static final Character ZERO_CHAR = (char) 0;
+
+  /**
+   * A {@code Map} mapping the primitive types ({@code int.class}, {@code boolean.class}, etc&#46;)
+   * to their default values.
+   */
+  public static final Map<Class<?>, Object> PRIMITIVE_DEFAULTS =
+      Map.of(
+          int.class,
+          ZERO_INT,
+          boolean.class,
+          Boolean.FALSE,
+          double.class,
+          ZERO_DOUBLE,
+          long.class,
+          ZERO_LONG,
+          float.class,
+          ZERO_FLOAT,
+          short.class,
+          ZERO_SHORT,
+          byte.class,
+          ZERO_BYTE,
+          char.class,
+          ZERO_CHAR);
+
   private ObjectMethods() {}
 
   /**
@@ -685,8 +729,8 @@ public class ObjectMethods {
    * @param arg An argument of type {@code String}
    * @return The argument or the default value of the corresponding primitive type
    */
-  public static String n2e(Object arg) {
-    return ifNotNull(arg, Object::toString, StringMethods.EMPTY);
+  public static String n2e(String arg) {
+    return ifNull(arg, StringMethods.EMPTY);
   }
 
   /**
@@ -723,63 +767,63 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns {@link NumberMethods#ZERO_INT} if the argument is null, else the argument itself.
+   * Returns {@link ObjectMethods#ZERO_INT} if the argument is null, else the argument itself.
    *
    * @param arg An argument of type {@code Integer}
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Integer n2e(Integer arg) {
-    return ifNull(arg, NumberMethods.ZERO_INT);
+    return ifNull(arg, ObjectMethods.ZERO_INT);
   }
 
   /**
-   * Returns {@link NumberMethods#ZERO_DOUBLE} the argument is null, else the argument itself.
+   * Returns {@link ObjectMethods#ZERO_DOUBLE} the argument is null, else the argument itself.
    *
    * @param arg An argument of type {@code Double}
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Double n2e(Double arg) {
-    return ifNull(arg, NumberMethods.ZERO_DOUBLE);
+    return ifNull(arg, ObjectMethods.ZERO_DOUBLE);
   }
 
   /**
-   * Returns {@link NumberMethods#ZERO_LONG} if the argument is null, else the argument itself.
+   * Returns {@link ObjectMethods#ZERO_LONG} if the argument is null, else the argument itself.
    *
    * @param arg An argument of type {@code Long}
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Long n2e(Long arg) {
-    return ifNull(arg, NumberMethods.ZERO_LONG);
+    return ifNull(arg, ObjectMethods.ZERO_LONG);
   }
 
   /**
-   * Returns {@link NumberMethods#ZERO_FLOAT} if the argument is null, else the argument itself.
+   * Returns {@link ObjectMethods#ZERO_FLOAT} if the argument is null, else the argument itself.
    *
    * @param arg An argument of type {@code Float}
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Float n2e(Float arg) {
-    return ifNull(arg, NumberMethods.ZERO_FLOAT);
+    return ifNull(arg, ObjectMethods.ZERO_FLOAT);
   }
 
   /**
-   * Returns {@link NumberMethods#ZERO_SHORT} if the argument is null, else the argument itself.
+   * Returns {@link ObjectMethods#ZERO_SHORT} if the argument is null, else the argument itself.
    *
    * @param arg An argument of type {@code Short}
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Short n2e(Short arg) {
-    return ifNull(arg, NumberMethods.ZERO_SHORT);
+    return ifNull(arg, ObjectMethods.ZERO_SHORT);
   }
 
   /**
-   * Returns {@link NumberMethods#ZERO_BYTE} if the argument is null, else the argument itself.
+   * Returns {@link ObjectMethods#ZERO_BYTE} if the argument is null, else the argument itself.
    *
    * @param arg An argument of type {@code Byte}
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Byte n2e(Byte arg) {
-    return ifNull(arg, NumberMethods.ZERO_BYTE);
+    return ifNull(arg, ObjectMethods.ZERO_BYTE);
   }
 
   /**

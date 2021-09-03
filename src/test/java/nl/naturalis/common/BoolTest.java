@@ -19,7 +19,7 @@ public class BoolTest {
     assertTrue(Bool.from("yEs"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = TypeConversionException.class)
   public void test01() {
     Bool.from("01");
   }
@@ -53,17 +53,17 @@ public class BoolTest {
     assertFalse(Bool.from((byte) 0));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = TypeConversionException.class)
   public void test05() {
     Bool.from(42);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = TypeConversionException.class)
   public void test06() {
     Bool.from(0.23);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = TypeConversionException.class)
   public void test07() {
     Bool.from(new ByteArrayOutputStream());
   }

@@ -11,7 +11,7 @@ class NumberConverter<T extends Number> {
   private final Class<T> targetType;
 
   NumberConverter(Class<T> targetType) {
-    this.targetType = Check.notNull(targetType).ok();
+    this.targetType = targetType;
   }
 
   @SuppressWarnings("unchecked")
@@ -29,13 +29,13 @@ class NumberConverter<T extends Number> {
       double d = bd.doubleValue();
       if (d == Double.POSITIVE_INFINITY || d == Double.NEGATIVE_INFINITY) {
         // myType is BigDecimal or BigInteger
-        return Check.fail(ERR0, n, tt.getSimpleName());
+        throw new TypeConversionException(n, tt, ERR0, n, tt.getSimpleName());
       }
       return (T) (Double) d;
     } else if (tt == Float.class) {
       float f = bd.floatValue();
       if (f == Float.POSITIVE_INFINITY || f == Float.NEGATIVE_INFINITY) {
-        return Check.fail(ERR0, n, tt.getSimpleName());
+        throw new TypeConversionException(n, tt, ERR0, n, tt.getSimpleName());
       }
       return (T) (Float) f;
     } else {
@@ -43,7 +43,7 @@ class NumberConverter<T extends Number> {
       try {
         return (T) mh.invoke(bd);
       } catch (ArithmeticException e) {
-        return Check.fail(ERR0, n, tt.getSimpleName());
+        throw new TypeConversionException(n, tt, ERR0, n, tt.getSimpleName());
       } catch (Throwable e) {
         throw ExceptionMethods.uncheck(e);
       }
