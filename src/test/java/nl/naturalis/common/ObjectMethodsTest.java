@@ -1,29 +1,13 @@
 package nl.naturalis.common;
 
-import static nl.naturalis.common.NumberMethods.*;
-import static nl.naturalis.common.ObjectMethods.e2nDeepEquals;
-import static nl.naturalis.common.ObjectMethods.ifEmpty;
-import static nl.naturalis.common.ObjectMethods.ifFalse;
-import static nl.naturalis.common.ObjectMethods.ifNotEmpty;
-import static nl.naturalis.common.ObjectMethods.ifNotNull;
-import static nl.naturalis.common.ObjectMethods.ifNull;
-import static nl.naturalis.common.ObjectMethods.ifTrue;
-import static nl.naturalis.common.ObjectMethods.isDeepNotEmpty;
+import java.util.*;
+import java.util.stream.Collectors;
+import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.junit.Test;
+import static nl.naturalis.common.ObjectMethods.*;
 
 @SuppressWarnings("rawtypes")
 public class ObjectMethodsTest {

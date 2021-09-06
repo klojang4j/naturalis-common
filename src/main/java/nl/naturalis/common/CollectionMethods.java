@@ -10,6 +10,7 @@ import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.function.ThrowingFunction;
 import nl.naturalis.common.unsafe.UnsafeList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toUnmodifiableList;
@@ -610,9 +611,14 @@ public class CollectionMethods {
    * @return An unmodifiable {@code List} containing the values that result from applying the
    *     specified function to the source list's elements
    */
-  public static <T, U> List<U> convertAndFreeze(
-      List<? extends T> source, Function<? super T, ? extends U> converter) {
-    return source.stream().map(converter::apply).collect(toUnmodifiableList());
+  @SuppressWarnings("unchecked")
+  public static <T, U, E extends Throwable> List<U> convertAndFreeze(
+      List<? extends T> source, ThrowingFunction<? super T, ? extends U, E> converter) throws E {
+    Object[] objs = new Object[source.size()];
+    for (int i = 0; i < source.size(); ++i) {
+      objs[i] = converter.apply(source.get(i));
+    }
+    return (List<U>) List.of(objs);
   }
 
   /**

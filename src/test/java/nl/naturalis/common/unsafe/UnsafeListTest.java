@@ -1,10 +1,11 @@
 package nl.naturalis.common.unsafe;
 
-import static org.junit.Assert.*;
-
 import java.util.List;
 import org.junit.Test;
-import nl.naturalis.common.unsafe.UnsafeList;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class UnsafeListTest {
 
