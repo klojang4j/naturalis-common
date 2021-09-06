@@ -2,33 +2,41 @@ package nl.naturalis.common.invoke;
 
 import java.util.function.Function;
 import nl.naturalis.common.ClassMethods;
+import static nl.naturalis.common.ArrayMethods.implode;
 
 public class InvokeException extends RuntimeException {
 
+  private static final String ERR_NOT_PUBLIC = "Class %s is not public";
+  private static final String ERR_INCLUDES = "At least one of %s must be a property of %s";
+  private static final String ERR_EXCLUDES = "No properties remain after excluding %s from %s";
   private static final String ERR_NOT_READABLE =
-      "Cannot read beans of type %s (bean type must be/extend %s)";
+      "Cannot read beans of type %s (bean must be instance of %s)";
 
-  static <T> InvokeException typeMismatch(BeanReader<? super T> reader, T bean) {
+  public static <T> InvokeException typeMismatch(BeanReader<? super T> reader, T bean) {
     String name0 = ClassMethods.getPrettyClassName(bean);
     String name1 = ClassMethods.getPrettyClassName(reader.getBeanClass());
     return new InvokeException(ERR_NOT_READABLE, name0, name1);
   }
 
-  static <T> InvokeException typeMismatch(SaveBeanReader<? super T> reader, T bean) {
+  public static <T> InvokeException typeMismatch(SaveBeanReader<? super T> reader, T bean) {
     String name0 = ClassMethods.getPrettyClassName(bean);
     String name1 = ClassMethods.getPrettyClassName(reader.getBeanClass());
     return new InvokeException(ERR_NOT_READABLE, name0, name1);
   }
 
-  static Function<String, InvokeException> notPublic(Class<?> clazz) {
-    return s -> new InvokeException("Class %s is not public", clazz.getName());
+  public static Function<String, InvokeException> classNotPublic(Class<?> clazz) {
+    return s -> new InvokeException(ERR_NOT_PUBLIC, clazz.getName());
   }
 
-  static Function<String, InvokeException> noPublicGetters(Class<?> clazz) {
-    return s -> new InvokeException("Class %s does not have any public getters", clazz.getName());
+  public static Function<String, InvokeException> noPropertiesSelected(
+      Class<?> clazz, boolean exclude, String... properties) {
+    if (exclude) {
+      return s -> new InvokeException(ERR_EXCLUDES, implode(properties), clazz);
+    }
+    return s -> new InvokeException(ERR_INCLUDES, implode(properties), clazz);
   }
 
-  private InvokeException(String message, Object... msgArgs) {
+  InvokeException(String message, Object... msgArgs) {
     super(msgArgs.length == 0 ? message : String.format(message, msgArgs));
   }
 }
