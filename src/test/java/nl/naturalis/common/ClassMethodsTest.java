@@ -1,10 +1,11 @@
 package nl.naturalis.common;
 
+import java.io.Serializable;
+import java.util.*;
+import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
 
 public class ClassMethodsTest {
 
@@ -35,11 +36,41 @@ public class ClassMethodsTest {
 
   @Test
   public void getArrayTypeName_01() {
-    assertEquals("java.lang.String[][][]", ClassMethods.getArrayTypeName(new String[0][0][0]));
+    assertEquals("java.lang.String[][][]", ClassMethods.arrayClassName(new String[0][0][0]));
   }
 
   @Test
   public void getArrayTypeSimpleName_01() {
-    assertEquals("String[][][]", ClassMethods.getArrayTypeSimpleName(new String[0][0][0]));
+    assertEquals("String[][][]", ClassMethods.arrayClassSimpleName(new String[0][0][0]));
+  }
+
+  @Test // Interesting: Enum.class returns false for Class::isEnum
+  public void isEnum01() {
+    assertFalse(Enum.class.isEnum());
+    assertTrue(ClassMethods.isA(Enum.class, Enum.class));
+  }
+
+  @Test
+  public void getAllInterfaces00() {
+    Set<Class<?>> expected =
+        Set.of(
+            NavigableSet.class,
+            Cloneable.class,
+            Serializable.class,
+            SortedSet.class,
+            Set.class,
+            Collection.class,
+            Iterable.class);
+    Set<Class<?>> actual = ClassMethods.getAllInterfaces(TreeSet.class);
+    // System.out.println(implode(actual.toArray(), "\n"));
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void getAllInterfaces01() {
+    Set<Class<?>> expected = Set.of(SortedSet.class, Set.class, Collection.class, Iterable.class);
+    Set<Class<?>> actual = ClassMethods.getAllInterfaces(NavigableSet.class);
+    // System.out.println(implode(actual.toArray(), "\n"));
+    assertEquals(expected, actual);
   }
 }

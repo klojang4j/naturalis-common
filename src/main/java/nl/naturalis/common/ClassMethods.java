@@ -1,17 +1,13 @@
 package nl.naturalis.common;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
 import static java.lang.Character.isUpperCase;
 import static java.lang.Character.toLowerCase;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.stream.Collectors.joining;
-import static nl.naturalis.common.ArrayMethods.isOneOf;
 import static nl.naturalis.common.CollectionMethods.swapAndFreeze;
 import static nl.naturalis.common.check.CommonChecks.array;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
@@ -55,9 +51,21 @@ public class ClassMethods {
     return superOrInterface.isInstance(objectToTest);
   }
 
+  /**
+   * Returns whether or not the specified class is a "regular" class. Returns {@code true} if the
+   * specified class is Object.class or if has a super class, is not an enum and not an array.
+   *
+   * @param clazz The class to test
+   * @return Whether or not the specified class is a "regular" class
+   */
+  public static boolean isRegular(Class<?> clazz) {
+    return clazz == Object.class
+        || (clazz.getSuperclass() != null && !isA(clazz, Enum.class) && !clazz.isArray());
+  }
+
   public static final boolean isPrimitiveNumberClass(Class<?> classToTest) {
-    return isOneOf(
-        classToTest, int.class, double.class, long.class, byte.class, float.class, short.class);
+    return Set.of(int.class, double.class, long.class, byte.class, float.class, short.class)
+        .contains(classToTest);
   }
 
   /**
@@ -103,96 +111,171 @@ public class ClassMethods {
   // wrappper-to-primitve
   private static final Map<Class<?>, Class<?>> w2p = swapAndFreeze(p2w);
 
-  public static boolean isPrimitiveClassOf(Class<?> primitiveClass, Class<?> classToTest) {
-    Check.notNull(primitiveClass);
+  public static boolean isPrimitive(Class<?> classToTest) {
+    return classToTest.isPrimitive();
+  }
+
+  public static boolean isWrapper(Class<?> classToTest) {
+    return w2p.keySet().contains(classToTest);
+  }
+
+  public static boolean isAutoUnboxedAs(Class<?> classToTest, Class<?> primitiveClass) {
     Check.notNull(classToTest);
+    Check.notNull(primitiveClass);
     return p2w.get(primitiveClass) == classToTest;
   }
 
-  public static boolean isWrapperClassOf(Class<?> wrapperClass, Class<?> classToTest) {
-    Check.notNull(wrapperClass);
+  public static boolean isAutoBoxedAs(Class<?> classToTest, Class<?> wrapperClass) {
     Check.notNull(classToTest);
+    Check.notNull(wrapperClass);
     return w2p.get(wrapperClass) == classToTest;
   }
 
-  public static Class<?> getWrapperClass(Class<?> primitiveClass) {
+  public static Class<?> box(Class<?> primitiveClass) {
     return Check.notNull(primitiveClass)
         .is(keyIn(), p2w, "Not a primitive class: %s", primitiveClass)
         .ok(p2w::get);
   }
 
-  public static Class<?> getPrimitiveClass(Class<?> wrapperClass) {
+  public static Class<?> unbox(Class<?> wrapperClass) {
     return Check.that(wrapperClass)
         .is(keyIn(), w2p, "Not a wrapper class: %s", wrapperClass)
         .ok(w2p::get);
   }
 
   /**
-   * Returns {@link #getArrayTypeName(Object)} if the argument is an array, else {@code
-   * obj.getClass().getName()}.
+   * Returns true if and only if both {@code Class} objects represent interfaces and the first
+   * interface directly or indirectly extends the the second interface.
+   *
+   * @param classToTest The {@code Class} object to test
+   * @param baseClass The {@code Class} object to test it against
+   * @return Whether or not the first argument is an interface that directly or indirectly extends
+   *     the second interface
+   */
+  public static boolean hasAncestor(Class<?> classToTest, Class<?> baseClass) {
+    Check.notNull(classToTest, "classToTest");
+    Check.notNull(baseClass, "baseClass");
+    for (Class<?> c = classToTest.getSuperclass(); c != null; c = c.getSuperclass()) {
+      if (c == baseClass) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns true if and only if both {@code Class} objects represent interfaces and the first
+   * interface directly or indirectly extends the the second interface.
+   *
+   * @param classToTest The {@code Class} object to test
+   * @param superInterface The {@code Class} object to test it against
+   * @return Whether or not the first argument is an interface that directly or indirectly extends
+   *     the second interface
+   */
+  public static boolean hasAncestorInterface(Class<?> classToTest, Class<?> superInterface) {
+    Check.notNull(classToTest, "classToTest");
+    Check.notNull(superInterface, "superInterface");
+    if (!classToTest.isInterface()
+        || !superInterface.isInterface()
+        || classToTest.getInterfaces().length == 0) {
+      return false;
+    }
+    return getAllInterfaces(classToTest).contains(superInterface);
+  }
+
+  public static Set<Class<?>> getAllInterfaces(Class<?> clazz) {
+    Set<Class<?>> interfaces = new LinkedHashSet<>();
+    collectInterfaces(interfaces, clazz);
+    for (Class<?> c = clazz.getSuperclass(); c != null; c = c.getSuperclass()) {
+      collectInterfaces(interfaces, c);
+    }
+    return interfaces;
+  }
+
+  private static void collectInterfaces(Set<Class<?>> interfaces, Class<?> clazz) {
+    Class<?>[] myInterfaces = clazz.getInterfaces();
+    interfaces.addAll(List.of(myInterfaces));
+    for (Class<?> c : myInterfaces) {
+      collectInterfaces(interfaces, c);
+    }
+  }
+
+  /**
+   * Returns a prettified version of the fully-qualified class name. If the argument is an array,
+   * {@link #arrayClassName(Object)} is returned, else {@code obj.getClass().getName()}.
    *
    * @param obj The object whose class name to return
    * @return The class name
    */
-  public static String getPrettyClassName(Object obj) {
+  public static String className(Object obj) {
     Check.notNull(obj);
     if (obj.getClass() == Class.class) {
-      return getPrettyClassName((Class<?>) obj);
+      return className((Class<?>) obj);
     }
-    return getPrettyClassName(obj.getClass());
+    return className(obj.getClass());
   }
 
   /**
-   * Returns {@link #getArrayTypeName(Object)} if the argument is an array type, else {@code
-   * clazz.getName()}.
+   * Returns a prettified version of the fully-qualified class name. If the argument is an array
+   * class, {@link #arrayClassName(Object)} is returned, else {@code obj.getClass().getName()}.
    *
    * @param clazz The class whose name to return
    * @return The class name
    */
-  public static String getPrettyClassName(Class<?> clazz) {
+  public static String className(Class<?> clazz) {
     Check.notNull(clazz);
-    return clazz.isArray() ? getArrayTypeName(clazz) : clazz.getName();
+    return clazz.isArray() ? arrayClassName(clazz) : clazz.getName();
   }
 
   /**
-   * Returns {@link #getArrayTypeSimpleName(Object)} if the argument is an array, else {@link
-   * Class#getSimpleName()}.
+   * Returns a prettified version of the simple class name. If the argument is an array, {@link
+   * #arrayClassSimpleName(Object)} is returned, else {@code obj.getClass().getSimpleName()}.
    *
    * @param obj The object whose class name to return
    * @return The class name
    */
-  public static String getPrettySimpleClassName(Object obj) {
+  public static String simpleClassName(Object obj) {
     Check.notNull(obj);
     if (obj.getClass() == Class.class) {
-      return getSimpleClassName((Class<?>) obj);
+      return simpleClassName((Class<?>) obj);
     }
-    return getSimpleClassName(obj.getClass());
-  }
-
-  public static String getSimpleClassName(Class<?> clazz) {
-    Check.notNull(clazz);
-    return clazz.isArray() ? getArrayTypeSimpleName(clazz) : clazz.getSimpleName();
+    return simpleClassName(obj.getClass());
   }
 
   /**
-   * Returns a less arcane description of the type of the specified array. For example {@code
-   * getArrayTypeName(new String[0][0])} will return {@code java.lang.String[][]}, which is a lot
-   * friendlier than what comes back from {@code (new String[0][0]).getClass().getName()}.
+   * Returns a prettified version of the simple class name. If the argument is an array class,
+   * {@link #arrayClassSimpleName(Class)} is returned, else {@code obj.getClass().getSimpleName()}.
+   *
+   * @param obj The object whose class name to return
+   * @return The class name
+   */
+  public static String simpleClassName(Class<?> clazz) {
+    Check.notNull(clazz);
+    return clazz.isArray() ? arrayClassSimpleName(clazz) : clazz.getSimpleName();
+  }
+
+  /**
+   * Returns a description for the specified array that is a bit easier on they eye than what you
+   * get from {@link Class#getName()}. For example {@code arrayClassName(new String[0][0])} will
+   * return {@code java.lang.String[][]}.
    *
    * @param array The array
-   * @return An intuitive description of the array's type
+   * @return A more intuitive description of the array's type
+   * @throws IllegalArgumentException If the argument is not an array
    */
-  public static String getArrayTypeName(Object array) {
-    return Check.notNull(array).ok(a -> getArrayTypeName(a.getClass()));
+  public static String arrayClassName(Object array) {
+    return Check.notNull(array).ok(a -> arrayClassName(a.getClass()));
   }
 
   /**
-   * Returns a less arcane description of the type of the specified array type.
+   * Returns a description for the specified array class that is a bit easier on they eye than what
+   * you get from {@link Class#getName()}.
    *
    * @param arrayClass The array type
-   * @return An intuitive description of the array type
+   * @return A more intuitive description of the array type
+   * @throws IllegalArgumentException If the argument is not an array class
    */
-  public static String getArrayTypeName(Class<?> arrayClass) {
+  public static String arrayClassName(Class<?> arrayClass) {
     Check.notNull(arrayClass).is(array());
     Class<?> c = arrayClass.getComponentType();
     int i = 0;
@@ -205,26 +288,30 @@ public class ClassMethods {
   }
 
   /**
-   * Returns a less arcane description of the type of the specified array. For example {@code
-   * getArrayTypeName(new String[0][0])} will return {@code String[][]}.
+   * Returns a short description for the specified array that is a bit easier on they eye than what
+   * you get from {@link Class#getSimpleName()}. For example {@code arrayClassName(new
+   * String[0][0])} will return {@code String[][]}.
    *
    * @param array The array
    * @return The simple name of the array type
+   * @throws IllegalArgumentException If the argument is not an array
    */
-  public static String getArrayTypeSimpleName(Object array) {
+  public static String arrayClassSimpleName(Object array) {
     Check.notNull(array).is(array());
     return array.getClass().getComponentType().getSimpleName() + "[]";
   }
 
   /**
-   * Returns a less arcane description of the type of the specified array type.
+   * Returns a short description for the specified array class that is a bit easier on they eye than
+   * what you get from {@link Class#getSimpleName()}.
    *
    * @param arrayClass The array type
    * @return An intuitive description of the array type
+   * @throws IllegalArgumentException If the argument is not an array class
    */
-  public static String getArrayTypeSimpleName(Class<?> arrayClass) {
+  public static String arrayClassSimpleName(Class<?> arrayClass) {
     Check.notNull(arrayClass).is(array());
-    return arrayClass.getClass().getComponentType().getSimpleName() + "[]";
+    return arrayClass.getComponentType().getSimpleName() + "[]";
   }
 
   /**
@@ -339,11 +426,11 @@ public class ClassMethods {
 
   private static IllegalArgumentException notAProperty(Method m, boolean asGetter) {
     String fmt = "Method %s %s(%s) in class %s is not a %s";
-    String rt = getSimpleClassName(m.getReturnType());
-    String clazz = getPrettyClassName(m.getDeclaringClass());
+    String rt = simpleClassName(m.getReturnType());
+    String clazz = className(m.getDeclaringClass());
     String params =
         Arrays.stream(m.getParameterTypes())
-            .map(ClassMethods::getSimpleClassName)
+            .map(ClassMethods::simpleClassName)
             .collect(joining(", "));
     String type = asGetter ? "getter" : "setter";
     String msg = String.format(fmt, rt, m.getName(), params, clazz, type);

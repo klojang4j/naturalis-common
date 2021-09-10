@@ -2,7 +2,7 @@ package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
 import static java.lang.String.format;
-import static nl.naturalis.common.ClassMethods.getPrettyClassName;
+import static nl.naturalis.common.ClassMethods.className;
 
 public class TypeConversionException extends RuntimeException {
 
@@ -24,7 +24,7 @@ public class TypeConversionException extends RuntimeException {
 
   private static String createMessage(Object obj, Class<?> type) {
     Check.notNull(type, "type");
-    String cn0 = getPrettyClassName(type);
+    String cn0 = className(type);
     if (obj == null) {
       return format("Cannot convert null into instance of %s", cn0);
     }
@@ -35,7 +35,7 @@ public class TypeConversionException extends RuntimeException {
       String fmt = "Cannot convert %s %s into instance of %s";
       return format(fmt, obj.getClass().getSimpleName(), obj, cn0);
     }
-    String cn1 = getPrettyClassName(obj.getClass());
+    String cn1 = className(obj.getClass());
     return format("Cannot convert instance of %s into instance of %s", cn1, cn0);
   }
 

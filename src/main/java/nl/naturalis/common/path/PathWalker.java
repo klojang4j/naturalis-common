@@ -15,24 +15,26 @@ import nl.naturalis.common.check.Check;
 import nl.naturalis.common.invoke.NoSuchPropertyException;
 
 /**
- * Reads/writes objects using {@link Path} objects. The {@code PathWalker} class is useful for
- * reading large batches of sparsely populated objects or maps. For some of these objects or maps,
- * the {@code PathWalker} may not be able to follow a path all the way to the end. This can be due
- * to any of the following reasons:
+ * A {@code PathWalker} lets you read and write deeply nested values within almost any kind of
+ * object by means of {@link Path} objects. The {@code PathWalker} class is useful for reading large
+ * batches of sparsely populated objects or maps. For some of these objects or maps, the {@code
+ * PathWalker} may not be able to follow a path all the way to the end. This can be due to any of
+ * the following reasons:
  *
  * <p>
  *
  * <ul>
- *   <li>One of the intermediate path segments references a null value
+ *   <li>One of the intermediate path segments references a null value (the {@code PathWalker}
+ *       literally hits a dead end)
  *   <li>The path is invalid given the type of the object to read/write
  *   <li>An array index within the path was out of bounds
  *   <li>The path continued after having reached a terminal value within the object (a primitive)
  * </ul>
  *
- * <p>By default {@code PathWalker} will return null in these cases. If you need to distinguish
- * between true nulls and the "dead ends" described above, you can instruct the {@code PathWalker}
- * to return a special value, {@link #DEAD_END}, in stead of null. You can also instruct to throw a
- * {@link NoSuchPropertyException}. See {@link DeadEndAction}.
+ * <p>By default {@code PathWalker} will return {@code null} in all of these cases. If you need to
+ * distinguish between true nulls and the "dead ends" described above, you can instruct the {@code
+ * PathWalker} to return a special value, {@link #DEAD_END}, in stead of null. You can also instruct
+ * to throw a {@link NoSuchPropertyException}. See {@link DeadEndAction}.
  *
  * <p>If the {@code PathWalker} is on a segment that references a {@code Collection} or an array,
  * the next path segment must be an array index (unless it is the {@code Collection} or array itself
@@ -56,6 +58,10 @@ public final class PathWalker {
      * it reaches a dead end. Use a reference comparison to check for this value.
      */
     RETURN_DEAD_END,
+    /**
+     * Instructs the {@code PathWalker} to throw a {@link NoSuchPropertyException} if it reaches a
+     * dead end.
+     */
     THROW_EXCEPTION;
   }
 
@@ -150,10 +156,10 @@ public final class PathWalker {
   }
 
   /**
-   * Reads the values of all paths within the provided object and places them in the provided output
-   * array. The values will be in the same order as the paths specified through the constructors.
-   * The length of the output array must be greater than or equal to the number of paths specified
-   * through the constructor.
+   * Reads the values of all paths within the specified host object and places them in the provided
+   * output array. The values will be in the same order as the paths specified through the
+   * constructors. The length of the output array must be greater than or equal to the number of
+   * paths specified through the constructor.
    *
    * @param host The object from which to read the values
    * @param output An array into which to place the values
@@ -165,7 +171,7 @@ public final class PathWalker {
   }
 
   /**
-   * Reads the values of all paths within the provided object and places them in the provided
+   * Reads the values of all paths within the specified host object and places them in the provided
    * path-to-value map.
    *
    * @param host The object from which to read the values
@@ -178,8 +184,8 @@ public final class PathWalker {
   }
 
   /**
-   * Returns the value of the first path. Useful if the {@code PathWalker} was created with just one
-   * path.
+   * Returns the value of the first path within the specified host object . Useful if the {@code
+   * PathWalker} was created with just one path.
    *
    * @param <T> The type of the value being returned
    * @param host The object to walk

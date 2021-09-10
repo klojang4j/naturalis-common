@@ -3,10 +3,10 @@ package nl.naturalis.common;
 import java.util.Arrays;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.invoke.BeanWriter;
-import static nl.naturalis.common.ClassMethods.getWrapperClass;
+import static nl.naturalis.common.ClassMethods.box;
 import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.ClassMethods.isPrimitiveNumberClass;
-import static nl.naturalis.common.ClassMethods.isWrapperClassOf;
+import static nl.naturalis.common.ClassMethods.isAutoBoxedAs;
 import static nl.naturalis.common.ObjectMethods.PRIMITIVE_DEFAULTS;
 
 /**
@@ -45,10 +45,10 @@ public class Loose<T> {
       return (T) obj.toString();
     } else if (targetType == boolean.class || targetType == Boolean.class) {
       return (T) Bool.from(obj);
-    } else if (isWrapperClassOf(obj.getClass(), targetType)) {
+    } else if (isAutoBoxedAs(targetType, obj.getClass())) {
       return (T) obj;
     } else if (isPrimitiveNumberClass(targetType)) {
-      Class<? extends Number> c = (Class<? extends Number>) getWrapperClass(targetType);
+      Class<? extends Number> c = (Class<? extends Number>) box(targetType);
       if (isA(obj.getClass(), Number.class)) {
         return (T) new NumberConverter<>(c).convert((Number) obj);
       }

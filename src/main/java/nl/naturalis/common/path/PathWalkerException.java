@@ -1,11 +1,10 @@
 package nl.naturalis.common.path;
 
-import static java.lang.String.format;
-import static nl.naturalis.common.ClassMethods.getPrettyClassName;
-import static nl.naturalis.common.ClassMethods.getPrettySimpleClassName;
-
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.invoke.NoSuchPropertyException;
+import static java.lang.String.format;
+import static nl.naturalis.common.ClassMethods.className;
+import static nl.naturalis.common.ClassMethods.simpleClassName;
 
 /**
  * Runtime exception thrown while the {@link PathWalker} is walking a path through an object.
@@ -64,20 +63,19 @@ public class PathWalkerException extends RuntimeException {
 
   static PathWalkerException cannotWrite(Object host) {
     String fmt = "Writing not supported for instances of %s";
-    String msg = String.format(fmt, getPrettyClassName(host));
+    String msg = String.format(fmt, className(host));
     return new PathWalkerException(msg);
   }
 
   static PathWalkerException nullInvalidForPrimitiveArray(Path p, Object array) {
     String fmt = "Cannot assign null to %s (%s)";
-    String msg = String.format(fmt, p, getPrettySimpleClassName(array));
+    String msg = String.format(fmt, p, simpleClassName(array));
     return new PathWalkerException(msg);
   }
 
   static PathWalkerException invalidType(Path p, Class<?> expected, Class<?> actual) {
     String fmt = "Cannot assign %s to %s (expected type: %s)";
-    String msg =
-        String.format(fmt, p, getPrettySimpleClassName(expected), getPrettySimpleClassName(actual));
+    String msg = String.format(fmt, p, simpleClassName(expected), simpleClassName(actual));
     return new PathWalkerException(msg);
   }
 
@@ -96,7 +94,7 @@ public class PathWalkerException extends RuntimeException {
 
   static PathWalkerException nullSegmentNotAllowed(Object obj) {
     String fmt = "Null segment not allowed when reading/writing %s";
-    return new PathWalkerException(format(fmt, getPrettyClassName(obj)));
+    return new PathWalkerException(format(fmt, className(obj)));
   }
 
   private PathWalkerException(String message) {

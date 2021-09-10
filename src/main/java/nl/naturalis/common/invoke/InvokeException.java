@@ -13,14 +13,14 @@ public class InvokeException extends RuntimeException {
       "Cannot read beans of type %s (bean must be instance of %s)";
 
   public static <T> InvokeException typeMismatch(BeanReader<? super T> reader, T bean) {
-    String name0 = ClassMethods.getPrettyClassName(bean);
-    String name1 = ClassMethods.getPrettyClassName(reader.getBeanClass());
+    String name0 = ClassMethods.className(bean);
+    String name1 = ClassMethods.className(reader.getBeanClass());
     return new InvokeException(ERR_NOT_READABLE, name0, name1);
   }
 
   public static <T> InvokeException typeMismatch(SaveBeanReader<? super T> reader, T bean) {
-    String name0 = ClassMethods.getPrettyClassName(bean);
-    String name1 = ClassMethods.getPrettyClassName(reader.getBeanClass());
+    String name0 = ClassMethods.className(bean);
+    String name1 = ClassMethods.className(reader.getBeanClass());
     return new InvokeException(ERR_NOT_READABLE, name0, name1);
   }
 

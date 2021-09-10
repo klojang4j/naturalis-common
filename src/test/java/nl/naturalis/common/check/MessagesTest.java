@@ -95,7 +95,7 @@ public class MessagesTest {
     String argName = "foo";
     LinkedHashSet<?> object = new LinkedHashSet<>();
     String s0 =
-        ClassMethods.getArrayTypeSimpleName(argument) + "@" + System.identityHashCode(argument);
+        ClassMethods.arrayClassSimpleName(argument) + "@" + System.identityHashCode(argument);
     String s1 = object.getClass().getSimpleName() + "@" + System.identityHashCode(object);
     String expected = String.format("foo must be in %s (was %s)", s1, s0);
     System.out.println(expected);
