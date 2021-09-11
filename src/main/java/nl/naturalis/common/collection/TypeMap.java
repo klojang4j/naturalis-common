@@ -8,31 +8,35 @@ import static nl.naturalis.common.check.CommonChecks.instanceOf;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
- * A {@link Map} implementation that returns a non-null value for a type if either the type itself
- * or any of its super types is present in the map. For example, suppose the map contains two
- * entries: one for {@code Integer.class} and one for {@code Number.class}. If the map is queried
- * for key {@code Integer.class}, then the value associated with {@code Integer.class} is returned.
- * But if the map is queried for key {@code Short.class}, then the value associated with {@code
- * Number.class} is returned. If the map is queried for, say, {@code InputStream.class}, a {@link
- * TypeNotSupportedException} is thrown. (In other words it will never return {@code null}.)
+ * A {@link Map} implementation with {@link Class} objects as keys, using the Java type hierarchy
+ * mechanism to find values for missing keys. It returns a non-null value for a type if either the
+ * type itself or any of its super types is present in the map. For example, suppose the map
+ * contains two entries: one for {@code Integer.class} and one for {@code Number.class}. If the map
+ * is queried for key {@code Integer.class}, then the value associated with {@code Integer.class} is
+ * returned. But if the map is queried for key {@code Short.class}, then the value associated with
+ * {@code Number.class} is returned. If the value for key {@code InputStream.class} is requested, a
+ * {@link TypeNotSupportedException} is thrown.
+ *
+ * <p>A {@code TypeMap} can optionally also be configured to "auto-box" and "auto-unbox" keys. For
+ * the map described above that would mean that the map would to also return values for types {@code
+ * int.class} and {@code short.class} (and any primitive number type for that matter).
  *
  * <p>This {@code Map} implementation is useful if you want to define fall-back values or shared
  * values for types that have not been explicitly added to the map. If the map contains an entry for
  * {@code Object.class}, {@code containsKey} will always return {@code true} and {@code get} will
  * always return a non-null value (it will never throw a {@code TypeNotSupportedException}).
  *
- * <p>This {@code Map} implementation does not support {@code null} keys or {@code null} values and
- * is unmodifiable to the outside world. All map-altering methods will throw an {@link
- * UnsupportedOperationException}. Thus the map will only ever contain the <i>values</i> contained
- * in the map passed to the static factory methods, and it will never contain any types (keys) that
- * are not equal to, or extending from the types already present in the original map. However a
- * {@code TypeMap} may or may not grow internally, depending on which of the static factory methods
- * is used. The {@link TypeMap#withValues(Map, int) static factory methods} that take an extra
- * integer argument silently gobble up missing subtypes upon being requested (via {@code
- * containsKey} or via {@code get}). The requested type will then be associated with the super
- * type's value. Thus the next time that type is requested it will result in a direct hit. The
- * {@link TypeMap#withTypes(Map) static factory methods} that do not take an extra integer argument
- * remain completely immutable.
+ * <p>A {@code TypeMap} does not {@code null} keys and {@code null} values and it is unmodifiable to
+ * the outside world. All map-altering methods will throw an {@link UnsupportedOperationException}.
+ * Thus the map will only ever contain the <i>values</i> contained in the source map passed to the
+ * static factory methods. Also, it will never contain any types (keys) that are not equal to, or
+ * extending from the types already present in the original map. However a {@code TypeMap} may or
+ * may not grow internally, depending on which of the static factory methods is used. The {@link
+ * TypeMap#withValues(Map, int) static factory methods} that take an extra integer argument silently
+ * gobble up missing subtypes upon being requested via the {@code containsKey} and {@code get}
+ * methods. The requested type will then be associated with the super type's value. Thus the next
+ * time that type is requested it will result in a direct hit. The {@link TypeMap#withTypes(Map)
+ * static factory methods} that do not take an extra integer argument remain completely immutable.
  *
  * @author Ayco Holleman
  * @param <V> The type of the values in the {@code Map}

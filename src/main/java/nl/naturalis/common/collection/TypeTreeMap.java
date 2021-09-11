@@ -12,13 +12,12 @@ import static nl.naturalis.common.check.CommonChecks.instanceOf;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
- * A {@code Map} implementation that behaves exactly like the {@link TypeMap} class, but which is
+ * A {@code Map} implementation that behaves exactly like the {@link TypeMap} class, but is
  * internally backed by a {@link TreeMap}. The {@code TreeMap} is instantiated with a {@link
  * Comparator} that is specifically tuned to navigate type hierarchies. As a bonus the {@link
  * #keySet() key set} of a {@code TypeTreeMap} is sorted such that for any two keys, the one that
- * comes first will never be a supertype of the one following it, and the one that comes second will
- * never be a subtype of the one preceding it. This is the main feature if the {@link TypeTreeSet}
- * class.
+ * comes first will never be a supertype of the one following it. This is the main feature if the
+ * {@link TypeTreeSet} class.
  *
  * @author Ayco Holleman
  * @param <V> The type of the values in the {@code Map}
@@ -96,14 +95,6 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
         }
         return 1;
       };
-
-  private static int countAncestors(Class<?> c) {
-    int i = 0;
-    for (Class<?> x = c.getSuperclass(); x != null; x = x.getSuperclass()) {
-      ++i;
-    }
-    return i;
-  }
 
   /**
    * A builder class for {@code TypeTreeMap} instances.
@@ -282,5 +273,13 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
   @Override
   Map<Class<?>, V> createBackend(Map<? extends Class<?>, ? extends V> m, int sz, boolean autobox) {
     return createBackend(m, autobox);
+  }
+
+  private static int countAncestors(Class<?> c) {
+    int i = 0;
+    for (Class<?> x = c.getSuperclass(); x != null; x = x.getSuperclass()) {
+      ++i;
+    }
+    return i;
   }
 }

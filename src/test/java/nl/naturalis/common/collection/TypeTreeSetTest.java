@@ -15,48 +15,11 @@ import static nl.naturalis.common.StringMethods.implode;
 
 public class TypeTreeSetTest {
 
-  // @Test
-  public void test00() {
-    TypeTreeSet tts =
-        TypeTreeSet.withTypes(
-            MyArrayList.class,
-            FileOutputStream.class,
-            StringBuilder.class,
-            Map.class,
-            SortedSet.class,
-            ExpansionType.class,
-            NavigableMap.class,
-            NavigableSet.class,
-            ArrayList.class,
-            Enum.class,
-            List.class,
-            SortedMap.class,
-            CharSequence.class,
-            ByteArrayOutputStream.class,
-            OutputStream.class,
-            Object.class,
-            Long.class,
-            Set.class,
-            String.class,
-            Month.class,
-            Iterable.class,
-            AbstractTypeMap.class,
-            Collection.class,
-            LinkedList.class,
-            RoundingMode.class,
-            AbstractTypeSet.class,
-            Number.class,
-            Function.class,
-            DayOfWeek.class,
-            MyArrayList2.class);
-    System.out.println();
-    System.out.println(implode(tts.prettySimpleTypeNames(), "\n"));
-  }
-
   @Test
   public void test01() {
     TypeTreeSet tts =
         TypeTreeSet.withTypes(
+            true,
             FileOutputStream.class,
             StringBuilder.class,
             Map.class,

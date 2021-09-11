@@ -76,20 +76,6 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
     V v = backend.get(k);
     if (v != null) {
       return Tuple.of(k, v);
-    } else if (autobox) {
-      if (k.isPrimitive()) {
-        Class<?> wc = box(k);
-        v = backend.get(wc);
-        if (v != null) {
-          return Tuple.of(wc, v);
-        }
-      } else if (isWrapper(k)) {
-        Class<?> pc = unbox(k);
-        v = backend.get(pc);
-        if (v != null) {
-          return Tuple.of(pc, v);
-        }
-      }
     }
     if (k.isInterface()) {
       Tuple<Class<?>, V> t = climbInterfaces(k);
@@ -106,6 +92,13 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
       Tuple<Class<?>, V> t = climbInterfaces(c);
       if (t != null) {
         return t;
+      }
+    }
+    if (autobox) {
+      if (k.isPrimitive()) {
+        return find(box(k));
+      } else if (isWrapper(k)) {
+        return find(unbox(k));
       }
     }
     return null;
