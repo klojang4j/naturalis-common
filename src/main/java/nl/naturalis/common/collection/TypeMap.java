@@ -23,20 +23,22 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  *
  * <p>This {@code Map} implementation is useful if you want to define fall-back values or shared
  * values for types that have not been explicitly added to the map. If the map contains an entry for
- * {@code Object.class}, {@code containsKey} will always return {@code true} and {@code get} will
- * always return a non-null value (it will never throw a {@code TypeNotSupportedException}).
+ * {@code Object.class}, that will be the ultimate fall-back entry: {@code containsKey} will always
+ * return {@code true} and {@code get} will always return a non-null value. If a type is not present
+ * in the map, {@code containsKey} and {@code get} will first go up its class hierarchy, then they
+ * will check the interfaces it implements or extends, preferring the most specific interface, and
+ * finally they will check if {@code Object.class} is present in the map.
  *
- * <p>A {@code TypeMap} does not {@code null} keys and {@code null} values and it is unmodifiable to
- * the outside world. All map-altering methods will throw an {@link UnsupportedOperationException}.
- * Thus the map will only ever contain the <i>values</i> contained in the source map passed to the
- * static factory methods. Also, it will never contain any types (keys) that are not equal to, or
- * extending from the types already present in the original map. However a {@code TypeMap} may or
- * may not grow internally, depending on which of the static factory methods is used. The {@link
- * TypeMap#withValues(Map, int) static factory methods} that take an extra integer argument silently
- * gobble up missing subtypes upon being requested via the {@code containsKey} and {@code get}
- * methods. The requested type will then be associated with the super type's value. Thus the next
- * time that type is requested it will result in a direct hit. The {@link TypeMap#withTypes(Map)
- * static factory methods} that do not take an extra integer argument remain completely immutable.
+ * <p>A {@code TypeMap} does not accept {@code null} keys and {@code null} values and it is
+ * unmodifiable to the outside world. All map-altering methods will throw an {@link
+ * UnsupportedOperationException}. Thus the map will only ever contain the values contained in the
+ * source map. Also, it will never contain any types (keys) that are not equal to, or extending from
+ * the types already present in the source map. However a {@code TypeMap} may or may not grow
+ * internally, depending on which of its static factory methods is used. The {@code withValues}
+ * methods produce instances that will silently gobble up missing subtypes upon being requested via
+ * {@code containsKey} or {@code get}. The requested type will be associated with the super type's
+ * value. Thus the next time that type is requested it will result in a direct hit. The {@code
+ * withTypes} methods produce instances that remain completely static internally.
  *
  * @author Ayco Holleman
  * @param <V> The type of the values in the {@code Map}
@@ -44,7 +46,7 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
 public class TypeMap<V> extends AbstractTypeMap<V> {
 
   /**
-   * A builder class for {@code TypeMap} instances
+   * A builder class for {@code TypeMap} instances.
    *
    * @author Ayco Holleman
    * @param <U> The type of the values in the {@code TypeMap} to be built
@@ -52,7 +54,7 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
   public static final class Builder<U> {
     private final Class<U> valueType;
     private final HashMap<Class<?>, U> tmp = new HashMap<>();
-    private Integer expectedSize;
+    private Integer expectedSize = 0;
     private boolean autobox;
 
     private Builder(Class<U> valueType) {
@@ -60,10 +62,21 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
     }
 
     /**
-     * Configures the resulting {@code TypeMap} to automatically add missing subtypes, associating
-     * them with the values of the nearest super type in the map. The map will be expected to grow
-     * to about twice the number of entries added through the {@link #put(Class, Object) put}
-     * method.
+     * Disables the automatic addition of new subtypes. Note that by default auto-expansion is
+     * enabled.
+     *
+     * @return This {@code Builder} instance
+     */
+    public Builder<U> noAutoExpand() {
+      expectedSize = null;
+      return this;
+    }
+
+    /**
+     * Enables the automatic addition of missing subtypes. The map will be expected to grow to about
+     * twice the number of entries added through the {@link #add(Class, Object) add} method. There
+     * is in fact no real reason to call this method, because this is how {@code TypeMap} instances
+     * are configured by default.
      *
      * @param expectedSize The expected size to which the map will grow
      * @return This {@code Builder} instance
@@ -73,10 +86,9 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
     }
 
     /**
-     * Configures the resulting {@code TypeMap} to automatically add missing subtypes, associating
-     * them with the values of the nearest super type in the map. You can specify 0 (zero) or any
-     * number less than the number of entries added through the {@link #add(Class, Object) put}
-     * method to indicate that expect the map to grow to about twice its original size.
+     * Enables the automatic addition of missing subtypes. You can specify 0 (zero) or any number
+     * less than the number of entries added through the {@link #add(Class, Object) put} method to
+     * indicate that you expect the map to grow to about twice its original size.
      *
      * @param expectedSize The expected size to which the map will grow
      * @return This {@code Builder} instance
@@ -87,9 +99,7 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
     }
 
     /**
-     * Configures the resulting {@code TypeMap} to search for the boxed version of a primitive type
-     * if the primitive type itself is not present, <i>and</i> it will search for the unboxed
-     * version of a primitive wrapper class if the primitive wrapper class is itself not present.
+     * Enables the "auto-boxing" and "auto-unboxing" feature.
      *
      * @return This {@code Builder} instance
      */

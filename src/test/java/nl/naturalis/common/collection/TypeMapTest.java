@@ -47,7 +47,8 @@ public class TypeMapTest {
 
   @Test
   public void test03() {
-    TypeMap<String> m = TypeMap.build(String.class).add(Object.class, "Object").freeze();
+    TypeMap<String> m =
+        TypeMap.build(String.class).noAutoExpand().add(Object.class, "Object").freeze();
     assertEquals(1, m.size());
     assertTrue(m.containsKey(Collection.class));
     assertEquals(1, m.size());

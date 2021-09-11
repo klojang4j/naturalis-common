@@ -2,9 +2,18 @@ package nl.naturalis.common.collection;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import nl.naturalis.common.check.Check;
 
 /**
+ * A {@link Set} implementation that returns {@code true} from its {@link Set#contains(Object)
+ * contains} method if the set either contains the specified type or any of its super types. It can
+ * also be configured to return true if the specified type is a primitive type (e.g. {@code
+ * boolean.class}) and the set either contains the primitive type itself or its corresponding
+ * wrapper type ({@code Boolean.class}). This will then also work the other way round.
+ *
+ * <p>A {@code TypeSet} is backed by a {@link TypeMap}.
+ *
  * @see TypeMap
  * @author Ayco Holleman
  */

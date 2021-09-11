@@ -19,6 +19,7 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  * comes first will never be a supertype of the one following it. This is the main feature if the
  * {@link TypeTreeSet} class.
  *
+ * @see TypeMap
  * @author Ayco Holleman
  * @param <V> The type of the values in the {@code Map}
  */
@@ -105,7 +106,7 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
   public static final class Builder<U> {
     private final Class<U> valueType;
     private final HashMap<Class<?>, U> tmp = new HashMap<>();
-    private boolean autoExpand;
+    private boolean autoExpand = true;
     private boolean autobox;
 
     private Builder(Class<U> valueType) {
@@ -113,21 +114,18 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
     }
 
     /**
-     * Configures the resulting {@code TypeTreeMap} to automatically add missing subtypes,
-     * associating them with the values of the nearest super type in the map.
+     * Disables the automatic addition of new subtypes. Note that by default auto-expansion is
+     * enabled.
      *
-     * @param expectedSize The expected size to which the map will grow
      * @return This {@code Builder} instance
      */
-    public Builder<U> autoExpand() {
-      this.autoExpand = true;
+    public Builder<U> noAutoExpand() {
+      this.autoExpand = false;
       return this;
     }
 
     /**
-     * Configures the resulting {@code TypeTreeMap} to search for the boxed version of a primitive
-     * type if the primitive type itself is not present, <i>and</i> it will search for the unboxed
-     * version of a primitive wrapper class if the primitive wrapper class is itself not present.
+     * Enables the "auto-boxing" and "auto-unboxing" feature.
      *
      * @return This {@code Builder} instance
      */
@@ -247,7 +245,7 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
     super(m, autobox);
   }
 
-  /**
+  /*
    * NB even though TreeMap has no use for a size parameter, we must still carefully distinguish
    * between the constructor that does, and the constructor that does not have the "expectedSize"
    * parameter. The use of the latter signals that an auto-expanding instance is requested. So the

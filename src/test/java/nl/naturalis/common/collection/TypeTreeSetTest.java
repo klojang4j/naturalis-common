@@ -11,12 +11,12 @@ import java.util.*;
 import java.util.function.Function;
 import org.junit.Test;
 import nl.naturalis.common.util.ExpansionType;
-import static nl.naturalis.common.StringMethods.implode;
 
 public class TypeTreeSetTest {
 
   @Test
   public void test01() {
+    @SuppressWarnings("unused")
     TypeTreeSet tts =
         TypeTreeSet.withTypes(
             true,
@@ -60,6 +60,6 @@ public class TypeTreeSetTest {
             Function.class,
             int.class,
             MyArrayList2.class);
-    System.out.println(implode(tts.prettySimpleTypeNames(), "\n"));
+    // System.out.println(implode(tts.prettySimpleTypeNames(), "\n"));
   }
 }
