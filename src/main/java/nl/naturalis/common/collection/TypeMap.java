@@ -76,12 +76,11 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
     }
 
     /**
-     * Enables the automatic addition of missing subtypes. The map will be expected to grow to about
-     * twice the number of entries added through the {@link #add(Class, Object) add} method. There
-     * is in fact no real reason to call this method, because this is how {@code TypeMap} instances
-     * are configured by default.
+     * Enables the automatic addition of missing subtypes. Equivalent to {@code autoExpand(0)}. The
+     * map will be expected to grow to about twice the number of entries added through the {@link
+     * #add(Class, Object) add} method. There is in fact no real reason to call this method, because
+     * this is how the {@code Builder} configures {@code TypeMap} instances by default.
      *
-     * @param expectedSize The expected size to which the map will grow
      * @return This {@code Builder} instance
      */
     public Builder<U> autoExpand() {
@@ -93,7 +92,8 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
      * less than the number of entries added through the {@link #add(Class, Object) put} method to
      * indicate that you expect the map to grow to about twice its original size.
      *
-     * @param expectedSize The expected size to which the map will grow
+     * @param expectedSize The size to which you expect the map to grow as it gobbles up new
+     *     subtypes presented to it {@code containsKey} and {@code get} methods.
      * @return This {@code Builder} instance
      */
     public Builder<U> autoExpand(int expectedSize) {
@@ -102,7 +102,7 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
     }
 
     /**
-     * Enables the "auto-boxing" and "auto-unboxing" feature.
+     * Enables the "auto-boxing" and "auto-unboxing" feature. See class comments above.
      *
      * @return This {@code Builder} instance
      */

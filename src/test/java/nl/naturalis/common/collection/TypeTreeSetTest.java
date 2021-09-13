@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.function.Function;
 import org.junit.Test;
 import nl.naturalis.common.util.ExpansionType;
+import static nl.naturalis.common.ArrayMethods.implode;
 
 public class TypeTreeSetTest {
 
@@ -31,6 +32,7 @@ public class TypeTreeSetTest {
             Number.class,
             SortedSet.class,
             Closeable.class,
+            Short.class,
             NavigableMap.class,
             int[][].class,
             AutoCloseable.class,
@@ -43,6 +45,7 @@ public class TypeTreeSetTest {
             Set.class,
             OutputStream.class,
             Object.class,
+            short.class,
             NavigableSet.class,
             String.class,
             Month.class,
@@ -54,12 +57,13 @@ public class TypeTreeSetTest {
             List.class,
             SortedMap.class,
             Enum.class,
+            short.class,
             MyArrayList.class,
             Long.class,
             CharSequence.class,
             Function.class,
             int.class,
             MyArrayList2.class);
-    // System.out.println(implode(tts.prettySimpleTypeNames(), "\n"));
+    System.out.println(implode(tts.prettySimpleTypeNames().toArray(), "\n"));
   }
 }

@@ -1,5 +1,6 @@
 package nl.naturalis.common.collection;
 
+import java.lang.reflect.Modifier;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -268,7 +269,7 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
 
   @Override
   Map<Class<?>, V> createBackend(Map<? extends Class<?>, ? extends V> m, boolean autobox) {
-    TreeMap<Class<?>, V> backend = new TreeMap<>(autobox ? AUTOBOX_COMP : COMP);
+    TreeMap<Class<?>, V> backend = new TreeMap<>(createComparator(m, autobox));
     m.forEach(
         (k, v) -> {
           Check.that(k).is(notNull(), ERR_NULL_KEY);
@@ -281,6 +282,52 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
   @Override
   Map<Class<?>, V> createBackend(Map<? extends Class<?>, ? extends V> m, int sz, boolean autobox) {
     return createBackend(m, autobox);
+  }
+
+  private Comparator<Class<?>> createComparator(
+      Map<? extends Class<?>, ? extends V> m, boolean autobox) {
+    return (c1, c2) -> {
+      if (c1 == c2) {
+        return 0;
+      } else if (autobox) {
+        if (c1.isPrimitive() && isAutoBoxedAs(c1, c2)) {
+          return 0;
+        } else if (isWrapper(c1) && isAutoUnboxedAs(c1, c2)) {
+          return 0;
+        }
+      } else if (c1 == Object.class) {
+        return 1;
+      } else if (c2 == Object.class) {
+        return -1;
+      } else if (c1.isArray()) {
+        return 1;
+      } else if (c2.isArray()) {
+        return -1;
+      }
+      if (m.containsKey(Enum.class)) {
+        if (c1.isEnum()) {
+          return -1;
+        } else if (c2.isEnum()) {
+          return 1;
+        }
+      }
+      if (countAncestors(c1) > countAncestors(c2)) {
+        return -1;
+      } else if (Modifier.isAbstract(c1.getModifiers())) {
+        return 1;
+      } else if (Modifier.isAbstract(c2.getModifiers())) {
+        return -1;
+      } else if (c1.isInterface()) {
+        if (!c2.isInterface()) {
+          return 1;
+        } else if (getAllInterfaces(c1).size() > getAllInterfaces(c2).size()) {
+          return -1;
+        }
+      } else if (isA(c1, c2)) {
+        return -1;
+      }
+      return 1;
+    };
   }
 
   private static int countAncestors(Class<?> c) {
