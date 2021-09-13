@@ -12,13 +12,20 @@ import nl.naturalis.common.check.Check;
  * boolean.class}) and the set either contains the primitive type itself or its corresponding
  * wrapper type ({@code Boolean.class}). This will then also work the other way round.
  *
- * <p>A {@code TypeSet} is backed by a {@link TypeMap}.
+ * <p>This {@code Set} implementation is backed by a {@link TypeMap}.
  *
  * @see TypeMap
  * @author Ayco Holleman
  */
 public class TypeSet extends AbstractTypeSet {
 
+  /**
+   * Returns a {@code TypeSet} instance that will never contain any other types than the ones in the
+   * specified array.
+   *
+   * @param types
+   * @return
+   */
   public static TypeSet withTypes(Class<?>... types) {
     return withTypes(false, types);
   }

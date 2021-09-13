@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import nl.naturalis.common.check.Check;
 import static nl.naturalis.common.ClassMethods.getAllInterfaces;
-import static nl.naturalis.common.ClassMethods.isA;
+import static nl.naturalis.common.ClassMethods.*;
 import static nl.naturalis.common.ClassMethods.isWrapper;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 import static nl.naturalis.common.check.CommonChecks.notNull;
@@ -158,6 +158,16 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
     public <W> TypeTreeMap<W> freeze() {
       if (autoExpand) {
         return (TypeTreeMap<W>) new TypeTreeMap<>(tmp, 0, autobox);
+      }
+      if (autobox) {
+        tmp.forEach(
+            (k, v) -> {
+              if (k.isPrimitive() && !tmp.containsKey(box(k))) {
+                tmp.put(box(k), v);
+              } else if (isWrapper(k) && !tmp.containsKey(unbox(k))) {
+                tmp.put(unbox(k), v);
+              }
+            });
       }
       return (TypeTreeMap<W>) new TypeTreeMap<>(tmp, autobox);
     }

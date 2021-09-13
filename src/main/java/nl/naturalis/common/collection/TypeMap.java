@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.ClassMethods.box;
+import static nl.naturalis.common.ClassMethods.isWrapper;
+import static nl.naturalis.common.ClassMethods.unbox;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 
@@ -26,8 +29,8 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  * {@code Object.class}, that will be the ultimate fall-back entry: {@code containsKey} will always
  * return {@code true} and {@code get} will always return a non-null value. If a type is not present
  * in the map, {@code containsKey} and {@code get} will first go up its class hierarchy, then they
- * will check the interfaces it implements or extends, preferring the most specific interface, and
- * finally they will check if {@code Object.class} is present in the map.
+ * will check the interfaces implemented or extended by the type (preferring the most specific
+ * interface), and finally they will check if {@code Object.class} is present in the map.
  *
  * <p>A {@code TypeMap} does not accept {@code null} keys and {@code null} values and it is
  * unmodifiable to the outside world. All map-altering methods will throw an {@link
@@ -130,7 +133,17 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
      */
     @SuppressWarnings("unchecked")
     public <W> TypeMap<W> freeze() {
-      if (expectedSize == null) {
+      if (expectedSize == null) { // No auto-expand
+        if (autobox) {
+          tmp.forEach(
+              (k, v) -> {
+                if (k.isPrimitive() && !tmp.containsKey(box(k))) {
+                  tmp.put(box(k), v);
+                } else if (isWrapper(k) && !tmp.containsKey(unbox(k))) {
+                  tmp.put(unbox(k), v);
+                }
+              });
+        }
         return (TypeMap<W>) new TypeMap<>(tmp, autobox);
       }
       return (TypeMap<W>) new TypeMap<>(tmp, expectedSize, autobox);
