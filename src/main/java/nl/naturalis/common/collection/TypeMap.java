@@ -249,28 +249,28 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
     return new Builder<>(valueType);
   }
 
+  private final Map<Class<?>, V> backend;
+
   TypeMap(Map<? extends Class<?>, ? extends V> m, boolean autobox) {
-    super(m, autobox);
+    super(false, autobox);
+    this.backend = Map.copyOf(m); // implicit check on null keys & values
   }
 
   TypeMap(Map<? extends Class<?>, ? extends V> m, int sz, boolean autobox) {
-    super(m, sz, autobox);
-  }
-
-  @Override
-  Map<Class<?>, V> createBackend(Map<? extends Class<?>, ? extends V> m, boolean autobox) {
-    return Map.copyOf(m); // implicit check on null keys & values
-  }
-
-  @Override
-  Map<Class<?>, V> createBackend(Map<? extends Class<?>, ? extends V> m, int sz, boolean autobox) {
-    Map<Class<?>, V> backend = new IdentityHashMap<>(sz);
+    super(true, autobox);
+    sz = sz < m.size() ? 2 * m.size() : sz;
+    Map<Class<?>, V> tmp = new IdentityHashMap<>(sz);
     m.forEach(
         (k, v) -> {
           Check.that(k).is(notNull(), ERR_NULL_KEY);
           Check.that(v).is(notNull(), ERR_NULL_VAL, k.getName());
-          backend.put(k, v);
+          tmp.put(k, v);
         });
+    this.backend = tmp;
+  }
+
+  @Override
+  Map<Class<?>, V> backend() {
     return backend;
   }
 }

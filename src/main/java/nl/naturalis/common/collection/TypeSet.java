@@ -78,11 +78,11 @@ public class TypeSet extends AbstractTypeSet {
     return new TypeSet(types, expectedSize, autobox);
   }
 
-  private TypeSet(Collection<Class<?>> s, boolean autobox) {
-    super(TypeMap::new, s, autobox);
+  private TypeSet(Collection<? extends Class<?>> s, boolean autobox) {
+    super(new TypeMap<>(toMap(s), autobox));
   }
 
   private TypeSet(Collection<? extends Class<?>> s, int sz, boolean autobox) {
-    super(TypeMap::new, s, sz, autobox);
+    super(new TypeMap<>(toMap(s), sz, autobox));
   }
 }

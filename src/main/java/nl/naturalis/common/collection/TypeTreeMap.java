@@ -6,9 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.ClassMethods.getAllInterfaces;
+import static nl.naturalis.common.ArrayMethods.isOneOf;
 import static nl.naturalis.common.ClassMethods.*;
-import static nl.naturalis.common.ClassMethods.isWrapper;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 
@@ -26,6 +25,8 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  */
 public class TypeTreeMap<V> extends AbstractTypeMap<V> {
 
+  static final Class<?>[] EMPTY = new Class[0];
+
   private static final Comparator<Class<?>> COMP =
       (c1, c2) -> {
         if (c1 == c2) {
@@ -34,19 +35,27 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
           return 1;
         } else if (c2 == Object.class) {
           return -1;
-        } else if (c1.isArray()) {
-          return 1;
-        } else if (c2.isArray()) {
-          return -1;
-        } else if (c1.isEnum()) {
-          return -1;
-        } else if (c2.isEnum()) {
-          return 1;
         } else if (c1.isPrimitive()) {
           return -1;
         } else if (c2.isPrimitive()) {
           return 1;
+        } else if (isWrapper(c1)) {
+          return -1;
+        } else if (isWrapper(c2)) {
+          return 1;
+        } else if (c1.isEnum()) {
+          return -1;
+        } else if (c2.isEnum()) {
+          return 1;
+        } else if (c1.isArray()) {
+          return 1;
+        } else if (c2.isArray()) {
+          return -1;
         } else if (countAncestors(c1) > countAncestors(c2)) {
+          return -1;
+        } else if (Modifier.isAbstract(c1.getModifiers())) {
+          return 1;
+        } else if (Modifier.isAbstract(c2.getModifiers())) {
           return -1;
         } else if (c1.isInterface()) {
           if (!c2.isInterface()) {
@@ -60,43 +69,9 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
         return 1;
       };
 
-  private static final Comparator<Class<?>> AUTOBOX_COMP =
-      (c1, c2) -> {
-        if (c1 == c2) {
-          return 0;
-        } else if (c1 == Object.class) {
-          return 1;
-        } else if (c2 == Object.class) {
-          return -1;
-        } else if (c1.isArray()) {
-          return 1;
-        } else if (c2.isArray()) {
-          return -1;
-        } else if (c1.isEnum()) {
-          return -1;
-        } else if (c2.isEnum()) {
-          return 1;
-        } else if (c1.isPrimitive()) {
-          return -1;
-        } else if (c2.isPrimitive()) {
-          return 1;
-        } else if (isWrapper(c1)) {
-          return -1;
-        } else if (isWrapper(c2)) {
-          return 1;
-        } else if (countAncestors(c1) > countAncestors(c2)) {
-          return -1;
-        } else if (c1.isInterface()) {
-          if (!c2.isInterface()) {
-            return 1;
-          } else if (getAllInterfaces(c1).size() > getAllInterfaces(c2).size()) {
-            return -1;
-          }
-        } else if (isA(c1, c2)) {
-          return -1;
-        }
-        return 1;
-      };
+  /////////////////////////////////////////////////////////////////////
+  // BEGIN BUILDER CLASS
+  /////////////////////////////////////////////////////////////////////
 
   /**
    * A builder class for {@code TypeTreeMap} instances.
@@ -108,7 +83,8 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
     private final Class<U> valueType;
     private final HashMap<Class<?>, U> tmp = new HashMap<>();
     private boolean autoExpand = true;
-    private boolean autobox;
+    private boolean autobox = false;
+    private Class<?>[] bumped = EMPTY;
 
     private Builder(Class<U> valueType) {
       this.valueType = valueType;
@@ -136,6 +112,19 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
     }
 
     /**
+     * Bumps the specified type to the head of the key set, so they will be found quickly. Could be
+     * used to quickly find ubiquitous types like {@code String.class} and {@code int.class}. Note
+     * though that this may break the ordering from less abstract to more abstract types.
+     *
+     * @param findFast The types to bump to the kead of the head of the key set.
+     * @return This {@code Builder} instance
+     */
+    public Builder<U> bump(Class<?>... findFast) {
+      this.bumped = Check.notNull(findFast).ok();
+      return this;
+    }
+
+    /**
      * Associates the specified type with the specified value
      *
      * @param type The type
@@ -158,7 +147,7 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
     @SuppressWarnings("unchecked")
     public <W> TypeTreeMap<W> freeze() {
       if (autoExpand) {
-        return (TypeTreeMap<W>) new TypeTreeMap<>(tmp, 0, autobox);
+        return (TypeTreeMap<W>) new TypeTreeMap<>(tmp, autoExpand, autobox, bumped);
       }
       if (autobox) {
         tmp.forEach(
@@ -170,9 +159,13 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
               }
             });
       }
-      return (TypeTreeMap<W>) new TypeTreeMap<>(tmp, autobox);
+      return (TypeTreeMap<W>) new TypeTreeMap<>(tmp, autoExpand, autobox, bumped);
     }
   }
+
+  /////////////////////////////////////////////////////////////////////
+  // END BUILDER CLASS
+  /////////////////////////////////////////////////////////////////////
 
   /**
    * Returns a {@code TypeTreeMap} instance that will never contain any other keys or values than
@@ -202,7 +195,7 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
    */
   public static <U> TypeTreeMap<U> withTypes(Map<Class<?>, U> src, boolean autobox) {
     Check.notNull(src);
-    return new TypeTreeMap<>(src, autobox);
+    return new TypeTreeMap<>(src, false, autobox, EMPTY);
   }
 
   /**
@@ -236,7 +229,7 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
    */
   public static <U> TypeTreeMap<U> withValues(Map<Class<?>, U> src, boolean autobox) {
     Check.notNull(src, "src");
-    return new TypeTreeMap<>(src, 0, autobox);
+    return new TypeTreeMap<>(src, true, autobox, EMPTY);
   }
 
   /**
@@ -252,82 +245,34 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
     return new Builder<>(valueType);
   }
 
-  TypeTreeMap(Map<? extends Class<?>, ? extends V> m, boolean autobox) {
-    super(m, autobox);
-  }
+  private final TreeMap<Class<?>, V> backend;
 
-  /*
-   * NB even though TreeMap has no use for a size parameter, we must still carefully distinguish
-   * between the constructor that does, and the constructor that does not have the "expectedSize"
-   * parameter. The use of the latter signals that an auto-expanding instance is requested. So the
-   * static factory methods of TypeTreeMap will pass an arbitrary value (0) for expectedSize in
-   * order to produce an auto-expanding instance.
-   */
-  TypeTreeMap(Map<? extends Class<?>, ? extends V> m, int expectedSize, boolean autobox) {
-    super(m, expectedSize, autobox);
-  }
-
-  @Override
-  Map<Class<?>, V> createBackend(Map<? extends Class<?>, ? extends V> m, boolean autobox) {
-    TreeMap<Class<?>, V> backend = new TreeMap<>(createComparator(m, autobox));
+  TypeTreeMap(
+      Map<? extends Class<?>, ? extends V> m,
+      boolean autoExpand,
+      boolean autobox,
+      Class<?>[] bumped) {
+    super(autoExpand, autobox);
+    TreeMap<Class<?>, V> tmp = new TreeMap<>(createComparator(bumped));
     m.forEach(
         (k, v) -> {
           Check.that(k).is(notNull(), ERR_NULL_KEY);
           Check.that(v).is(notNull(), ERR_NULL_VAL, k.getName());
-          backend.put(k, v);
+          tmp.put(k, v);
         });
-    return backend;
+    this.backend = tmp;
   }
 
   @Override
-  Map<Class<?>, V> createBackend(Map<? extends Class<?>, ? extends V> m, int sz, boolean autobox) {
-    return createBackend(m, autobox);
+  Map<Class<?>, V> backend() {
+    return backend;
   }
 
-  private Comparator<Class<?>> createComparator(
-      Map<? extends Class<?>, ? extends V> m, boolean autobox) {
-    return (c1, c2) -> {
-      if (c1 == c2) {
-        return 0;
-      } else if (autobox) {
-        if (c1.isPrimitive() && isAutoBoxedAs(c1, c2)) {
-          return 0;
-        } else if (isWrapper(c1) && isAutoUnboxedAs(c1, c2)) {
-          return 0;
-        }
-      } else if (c1 == Object.class) {
-        return 1;
-      } else if (c2 == Object.class) {
-        return -1;
-      } else if (c1.isArray()) {
-        return 1;
-      } else if (c2.isArray()) {
-        return -1;
-      }
-      if (m.containsKey(Enum.class)) {
-        if (c1.isEnum()) {
-          return -1;
-        } else if (c2.isEnum()) {
-          return 1;
-        }
-      }
-      if (countAncestors(c1) > countAncestors(c2)) {
-        return -1;
-      } else if (Modifier.isAbstract(c1.getModifiers())) {
-        return 1;
-      } else if (Modifier.isAbstract(c2.getModifiers())) {
-        return -1;
-      } else if (c1.isInterface()) {
-        if (!c2.isInterface()) {
-          return 1;
-        } else if (getAllInterfaces(c1).size() > getAllInterfaces(c2).size()) {
-          return -1;
-        }
-      } else if (isA(c1, c2)) {
-        return -1;
-      }
-      return 1;
-    };
+  private static Comparator<Class<?>> createComparator(Class<?>[] bumped) {
+    if (bumped.length == 0) {
+      return COMP;
+    }
+    return (c1, c2) -> isOneOf(c1, bumped) ? -1 : isOneOf(c2) ? 1 : COMP.compare(c1, c2);
   }
 
   private static int countAncestors(Class<?> c) {

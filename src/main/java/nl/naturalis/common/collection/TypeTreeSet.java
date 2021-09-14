@@ -37,49 +37,27 @@ public class TypeTreeSet extends AbstractTypeSet {
 
   public static TypeTreeSet withTypes(Collection<Class<?>> src, boolean autobox) {
     Check.notNull(src, "src");
-    return new TypeTreeSet(src, autobox);
+    return new TypeTreeSet(src, false, autobox);
   }
 
   public static TypeTreeSet extending(Class<?>... types) {
     return extending(false, types);
   }
 
-  public static TypeTreeSet extending(int expectedSize, Class<?>... types) {
-    return extending(expectedSize, false, types);
-  }
-
   public static TypeTreeSet extending(boolean autobox, Class<?>... types) {
-    return extending(0, autobox, types);
-  }
-
-  public static TypeTreeSet extending(int expectedSize, boolean autobox, Class<?>... types) {
     Check.notNull(types, "types");
-    return extending(Set.of(types), expectedSize, autobox);
+    return extending(Set.of(types), autobox);
   }
 
   public static TypeTreeSet extending(Collection<Class<?>> types) {
-    return extending(types, 0);
-  }
-
-  public static TypeTreeSet extending(Collection<Class<?>> types, int expectedSize) {
-    return extending(types, expectedSize, false);
+    return extending(types, true);
   }
 
   public static TypeTreeSet extending(Collection<Class<?>> types, boolean autobox) {
-    return extending(types, 0, autobox);
+    return new TypeTreeSet(types, true, autobox);
   }
 
-  public static TypeTreeSet extending(
-      Collection<Class<?>> types, int expectedSize, boolean autobox) {
-    Check.notNull(types, "types");
-    return new TypeTreeSet(types, expectedSize, autobox);
-  }
-
-  private TypeTreeSet(Collection<Class<?>> s, boolean autobox) {
-    super(TypeTreeMap::new, s, autobox);
-  }
-
-  private TypeTreeSet(Collection<? extends Class<?>> s, int sz, boolean autobox) {
-    super(TypeTreeMap::new, s, sz, autobox);
+  private TypeTreeSet(Collection<? extends Class<?>> s, boolean autoExpand, boolean autobox) {
+    super(new TypeTreeMap<>(toMap(s), autoExpand, autobox, TypeTreeMap.EMPTY));
   }
 }

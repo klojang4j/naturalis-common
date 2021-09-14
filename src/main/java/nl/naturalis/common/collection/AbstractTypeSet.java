@@ -15,30 +15,22 @@ import static nl.naturalis.common.check.CommonGetters.type;
 abstract class AbstractTypeSet implements Set<Class<?>> {
 
   @FunctionalInterface
-  static interface TypeMapFactory1 {
-    AbstractTypeMap<Object> create(Map<Class<?>, Object> src, boolean autobox);
-  }
-
-  @FunctionalInterface
   static interface TypeMapFactory2 {
-    AbstractTypeMap<Object> create(Map<Class<?>, Object> src, int sz, boolean autobox);
+    AbstractTypeMap<Object> create(Map<Class<?>, Object> src, boolean autoExpand, boolean autobox);
   }
 
   private static final Object FOO = new Object();
 
-  private final AbstractTypeMap<Object> map;
-
-  AbstractTypeSet(TypeMapFactory1 factory, Collection<Class<?>> c, boolean autobox) {
-    Map<Class<?>, Object> src = new LinkedHashMap<>(c.size());
-    c.forEach(x -> src.put(x, FOO));
-    this.map = factory.create(src, autobox);
+  static Map<Class<?>, Object> toMap(Collection<? extends Class<?>> types) {
+    Map<Class<?>, Object> m = new LinkedHashMap<>(types.size());
+    types.forEach(x -> m.put(x, FOO));
+    return m;
   }
 
-  AbstractTypeSet(
-      TypeMapFactory2 factory, Collection<? extends Class<?>> c, int sz, boolean autobox) {
-    Map<Class<?>, Object> src = new LinkedHashMap<>(c.size());
-    c.forEach(x -> src.put(x, FOO));
-    this.map = factory.create(src, sz, autobox);
+  private final AbstractTypeMap<Object> map;
+
+  AbstractTypeSet(AbstractTypeMap<Object> map) {
+    this.map = map;
   }
 
   @Override
