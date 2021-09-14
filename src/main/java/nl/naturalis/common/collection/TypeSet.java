@@ -21,41 +21,108 @@ public class TypeSet extends AbstractTypeSet {
 
   /**
    * Returns a {@code TypeSet} instance that will never contain any other types than the ones in the
-   * specified array.
+   * specified array. Calling {@link #contains(Object) contains} on it will return true if either
+   * the specified type itself or any of its super types is present in the set, but if the type
+   * itself is not present in the set, it will not be added to it.
    *
-   * @param types
-   * @return
+   * @param types The tyoes contained in the set
+   * @return A {@code TypeSet} configured as described above
    */
   public static TypeSet withTypes(Class<?>... types) {
     return withTypes(false, types);
   }
 
+  /**
+   * Returns a {@code TypeSet} instance that will never contain any other types than the ones in the
+   * specified array. Calling {@link #contains(Object) contains} on it will return true if either
+   * the specified type itself or any of its super types is present in the set, but if the type
+   * itself is not present in the set, it will not be added to it. The instance can also be
+   * configured to return {@code true} if the corresponding wrapper type c.q. primitive type is
+   * present in the set.
+   *
+   * @param autobox Enables/disables the "auto-boxing" and "auto-unboxing" feature
+   * @param types The tyoes contained in the set
+   * @return A {@code TypeSet} configured as described above
+   */
   public static TypeSet withTypes(boolean autobox, Class<?>... types) {
     Check.notNull(types, "types");
     return withTypes(List.of(types), autobox);
   }
 
+  /**
+   * Returns a {@code TypeSet} instance that will never contain any other types than the ones in the
+   * specified source collection. Calling {@link #contains(Object) contains} on it will return true
+   * if either the specified type itself or any of its super types is present in the set, but if the
+   * type itself is not present in the set, it will not be added to it.
+   *
+   * @param src The souurce collection from which to create the {@code TypeSet}.
+   * @return A {@code TypeSet} configured as described above
+   */
   public static TypeSet withTypes(Collection<Class<?>> src) {
     return withTypes(src, false);
   }
 
+  /**
+   * Returns a {@code TypeSet} instance that will never contain any other types than the ones in the
+   * specified souurce collection. Calling {@link #contains(Object) contains} on it will return true
+   * if either the specified type itself or any of its super types is present in the set, but if the
+   * type itself is not present in the set, it will not be added to it. The instance can also be
+   * configured to return {@code true} if the corresponding wrapper type c.q. primitive type is
+   * present in the set.
+   *
+   * @param src The souurce collection from which to create the {@code TypeSet}.
+   * @param autobox Enables/disables the "auto-boxing" and "auto-unboxing" feature
+   * @return A {@code TypeSet} configured as described above
+   */
   public static TypeSet withTypes(Collection<Class<?>> src, boolean autobox) {
     Check.notNull(src, "src");
     return new TypeSet(src, autobox);
   }
 
+  /**
+   * Returns a {@code TypeSet} instance that will grow as new subtypes are presented to the {@link
+   * #contains(Object) method}. The set is expected to grow to about twice the length of the
+   * specified array.
+   *
+   * @param types The types contained in the set
+   * @return A {@code TypeSet} configured as described above
+   */
   public static TypeSet extending(Class<?>... types) {
     return extending(false, types);
   }
 
+  /**
+   * Returns a {@code TypeSet} instance that will grow as new subtypes are presented to the {@link
+   * #contains(Object) method}. The instance can also be configured to return {@code true} if the
+   * corresponding wrapper type.
+   *
+   * @param expectedSize The expected size of the set
+   * @param types
+   * @return
+   */
   public static TypeSet extending(int expectedSize, Class<?>... types) {
     return extending(expectedSize, false, types);
   }
 
+  /**
+   * Returns a {@code TypeSet} instance that will grow as new subtypes are presented to the {@link
+   * #contains(Object) method}. The instance can also be configured to return {@code true} if the
+   * corresponding wrapper type c.q. primitive type is present in the set.
+   *
+   * @param autobox
+   * @param types
+   * @return
+   */
   public static TypeSet extending(boolean autobox, Class<?>... types) {
     return extending(0, autobox, types);
   }
 
+  /**
+   * @param expectedSize
+   * @param autobox
+   * @param types
+   * @return
+   */
   public static TypeSet extending(int expectedSize, boolean autobox, Class<?>... types) {
     Check.notNull(types, "types");
     return extending(List.of(types), expectedSize, autobox);
