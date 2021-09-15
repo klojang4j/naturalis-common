@@ -26,15 +26,15 @@ public class BeanWriter<T> {
 
   /**
    * Returns a {@code BeanWriter} that allows for "loose typing" of the values to be assigned to the
-   * bean's properties. A {@link Loose} object will be used to morph the values to the type of the
-   * property for which they are destined.
+   * bean's properties. A {@link Loose} object will be used to morph incoming values to the type of
+   * the destination property.
    *
    * @param <U> The type of the bean
    * @param beanClass The bean class
    * @return A @code BeanWriter} for the specified class that uses a {@link Loose} to convert values
    *     to the type of the property for which they are destined
    */
-  public static <U> BeanWriter<U> loose(Class<U> beanClass, String... properties) {
+  public static <U> BeanWriter<U> getTolerantWriter(Class<U> beanClass, String... properties) {
     return new BeanWriter<>(beanClass, (obj, type) -> Loose.convert(obj, type), false, properties);
   }
 
