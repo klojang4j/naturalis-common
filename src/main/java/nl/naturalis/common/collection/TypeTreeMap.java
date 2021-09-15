@@ -2,7 +2,7 @@ package nl.naturalis.common.collection;
 
 import java.lang.reflect.Modifier;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import nl.naturalis.common.check.Check;
@@ -81,7 +81,7 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
    */
   public static final class Builder<U> {
     private final Class<U> valueType;
-    private final HashMap<Class<?>, U> tmp = new HashMap<>();
+    private final LinkedHashMap<Class<?>, U> tmp = new LinkedHashMap<>();
     private boolean autoExpand = true;
     private boolean autobox = false;
     private Class<?>[] bumped = EMPTY;
@@ -112,9 +112,9 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
     }
 
     /**
-     * Bumps the specified type to the head of the key set, so they will be found quickly. Could be
-     * used to quickly find ubiquitous types like {@code String.class} and {@code int.class}. Note
-     * though that this may break the ordering from less abstract to more abstract types.
+     * Bumps the specified types to the head of the key set. This can be used to make the {@code
+     * TypeTreeMap} quickly find ubiquitous types like {@code String.class} and {@code int.class}.
+     * Note though that this may break the ordering from less abstract to more abstract types.
      *
      * @param findFast The types to bump to the kead of the head of the key set.
      * @return This {@code Builder} instance
