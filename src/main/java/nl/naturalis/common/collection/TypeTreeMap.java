@@ -1,13 +1,10 @@
 package nl.naturalis.common.collection;
 
-import java.lang.reflect.Modifier;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.ArrayMethods.isOneOf;
-import static nl.naturalis.common.ClassMethods.*;
+import static nl.naturalis.common.ClassMethods.box;
+import static nl.naturalis.common.ClassMethods.isWrapper;
+import static nl.naturalis.common.ClassMethods.unbox;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 
@@ -26,48 +23,6 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
 public class TypeTreeMap<V> extends AbstractTypeMap<V> {
 
   static final Class<?>[] EMPTY = new Class[0];
-
-  private static final Comparator<Class<?>> COMP =
-      (c1, c2) -> {
-        if (c1 == c2) {
-          return 0;
-        } else if (c1 == Object.class) {
-          return 1;
-        } else if (c2 == Object.class) {
-          return -1;
-        } else if (c1.isPrimitive()) {
-          return -1;
-        } else if (c2.isPrimitive()) {
-          return 1;
-        } else if (isWrapper(c1)) {
-          return -1;
-        } else if (isWrapper(c2)) {
-          return 1;
-        } else if (c1.isEnum()) {
-          return -1;
-        } else if (c2.isEnum()) {
-          return 1;
-        } else if (c1.isArray()) {
-          return 1;
-        } else if (c2.isArray()) {
-          return -1;
-        } else if (countAncestors(c1) > countAncestors(c2)) {
-          return -1;
-        } else if (Modifier.isAbstract(c1.getModifiers())) {
-          return 1;
-        } else if (Modifier.isAbstract(c2.getModifiers())) {
-          return -1;
-        } else if (c1.isInterface()) {
-          if (!c2.isInterface()) {
-            return 1;
-          } else if (getAllInterfaces(c1).size() > getAllInterfaces(c2).size()) {
-            return -1;
-          }
-        } else if (isA(c1, c2)) {
-          return -1;
-        }
-        return 1;
-      };
 
   /////////////////////////////////////////////////////////////////////
   // BEGIN BUILDER CLASS
@@ -146,6 +101,9 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
      */
     @SuppressWarnings("unchecked")
     public <W> TypeTreeMap<W> freeze() {
+      if (bumped.length > 0 && !tmp.keySet().containsAll(Set.of(bumped))) {
+        throw new IllegalStateException("Bumped classes must have been added too");
+      }
       if (autoExpand) {
         return (TypeTreeMap<W>) new TypeTreeMap<>(tmp, autoExpand, autobox, bumped);
       }
@@ -253,7 +211,8 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
       boolean autobox,
       Class<?>[] bumped) {
     super(autoExpand, autobox);
-    TreeMap<Class<?>, V> tmp = new TreeMap<>(createComparator(bumped));
+    Comparator<Class<?>> cmp = new TypeTreeMapHelper(bumped).getComparator();
+    TreeMap<Class<?>, V> tmp = new TreeMap<>(cmp);
     m.forEach(
         (k, v) -> {
           Check.that(k).is(notNull(), ERR_NULL_KEY);
@@ -266,20 +225,5 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
   @Override
   Map<Class<?>, V> backend() {
     return backend;
-  }
-
-  private static Comparator<Class<?>> createComparator(Class<?>[] bumped) {
-    if (bumped.length == 0) {
-      return COMP;
-    }
-    return (c1, c2) -> isOneOf(c1, bumped) ? -1 : isOneOf(c2) ? 1 : COMP.compare(c1, c2);
-  }
-
-  private static int countAncestors(Class<?> c) {
-    int i = 0;
-    for (Class<?> x = c.getSuperclass(); x != null; x = x.getSuperclass()) {
-      ++i;
-    }
-    return i;
   }
 }

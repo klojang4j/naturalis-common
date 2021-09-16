@@ -5,7 +5,7 @@ import nl.naturalis.common.check.Check;
 import nl.naturalis.common.invoke.BeanWriter;
 import static nl.naturalis.common.ClassMethods.box;
 import static nl.naturalis.common.ClassMethods.isA;
-import static nl.naturalis.common.ClassMethods.isPrimitiveNumberClass;
+import static nl.naturalis.common.ClassMethods.isPrimitiveNumber;
 import static nl.naturalis.common.ClassMethods.isAutoBoxedAs;
 import static nl.naturalis.common.ObjectMethods.PRIMITIVE_DEFAULTS;
 
@@ -84,7 +84,7 @@ public class Loose<T> {
       return (T) Bool.from(obj);
     } else if (isAutoBoxedAs(targetType, obj.getClass())) {
       return (T) obj;
-    } else if (isPrimitiveNumberClass(targetType)) {
+    } else if (isPrimitiveNumber(targetType)) {
       Class<? extends Number> c = (Class<? extends Number>) box(targetType);
       if (isA(obj.getClass(), Number.class)) {
         return (T) new NumberConverter<>(c).convert((Number) obj);

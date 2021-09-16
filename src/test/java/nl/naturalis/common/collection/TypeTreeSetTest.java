@@ -46,6 +46,7 @@ public class TypeTreeSetTest {
             OutputStream.class,
             Object.class,
             short.class,
+            NavigableMap.class,
             NavigableSet.class,
             String.class,
             Month.class,

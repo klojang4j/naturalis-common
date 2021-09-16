@@ -1,5 +1,6 @@
 package nl.naturalis.common;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.IntStream;
@@ -17,76 +18,6 @@ import static nl.naturalis.common.check.CommonChecks.keyIn;
  * @author Ayco Holleman
  */
 public class ClassMethods {
-
-  private ClassMethods() {}
-
-  /**
-   * Tests whether the 1st argument extends or implements the 2nd argument. In case you keep
-   * forgetting what "assign from" even means. Equivalent to <code>
-   * superOrInterface.isAssignableFrom(classToTest)</code>.
-   *
-   * @param classToTest The class to test
-   * @param superOrInterface The class or interface to test the class against
-   * @return Whether the 1st argument extends or implements the 2nd argument
-   */
-  public static boolean isA(Class<?> classToTest, Class<?> superOrInterface) {
-    Check.notNull(classToTest, "classToTest");
-    Check.notNull(superOrInterface, "superOrInterface");
-    return superOrInterface.isAssignableFrom(classToTest);
-  }
-
-  /**
-   * Tests whether the 1st argument is an instance of the 2nd argument. Equivalent to <code>
-   * superOrInterface.isInstance(objectToTest)</code>. Note that, since this method is overloaded
-   * with {@code Class} as the type of the first parameter, you cannot and should not use this
-   * method to figure out if a {@code Class} object is an instance of some interface or super class.
-   *
-   * @param objectToTest The object to test
-   * @param superOrInterface The class or interface to test the object against
-   * @return Whether the 1st argument is an instance of the 2nd argument
-   */
-  public static boolean isA(Object objectToTest, Class<?> superOrInterface) {
-    Check.notNull(objectToTest, "objectToTest");
-    Check.notNull(superOrInterface, "superOrInterface");
-    return superOrInterface.isInstance(objectToTest);
-  }
-
-  /**
-   * Returns whether or not the specified class is a "regular" class. Returns {@code true} if the
-   * specified class is Object.class or if has a super class, is not an enum and not an array.
-   *
-   * @param clazz The class to test
-   * @return Whether or not the specified class is a "regular" class
-   */
-  public static boolean isRegular(Class<?> clazz) {
-    return clazz == Object.class
-        || (clazz.getSuperclass() != null && !isA(clazz, Enum.class) && !clazz.isArray());
-  }
-
-  public static final boolean isPrimitiveNumberClass(Class<?> classToTest) {
-    return Set.of(int.class, double.class, long.class, byte.class, float.class, short.class)
-        .contains(classToTest);
-  }
-
-  /**
-   * Returns whether or not the argument is an array of primitives without using reflection.
-   * Null-safe.
-   *
-   * @param arg The object to test
-   * @return Whether or not it is an array of primitives
-   */
-  public static boolean isPrimitiveArray(Object arg) {
-    Class<?> c;
-    return arg != null
-        && ((c = arg.getClass()) == int[].class
-            || c == boolean[].class
-            || c == byte[].class
-            || c == double[].class
-            || c == long[].class
-            || c == float[].class
-            || c == char[].class
-            || c == short[].class);
-  }
 
   // primitive-to-wrapper
   private static final Map<Class<?>, Class<?>> p2w =
@@ -111,12 +42,66 @@ public class ClassMethods {
   // wrappper-to-primitve
   private static final Map<Class<?>, Class<?>> w2p = swapAndFreeze(p2w);
 
-  public static boolean isPrimitive(Class<?> classToTest) {
-    return classToTest.isPrimitive();
+  private ClassMethods() {}
+  /**
+   * Tests whether the 1st argument is an instance of the 2nd argument. Equivalent to <code>
+   * superOrInterface.isInstance(objectToTest)</code>. Since this method is overloaded with {@code
+   * Class} as the type of the first parameter, <i>you cannot and should not use this method to test
+   * the {@code Class} object itself</i>, even though it does implement some interfaces (like {@link
+   * Serializable}).
+   *
+   * @param instance The object to test
+   * @param superOrInterface The class or interface to test the object against
+   * @return Whether the 1st argument is an instance of the 2nd argument
+   */
+  public static boolean isA(Object instance, Class<?> superOrInterface) {
+    Check.notNull(instance, "objectToTest");
+    if (instance == Class.class) {
+      return isA((Class<?>) instance, superOrInterface);
+    }
+    Check.notNull(superOrInterface, "superOrInterface");
+    return superOrInterface.isInstance(instance);
   }
 
-  public static boolean isWrapper(Class<?> classToTest) {
-    return w2p.keySet().contains(classToTest);
+  /**
+   * Tests whether the 1st argument extends or implements the 2nd argument. In case you keep
+   * forgetting what "assign from" even means. Equivalent to <code>
+   * superOrInterface.isAssignableFrom(classToTest)</code>.
+   *
+   * @param classToTest The class to test
+   * @param superOrInterface The class or interface to test the class against
+   * @return Whether the 1st argument extends or implements the 2nd argument
+   */
+  public static boolean isA(Class<?> classToTest, Class<?> superOrInterface) {
+    Check.notNull(classToTest, "classToTest");
+    Check.notNull(superOrInterface, "superOrInterface");
+    return superOrInterface.isAssignableFrom(classToTest);
+  }
+
+  /**
+   * Equivalent to {@code clazz.isPrimitive()}.
+   *
+   * @param clazz The class to test
+   * @return Whether or not it is one of the primitive types
+   */
+  public static boolean isPrimitive(Class<?> clazz) {
+    return clazz.isPrimitive();
+  }
+
+  /**
+   * Returns whether or not the specified class is one of the primitive number classes.
+   *
+   * @param clazz The class to test
+   * @return Whether or not the specified class is one of the primitive number classes
+   */
+  public static final boolean isPrimitiveNumber(Class<?> clazz) {
+    Check.notNull(clazz);
+    return Set.of(int.class, double.class, long.class, byte.class, float.class, short.class)
+        .contains(clazz);
+  }
+
+  public static boolean isWrapper(Class<?> clazz) {
+    return w2p.keySet().contains(clazz);
   }
 
   public static boolean isAutoUnboxedAs(Class<?> classToTest, Class<?> primitiveClass) {
@@ -141,6 +126,52 @@ public class ClassMethods {
     return Check.that(wrapperClass)
         .is(keyIn(), w2p, "Not a wrapper class: %s", wrapperClass)
         .ok(w2p::get);
+  }
+
+  /**
+   * Returns whether or not the specified object is a primitive array classes. Defers to {@link
+   * #isPrimitiveArray(Class)} if the specified object is a {@code Class} object.
+   *
+   * @param arg The class to test
+   * @return Whether or not it is a primitive array class
+   */
+  public static boolean isPrimitiveArray(Object obj) {
+    Check.notNull(obj);
+    if (obj.getClass() == Class.class) {
+      return isPrimitive((Class<?>) obj);
+    }
+    return isPrimitiveArray(obj.getClass());
+  }
+
+  /**
+   * Returns whether or not the class is a primitive array class.
+   *
+   * @param arg The class to test
+   * @return Whether or not it is a primitive array class
+   */
+  public static boolean isPrimitiveArray(Class<?> clazz) {
+    Check.notNull(clazz);
+    return Set.of(
+            int[].class, double[].class, long[].class, byte[].class, float[].class, short[].class)
+        .contains(clazz);
+  }
+
+  public static List<Class<?>> getAncestors(Class<?> clazz) {
+    Check.notNull(clazz);
+    List<Class<?>> l = new ArrayList<>(5);
+    for (Class<?> x = clazz.getSuperclass(); x != null; x = x.getSuperclass()) {
+      l.add(x);
+    }
+    return l;
+  }
+
+  public static int countAncestors(Class<?> clazz) {
+    Check.notNull(clazz);
+    int i = 0;
+    for (Class<?> x = clazz.getSuperclass(); x != null; x = x.getSuperclass()) {
+      ++i;
+    }
+    return i;
   }
 
   /**
