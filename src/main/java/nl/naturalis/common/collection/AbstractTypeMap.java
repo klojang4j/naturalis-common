@@ -89,8 +89,13 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
     if (autobox) {
       if (k.isPrimitive()) {
         return find(box(k));
-      } else if (isWrapper(k)) {
-        return find(unbox(k));
+      }
+      if (isWrapper(k)) {
+        Class<?> c = unbox(k);
+        v = backend().get(c);
+        if (v != null) {
+          return Tuple.of(c, v);
+        }
       }
     }
     return null;
