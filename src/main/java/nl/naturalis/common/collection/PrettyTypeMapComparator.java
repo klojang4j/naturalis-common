@@ -12,12 +12,6 @@ class PrettyTypeMapComparator implements Comparator<Class<?>> {
     if (c1 == c2) {
       return 0;
     }
-    if (c1 == Object.class) {
-      return 1;
-    }
-    if (c2 == Object.class) {
-      return -1;
-    }
     if (c1.isPrimitive()) {
       return -1;
     }

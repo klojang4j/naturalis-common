@@ -35,8 +35,9 @@ public class NumberMethods {
   }
 
   /**
-   * Returns whether or not the specified string consists of digits only, without plus or minus
-   * sign, without leading zeros, and fitting into a 32-bit integer.
+   * Returns whether or not the specified string represents a plain, positive integer, consisting of
+   * digits only, without plus or minus sign, without leading zeros, and fitting into a 32-bit
+   * integer.
    *
    * @param str The string
    * @return Whether or not the specified string is a valid, digit-only integer

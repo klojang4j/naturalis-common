@@ -12,6 +12,7 @@ import static java.util.stream.Collectors.joining;
 import static nl.naturalis.common.CollectionMethods.swapAndFreeze;
 import static nl.naturalis.common.check.CommonChecks.array;
 import static nl.naturalis.common.check.CommonChecks.keyIn;
+import static nl.naturalis.common.check.CommonChecks.yes;
 /**
  * Methods for inspecting types.
  *
@@ -20,7 +21,7 @@ import static nl.naturalis.common.check.CommonChecks.keyIn;
 public class ClassMethods {
 
   // primitive-to-wrapper
-  private static final Map<Class<?>, Class<?>> p2w =
+  private static final Map<Class<?>, Class<?>> P2W =
       Map.of(
           double.class,
           Double.class,
@@ -40,7 +41,24 @@ public class ClassMethods {
           Boolean.class);
 
   // wrappper-to-primitve
-  private static final Map<Class<?>, Class<?>> w2p = swapAndFreeze(p2w);
+  private static final Map<Class<?>, Class<?>> W2P = swapAndFreeze(P2W);
+
+  private static final Set<Class<?>> PRIMITIVE_NUMBERS =
+      Set.of(int.class, double.class, long.class, float.class, short.class, byte.class);
+
+  private static final Set<Class<?>> PRIMITIVE_ARRAYS =
+      Set.of(
+          int[].class,
+          double[].class,
+          long[].class,
+          float[].class,
+          short[].class,
+          byte[].class,
+          boolean[].class,
+          char[].class);
+
+  private static final Set<Class<?>> PRIM_NUM_ARRAYS =
+      Set.of(int[].class, double[].class, long[].class, float[].class, short[].class, byte[].class);
 
   private ClassMethods() {}
   /**
@@ -95,42 +113,69 @@ public class ClassMethods {
    * @return Whether or not the specified class is one of the primitive number classes
    */
   public static final boolean isPrimitiveNumber(Class<?> clazz) {
-    Check.notNull(clazz);
-    return Set.of(int.class, double.class, long.class, byte.class, float.class, short.class)
-        .contains(clazz);
+    return PRIMITIVE_NUMBERS.contains(Check.notNull(clazz).ok());
   }
 
+  /**
+   * Returns whether or not the specified is one of the primitive wrapper classes.
+   *
+   * @param clazz The class to test
+   * @return Whether or not the specified is one of the primitive wrapper classes
+   */
   public static boolean isWrapper(Class<?> clazz) {
-    return w2p.keySet().contains(clazz);
+    return W2P.keySet().contains(clazz);
   }
 
+  /**
+   * Returns whether or not instances of the first class will be auto-unboxed into instances of the
+   * second class. This method does not check whether the first class actually is a wrapper class
+   * and the second a primitive class. If either is not true, the method will simply return {@code
+   * false}.
+   *
+   * @param classToTest The class to test
+   * @param primitiveClass Supposedly a primitively class
+   * @return Whether or not instances of the first class will be auto-unboxed into instances of the
+   *     second class
+   */
   public static boolean isAutoUnboxedAs(Class<?> classToTest, Class<?> primitiveClass) {
     Check.notNull(classToTest);
     Check.notNull(primitiveClass);
-    return p2w.get(primitiveClass) == classToTest;
+    return P2W.get(primitiveClass) == classToTest;
   }
 
+  /**
+   * Returns whether or not instances of the first class will be auto-unboxed into instances of the
+   * second class. This method does not check whether the first class actually is a wrapper class
+   * and the second a primitive class. If either is not true, the method will simply return {@code
+   * false}.
+   *
+   * @param classToTest The class to test
+   * @param wrapperClass Supposedly a wrapper class
+   * @return Whether or not instances of the first class will be auto-unboxed into instances of the
+   *     second class
+   */
   public static boolean isAutoBoxedAs(Class<?> classToTest, Class<?> wrapperClass) {
     Check.notNull(classToTest);
     Check.notNull(wrapperClass);
-    return w2p.get(wrapperClass) == classToTest;
+    return W2P.get(wrapperClass) == classToTest;
   }
 
   public static Class<?> box(Class<?> primitiveClass) {
     return Check.notNull(primitiveClass)
-        .is(keyIn(), p2w, "Not a primitive class: %s", primitiveClass)
-        .ok(p2w::get);
+        .has(Class::isPrimitive, yes(), "Not a primitive class: %s", primitiveClass)
+        .ok(P2W::get);
   }
 
   public static Class<?> unbox(Class<?> wrapperClass) {
     return Check.that(wrapperClass)
-        .is(keyIn(), w2p, "Not a wrapper class: %s", wrapperClass)
-        .ok(w2p::get);
+        .is(keyIn(), W2P, "Not a wrapper class: %s", wrapperClass)
+        .ok(W2P::get);
   }
 
   /**
-   * Returns whether or not the specified object is a primitive array classes. Defers to {@link
-   * #isPrimitiveArray(Class)} if the specified object is a {@code Class} object.
+   * Returns whether or not the specified object is a primitive array or a {@code Class} object
+   * representing a primitive array. Defers to {@link #isPrimitiveArray(Class)} if the specified
+   * object is a {@code Class} object.
    *
    * @param arg The class to test
    * @return Whether or not it is a primitive array class
@@ -138,7 +183,7 @@ public class ClassMethods {
   public static boolean isPrimitiveArray(Object obj) {
     Check.notNull(obj);
     if (obj.getClass() == Class.class) {
-      return isPrimitive((Class<?>) obj);
+      return isPrimitiveArray((Class<?>) obj);
     }
     return isPrimitiveArray(obj.getClass());
   }
@@ -150,10 +195,33 @@ public class ClassMethods {
    * @return Whether or not it is a primitive array class
    */
   public static boolean isPrimitiveArray(Class<?> clazz) {
-    Check.notNull(clazz);
-    return Set.of(
-            int[].class, double[].class, long[].class, byte[].class, float[].class, short[].class)
-        .contains(clazz);
+    return PRIMITIVE_ARRAYS.contains(Check.notNull(clazz).ok());
+  }
+
+  /**
+   * Returns whether or not the specified object is a primitive number array or a {@code Class}
+   * object representing a primitive number array. Defers to {@link #isPrimitiveNumberArray(Class)}
+   * if the specified object is a {@code Class} object.
+   *
+   * @param arg The class to test
+   * @return Whether or not it is a primitive array class
+   */
+  public static boolean isPrimitiveNumberArray(Object obj) {
+    Check.notNull(obj);
+    if (obj.getClass() == Class.class) {
+      return isPrimitiveArray((Class<?>) obj);
+    }
+    return isPrimitiveArray(obj.getClass());
+  }
+
+  /**
+   * Returns whether or not the class represents an array of primitive numbers.
+   *
+   * @param arg The class to test
+   * @return Whether or not it is a primitive array class
+   */
+  public static boolean isPrimitiveNumberArray(Class<?> clazz) {
+    return PRIM_NUM_ARRAYS.contains(Check.notNull(clazz).ok());
   }
 
   public static List<Class<?>> getAncestors(Class<?> clazz) {
