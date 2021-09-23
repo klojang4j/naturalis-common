@@ -1,15 +1,32 @@
 package nl.naturalis.common;
 
 import java.lang.reflect.Array;
+import java.util.function.IntBinaryOperator;
 
 public class MathMethods {
 
   private MathMethods() {}
 
+  /**
+   * Converts to arguments to {@code double}, then divides the first argument by the second, and
+   * then applies {@link Math#ceil(double) Math.ceil}.
+   *
+   * @param value The initeger to divide
+   * @param dividedBy The integer to divide it by
+   * @return The result of the division, rounded to the next integer
+   */
   public static int divUp(int value, int dividedBy) {
     return (int) Math.ceil((double) value / (double) dividedBy);
   }
 
+  /**
+   * Equivalent to {@code value / dividedBy}, but still useful as method reference for an {@link
+   * IntBinaryOperator}.
+   *
+   * @param value The initeger to divide
+   * @param dividedBy The integer to divide it by
+   * @return The result of the division, rounded to the preceding integer
+   */
   public static int divDown(int value, int dividedBy) {
     return value / dividedBy;
   }

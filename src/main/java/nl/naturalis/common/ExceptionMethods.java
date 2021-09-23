@@ -46,10 +46,10 @@ public final class ExceptionMethods {
   }
 
   /**
-   * Returns the stack trace of the root cause of {@code exc} as a {@code String} using the
-   * specified filter string the filter stack trace elements. If the {@link
-   * StackTraceElement#getClassName() class name} of the stack trace element contains the filter
-   * string, the stack trace element will be included in the output.
+   * Returns the exception message and stack trace of the root cause of {@code exc}, using the
+   * specified string to filter stack trace elements. If the {@link StackTraceElement#getClassName()
+   * class name} of the stack trace element contains the filter string, the stack trace element will
+   * be included in the output.
    *
    * @param exc The exception
    * @param filter The string used to filter stack trace elements

@@ -35,7 +35,7 @@ public class UncheckedException extends RuntimeException {
    * @param cause
    */
   public UncheckedException(Throwable cause) {
-    this(null, cause);
+    this(null, Check.notNull(cause, "cause").ok(UncheckedException::pealAway));
   }
 
   /**
@@ -45,8 +45,20 @@ public class UncheckedException extends RuntimeException {
    * @param cause
    */
   public UncheckedException(String message, Throwable cause) {
-    super(Check.notNull(cause, "cause").ok());
+    // Peal until we find something other than an UncheckedException
+    super(Check.notNull(cause, "cause").ok(UncheckedException::pealAway));
     this.customMessage = Optional.ofNullable(message);
+  }
+
+  /**
+   * Returns the exception wrapped by this {@code UncheckedException}. Note that {@link #getCause()}
+   * does <i>not</i> return that exception. It returns the <i>cause</i> of that exception.
+   *
+   * @return The exception directly wrapped by this {@code UncheckedException}
+   */
+  @SuppressWarnings("unchecked")
+  public <E extends Throwable> E unwrap() {
+    return (E) super.getCause();
   }
 
   /** Returns the message of the wrapped {@code Exception}. */
@@ -100,5 +112,12 @@ public class UncheckedException extends RuntimeException {
   @Override
   public StackTraceElement[] getStackTrace() {
     return super.getCause().getStackTrace();
+  }
+
+  private static Throwable pealAway(Throwable t) {
+    while (t.getClass() == UncheckedException.class) {
+      t = ((UncheckedException) t).unwrap();
+    }
+    return t;
   }
 }
