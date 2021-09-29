@@ -1,12 +1,15 @@
 package nl.naturalis.common;
 
-import java.util.Arrays;
+import java.lang.reflect.Array;
+import java.util.*;
+import java.util.function.IntFunction;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.invoke.BeanWriter;
+import static nl.naturalis.common.ArrayMethods.isOneOf;
 import static nl.naturalis.common.ClassMethods.box;
 import static nl.naturalis.common.ClassMethods.isA;
-import static nl.naturalis.common.ClassMethods.isPrimitiveNumber;
 import static nl.naturalis.common.ClassMethods.isAutoBoxedAs;
+import static nl.naturalis.common.ClassMethods.isPrimitiveNumber;
 import static nl.naturalis.common.ObjectMethods.PRIMITIVE_DEFAULTS;
 
 /**
@@ -45,6 +48,14 @@ import static nl.naturalis.common.ObjectMethods.PRIMITIVE_DEFAULTS;
  *       returned. Otherwise the incoming value is converted to a {@code String} and the enum
  *       constant whose name or {@code toString()} value is equal to that {@code String} is
  *       returned.
+ *   <li>If the incoming value is an array and the target type is a {@link Collection}, the array
+ *       will be wrapped into an instance of the appropriate subtype of {@code Collection}.
+ *       Otherwise, the first element of the array is returned (recursively converted to the
+ *       appropriate type), or {@code null} in case of a zero-length array.
+ *   <li>If the incoming value a {@code Collection} and the target type is an array. The {@code
+ *       Collection} will be unwrapped into an array. Otherwise the first element of the {@code
+ *       Collection} will be returned (recursively converted to the appropriate type), or {@code
+ *       null} in case of a zero-size {@code Collection}.
  *   <li>If the target type is {@code String.class}, {@code obj.toString()} is returned.
  * </ol>
  *
@@ -54,6 +65,7 @@ import static nl.naturalis.common.ObjectMethods.PRIMITIVE_DEFAULTS;
  * @author Ayco Holleman
  * @param <T> The type to which incoming values will be converted
  */
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class Loose<T> {
 
   /**
@@ -74,7 +86,6 @@ public class Loose<T> {
     this.targetType = Check.notNull(targetType).ok();
   }
 
-  @SuppressWarnings("unchecked")
   public T convert(Object obj) {
     if (obj == null) {
       return targetType.isPrimitive() ? (T) PRIMITIVE_DEFAULTS.get(targetType) : null;
@@ -97,24 +108,75 @@ public class Loose<T> {
       }
       return (T) new NumberParser<>(c).parse(obj.toString());
     } else if (isA(targetType, Enum.class)) {
-      if (isA(obj.getClass(), Number.class)) {
-        Integer i = new NumberConverter<>(Integer.class).convert((Number) obj);
-        if (i < 0 || i >= targetType.getEnumConstants().length) {
-          String fmt = "Invalid ordinal value for enum %s: %d";
-          throw new TypeConversionException(obj, targetType, fmt, targetType.getName(), i);
-        }
-        return targetType.getEnumConstants()[i];
+      return toEnum(obj);
+    } else if (obj.getClass().isArray()) {
+      if (isA(obj.getClass().getComponentType(), targetType)) {
+        return Array.getLength(obj) == 0 ? null : convert(Array.get(obj, 0), targetType);
+      } else if (isOneOf(targetType, List.class, Collection.class, ArrayList.class)) {
+        return (T) arrayToCollection(obj, ArrayList::new);
+      } else if (targetType == LinkedList.class) {
+        return (T) arrayToCollection(obj, new LinkedList());
+      } else if (targetType == Set.class || targetType == LinkedHashSet.class) {
+        return (T) arrayToCollection(obj, LinkedHashSet::new);
+      } else if (targetType == Set.class || targetType == HashSet.class) {
+        return (T) arrayToCollection(obj, HashSet::new);
+      } else if (targetType == Set.class || targetType == TreeSet.class) {
+        return (T) arrayToCollection(obj, new TreeSet());
       }
-      String s = obj.toString();
-      return (T)
-          Arrays.stream(targetType.getEnumConstants())
-              .map(Enum.class::cast)
-              .filter(c -> c.name().equals(s) || c.toString().equals(s))
-              .findFirst()
-              .orElseThrow(() -> new TypeConversionException(obj, targetType));
+    } else if (isA(obj.getClass(), Collection.class)) {
+      Collection c = (Collection) obj;
+      if (targetType.isArray()) {
+        T array = (T) Array.newInstance(targetType.getComponentType(), c.size());
+        int i = 0;
+        for (Object o : c) {
+          Array.set(array, i++, convert(o, targetType.getComponentType()));
+        }
+        return array;
+      } else if (c.isEmpty()) {
+        return null;
+      }
+      return convert(c.iterator().next(), targetType);
     } else if (targetType == String.class) {
       return (T) obj.toString();
     }
     throw new TypeConversionException(obj, targetType);
+  }
+
+  private T toEnum(Object obj) {
+    if (isA(obj.getClass(), Number.class)) {
+      Integer i = new NumberConverter<>(Integer.class).convert((Number) obj);
+      return checkOrdinal(i, obj);
+    }
+    String s = obj.toString();
+    try {
+      int i = NumberMethods.parseInt(s);
+      return checkOrdinal(i, obj);
+    } catch (IllegalArgumentException e) {
+    }
+    return (T)
+        Arrays.stream(targetType.getEnumConstants())
+            .map(Enum.class::cast)
+            .filter(c -> c.name().equals(s) || c.toString().equals(s))
+            .findFirst()
+            .orElseThrow(() -> new TypeConversionException(obj, targetType));
+  }
+
+  private T checkOrdinal(int ordinal, Object obj) {
+    if (ordinal < 0 || ordinal >= targetType.getEnumConstants().length) {
+      String fmt = "Invalid ordinal value for enum %s: %d";
+      throw new TypeConversionException(obj, targetType, fmt, targetType.getName(), ordinal);
+    }
+    return targetType.getEnumConstants()[ordinal];
+  }
+
+  private static Collection arrayToCollection(Object obj, IntFunction<Collection> constructor) {
+    return arrayToCollection(obj, constructor.apply(Array.getLength(obj)));
+  }
+
+  private static Collection arrayToCollection(Object obj, Collection c) {
+    for (int i = 0; i < Array.getLength(obj); ++i) {
+      c.add(Array.get(obj, i));
+    }
+    return c;
   }
 }

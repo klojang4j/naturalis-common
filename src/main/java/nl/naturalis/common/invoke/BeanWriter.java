@@ -125,10 +125,10 @@ public class BeanWriter<T> {
    *     or a {@link TypeConversionException} if loose typing was specified through the constructor
    *     and one or more values in the {@code Map} could not be converted to the appropriate type
    */
-  public void set(T bean, Map<String, Object> data) throws Throwable {
+  public void set(T bean, Map<String, ?> data) throws Throwable {
     Check.notNull(bean, "bean");
     Check.notNull(data, "data");
-    for (Map.Entry<String, Object> e : data.entrySet()) {
+    for (Map.Entry<String, ?> e : data.entrySet()) {
       String k = e.getKey();
       if (k != null && setters.containsKey(k)) {
         Object v = e.getValue();
