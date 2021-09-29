@@ -119,7 +119,7 @@ public class NumberMethods {
 
   /**
    * Converts the specified number into a number of the specified type. Throws an {@link
-   * IllegalArgumentException} if the number is too big to fit into the target type.
+   * TypeConversionException} if the number is too big to fit into the target type.
    *
    * @param <T> The type of the number to be converted
    * @param <U> The target type
@@ -132,7 +132,7 @@ public class NumberMethods {
   }
 
   /**
-   * Parses the specified string into an {@code Integer}. Throws an {@link IllegalArgumentException}
+   * Parses the specified string into an {@code Integer}. Throws an {@link TypeConversionException}
    * if the string is not a number or if the number is too big to fit into an {@code Integer}. This
    * method delegates to {@link BigDecimal#intValueExact()} and is therefore more strict than {@link
    * Integer#parseInt(String)}.
@@ -140,13 +140,13 @@ public class NumberMethods {
    * @param s The string to be parsed
    * @return The {@code Integer} representation of the string
    */
-  public static Integer parseInt(String s) {
+  public static Integer parseInt(String s) throws TypeConversionException {
     return parse(s, Integer.class);
   }
 
   /**
    * Parses the specified string into a number of the specified type. Throws an {@link
-   * IllegalArgumentException} if the string is not a number or if the number is too big to fit into
+   * TypeConversionException} if the string is not a number or if the number is too big to fit into
    * the target type.
    *
    * @param <T> The type of {@code Number} to convert the string to
@@ -154,7 +154,8 @@ public class NumberMethods {
    * @param targetType The class of the {@code Number} type
    * @return A {@code Number} of the specified type
    */
-  public static <T extends Number> T parse(String s, Class<T> targetType) {
+  public static <T extends Number> T parse(String s, Class<T> targetType)
+      throws TypeConversionException {
     return new NumberParser<>(targetType).parse(s);
   }
 

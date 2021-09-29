@@ -151,7 +151,7 @@ public class Loose<T> {
     try {
       int i = NumberMethods.parseInt(s);
       return checkOrdinal(i, obj);
-    } catch (IllegalArgumentException e) {
+    } catch (TypeConversionException e) {
     }
     return (T)
         Arrays.stream(targetType.getEnumConstants())
