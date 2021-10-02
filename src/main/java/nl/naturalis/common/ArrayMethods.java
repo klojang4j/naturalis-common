@@ -267,7 +267,9 @@ public class ArrayMethods {
    * @param array The array to implode
    * @param separator The separator string
    * @param limit The maximum number of elements to collect. Specify -1 for no maximum. Any other
-   *     negative integer results in an {@link IllegalArgumentException}.
+   *     negative integer results in an {@link IllegalArgumentException}. Specifying a number
+   *     greater than the number of elements in the array works as though {@link #implode(Object[],
+   *     String) no limit was specified}.
    * @return A concatenation of the elements in the array.
    */
   public static String implode(Object[] array, String separator, int limit) {
@@ -278,7 +280,7 @@ public class ArrayMethods {
     if (limit != -1 || limit < array.length) {
       stream = stream.limit(limit);
     }
-    return Arrays.stream(array).map(Objects::toString).collect(Collectors.joining(separator));
+    return stream.map(Objects::toString).collect(Collectors.joining(separator));
   }
 
   /**

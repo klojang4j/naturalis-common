@@ -1116,8 +1116,9 @@ public class CommonChecks {
   /* ++++++++++++++ Miscellaneous ++++++++++++++ */
 
   /**
-   * Converts the specified {@code Predicate} into an {@code IntPredicate}. Can be used to force the
-   * compiler to interpret a lambda as an {@code IntPredicate} rather than a {@code Predicate}.
+   * (Not a check) Converts the specified {@code Predicate} into an {@code IntPredicate}. Can be
+   * used to force the compiler to interpret a lambda as an {@code IntPredicate} rather than a
+   * {@code Predicate}.
    *
    * @param predicate A {@code Predicate}, supposedly in the form of a lambda
    * @return The {@code IntPredicate} version of the {@code Predicate}
@@ -1127,8 +1128,8 @@ public class CommonChecks {
   }
 
   /**
-   * Simply returns the argument. Can be used to force the compiler to interpret a lambda as a
-   * {@code Predicate} rather than an {@code IntPredicate}.
+   * (Not a check) Simply returns the argument. Can be used to force the compiler to interpret a
+   * lambda as a {@code Predicate} rather than an {@code IntPredicate}.
    *
    * @param <T> The type of the argument being tested
    * @param predicate A {@code Predicate}, supposedly in the form of a lambda
@@ -1139,24 +1140,35 @@ public class CommonChecks {
   }
 
   /**
-   * Shortcut for {@link IllegalStateException#IllegalStateException(String)
+   * (Not a check) Shortcut for {@link IllegalStateException#IllegalStateException(String)
    * IllegalStateException::new}. Can be used in combination with {@link Check#on(Function, Object)
    * Check.on(...)}. For example: <code>Check.on(illegalState(), out.isClosed()).is(no())</code>.
    *
-   * @return A {@code Function} produces an {@code IllegalStateException}
+   * @return A {@code Function} that produces an {@code IllegalStateException}
    */
   public static Function<String, IllegalStateException> illegalState() {
     return IllegalStateException::new;
   }
 
   /**
-   * Shortcut for {@link IndexOutOfBoundsException#IndexOutOfBoundsException(String)
+   * (Not a check) Shortcut for {@link IndexOutOfBoundsException#IndexOutOfBoundsException(String)
    * IndexOutOfBoundsException::new}.
    *
-   * @return A {@code Function} produces an {@code IndexOutOfBoundsException}
+   * @return A {@code Function} that produces an {@code IndexOutOfBoundsException}
    */
-  public static Function<String, IndexOutOfBoundsException> index() {
+  public static Function<String, IndexOutOfBoundsException> indexOutOfBounds() {
     return IndexOutOfBoundsException::new;
+  }
+
+  /**
+   * (Not a check) Shortcut for {@link
+   * UnsupportedOperationException#UnsupportedOperationException(String)
+   * UnsupportedOperationException::new}.
+   *
+   * @return A {@code Function} that produces an {@code UnsupportedOperationException}
+   */
+  public static Function<String, UnsupportedOperationException> unsupportedOperation() {
+    return UnsupportedOperationException::new;
   }
 
   /* ++++++++++++++ END OF CHECKS ++++++++++++++ */

@@ -2,7 +2,7 @@ package nl.naturalis.common;
 
 import static nl.naturalis.common.CollectionMethods.asList;
 import static nl.naturalis.common.CollectionMethods.newLinkedHashSet;
-import static nl.naturalis.common.CollectionMethods.sublist;
+import static nl.naturalis.common.CollectionMethods.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
@@ -104,5 +104,17 @@ public class CollectionMethodsTest {
 
   private static String concat(List<String> chars) {
     return chars.stream().collect(Collectors.joining());
+  }
+
+  @Test
+  public void implode01() {
+    List<String> chars = List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+    assertEquals("234", implode(chars, "", 2, 5));
+  }
+
+  @Test
+  public void implode02() {
+    List<String> chars = List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+    assertEquals("2/3/4", implode(chars, "/", 2, 5));
   }
 }

@@ -20,42 +20,38 @@ import static nl.naturalis.common.ObjectMethods.PRIMITIVE_DEFAULTS;
  * used by the {@link BeanWriter} class to perform type conversions on the values passed to its
  * {@link BeanWriter#set(Object, String, Object) set} method.
  *
- * <p>The following type and value conversion will be performed:
+ * <p>The following type and value conversions will be performed:
  *
  * <p>
  *
  * <ol>
- *   <li>If the incoming value is {@code null} and the targetype is a primitive type (e.g. {@code
+ *   <li>If the argument is {@code null} and the targetype is a primitive type (e.g. {@code
  *       float.class}, that type's default value will be returned ({@code 0F}), wrapped into the
  *       type's wrapper class ({@code Float.class}). Otherwise {@code null} will be returned.
- *   <li>If the incoming value is an instance of the target type, a simple cast of the object
+ *   <li>If the incoming value is an instance of the target type, a simple cast of the argument
  *       ({@code (T) obj} is returned.
- *   <li>If the target type is a primitive type and the incoming value has the corresponding wrapper
- *       type, a simple cast of the object ({@code (T) obj} is returned.
+ *   <li>If the target type is a primitive type and the argument is an instance of the corresponding
+ *       wrapper type, a simple cast of the argument ({@code (T) obj} is returned.
+ *   <li>If the target type is a primitive number type and the argument is an instance of {@link
+ *       Number}, the result of {@link NumberMethods#convert(Number, Class)
+ *       NumberMethods.convert(obj)} is returned. Otherwise the result of {@link
+ *       NumberMethods#parse(String, Class) NumberMethods.parse(obj.toString()} is returned.
+ *   <li>If the target type is a subclass of {@code Number} type and the argument's type is a
+ *       different subclass of {@code Number}, the result of {@link NumberMethods#convert(Number,
+ *       Class) NumberMethods.convert(obj)} is returned.
  *   <li>If the target type is {@code boolean.class} or {@code Boolean.class}, {@link
  *       Bool#from(Object) Bool.from(obj)} is returned.
- *   <li>If the target type is a primitive number type and the incoming value is a {@link Number}
- *       type other than the corresponding wrapper class, the result of {@link
- *       NumberMethods#convert(Number, Class) NumberMethods.convert(obj)} is returned. Otherwise the
- *       result of {@link NumberMethods#parse(String, Class) NumberMethods.parse(obj.toString()} is
- *       returned.
- *   <li>If the target type is a {@code Number} type and the incoming value has a different {@code
- *       Number} type, the result of {@link NumberMethods#convert(Number, Class)
- *       NumberMethods.convert(obj)} is returned.
- *   <li>If the target type is an {@code enum} class and the incoming value is a {@code Number}, the
+ *   <li>If the target type is an {@code enum} class and the argument is a {@code Number}, the
  *       number will be converted to an {@code Integer} using {@link NumberMethods#convert(Number,
  *       Class) NumberMethods.convert(obj)} and {@code targetType.getEnumConstants()[integer]} is
- *       returned. Otherwise the incoming value is converted to a {@code String} and the enum
- *       constant whose name or {@code toString()} value is equal to that {@code String} is
- *       returned.
- *   <li>If the incoming value is an array and the target type is a {@link Collection}, the array
- *       will be wrapped into an instance of the appropriate subtype of {@code Collection}.
- *       Otherwise, the first element of the array is returned (recursively converted to the
- *       appropriate type), or {@code null} in case of a zero-length array.
- *   <li>If the incoming value a {@code Collection} and the target type is an array. The {@code
+ *       returned. Otherwise {@code toString()} is called on the argument and the enum constant
+ *       whose name or {@code toString()} value is equal to the resulting string is returned.
+ *   <li>If the argument is an array and the target type is a {@link Collection}, the array will be
+ *       wrapped into an instance of the appropriate subtype of {@code Collection}. Otherwise, the
+ *       first element of the array is returned, or {@code null} in case of a zero-length array.
+ *   <li>If the argument is a {@code Collection} and the target type is an array, the {@code
  *       Collection} will be unwrapped into an array. Otherwise the first element of the {@code
- *       Collection} will be returned (recursively converted to the appropriate type), or {@code
- *       null} in case of a zero-size {@code Collection}.
+ *       Collection} will be returned, or {@code null} in case of a zero-size {@code Collection}.
  *   <li>If the target type is {@code String.class}, {@code obj.toString()} is returned.
  * </ol>
  *
@@ -66,7 +62,7 @@ import static nl.naturalis.common.ObjectMethods.PRIMITIVE_DEFAULTS;
  * @param <T> The type to which incoming values will be converted
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class Loose<T> {
+public class Morph<T> {
 
   /**
    * Converts the specified object to the specified type.
@@ -75,18 +71,32 @@ public class Loose<T> {
    * @param obj The value to convert
    * @param targetType The {@code Class} object corresponding to the target type
    * @return The converted value
+   * @throws TypeConversionException If the conversion did not succeed
    */
   public static <U> U convert(Object obj, Class<U> targetType) {
-    return new Loose<>(targetType).convert(obj);
+    return new Morph<>(targetType).convert(obj);
   }
 
   private final Class<T> targetType;
 
-  public Loose(Class<T> targetType) {
+  /**
+   * Creates a new {@code Morph} instance that will convert values to the specified type.
+   *
+   * @param targetType The type to which to convert values
+   */
+  public Morph(Class<T> targetType) {
     this.targetType = Check.notNull(targetType).ok();
   }
 
-  public T convert(Object obj) {
+  /**
+   * Converts the specified object into an instance of the type specified through the {@link
+   * #Loose(Class) constructor}.
+   *
+   * @param obj The value to convert
+   * @return An instance of the target type
+   * @throws TypeConversionException If the conversion did not succeed
+   */
+  public T convert(Object obj) throws TypeConversionException {
     if (obj == null) {
       return targetType.isPrimitive() ? (T) PRIMITIVE_DEFAULTS.get(targetType) : null;
     } else if (targetType.isInstance(obj)) {
@@ -149,22 +159,23 @@ public class Loose<T> {
     }
     String s = obj.toString();
     try {
-      int i = NumberMethods.parseInt(s);
+      int i = new NumberParser<>(Integer.class).parse(s);
       return checkOrdinal(i, obj);
     } catch (TypeConversionException e) {
     }
-    return (T)
-        Arrays.stream(targetType.getEnumConstants())
-            .map(Enum.class::cast)
-            .filter(c -> c.name().equals(s) || c.toString().equals(s))
-            .findFirst()
-            .orElseThrow(() -> new TypeConversionException(obj, targetType));
+    for (Object o : targetType.getEnumConstants()) {
+      if (o.toString().equals(s) || ((Enum) o).name().equals(s)) {
+        return (T) o;
+      }
+    }
+    throw new TypeConversionException(obj, targetType);
   }
 
   private T checkOrdinal(int ordinal, Object obj) {
     if (ordinal < 0 || ordinal >= targetType.getEnumConstants().length) {
       String fmt = "Invalid ordinal value for enum %s: %d";
-      throw new TypeConversionException(obj, targetType, fmt, targetType.getName(), ordinal);
+      String msg = String.format(fmt, targetType.getName(), ordinal);
+      throw new TypeConversionException(obj, targetType, msg);
     }
     return targetType.getEnumConstants()[ordinal];
   }

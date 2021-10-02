@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.ThrowingFunction;
 import nl.naturalis.common.unsafe.UnsafeList;
@@ -666,5 +667,71 @@ public class CollectionMethods {
   public static <T, U> Set<U> freezeIntoSet(
       Collection<? extends T> source, Function<? super T, ? extends U> converter) {
     return source.stream().map(converter::apply).collect(toUnmodifiableSet());
+  }
+
+  /**
+   * PHP-style implode method, concatenating the array elements with &#34;, &#34; as separator
+   * string.
+   *
+   * @param c The collection to implode
+   * @return A concatenation of the elements in the collection.
+   */
+  public static String implode(Collection<?> c) {
+    return implode(c, ", ");
+  }
+
+  /**
+   * PHP-style implode method, concatenating the array elements using the specified separator
+   * string.
+   *
+   * @param c The collection to implode
+   * @param separator The separator string
+   * @return A concatenation of the elements in the collection.
+   */
+  public static String implode(Collection<?> c, String separator) {
+    return c.stream().map(Objects::toString).collect(Collectors.joining(separator));
+  }
+
+  /**
+   * PHP-style implode method, concatenating the array elements using the specified separator
+   * string.
+   *
+   * @param c The collection to implode
+   * @param separator The separator string
+   * @param limit The maximum number of elements to collect. Specify -1 for no maximum. Any other
+   *     negative integer results in an {@link IllegalArgumentException}.
+   * @return A concatenation of the elements in the collection.
+   */
+  public static String implode(Collection<?> c, String separator, int limit) {
+    Check.notNull(c, "c");
+    Check.notNull(separator, "separator");
+    Check.that(limit, "limit").is(gte(), -1);
+    Stream<?> stream = c.stream();
+    if (limit != -1 || limit < c.size()) {
+      stream = stream.limit(limit);
+    }
+    return stream.map(Objects::toString).collect(Collectors.joining(separator));
+  }
+
+  /**
+   * PHP-style implode method, concatenating the array elements using the specified separator
+   * string.
+   *
+   * @param c The collection to implode
+   * @param separator The separator string
+   * @param from The index of the element to begin the concatenation with (inclusive)
+   * @param to The index of the element to end the concatenation with (exclusive)
+   * @return A concatenation of the elements in the collection.
+   */
+  public static String implode(Collection<?> c, String separator, int from, int to) {
+    Check.notNull(c, "c");
+    Check.notNull(separator, "separator");
+    Check.that(from, "from").is(gte(), 0).is(lte(), c.size());
+    Check.that(to, "to").is(gte(), from).is(lte(), c.size());
+    return List.copyOf(c)
+        .subList(from, to)
+        .stream()
+        .map(Objects::toString)
+        .collect(Collectors.joining(separator));
   }
 }

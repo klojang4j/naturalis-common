@@ -1,25 +1,18 @@
 package nl.naturalis.common;
 
-import static nl.naturalis.common.ArrayMethods.END_INDEX;
-import static nl.naturalis.common.ArrayMethods.START_INDEX;
-import static nl.naturalis.common.ObjectMethods.ifNotNull;
-import static nl.naturalis.common.ObjectMethods.ifNull;
-import static nl.naturalis.common.ObjectMethods.ifTrue;
-import static nl.naturalis.common.check.CommonChecks.atLeast;
-import static nl.naturalis.common.check.CommonChecks.deepNotEmpty;
-import static nl.naturalis.common.check.CommonChecks.empty;
-import static nl.naturalis.common.check.CommonChecks.gt;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.lt;
-import static nl.naturalis.common.check.CommonChecks.lte;
-import static nl.naturalis.common.check.CommonChecks.neverNull;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.ArrayMethods.END_INDEX;
+import static nl.naturalis.common.ArrayMethods.START_INDEX;
+import static nl.naturalis.common.ObjectMethods.ifNotNull;
+import static nl.naturalis.common.ObjectMethods.ifNull;
+import static nl.naturalis.common.ObjectMethods.ifTrue;
+import static nl.naturalis.common.check.Check.fail;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * Methods for working with strings. Most methods are friendly towards batch-wise print jobs, trying
@@ -177,6 +170,21 @@ public final class StringMethods {
     StringBuilder sb = new StringBuilder(10 * data.length);
     Arrays.stream(data).forEach(sb::append);
     return sb.toString();
+  }
+
+  public static int count(Object subject, char c, int stopAfter) {
+    Check.that(stopAfter).is(positive());
+    if (subject == null) {
+      return 0;
+    }
+    String str = subject.toString();
+    int x = 0;
+    for (int i = 0; i < str.length() && x < stopAfter; ++i) {
+      if (str.charAt(i) == c) {
+        ++x;
+      }
+    }
+    return x;
   }
 
   /**
@@ -1181,6 +1189,18 @@ public final class StringMethods {
     Check.notNull(str, "str");
     int i = last ? str.lastIndexOf(to) : str.indexOf(to);
     return i == -1 ? str : str.substring(0, i);
+  }
+
+  public static String substrTo(String str, char c, int occurrence) {
+    Check.notNull(str, "str");
+    Check.that(occurrence, "occurrence").is(gt(), 0);
+    int x = occurrence;
+    for (int i = 0; i < str.length(); ++i) {
+      if (str.charAt(i) == c && --x == 0) {
+        return str.substring(0, i);
+      }
+    }
+    return fail("Occurrences of '%s' in \"%s\": %d. Expected: %d.", c, str, x, occurrence);
   }
 
   /**

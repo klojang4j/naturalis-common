@@ -4,7 +4,7 @@ import java.lang.invoke.MethodHandle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import nl.naturalis.common.Loose;
+import nl.naturalis.common.Morph;
 import nl.naturalis.common.TypeConversionException;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.ThrowingBiFunction;
@@ -26,16 +26,16 @@ public class BeanWriter<T> {
 
   /**
    * Returns a {@code BeanWriter} that allows for "loose typing" of the values to be assigned to the
-   * bean's properties. A {@link Loose} object will be used to morph incoming values to the type of
+   * bean's properties. A {@link Morph} object will be used to morph incoming values to the type of
    * the destination property.
    *
    * @param <U> The type of the bean
    * @param beanClass The bean class
-   * @return A @code BeanWriter} for the specified class that uses a {@link Loose} to convert values
+   * @return A @code BeanWriter} for the specified class that uses a {@link Morph} to convert values
    *     to the type of the property for which they are destined
    */
   public static <U> BeanWriter<U> getTolerantWriter(Class<U> beanClass, String... properties) {
-    return new BeanWriter<>(beanClass, (obj, type) -> Loose.convert(obj, type), false, properties);
+    return new BeanWriter<>(beanClass, Morph::convert, false, properties);
   }
 
   private final Class<T> beanClass;
@@ -84,7 +84,7 @@ public class BeanWriter<T> {
    * values passed to the {@link #set(Object, String, Object) set} method to the type of the
    * property for which they are destined.
    *
-   * @see Loose
+   * @see Morph
    * @param beanClass The bean class
    * @param converter A function that takes the value passed to the {@link #set(Object, String,
    *     Object) set} method (first parameter) and the target type (second parameter) and produces
@@ -134,6 +134,70 @@ public class BeanWriter<T> {
         Object v = e.getValue();
         Setter setter = setters.get(k);
         setter.write(bean, converter.apply(v, setter.getParamType()));
+      }
+    }
+  }
+
+  /**
+   * Copies all non-null values from the first bean to the second bean.
+   *
+   * @param from The bean from which to copy the values.
+   * @param to The bean to which to copy the values.
+   * @throws Throwable Any {@code Throwable} thrown from inside the {@code java.lang.invoke} package
+   *     or a {@link TypeConversionException} if loose typing was specified through the constructor
+   *     and one or more values in the {@code Map} could not be converted to the appropriate type
+   */
+  public void transfer(T from, T to) throws Throwable {
+    BeanReader<T> reader = new BeanReader<>(beanClass);
+    for (Setter setter : setters.values()) {
+      Object v = reader.read(from, setter.getProperty());
+      if (v == null) {
+        continue;
+      }
+      set(to, setter.getProperty(), v);
+    }
+  }
+
+  /**
+   * Copies all values, including null-values, from the first bean to the second bean.
+   *
+   * @param from The bean from which to copy the values.
+   * @param to The bean to which to copy the values.
+   * @throws Throwable Any {@code Throwable} thrown from inside the {@code java.lang.invoke} package
+   *     or a {@link TypeConversionException} if loose typing was specified through the constructor
+   *     and one or more values in the {@code Map} could not be converted to the appropriate type
+   */
+  public void overwrite(T from, T to) throws Throwable {
+    BeanReader<T> reader = new BeanReader<>(beanClass);
+    for (Setter setter : setters.values()) {
+      Object v = reader.read(from, setter.getProperty());
+      if (v == null) {
+        continue;
+      }
+      set(to, setter.getProperty(), v);
+    }
+  }
+
+  /**
+   * Copies all values from the first bean to the second bean, but only if the value in the second
+   * bean is {@code null}.
+   *
+   * @param from The bean from which to copy the values.
+   * @param to The bean to which to copy the values.
+   * @throws Throwable Any {@code Throwable} thrown from inside the {@code java.lang.invoke} package
+   *     or a {@link TypeConversionException} if loose typing was specified through the constructor
+   *     and one or more values in the {@code Map} could not be converted to the appropriate type
+   */
+  public void enrich(T from, T to) throws Throwable {
+    BeanReader<T> fromReader = new BeanReader<>(beanClass);
+    BeanReader<T> toReader = new BeanReader<>(beanClass);
+    for (Setter setter : setters.values()) {
+      Object v = fromReader.read(from, setter.getProperty());
+      if (v == null) {
+        continue;
+      }
+      if (toReader.read(to, setter.getProperty()) == null) {
+        set(to, setter.getProperty(), v);
       }
     }
   }
