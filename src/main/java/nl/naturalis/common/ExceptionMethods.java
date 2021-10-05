@@ -3,6 +3,7 @@ package nl.naturalis.common;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import nl.naturalis.common.check.Check;
@@ -72,6 +73,32 @@ public final class ExceptionMethods {
       }
     }
     return baos.toString(StandardCharsets.UTF_8);
+  }
+
+  /**
+   * Returns the stack trace of the root cause of the specified exception, using the specified
+   * string(s) to filter stack trace elements. If the {@link StackTraceElement#getClassName() class
+   * name} of the stack trace element {@link String#contains(CharSequence) contains} the filter
+   * string, the stack trace element will be included in the returned array.
+   *
+   * @param exc The exception
+   * @param filter One or more filters on stacke trace elemenets
+   * @return The root stack trace
+   */
+  public static StackTraceElement[] getRootStackTrace(Throwable exc, String... filter) {
+    Check.notNull(exc, "exc");
+    Check.notNull(filter, "filter");
+    return Arrays.stream(getRootCause(exc).getStackTrace())
+        .filter(
+            ste -> {
+              for (String f : filter) {
+                if (ste.getClassName().contains(f)) {
+                  return true;
+                }
+              }
+              return false;
+            })
+        .toArray(StackTraceElement[]::new);
   }
 
   /**
