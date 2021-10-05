@@ -17,7 +17,6 @@ public class TypeTreeSetTest {
 
   @Test
   public void test01() {
-    @SuppressWarnings("unused")
     TypeTreeSet tts =
         TypeTreeSet.withTypes(
             true,
