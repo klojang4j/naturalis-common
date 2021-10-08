@@ -1,5 +1,7 @@
 package nl.naturalis.common.unsafe;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.assertArrayEquals;
@@ -13,7 +15,7 @@ public class UnsafeListTest {
 
   @Test
   public void testInit00() {
-    List<String> list0 = List.of("Hello", ", ", "World", "!");
+    List<String> list0 = new ArrayList<>(List.of("Hello", ", ", "World", "!"));
     UnsafeList<String> list1 = new UnsafeList<>(list0);
     assertEquals(4, list1.size());
     assertEquals("Hello", list1.get(0));
@@ -135,5 +137,16 @@ public class UnsafeListTest {
     list.set(3, "Bar");
     list.retainAll(List.of("Foo", "Bar"));
     assertArrayEquals(new String[] {null, "Foo", null, "Bar"}, list.getBackingArray());
+  }
+
+  @Test(expected = ClassCastException.class)
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public void test1001() {
+    List l = new ArrayList();
+    l.add(new File("/foo"));
+    l.add(new File("/foo/bar"));
+    UnsafeList<String> ul = new UnsafeList<>(l);
+    assertEquals(Object[].class, ul.getBackingArray().getClass());
+    ul.get(0).charAt(0);
   }
 }

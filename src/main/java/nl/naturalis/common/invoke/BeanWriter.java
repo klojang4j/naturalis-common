@@ -116,24 +116,75 @@ public class BeanWriter<T> {
   }
 
   /**
-   * Populates the provided JavaBean with the values in the specified {@code Map}. Map keys that do
-   * not correspond to bean properties are ignored.
+   * Copies all non-null values from the specified map to the specified bean. Map keys that do not
+   * correspond to bean properties are ignored.
    *
-   * @param bean The JavaBean to populate
-   * @param data The {@code Map} providing the data for the JavaBean
+   * @param fromMap The {@code Map} providing the data for the JavaBean
+   * @param toBean The JavaBean to populate
    * @throws Throwable Any {@code Throwable} thrown from inside the {@code java.lang.invoke} package
    *     or a {@link TypeConversionException} if loose typing was specified through the constructor
    *     and one or more values in the {@code Map} could not be converted to the appropriate type
    */
-  public void set(T bean, Map<String, ?> data) throws Throwable {
-    Check.notNull(bean, "bean");
-    Check.notNull(data, "data");
-    for (Map.Entry<String, ?> e : data.entrySet()) {
+  public void transfer(Map<String, ?> fromMap, T toBean) throws Throwable {
+    Check.notNull(toBean, "bean");
+    Check.notNull(fromMap, "data");
+    for (Map.Entry<String, ?> e : fromMap.entrySet()) {
+      String k = e.getKey();
+      if (k != null && setters.containsKey(k)) {
+        Object v = e.getValue();
+        if (v != null) {
+          Setter setter = setters.get(k);
+          setter.write(toBean, converter.apply(v, setter.getParamType()));
+        }
+      }
+    }
+  }
+
+  /**
+   * Copies all values, including null-values, from the specified map to the specified bean. Map
+   * keys that do not correspond to bean properties are ignored.
+   *
+   * @param fromMap The {@code Map} providing the data for the JavaBean
+   * @param toBean The JavaBean to populate
+   * @throws Throwable Any {@code Throwable} thrown from inside the {@code java.lang.invoke} package
+   *     or a {@link TypeConversionException} if loose typing was specified through the constructor
+   *     and one or more values in the {@code Map} could not be converted to the appropriate type
+   */
+  public void copy(Map<String, ?> fromMap, T toBean) throws Throwable {
+    Check.notNull(toBean, "bean");
+    Check.notNull(fromMap, "data");
+    for (Map.Entry<String, ?> e : fromMap.entrySet()) {
       String k = e.getKey();
       if (k != null && setters.containsKey(k)) {
         Object v = e.getValue();
         Setter setter = setters.get(k);
-        setter.write(bean, converter.apply(v, setter.getParamType()));
+        setter.write(toBean, converter.apply(v, setter.getParamType()));
+      }
+    }
+  }
+
+  /**
+   * Copies all values from the specified map to the specified bean, but only if the value in the
+   * bean is {@code null}. Map keys that do not correspond to bean properties are ignored.
+   *
+   * @param fromMap The {@code Map} providing the data for the JavaBean
+   * @param toBean The JavaBean to populate
+   * @throws Throwable Any {@code Throwable} thrown from inside the {@code java.lang.invoke} package
+   *     or a {@link TypeConversionException} if loose typing was specified through the constructor
+   *     and one or more values in the {@code Map} could not be converted to the appropriate type
+   */
+  public void enrich(Map<String, ?> fromMap, T toBean) throws Throwable {
+    Check.notNull(toBean, "bean");
+    Check.notNull(fromMap, "data");
+    BeanReader<T> reader = new BeanReader<>(beanClass);
+    for (Map.Entry<String, ?> e : fromMap.entrySet()) {
+      String k = e.getKey();
+      if (k != null && setters.containsKey(k)) {
+        Object v = e.getValue();
+        if (v != null && reader.read(toBean, k) == null) {
+          Setter setter = setters.get(k);
+          setter.write(toBean, converter.apply(v, setter.getParamType()));
+        }
       }
     }
   }
@@ -167,7 +218,7 @@ public class BeanWriter<T> {
    *     or a {@link TypeConversionException} if loose typing was specified through the constructor
    *     and one or more values in the {@code Map} could not be converted to the appropriate type
    */
-  public void overwrite(T from, T to) throws Throwable {
+  public void copy(T from, T to) throws Throwable {
     BeanReader<T> reader = new BeanReader<>(beanClass);
     for (Setter setter : setters.values()) {
       Object v = reader.read(from, setter.getProperty());
@@ -189,15 +240,13 @@ public class BeanWriter<T> {
    *     and one or more values in the {@code Map} could not be converted to the appropriate type
    */
   public void enrich(T from, T to) throws Throwable {
-    BeanReader<T> fromReader = new BeanReader<>(beanClass);
-    BeanReader<T> toReader = new BeanReader<>(beanClass);
+    BeanReader<T> fRdr = new BeanReader<>(beanClass);
+    BeanReader<T> tRdr = new BeanReader<>(beanClass);
     for (Setter setter : setters.values()) {
-      Object v = fromReader.read(from, setter.getProperty());
-      if (v == null) {
-        continue;
-      }
-      if (toReader.read(to, setter.getProperty()) == null) {
-        set(to, setter.getProperty(), v);
+      String prop = setter.getProperty();
+      Object v = fRdr.read(from, prop);
+      if (v != null && tRdr.read(to, prop) == null) {
+        set(to, prop, v);
       }
     }
   }

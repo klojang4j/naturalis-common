@@ -6,16 +6,17 @@ import java.util.function.IntFunction;
 import java.util.stream.Stream;
 import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
 import static nl.naturalis.common.check.CommonChecks.gte;
 
 /**
- * A fixed-size, mutable {@code List} implementation that does not perform range checking and
- * exposes its backing array. Useful for package-private and/or intra-modular list exchanges with a
- * high number if reads and/or writes on the list. Since this is a fixed-size list, you can
- * immediately {@code get} and {@code set} values, provided you specify a valid list index. All
- * {@code add} methods throw an {@code UnsupportedOperationException}; list manipulation must be
- * done via the {@code set} method. The {@code remove} methods, however, have been repurposed to
- * nullify list elements.
+ * A fixed-size {@code List} implementation that does not perform range checking and exposes its
+ * backing array. Useful for package-private and/or intra-modular list exchanges with a high number
+ * if reads and/or writes on the list. Since this is a fixed-size list, you can immediately {@code
+ * get} and {@code set} values, provided you specify a valid list index. All {@code add} methods
+ * throw an {@code UnsupportedOperationException}; list manipulation <i>must</i> be done via the
+ * {@code set} method. The {@code remove} methods, however, have been repurposed to nullify list
+ * elements.
  *
  * @param <E> The type of the list elements
  * @author Ayco Holleman
@@ -28,8 +29,8 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
    * Creates a new {@code UnsafeList} for the specified element type and with the specified
    * <i>size</i> (not capacity). All elements in the list are null.
    *
-   * @param clazz
-   * @param size
+   * @param clazz The class of the list elements
+   * @param size The desired size of the list
    */
   @SuppressWarnings("unchecked")
   public UnsafeList(Class<E> clazz, int size) {
@@ -54,7 +55,7 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
   /**
    * Creates a new {@code UnsafeList} from the specified {@code Collection}.
    *
-   * @param c
+   * @param c The collection from which to created the {@code UnsafeList}
    */
   @SuppressWarnings("unchecked")
   public UnsafeList(Collection<? extends E> c) {
@@ -63,21 +64,21 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
   }
 
   /**
-   * Creates a new {@code UnsafeList} from a copy of the specified array.
+   * Creates a new {@code UnsafeList} from the specified array. The array is "swallowed" by the
+   * {@code UnsafeList}, so any externally performed updates on the array are visible to the {@code
+   * UnsafeList}.
    *
-   * @param array
+   * @param array The array from which to create the {@code UnsafeList}
    */
   public UnsafeList(E[] array) {
-    this.data = ArrayMethods.fromTemplate(array);
+    this.data = array;
   }
 
-  /** {@inheritDoc} */
   @Override
   public E get(int index) {
     return data[index];
   }
 
-  /** {@inheritDoc} */
   @Override
   public E set(int index, E element) {
     E e = data[index];
@@ -85,45 +86,35 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
     return e;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int size() {
     return data.length;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean isEmpty() {
     return data.length == 0;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean contains(Object o) {
-    return Arrays.stream(data).anyMatch(obj -> Objects.deepEquals(obj, o));
+    return indexOf(o) != -1;
   }
 
-  /** {@inheritDoc} */
   @Override
   public boolean containsAll(Collection<?> c) {
-    Check.notNull(c);
-    MAIN_LOOP:
-    for (Object obj0 : c) {
-      for (Object obj1 : data) {
-        if (Objects.equals(obj0, obj1)) {
-          continue MAIN_LOOP;
-        }
+    for (Object obj : Check.notNull(c).ok()) {
+      if (!contains(obj)) {
+        return false;
       }
-      return false;
     }
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Iterator<E> iterator() {
     return new Iterator<>() {
-      private int idx;
+      private int idx = 0;
 
       @Override
       public boolean hasNext() {
@@ -135,7 +126,7 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
         if (idx < data.length) {
           return data[idx++];
         }
-        throw new NoSuchElementException("No more elements in FastList");
+        throw new NoSuchElementException("Cannot move beyond end of list");
       }
     };
   }
@@ -143,7 +134,7 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
   /**
    * Repurposed to nullify the element at the specified index. Note, however, that this method will
    * throw an {@link UnsupportedOperationException} if the type parameter for this {@UnsafeList} is
-   * {@code Integer}, because Java's auto-boxing/auto-unboxing would make the method
+   * {@code Integer}, because Java's auto-boxing/auto-unboxing feature would make the method
    * indistinguishable from {@code remove(Object o)}.
    */
   @Override
@@ -153,8 +144,8 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
     }
     if (data[0].getClass() == Integer.class) {
       String msg =
-          "remove(int index) not supported for UnsafeList<Integer> because"
-              + "auto-boxing makes it indistinguishable from remove(Object o)";
+          "Method remove(int index) not supported for UnsafeList<Integer>. "
+              + "Auto-boxing makes it indistinguishable from remove(Object o)";
       throw new UnsupportedOperationException(msg);
     }
     E e = data[index];
@@ -175,8 +166,8 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
     }
     if (data[0].getClass() == Integer.class) {
       String msg =
-          "remove(int index) not supported for UnsafeList<Integer> because"
-              + "auto-unboxing makes it indistinguishable from remove(Object o)";
+          "Method remove(int index) not supported for UnsafeList<Integer>. "
+              + "Auto-unboxing makes it indistinguishable from remove(Object o)";
       throw new UnsupportedOperationException(msg);
     }
     Check.notNull(o);
@@ -230,29 +221,43 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
     Arrays.fill(data, null);
   }
 
-  /** {@inheritDoc} */
   @Override
   public int indexOf(Object o) {
-    for (int i = 0; i < data.length; ++i) {
-      if (Objects.equals(data[i], o)) {
-        return i;
+    E[] data = this.data;
+    if (o == null) {
+      for (int i = 0; i < data.length; ++i) {
+        if (data[i] == null) {
+          return i;
+        }
+      }
+    } else {
+      for (int i = 0; i < data.length; ++i) {
+        if (o.equals(data[i])) {
+          return i;
+        }
       }
     }
     return -1;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int lastIndexOf(Object o) {
-    for (int i = data.length - 1; i >= 0; --i) {
-      if (Objects.equals(data[i], o)) {
-        return i;
+    if (o == null) {
+      for (int i = data.length - 1; i >= 0; --i) {
+        if (data[i] == null) {
+          return i;
+        }
+      }
+    } else {
+      for (int i = data.length - 1; i >= 0; --i) {
+        if (o.equals(data[i])) {
+          return i;
+        }
       }
     }
     return -1;
   }
 
-  /** {@inheritDoc} */
   @Override
   public List<E> subList(int fromIndex, int toIndex) {
     E[] elems = ArrayMethods.fromTemplate(data, toIndex - fromIndex);
@@ -260,7 +265,6 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
     return new UnsafeList<>(elems);
   }
 
-  /** {@inheritDoc} */
   @Override
   public Stream<E> stream() {
     return Arrays.stream(data);
@@ -271,11 +275,9 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;
-    }
-    if (obj == null) {
+    } else if (obj == null) {
       return false;
-    }
-    if (obj.getClass() == UnsafeList.class) {
+    } else if (obj.getClass() == UnsafeList.class) {
       return Arrays.deepEquals(data, ((UnsafeList) obj).data);
     } else if (obj instanceof List) {
       List other = (List) obj;
@@ -301,18 +303,21 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
     return data;
   }
 
-  /** {@inheritDoc} */
   @Override
   public Object[] toArray() {
+    E[] data = this.data;
+    if (data.length == 0) {
+      return EMPTY_OBJECT_ARRAY;
+    }
     Object[] objs = new Object[data.length];
     System.arraycopy(data, 0, objs, 0, data.length);
     return objs;
   }
 
-  /** {@inheritDoc} */
-  @SuppressWarnings("unchecked")
   @Override
+  @SuppressWarnings("unchecked")
   public <T> T[] toArray(T[] a) {
+    E[] data = this.data;
     if (a.length < data.length) {
       return (T[]) Arrays.copyOf(data, data.length, a.getClass());
     }

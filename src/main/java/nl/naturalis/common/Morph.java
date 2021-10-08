@@ -8,7 +8,7 @@ import nl.naturalis.common.invoke.BeanWriter;
 import static nl.naturalis.common.ArrayMethods.isOneOf;
 import static nl.naturalis.common.ClassMethods.box;
 import static nl.naturalis.common.ClassMethods.isA;
-import static nl.naturalis.common.ClassMethods.isAutoBoxedAs;
+import static nl.naturalis.common.ClassMethods.isAutoUnboxedAs;
 import static nl.naturalis.common.ClassMethods.isPrimitiveNumber;
 import static nl.naturalis.common.ObjectMethods.PRIMITIVE_DEFAULTS;
 
@@ -103,24 +103,36 @@ public class Morph<T> {
       return (T) obj;
     } else if (targetType == boolean.class || targetType == Boolean.class) {
       return (T) Bool.from(obj);
-    } else if (isAutoBoxedAs(targetType, obj.getClass())) {
+    }
+    Class<?> myType = obj.getClass();
+    if (isAutoUnboxedAs(myType, targetType)) {
       return (T) obj;
     } else if (isPrimitiveNumber(targetType)) {
       Class<? extends Number> c = (Class<? extends Number>) box(targetType);
-      if (isA(obj.getClass(), Number.class)) {
+      if (isA(myType, Number.class)) {
         return (T) new NumberConverter<>(c).convert((Number) obj);
       }
       return (T) new NumberParser<>(c).parse(obj.toString());
     } else if (isA(targetType, Number.class)) {
       Class<? extends Number> c = (Class<? extends Number>) targetType;
-      if (isA(obj.getClass(), Number.class)) {
+      if (isA(myType, Number.class)) {
         return (T) new NumberConverter<>(c).convert((Number) obj);
       }
       return (T) new NumberParser<>(c).parse(obj.toString());
     } else if (isA(targetType, Enum.class)) {
       return toEnum(obj);
-    } else if (obj.getClass().isArray()) {
-      if (isA(obj.getClass().getComponentType(), targetType)) {
+    } else if (targetType.isArray()) {
+      if (isA(myType, targetType.getComponentType())) {
+        return singletonArray(obj);
+      } else if (isA(myType, Collection.class)) {
+        return collectionToArray((Collection) obj);
+      }
+    } else if (targetType == List.class) {
+      // TODO
+    } else if (targetType == Set.class) {
+      // TODO
+    } else if (myType.isArray()) {
+      if (isA(myType.getComponentType(), targetType)) {
         return Array.getLength(obj) == 0 ? null : convert(Array.get(obj, 0), targetType);
       } else if (isOneOf(targetType, List.class, Collection.class, ArrayList.class)) {
         return (T) arrayToCollection(obj, ArrayList::new);
@@ -133,15 +145,10 @@ public class Morph<T> {
       } else if (targetType == Set.class || targetType == TreeSet.class) {
         return (T) arrayToCollection(obj, new TreeSet());
       }
-    } else if (isA(obj.getClass(), Collection.class)) {
+    } else if (isA(myType, Collection.class)) {
       Collection c = (Collection) obj;
       if (targetType.isArray()) {
-        T array = (T) Array.newInstance(targetType.getComponentType(), c.size());
-        int i = 0;
-        for (Object o : c) {
-          Array.set(array, i++, convert(o, targetType.getComponentType()));
-        }
-        return array;
+        return collectionToArray(c);
       } else if (c.isEmpty()) {
         return null;
       }
@@ -178,6 +185,21 @@ public class Morph<T> {
       throw new TypeConversionException(obj, targetType, msg);
     }
     return targetType.getEnumConstants()[ordinal];
+  }
+
+  private T singletonArray(Object obj) {
+    T array = (T) Array.newInstance(targetType.getComponentType(), 1);
+    Array.set(array, 0, obj);
+    return array;
+  }
+
+  private T collectionToArray(Collection c) {
+    T array = (T) Array.newInstance(targetType.getComponentType(), c.size());
+    int i = 0;
+    for (Object o : c) {
+      Array.set(array, i++, convert(o, targetType.getComponentType()));
+    }
+    return array;
   }
 
   private static Collection arrayToCollection(Object obj, IntFunction<Collection> constructor) {

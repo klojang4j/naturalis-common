@@ -30,8 +30,8 @@ import static nl.naturalis.common.util.ExpansionType.MULTIPLY;
  */
 public class UnsafeByteArrayOutputStream extends OutputStream {
 
-  private final float ib;
-  private final ExpansionType et;
+  private final float expandBy;
+  private final ExpansionType expansionType;
 
   private byte[] buf;
   private int cnt;
@@ -72,13 +72,14 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    * size} bytes, though its size increases if necessary.
    *
    * @param size The initial length of the byte array
-   * @param incrementBy incrementBy The amount by which the increase the size of the byte array
-   * @param incrementType The type of increase. Whichever {@code IncrementBy} value and {@code
-   *     IncrementType} you choose, the buffer capacity will always be increased enough to sustain
-   *     the {@code write} action.
+   * @param expandBy The amount by which the increase the size of the byte array when it reach full
+   *     capacity
+   * @param expansionType The type of expansion. Whichever {@code expandBy} value and {@code
+   *     ExpansionType} you choose, the buffer capacity will always be increased enough to sustain
+   *     the next {@code write} action.
    */
-  public UnsafeByteArrayOutputStream(int size, float incrementBy, ExpansionType incrementType) {
-    this(new byte[size], 0, incrementBy, incrementType);
+  public UnsafeByteArrayOutputStream(int size, float expandBy, ExpansionType expansionType) {
+    this(new byte[size], 0, expandBy, expansionType);
   }
 
   /**
@@ -88,16 +89,18 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    * @param offset The offset of the first byte to write. The offset may be equal to the byte
    *     array's length (causing write actions to append to what is already in the array) but not
    *     greater.
-   * @param incrementBy The amount by which the increase the size of the byte array
-   * @param incrementType The type of increase. Whichever {@code IncrementBy} value and {@code
-   *     IncrementType} you choose, the buffer capacity will always be increased by at least 1.
+   * @param expandBy The amount by which the increase the size of the byte array when it reaches
+   *     full capacity
+   * @param expansionType The type of expansion. Whichever {@code expandBy} value and {@code
+   *     ExpansionType} you choose, the buffer capacity will always be increased enough to sustain
+   *     the next {@code write} action.
    */
   public UnsafeByteArrayOutputStream(
-      byte[] buf, int offset, float incrementBy, ExpansionType incrementType) {
+      byte[] buf, int offset, float expandBy, ExpansionType expansionType) {
     this.buf = Check.notNull(buf, "buf").has(length(), gt(), 0).ok();
     this.cnt = Check.that(offset, "offset").is(lte(), buf.length).ok();
-    this.ib = Check.that(incrementBy, "incrementBy").is(greaterThan(), 0).ok();
-    this.et = Check.notNull(incrementType, "incrementType").ok();
+    this.expandBy = Check.that(expandBy, "expandBy").is(greaterThan(), 0).ok();
+    this.expansionType = Check.notNull(expansionType, "expansionType").ok();
   }
 
   /**
@@ -199,16 +202,16 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
 
   private void increaseCapacity(int minIncrease) {
     long newSize;
-    switch (et) {
+    switch (expansionType) {
       case ADD:
-        newSize = buf.length + Math.max(minIncrease, (int) ib);
+        newSize = buf.length + Math.max(minIncrease, (int) expandBy);
         break;
       case MULTIPLY:
-        newSize = Math.max(buf.length + minIncrease, buf.length * (int) ib);
+        newSize = Math.max(buf.length + minIncrease, buf.length * (int) expandBy);
         break;
       case PERCENTAGE:
       default:
-        newSize = Math.max(buf.length + minIncrease, buf.length * ((100 + (int) ib) / 100));
+        newSize = Math.max(buf.length + minIncrease, buf.length * ((100 + (int) expandBy) / 100));
         break;
     }
     Check.on(s -> new BufferOverflowException(), newSize).is(atMost(), Integer.MAX_VALUE);

@@ -1,11 +1,13 @@
 package nl.naturalis.common;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.ArrayMethods.EMPTY_STRING_ARRAY;
 import static nl.naturalis.common.ArrayMethods.END_INDEX;
 import static nl.naturalis.common.ArrayMethods.START_INDEX;
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
@@ -172,14 +174,22 @@ public final class StringMethods {
     return sb.toString();
   }
 
-  public static int count(Object subject, char c, int stopAfter) {
-    Check.that(stopAfter).is(positive());
+  /**
+   * Counts the number of occurrences of the specified character within the specified string.s
+   *
+   * @param subject
+   * @param c
+   * @param limit
+   * @return
+   */
+  public static int count(Object subject, char c, int limit) {
+    Check.that(limit).is(positive());
     if (subject == null) {
       return 0;
     }
     String str = subject.toString();
     int x = 0;
-    for (int i = 0; i < str.length() && x < stopAfter; ++i) {
+    for (int i = 0; i < str.length() && x < limit; ++i) {
       if (str.charAt(i) == c) {
         ++x;
       }
@@ -261,6 +271,58 @@ public final class StringMethods {
       j = str.indexOf(substr, j + substr.length());
     }
     return i;
+  }
+
+  /**
+   * Equivalent to {@link #split(Object, char, int)}.
+   *
+   * @param subject The string to split
+   * @param separator The separator used to split the string
+   * @return An array containing the string segments
+   */
+  public static String[] split(Object subject, char separator) {
+    return split(subject, separator, 0);
+  }
+
+  /**
+   * Splits the specified string along the specified separator using the specified limit to limit
+   * the number of segments extracted from the string. Specify 0 (zero) for {@code limit} if you
+   * want to entire string to be processed.
+   *
+   * @param subject The string to split
+   * @param separator The separator used to split the string
+   * @param limit The maximum number of segments to extract from the string
+   * @return An array containing at most {@code limit} string segments
+   */
+  public static String[] split(Object subject, char separator, int limit) {
+    Check.that(limit).isNot(negative());
+    if (isEmpty(subject)) {
+      return EMPTY_STRING_ARRAY;
+    }
+    String str = subject.toString();
+    ArrayList<String> strs;
+    if (limit == 0) {
+      strs = new ArrayList<>();
+      limit = str.length();
+    } else {
+      strs = new ArrayList<>(limit);
+    }
+    int i = 0;
+    for (int j = 0; j < str.length(); ++j) {
+      if (str.charAt(j) == separator) {
+        strs.add(str.substring(i, j));
+        if (--limit == 0) {
+          break;
+        }
+        i = j + 1;
+      }
+    }
+    if (str.charAt(str.length() - 1) == separator) {
+      strs.add(EMPTY);
+    } else {
+      strs.add(str.substring(i));
+    }
+    return strs.toArray(new String[strs.size()]);
   }
 
   /**
