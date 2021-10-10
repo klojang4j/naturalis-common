@@ -1,23 +1,7 @@
 package nl.naturalis.common;
 
-import static java.util.stream.Collectors.toSet;
-import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
-import static nl.naturalis.common.check.CommonChecks.empty;
-import static nl.naturalis.common.check.CommonChecks.inArray;
-import static nl.naturalis.common.check.CommonChecks.notNull;
-
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import nl.naturalis.common.check.Check;
@@ -25,6 +9,11 @@ import nl.naturalis.common.check.CommonChecks;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.Relation;
 import nl.naturalis.common.function.ThrowingSupplier;
+import static java.util.stream.Collectors.toSet;
+import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
+import static nl.naturalis.common.check.CommonChecks.empty;
+import static nl.naturalis.common.check.CommonChecks.inArray;
+import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
  * General methods applicable to objects of any type.
@@ -78,7 +67,7 @@ public class ObjectMethods {
    * A {@code Map} mapping the primitive types ({@code int.class}, {@code boolean.class}, etc&#46;)
    * to their default values.
    */
-  public static final Map<Class<?>, Object> PRIMITIVE_DEFAULTS =
+  private static final Map<Class<?>, Object> PRIMITIVE_DEFAULTS =
       Map.of(
           int.class,
           ZERO_INT,
@@ -720,6 +709,19 @@ public class ObjectMethods {
    */
   public static <T, U> U ifNotEmpty(T arg, Function<T, U> then, U dfault) {
     return isNotEmpty(arg) ? then.apply(arg) : dfault;
+  }
+
+  /**
+   * Returns the default value for the specified class: the primitive default for primitive classes;
+   * {@code null} for any other class.
+   *
+   * @param <T> The type of the class
+   * @param clazz The class for which to retrieve the default value
+   * @return The default value
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> T getDefaultValue(Class<T> clazz) {
+    return (T) (Check.notNull(clazz).ok().isPrimitive() ? PRIMITIVE_DEFAULTS.get(clazz) : null);
   }
 
   /**

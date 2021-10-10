@@ -3,6 +3,7 @@ package nl.naturalis.common;
 import java.util.Set;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
+import static nl.naturalis.common.ClassMethods.*;
 
 /**
  * Converts values from various non-boolean types to boolean values. Where applicable, {@code null}
@@ -29,6 +30,26 @@ public class Bool {
    * "false", "off", "disabled".
    */
   public static final Set<String> FALSE_STRINGS = Set.of("false", "0", "no", "off", "disabled");
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  public static <T> T to(Class<T> targetType, boolean b) {
+    if (targetType == boolean.class || targetType == Boolean.class) {
+      return (T) Boolean.valueOf(b);
+    } else if (targetType == String.class) {
+      return (T) Boolean.valueOf(b).toString();
+    } else if (isA(targetType, Number.class)) {
+      return b
+          ? (T) new NumberConverter(targetType).convert(1)
+          : (T) new NumberConverter(targetType).convert(0);
+    } else if (isPrimitiveNumber(targetType)) {
+      return b
+          ? (T) new NumberConverter(box(targetType)).convert(1)
+          : (T) new NumberConverter(box(targetType)).convert(0);
+    } else if (targetType == char.class || targetType == Character.class) {
+      return (T) (b ? Character.valueOf('1') : Character.valueOf('0'));
+    }
+    throw new TypeConversionException(b, targetType);
+  }
 
   /**
    * Attempts to convert the specified object to a {@code Boolean}. This is done by delegating to
@@ -162,7 +183,9 @@ public class Bool {
             ? (Boolean) obj
             : obj.getClass() == String.class
                 ? getBoolean((String) obj)
-                : obj instanceof Number ? getBoolean((Number) obj) : noCanDo(obj);
+                : obj instanceof Number
+                    ? getBoolean((Number) obj)
+                    : obj.getClass() == Character.class ? getBoolean(obj) : noCanDo(obj);
   }
 
   /**
@@ -253,6 +276,18 @@ public class Bool {
    */
   public Boolean getBoolean(byte n) {
     return n == 1 ? TRUE : n == 0 ? FALSE : noCanDo(n);
+  }
+
+  /**
+   * Converts the specified {@code char} to a {@code Boolean} value. Returns {@code true} if the
+   * argument equals '1'; {@code false} if the argument equals '0'; otherwise throws a {@link
+   * TypeConversionException}.
+   *
+   * @param c The argument
+   * @return The corresponding {@code Boolean} value
+   */
+  public Boolean getBoolean(char c) {
+    return c == '1' ? TRUE : c == '0' ? FALSE : noCanDo(c);
   }
 
   private static Boolean noCanDo(Object obj) {

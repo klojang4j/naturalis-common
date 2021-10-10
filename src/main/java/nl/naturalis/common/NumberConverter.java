@@ -2,7 +2,6 @@ package nl.naturalis.common;
 
 import java.lang.invoke.MethodHandle;
 import java.math.BigDecimal;
-import nl.naturalis.common.check.Check;
 
 class NumberConverter<T extends Number> {
 
@@ -16,10 +15,10 @@ class NumberConverter<T extends Number> {
 
   @SuppressWarnings("unchecked")
   <U extends Number> T convert(U n) {
-    if (n == null) {
+    if (n == null || targetType == Number.class) {
       return (T) n;
     }
-    Class<U> myType = (Class<U>) Check.notNull(n).ok(Object::getClass);
+    Class<U> myType = (Class<U>) n.getClass();
     Class<T> tt = targetType;
     if (myType == tt) {
       return (T) n;

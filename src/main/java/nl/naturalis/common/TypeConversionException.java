@@ -10,7 +10,7 @@ public class TypeConversionException extends RuntimeException {
   private final Class<?> targetType;
 
   public TypeConversionException(Object objectToConvert, Class<?> targetType) {
-    super(createMessage(objectToConvert, targetType));
+    super(getDefaultMessage(objectToConvert, targetType));
     this.objectToConvert = objectToConvert;
     this.targetType = targetType;
   }
@@ -22,7 +22,7 @@ public class TypeConversionException extends RuntimeException {
     this.targetType = targetType;
   }
 
-  private static String createMessage(Object obj, Class<?> type) {
+  static String getDefaultMessage(Object obj, Class<?> type) {
     Check.notNull(type, "type");
     String cn0 = className(type);
     if (obj == null) {
