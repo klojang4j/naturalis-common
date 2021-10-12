@@ -104,9 +104,12 @@ public class EnumParser<T extends Enum<T>> {
    * @throws IllegalArgumentException If the string could not be mapped to one of the enum's
    *     constants.
    */
+  @SuppressWarnings("unchecked")
   public T parse(Object value) throws IllegalArgumentException {
-    Check.that(value).is(notNull(), BAD_VALUE, enumClass.getName());
-    if (value.getClass() == Integer.class) {
+    Check.that(value).is(notNull(), BAD_VALUE, value, enumClass.getName());
+    if (value.getClass() == enumClass) {
+      return (T) value;
+    } else if (value.getClass() == Integer.class) {
       int i = (Integer) value;
       T[] consts = enumClass.getEnumConstants();
       Check.that(i).is(between(), Pair.of(0, consts.length), BAD_ORDINAL, enumClass.getName(), i);
