@@ -175,12 +175,33 @@ public final class StringMethods {
   }
 
   /**
-   * Counts the number of occurrences of the specified character within the specified string.s
+   * Counts the number of occurrences of the specified character within the specified string.
    *
-   * @param subject
-   * @param c
-   * @param limit
-   * @return
+   * @param subject The string in which to count the number of occurrences
+   * @param c The character the search for
+   * @return The number of occurrences of the specified character within the specified string
+   */
+  public static int count(Object subject, char c) {
+    if (subject == null) {
+      return 0;
+    }
+    String str = subject.toString();
+    int x = 0;
+    for (int i = 0; i < str.length(); ++i) {
+      if (str.charAt(i) == c) {
+        ++x;
+      }
+    }
+    return x;
+  }
+
+  /**
+   * Counts the number of occurrences of the specified character within the specified string.
+   *
+   * @param subject The string in which to count the number of occurrences
+   * @param c The character the search for
+   * @param limit Imposes an upper limit on the number of occurrences to count
+   * @return The number of occurrences of the specified character within the specified string
    */
   public static int count(Object subject, char c, int limit) {
     Check.that(limit).is(positive());
