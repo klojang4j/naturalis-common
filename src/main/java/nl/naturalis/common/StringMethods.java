@@ -367,8 +367,11 @@ public final class StringMethods {
    * @return The string itself or an abbreviated version, suffixed with "..."
    */
   public static String ellipsis(Object subject, int maxWidth) {
-    String str = Check.notNull(subject, "subject").ok().toString();
     Check.that(maxWidth, "maxWidth").is(gt(), 3);
+    if (subject == null) {
+      return EMPTY;
+    }
+    String str = subject.toString();
     if (str.length() <= maxWidth) {
       return str;
     }

@@ -2,7 +2,11 @@ package nl.naturalis.common;
 
 import java.lang.reflect.Array;
 import java.util.function.IntBinaryOperator;
+import nl.naturalis.common.check.Check;
+import static nl.naturalis.common.check.CommonChecks.negative;
+import static nl.naturalis.common.check.CommonChecks.positive;
 
+/** @author Ayco Holleman */
 public class MathMethods {
 
   private MathMethods() {}
@@ -12,11 +16,12 @@ public class MathMethods {
    * then applies {@link Math#ceil(double) Math.ceil}.
    *
    * @param value The initeger to divide
-   * @param dividedBy The integer to divide it by
+   * @param divideBy The integer to divide it by
    * @return The result of the division, rounded to the next integer
+   * @implNote Since this is a very low-level operation, no argument-checking is done
    */
-  public static int divUp(int value, int dividedBy) {
-    return (int) Math.ceil((double) value / (double) dividedBy);
+  public static int divUp(int value, int divideBy) {
+    return (int) Math.ceil((double) value / (double) divideBy);
   }
 
   /**
@@ -24,37 +29,57 @@ public class MathMethods {
    * IntBinaryOperator}.
    *
    * @param value The initeger to divide
-   * @param dividedBy The integer to divide it by
+   * @param divideBy The integer to divide it by
    * @return The result of the division, rounded to the preceding integer
+   * @implNote Since this is a very low-level operation, no argument-checking is done
    */
-  public static int divDown(int value, int dividedBy) {
-    return value / dividedBy;
-  }
-
-  public static int divHalfUp(int value, int dividedBy) {
-    return (int) Math.floor(0.5D + (double) value / (double) dividedBy);
-  }
-
-  public static int divHalfDown(int value, int dividedBy) {
-    return (int) Math.ceil(-0.5D + (double) value / (double) dividedBy);
+  public static int divDown(int value, int divideBy) {
+    return value / divideBy;
   }
 
   /**
-   * Returns the number of pages (or pages) needed to contain the specified number of items (or
-   * cells), given a {@code rowCount x columnCount} matrix.
+   * Divides the specified value by the specified denominator, rounding up if the remainder is
+   * exactly {@code 0.5} (given double-precision calculation).
    *
-   * @param itemCount
-   * @param rowCount
-   * @param columnCount
+   * @param value
+   * @param divideBy
+   * @return
+   * @implNote Since this is a very low-level operation, no argument-checking is done
+   */
+  public static int divHalfUp(int value, int divideBy) {
+    return (int) Math.floor(0.5D + (double) value / (double) divideBy);
+  }
+
+  /**
+   * Divides the specified value by the specified denominator, rounding down if the remainder is
+   * exactly {@code 0.5} (given double-precision calculation).
+   *
+   * @param value
+   * @param divideBy
+   * @return
+   * @implNote Since this is a very low-level operation, no argument-checking is done
+   */
+  public static int divHalfDown(int value, int divideBy) {
+    return (int) Math.ceil(-0.5D + (double) value / (double) divideBy);
+  }
+
+  /**
+   * Returns the number of matrices (or tables or pages) needed to contain the specified number of
+   * items, given a {@code rowCount x columnCount} matrix.
+   *
+   * @param itemCount The total number of elements to layout across one or more matrices.
+   * @param rowCount The number of rows
+   * @param columnCount The number of columns
    * @return
    */
   public static int getPageCount(int itemCount, int rowCount, int columnCount) {
-    return 1 + getPageIndex(itemCount, rowCount, columnCount);
+    return divUp(itemCount, rowCount * columnCount);
   }
 
   /**
-   * Return the index of the page (or matrix) hosting the specified item, given a {@code rowCount x
-   * columnCount} matrix.
+   * Returns the index of the matrix (or table or page) hosting the element with the specified
+   * absolute index, given a {@code rowCount x columnCount} matrix. The absolute index is the item's
+   * array index of the element if all elements were coalesced into a single array.
    *
    * @param itemIndex
    * @param rowCount
@@ -62,12 +87,17 @@ public class MathMethods {
    * @return
    */
   public static int getPageIndex(int itemIndex, int rowCount, int columnCount) {
+    Check.that(itemIndex, "itemIndex").isNot(negative());
+    Check.that(rowCount, "rowCount").is(positive());
+    Check.that(columnCount, "columnCount").is(positive());
     return itemIndex / (rowCount * columnCount);
   }
 
   /**
-   * Returns the row offset from the top of the page (or matrix), given a {@code rowCount x
-   * columnCount} matrix.
+   * Returns the row index of the element with the specified absolute index, given a {@code rowCount
+   * x columnCount} matrix. The absolute index is the element's array index of the item if all
+   * elements were coalesced into a single array. The returned index is relative to the top of the
+   * matrix containing the element
    *
    * @param itemIndex
    * @param rowCount
@@ -79,8 +109,8 @@ public class MathMethods {
   }
 
   /**
-   * Returns the column index of the specified item, given a row-major layout of any matrix with the
-   * specified number of columns.
+   * Returns the column index of the specified element, given a row-major layout of any matrix with
+   * the specified number of columns.
    *
    * @param itemIndex
    * @param columnCount
@@ -91,8 +121,8 @@ public class MathMethods {
   }
 
   /**
-   * Returns the row index of the specified item, given a column-major layout of any matrix with the
-   * specified number of rows.
+   * Returns the row index of the specified element, given a column-major layout of any matrix with
+   * the specified number of rows.
    *
    * @param itemIndex
    * @param rowCount
@@ -131,7 +161,19 @@ public class MathMethods {
     };
   }
 
+  /**
+   * Lays out the elements in the specified array across zero or more @code rowCount x columnCount}
+   * matrices, using 0 (zero) to pad out the unused cells of the last matrix.
+   *
+   * @param values
+   * @param rowCount
+   * @param columnCount
+   * @return
+   */
   public static int[][][] rasterize(int[] values, int rowCount, int columnCount) {
+    if (values.length == 0) {
+      return new int[0][0][0];
+    }
     int cellsPerPage = rowCount * columnCount;
     int numPages = getPageCount(values.length, rowCount, columnCount);
     int[][][] pages = new int[numPages][rowCount][columnCount];
