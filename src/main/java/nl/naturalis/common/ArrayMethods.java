@@ -237,6 +237,24 @@ public class ArrayMethods {
     return (T[]) Array.newInstance(template.getClass().getComponentType(), length);
   }
 
+  public static String implode(Object array) {
+    return implode(array, ", ");
+  }
+
+  public static String implode(Object array, String separator) {
+    Check.notNull(array, "array").is(array());
+    Check.notNull(separator, "separator");
+    int sz = Array.getLength(array);
+    StringBuilder sb = new StringBuilder(sz * 8);
+    for (int i = 0; i < sz; ++i) {
+      if (i != 0) {
+        sb.append(separator);
+      }
+      sb.append(Array.get(array, i));
+    }
+    return sb.toString();
+  }
+
   /**
    * PHP-style implode method, concatenating the array elements with &#34;, &#34; as separator
    * string.
@@ -257,6 +275,8 @@ public class ArrayMethods {
    * @return A concatenation of the elements in the array.
    */
   public static String implode(Object[] array, String separator) {
+    Check.notNull(array, "array");
+    Check.notNull(separator, "separator");
     return Arrays.stream(array).map(Objects::toString).collect(Collectors.joining(separator));
   }
 

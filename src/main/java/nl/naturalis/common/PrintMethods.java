@@ -9,6 +9,7 @@ import nl.naturalis.common.invoke.Getter;
 import nl.naturalis.common.invoke.GetterFactory;
 import nl.naturalis.common.unsafe.UnsafeByteArrayOutputStream;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static nl.naturalis.common.ArrayMethods.implode;
 import static nl.naturalis.common.StringMethods.lpad;
 import static java.util.Comparator.*;
 
@@ -78,6 +79,11 @@ public class PrintMethods {
   }
 
   private static String toStr(Object o) {
-    return Objects.toString(o);
+    if (o == null) {
+      return "null";
+    } else if (o.getClass().isArray()) {
+      return "[" + implode(o) + "]";
+    }
+    return o.toString();
   }
 }
