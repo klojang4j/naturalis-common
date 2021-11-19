@@ -527,6 +527,27 @@ public final class StringMethods {
   }
 
   /**
+   * Returns the {@code toString()} version of {@code subject} with the first character converted to
+   * lowercase. If the argument is null or an empty string, an empty string is returned.
+   *
+   * @param subject An object whose {@code toString()} version is to be manipulated
+   * @return The {@code toString()} version of {@code subject} with the first character converted to
+   *     lowercase
+   */
+  public static String firstCharToLowerCase(Object subject) {
+    if (subject == null) {
+      return EMPTY;
+    }
+    String str = subject.toString();
+    if (str.isEmpty() || Character.isLowerCase(str.charAt(0))) {
+      return str;
+    }
+    StringBuilder sb = new StringBuilder(str.length()).append(str);
+    sb.setCharAt(0, Character.toLowerCase(str.charAt(0)));
+    return sb.toString();
+  }
+
+  /**
    * Whether or not the specified string is null or empty.
    *
    * @param subject The string
