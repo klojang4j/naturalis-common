@@ -76,6 +76,10 @@ public class Bool {
     return INSTANCE.getBoolean(s);
   }
 
+  public static boolean isConvertible(String s) {
+    return INSTANCE.isBoolean(s);
+  }
+
   /**
    * Converts the specified {@code Number} to a {@code Boolean} value.
    *
@@ -202,6 +206,12 @@ public class Bool {
       return TRUE;
     }
     throw new TypeConversionException(s, Boolean.class);
+  }
+
+  public boolean isBoolean(String s) {
+    return s == null
+        || falseStrings.contains(s.toLowerCase())
+        || trueStrings.contains(s.toLowerCase());
   }
 
   /**

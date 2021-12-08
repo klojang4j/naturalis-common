@@ -46,7 +46,7 @@ public class PathWalkerException extends RuntimeException {
   }
 
   static PathWalkerException emptySegment(Path p) {
-    String fmt = INVALID_PATH + " (null orempty segment)";
+    String fmt = INVALID_PATH + " (null or empty segment)";
     String msg = String.format(fmt, p);
     return new PathWalkerException(msg);
   }

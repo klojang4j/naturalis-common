@@ -1,48 +1,45 @@
 package nl.naturalis.common.path;
 
-import static java.lang.System.arraycopy;
-import static java.util.Arrays.copyOfRange;
-import static java.util.function.Predicate.not;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.illegalState;
-import static nl.naturalis.common.check.CommonChecks.lt;
-import static nl.naturalis.common.check.CommonChecks.lte;
-import static nl.naturalis.common.check.CommonChecks.ne;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import nl.naturalis.common.ArrayMethods;
-import nl.naturalis.common.Emptyable;
-import nl.naturalis.common.NumberMethods;
-import nl.naturalis.common.Sizeable;
-import nl.naturalis.common.StringMethods;
+import nl.naturalis.common.*;
 import nl.naturalis.common.check.Check;
+import static java.lang.System.arraycopy;
+import static java.util.Arrays.copyOfRange;
+import static java.util.function.Predicate.not;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
- * Specifies a path to a possibly deeply nested value within an object. Path segments are separated
- * by '.' (dot). For example: {@code employee.address.street}. Array indices are specified as
- * separate path segments. For example: {@code employees.3.address.street}. Non-numeric segments can
- * be either field names or map keys. Therefore the {@code Path} class does not impose any
- * constraints on what constitutes a valid path segment, since a map key can be anything (including
- * null or an empty string).
+ * Specifies a path to a value within an object. Path segments are separated by the dot character
+ * ('.'). For example: {@code employee.address.street}. Array indices are specified as separate path
+ * segments. For example: {@code employees.3.address.street}. Non-numeric segments can be either
+ * field names or map keys. Therefore the {@code Path} class does not impose any constraints on what
+ * constitutes a valid path segment, since a map key can be anything (including {@code null} or an
+ * empty string). The only requirement is that they don't contain control characters. Of course, if
+ * the path segment denotes a JavaBean property, it should be a valid Java identifier.
  *
  * <h4>Escaping</h4>
  *
- * <p>If a path segment represents a map key that happens to contain the segment separator, it must
- * be escaped using the circumflex character ('^'). (Using the backslash character as an escape
- * character would have made it very cumbersome to write path strings in Java code.) So a map key
- * named {@code my.awkward.map.key} would become {@code my^.awkward^.map^.key}. The escape character
- * itself <i>must not</i> be escaped. You can let the {@link #escape(String) escape} method do the
- * escaping for you. Do not escape path segments when passing them individually (as a {@code String}
- * array) to the constructor. Only escape them when passing a complete path string.
+ * <p>If a path segment represents a map key that happens to contain the segment separator ('.'), it
+ * must be escaped using the circumflex character ('^'). (Using the backslash character as an escape
+ * character would have made it needlessly cumbersome to write path strings in Java code.) So a map
+ * key named {@code my.awkward.map.key} would become {@code my^.awkward^.map^.key}. The escape
+ * character itself must not be escaped.
  *
- * <p>In case you need to reference the {@code null} key of a {@code Map}, use {@code "^0"}. So
- * {@code "lookups.^0.name"} references the {@code name} field of an object stored under key {@code
- * null} in the {@code lookups} map. You could also pass this in as: {@code new String[] {"lookups",
- * null, "name"}}.
+ * <p>In case you want a segment to denote need the {@code null} key of a {@code Map}, use this
+ * character sequence: {@code ^0}. So {@code lookups.^0.name} references the {@code name} field of
+ * an object stored under key {@code null} in the {@code lookups} map. You could also pass this in
+ * as a {@code String} array: {@code new String[] {"lookups", null, "name"}}. In case you want a
+ * segment to denote need the empty-string key of a {@code Map}, simply make it a zero-length
+ * segment: {@code "lookups..name"}. Or, alternatively, pass it as a {@code String} array: {@code
+ * new String[] {"lookups", "", "name"}}.
+ *
+ * <p>You can let the {@link #escape(String) escape} method do the escaping for you. Do <b>not</b>
+ * escape path segments when passing them individually (as a {@code String} array) to the
+ * constructor. Only escape them when passing a complete path string.
  *
  * @author Ayco Holleman
  */
