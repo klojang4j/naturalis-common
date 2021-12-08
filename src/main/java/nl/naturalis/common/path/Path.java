@@ -15,11 +15,11 @@ import static nl.naturalis.common.check.CommonChecks.*;
 /**
  * Specifies a path to a value within an object. Path segments are separated by the dot character
  * ('.'). For example: {@code employee.address.street}. Array indices are specified as separate path
- * segments. For example: {@code employees.3.address.street}. Non-numeric segments can be either
- * field names or map keys. Therefore the {@code Path} class does not impose any constraints on what
+ * segments. For example: {@code employees.3.address.street}. Non-numeric segments can be either bea
+ * properties or map keys. Therefore the {@code Path} class does not impose any constraints on what
  * constitutes a valid path segment, since a map key can be anything (including {@code null} or an
- * empty string). The only requirement is that they don't contain control characters. Of course, if
- * the path segment denotes a JavaBean property, it should be a valid Java identifier.
+ * empty string). Of course, if the path segment denotes a JavaBean property, it should be a valid
+ * Java identifier.
  *
  * <h4>Escaping</h4>
  *
@@ -33,12 +33,11 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * character sequence: {@code ^0}. So {@code lookups.^0.name} references the {@code name} field of
  * an object stored under key {@code null} in the {@code lookups} map. You could also pass this in
  * as a {@code String} array: {@code new String[] {"lookups", null, "name"}}. In case you want a
- * segment to denote need the empty-string key of a {@code Map}, simply make it a zero-length
- * segment: {@code "lookups..name"}. Or, alternatively, pass it as a {@code String} array: {@code
- * new String[] {"lookups", "", "name"}}.
+ * segment to denote the empty-string key of a {@code Map}, simply make it a zero-length segment:
+ * {@code "lookups..name"}.
  *
- * <p>You can let the {@link #escape(String) escape} method do the escaping for you. Do <b>not</b>
- * escape path segments when passing them individually (as a {@code String} array) to the
+ * <p>You can let the {@link #escape(String) escape} method do the escaping for you. However, do
+ * <i>not</i> escape path segments when passing them individually (as a {@code String} array) to the
  * constructor. Only escape them when passing a complete path string.
  *
  * @author Ayco Holleman
