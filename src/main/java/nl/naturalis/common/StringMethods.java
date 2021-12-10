@@ -1,9 +1,7 @@
 package nl.naturalis.common;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.naturalis.common.check.Check;
@@ -31,133 +29,276 @@ public final class StringMethods {
 
   private StringMethods() {}
 
-  public static StringBuilder append(StringBuilder sb, Object data0) {
-    Check.notNull(sb, "sb");
-    return sb.append(data0);
+  /**
+   * Appends the specified value to the specified {@code StringBuilder} and returns the {@code
+   * StringBuilder}.
+   *
+   * @param sb The {@code StringBuilder} to append the value to
+   * @param The value
+   * @return The {@code StringBuilder}
+   */
+  public static StringBuilder append(StringBuilder sb, Object val) {
+    return Check.notNull(sb, "sb").ok().append(val);
   }
 
-  public static StringBuilder append(StringBuilder sb, Object data0, Object data1) {
-    Check.notNull(sb, "sb");
-    return sb.append(data0).append(data1);
+  /**
+   * Appends the specified values to the specified {@code StringBuilder} and returns the {@code
+   * StringBuilder}.
+   *
+   * @param sb The {@code StringBuilder} to append the values to
+   * @param val0 A value
+   * @param val1 Another value
+   * @return The {@code StringBuilder}
+   */
+  public static StringBuilder append(StringBuilder sb, Object val0, Object val1) {
+    return Check.notNull(sb, "sb").ok().append(val0).append(val1);
   }
 
-  public static StringBuilder append(StringBuilder sb, Object data0, Object data1, Object data2) {
-    Check.notNull(sb, "sb");
-    return sb.append(data0).append(data1).append(data2);
+  /**
+   * Appends the specified values to the specified {@code StringBuilder} and returns the {@code
+   * StringBuilder}.
+   *
+   * @param sb The {@code StringBuilder} to append the values to
+   * @param val0 A value
+   * @param val1 Another value
+   * @param val2 Another value
+   * @return The {@code StringBuilder}
+   */
+  public static StringBuilder append(StringBuilder sb, Object val0, Object val1, Object val2) {
+    return Check.notNull(sb, "sb").ok().append(val0).append(val1).append(val2);
   }
 
+  /**
+   * Appends the specified values to the specified {@code StringBuilder} and returns the {@code
+   * StringBuilder}.
+   *
+   * @param sb The {@code StringBuilder} to append the values to
+   * @param val0 A value
+   * @param val1 Another value
+   * @param val2 Another value
+   * @param val3 Another value
+   * @return The {@code StringBuilder}
+   */
   public static StringBuilder append(
-      StringBuilder sb, Object data0, Object data1, Object data2, Object data3) {
-    Check.notNull(sb, "sb");
-    return sb.append(data0).append(data1).append(data2).append(data3);
+      StringBuilder sb, Object val0, Object val1, Object val2, Object val3) {
+    return Check.notNull(sb, "sb").ok().append(val0).append(val1).append(val2).append(val3);
   }
 
+  /**
+   * Appends the specified values to the specified {@code StringBuilder} and returns the {@code
+   * StringBuilder}.
+   *
+   * @param sb The {@code StringBuilder} to append the values to
+   * @param val0 A value
+   * @param val1 Another value
+   * @param val2 Another value
+   * @param val3 Another value
+   * @param val4 Another value
+   * @return The {@code StringBuilder}
+   */
   public static StringBuilder append(
-      StringBuilder sb, Object data0, Object data1, Object data2, Object data3, Object data4) {
-    Check.notNull(sb, "sb");
-    return sb.append(data0).append(data1).append(data2).append(data3).append(data4);
+      StringBuilder sb, Object val0, Object val1, Object val2, Object val3, Object val4) {
+
+    return Check.notNull(sb, "sb")
+        .ok()
+        .append(val0)
+        .append(val1)
+        .append(val2)
+        .append(val3)
+        .append(val4);
   }
 
-  public static StringBuilder append(
-      StringBuilder sb,
-      Object data0,
-      Object data1,
-      Object data2,
-      Object data3,
-      Object data4,
-      Object data5) {
-    Check.notNull(sb, "sb");
-    return sb.append(data0).append(data1).append(data2).append(data3).append(data4).append(data5);
-  }
-
-  public static StringBuilder append(
-      StringBuilder sb,
-      Object data0,
-      Object data1,
-      Object data2,
-      Object data3,
-      Object data4,
-      Object data5,
-      Object data6) {
-    Check.notNull(sb, "sb");
-    return sb.append(data0)
-        .append(data1)
-        .append(data2)
-        .append(data3)
-        .append(data4)
-        .append(data5)
-        .append(data6);
-  }
-
-  public static StringBuilder append(
-      StringBuilder sb,
-      Object data0,
-      Object data1,
-      Object data2,
-      Object data3,
-      Object data4,
-      Object data5,
-      Object data6,
-      Object data7) {
-    Check.notNull(sb, "sb");
-    return sb.append(data0)
-        .append(data1)
-        .append(data2)
-        .append(data3)
-        .append(data4)
-        .append(data5)
-        .append(data6)
-        .append(data7);
-  }
-
-  public static StringBuilder append(
-      StringBuilder sb,
-      Object data0,
-      Object data1,
-      Object data2,
-      Object data3,
-      Object data4,
-      Object data5,
-      Object data6,
-      Object data7,
-      Object data8) {
-    Check.notNull(sb, "sb");
-    return sb.append(data0)
-        .append(data1)
-        .append(data2)
-        .append(data3)
-        .append(data4)
-        .append(data5)
-        .append(data6)
-        .append(data7)
-        .append(data8);
-  }
-
+  /**
+   * Appends the specified values to the specified {@code StringBuilder} and returns the {@code
+   * StringBuilder}.
+   *
+   * @param sb The {@code StringBuilder} to append the values to
+   * @param val0 A value
+   * @param val1 Another value
+   * @param val2 Another value
+   * @param val3 Another value
+   * @param val4 Another value
+   * @param val5 Another value
+   * @return The {@code StringBuilder}
+   */
   public static StringBuilder append(
       StringBuilder sb,
-      Object data0,
-      Object data1,
-      Object data2,
-      Object data3,
-      Object data4,
-      Object data5,
-      Object data6,
-      Object data7,
-      Object data8,
-      Object data9,
+      Object val0,
+      Object val1,
+      Object val2,
+      Object val3,
+      Object val4,
+      Object val5) {
+
+    return Check.notNull(sb, "sb")
+        .ok()
+        .append(val0)
+        .append(val1)
+        .append(val2)
+        .append(val3)
+        .append(val4)
+        .append(val5);
+  }
+
+  /**
+   * Appends the specified values to the specified {@code StringBuilder} and returns the {@code
+   * StringBuilder}.
+   *
+   * @param sb The {@code StringBuilder} to append the values to
+   * @param val0 A value
+   * @param val1 Another value
+   * @param val2 Another value
+   * @param val3 Another value
+   * @param val4 Another value
+   * @param val5 Another value
+   * @param val6 Another value
+   * @return The {@code StringBuilder}
+   */
+  public static StringBuilder append(
+      StringBuilder sb,
+      Object val0,
+      Object val1,
+      Object val2,
+      Object val3,
+      Object val4,
+      Object val5,
+      Object val6) {
+
+    return Check.notNull(sb, "sb")
+        .ok()
+        .append(val0)
+        .append(val1)
+        .append(val2)
+        .append(val3)
+        .append(val4)
+        .append(val5)
+        .append(val6);
+  }
+
+  /**
+   * Appends the specified values to the specified {@code StringBuilder} and returns the {@code
+   * StringBuilder}.
+   *
+   * @param sb The {@code StringBuilder} to append the values to
+   * @param val0 A value
+   * @param val1 Another value
+   * @param val2 Another value
+   * @param val3 Another value
+   * @param val4 Another value
+   * @param val5 Another value
+   * @param val6 Another value
+   * @param val7 Another value
+   * @return The {@code StringBuilder}
+   */
+  public static StringBuilder append(
+      StringBuilder sb,
+      Object val0,
+      Object val1,
+      Object val2,
+      Object val3,
+      Object val4,
+      Object val5,
+      Object val6,
+      Object val7) {
+
+    return Check.notNull(sb, "sb")
+        .ok()
+        .append(val0)
+        .append(val1)
+        .append(val2)
+        .append(val3)
+        .append(val4)
+        .append(val5)
+        .append(val6)
+        .append(val7);
+  }
+
+  /**
+   * Appends the specified values to the specified {@code StringBuilder} and returns the {@code
+   * StringBuilder}.
+   *
+   * @param sb The {@code StringBuilder} to append the values to
+   * @param val0 A value
+   * @param val1 Another value
+   * @param val2 Another value
+   * @param val3 Another value
+   * @param val4 Another value
+   * @param val5 Another value
+   * @param val6 Another value
+   * @param val7 Another value
+   * @param val8 Another value
+   * @return The {@code StringBuilder}
+   */
+  public static StringBuilder append(
+      StringBuilder sb,
+      Object val0,
+      Object val1,
+      Object val2,
+      Object val3,
+      Object val4,
+      Object val5,
+      Object val6,
+      Object val7,
+      Object val8) {
+
+    return Check.notNull(sb, "sb")
+        .ok()
+        .append(val0)
+        .append(val1)
+        .append(val2)
+        .append(val3)
+        .append(val4)
+        .append(val5)
+        .append(val6)
+        .append(val7)
+        .append(val8);
+  }
+
+  /**
+   * Appends the specified values to the specified {@code StringBuilder} and returns the {@code
+   * StringBuilder}.
+   *
+   * @param sb The {@code StringBuilder} to append the values to
+   * @param val0 A value
+   * @param val1 Another value
+   * @param val2 Another value
+   * @param val3 Another value
+   * @param val4 Another value
+   * @param val5 Another value
+   * @param val6 Another value
+   * @param val7 Another value
+   * @param val8 Another value
+   * @param val9 Another value
+   * @param moreData Some more values
+   * @return The {@code StringBuilder}
+   */
+  public static StringBuilder append(
+      StringBuilder sb,
+      Object val0,
+      Object val1,
+      Object val2,
+      Object val3,
+      Object val4,
+      Object val5,
+      Object val6,
+      Object val7,
+      Object val8,
+      Object val9,
       Object... moreData) {
-    Check.notNull(sb, "sb");
-    sb.append(data0)
-        .append(data1)
-        .append(data2)
-        .append(data3)
-        .append(data4)
-        .append(data5)
-        .append(data6)
-        .append(data7)
-        .append(data8)
-        .append(data9);
-    Check.notNull(moreData, "data").ok(Arrays::stream).forEach(sb::append);
+
+    Check.notNull(sb, "sb")
+        .ok()
+        .append(val0)
+        .append(val1)
+        .append(val2)
+        .append(val3)
+        .append(val4)
+        .append(val5)
+        .append(val6)
+        .append(val7)
+        .append(val8)
+        .append(val9);
+    Check.notNull(moreData, "val").ok(Arrays::stream).forEach(sb::append);
     return sb;
   }
 
@@ -733,14 +874,48 @@ public final class StringMethods {
    * @return A concatenation of the elements in the collection.
    */
   public static String implode(Collection<?> collection, String separator, int limit) {
+    return implode(collection, Objects::toString, separator, limit);
+  }
+
+  /**
+   * PHP-style implode method, concatenating the collection elements using the specified stringifier
+   * function and the specified separator string.
+   *
+   * @param collection The collection to implode
+   * @param stringifier The stringification function to apply to the elements in the collection
+   * @param separator The separator string
+   * @return A concatenation of the elements in the collection.
+   */
+  public static <T> String implode(
+      Collection<T> collection, Function<T, String> stringifier, String separator) {
+    return implode(collection, stringifier, separator, -1);
+  }
+
+  /**
+   * PHP-style implode method, concatenating the collection elements using the specified stringifier
+   * function and the specified separator string.
+   *
+   * @param collection The collection to implode
+   * @param stringifier The stringification function to apply to the elements in the collection
+   * @param separator The separator string
+   * @param limit The maximum number of elements to collect. Specify -1 for no maximum. Any other
+   *     negative integer results in an {@link IllegalArgumentException}.
+   * @return A concatenation of the elements in the collection.
+   */
+  public static <T> String implode(
+      Collection<T> collection, Function<T, String> stringifier, String separator, int limit) {
     Check.notNull(collection, "collection");
     Check.notNull(separator, "separator");
     Check.that(limit, "limit").is(gte(), -1);
-    Stream<?> stream = collection.stream();
+    Stream<T> stream = collection.stream();
     if (limit != -1 && limit < collection.size()) {
       stream = stream.limit(limit);
     }
-    return stream.map(Objects::toString).collect(Collectors.joining(separator));
+    try {
+      return stream.map(stringifier).collect(Collectors.joining(separator));
+    } catch (NullPointerException e) {
+      return Check.fail("Stringifier function not designed to handle null elements");
+    }
   }
 
   /**
