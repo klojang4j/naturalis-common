@@ -160,6 +160,6 @@ public final class Tuple<T, U> {
 
   @Override
   public String toString() {
-    return "[" + Objects.toString(left) + "," + Objects.toString(right) + "]";
+    return "[" + left + ":" + right + "]";
   }
 }
