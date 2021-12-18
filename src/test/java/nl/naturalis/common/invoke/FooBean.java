@@ -1,6 +1,7 @@
 package nl.naturalis.common.invoke;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class FooBean {
 
@@ -8,6 +9,7 @@ public class FooBean {
   private String firstName;
   private String lastName;
   private LocalDate date;
+  private List<String> hobbies;
 
   public int getId() {
     return id;
@@ -39,5 +41,13 @@ public class FooBean {
 
   public void setDate(LocalDate date) {
     this.date = date;
+  }
+
+  public List<String> getHobbies() {
+    return hobbies;
+  }
+
+  public void setHobbies(List<String> hobbies) {
+    this.hobbies = hobbies;
   }
 }

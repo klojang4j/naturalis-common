@@ -3,6 +3,8 @@ package nl.naturalis.common.invoke;
 import static org.junit.Assert.assertEquals;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Test;
 
 public class SaveBeanReaderTest {
@@ -14,19 +16,19 @@ public class SaveBeanReaderTest {
     fb.setLastName("Smith");
     LocalDate now = LocalDate.now();
     fb.setDate(now);
+    List<String> hobbies = Arrays.asList("Tennis", "Scoccer");
+    fb.setHobbies(hobbies);
     SaveBeanReader<FooBean> br =
         SaveBeanReader.configure(FooBean.class)
-            .with("id", int.class)
-            .with("firstName", String.class)
-            .with("lastName", String.class)
-            .withGetter("lastModified", LocalDate.class)
+            .withInt("id")
+            .withString("firstName", "lastName")
+            .with(List.class, "hobbies")
+            .withGetter(LocalDate.class, "lastModified")
             .freeze();
-    int i = br.read(fb, "id");
-    assertEquals(10, i);
-    String s = br.read(fb, "firstName");
-    assertEquals("John", s);
-    s = br.read(fb, "lastName");
-    assertEquals("Smith", s);
+    assertEquals(10, (int) br.read(fb, "id"));
+    assertEquals("John", br.read(fb, "firstName"));
+    assertEquals("Smith", br.read(fb, "lastName"));
     assertEquals(now, br.read(fb, "lastModified"));
+    assertEquals(hobbies, br.read(fb, "hobbies"));
   }
 }
