@@ -1,18 +1,17 @@
 package nl.naturalis.common.path;
 
-import static nl.naturalis.common.check.CommonChecks.empty;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.neverNull;
-import static nl.naturalis.common.check.CommonGetters.length;
-import static nl.naturalis.common.path.PathWalker.DeadEndAction.RETURN_NULL;
+import nl.naturalis.common.check.Check;
+import nl.naturalis.common.invoke.NoSuchPropertyException;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.IntStream;
-import nl.naturalis.common.check.Check;
-import nl.naturalis.common.invoke.NoSuchPropertyException;
+
+import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonGetters.length;
+import static nl.naturalis.common.path.PathWalker.DeadEndAction.RETURN_NULL;
 
 /**
  * A {@code PathWalker} lets you read and write deeply nested values within almost any kind of
@@ -47,7 +46,7 @@ import nl.naturalis.common.invoke.NoSuchPropertyException;
 public final class PathWalker {
 
   /**
-   * Symbolic constants for what to do if the {@code PathWalker} hits a dead end for a particular
+   * Symbolic formatters for what to do if the {@code PathWalker} hits a dead end for a particular
    * {@code Path}.
    */
   public static enum DeadEndAction {

@@ -1,5 +1,8 @@
 package nl.naturalis.common;
 
+import nl.naturalis.common.check.Check;
+import nl.naturalis.common.unsafe.UnsafeList;
+
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
@@ -8,8 +11,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import nl.naturalis.common.check.Check;
-import nl.naturalis.common.unsafe.UnsafeList;
+
 import static java.lang.System.arraycopy;
 import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.check.CommonChecks.*;
@@ -297,7 +299,7 @@ public class ArrayMethods {
     Check.notNull(separator, "separator");
     Check.that(limit, "limit").is(gte(), -1);
     Stream<?> stream = Arrays.stream(array);
-    if (limit != -1 || limit < array.length) {
+    if (limit < array.length) {
       stream = stream.limit(limit);
     }
     return stream.map(Objects::toString).collect(Collectors.joining(separator));
@@ -338,8 +340,8 @@ public class ArrayMethods {
 
   /**
    * Returns the array index of the first occurrence of the specified value within the specified
-   * array. Returns -1 if the array does not contain the value. Searching for null is allowed.
-   * Comparisons are done using {@link Objects#deepEquals(Object, Object)}.
+   * array, using {@link Objects#deepEquals(Object, Object) Objects.deepEquals} to identify the
+   * occurrence. Returns -1 if the array does not contain the value. Searching for null is allowed.
    *
    * @param <T> The type of the elements within the array
    * @param array The array to search
@@ -348,43 +350,49 @@ public class ArrayMethods {
    */
   public static <T> int indexOf(T[] array, T value) {
     Check.notNull(array, "array");
-    return indices(array).filter(i -> Objects.deepEquals(array[i], value)).findFirst().orElse(-1);
+    return streamIndices(array)
+        .filter(i -> Objects.deepEquals(array[i], value))
+        .findFirst()
+        .orElse(-1);
   }
 
   /**
-   * Returns the array index of the first occurrence of the specified reference within the specified
-   * array. Returns -1 if the array does not contain the reference. Searching for null is <i>not</i>
-   * allowed.
+   * Returns the array index of the first occurrence of the specified value within the specified
+   * array, using reference comparison to identify the occurrence. Returns -1 if the array does not
+   * contain the value. Searching for null is <i>not</i> allowed.
    *
    * @param array The array to search
    * @param reference The reference to search for (must not be null)
    * @return The array index of the reference
    */
   public static int find(Object[] array, Object reference) {
+    Check.notNull(array, "array");
     Check.notNull(reference, "reference");
-    return indices(array).filter(i -> array[i] == reference).findFirst().orElse(-1);
+    return streamIndices(array).filter(i -> array[i] == reference).findFirst().orElse(-1);
   }
 
   /**
-   * Returns a {@code Stream} of the indices of the specified array.
+   * Returns an {@code IntStream} of the indices of the specified array.
    *
    * @param <T> The component type of the array
    * @param array The array
    * @return a {@code Stream} of its indices
    */
-  public static <T> IntStream indices(T[] array) {
+  public static <T> IntStream streamIndices(T[] array) {
     return Check.notNull(array).ok(x -> IntStream.range(0, x.length));
   }
 
   /**
    * Simply returns the specified array, but allows for leaner code.
    *
-   * <p>
+   * <blockquote>
    *
-   * <pre>
+   * <pre>{@code
    * String[] words0 = new String[] {"Hello", "world"};
    * String[] words1 = pack("Hello", "world");
-   * </pre>
+   * }</pre>
+   *
+   * </blockquote>
    *
    * @param <T> The type of the objects to pack
    * @param objs The objects to pack

@@ -1,22 +1,17 @@
 package nl.naturalis.common.io;
 
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
-import static java.nio.file.StandardOpenOption.READ;
-import static java.nio.file.StandardOpenOption.WRITE;
-import static nl.naturalis.common.IOMethods.createTempFile;
-import static nl.naturalis.common.check.CommonChecks.gt;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.no;
-import static nl.naturalis.common.check.CommonChecks.present;
-import static nl.naturalis.common.check.CommonGetters.length;
+import nl.naturalis.common.ExceptionMethods;
+import nl.naturalis.common.check.Check;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import nl.naturalis.common.ExceptionMethods;
-import nl.naturalis.common.check.Check;
+
+import static java.nio.file.StandardOpenOption.*;
+import static nl.naturalis.common.IOMethods.createTempFile;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * A {@code SwapOutputStream} implementation based on the {@code java.nio} package. This
@@ -104,7 +99,7 @@ public class NioSwapOutputStream extends SwapOutputStream {
    */
   @Override
   public void write(byte[] b, int off, int len) throws IOException {
-    Check.notNull(b, "b").has(length(), gte(), off + len).given(off >= 0, len >= 0);
+    Check.notNull(b, "b");
     if (recalled) {
       out.write(b, off, len);
       return;

@@ -8,8 +8,11 @@ package nl.naturalis.common.time;
  */
 public class FuzzyDateException extends Exception {
 
+  static final String ERR_CASE_SENSITIVTY_FIXED =
+      "Case sensitivity cannot be set for pre-built DateTimeFormatter";
+
   static FuzzyDateException notParsable(String dateString) {
-    String fmt = "Date string \"%s\" could not be parsed using the provided ParseInfo";
+    String fmt = "Date string \"%s\" could not be parsed using the provided ParseAttempt(s)";
     return new FuzzyDateException(String.format(fmt, dateString));
   }
 
@@ -43,7 +46,7 @@ public class FuzzyDateException extends Exception {
     return new FuzzyDateException(String.format(fmt, className));
   }
 
-  private FuzzyDateException(String message) {
+  FuzzyDateException(String message) {
     super(message);
   }
 }

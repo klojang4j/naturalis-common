@@ -1,17 +1,16 @@
 package nl.naturalis.common.invoke;
 
-import static java.lang.Character.toUpperCase;
-import static nl.naturalis.common.check.CommonChecks.empty;
-import static nl.naturalis.common.check.CommonChecks.instanceOf;
-import static nl.naturalis.common.check.CommonChecks.keyIn;
-import static nl.naturalis.common.invoke.InvokeException.typeMismatch;
-import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
+import nl.naturalis.common.ExceptionMethods;
+import nl.naturalis.common.check.Check;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import nl.naturalis.common.ExceptionMethods;
-import nl.naturalis.common.check.Check;
+
+import static java.lang.Character.toUpperCase;
+import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.invoke.InvokeException.typeMismatch;
+import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 
 /**
  * A bean reader that does not use reflection at all in order to read properties off JavaBeans. This
@@ -38,7 +37,7 @@ public class SaveBeanReader<T> {
    */
   public static class Builder<U> {
 
-    private static final String ERR_DUPLICATE = "\"%s\" already added";
+    private static final String ERR_DUPLICATE = "\"${arg}\" already added";
 
     private final Map<String, Getter> getters = new HashMap<>();
 
@@ -90,9 +89,7 @@ public class SaveBeanReader<T> {
     }
 
     private void add(Class<?> type, String property) throws NoSuchMethodException {
-      Check.that(property, "property")
-          .isNot(empty())
-          .isNot(keyIn(), getters, ERR_DUPLICATE, property);
+      Check.that(property, "property").isNot(empty()).isNot(keyIn(), getters, ERR_DUPLICATE);
       String name;
       if (type == boolean.class) {
         name = "is" + toUpperCase(property.charAt(0)) + property.substring(1);
@@ -116,7 +113,7 @@ public class SaveBeanReader<T> {
      *     correspond to any method on the bean class.
      */
     public Builder<U> withGetter(Class<?> type, String name) throws NoSuchMethodException {
-      Check.that(name).isNot(empty()).isNot(keyIn(), getters, ERR_DUPLICATE, name);
+      Check.that(name).isNot(empty()).isNot(keyIn(), getters, ERR_DUPLICATE);
       Getter getter = new Getter(beanClass, name, type, name);
       getters.put(name, getter);
       return this;

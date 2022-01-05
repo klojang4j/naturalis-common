@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema targetNamespace="http://data.klojang.org/fuzzy-date"
+           elementFormDefault="qualified" attributeFormDefault="unqualified"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:self="http://data.klojang.org/fuzzy-date"
+           version="0.1">
+    <xs:element name="FuzzyDateConfig">
+        <xs:complexType>
+            <xs:all>
+                <xs:element name="defaults" type="self:Defaults" minOccurs="0"/>
+                <xs:element name="Instant" type="self:ParseTarget" minOccurs="0"/>
+                <xs:element name="OffsetDateTime" type="self:ParseTarget" minOccurs="0"/>
+                <xs:element name="LocalDate" type="self:ParseTarget" minOccurs="0"/>
+                <xs:element name="YearMonth" type="self:ParseTarget" minOccurs="0"/>
+                <xs:element name="Year" type="self:ParseTarget" minOccurs="0"/>
+            </xs:all>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="ParseTarget">
+        <xs:all>
+            <xs:element name="try" type="self:ParseAttempt" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:complexType name="ParseAttempt">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attributeGroup ref="self:AttemptConfig"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:attributeGroup name="AttemptConfig">
+        <xs:attribute name="predefined" type="xs:boolean" default="false"/>
+        <xs:attribute name="caseSensitive" type="xs:boolean" default="false"/>
+        <xs:attribute name="resolverStyle" type="self:ResolverStyle" default="LENIENT"/>
+        <xs:attribute name="preprocessor" type="xs:boolean" default="false"/>
+    </xs:attributeGroup>
+
+    <xs:complexType name="Defaults">
+        <xs:all>
+            <!-- Whether to ignore case while parsing date strings-->
+            <xs:element name="caseSensitive" minOccurs="0" type="xs:boolean"/>
+            <!-- Sets the java.time.format.ResolverStyle of the date parser -->
+            <xs:element name="resolverStyle" minOccurs="0" type="self:ResolverStyle"/>
+            <!-- A semicolon-separated string of locales -->
+            <xs:element name="locales" minOccurs="0" type="xs:string"/>
+            <!--
+                The fully-qualified name of a class implementing
+                UnaryOperator<String>, which will be used to pre-process
+                the date string before it parsed.
+            -->
+            <xs:element name="preprocessor" minOccurs="0" type="xs:string"/>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:simpleType name="ResolverStyle">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="LENIENT"/>
+            <xs:enumeration value="SMART"/>
+            <xs:enumeration value="STRICT"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>

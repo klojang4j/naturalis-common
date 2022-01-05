@@ -1,6 +1,7 @@
 package nl.naturalis.common;
 
 import java.util.Set;
+
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static nl.naturalis.common.ClassMethods.*;
@@ -193,7 +194,8 @@ public class Bool {
   }
 
   /**
-   * Converts the specified {@code String} to a {@code Boolean} value.
+   * Converts the specified {@code String} to a {@code Boolean} value. Null values are allowed and
+   * will result in {@code Boolean.FALSE} being returns.
    *
    * @param s The argument
    * @return The corresponding {@code Boolean} value

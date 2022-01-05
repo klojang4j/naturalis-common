@@ -1,15 +1,14 @@
 package nl.naturalis.common.util;
 
+import nl.naturalis.common.Pair;
+import nl.naturalis.common.check.Check;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
-import nl.naturalis.common.Pair;
-import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.between;
-import static nl.naturalis.common.check.CommonChecks.containingKey;
-import static nl.naturalis.common.check.CommonChecks.keyIn;
-import static nl.naturalis.common.check.CommonChecks.notNull;
+
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * Parses strings into enum constants. Internally {@code EnumParser} maintains a string-to-enum map
@@ -37,9 +36,9 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  */
 public class EnumParser<T extends Enum<T>> {
 
-  private static final String BAD_KEY = "Non-unique key: %s";
-  private static final String BAD_VALUE = "Cannot parse %s into enum constant of %s";
-  private static final String BAD_ORDINAL = "Invalid ordinal value for enum %s: %d";
+  private static final String BAD_KEY = "Non-unique key: ${arg}";
+  private static final String BAD_VALUE = "Cannot parse ${arg} into enum constant of ${0}";
+  private static final String BAD_ORDINAL = "Invalid ordinal value for enum ${0}: ${arg}";
 
   /**
    * The default normalization function. Removes spaces, hyphens and underscores and returns an
@@ -79,14 +78,13 @@ public class EnumParser<T extends Enum<T>> {
               map.put(String.valueOf(e.ordinal()), e);
               if (e.name().equals(e.toString())) {
                 String key = normalizer.apply(e.name());
-                Check.that(map).isNot(containingKey(), key, BAD_KEY, key);
+                Check.that(key).isNot(keyIn(), map, BAD_KEY);
                 map.put(key, e);
               } else {
                 String key0 = normalizer.apply(e.name());
                 String key1 = normalizer.apply(e.toString());
-                Check.that(map)
-                    .isNot(containingKey(), key0, BAD_KEY, key0)
-                    .isNot(containingKey(), key1, BAD_KEY, key1);
+                Check.that(key0).isNot(keyIn(), map, BAD_KEY);
+                Check.that(key1).isNot(keyIn(), map, BAD_KEY);
                 map.put(key0, e);
                 map.put(key1, e);
               }
@@ -106,17 +104,18 @@ public class EnumParser<T extends Enum<T>> {
    */
   @SuppressWarnings("unchecked")
   public T parse(Object value) throws IllegalArgumentException {
-    Check.that(value).is(notNull(), BAD_VALUE, value, enumClass.getName());
+    String name = enumClass.getName();
+    Check.that(value).is(notNull(), BAD_VALUE, name);
     if (value.getClass() == enumClass) {
       return (T) value;
     } else if (value.getClass() == Integer.class) {
       int i = (Integer) value;
       T[] consts = enumClass.getEnumConstants();
-      Check.that(i).is(between(), Pair.of(0, consts.length), BAD_ORDINAL, enumClass.getName(), i);
+      Check.that(i).is(between(), Pair.of(0, consts.length), BAD_ORDINAL, name);
       return consts[i];
     }
     return Check.that(normalizer.apply(value.toString()))
-        .is(keyIn(), lookups, BAD_VALUE, value, enumClass.getName())
+        .is(keyIn(), lookups, BAD_VALUE, value, name)
         .ok(lookups::get);
   }
 }

@@ -16,4 +16,6 @@ module nl.naturalis.common {
   exports nl.naturalis.common.time;
   exports nl.naturalis.common.unsafe;
   exports nl.naturalis.common.util;
+
+  requires java.xml;
 }

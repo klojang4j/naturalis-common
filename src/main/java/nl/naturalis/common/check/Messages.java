@@ -1,10 +1,5 @@
 package nl.naturalis.common.check;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.Set;
-import java.util.function.IntPredicate;
-import java.util.function.Predicate;
 import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.Pair;
 import nl.naturalis.common.StringMethods;
@@ -13,6 +8,13 @@ import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
+
+import java.io.File;
+import java.util.Collection;
+import java.util.Set;
+import java.util.function.IntPredicate;
+import java.util.function.Predicate;
+
 import static java.lang.String.format;
 import static nl.naturalis.common.ArrayMethods.asArray;
 import static nl.naturalis.common.ClassMethods.className;
@@ -398,15 +400,15 @@ class Messages {
 
   static Formatter msgPositive() {
     return md -> {
-      String not = md.negated() ? "not " : "";
-      return format("%s must be positive (was %d)", not, md.argName(), md.argument());
+      String not = md.negated() ? " not" : "";
+      return format("%s must%s be positive (was %d)", md.argName(), not, md.argument());
     };
   }
 
   static Formatter msgNegative() {
     return md -> {
-      String not = md.negated() ? "not " : "";
-      return format("%s must be negative (was %d)", not, md.argName(), md.argument());
+      String not = md.negated() ? " not" : "";
+      return format("%s must%s be negative (was %d)", md.argName(), not, md.argument());
     };
   }
 
@@ -631,16 +633,18 @@ class Messages {
     };
   }
 
-  private static final Set<Class<?>> STRINGIFIABLES =
+  private static final Set<Class<?>> DECENT_TO_STRING =
       TypeSet.withTypes(Number.class, Boolean.class, Character.class, Enum.class);
 
-  private static String toStr(Object val) {
+  static String toStr(Object val) {
     if (val == null) {
       return "null";
-    } else if (STRINGIFIABLES.contains(val.getClass())) {
+    } else if (DECENT_TO_STRING.contains(val.getClass())) {
       return val.toString();
     } else if (val instanceof CharSequence) {
       return ellipsis(val.toString(), 40);
+    } else if (val.getClass() == Class.class) {
+      return simpleClassName(val);
     } else if (val instanceof Collection) {
       Collection c = (Collection) val;
       return concat(

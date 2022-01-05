@@ -1,110 +1,211 @@
 package nl.naturalis.common.check;
 
-import java.io.OutputStream;
-import java.util.function.*;
 import nl.naturalis.common.NumberMethods;
 import nl.naturalis.common.function.*;
+
+import java.util.function.*;
+import java.util.stream.IntStream;
+
+import static nl.naturalis.common.ObjectMethods.ifNotNull;
+import static nl.naturalis.common.check.CommonChecks.CHECK_NAMES;
 import static nl.naturalis.common.check.CommonGetters.formatProperty;
 import static nl.naturalis.common.check.Messages.createMessage;
 
 /**
- * Facilitates precondition checking. For example:
+ * Facilitates the validation of method arguments, variables, object state and computational
+ * outcomes. For example:
  *
- * <p>
+ * <blockquote>
  *
- * <pre>
- * this.numChairs = Check.that(numChairs).is(gt(), 0).is(lte(), 10).is(even()).ok();
- * </pre>
+ * <pre>{@code
+ * // Verify that the number of chairs is greater than 0, less than
+ * // or equal to 4, and that it is an even number of chairs:
+ * this.numChairs = Check.that(numChairs).is(gt(), 0).is(lte(), 4).is(even()).ok();
+ * }</pre>
+ *
+ * </blockquote>
  *
  * <h4>Common checks</h4>
  *
- * The {@link CommonChecks} class provides a grab bag of common checks for arguments. These are
- * already associated with short, informative error messages, so you don't have to invent them
- * yourself. For example:
+ * All checks come in two variants: one where you can provide a custom error message and one where
+ * you can't. The latter is mainly meant to be used in combination with the {@link CommonChecks}
+ * class. This class is a grab bag of common checks for arguments. These checks are already
+ * associated with short, informative error messages, so you don't have to invent them yourself.
+ * This allows for very concise precondition checking. For example:
  *
- * <p>
+ * <blockquote>
  *
- * <pre>
+ * <pre>{@code
+ * // import static nl.naturalis.common.check.CommonChecks.gt;
  * Check.that(numChairs, "numChairs").is(gt(), 0);
  * // Auto-generated error message: "numChairs must be > 0 (was -3)"
- * </pre>
+ * }</pre>
+ *
+ * </blockquote>
+ *
+ * <h4>Custom error messages</h4>
+ *
+ * <p>If you prefer to send out a custom error message, you van do so by specifying a {@code
+ * String.format} message pattern and zero or more message argument. Note, however, that the
+ * following message arguments are tacitly prepended your own message arguments:
+ *
+ * <ol>
+ *   <li>The name of the check that was executed. E.g. "gt" or "notNull". Within the message pattern
+ *       this message argument can be referenced as <code>${test}</code> or <code>%1$s</code>.
+ *   <li>The argument being validated. Within the message pattern this message argument can be
+ *       referenced as <code>${arg}</code> or <code>%2$s</code>.
+ *   <li>The simple class name of the argument, or {@code null} if the argument was {@code null}.
+ *       Within the message pattern this message argument can be referenced as <code>
+ *       ${type}</code> or <code>%3$s</code>.
+ *   <li>The name of the argument. Within the message pattern this message argument can be
+ *       referenced as <code>${name}</code> or <code>%4$s</code>.
+ *   <li>The object of the relationship in case the check took the form of a {@link Relation} or one
+ *       of its sister interfaces. E.g. for {@code gt} that would be the number that the argument
+ *       must exceed. Within the message pattern this message argument can be referenced as <code>
+ *       ${obj}</code> or <code>%5$s</code>. For checks expressed through a {@link Predicate} or
+ *       {@link IntPredicate} this message argument will be {@code null}.
+ * </ol>
+ *
+ * <p>Thus, if your custom message only needs to reference these elements of the check, you don't,
+ * in fact, need to specify any message arguments yourself at all. The first of your own message
+ * arguments can be referenced from within the message pattern as <code>${0}</code> or <code>%6$s
+ * </code>, the second as <code>${1}</code> or <code>%7$s</code>, etc.
+ *
+ * <p>Examples:
+ *
+ * <blockquote>
+ *
+ * <pre>{@code
+ * // import static nl.naturalis.common.check.CommonChecks.keyIn;
+ * Check.that(word).is(keyIn(), dictionary, "Missing key: ${arg}");
+ * // Or as pure printf-style format string:
+ * Check.that(word).is(keyIn(), dictionary, "Missing key: %2$s");
+ *
+ * Check.that(word).is(keyIn(), dictionary, "You forgot about ${0}");
+ * // Or as pure printf-style format string:
+ * Check.that(word).is(keyIn(), dictionary, "You forgot about %6$s");
+ * }</pre>
+ *
+ * </blockquote>
  *
  * <h4>Checking argument properties</h4>
  *
- * A {@code Check} object lets you check not just arguments but also argument properties. For
+ * <p>>A {@code Check} object lets you validate not just arguments but also argument properties. For
  * example:
  *
- * <pre>
+ * <blockquote>
+ *
+ * <pre>{@code
  * Check.notNull(name, "name").has(String::length, "length", gte(), 10);
  * Check.notNull(employee, "employee").has(Employee::getAge, "age", lt(), 50);
  * Check.notNull(employees, "emps").has(Collection::size, "size", gte(), 100);
- * </pre>
+ * }</pre>
  *
- * <p>The {@link CommonGetters} class defines some common getters which, again, are already
- * associated with the name of the name they expose:
+ * </blockquote>
  *
- * <pre>
+ * <p>The {@link CommonGetters} is a grab bag of common getters which, again, are already associated
+ * with the name of the getter they expose:
+ *
+ * <blockquote>
+ *
+ * <pre>{@code
+ * // import static nl.naturalis.common.check.CommonChecks.gte;
+ * // import static nl.naturalis.common.check.CommonGetters.size;
  * Check.notNull(employees, "emps").has(size(), gte(), 100);
  * // Auto-generated error message: "emps.size() must be >= 100 (was 42)"
- * </pre>
+ * }</pre>
+ *
+ * </blockquote>
+ *
+ * <p>Note that the words "getter" and "property" are suggestive of what is being validated, but
+ * also misleading. All that is required as the first argument to the {@link #has(Function,
+ * Predicate) has} and {@link #notHas(Function, Predicate) notHas} methods is a function that takes
+ * the argument and returns the value to be validated. That could be a method reference like {@code
+ * Person::getFirstName}, but it could just as well be a function that transforms the argument
+ * itself, like the square root of an {@code int} argument or the uppercase version of a {@code
+ * String} argument.
  *
  * <h4>Lambdas</h4>
  *
- * Checks are done via the various {@code is(...)} and {@code has(...)} methods. These methods are
- * overloaded to take either a {@link Predicate} or an {@link IntPredicate}. This is not a problem
- * when passing them a method reference or a check from the {@code CommonChecks} class. When passing
- * a lambda, however, the compiler will be unable to decide whether it is dealing with a {@code
- * Predicate} or an {@code IntPredicate} - an unfortunate side effect of the combination of type
- * erasure and auto-boxing. This will result in a compiler error like <i>The method
- * is(Predicate&lt;String&gt;) is ambigious for the type Check&lt;String,
+ * <p>You don't <i>have to</i> use the checks from the {@code CommonChecks} class. You can also
+ * provide method references and lambdas expressing the test you want the argument to pass. When
+ * passing a lambda implementing a {@code Predicate} or {@code IntPredicate}, however, you will
+ * likely run into compilation problems (not occurring with method references and lambdas
+ * implementing a {@link Relation}): the compiler will be unable to decide whether it is dealing
+ * with a {@code Predicate} or an {@code IntPredicate} - an unfortunate side effect of the
+ * combination of type erasure and auto-boxing. This will result in a compiler error like <i>The
+ * method is(Predicate&lt;String&gt;) is ambiguous for the type Check&lt;String,
  * IllegalArgumentException&gt;</i>:
  *
- * <p>
+ * <blockquote>
  *
- * <pre>
+ * <pre>{@code
  * // Won't compile even though it's clear this can't be an IntPredicate:
  * Check.that(fullName).is(s -> s.charAt(0) == 'A');
- * </pre>
+ * }</pre>
+ *
+ * </blockquote>
  *
  * <p>To resolve this, simply specify the type of the lambda parameter:
  *
- * <pre>
+ * <blockquote>
+ *
+ * <pre>{@code
  * Check.that(fullName).is((String s) -> s.charAt(0) == 'A');
- * </pre>
+ * }</pre>
+ *
+ * </blockquote>
  *
  * <p>Alternatively, you can use the {@link CommonChecks#asObj(Predicate) asObj} and {@link
  * CommonChecks#asInt(Predicate) asInt} utility methods:
  *
- * <pre>
+ * <blockquote>
+ *
+ * <pre>{@code
+ * // import static nl.naturalis.common.check.CommonChecks.asInt;
+ * // import static nl.naturalis.common.check.CommonChecks.asObj;
  * Check.that(numChairs).is(asInt(x -> x <= 10)); // IntPredicate
- * Check.that(numChairs).is(asObj(x -> x <= 10)); // Predicate&lt;Integer&gt;
- * </pre>
+ * Check.that(numChairs).is(asObj(x -> x <= 10)); // Predicate<Integer>
+ * }</pre>
  *
- * <p>Or, as another alternative, every {@code Predicate} can also be written as a {@link Relation}:
- *
- * <pre>
- * Check.that(fullName).has(s -> s.charAt(0), eq(), 'A');
- * </pre>
+ * </blockquote>
  *
  * <h4>Changing the Exception type</h4>
  *
- * By default an {@code IllegalArgumentException} is thrown if an argument fails to pass a test.
+ * <p>By default, an {@code IllegalArgumentException} is thrown if an argument fails to pass a test.
  * This can be customized through the static factory methods. For example:
  *
- * <p>
+ * <blockquote>
  *
- * <pre>
- * this.query = Check.with(InvalidQueryException::new, query, "query").has(Query::getFrom, "from", nullOr(), 0).has(Query::getSize, "size", gte(), 10).has(
- *     Query::getSize, "size", lte(), 10000).ok();
- * </pre>
+ * <pre>{@code
+ * this.query = Check.on(InvalidQueryException::new, query, "query")
+ *  .notHas(Query::getFrom, "from", negative())
+ *  .has(Query::getLimit, "size", gte(), 10)
+ *  .has(Query::getLimit, "size", lte(), 10000)
+ *  .ok();
+ * }</pre>
+ *
+ * </blockquote>
+ *
+ * <p>To save on the number of classes you need to statically import, the {@code CommonChecks} class
+ * additionally contains some common exception factories. For example:
+ *
+ * <blockquote>
+ *
+ * <pre>{@code
+ * // import static nl.naturalis.common.check.CommonChecks.*;
+ * Check.on(illegalState(), inputstream).is(open());
+ * }</pre>
+ *
+ * </blockquote>
  *
  * @author Ayco Holleman
- * @param <T> The type of the object being checked
- * @param <E> The type of exception thrown if a test fails
+ * @param <T> The type of the object being validated
+ * @param <E> The type of exception thrown if the object is invalid
  */
 public abstract class Check<T, E extends Exception> {
 
-  static final String DEF_ARG_NAME = "argument";
+  static final String DEF_ARG_NAME = "value";
 
   private static final Function<String, IllegalArgumentException> DEF_EXC_FACTORY =
       IllegalArgumentException::new;
@@ -128,7 +229,7 @@ public abstract class Check<T, E extends Exception> {
    * @return A {@code Check} object suitable for testing the provided argument
    */
   public static <U> Check<U, IllegalArgumentException> that(U arg) {
-    return new ObjectCheck<>(arg, DEF_ARG_NAME, DEF_EXC_FACTORY);
+    return new ObjectCheck<>(arg, getDefaultArgName(arg), DEF_EXC_FACTORY);
   }
 
   /**
@@ -167,18 +268,19 @@ public abstract class Check<T, E extends Exception> {
   public static <U> Check<U, IllegalArgumentException> notNull(U arg)
       throws IllegalArgumentException {
     /*
-     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ NB we
-     * construct the Check instance right here, rather than calling another static
-     * factory method, e.g. notNull(arg, DEFAULT_ARG_NAME). In performance tests it
-     * turned out that for some reason the JVM had a hard time inlining these calls,
-     * making the notNull check about 20% slower than a "manual" not null check.
+     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+     * NB we construct the Check instance right here, rather than calling
+     * another static factory method, e.g. notNull(arg, DEFAULT_ARG_NAME).
+     * In performance tests it turned out that for some reason the JVM had
+     * a hard time inlining these calls, making the notNull check about 20%
+     * slower than a "manual" not null check.
      * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
      */
     if (arg == null) {
       String msg = createMessage(CommonChecks.notNull(), false, DEF_ARG_NAME, null);
       throw DEF_EXC_FACTORY.apply(msg);
     }
-    return new ObjectCheck<>(arg, DEF_ARG_NAME, DEF_EXC_FACTORY);
+    return new ObjectCheck<>(arg, getDefaultArgName(arg), DEF_EXC_FACTORY);
   }
 
   /**
@@ -220,7 +322,7 @@ public abstract class Check<T, E extends Exception> {
       String msg = createMessage(CommonChecks.notNull(), false, DEF_ARG_NAME, null);
       throw excFactory.apply(msg);
     }
-    return new ObjectCheck<>(arg, DEF_ARG_NAME, excFactory);
+    return new ObjectCheck<>(arg, getDefaultArgName(arg), excFactory);
   }
 
   /**
@@ -276,7 +378,7 @@ public abstract class Check<T, E extends Exception> {
    * @return A {@code Check} object suitable for testing the provided argument
    */
   public static <U, X extends Exception> Check<U, X> on(Function<String, X> excFactory, U arg) {
-    return new ObjectCheck<>(arg, DEF_ARG_NAME, excFactory);
+    return new ObjectCheck<>(arg, getDefaultArgName(arg), excFactory);
   }
 
   /**
@@ -372,15 +474,6 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Returns the name of the argument being tested.
-   *
-   * @return The name of the argument being tested
-   */
-  public String argName() {
-    return argName;
-  }
-
-  /**
    * Verifies that the argument passes the test expressed through the specified {@code Predicate}.
    * Although not required this method is meant to be used with a {@code Predicate} from the {@link
    * CommonChecks} class so that an informative error message is generated upon failure.
@@ -428,8 +521,7 @@ public abstract class Check<T, E extends Exception> {
     if (test.test(ok())) {
       return this;
     }
-    String msg = String.format(message, msgArgs);
-    throw excFactory.apply(msg);
+    throw exception(test, message, msgArgs);
   }
 
   /**
@@ -553,8 +645,7 @@ public abstract class Check<T, E extends Exception> {
     if (test.exists(ok(), object)) {
       return this;
     }
-    String msg = String.format(message, msgArgs);
-    throw excFactory.apply(msg);
+    throw exception(test, object, message, msgArgs);
   }
 
   /**
@@ -632,8 +723,7 @@ public abstract class Check<T, E extends Exception> {
     if (test.exists(ok(), object)) {
       return this;
     }
-    String msg = String.format(message, msgArgs);
-    throw excFactory.apply(msg);
+    throw exception(test, object, message, msgArgs);
   }
 
   /**
@@ -829,7 +919,8 @@ public abstract class Check<T, E extends Exception> {
    * message is generated upon failure.
    *
    * @param <U> The type of the property
-   * @param name A function which is given the argument as input and returns the value to be tested
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
    * @param test A {@code Predicate} expressing the test
    * @return This {@code Check} object
    * @throws E If the test fails
@@ -852,7 +943,8 @@ public abstract class Check<T, E extends Exception> {
    * message is generated upon failure.
    *
    * @param <U> The type of the property
-   * @param name A function which is given the argument as input and returns the value to be tested
+   * @param property A function which is given the argument as input and returns the value to be
+   *     tested
    * @param test A {@code Predicate} expressing the test
    * @return This {@code Check} object
    * @throws E If the test fails
@@ -888,8 +980,7 @@ public abstract class Check<T, E extends Exception> {
     if (test.test(value)) {
       return this;
     }
-    String msg = String.format(message, msgArgs);
-    throw excFactory.apply(msg);
+    throw exception(test, message, msgArgs);
   }
 
   /**
@@ -1026,8 +1117,7 @@ public abstract class Check<T, E extends Exception> {
     if (test.test(value)) {
       return this;
     }
-    String msg = String.format(message, msgArgs);
-    throw excFactory.apply(msg);
+    throw exception(test, message, msgArgs);
   }
 
   /**
@@ -1182,8 +1272,7 @@ public abstract class Check<T, E extends Exception> {
     if (test.exists(value, object)) {
       return this;
     }
-    String msg = String.format(message, msgArgs);
-    throw excFactory.apply(msg);
+    throw exception(test, object, message, msgArgs);
   }
 
   /**
@@ -1341,8 +1430,7 @@ public abstract class Check<T, E extends Exception> {
     if (test.exists(value, object)) {
       return this;
     }
-    String msg = String.format(message, msgArgs);
-    throw excFactory.apply(msg);
+    throw exception(test, object, message, msgArgs);
   }
 
   /**
@@ -1519,79 +1607,15 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Imposes extra preconditions that may or may not be related to the argument being checked by
-   * this instance. For example a precondition check for a typical {@link OutputStream#write(byte[],
-   * int, int) OutputStream.write(b, off, len)} implementation might look like this:
+   * Returns the argument. To be used as the last call after a chain of checks. For example:
    *
-   * <p>
+   * <blockquote>
    *
-   * <pre>
-   * write(byte[] b, int off, int len) {
-   *   Check.notNull(b, "b").has(length(), gte(), off + len).given(off >= 0, len >= 0);
-   *   // ...
-   * }
-   * </pre>
+   * <pre>{@code
+   * int age = Check.that(person).has(Person::getAge, "age", lt(), 50).ok().getAge();
+   * }</pre>
    *
-   * @param conditions The conditions to evaluate
-   * @return This {@code Check} object
-   * @throws E If any of the conditions evaluate to false
-   */
-  public Check<T, E> given(boolean... conditions) throws E {
-    if (conditions == null || conditions.length == 0) {
-      throw new InvalidCheckException("No conditions provided");
-    }
-    for (int i = 0; i < conditions.length; ++i) {
-      if (!conditions[i]) {
-        String s = argName.equals(DEF_ARG_NAME) ? " " : argName + " ";
-        String msg = String.format("Argument %snot valid given condition %d", s, i + 1);
-        throw excFactory.apply(msg);
-      }
-    }
-    return this;
-  }
-
-  /**
-   * Imposes extra preconditions that may or may not be related to the argument being checked by
-   * this instance. Lazy but practical. For example a precondition check for a typical {@link
-   * OutputStream#write(byte[], int, int) OutputStream.write(b, off, len)} implementation might look
-   * like:
-   *
-   * <p>
-   *
-   * <pre>
-   * write(byte[] b, int off, int len) {
-   *   Check.notNull(b, "b").has(length(), gte(), off + len).given("No can do buddy: check condition %d", off >= 0, len >= 0);
-   *   // ...
-   * }
-   * </pre>
-   *
-   * @param message A custom message that may (but does not have to) contain one %d message
-   *     argument. The message argument is substituted with the one-based number of the first
-   *     condition that failed.
-   * @param conditions The conditions to evaluate
-   * @return This {@code Check} object
-   * @throws E If any of the conditions evaluate to false
-   */
-  public Check<T, E> given(String message, boolean... conditions) throws E {
-    if (conditions == null || conditions.length == 0) {
-      throw new InvalidCheckException("No conditions provided");
-    }
-    for (int i = 0; i < conditions.length; ++i) {
-      if (!conditions[i]) {
-        String msg = String.format(message, i + 1);
-        throw excFactory.apply(msg);
-      }
-    }
-    return this;
-  }
-
-  /**
-   * Returns the argument being tested. To be used as the last call after a chain of checks. For
-   * example:
-   *
-   * <pre>
-   * int age = Check.notNull(employee, "employee").has(Employee::getAge, "age", lt(), 50).ok().getAge();
-   * </pre>
+   * </blockquote>
    *
    * @return The argument
    */
@@ -1599,7 +1623,15 @@ public abstract class Check<T, E extends Exception> {
 
   /**
    * Passes the argument to the specified {@code Function} and returns the value it computes. To be
-   * used as the last call after a chain of checks.
+   * used as the last call after a chain of checks. For example:
+   *
+   * <blockquote>
+   *
+   * <pre>{@code
+   * int age = Check.that(person).has(Person::getAge, "age", lt(), 50).ok(Person::getAge);
+   * }</pre>
+   *
+   * </blockquote>
    *
    * @param <U> The type of the returned value
    * @param transformer A {@code Function} that transforms the argument into some other value
@@ -1611,8 +1643,8 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Passes the validated argument to a {@code Consumer} to be processed safely. To be used as the
-   * last call after a chain of checks.
+   * Passes the validated argument to the specified {@code Consumer}. To be used as the last call
+   * after a chain of checks.
    *
    * @param consumer The {@code Consumer}
    */
@@ -1639,6 +1671,51 @@ public abstract class Check<T, E extends Exception> {
    */
   public <U> U intValue(IntFunction<U> transformer) throws E {
     return transformer.apply(intValue());
+  }
+
+  E exception(Object test, String msg, Object[] msgArgs) {
+    return exception(test, null, msg, msgArgs);
+  }
+
+  E exception(Object test, Object object, String msg, Object[] msgArgs) {
+    return exception(test, ok(), object, msg, msgArgs);
+  }
+
+  E exception(Object test, Object subject, Object object, String pattern, Object[] msgArgs) {
+    if (pattern == null) {
+      throw new InvalidCheckException("message must not be null");
+    }
+    if (msgArgs == null) {
+      throw new InvalidCheckException("message arguments must not be null");
+    }
+    String fmt = FormatNormalizer.normalize(pattern);
+    Object[] all = new Object[msgArgs.length + 5];
+    all[0] = CHECK_NAMES.getOrDefault(test, test.getClass().getSimpleName());
+    all[1] = Messages.toStr(subject);
+    all[2] = ifNotNull(subject, Check::className);
+    all[3] = argName;
+    all[4] = Messages.toStr(object);
+    System.arraycopy(msgArgs, 0, all, 5, msgArgs.length);
+    return excFactory.apply(String.format(fmt, all));
+  }
+
+  private static String getDefaultArgName(Object arg) {
+    return arg == null ? DEF_ARG_NAME : className(arg);
+  }
+
+  private static String className(Object obj) {
+    Class<?> clazz = obj.getClass();
+    if (clazz.isArray()) {
+      Class<?> c = clazz.getComponentType();
+      int i = 0;
+      for (; c.isArray(); c = c.getComponentType()) {
+        ++i;
+      }
+      StringBuilder sb = new StringBuilder(c.getSimpleName());
+      IntStream.rangeClosed(0, i).forEach(x -> sb.append("[]"));
+      return sb.toString();
+    }
+    return clazz.getSimpleName();
   }
 
   /* Returns fully-qualified name of the property with the specified name */

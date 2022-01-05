@@ -1,37 +1,15 @@
 package nl.naturalis.common.check;
 
-import static nl.naturalis.common.check.CommonChecks.greaterThan;
-import static nl.naturalis.common.check.CommonChecks.atLeast;
-import static nl.naturalis.common.check.CommonChecks.array;
-import static nl.naturalis.common.check.CommonChecks.asInt;
-import static nl.naturalis.common.check.CommonChecks.asObj;
-import static nl.naturalis.common.check.CommonChecks.eq;
-import static nl.naturalis.common.check.CommonChecks.equalTo;
-import static nl.naturalis.common.check.CommonChecks.gt;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.indexOf;
-import static nl.naturalis.common.check.CommonChecks.instanceOf;
-import static nl.naturalis.common.check.CommonChecks.lt;
-import static nl.naturalis.common.check.CommonChecks.lte;
-import static nl.naturalis.common.check.CommonChecks.ne;
-import static nl.naturalis.common.check.CommonChecks.no;
-import static nl.naturalis.common.check.CommonChecks.notNull;
-import static nl.naturalis.common.check.CommonChecks.sizeGTE;
-import static nl.naturalis.common.check.CommonChecks.yes;
-import static nl.naturalis.common.check.CommonGetters.abs;
-import static nl.naturalis.common.check.CommonGetters.length;
-import static nl.naturalis.common.check.CommonGetters.size;
-import static nl.naturalis.common.check.CommonGetters.strlen;
-import static nl.naturalis.common.check.CommonGetters.toStr;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
-import org.junit.Test;
+
+import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonGetters.*;
+import static org.junit.Assert.*;
 
 /**
  * NB A lot of these tests don't make any assertion, but just verify that we can code them as we do
@@ -269,41 +247,6 @@ public class CheckTest {
     Check.that(-7).has(abs(), eq(), 7);
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void given01() {
-    byte[] b = new byte[10];
-    int off = -5;
-    int len = 7;
-    // -5 + 7 < 10, but -5 not allowed
-    Check.that(b).is(notNull()).has(length(), gte(), off + len).given(off >= 0, len >= 0);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void given02() {
-    byte[] b = new byte[10];
-    int off = -5;
-    int len = 7;
-    // -5 + 7 < 10, but -5 not allowed
-    Check.that(b)
-        .is(notNull())
-        .has(length(), gte(), off + len)
-        // Without message argument
-        .given("No can do buddy", off >= 0, len >= 0);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void given03() {
-    byte[] b = new byte[10];
-    int off = -5;
-    int len = 7;
-    // -5 + 7 < 10, but -5 not allowed
-    Check.that(b)
-        .is(notNull())
-        .has(length(), gte(), off + len)
-        // With message argument
-        .given("No can do buddy: check condition %d", off >= 0, len >= 0);
-  }
-
   @Test
   public void asObj01() {
     StringBuilder sb = new StringBuilder("AYCO");
@@ -349,7 +292,7 @@ public class CheckTest {
     } catch (InvalidCheckException e) {
       System.out.println(e.getMessage());
       assertEquals(
-          "Error while checking argument: java.lang.String cannot be subject of indexOf()",
+          "Error while checking String: java.lang.String cannot be subject of indexOf()",
           e.getMessage());
       return;
     }

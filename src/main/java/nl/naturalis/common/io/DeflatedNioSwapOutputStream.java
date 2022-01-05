@@ -1,16 +1,15 @@
 package nl.naturalis.common.io;
 
-import static nl.naturalis.common.IOMethods.createTempFile;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonGetters.length;
+import nl.naturalis.common.ExceptionMethods;
+import nl.naturalis.common.check.Check;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.Deflater;
 import java.util.zip.InflaterOutputStream;
-import nl.naturalis.common.ExceptionMethods;
-import nl.naturalis.common.check.Check;
+
+import static nl.naturalis.common.IOMethods.createTempFile;
 
 /**
  * A {@code SwapOutputStream} that compresses the data as it enters the internal buffer. This will
@@ -119,7 +118,7 @@ public class DeflatedNioSwapOutputStream extends NioSwapOutputStream {
     if (dataRecalled()) {
       super.write(b, off, len);
     } else {
-      Check.notNull(b, "b").has(length(), gte(), off + len).given(off >= 0, len >= 0);
+      Check.notNull(b, "b");
       def.setInput(b, off, len);
       while (!def.needsInput()) {
         deflate();

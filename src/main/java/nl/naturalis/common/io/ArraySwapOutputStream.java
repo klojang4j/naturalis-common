@@ -1,19 +1,14 @@
 package nl.naturalis.common.io;
 
+import nl.naturalis.common.ExceptionMethods;
+import nl.naturalis.common.check.Check;
+
+import java.io.*;
+
 import static nl.naturalis.common.IOMethods.createTempFile;
 import static nl.naturalis.common.IOMethods.pipe;
 import static nl.naturalis.common.check.CommonChecks.gt;
-import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonChecks.no;
-import static nl.naturalis.common.check.CommonGetters.length;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import nl.naturalis.common.ExceptionMethods;
-import nl.naturalis.common.check.Check;
 
 /**
  * A {@code SwapOutputStream} that uses a byte array as internal buffer.
@@ -93,9 +88,10 @@ public class ArraySwapOutputStream extends SwapOutputStream {
    */
   @Override
   public void write(byte[] b, int off, int len) throws IOException {
-    Check.notNull(b, "b").has(length(), gte(), off + len).given(off >= 0, len >= 0);
-    // If the incoming byte array is bigger than the internal buffer we don't bother buffering it.
-    // We flush the internal buffer and then write the byte array directly to the output stream
+    Check.notNull(b, "b");
+    // If the incoming byte array is bigger than the internal buffer we
+    // don't bother buffering it. We flush the internal buffer and then
+    // write the byte array directly to the output stream
     if (len > buf.length) {
       flushBuffer();
       out.write(b, off, len);

@@ -1,38 +1,24 @@
 package nl.naturalis.common.time;
 
-import static java.time.ZoneOffset.UTC;
-import static java.time.temporal.ChronoField.DAY_OF_MONTH;
-import static java.time.temporal.ChronoField.HOUR_OF_DAY;
-import static java.time.temporal.ChronoField.MICRO_OF_SECOND;
-import static java.time.temporal.ChronoField.MILLI_OF_SECOND;
-import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
-import static java.time.temporal.ChronoField.MONTH_OF_YEAR;
-import static java.time.temporal.ChronoField.NANO_OF_SECOND;
-import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
-import static nl.naturalis.common.ArrayMethods.isOneOf;
-import static nl.naturalis.common.ObjectMethods.ifNotEmpty;
-
-import java.time.DateTimeException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.Year;
-import java.time.YearMonth;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import static java.time.ZoneOffset.UTC;
+import static java.time.temporal.ChronoField.*;
+import static nl.naturalis.common.ArrayMethods.isOneOf;
+import static nl.naturalis.common.ObjectMethods.ifNotEmpty;
+
 /**
- * A {@code FuzzyDate} represents the result of parsing a date string into a date/time object. You
- * obtain a {@code FuzzyDate} by calling {@link FuzzyDateParser#parse(String)}. The instance
- * returned by the parser is guaranteed to have at least a known year. Month, day, hour, minute,
- * second and time zone may or may not be known. If the parser could not extract a year from the
- * date string a {@link FuzzyDateException} is thrown.
+ * A {@code FuzzyDate} is a date of which at least the year component is set. The {@code FuzzyDate}
+ * class and the other classes in this package or no general-purpose date/time utility classes.
+ * Instead, they focus on extracting {@code java.time} objects from historical records with
+ * inconsistently formatted dates. You obtain a {@code FuzzyDate} by calling {@link
+ * FuzzyDateParser#parse(String)}. The instance returned by the parser is guaranteed to have at
+ * least its year set. Month, day, hour, minute, second and time zone may or may not be known. If
+ * the parser could not extract a year from the date string a {@link FuzzyDateException} is thrown.
  *
  * <p>Although any number of date/time patterns can be used to parse date strings into date/time
  * objects, {@code FuzzyDate} works best when they are composed of the usual date fields: {@link
@@ -43,35 +29,37 @@ import java.util.OptionalInt;
  * {@link ZoneId}. It may not be accurate when composed of more exotic date fields like {@link
  * ChronoField#DAY_OF_YEAR DAY_OF_YEAR} or {@link ChronoField#SECOND_OF_DAY SECOND_OF_DAY}.
  *
- * <p>A simple example of the workflow and capabilities of {@code FuzzyDate} and friends:
+ * <p>Example:
  *
- * <p>
+ * <blockquote>
  *
- * <pre>
- * ParseInfo info1 = new ParseInfo("yyyy-MM-dd HH:mm:ss");
- * ParseInfo info2 = new ParseInfo("yyyy-MM-dd");
- * FuzzyDateParser parser = new FuzzyDateParser(info1, info2);
+ * <pre>{@code
+ * ParseAttempt try0 = new ParseAttempt("yyyy-MM-dd HH:mm:ss");
+ * ParseAttempt try1 = new ParseAttempt("yyyy-MM-dd");
+ * FuzzyDateParser parser = new FuzzyDateParser(try0, try1);
  * String dateString = "2020-09-18";
  * FuzzyDate fuzzyDate = parser.parse(dateString);
  * assertTrue(fuzzyDate.isTimeFuzzy());
  * assertFalse(fuzzyDate.isDateFuzzy());
  * assertSame(LocalDate.class, fuzzyDate.bestMatch().getClass());
- * assertSame(info2, fuzzyDate.getParseInfo());
+ * assertSame(try1, fuzzyDate.getParseAttempt());
  * OffsetDateTime realDate = fuzzyDate.toOffsetDateTime();
- * </pre>
+ * }</pre>
+ *
+ * </blockquote>
  */
 public final class FuzzyDate {
 
   private final TemporalAccessor ta;
   private final int year;
   private final String verbatim;
-  private final ParseInfo parseInfo;
+  private final ParseAttempt parseAttempt;
 
-  FuzzyDate(TemporalAccessor ta, int year, String verbatim, ParseInfo parseInfo) {
+  FuzzyDate(TemporalAccessor ta, int year, String verbatim, ParseAttempt parseAttempt) {
     this.ta = ta;
     this.year = year;
     this.verbatim = verbatim;
-    this.parseInfo = parseInfo;
+    this.parseAttempt = parseAttempt;
   }
 
   /**
@@ -138,7 +126,7 @@ public final class FuzzyDate {
    * {@code OptionalInt} if no nanosecond, microsecond or millisecond could be extracted from the
    * date string.
    *
-   * @return The nano second of this {@code FuzzyDate}
+   * @return The nanosecond of this {@code FuzzyDate}
    */
   public OptionalInt getNano() {
     return ta.isSupported(NANO_OF_SECOND)
@@ -265,7 +253,7 @@ public final class FuzzyDate {
    */
   public LocalDateTime toLocalDateTime(ZoneOffset zone) {
     if (ta.getClass() == Year.class) {
-      return ((YearMonth) ta).atDay(1).atStartOfDay();
+      return ((Year) ta).atMonth(1).atDay(1).atStartOfDay();
     } else if (ta.getClass() == YearMonth.class) {
       return ((YearMonth) ta).atDay(1).atStartOfDay();
     } else if (ta.getClass() == LocalDate.class) {
@@ -305,8 +293,6 @@ public final class FuzzyDate {
       return ((OffsetDateTime) ta).toLocalDate();
     } else if (ta.getClass() == LocalDateTime.class) {
       return ((LocalDateTime) ta).toLocalDate();
-    } else if (ta.getClass() == OffsetDateTime.class) {
-      return ((OffsetDateTime) ta).toLocalDate();
     } else if (ta.getClass() == Instant.class) {
       return LocalDate.ofInstant((Instant) ta, getZone(timeZone));
     }
@@ -405,40 +391,40 @@ public final class FuzzyDate {
   }
 
   /**
-   * Returns the {@link ParseInfo} instance that was used to parse the date string.
+   * Returns the {@link ParseAttempt} instance from which this {@code FuzzyDate} was created.
    *
-   * @return The {@code ParseInfo} instance that was used to parse the date string
+   * @return The {@link ParseAttempt} instance from which this {@code FuzzyDate} was created
    */
-  public ParseInfo getParseInfo() {
-    return parseInfo;
+  public ParseAttempt getParseAttempt() {
+    return parseAttempt;
   }
 
   /**
-   * Returns whether or not the date of this instance is fuzzy. Returns true if either month or day
-   * is unknown, false if both are known.
+   * Returns whether the date of this instance is fuzzy. Returns true if either month or day is
+   * unknown, false if both are known.
    *
-   * @return Whether or not the date of this instance is fuzzy
+   * @return Whether the date of this instance is fuzzy
    */
   public boolean isDateFuzzy() {
     return !(ta.isSupported(MONTH_OF_YEAR) && ta.isSupported(DAY_OF_MONTH));
   }
 
   /**
-   * Returns whether or not the time of this instance is fuzzy. Returns true if either the hour or
-   * the minute is unknown, false if both are known. Seconds are ignored, so time is <i>not</i>
-   * regarded as fuzzy if hour and minute are known but the second is not.
+   * Returns whether the time of this instance is fuzzy. Returns true if either the hour or the
+   * minute is unknown, false if both are known. Seconds are ignored, so time is <i>not</i> regarded
+   * as fuzzy if hour and minute are known but the second is not.
    *
-   * @return Whether or not the date of this instance is fuzzy
+   * @return Whether the date of this instance is fuzzy
    */
   public boolean isTimeFuzzy() {
     return !(ta.isSupported(HOUR_OF_DAY) && ta.isSupported(MINUTE_OF_HOUR));
   }
 
   /**
-   * Returns whether or not the date or time is fuzzy. Equivalent to {@code isDateFuzzy() ||
+   * Returns whether the date or time is fuzzy. Equivalent to {@code isDateFuzzy() ||
    * isTimeFuzzy()}.
    *
-   * @return Whether or not the date and/or time is fuzzy.
+   * @return Whether the date and/or time is fuzzy.
    */
   public boolean isFuzzy() {
     return isDateFuzzy() || isTimeFuzzy();

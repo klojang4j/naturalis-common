@@ -1,16 +1,19 @@
 package nl.naturalis.common.check;
 
-import java.io.File;
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.IntPredicate;
-import java.util.function.Predicate;
 import nl.naturalis.common.*;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
+
+import java.io.File;
+import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.IntPredicate;
+import java.util.function.Predicate;
+
 import static nl.naturalis.common.ArrayMethods.isOneOf;
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
 import static nl.naturalis.common.check.Messages.*;
@@ -363,7 +366,7 @@ public class CommonChecks {
 
   /**
    * If the argument is a {@link Class} object, this method verifies that it is a subclass or
-   * implementation of the specified class; otherwise that the argument is an intance of it.
+   * implementation of the specified class; otherwise that the argument is an instance of it.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation}
@@ -939,30 +942,30 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is a valid index for a {@code List} operation like {@link
-   * List#get(int) get} or {@link List#set(int, Object) set}. In other words, that the argument is
-   * greater than or equal to zero and less than the size of the list.
+   * Verifies that the argument is greater than or equal to zero and less than the size of the
+   * specified {@code List} or array. The object of the relationship is deliberately weakly typed to
+   * allow it to be either a {@code List} or an array. Specifying any other type of object will
+   * cause an {@link InvalidCheckException} to be thrown though.
    *
-   * @param <E> The type of the elements in the {@code List}
-   * @param <L> The type of the {@code List}
-   * @return An {@code IntObjRelation}
+   * @return An {@code IntObjRelation} expressing this requirement
    */
-  public static <E, L extends List<? super E>> IntObjRelation<L> indexOf() {
-    return (x, y) -> x >= 0 && x < y.size();
+  @SuppressWarnings("rawtypes")
+  public static <T> IntObjRelation<T> indexOf() {
+    return (x, y) -> {
+      if (x < 0) {
+        return false;
+      } else if (y instanceof List) {
+        return x < ((List) y).size();
+      } else if (y.getClass().isArray()) {
+        return x < Array.getLength(y);
+      }
+      throw new InvalidCheckException("Object of \"indexOf\" relation must be List or array");
+    };
   }
 
   static {
     setMessagePattern(indexOf(), msgIndexOf());
     setName(indexOf(), "indexOf");
-  }
-
-  public static <T> IntObjRelation<T[]> arrayIndexOf() {
-    return (x, y) -> x >= 0 && x < y.length;
-  }
-
-  static {
-    setMessagePattern(arrayIndexOf(), msgIndexOf()); // recycle message
-    setName(arrayIndexOf(), "arrayIndexOf");
   }
 
   /**

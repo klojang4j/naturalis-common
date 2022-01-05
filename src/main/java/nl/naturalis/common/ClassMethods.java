@@ -1,18 +1,18 @@
 package nl.naturalis.common;
 
+import nl.naturalis.common.check.Check;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.IntStream;
-import nl.naturalis.common.check.Check;
+
 import static java.lang.Character.isUpperCase;
 import static java.lang.Character.toLowerCase;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.stream.Collectors.joining;
 import static nl.naturalis.common.CollectionMethods.swapAndFreeze;
-import static nl.naturalis.common.check.CommonChecks.array;
-import static nl.naturalis.common.check.CommonChecks.keyIn;
-import static nl.naturalis.common.check.CommonChecks.yes;
+import static nl.naturalis.common.check.CommonChecks.*;
 /**
  * Methods for inspecting types.
  *
@@ -177,7 +177,7 @@ public class ClassMethods {
    * representing a primitive array. Defers to {@link #isPrimitiveArray(Class)} if the specified
    * object is a {@code Class} object.
    *
-   * @param arg The class to test
+   * @param obj The object to test
    * @return Whether or not it is a primitive array class
    */
   public static boolean isPrimitiveArray(Object obj) {
@@ -191,7 +191,7 @@ public class ClassMethods {
   /**
    * Returns whether or not the class is a primitive array class.
    *
-   * @param arg The class to test
+   * @param clazz The class to test
    * @return Whether or not it is a primitive array class
    */
   public static boolean isPrimitiveArray(Class<?> clazz) {
@@ -203,7 +203,7 @@ public class ClassMethods {
    * object representing a primitive number array. Defers to {@link #isPrimitiveNumberArray(Class)}
    * if the specified object is a {@code Class} object.
    *
-   * @param arg The class to test
+   * @param obj The object to test
    * @return Whether or not it is a primitive array class
    */
   public static boolean isPrimitiveNumberArray(Object obj) {
@@ -217,7 +217,7 @@ public class ClassMethods {
   /**
    * Returns whether or not the class represents an array of primitive numbers.
    *
-   * @param arg The class to test
+   * @param clazz The class to test
    * @return Whether or not it is a primitive array class
    */
   public static boolean isPrimitiveNumberArray(Class<?> clazz) {
@@ -345,7 +345,7 @@ public class ClassMethods {
    * Returns a prettified version of the simple class name. If the argument is an array class,
    * {@link #arrayClassSimpleName(Class)} is returned, else {@code obj.getClass().getSimpleName()}.
    *
-   * @param obj The object whose class name to return
+   * @param clazz The class whose ame to return
    * @return The class name
    */
   public static String simpleClassName(Class<?> clazz) {
@@ -396,8 +396,7 @@ public class ClassMethods {
    * @throws IllegalArgumentException If the argument is not an array
    */
   public static String arrayClassSimpleName(Object array) {
-    Check.notNull(array).is(array());
-    return array.getClass().getComponentType().getSimpleName() + "[]";
+    return Check.notNull(array).ok(a -> arrayClassSimpleName(a.getClass()));
   }
 
   /**
@@ -410,7 +409,14 @@ public class ClassMethods {
    */
   public static String arrayClassSimpleName(Class<?> arrayClass) {
     Check.notNull(arrayClass).is(array());
-    return arrayClass.getComponentType().getSimpleName() + "[]";
+    Class<?> c = arrayClass.getComponentType();
+    int i = 0;
+    for (; c.isArray(); c = c.getComponentType()) {
+      ++i;
+    }
+    StringBuilder sb = new StringBuilder(c.getSimpleName());
+    IntStream.rangeClosed(0, i).forEach(x -> sb.append("[]"));
+    return sb.toString();
   }
 
   /**

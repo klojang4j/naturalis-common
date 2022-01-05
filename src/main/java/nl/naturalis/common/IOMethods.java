@@ -1,24 +1,17 @@
 package nl.naturalis.common;
 
-import static nl.naturalis.common.check.CommonChecks.empty;
-import static nl.naturalis.common.check.CommonChecks.gt;
-import static nl.naturalis.common.check.CommonChecks.notNull;
-import static nl.naturalis.common.check.CommonChecks.yes;
+import nl.naturalis.common.check.Check;
+import nl.naturalis.common.unsafe.UnsafeByteArrayOutputStream;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import nl.naturalis.common.check.Check;
-import nl.naturalis.common.unsafe.UnsafeByteArrayOutputStream;
+
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * I/O-related methods.
@@ -27,7 +20,7 @@ import nl.naturalis.common.unsafe.UnsafeByteArrayOutputStream;
  */
 public class IOMethods {
 
-  public static final String RESOURCE_NOT_FOUND = "Resource not found: \"%s\"";
+  public static final String INVALID_PATH = "Invalid path: \"${0}\"";
 
   private IOMethods() {}
 
@@ -39,7 +32,7 @@ public class IOMethods {
     Check.notNull(clazz, "clazz");
     Check.that(path, "path").isNot(empty());
     try (InputStream in = clazz.getResourceAsStream(path)) {
-      Check.that(in).is(notNull(), RESOURCE_NOT_FOUND, path);
+      Check.that(in).is(notNull(), INVALID_PATH, path);
       return toString(in, chunkSize);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
@@ -171,7 +164,7 @@ public class IOMethods {
    * @param requester The class requesting the temp file (simple name will become part of the file
    *     name)
    * @param extension The extension to append to the generated file name
-   * @param touch Whether or not to actually create the file on the file system
+   * @param touch Whether to actually create the file on the file system
    * @return A {@code File} object for a new, empty file in the file system's temp directory
    * @throws IOException If an I/O error occurs
    */
@@ -214,7 +207,7 @@ public class IOMethods {
     }
     Files.walkFileTree(
         p,
-        new SimpleFileVisitor<Path>() {
+        new SimpleFileVisitor<>() {
           @Override
           public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
             Files.delete(dir);
