@@ -1,6 +1,7 @@
 package nl.naturalis.common.time;
 
 import nl.naturalis.common.ExceptionMethods;
+import nl.naturalis.common.IOMethods;
 import nl.naturalis.common.check.Check;
 import org.xml.sax.SAXException;
 
@@ -41,16 +42,48 @@ import static nl.naturalis.common.check.CommonChecks.deepNotEmpty;
  */
 public class FuzzyDateParser {
 
-  private static FuzzyDateParser DEFAULT;
-
   private static final Map<ParseDefaults, FuzzyDateParser> parsers = new HashMap<>();
 
+  /**
+   * Returns a {@code FuzzyDateParser} capable of parsing a wide variety of date strings. To see how
+   * it is configured, call {@link #getDefaultXmlConfig()}.
+   *
+   * @return A {@code FuzzyDateParser} capable of parsing a wide variety of date strings
+   */
   public static FuzzyDateParser getDefaultParser() {
     return parsers.computeIfAbsent(null, k -> new FuzzyDateParser());
   }
 
+  /**
+   * Returns a {@code FuzzyDateParser} capable of parsing a wide variety of date strings.To see how
+   * it is configured, call {@link #getDefaultXmlConfig()}. Its runtime behaviour can be
+   * programmatically altered using the specified {@code ParseDefaults} object.
+   *
+   * @param defaults A {@code ParseDefaults} that will override the values specified in the
+   *     &lt;ParseDefaults&gt; element of the XML configuration.
+   * @return A {@code FuzzyDateParser} capable of parsing a wide variety of date strings
+   */
   public static FuzzyDateParser getDefaultParser(ParseDefaults defaults) {
     return parsers.computeIfAbsent(defaults, FuzzyDateParser::new);
+  }
+
+  /**
+   * Returns the XML configuration used by the {@link #getDefaultParser() default parser}.
+   *
+   * @return The XML configuration used by the default parser.
+   */
+  public static String getDefaultXmlConfig() {
+    return IOMethods.toString(FuzzyDateParser.class, "FuzzyDate.xml");
+  }
+
+  /**
+   * Returns the XML schema for the XML configuration. Can be used if you want to use validating XML
+   * parsers or libraries like JAXB.
+   *
+   * @return The XML schema for the XML configuration
+   */
+  public static String getConfigXsd() {
+    return IOMethods.toString(FuzzyDateParser.class, "FuzzyDate.xsd");
   }
 
   private final List<ParseAttempt> parseAttempts;
@@ -77,12 +110,14 @@ public class FuzzyDateParser {
   }
 
   /**
-   * Creates a {@code FuzzyDateParser} from the provided input stream, supposedly created from a
-   * properties file encoding the {@code ParseAttempt} instances. See the description of the {@link
-   * #DEFAULT} {@code FuzzyDateParser} for how to encode {@code ParseAttempt} instances.
+   * Creates a {@code FuzzyDateParser} from the provided input stream, supposedly created from an
+   * XML configuration conforming to {@link #getConfigXsd() this XML schema}.
    *
    * @param is The {@code InputStream}
-   * @throws FuzzyDateException If there is an encoding error in the {@code InputStream}
+   * @throws FuzzyDateException Thrown if the XML configuration file contains semantic errors
+   * @throws ParserConfigurationException Thrown by the XML parser
+   * @throws IOException Thrown by the XML parser
+   * @throws SAXException Thrown by the XML parser
    */
   public FuzzyDateParser(InputStream is)
       throws FuzzyDateException, ParserConfigurationException, IOException, SAXException {
@@ -90,6 +125,18 @@ public class FuzzyDateParser {
     this.parseAttempts = new ConfigReader(is).getConfig();
   }
 
+  /**
+   * Creates a {@code FuzzyDateParser} from the provided input stream, supposedly created from an
+   * XML configuration conforming to {@link #getConfigXsd() this XML schema}.
+   *
+   * @param is The {@code InputStream}
+   * @param defaults A {@code ParseDefaults} that will override the values specified in the
+   *     &lt;ParseDefaults&gt; element of the XML configuration.
+   * @throws FuzzyDateException Thrown if the XML configuration file contains semantic errors
+   * @throws ParserConfigurationException Thrown by the XML parser
+   * @throws IOException Thrown by the XML parser
+   * @throws SAXException Thrown by the XML parser
+   */
   public FuzzyDateParser(InputStream is, ParseDefaults defaults)
       throws FuzzyDateException, ParserConfigurationException, IOException, SAXException {
     Check.notNull(is);

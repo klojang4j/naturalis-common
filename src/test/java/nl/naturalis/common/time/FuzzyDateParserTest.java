@@ -394,4 +394,16 @@ public class FuzzyDateParserTest {
   private static DateTimeFormatter formatter(String pattern) {
     return new DateTimeFormatterBuilder().appendPattern(pattern).toFormatter();
   }
+
+  @Test
+  public void getDefaultParser() {}
+
+  @Test
+  public void testGetDefaultParser() {}
+
+  @Test
+  public void getDefaultXmlConfig() {}
+
+  @Test
+  public void parse() {}
 }

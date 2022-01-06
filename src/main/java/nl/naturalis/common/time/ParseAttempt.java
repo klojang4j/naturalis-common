@@ -334,10 +334,10 @@ public final class ParseAttempt {
   public ParseAttempt(
       String pattern, List<TemporalQuery<TemporalAccessor>> parseInto, DateStringFilter filter) {
     this.pattern = Check.notNull(pattern, "pattern").ok();
-    this.formatter = DateTimeFormatter.ofPattern(pattern);
+    this.formatter = DateTimeFormatter.ofPattern(pattern).withResolverStyle(ResolverStyle.LENIENT);
     this.parseInto = Check.notNull(parseInto, "parseInto").ok(List::copyOf);
     this.filter = filter;
-    this.tag = getDefaultTag(pattern);
+    this.tag = pattern + " (" + formatter.getLocale() + ")";
   }
 
   /**
@@ -357,7 +357,14 @@ public final class ParseAttempt {
     this.parseInto = Check.notNull(parseInto, "parseInto").ok(List::copyOf);
     this.filter = filter;
     this.pattern = null;
-    this.tag = "" + formatter.getLocale() + ")";
+    this.tag =
+        ""
+            + formatter.getChronology()
+            + " "
+            + formatter.getResolverStyle()
+            + " ("
+            + formatter.getLocale()
+            + ")";
   }
 
   private ParseAttempt(
@@ -428,9 +435,5 @@ public final class ParseAttempt {
   @Override
   public String toString() {
     return tag;
-  }
-
-  private static String getDefaultTag(String pattern) {
-    return pattern + " (" + Locale.getDefault() + ")";
   }
 }

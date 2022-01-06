@@ -4,20 +4,21 @@
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:self="http://data.klojang.org/fuzzy-date"
            version="0.1">
-    <xs:element name="FuzzyDateConfig">
+    <xs:element name="FuzzyDate">
         <xs:complexType>
             <xs:all>
-                <xs:element name="defaults" type="self:Defaults" minOccurs="0"/>
-                <xs:element name="Instant" type="self:ParseTarget" minOccurs="0"/>
-                <xs:element name="OffsetDateTime" type="self:ParseTarget" minOccurs="0"/>
-                <xs:element name="LocalDate" type="self:ParseTarget" minOccurs="0"/>
-                <xs:element name="YearMonth" type="self:ParseTarget" minOccurs="0"/>
-                <xs:element name="Year" type="self:ParseTarget" minOccurs="0"/>
+                <xs:element name="ParseDefaults" type="self:Defaults" minOccurs="0"/>
+                <xs:element name="Instant" type="self:ParseInto" minOccurs="0"/>
+                <xs:element name="OffsetDateTime" type="self:ParseInto" minOccurs="0"/>
+                <xs:element name="LocalDateTime" type="self:ParseInto" minOccurs="0"/>
+                <xs:element name="LocalDate" type="self:ParseInto" minOccurs="0"/>
+                <xs:element name="YearMonth" type="self:ParseInto" minOccurs="0"/>
+                <xs:element name="Year" type="self:ParseInto" minOccurs="0"/>
             </xs:all>
         </xs:complexType>
     </xs:element>
 
-    <xs:complexType name="ParseTarget">
+    <xs:complexType name="ParseInto">
         <xs:all>
             <xs:element name="try" type="self:ParseAttempt" minOccurs="0" maxOccurs="unbounded"/>
         </xs:all>
@@ -26,32 +27,45 @@
     <xs:complexType name="ParseAttempt">
         <xs:simpleContent>
             <xs:extension base="xs:string">
-                <xs:attributeGroup ref="self:AttemptConfig"/>
+                <xs:attributeGroup ref="self:TryAttributes"/>
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
 
-    <xs:attributeGroup name="AttemptConfig">
+    <!-- Allow attributes on the <try> element. All optional -->
+    <xs:attributeGroup name="TryAttributes">
+        <!--
+            Whether to interpret the content of the <try> element as the fully-qualified
+            name of a public static final DateTimeFormatter field, like
+            java.time.format.DateTimeFormatter.ISO_LOCAL_DATE, or as a date/time pattern,
+            like yyyy/MM/dd. In the particular case of java.time.format.DateTimeFormatter
+            itself, the name actually need not be fully-qualified. So ISO_LOCAL_DATE would
+            also be valid with predefined="true".
+        -->
         <xs:attribute name="predefined" type="xs:boolean" default="false"/>
+        <!-- The fully-qualified name of a DateStringFilter implementation -->
+        <xs:attribute name="filter" type="xs:string"/>
+        <!-- Whether to ignore case while parsing date strings -->
         <xs:attribute name="caseSensitive" type="xs:boolean" default="false"/>
+        <!-- Sets the java.time.format.ResolverStyle of the date parser -->
         <xs:attribute name="resolverStyle" type="self:ResolverStyle" default="LENIENT"/>
-        <xs:attribute name="preprocessor" type="xs:boolean" default="false"/>
+        <!--
+            A semicolon-separated string of locales. Currently only simple locale strings
+            like en_US are supported.
+        -->
+        <xs:attribute name="locales" type="xs:string"/>
     </xs:attributeGroup>
 
     <xs:complexType name="Defaults">
         <xs:all>
-            <!-- Whether to ignore case while parsing date strings-->
+            <!-- Whether to ignore case while parsing date strings -->
             <xs:element name="caseSensitive" minOccurs="0" type="xs:boolean"/>
             <!-- Sets the java.time.format.ResolverStyle of the date parser -->
             <xs:element name="resolverStyle" minOccurs="0" type="self:ResolverStyle"/>
             <!-- A semicolon-separated string of locales -->
             <xs:element name="locales" minOccurs="0" type="xs:string"/>
-            <!--
-                The fully-qualified name of a class implementing
-                UnaryOperator<String>, which will be used to pre-process
-                the date string before it parsed.
-            -->
-            <xs:element name="preprocessor" minOccurs="0" type="xs:string"/>
+            <!-- The fully-qualified name of a DateStringFilter implementation -->
+            <xs:element name="filter" minOccurs="0" type="xs:string"/>
         </xs:all>
     </xs:complexType>
 
