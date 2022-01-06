@@ -27,6 +27,10 @@ class Utils {
     return Check.on(FuzzyDateException::new, arg);
   }
 
+  static <T> Check<T, FuzzyDateException> checkThat(T arg, String argName) {
+    return Check.on(FuzzyDateException::new, arg, argName);
+  }
+
   static List<Element> xmlGetChildElements(Element e) {
     NodeList nl = e.getChildNodes();
     List<Element> children = new ArrayList<>(nl.getLength());

@@ -1,15 +1,16 @@
 package nl.naturalis.common.time;
 
 /**
- * Thrown if an error occurs while parsing a date string or if no year could be extract from the
- * date string.
+ * Thrown if an error occurs while parsing a date string or if not even a year could be extracted
+ * from the date string. A {@code FuzzyDateException} may also be thrown while parsing the XML
+ * configuration file configuring the {@link FuzzyDateParser}.
  *
  * @author Ayco Holleman
  */
 public class FuzzyDateException extends Exception {
 
-  static final String ERR_CASE_SENSITIVTY_FIXED =
-      "Case sensitivity cannot be set for pre-built DateTimeFormatter";
+  static final String ERR_CASE_SENSITIVITY_FIXED =
+      "Case sensitivity cannot be set for predefined DateTimeFormatter";
 
   static FuzzyDateException notParsable(String dateString) {
     String fmt = "Date string \"%s\" could not be parsed using the provided ParseAttempt(s)";
@@ -46,7 +47,12 @@ public class FuzzyDateException extends Exception {
     return new FuzzyDateException(String.format(fmt, className));
   }
 
-  FuzzyDateException(String message) {
+  /**
+   * Creates a new {@code FuzzyDateException} with the specified message.
+   *
+   * @param message The message
+   */
+  public FuzzyDateException(String message) {
     super(message);
   }
 }

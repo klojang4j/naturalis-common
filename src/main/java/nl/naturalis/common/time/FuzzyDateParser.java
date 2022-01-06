@@ -14,11 +14,10 @@ import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalQuery;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import static java.time.temporal.ChronoField.YEAR;
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonChecks.deepNotEmpty;
 
 /**
  * Parses date strings into {@link FuzzyDate} instances. The minimum requirement for a valid date
@@ -44,14 +43,14 @@ public class FuzzyDateParser {
 
   private static FuzzyDateParser DEFAULT;
 
-  private static final Map<Locale, FuzzyDateParser> parsers = new HashMap<>();
+  private static final Map<ParseDefaults, FuzzyDateParser> parsers = new HashMap<>();
 
   public static FuzzyDateParser getDefaultParser() {
     return parsers.computeIfAbsent(null, k -> new FuzzyDateParser());
   }
 
-  public static FuzzyDateParser getDefaultParser(Locale defaultLocale) {
-    return parsers.computeIfAbsent(defaultLocale, FuzzyDateParser::new);
+  public static FuzzyDateParser getDefaultParser(ParseDefaults defaults) {
+    return parsers.computeIfAbsent(defaults, FuzzyDateParser::new);
   }
 
   private final List<ParseAttempt> parseAttempts;
@@ -67,10 +66,10 @@ public class FuzzyDateParser {
     }
   }
 
-  private FuzzyDateParser(Locale locale) {
+  private FuzzyDateParser(ParseDefaults defaults) {
     InputStream is = FuzzyDateParser.class.getResourceAsStream("FuzzyDate.xml");
     try {
-      this.parseAttempts = new ConfigReader(is, List.of(locale)).getConfig();
+      this.parseAttempts = new ConfigReader(is, defaults).getConfig();
     } catch (Exception e) {
       // That's a bug because we created the XML file ourselves
       throw ExceptionMethods.uncheck(e);
@@ -91,11 +90,11 @@ public class FuzzyDateParser {
     this.parseAttempts = new ConfigReader(is).getConfig();
   }
 
-  public FuzzyDateParser(InputStream is, Locale defaultLocale)
+  public FuzzyDateParser(InputStream is, ParseDefaults defaults)
       throws FuzzyDateException, ParserConfigurationException, IOException, SAXException {
     Check.notNull(is);
-    Check.notNull(defaultLocale);
-    this.parseAttempts = new ConfigReader(is, List.of(defaultLocale)).getConfig();
+    Check.notNull(defaults);
+    this.parseAttempts = new ConfigReader(is, defaults).getConfig();
   }
 
   /**
@@ -115,13 +114,13 @@ public class FuzzyDateParser {
    * @param parseAttempts The {@code ParseAttempt} instances used to parse date strings
    */
   public FuzzyDateParser(List<ParseAttempt> parseAttempts) {
-    this.parseAttempts = Check.that(parseAttempts).isNot(empty()).is(neverNull()).ok(List::copyOf);
+    this.parseAttempts = Check.that(parseAttempts).is(deepNotEmpty()).ok(List::copyOf);
   }
 
   /**
-   * Parses the provided date string using the {@code ParseSpec} instances passed in through the
-   * constructors. The {@code ParseSpec} instances are tried out sequentially, so the most granular
-   * ones should come first in the list.
+   * Parses the provided date string using the {@code ParseAttempt} instances passed in through the
+   * constructors. The {@code ParseAttempt} instances are tried out sequentially, so the most
+   * granular ones should come first in the list.
    *
    * @param dateString The string to be parsed
    * @return A {@code FuzzyDate} instance representing th parse result.

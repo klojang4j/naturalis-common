@@ -4,7 +4,10 @@ import nl.naturalis.common.Bool;
 import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.util.EnumParser;
-import org.w3c.dom.*;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -34,7 +37,7 @@ import static nl.naturalis.common.time.Utils.*;
 class ConfigReader {
 
   private static final String ERR_NOT_SUPPORTED = "Invalid or unsupported date/time type: ${arg}";
-  private static final String ERR_BAD_ELEMENT = "Element <${arg}> not allowed within <${0}>";
+  private static final String ERR_UNEXPECTED_ELEM = "Element <${arg}> not allowed within <${0}>";
   private static final String ERR_BAD_ATTR = "Illegal attribute \"${arg}\" for element <${0}>";
   private static final String ERR_BLANK_ATTR = "Attribute ${0} must not have empty value";
 
@@ -58,18 +61,21 @@ class ConfigReader {
 
   private final InputStream is;
 
-  private ResolverStyle defResolverStyle;
-  private boolean defCaseSensitive;
-  private List<Locale> defLocales;
-  private DateStringFilter defFilter;
+  private DateStringFilter defFilter = null;
+  private ResolverStyle defResolverStyle = null;
+  private Boolean defCaseSensitive = null;
+  private List<Locale> defLocales = null;
 
   ConfigReader(InputStream is) {
     this.is = is;
   }
 
-  ConfigReader(InputStream is, List<Locale> defLocales) {
+  ConfigReader(InputStream is, ParseDefaults defaults) {
     this.is = is;
-    this.defLocales = defLocales;
+    this.defResolverStyle = defaults.resolverStyle();
+    this.defCaseSensitive = defaults.caseSensitive();
+    this.defLocales = defaults.locales();
+    this.defFilter = defaults.filter();
   }
 
   List<ParseAttempt> getConfig()
@@ -78,24 +84,48 @@ class ConfigReader {
     DocumentBuilder db = dbf.newDocumentBuilder();
     Document doc = db.parse(is);
     Element root = doc.getDocumentElement();
-    Element defaults = xmlGetChildElement(root, "defaults");
-    setDefaults(defaults); // Must be called *before* processing other elements!
+    Element defaults = xmlGetChildElement(root, "ParseDefaults");
+    setDefaults(defaults); // Must be called *before* processing other elements!!
     List<ParseAttempt> attempts = new ArrayList<>();
     for (Element e : xmlGetChildElements(root)) {
-      if (!e.getTagName().equals("defaults")) {
+      if (!e.getTagName().equals("ParseDefaults")) {
         addParseAttempts(attempts, e);
       }
     }
     return attempts;
   }
 
-  private void addParseAttempts(List<ParseAttempt> attempts, Element e) throws FuzzyDateException {
-    checkThat(e.getTagName()).is(keyIn(), supported, ERR_NOT_SUPPORTED);
-    NodeList nl = e.getElementsByTagName("*");
-    for (int i = 0; i < nl.getLength(); ++i) {
-      Element tryElement = (Element) nl.item(i);
-      Check.that(tryElement.getTagName()).is(equalTo(), "try", ERR_BAD_ELEMENT, e.getTagName());
-      processTryElement(attempts, tryElement);
+  private void setDefaults(Element e) throws FuzzyDateException {
+    // The defaults passed in through the constructor (in de ParseDefaults object)
+    // take precedence over the defaults in the <ParseDefaults> element. Therefore,
+    // only set the defXXX fields if they are still null.
+    if (e == null) {
+      defResolverStyle = ifNull(defResolverStyle, ResolverStyle.LENIENT);
+      defCaseSensitive = ifNull(defCaseSensitive, false);
+      defLocales = ifNull(defLocales, List.of(Locale.getDefault()));
+    } else {
+      if (defFilter == null) {
+        defFilter = getFilter(xmlGetTextContent(e, "filter"));
+      }
+      if (defResolverStyle == null) {
+        defResolverStyle = getResolverStyle(xmlGetTextContent(e, "resolverStyle"));
+      }
+      if (defCaseSensitive == null) {
+        defCaseSensitive = Bool.from(xmlGetTextContent(e, "caseSensitive"));
+      }
+      if (defLocales == null) {
+        defLocales = getLocales(xmlGetTextContent(e, "locales"));
+      }
+    }
+  }
+
+  private void addParseAttempts(List<ParseAttempt> attempts, Element dateTimeElem)
+      throws FuzzyDateException {
+    String dateTimeClass = dateTimeElem.getTagName();
+    checkThat(dateTimeClass).is(keyIn(), supported, ERR_NOT_SUPPORTED);
+    for (Element tryElem : xmlGetChildElements(dateTimeElem)) {
+      checkThat(tryElem.getTagName()).is(equalTo(), "try", ERR_UNEXPECTED_ELEM, dateTimeClass);
+      processTryElement(attempts, tryElem);
     }
   }
 
@@ -166,26 +196,12 @@ class ConfigReader {
       } else if ("locales".equals(name)) {
         attribs.locales = getLocales(val);
       } else if ("filter".equals(name)) {
-        attribs.filter = createFilter(val);
+        attribs.filter = getFilter(val);
       } else {
         return Check.fail(FuzzyDateException::new, ERR_BAD_ATTR, name, "try");
       }
     }
     return attribs;
-  }
-
-  private void setDefaults(Element e) throws FuzzyDateException {
-    if (e == null) {
-      defResolverStyle = ResolverStyle.LENIENT;
-      defCaseSensitive = false;
-      defLocales = ifNull(defLocales, List.of(Locale.getDefault()));
-      defFilter = null;
-    } else {
-      defResolverStyle = getResolverStyle(xmlGetTextContent(e, "resolverStyle"));
-      defCaseSensitive = Bool.from(xmlGetTextContent(e, "caseSensitive"));
-      defLocales = ifNull(defLocales, getLocales(xmlGetTextContent(e, "locales")));
-      defFilter = createFilter(xmlGetTextContent(e, "filter"));
-    }
   }
 
   private static DateTimeFormatter getFormatter(String name) throws FuzzyDateException {
@@ -234,21 +250,21 @@ class ConfigReader {
     return locales;
   }
 
-  private static DateStringFilter createFilter(String className) throws FuzzyDateException {
+  private static DateStringFilter getFilter(String className) throws FuzzyDateException {
     if (isEmpty(className)) {
-      return x -> x;
+      return null;
     }
     Class<?> clazz = null;
     try {
       clazz = Class.forName(className);
     } catch (ClassNotFoundException e) {
-      return Check.fail(FuzzyDateException::new, "Class not found: \"%s\"", className);
+      return Check.fail(FuzzyDateException::new, "Class not found: \"${0}\"", className);
     }
-    Check.that(clazz, "filter").is(instanceOf(), DateStringFilter.class);
+    checkThat(clazz, "filter").is(instanceOf(), DateStringFilter.class);
     try {
       return (DateStringFilter) clazz.getDeclaredConstructor().newInstance();
     } catch (Exception e) {
-      return Check.fail(FuzzyDateException::new, "Failed to instantiate %s", className);
+      return Check.fail(FuzzyDateException::new, "Failed to instantiate ${0}", className);
     }
   }
 }

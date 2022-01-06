@@ -265,7 +265,8 @@ public class FuzzyDateParserTest {
 
   @Test
   public void test105() throws FuzzyDateException {
-    FuzzyDate date = FuzzyDateParser.getDefaultParser(Locale.US).parse("05-May-2014");
+    FuzzyDate date =
+        FuzzyDateParser.getDefaultParser(new ParseDefaults(Locale.US)).parse("05-May-2014");
     assertEquals("01", 5, date.toLocalDate().get(ChronoField.DAY_OF_MONTH));
     assertEquals("02", 5, date.toLocalDate().get(ChronoField.MONTH_OF_YEAR));
   }

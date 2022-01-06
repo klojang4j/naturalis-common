@@ -14,8 +14,8 @@ import static nl.naturalis.common.ObjectMethods.ifNotEmpty;
 /**
  * A {@code FuzzyDate} is a date of which at least the year component is set. The {@code FuzzyDate}
  * class and the other classes in this package or no general-purpose date/time utility classes.
- * Instead, they focus on extracting {@code java.time} objects from historical records with
- * inconsistently formatted dates. You obtain a {@code FuzzyDate} by calling {@link
+ * Instead, they focus on extracting {@code java.time} objects from archival data or historical
+ * records with inconsistently formatted dates. You obtain a {@code FuzzyDate} by calling {@link
  * FuzzyDateParser#parse(String)}. The instance returned by the parser is guaranteed to have at
  * least its year set. Month, day, hour, minute, second and time zone may or may not be known. If
  * the parser could not extract a year from the date string a {@link FuzzyDateException} is thrown.
@@ -28,6 +28,14 @@ import static nl.naturalis.common.ObjectMethods.ifNotEmpty;
  * SECOND_OF_MINUTE}, {@link ChronoField#NANO_OF_SECOND NANO_OF_SECOND}, {@link ZoneOffset} and
  * {@link ZoneId}. It may not be accurate when composed of more exotic date fields like {@link
  * ChronoField#DAY_OF_YEAR DAY_OF_YEAR} or {@link ChronoField#SECOND_OF_DAY SECOND_OF_DAY}.
+ *
+ * <p><b>Performance</b>. Although parsing date strings into {@link
+ * java.time.temporal.TemporalAccessor} objects is slow, that's not because of matching them against
+ * some date/time pattern, which actually is very fast. It is in what happens next, the assembly of
+ * a {@code TemporalAccessor} object, that the cost is incurred. Therefore you shouldn't probably
+ * worry about the number of {@link ParseAttempt} instances you deploy to beat the date strings into
+ * submission. Only the {@code ParseAttempt} that succeeds will go on to create the {@code
+ * TemporalAccessor} and wrap it into a {@code FuzzyDate}.
  *
  * <p>Example:
  *

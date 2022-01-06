@@ -1,6 +1,7 @@
 package nl.naturalis.common.check;
 
 import nl.naturalis.common.NumberMethods;
+import nl.naturalis.common.StringMethods;
 import nl.naturalis.common.function.*;
 
 import java.util.function.*;
@@ -8,6 +9,7 @@ import java.util.stream.IntStream;
 
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
 import static nl.naturalis.common.check.CommonChecks.CHECK_NAMES;
+import static nl.naturalis.common.check.CommonChecks.eq;
 import static nl.naturalis.common.check.CommonGetters.formatProperty;
 import static nl.naturalis.common.check.Messages.createMessage;
 
@@ -423,11 +425,11 @@ public abstract class Check<T, E extends Exception> {
    * @param <U> The type of the object that would have been returned if it had passed the checks
    * @param msg The message
    * @param msgArgs The message argument
-   * @return Nothing, but allows {@code fail} to be used as the expresion in a {@code return}
+   * @return Nothing, but allows {@code fail} to be used as the expression in a {@code return}
    *     statement
    */
   public static <U> U fail(String msg, Object... msgArgs) {
-    throw DEF_EXC_FACTORY.apply(String.format(msg, msgArgs));
+    return fail(DEF_EXC_FACTORY, msg, msgArgs);
   }
 
   /**
@@ -436,12 +438,12 @@ public abstract class Check<T, E extends Exception> {
    * @param <U> The type of the object that would have been returned if it had passed the checks
    * @param <X> The type of the exception
    * @param excFactory The exception supplier
-   * @return Nothing, but allows {@code fail} to be used as the expresion in a {@code return}
+   * @return Nothing, but allows {@code fail} to be used as the expression in a {@code return}
    *     statement
    * @throws X The exception that is thrown
    */
   public static <U, X extends Exception> U fail(Function<String, X> excFactory) throws X {
-    throw excFactory.apply("");
+    return fail(excFactory, StringMethods.EMPTY);
   }
 
   /**
@@ -452,13 +454,13 @@ public abstract class Check<T, E extends Exception> {
    * @param <X> The type of the exception
    * @param msg The message
    * @param msgArgs The message argument
-   * @return Nothing, but allows {@code fail} to be used as the expresion in a {@code return}
+   * @return Nothing, but allows {@code fail} to be used as the expression in a {@code return}
    *     statement
    * @throws X The exception that is thrown
    */
   public static <U, X extends Exception> U fail(
       Function<String, X> excFactory, String msg, Object... msgArgs) throws X {
-    throw excFactory.apply(String.format(msg, msgArgs));
+    return Check.on(excFactory, 1).is(eq(), 0, msg, msgArgs).ok(i -> (U) null);
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////

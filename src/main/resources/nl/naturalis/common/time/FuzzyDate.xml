@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <FuzzyDate>
-    <defaults>
+    <ParseDefaults>
         <caseSensitive>false</caseSensitive>
         <resolverStyle>LENIENT</resolverStyle>
         <locales>en_US</locales>
         <filter></filter>
-    </defaults>
+    </ParseDefaults>
     <Instant>
         <try predefined="true">ISO_INSTANT</try>
     </Instant>
