@@ -11,7 +11,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static nl.naturalis.common.ObjectMethods.e2n;
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonChecks.blank;
+import static nl.naturalis.common.check.CommonChecks.lt;
 
 class Utils {
 
@@ -31,6 +32,10 @@ class Utils {
     return Check.on(FuzzyDateException::new, arg, argName);
   }
 
+  static <T> T fail(String msg, Object... msgArgs) throws FuzzyDateException {
+    return Check.fail(FuzzyDateException::new, msg, msgArgs);
+  }
+
   static List<Element> xmlGetChildElements(Element e) {
     NodeList nl = e.getChildNodes();
     List<Element> children = new ArrayList<>(nl.getLength());
@@ -48,24 +53,13 @@ class Utils {
             .ok(String::strip);
   }
 
-  static String xmlGetRequiredTextContent(Element e, String childTagName) throws FuzzyDateException {
-    return checkThat(xmlGetTextContent(e, childTagName))
-            .is(notNull(), ERR_BLANK_CHILD, childTagName, e.getTagName())
-            .ok();
-  }
-
-  static String xmlGetTextContent(Element e, String childTagName) {
+   static String xmlGetTextContent(Element e, String childTagName) {
     NodeList nl = e.getElementsByTagName(childTagName);
     Check.that(nl).has(NodeList::getLength, lt(), 2, ERR_OCCURRENCE, childTagName, e.getTagName());
     if (nl.getLength() == 0) {
       return null;
     }
-    String s = ((Element) nl.item(0)).getTextContent().strip();
-    return s.isEmpty() ? null : s;
-  }
-
-  static String getAttr(Element e, String name) {
-    return e2n(e.getAttribute(name));
+    return e2n(nl.item(0).getTextContent().strip());
   }
 
   static Element xmlGetChildElement(Element e, String childTagName) {
@@ -79,6 +73,6 @@ class Utils {
     if (m.matches()) {
       return new Locale.Builder().setLanguage(m.group(1)).setRegion(m.group(2)).build();
     }
-    return Check.fail(FuzzyDateException::new, ERR_BAD_LOCALE, s, LOCALE_PATTERN);
+    return fail(ERR_BAD_LOCALE, s, LOCALE_PATTERN);
   }
 }

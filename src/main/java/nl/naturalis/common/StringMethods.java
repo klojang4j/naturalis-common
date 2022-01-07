@@ -1,16 +1,17 @@
 package nl.naturalis.common;
 
-import java.util.*;
+import nl.naturalis.common.check.Check;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.ArrayMethods.EMPTY_STRING_ARRAY;
-import static nl.naturalis.common.ArrayMethods.END_INDEX;
-import static nl.naturalis.common.ArrayMethods.START_INDEX;
-import static nl.naturalis.common.ObjectMethods.ifNotNull;
-import static nl.naturalis.common.ObjectMethods.ifNull;
-import static nl.naturalis.common.ObjectMethods.ifTrue;
+
+import static nl.naturalis.common.ArrayMethods.*;
+import static nl.naturalis.common.ObjectMethods.*;
 import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.CommonChecks.*;
 
@@ -783,7 +784,7 @@ public final class StringMethods {
    * @param prefixes The prefixes to remove
    */
   public static String lchop(Object subject, boolean ignoreCase, String... prefixes) {
-    Check.that(prefixes, "prefixes").is(neverNull());
+    Check.that(prefixes, "prefixes").is(deepNotNull());
     if (subject == null) {
       return EMPTY;
     }
@@ -1137,7 +1138,7 @@ public final class StringMethods {
    * @param suffixes
    */
   public static String rchop(Object subject, boolean ignoreCase, String... suffixes) {
-    Check.that(suffixes, "suffixes").is(neverNull());
+    Check.that(suffixes, "suffixes").is(deepNotNull());
     if (subject == null) {
       return EMPTY;
     }

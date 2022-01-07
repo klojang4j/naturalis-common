@@ -81,7 +81,7 @@ public final class PathWalker {
    * @param paths
    */
   public PathWalker(Path... paths) {
-    Check.that(paths, "paths").isNot(empty()).is(neverNull());
+    Check.that(paths, "paths").isNot(empty()).is(deepNotNull());
     this.paths = Arrays.copyOf(paths, paths.length);
     this.dea = RETURN_NULL;
     this.kds = null;
@@ -94,7 +94,7 @@ public final class PathWalker {
    * @param paths
    */
   public PathWalker(String... paths) {
-    Check.that(paths, "paths").isNot(empty()).is(neverNull());
+    Check.that(paths, "paths").isNot(empty()).is(deepNotNull());
     this.paths = Arrays.stream(paths).map(Path::new).toArray(Path[]::new);
     this.dea = RETURN_NULL;
     this.kds = null;
@@ -136,7 +136,7 @@ public final class PathWalker {
    */
   public PathWalker(
       List<Path> paths, DeadEndAction deadEndAction, Function<Path, Object> mapKeyDeserializer) {
-    Check.that(paths, "paths").isNot(empty()).is(neverNull());
+    Check.that(paths, "paths").isNot(empty()).is(deepNotNull());
     this.paths = paths.toArray(Path[]::new);
     this.dea = deadEndAction;
     this.kds = mapKeyDeserializer;

@@ -1,17 +1,16 @@
 package nl.naturalis.common.invoke;
 
-import static nl.naturalis.common.check.CommonChecks.instanceOf;
-import static nl.naturalis.common.check.CommonChecks.keyIn;
-import static nl.naturalis.common.check.CommonChecks.neverNull;
-import static nl.naturalis.common.invoke.InvokeException.typeMismatch;
-import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
+import nl.naturalis.common.ClassMethods;
+import nl.naturalis.common.ExceptionMethods;
+import nl.naturalis.common.check.Check;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import nl.naturalis.common.ClassMethods;
-import nl.naturalis.common.ExceptionMethods;
-import nl.naturalis.common.check.Check;
+
+import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.invoke.InvokeException.typeMismatch;
+import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 
 /**
  * Reads properties from a predetermined type of JavaBean. This class uses the {@code
@@ -81,7 +80,7 @@ public class BeanReader<T> {
   public BeanReader(
       Class<? super T> beanClass, boolean strictNaming, boolean exclude, String... properties) {
     this.beanClass = Check.notNull(beanClass, "beanClass").ok();
-    Check.that(properties, "properties").is(neverNull());
+    Check.that(properties, "properties").is(deepNotNull());
     if (properties == null || properties.length == 0) {
       this.getters = GetterFactory.INSTANCE.getGetters(beanClass, strictNaming);
     } else {

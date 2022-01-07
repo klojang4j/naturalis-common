@@ -1,7 +1,6 @@
 package nl.naturalis.common.time;
 
 import nl.naturalis.common.Bool;
-import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.util.EnumParser;
 import org.w3c.dom.Attr;
@@ -28,10 +27,9 @@ import java.util.Map;
 
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
-import static nl.naturalis.common.ObjectMethods.ifNull;
-import static nl.naturalis.common.ObjectMethods.isEmpty;
+import static nl.naturalis.common.ObjectMethods.*;
 import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.time.FuzzyDateException.cannotCreateFormatter;
+import static nl.naturalis.common.time.FuzzyDateException.ERR_CASE_SENSITIVITY_FIXED;
 import static nl.naturalis.common.time.Utils.*;
 
 class ConfigReader {
@@ -85,7 +83,7 @@ class ConfigReader {
     Document doc = db.parse(is);
     Element root = doc.getDocumentElement();
     Element defaults = xmlGetChildElement(root, "ParseDefaults");
-    setDefaults(defaults); // Must be called *before* processing other elements!!
+    setDefaults(defaults);
     List<ParseAttempt> attempts = new ArrayList<>();
     for (Element e : xmlGetChildElements(root)) {
       if (!e.getTagName().equals("ParseDefaults")) {
@@ -99,11 +97,7 @@ class ConfigReader {
     // The defaults passed in through the constructor (in de ParseDefaults object)
     // take precedence over the defaults in the <ParseDefaults> element. Therefore,
     // only set the defXXX fields if they are still null.
-    if (e == null) {
-      defResolverStyle = ifNull(defResolverStyle, ResolverStyle.LENIENT);
-      defCaseSensitive = ifNull(defCaseSensitive, false);
-      defLocales = ifNull(defLocales, List.of(Locale.getDefault()));
-    } else {
+    if (e != null) {
       if (defFilter == null) {
         defFilter = getFilter(xmlGetTextContent(e, "filter"));
       }
@@ -150,7 +144,7 @@ class ConfigReader {
     String target = tryElement.getParentNode().getNodeName();
     var parseInto = supported.get(target);
     String content = xmlGetRequiredTextContent(tryElement);
-    TryAttribs attribs = processAttributes(tryElement.getAttributes());
+    TryAttribs attribs = processAttributes(tryElement);
     if (attribs.predefined) {
       DateTimeFormatter formatter = getFormatter(content);
       for (Locale locale : attribs.locales) {
@@ -178,17 +172,18 @@ class ConfigReader {
     }
   }
 
-  private TryAttribs processAttributes(NamedNodeMap attrs) throws FuzzyDateException {
+  private TryAttribs processAttributes(Element tryElement) throws FuzzyDateException {
+    NamedNodeMap attrs = tryElement.getAttributes();
     TryAttribs attribs = new TryAttribs();
     for (int j = 0; j < attrs.getLength(); ++j) {
       Attr attr = (Attr) attrs.item(j);
       String name = attr.getNodeName();
-      String val = attr.getNodeValue();
+      String val = e2n(attr.getNodeValue().strip());
       Check.that(val).isNot(blank(), ERR_BLANK_ATTR, name);
-      if ("tag".equals(name)) {
-        attribs.tag = val;
-      } else if ("predefined".equals(name)) {
-        attribs.predefined = Bool.from(val);
+      if ("predefined".equals(name)) {
+        if (attribs.predefined = Bool.from(val)) {
+          checkThat(tryElement.hasAttribute("caseSensitive")).is(no(), ERR_CASE_SENSITIVITY_FIXED);
+        }
       } else if ("resolverStyle".equals(name)) {
         attribs.resolverStyle = getResolverStyle(val);
       } else if ("caseSensitive".equals(name)) {
@@ -197,8 +192,10 @@ class ConfigReader {
         attribs.locales = getLocales(val);
       } else if ("filter".equals(name)) {
         attribs.filter = getFilter(val);
+      } else if ("tag".equals(name)) {
+        attribs.tag = val;
       } else {
-        return Check.fail(FuzzyDateException::new, ERR_BAD_ATTR, name, "try");
+        return fail(ERR_BAD_ATTR, name, "try");
       }
     }
     return attribs;
@@ -208,39 +205,46 @@ class ConfigReader {
     Field field;
     try {
       field = DateTimeFormatter.class.getDeclaredField(name);
-    } catch (NoSuchFieldException exc0) {
-      int i = name.lastIndexOf('.');
-      try {
-        Class<?> clazz = Class.forName(name.substring(0, i));
-        field = clazz.getDeclaredField(name.substring(i + 1));
-        int m = field.getModifiers();
-        if (!isStatic(m) || !isPublic(m)) {
-          throw cannotCreateFormatter(name, "not a public static field");
-        }
-      } catch (Exception exc1) {
-        throw cannotCreateFormatter(name, exc1.toString());
-      }
+      return (DateTimeFormatter) field.get(null);
+    } catch (IllegalAccessException e) {
+      return fail(e.toString());
+    } catch (NoSuchFieldException e) {
     }
-    if (!ClassMethods.isA(field.getType(), DateTimeFormatter.class)) {
-      throw cannotCreateFormatter(name, "not a DateTimeFormatter instance");
+    int i = name.lastIndexOf('.');
+    String className = name.substring(0, i);
+    String fieldName = name.substring(i + 1);
+    Class<?> clazz = null;
+    try {
+      clazz = Class.forName(name.substring(0, i));
+    } catch (ClassNotFoundException e) {
+      return fail("Class not found: ${0}", className);
     }
     try {
+      field = clazz.getDeclaredField(fieldName);
+    } catch (NoSuchFieldException e) {
+      return fail("No such field: ${0}", name);
+    }
+    checkThat(field).is(instanceOf(), DateTimeFormatter.class, "Not a DateTimeFormatter: ${arg}");
+    int m = field.getModifiers();
+    checkThat(isPublic(m)).is(yes(), "Not a public field: ${0}", name);
+    checkThat(isStatic(m)).is(yes(), "Not a static field: ${0}", name);
+    try {
       return (DateTimeFormatter) field.get(null);
-    } catch (IllegalAccessException exc2) {
-      throw cannotCreateFormatter(name, exc2.toString());
+    } catch (IllegalAccessException e) {
+      return fail(e.toString());
     }
   }
 
   private static ResolverStyle getResolverStyle(String s) {
-    if (isEmpty(s)) {
-      return ResolverStyle.LENIENT;
+    if (s == null) {
+      return null;
     }
     return resolverStyleParser.parse(s);
   }
 
   private static List<Locale> getLocales(String s) throws FuzzyDateException {
-    if (isEmpty(s)) {
-      return List.of(Locale.getDefault());
+    if (s == null) {
+      return null;
     }
     String[] localeStrings = s.split(";");
     List<Locale> locales = new ArrayList<>(localeStrings.length);
@@ -254,7 +258,7 @@ class ConfigReader {
     if (isEmpty(className)) {
       return null;
     }
-    Class<?> clazz = null;
+    Class<?> clazz;
     try {
       clazz = Class.forName(className);
     } catch (ClassNotFoundException e) {
@@ -264,7 +268,7 @@ class ConfigReader {
     try {
       return (DateStringFilter) clazz.getDeclaredConstructor().newInstance();
     } catch (Exception e) {
-      return Check.fail(FuzzyDateException::new, "Failed to instantiate ${0}", className);
+      return fail("Failed to instantiate ${0}", className);
     }
   }
 }

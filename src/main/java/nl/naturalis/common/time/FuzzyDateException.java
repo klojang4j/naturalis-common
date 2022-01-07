@@ -13,23 +13,13 @@ public class FuzzyDateException extends Exception {
       "Case sensitivity cannot be set for predefined DateTimeFormatter";
 
   static FuzzyDateException notParsable(String dateString) {
-    String fmt = "Date string \"%s\" could not be parsed using the provided ParseAttempt(s)";
+    String fmt = "\"%s\" not parsable using the provided ParseAttempt(s)";
     return new FuzzyDateException(String.format(fmt, dateString));
   }
 
   static FuzzyDateException missingYear(String dateString) {
-    String fmt = "Failed to extract year from date string \"%s\"";
+    String fmt = "Failed to extract year from \"%s\"";
     return new FuzzyDateException(String.format(fmt, dateString));
-  }
-
-  static FuzzyDateException cannotCreateFormatter(String name) {
-    String fmt = "Cannot create DateTimeFormatter for \"%s\"";
-    return new FuzzyDateException(String.format(fmt, name));
-  }
-
-  static FuzzyDateException cannotCreateFormatter(String name, String reason) {
-    String fmt = "Cannot create DateTimeFormatter for \"%s\": %s";
-    return new FuzzyDateException(String.format(fmt, name, reason));
   }
 
   static FuzzyDateException cannotCreateFilter(String name) {

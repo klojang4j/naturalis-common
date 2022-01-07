@@ -1,26 +1,21 @@
 package nl.naturalis.common.util;
 
-import static nl.naturalis.common.ArrayMethods.inArray;
-import static nl.naturalis.common.StringMethods.endsWith;
-import static nl.naturalis.common.check.CommonChecks.directory;
-import static nl.naturalis.common.check.CommonChecks.neverNull;
-import static nl.naturalis.common.check.CommonChecks.yes;
+import nl.naturalis.common.ExceptionMethods;
+import nl.naturalis.common.IOMethods;
+import nl.naturalis.common.StringMethods;
+import nl.naturalis.common.check.Check;
 
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import nl.naturalis.common.ExceptionMethods;
-import nl.naturalis.common.IOMethods;
-import nl.naturalis.common.StringMethods;
-import nl.naturalis.common.check.Check;
+
+import static nl.naturalis.common.ArrayMethods.inArray;
+import static nl.naturalis.common.StringMethods.endsWith;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * Global search-and-replace utility that can be used stand-alone (it has a main method) or from
@@ -82,7 +77,7 @@ public class SearchReplace {
     Check.notNull(rootDir, "rootDir");
     Check.notNull(search, "regexSearch");
     Check.notNull(replace, "replace");
-    Check.that(fileExts).is(neverNull(), "At least one file extension required");
+    Check.that(fileExts).is(deepNotNull(), "At least one file extension required");
     Path root = Path.of(rootDir);
     Check.that(root)
         .has(Path::isAbsolute, yes(), "rootDir must be absolute path")

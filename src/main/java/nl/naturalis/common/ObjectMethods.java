@@ -1,19 +1,19 @@
 package nl.naturalis.common;
 
-import java.lang.reflect.Array;
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.check.CommonChecks;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.Relation;
 import nl.naturalis.common.function.ThrowingSupplier;
+
+import java.lang.reflect.Array;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
+
 import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
-import static nl.naturalis.common.check.CommonChecks.empty;
-import static nl.naturalis.common.check.CommonChecks.inArray;
-import static nl.naturalis.common.check.CommonChecks.notNull;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * General methods applicable to objects of any type.
@@ -233,9 +233,8 @@ public class ObjectMethods {
     return !isEmpty(arg);
   }
   /**
-   * Verifies that the argument is neither null nor empty. This method is (and can be) used for
-   * broad-stroke methods like {@link #ifNotEmpty(Object, Object)} and {@link
-   * CommonChecks#notEmpty()}. Returns {@code true} if <i>any</i> of the following applies:
+   * Verifies that the argument is neither null nor empty. Returns {@code true} if <i>any</i> of the
+   * following applies:
    *
    * <p>
    *
@@ -318,7 +317,7 @@ public class ObjectMethods {
    * @param arg The object to be tested
    * @return Whether or not it is not null and does not contain any null values
    */
-  public static boolean isNoneNull(Object arg) {
+  public static boolean isDeepNotNull(Object arg) {
     if (arg == null) {
       return false;
     } else if (arg instanceof Object[]) {

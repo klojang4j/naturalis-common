@@ -7,18 +7,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.ResolverStyle;
 import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalQuery;
 import java.util.List;
-import java.util.Locale;
 
 import static java.time.format.DateTimeFormatter.*;
-import static nl.naturalis.common.check.CommonChecks.neverNull;
-import static nl.naturalis.common.check.CommonChecks.notNull;
-import static nl.naturalis.common.time.FuzzyDateException.ERR_CASE_SENSITIVITY_FIXED;
-import static nl.naturalis.common.time.Utils.checkThat;
+import static java.time.format.ResolverStyle.LENIENT;
+import static nl.naturalis.common.check.CommonChecks.deepNotNull;
 
 /**
  * A {@code ParseAttempt} specifies how to parse a date string. The following can be specified when
@@ -33,7 +28,7 @@ import static nl.naturalis.common.time.Utils.checkThat;
  *       LocalDate::from}. <i>Optional.</i> Ordinarily you would specify them in descending order of
  *       granularity, but that is not required. Unless you are dealing with an exotic date/time
  *       pattern it is recommended that you provide at least one {@code TemporalQuery} object.
- *   <li>One or more {@link java.util.Locale locale}. <i>Optional.</i> Note though that if you do
+ *   <li>One or more {@link java.util.Locale locales}. <i>Optional.</i> Note though that if you do
  *       not specify a {@code Locale} you make yourself dependent on the host operating system's
  *       locale settings.
  *   <li>A {@link DateStringFilter} that validates and/or transforms the date string before it is
@@ -44,13 +39,10 @@ import static nl.naturalis.common.time.Utils.checkThat;
  *       not-parsable by this or any subsequent {@code ParseAttempt}.
  * </ol>
  *
- * In addition, you can also optionally specify a "tag" for the {@code ParseAttempt}. When employing
- * a large army of {@code ParseAttempt} instances to get your date strings parsed, this will make it
- * more easy to recognize the {@code ParseAttempt} that succeeded in parsing the date string. See
- * {@link FuzzyDate#getParseAttempt()}. If no tag is provided through the constructor or the {@link
- * Builder}, it is auto-generated. The auto-generated tag will probably serve its purpose if the
- * {@code ParseAttempt} is based on a date/time pattern string, but most likely not if the {@code
- * ParseAttempt} is based on a {@code DateTimeFormatter}. See {@link FuzzyDate#getParseAttempt()}.
+ * In addition, you can also optionally specify a "tag" for the {@code ParseAttempt}. When deploying
+ * a large amount of {@code ParseAttempt} instances to get your date strings parsed, this might make
+ * it more easy to recognize the {@code ParseAttempt} that succeeded in parsing the date string. See
+ * {@link FuzzyDate#getParseAttempt()}.
  */
 public final class ParseAttempt {
 
@@ -100,8 +92,8 @@ public final class ParseAttempt {
    * @return A {@code Builder} instance that give you fine-grained control over the configuration of
    *     the {@code ParseAttempt}
    */
-  public static Builder configure(String pattern) {
-    return new Builder(pattern);
+  public static AttemptBuilder configure(String pattern) {
+    return new AttemptBuilder(pattern);
   }
 
   /**
@@ -112,166 +104,8 @@ public final class ParseAttempt {
    * @return A {@code Builder} instance that give you fine-grained control over the configuration of
    *     the {@code ParseAttempt}
    */
-  public static Builder configure(DateTimeFormatter formatter) {
-    return new Builder(formatter);
-  }
-
-  /** A builder class for {@code ParseAttempt} instances. */
-  public static class Builder {
-    private final String pattern;
-    private final DateTimeFormatter formatter;
-
-    private String tag;
-    private Locale locale = Locale.getDefault();
-    private boolean caseSensitive;
-    private ResolverStyle resolverStyle = ResolverStyle.LENIENT;
-    private List<TemporalQuery<TemporalAccessor>> parseInto = List.of();
-    private DateStringFilter filter;
-
-    private Builder(String pattern) {
-      this.pattern = pattern;
-      this.formatter = null;
-    }
-
-    private Builder(DateTimeFormatter formatter) {
-      this.pattern = null;
-      this.formatter = formatter;
-    }
-
-    /**
-     * @param tag An arbitrary string enabling you to recognize this {@code ParseAttempt} when
-     *     returned from {@link FuzzyDate#getParseAttempt()}.
-     * @return This {@code Builder}
-     */
-    public Builder withTag(String tag) {
-      this.tag = Check.notNull(tag).ok();
-      return this;
-    }
-
-    /**
-     * The {@code Locale} to use when parsing date strings. Important when parsing
-     * language-sensitive date formats (e.g. {@code yyyy-MMMM-dd}).
-     *
-     * @param locale The {@code Locale}
-     * @return This {@code Builder}
-     */
-    public Builder withLocale(Locale locale) {
-      this.locale = Check.notNull(locale).ok();
-      return this;
-    }
-
-    /**
-     * Enables case-sensitive parsing. This method must not be called when building a {@code
-     * ParseAttempt} from a predefined {@link DateTimeFormatter} instance.
-     *
-     * @return This {@code Builder}
-     * @throws FuzzyDateException If the {@code Builder} was created with a {@code
-     *     DateTimeFormatter} instance
-     */
-    public Builder caseSensitive() throws FuzzyDateException {
-      return caseSensitive(true);
-    }
-
-    /**
-     * Enables or disables case-sensitive parsing. This method must not be called when building a
-     * {@code ParseAttempt} from a predefined {@link DateTimeFormatter} instance.
-     *
-     * @param cs Whether to parse in a case-senitive manner
-     * @return This {@code Builder}
-     * @throws FuzzyDateException If the {@code Builder} was created with a {@code
-     *     DateTimeFormatter} instance
-     */
-    public Builder caseSensitive(boolean cs) throws FuzzyDateException {
-      checkThat(pattern).is(notNull(), ERR_CASE_SENSITIVITY_FIXED);
-      this.caseSensitive = cs;
-      return this;
-    }
-
-    /**
-     * Sets the {@link ResolverStyle} of the parser. By default parsing is done in a {@link
-     * ResolverStyle#LENIENT LENIET} manner.
-     *
-     * @param resolverStyle The {@code ResolverStyle}
-     * @return This {@code Builder}
-     */
-    public Builder withResolverStyle(ResolverStyle resolverStyle) {
-      this.resolverStyle = Check.notNull(resolverStyle).ok();
-      return this;
-    }
-
-    /***
-     * Species the desired target date/time type. This is usually done by means of a method reference like
-     * {@link LocalDate#from(TemporalAccessor) LocalDate::from}.
-     *
-     * @param parseInto The desired target date/time type
-     * @return This {@code Builder}
-     */
-    public Builder parseInto(TemporalQuery<TemporalAccessor> parseInto) {
-      this.parseInto = Check.notNull(parseInto).ok(List::of);
-      return this;
-    }
-
-    /**
-     * Specifies a list of target date/time type alternatives. These will be passed on to {@link
-     * DateTimeFormatter#parseBest(CharSequence, TemporalQuery[])}.
-     *
-     * @param parseInto A list of target date/time type alternatives
-     * @return This {@code Builder}
-     */
-    public Builder parseInto(List<TemporalQuery<TemporalAccessor>> parseInto) {
-      this.parseInto = Check.that(parseInto).is(neverNull()).ok();
-      return this;
-    }
-
-    /**
-     * Specifies a {@link DateStringFilter} that will validate and/or transform in the input string
-     * before it is parsed.
-     *
-     * @param filter A {@link DateStringFilter} that will validate and/or transform in the input
-     *     string
-     * @return This {@code Builder}
-     */
-    public Builder withFilter(DateStringFilter filter) {
-      this.filter = filter;
-      return this;
-    }
-
-    /**
-     * Returns a fully-configured {@link ParseAttempt}.
-     *
-     * @return A fully-configured {@link ParseAttempt}.
-     */
-    public ParseAttempt freeze() {
-      return pattern == null ? buildFromFormatter() : buildFromPattern();
-    }
-
-    /**
-     * Instantiates the {@link ParseAttempt} and adds it to the specified {@code List}, which can
-     * then be used to {@link FuzzyDateParser#FuzzyDateParser(List) construct} a {@link
-     * FuzzyDateParser}.
-     *
-     * @param parseAttempts The {@code List} to which to add the {@code ParseAttempt}.
-     */
-    public void addTo(List<ParseAttempt> parseAttempts) {
-      parseAttempts.add(freeze());
-    }
-
-    private ParseAttempt buildFromPattern() {
-      DateTimeFormatterBuilder dtfb = new DateTimeFormatterBuilder().appendPattern(pattern);
-      if (caseSensitive) {
-        dtfb.parseCaseInsensitive();
-      }
-      return buildFromFormatter(dtfb.toFormatter());
-    }
-
-    private ParseAttempt buildFromFormatter() {
-      return buildFromFormatter(formatter);
-    }
-
-    private ParseAttempt buildFromFormatter(DateTimeFormatter formatter) {
-      formatter = formatter.withLocale(locale).withResolverStyle(resolverStyle);
-      return new ParseAttempt(tag, pattern, formatter, parseInto, filter);
-    }
+  public static AttemptBuilder configure(DateTimeFormatter formatter) {
+    return new AttemptBuilder(formatter);
   }
 
   final String tag;
@@ -334,8 +168,8 @@ public final class ParseAttempt {
   public ParseAttempt(
       String pattern, List<TemporalQuery<TemporalAccessor>> parseInto, DateStringFilter filter) {
     this.pattern = Check.notNull(pattern, "pattern").ok();
-    this.formatter = DateTimeFormatter.ofPattern(pattern).withResolverStyle(ResolverStyle.LENIENT);
-    this.parseInto = Check.notNull(parseInto, "parseInto").ok(List::copyOf);
+    this.formatter = DateTimeFormatter.ofPattern(pattern).withResolverStyle(LENIENT);
+    this.parseInto = Check.that(parseInto, "parseInto").is(deepNotNull()).ok(List::copyOf);
     this.filter = filter;
     this.tag = pattern + " (" + formatter.getLocale() + ")";
   }
@@ -353,21 +187,14 @@ public final class ParseAttempt {
       DateTimeFormatter formatter,
       List<TemporalQuery<TemporalAccessor>> parseInto,
       DateStringFilter filter) {
-    this.formatter = Check.notNull(formatter, "formatter").ok();
-    this.parseInto = Check.notNull(parseInto, "parseInto").ok(List::copyOf);
-    this.filter = filter;
     this.pattern = null;
-    this.tag =
-        ""
-            + formatter.getChronology()
-            + " "
-            + formatter.getResolverStyle()
-            + " ("
-            + formatter.getLocale()
-            + ")";
+    this.formatter = Check.notNull(formatter, "formatter").ok();
+    this.parseInto = Check.that(parseInto, "parseInto").is(deepNotNull()).ok(List::copyOf);
+    this.filter = filter;
+    this.tag = null;
   }
 
-  private ParseAttempt(
+  ParseAttempt(
       String tag,
       String pattern,
       DateTimeFormatter formatter,
@@ -397,7 +224,7 @@ public final class ParseAttempt {
    * ParseAttempt} and the {@link FuzzyDateParser} will skip to the next {@code ParseAttempt}, if
    * any.
    *
-   * @return
+   * @return The filter used to validate and/or transform the input string
    */
   public DateStringFilter getFilter() {
     return filter;

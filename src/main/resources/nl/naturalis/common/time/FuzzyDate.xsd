@@ -35,23 +35,29 @@
     <!-- Allow attributes on the <try> element. All optional -->
     <xs:attributeGroup name="TryAttributes">
         <!--
-            Whether to interpret the content of the <try> element as the fully-qualified
-            name of a public static final DateTimeFormatter field, like
-            java.time.format.DateTimeFormatter.ISO_LOCAL_DATE, or as a date/time pattern,
-            like yyyy/MM/dd. In the particular case of java.time.format.DateTimeFormatter
-            itself, the name actually need not be fully-qualified. So ISO_LOCAL_DATE would
-            also be valid with predefined="true".
-        -->
+            Whether the <try> element's content is the name of a public static
+            final DateTimeFormatter field (true) or a date/time pattern string
+            (false). If you want to reference the public static final
+            DateTimeFormatter fields of the DateTimeFormatter itself (e.g.
+            ISO_LOCAL_DATE), the name of the field itself is enough.
+            DateTimeFormatter constants defined elsewhere must be specified
+            using their fully-qualified name (e.g.
+            java.time.format.DateTimeFormatter.ISO_LOCAL_DATE).
+         -->
         <xs:attribute name="predefined" type="xs:boolean" default="false"/>
         <!-- The fully-qualified name of a DateStringFilter implementation -->
         <xs:attribute name="filter" type="xs:string"/>
-        <!-- Whether to ignore case while parsing date strings -->
-        <xs:attribute name="caseSensitive" type="xs:boolean" default="false"/>
-        <!-- Sets the java.time.format.ResolverStyle of the date parser -->
-        <xs:attribute name="resolverStyle" type="self:ResolverStyle" default="LENIENT"/>
         <!--
-            A semicolon-separated string of locales. Currently only simple locale strings
-            like en_US are supported.
+            Whether to ignore case while parsing date strings. This attribute
+            must be  absent when predefined="true", because case sensitivity is
+            fixed for predefined DateTimeFormatter instances.
+        -->
+        <xs:attribute name="caseSensitive" type="xs:boolean"/>
+        <!-- Sets the java.time.format.ResolverStyle of the date parser -->
+        <xs:attribute name="resolverStyle" type="self:ResolverStyle"/>
+        <!--
+            A semicolon-separated string of locales. Only simply formatted locale
+            strings like "en_US" are supported.
         -->
         <xs:attribute name="locales" type="xs:string"/>
     </xs:attributeGroup>

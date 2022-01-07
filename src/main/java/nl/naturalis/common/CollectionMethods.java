@@ -1,5 +1,9 @@
 package nl.naturalis.common;
 
+import nl.naturalis.common.check.Check;
+import nl.naturalis.common.function.ThrowingFunction;
+import nl.naturalis.common.unsafe.UnsafeList;
+
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Array;
@@ -10,18 +14,12 @@ import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import nl.naturalis.common.check.Check;
-import nl.naturalis.common.function.ThrowingFunction;
-import nl.naturalis.common.unsafe.UnsafeList;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toUnmodifiableList;
-import static java.util.stream.Collectors.toUnmodifiableSet;
+
+import static java.util.stream.Collectors.*;
 import static nl.naturalis.common.ArrayMethods.END_INDEX;
 import static nl.naturalis.common.ArrayMethods.START_INDEX;
 import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.check.CommonGetters.length;
-import static nl.naturalis.common.check.CommonGetters.mapSize;
-import static nl.naturalis.common.check.CommonGetters.size;
+import static nl.naturalis.common.check.CommonGetters.*;
 
 /** Methods extending the Java Collection framework. */
 public class CollectionMethods {
@@ -291,7 +289,7 @@ public class CollectionMethods {
   public static <K extends Enum<K>, V, M extends EnumMap<K, ? super V>> M saturatedEnumMap(
       Class<K> enumClass, V... values) throws IllegalArgumentException {
     K[] consts = Check.notNull(enumClass, "enumClass").ok().getEnumConstants();
-    Check.that(values, "values").is(neverNull()).has(length(), eq(), consts.length);
+    Check.that(values, "values").is(deepNotNull()).has(length(), eq(), consts.length);
     EnumMap<K, ? super V> map = new EnumMap<>(enumClass);
     for (int i = 0; i < consts.length; ++i) {
       map.put(consts[i], values[i]);
@@ -547,8 +545,7 @@ public class CollectionMethods {
     Check.notNull(map);
     Check.that(map.values()).has(size(), eq(), map.size(), ERR_MAP_VALUES_NON_UNIQUE);
     return Map.ofEntries(
-        map.entrySet()
-            .stream()
+        map.entrySet().stream()
             .map(e -> Map.entry(e.getValue(), e.getKey()))
             .toArray(Map.Entry[]::new));
   }
@@ -569,9 +566,7 @@ public class CollectionMethods {
   public static <K, V, W> Map<K, W> convertAndFreeze(
       Map<K, V> source, Function<? super V, ? extends W> converter) {
     return Map.ofEntries(
-        source
-            .entrySet()
-            .stream()
+        source.entrySet().stream()
             .map(e -> Map.entry(e.getKey(), converter.apply(e.getValue())))
             .toArray(Map.Entry[]::new));
   }
@@ -594,9 +589,7 @@ public class CollectionMethods {
   public static <K, V, W> Map<K, W> convertAndFreeze(
       Map<K, V> source, BiFunction<? super K, ? super V, ? extends W> converter) {
     return Map.ofEntries(
-        source
-            .entrySet()
-            .stream()
+        source.entrySet().stream()
             .map(e -> Map.entry(e.getKey(), converter.apply(e.getKey(), e.getValue())))
             .toArray(Map.Entry[]::new));
   }
@@ -728,9 +721,7 @@ public class CollectionMethods {
     Check.notNull(separator, "separator");
     Check.that(from, "from").is(gte(), 0).is(lte(), c.size());
     Check.that(to, "to").is(gte(), from).is(lte(), c.size());
-    return List.copyOf(c)
-        .subList(from, to)
-        .stream()
+    return List.copyOf(c).subList(from, to).stream()
         .map(Objects::toString)
         .collect(Collectors.joining(separator));
   }

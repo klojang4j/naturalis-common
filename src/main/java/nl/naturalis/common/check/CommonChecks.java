@@ -121,26 +121,29 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is not null and, in case of an array {@code Collection} or {@code
-   * Map}, does not contain any null values. Equivalent to {@link ObjectMethods#isNoneNull(Object)
-   * ObjectMethods::isNoneNull}. Especially useful for validating varargs arguments.
+   * Verifies that the argument is not null and, if it is an array or {@code Collection}, does not
+   * contain any null values. The array or {@code Collection} may still be zero-sized though. Useful
+   * for validating varargs arguments. Use {@link #deepNotEmpty()} if you want the array or {@code
+   * Collection} to contain at least one element.
    *
+   * @see ObjectMethods#isDeepNotNull(Object)
    * @param <T> The type of the argument
-   * @return A {@code Predicate}
+   * @return A {@code Predicate} implementing the check described above
    */
-  public static <T> Predicate<T> neverNull() {
-    return ObjectMethods::isNoneNull;
+  public static <T> Predicate<T> deepNotNull() {
+    return ObjectMethods::isDeepNotNull;
   }
 
   static {
-    setMessagePattern(neverNull(), msgNeverNull());
-    setName(neverNull(), "neverNull");
+    setMessagePattern(deepNotNull(), msgDeepNotNull());
+    setName(deepNotNull(), "deepNotNull");
   }
 
   /**
    * Verifies that the argument is recursively non-empty as per {@link
    * ObjectMethods#isDeepNotEmpty(Object) ObjectMethods.isDeepNotEmpty}.
    *
+   * @see ObjectMethods#isDeepNotEmpty(Object)
    * @param <T> The type of the argument
    * @return A {@code Predicate}
    */
