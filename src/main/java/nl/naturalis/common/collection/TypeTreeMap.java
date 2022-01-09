@@ -5,24 +5,30 @@ import nl.naturalis.common.check.Check;
 import java.util.*;
 
 import static nl.naturalis.common.ClassMethods.*;
-import static nl.naturalis.common.check.CommonChecks.instanceOf;
-import static nl.naturalis.common.check.CommonChecks.notNull;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
- * A {@code Map} implementation that behaves exactly like the {@link TypeMap} class, but is
- * internally backed by a {@link TreeMap}. The {@code TreeMap} is instantiated with a {@link
- * Comparator} that is specifically tuned to navigate type hierarchies. As a bonus the {@link
- * #keySet() key set} of a {@code TypeTreeMap} is sorted such that for any two keys, the one that
- * comes first will never be a supertype of the one following it. This is the main feature if the
- * {@link TypeTreeSet} class.
+ * A specialized {@link Map} implementation used to concisely associate a single value or action
+ * (i&#46;e&#46; lambdas) to multiple Java types. If the requested type is not present, but one of
+ * its super types is, it will return the value associated with the super type. The map can
+ * optionally also be configured to "autobox" (and unbox) types: if the requested type is a
+ * primitive type, and there is no entry for it in the map, but there is one for the corresponding
+ * wrapper type, then the map will return the value associated with the wrapper type (and vice
+ * versa).
+ *
+ * <p>The {@code TypeTreeMap} class behaves just like the {@link TypeMap} class, but is internally
+ * backed by a {@link TreeMap}. See the class comments of {@link TypeMap} for more info. The keys of
+ * a {@code TypeTreeMap} are sorted in ascending order of abstraction. That is, any two keys, the
+ * one that comes first will never be a supertype of the one following it.
  *
  * @see TypeMap
+ * @see TypeTreeSet
  * @author Ayco Holleman
  * @param <V> The type of the values in the {@code Map}
  */
 public class TypeTreeMap<V> extends AbstractTypeMap<V> {
 
-  static final Class<?>[] EMPTY = new Class[0];
+  static final Class<?>[] EMPTY_TYPE_ARRAY = new Class[0];
 
   /////////////////////////////////////////////////////////////////////
   // BEGIN BUILDER CLASS
@@ -39,15 +45,14 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
     private final LinkedHashMap<Class<?>, U> tmp = new LinkedHashMap<>();
     private boolean autoExpand = false;
     private boolean autobox = false;
-    private Class<?>[] bumped = EMPTY;
+    private Class<?>[] bumped = EMPTY_TYPE_ARRAY;
 
     private Builder(Class<U> valueType) {
       this.valueType = valueType;
     }
 
     /**
-     * Enables the automatic addition of new subtypes. Note that by default auto-expansion is
-     * disabled.
+     * Enables the automatic addition of new subtypes. By default auto-expansion is disabled.
      *
      * @return This {@code Builder} instance
      */
@@ -57,25 +62,27 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
     }
 
     /**
-     * Enables the "auto-boxing" and "auto-unboxing" feature.
+     * Whether to enable the "autoboxing" feature. See description above. By default, autoboxing is
+     * enabled.
      *
      * @return This {@code Builder} instance
      */
-    public Builder<U> autobox() {
-      this.autobox = true;
+    public Builder<U> autobox(boolean autobox) {
+      this.autobox = autobox;
       return this;
     }
 
     /**
      * Bumps the specified types to the head of the key set. This can be used to make the {@code
-     * TypeTreeMap} quickly find ubiquitous types like {@code String.class} and {@code int.class}.
-     * Note though that this may break the ordering from less abstract to more abstract types.
+     * TypeTreeMap} quickly find ubiquitous types like {@code String.class} and {@code int.class},
+     * but it will negatively impact general retrieval time as it deepens the tree. Also note that
+     * this may break the ordering from less abstract to more abstract types.
      *
-     * @param findFast The types to bump to the kead of the head of the key set.
+     * @param types The types to bump to the head of the head of the key set.
      * @return This {@code Builder} instance
      */
-    public Builder<U> bump(Class<?>... findFast) {
-      this.bumped = Check.notNull(findFast).ok();
+    public Builder<U> bump(Class<?>... types) {
+      this.bumped = Check.that(types, "types").is(deepNotNull()).ok();
       return this;
     }
 
@@ -126,68 +133,35 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
   /////////////////////////////////////////////////////////////////////
 
   /**
-   * Returns a {@code TypeTreeMap} instance that will never contain any other keys or values than
-   * the ones in the specified map. See class description above.
+   * Converts the specified {@code Map} to a non-auto-expanding, autoboxing {@code TypeMap} .
    *
    * @param <U> The type of the values in the {@code Map}
-   * @param src The {@code Map} to turn into a {@code TypeTreeMap}
-   * @return A {@code TypeTreeMap} instance that will never grow beyond the size of the specified
-   *     map
+   * @param src The {@code Map} to convert
+   * @return A non-auto-expanding, autoboxing {@code TypeTreeMap}
    */
-  public static <U> TypeTreeMap<U> withTypes(Map<Class<?>, U> src) {
-    return withTypes(src, false);
+  public static <U> TypeTreeMap<U> copyOf(Map<Class<?>, U> src) {
+    return copyOf(src, true, false);
   }
 
   /**
-   * Returns a {@code TypeTreeMap} instance that will never contain any other keys or values than
-   * the ones in the specified map. See class description above.
+   * Converts the specified {@code Map} to a {@code TypeTreeMap} .
    *
    * @param <U> The type of the values in the {@code Map}
-   * @param src The {@code Map} to turn into a {@code TypeTreeMap}
-   * @param autobox Specifying {@code true} causes the following behaviour: if the value for a
-   *     primitive type (e.g. {@code int.class}) is requested and there is no entry for the
-   *     primitive type, then, if present, the value for the corresponding wrapper type ({@code
-   *     Integer.class}) will be returned - <i>and vice versa</i>.
-   * @return A {@code TypeTreeMap} instance that will never grow beyond the size of the specified
-   *     map
-   */
-  public static <U> TypeTreeMap<U> withTypes(Map<Class<?>, U> src, boolean autobox) {
-    Check.notNull(src);
-    return new TypeTreeMap<>(src, false, autobox, EMPTY);
-  }
-
-  /**
-   * Returns a {@code TypeTreeMap} instance that will never contain any other values than the ones
-   * in the specified map (as per {@link Map#values()}), and that will never contain any types
-   * (keys) that are not equal to, or extending from the types already present in the specified map,
-   * but that <i>will</i> grow as new subtypes are being associated with pre-existing values.
-   * Equivalent to {@code withValues(src, 0)}.
-   *
-   * @param <U> The type of the values in the {@code Map}
-   * @param src The {@code Map} to turn into a {@code TypeTreeMap}
+   * @param src The {@code Map} to convert
+   * @param autoExpand Whether to enable the auto-expand feature (see class comments)
+   * @param autobox Whether to enable the "autoboxing" feature (see class comments)
    * @return A {@code TypeTreeMap} instance that will grow as new types are being requested from it
    */
-  public static <U> TypeTreeMap<U> withValues(Map<Class<?>, U> src) {
-    return withValues(src, false);
-  }
-
-  /**
-   * Returns a {@code TypeTreeMap} instance that will never contain any other values than the ones
-   * in the specified map (as per {@link Map#values()}), and that will never contain any types
-   * (keys) that are not equal to, or extending from the types already present in the specified map,
-   * but that <i>will</i> grow as new subtypes are being associated with pre-existing values.
-   *
-   * @param <U> The type of the values in the {@code Map}
-   * @param src The {@code Map} to turn into a {@code TypeTreeMap}
-   * @param autobox Specifying {@code true} causes the following behaviour: if the value for a
-   *     primitive type (e.g. {@code int.class}) is requested and there is no entry for the
-   *     primitive type, then, if present, the value for the corresponding wrapper type ({@code
-   *     Integer.class}) will be returned - <i>and vice versa</i>.
-   * @return A {@code TypeTreeMap} instance that will grow as new types are being requested from it
-   */
-  public static <U> TypeTreeMap<U> withValues(Map<Class<?>, U> src, boolean autobox) {
+  public static <U> TypeTreeMap<U> copyOf(
+      Map<Class<?>, U> src, boolean autoExpand, boolean autobox) {
     Check.notNull(src, "src");
-    return new TypeTreeMap<>(src, true, autobox, EMPTY);
+    if (src.getClass() == TypeTreeMap.class) {
+      TypeTreeMap<U> ttm = (TypeTreeMap<U>) src;
+      if (ttm.autobox == autobox && ttm.autoExpand == autoExpand) {
+        return ttm;
+      }
+    }
+    return new TypeTreeMap<>(src, autoExpand, autobox, EMPTY_TYPE_ARRAY);
   }
 
   /**
@@ -195,7 +169,7 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
    *
    * @param <U> The type of the values in the {@code TypeTreeMap} to be built
    * @param valueType The class object corresponding to the type of the values in the {@code
-   *     TypeTreeMap} to be built
+   *     TypeTreeMap}
    * @return A {@code Builder} instance that lets you configure a {@code TypeTreeMap}
    */
   public static <U> Builder<U> build(Class<U> valueType) {

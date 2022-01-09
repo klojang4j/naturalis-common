@@ -58,6 +58,6 @@ public class TypeTreeSet extends AbstractTypeSet {
   }
 
   private TypeTreeSet(Collection<? extends Class<?>> s, boolean autoExpand, boolean autobox) {
-    super(new TypeTreeMap<>(toMap(s), autoExpand, autobox, TypeTreeMap.EMPTY));
+    super(new TypeTreeMap<>(toMap(s), autoExpand, autobox, TypeTreeMap.EMPTY_TYPE_ARRAY));
   }
 }

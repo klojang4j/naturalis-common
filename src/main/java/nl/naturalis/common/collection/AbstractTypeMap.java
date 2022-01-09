@@ -17,7 +17,7 @@ import static nl.naturalis.common.check.CommonGetters.type;
 abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
 
   static final String ERR_NULL_KEY = "Source map must not contain null keys";
-  static final String ERR_NULL_VAL = "Illegal null value for type %s";
+  static final String ERR_NULL_VAL = "Illegal null value for type ${0}";
 
   final boolean autoExpand;
   final boolean autobox;
