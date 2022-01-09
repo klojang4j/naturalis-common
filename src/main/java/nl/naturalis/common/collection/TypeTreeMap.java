@@ -1,10 +1,10 @@
 package nl.naturalis.common.collection;
 
-import java.util.*;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.ClassMethods.box;
-import static nl.naturalis.common.ClassMethods.isWrapper;
-import static nl.naturalis.common.ClassMethods.unbox;
+
+import java.util.*;
+
+import static nl.naturalis.common.ClassMethods.*;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 
@@ -37,7 +37,7 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
   public static final class Builder<U> {
     private final Class<U> valueType;
     private final LinkedHashMap<Class<?>, U> tmp = new LinkedHashMap<>();
-    private boolean autoExpand = true;
+    private boolean autoExpand = false;
     private boolean autobox = false;
     private Class<?>[] bumped = EMPTY;
 
@@ -46,13 +46,13 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
     }
 
     /**
-     * Disables the automatic addition of new subtypes. Note that by default auto-expansion is
-     * enabled.
+     * Enables the automatic addition of new subtypes. Note that by default auto-expansion is
+     * disabled.
      *
      * @return This {@code Builder} instance
      */
-    public Builder<U> noAutoExpand() {
-      this.autoExpand = false;
+    public Builder<U> autoExpand() {
+      this.autoExpand = true;
       return this;
     }
 

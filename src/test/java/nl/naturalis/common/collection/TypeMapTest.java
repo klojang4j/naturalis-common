@@ -1,12 +1,13 @@
 package nl.naturalis.common.collection;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TypeMapTest {
 
@@ -30,7 +31,7 @@ public class TypeMapTest {
   @Test
   public void test01() {
     TypeMap<String> m =
-        TypeMap.build(String.class).add(Object.class, "Object").autoExpand().freeze();
+        TypeMap.build(String.class).add(Object.class, "Object").autoExpand(2).freeze();
     assertEquals(1, m.size());
     assertTrue(m.containsKey(Integer.class));
     assertEquals(2, m.size());
@@ -39,7 +40,7 @@ public class TypeMapTest {
   @Test
   public void test02() {
     TypeMap<String> m =
-        TypeMap.build(String.class).autoExpand().add(Object.class, "Object").freeze();
+        TypeMap.build(String.class).autoExpand(2).add(Object.class, "Object").freeze();
     assertEquals(1, m.size());
     assertTrue(m.containsKey(Collection.class));
     assertEquals(2, m.size());
@@ -54,9 +55,9 @@ public class TypeMapTest {
     assertEquals(1, m.size());
   }
 
-  public static interface MyListInterface extends List<String> {}
+  interface MyListInterface extends List<String> {}
 
-  public static class MyArrayList extends ArrayList<String> implements MyListInterface {}
+  static class MyArrayList extends ArrayList<String> implements MyListInterface {}
 
   @Test
   public void test04() {

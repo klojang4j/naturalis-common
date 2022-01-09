@@ -1,47 +1,36 @@
 package nl.naturalis.common.collection;
 
+import nl.naturalis.common.check.Check;
+
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.ClassMethods.box;
-import static nl.naturalis.common.ClassMethods.isWrapper;
-import static nl.naturalis.common.ClassMethods.unbox;
-import static nl.naturalis.common.check.CommonChecks.instanceOf;
-import static nl.naturalis.common.check.CommonChecks.notNull;
+
+import static nl.naturalis.common.ClassMethods.*;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
- * A {@link Map} implementation with {@link Class} objects as keys, using the Java type hierarchy
- * mechanism to find values for missing keys. It returns a non-null value for a type if either the
- * type itself or any of its super types is present in the map. For example, suppose the map
- * contains two entries: one for {@code Integer.class} and one for {@code Number.class}. If the map
- * is queried for key {@code Integer.class}, then the value associated with {@code Integer.class} is
- * returned. But if the map is queried for key {@code Short.class}, then the value associated with
- * {@code Number.class} is returned. If the value for key {@code InputStream.class} is requested, a
- * {@link TypeNotSupportedException} is thrown.
+ * A specialized {@link Map} implementation used to associate Java types with values or actions
+ * (i&#46;e&#46; lambdas). Its main feature is that, if the requested type is not present, but one
+ * of its super types is, it will return the value associated with the super type. The map will
+ * first climb the type's class hierarchy up to, but excluding {@code Object.class}; then it will
+ * climb up the type's interfaces (if any); and finally it will check to see if it contains an entry
+ * for {@code Object.class}.
  *
- * <p>A {@code TypeMap} can optionally also be configured to "auto-box" and "auto-unbox" keys. For
- * the map described above that would mean that the map would to also return values for types {@code
- * int.class} and {@code short.class} (and any primitive number type for that matter).
+ * <p>The map can optionally also be configured to "autobox" (and unbox) types: if the requested
+ * type is a primitive type, and it is not present, but the corresponding wrapper type is, then it
+ * will return the value associated with the wrapper type (and vice versa). By default, autoboxing
+ * is enabled.
  *
- * <p>This {@code Map} implementation is useful if you want to define fall-back values or shared
- * values for types that have not been explicitly added to the map. If the map contains an entry for
- * {@code Object.class}, that will be the ultimate fall-back entry: {@code containsKey} will always
- * return {@code true} and {@code get} will always return a non-null value. If a type is not present
- * in the map, {@code containsKey} and {@code get} will first go up its class hierarchy, then they
- * will check the interfaces implemented or extended by the type (preferring the most specific
- * interface), and finally they will check if {@code Object.class} is present in the map.
+ * <p>A {@code TypeMap} is unmodifiable. All map-altering methods will throw an {@link
+ * UnsupportedOperationException}. However, the map can be configured to auto-expand internally: if
+ * the requested type is not present, but one of its super types is, then the requested type will
+ * tacitly be added to the map with the same value as the super type's value. Thus, when the type is
+ * requested again, it will result in a direct hit. Auto-expansion is enabled by default
+ * for the {@code TypeMap} class while it is disabled by default for its sibling class, {@link
+ * TypeTreeMap}.
  *
- * <p>A {@code TypeMap} does not accept {@code null} keys and {@code null} values and it is
- * unmodifiable to the outside world. All map-altering methods will throw an {@link
- * UnsupportedOperationException}. Thus the map will only ever contain the values contained in the
- * source map. Also, it will never contain any types (keys) that are not equal to, or extending from
- * the types already present in the source map. However a {@code TypeMap} may or may not grow
- * internally, depending on which of its static factory methods is used. The {@code withValues}
- * methods produce instances that will silently gobble up missing subtypes upon being requested via
- * {@code containsKey} or {@code get}. The requested type will be associated with the super type's
- * value. Thus the next time that type is requested it will result in a direct hit. The {@code
- * withTypes} methods produce instances that remain completely static internally.
+ * <p>Null keys and {@code null} values are not allowed.
  *
  * @author Ayco Holleman
  * @param <V> The type of the values in the {@code Map}
@@ -58,14 +47,14 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
     private final Class<U> valueType;
     private final HashMap<Class<?>, U> tmp = new HashMap<>();
     private Integer expectedSize = 0;
-    private boolean autobox;
+    private boolean autobox = true;
 
     private Builder(Class<U> valueType) {
       this.valueType = valueType;
     }
 
     /**
-     * Disables the automatic addition of new subtypes. Note that by default auto-expansion is
+     * Disables the auto-expand feature. See description above. By default auto-expansion is
      * enabled.
      *
      * @return This {@code Builder} instance
@@ -76,38 +65,26 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
     }
 
     /**
-     * Enables the automatic addition of missing subtypes. Equivalent to {@code autoExpand(0)}. The
-     * map will be expected to grow to about twice the number of entries added through the {@link
-     * #add(Class, Object) add} method. There is in fact no real reason to call this method, because
-     * this is how the {@code Builder} configures {@code TypeMap} instances by default.
+     * Enables the auto-expand feature. See description above. If the {@code expectedSize} argument
+     * is less than or equal to the total number of entries you {@link #add(Class, Object) added},
+     * it will be interpreted as a multiplier. So, for example, 3 would mean that you expect the map
+     * to grow to about three times its original size.
      *
-     * @return This {@code Builder} instance
-     */
-    public Builder<U> autoExpand() {
-      return autoExpand(0);
-    }
-
-    /**
-     * Enables the automatic addition of missing subtypes. You can specify 0 (zero) or any number
-     * less than the number of entries added through the {@link #add(Class, Object) put} method to
-     * indicate that you expect the map to grow to about twice its original size.
-     *
-     * @param expectedSize The size to which you expect the map to grow as it gobbles up new
-     *     subtypes presented to it {@code containsKey} and {@code get} methods.
+     * @param expectedSize The expected size of the auto-expanding map
      * @return This {@code Builder} instance
      */
     public Builder<U> autoExpand(int expectedSize) {
-      this.expectedSize = expectedSize;
+      this.expectedSize = Check.that(expectedSize).is(gt(), 1).intValue();
       return this;
     }
 
     /**
-     * Enables the "auto-boxing" and "auto-unboxing" feature. See class comments above.
+     * Disables the "autoboxing" feature. See description above. By default, autoboxing is enabled.
      *
      * @return This {@code Builder} instance
      */
-    public Builder<U> autobox() {
-      this.autobox = true;
+    public Builder<U> noAutoboxing() {
+      this.autobox = false;
       return this;
     }
 
@@ -126,7 +103,11 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
     }
 
     /**
-     * Returns a new {@code TypeMap} instance with the configured types and behaviour.
+     * Returns an unmodifiable {@code TypeMap} with the configured types and behaviour. If
+     * autoboxing was enabled, but auto-expansion was disabled, the map will first tacitly be
+     * enlarged with the wrapper types corresponding to the primitive types in the map (without
+     * overwriting already-present wrapper types), and with the primitive types corresponding to the
+     * wrapper types in the map (without overwriting already-present primitive types).
      *
      * @param <W> The type of the values in the returned {@code TypeMap}
      * @return S new {@code TypeMap} instance with the configured types and behaviour
@@ -146,100 +127,80 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
         }
         return (TypeMap<W>) new TypeMap<>(tmp, autobox);
       }
-      return (TypeMap<W>) new TypeMap<>(tmp, expectedSize, autobox);
+      int sz = expectedSize > tmp.size() ? expectedSize : tmp.size() * expectedSize;
+      return (TypeMap<W>) new TypeMap<>(tmp, sz, autobox);
     }
   }
 
   /**
-   * Returns a {@code TypeMap} instance that will never contain any other keys or values than the
-   * ones in the specified map. See class description above.
+   * Converts the specified {@code Map} to a non-auto-expanding, autoboxing {@code TypeMap} .
    *
    * @param <U> The type of the values in the {@code Map}
    * @param src The {@code Map} to turn into a {@code TypeMap}
-   * @return A {@code TypeMap} instance that will never grow beyond the size of the specified map
+   * @return A non-auto-expanding, non-autoboxing {@code TypeMap}
    */
-  public static <U> TypeMap<U> withTypes(Map<Class<?>, U> src) {
-    return withTypes(src, false);
+  public static <U> TypeMap<U> copyOf(Map<Class<?>, U> src) {
+    Check.notNull(src);
+    if(src instanceof TypeMap<U> tm && tm.autobox && !tm.autoExpand) {
+      return tm;
+    }
+    return copyOf(src, false);
   }
 
   /**
-   * Returns a {@code TypeMap} instance that will never contain any other keys or values than the
-   * ones in the specified map. See class description above.
+   * Converts the specified {@code Map} to a non-auto-expanding {@code TypeMap} .
    *
    * @param <U> The type of the values in the {@code Map}
    * @param src The {@code Map} to turn into a {@code TypeMap}
-   * @param autobox Specifying {@code true} causes the following behaviour: if the value for a
-   *     primitive type (e.g. {@code int.class}) is requested and there is no entry for the
-   *     primitive type, then, if present, the value for the corresponding wrapper type ({@code
-   *     Integer.class}) will be returned - <i>and vice versa</i>.
-   * @return A {@code TypeMap} instance that will never grow beyond the size of the specified map
+   * @param autobox Whether to enable the "autoboxing" feature (see class comments)
+   * @return A non-auto-expanding {@code TypeMap}
    */
-  public static <U> TypeMap<U> withTypes(Map<Class<?>, U> src, boolean autobox) {
+  public static <U> TypeMap<U> copyOf(Map<Class<?>, U> src, boolean autobox) {
     Check.notNull(src);
+    if(src instanceof TypeMap<U> tm && tm.autobox == autobox && !tm.autoExpand) {
+      return tm;
+    }
     return new TypeMap<>(src, autobox);
   }
 
   /**
-   * Returns a {@code TypeMap} instance that will never contain any other values than the ones
-   * already present in the specified map, and that will never contain any types (keys) that are not
-   * equal to, or extending from the types already present in the specified map, but that
-   * <i>will</i> grow as new subtypes are being associated with pre-existing values. Equivalent to
-   * {@code withValues(src, 0)}.
+   * Converts the specified {@code Map} to an auto-expanding, autoboxing {@code TypeMap}. If the {@code
+   * expectedSize} argument is less than or equal to the size of the source map, it will be
+   * interpreted as a multiplier. So, for example, 3 would mean that you expect the map to grow to
+   * about three times its original size.
    *
    * @param <U> The type of the values in the {@code Map}
    * @param src The {@code Map} to turn into a {@code TypeMap}
-   * @return A {@code TypeMap} instance that will grow as new types are being requested from it
+   * @param expectedSize The expected size of the map
+   * @return An auto-expanding, autoboxing {@code TypeMap}
    */
-  public static <U> TypeMap<U> withValues(Map<Class<?>, U> src) {
-    return withValues(src, 0);
+  public static <U> TypeMap<U> copyOf(Map<Class<?>, U> src, int expectedSize) {
+    return copyOf(src, expectedSize, true);
   }
 
   /**
-   * Returns a {@code TypeMap} instance that will never contain any other values than the ones in
-   * the specified map (as per {@link Map#values()}), and that will never contain any types (keys)
-   * that are not equal to, or extending from the types already present in the specified map, but
-   * that <i>will</i> grow as new subtypes are being associated with pre-existing values.
+   * Converts the specified {@code Map} to an auto-expanding {@code TypeMap}. If the {@code expectedSize}
+   * argument is less than or equal to the size of the source map, it will be
+   * interpreted as a multiplier. So, for example, 3 would mean that you expect the map to grow to
+   * about three times its original size.
    *
    * @param <U> The type of the values in the {@code Map}
    * @param src The {@code Map} to turn into a {@code TypeMap}
-   * @param expectedSize The expected number of types (pre-existing and new) that the map will be
-   *     catering for. Specifying any value less than {@code src.size()} is equivalent to specifying
-   *     {@code src.size() * 2}. (In other words, you expect the type map to silently gobble up
-   *     about as many subtypes as there are types in the specified map.)
-   * @return A {@code TypeMap} instance that will grow as new types are being requested from it
+   * @param expectedSize The expected size of the map
+   * @param autobox Whether to enable the "autoboxing" feature (see class comments)
+   * @return An auto-expanding {@code TypeMap}
    */
-  public static <U> TypeMap<U> withValues(Map<Class<?>, U> src, int expectedSize) {
-    return withValues(src, expectedSize, false);
-  }
-
-  /**
-   * Returns a {@code TypeMap} instance that will never contain any other values than the ones in
-   * the specified map (as per {@link Map#values()}), and that will never contain any types (keys)
-   * that are not equal to, or extending from the types already present in the specified map, but
-   * that <i>will</i> grow as new subtypes are being associated with pre-existing values.
-   *
-   * @param <U> The type of the values in the {@code Map}
-   * @param src The {@code Map} to turn into a {@code TypeMap}
-   * @param expectedSize The expected number of types (pre-existing and new) that the map will be
-   *     catering for. Specifying a value less than {@code src.size()} is equivalent to specifying
-   *     {@code src.size() * 2}. (In other words, you expect the type map to silently gobble up
-   *     about as many subtypes as there are types in the specified map.)
-   * @param autobox Specifying {@code true} causes the following behaviour: if the value for a
-   *     primitive type (e.g. {@code int.class}) is requested and there is no entry for the
-   *     primitive type, then, if present, the value for the corresponding wrapper type ({@code
-   *     Integer.class}) will be returned - <i>and vice versa</i>.
-   * @return A {@code TypeMap} instance that will grow as new types are being requested from it
-   */
-  public static <U> TypeMap<U> withValues(Map<Class<?>, U> src, int expectedSize, boolean autobox) {
+  public static <U> TypeMap<U> copyOf(Map<Class<?>, U> src, int expectedSize, boolean autobox) {
     Check.notNull(src, "src");
-    int sz = expectedSize < src.size() ? src.size() * 2 : expectedSize;
+    Check.that(expectedSize, "expectedSize").is(gt(), 1);
+    int sz = expectedSize > src.size() ? expectedSize : expectedSize * src.size();
     return new TypeMap<>(src, sz, autobox);
   }
 
   /**
    * Returns a {@code Builder} instance that lets you configure a {@code TypeMap}
    *
-   * @param <U> The type of the values in the {@code TypeMap} to be built
+   * @param <U> The type of the values in the {@code TypeMap}
    * @param valueType The class object corresponding to the type of the values in the {@code
    *     TypeMap} to be built
    * @return A {@code Builder} instance that lets you configure a {@code TypeMap}
@@ -258,7 +219,6 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
 
   TypeMap(Map<? extends Class<?>, ? extends V> m, int sz, boolean autobox) {
     super(true, autobox);
-    sz = sz < m.size() ? 2 * m.size() : sz;
     Map<Class<?>, V> tmp = new IdentityHashMap<>(sz);
     m.forEach(
         (k, v) -> {

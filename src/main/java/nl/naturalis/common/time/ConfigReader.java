@@ -141,14 +141,14 @@ class ConfigReader {
 
   private void processTryElement(List<ParseAttempt> attempts, Element tryElement)
       throws FuzzyDateException {
-    String target = tryElement.getParentNode().getNodeName();
-    var parseInto = supported.get(target);
+    String dateTimeClass = tryElement.getParentNode().getNodeName();
+    var parseInto = supported.get(dateTimeClass);
     String content = xmlGetRequiredTextContent(tryElement);
     TryAttribs attribs = processAttributes(tryElement);
     if (attribs.predefined) {
       DateTimeFormatter formatter = getFormatter(content);
       for (Locale locale : attribs.locales) {
-        String tag = ifNull(attribs.tag, content + " (" + locale + ")");
+        String tag = ifNull(attribs.tag, dateTimeClass + ": " + content + " (" + locale + ")");
         ParseAttempt.configure(formatter)
             .withTag(tag)
             .withFilter(attribs.filter)
@@ -159,7 +159,7 @@ class ConfigReader {
       }
     } else {
       for (Locale locale : attribs.locales) {
-        String tag = ifNull(attribs.tag, content + " (" + locale + ")");
+        String tag = ifNull(attribs.tag, dateTimeClass + ": " + content + " (" + locale + ")");
         ParseAttempt.configure(content)
             .withTag(tag)
             .withFilter(attribs.filter)
