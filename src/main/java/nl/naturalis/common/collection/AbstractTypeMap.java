@@ -1,9 +1,7 @@
 package nl.naturalis.common.collection;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
 import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.Tuple;
 import nl.naturalis.common.check.Check;
@@ -52,7 +50,7 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
 
   @Override
   public boolean containsKey(Object key) {
-    Check.notNull(key).has(type(), sameAs(), Class.class);
+    Check.notNull(key, "key").has(type(), sameAs(), Class.class);
     Class<?> type = (Class<?>) key;
     Tuple<Class<?>, V> entry = find(type);
     if (entry == null) {
@@ -155,12 +153,12 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
 
   @Override
   public Set<Class<?>> keySet() {
-    return autoExpand ? Set.copyOf(backend().keySet()) : backend().keySet();
+    return Collections.unmodifiableSet(backend().keySet());
   }
 
   @Override
   public Collection<V> values() {
-    return autoExpand ? Set.copyOf(backend().values()) : backend().values();
+    return Collections.unmodifiableCollection(backend().values());
   }
 
   @Override
@@ -183,11 +181,11 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
     return backend().toString();
   }
 
-  public List<String> prettyTypeNames() {
+  public List<String> typeNames() {
     return keySet().stream().map(ClassMethods::className).collect(toUnmodifiableList());
   }
 
-  public List<String> prettySimpleTypeNames() {
+  public List<String> simpleTypeNames() {
     return keySet().stream().map(ClassMethods::simpleClassName).collect(toUnmodifiableList());
   }
 

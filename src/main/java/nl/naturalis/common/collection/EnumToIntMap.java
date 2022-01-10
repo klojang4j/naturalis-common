@@ -37,7 +37,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
   private final int kav; // the value used to indicate the absence of a key
 
   /**
-   * Creates a new empty {@code EnumToIntMap} for the specfied enum class using {@link
+   * Creates a new empty {@code EnumToIntMap} for the specified enum class using {@link
    * Integer#MIN_VALUE Integer.MIN_VALUE} as the <i>key-absent-value</i> value. All elements in the
    * backing array will be initialized to this value (meaning that the map is empty).
    *
@@ -48,7 +48,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
   }
 
   /**
-   * Creates a new {@code EnumToIntMap} for the specfied enum class with the specified integer as
+   * Creates a new {@code EnumToIntMap} for the specified enum class with the specified integer as
    * the <i>key-absent-value</i> value. All elements in the backing array will be initialized to
    * this value (meaning that the map is empty).
    *

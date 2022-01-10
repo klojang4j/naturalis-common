@@ -634,7 +634,7 @@ class Messages {
   }
 
   private static final Set<Class<?>> DECENT_TO_STRING =
-      TypeSet.withTypes(Number.class, Boolean.class, Character.class, Enum.class);
+      TypeSet.of(Number.class, Boolean.class, Character.class, Enum.class);
 
   static String toStr(Object val) {
     if (val == null) {

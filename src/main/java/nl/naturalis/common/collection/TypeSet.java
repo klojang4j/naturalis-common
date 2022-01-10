@@ -3,146 +3,149 @@ package nl.naturalis.common.collection;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import nl.naturalis.common.check.Check;
 
 /**
- * A {@link Set} implementation that returns {@code true} from its {@link Set#contains(Object)
- * contains} method if the set either contains the specified type or any of its super types. It can
- * also be configured to return true if the specified type is a primitive type (e.g. {@code
- * boolean.class}) and the set either contains the primitive type itself or its corresponding
- * wrapper type ({@code Boolean.class}). This will then also work the other way round.
+ * A specialized {@link Set} implementation for Java types. It returns {@code true} from its {@link
+ * Set#contains(Object) contains} method if the set contains the specified type <i>or any of its
+ * super types</i>. As with {@link TypeMap} and {@link TypeTreeMap} you can optionally enable
+ * "autoboxing" and auto-expansion. See {@link TypeMap} for a description of these features.
  *
- * <p>This {@code Set} implementation is backed by a {@link TypeMap}.
+ * <p>A {@code TypeSet} is unmodifiable and does not allow {@code null} values. It is backed by a
+ * {@link TypeMap}.
  *
  * @see TypeMap
+ * @see TypeSet
+ * @see TypeTreeMap
  * @author Ayco Holleman
  */
 public class TypeSet extends AbstractTypeSet {
 
   /**
-   * Returns a {@code TypeSet} instance that will never contain any other types than the ones in the
-   * specified array. Calling {@link #contains(Object) contains} on it will return true if either
-   * the specified type itself or any of its super types is present in the set, but if the type
-   * itself is not present in the set, it will not be added to it.
+   * Returns an auto-expanding, autoboxing {@code TypeSet} for the specified types.
    *
-   * @param types The tyoes contained in the set
-   * @return A {@code TypeSet} configured as described above
+   * @param types The types to add to the {@code Set}.
+   * @return A non-auto-expanding, autoboxing {@code TypeSet} for the specified types
    */
-  public static TypeSet withTypes(Class<?>... types) {
-    return withTypes(false, types);
+  public static TypeSet of(Class<?>... types) {
+    return copyOf(List.of(types));
   }
 
   /**
-   * Returns a {@code TypeSet} instance that will never contain any other types than the ones in the
-   * specified array. Calling {@link #contains(Object) contains} on it will return true if either
-   * the specified type itself or any of its super types is present in the set, but if the type
-   * itself is not present in the set, it will not be added to it. The instance can also be
-   * configured to return {@code true} if the corresponding wrapper type c.q. primitive type is
-   * present in the set.
+   * Returns an auto-expanding, autoboxing {@code TypeSet} for the specified types.
    *
-   * @param autobox Enables/disables the "auto-boxing" and "auto-unboxing" feature
-   * @param types The tyoes contained in the set
-   * @return A {@code TypeSet} configured as described above
+   * @param expectedSize An estimate of the final size of the auto-expanding set.See {@link
+   *     TypeMap.Builder#autoExpand(int) TypeMap} for more information about this parameter.
+   * @param types The types to add to the {@code Set}.
+   * @return An autoboxing {@code TypeSet} for the specified types
    */
-  public static TypeSet withTypes(boolean autobox, Class<?>... types) {
-    Check.notNull(types, "types");
-    return withTypes(List.of(types), autobox);
+  public static TypeSet of(int expectedSize, Class<?>... types) {
+    return of(expectedSize, true, types);
   }
 
   /**
-   * Returns a {@code TypeSet} instance that will never contain any other types than the ones in the
-   * specified source collection. Calling {@link #contains(Object) contains} on it will return true
-   * if either the specified type itself or any of its super types is present in the set, but if the
-   * type itself is not present in the set, it will not be added to it.
+   * Returns an autoboxing {@code TypeSet} for the specified types.
    *
-   * @param src The souurce collection from which to create the {@code TypeSet}.
-   * @return A {@code TypeSet} configured as described above
+   * @param autoExpand Whether to enable auto-expansion. See {@link
+   *     TypeMap.Builder#autoExpand(boolean) TypeMap} for more information about this parameter.
+   * @param types The types to add to the {@code Set}.
+   * @return An autoboxing {@code TypeSet} for the specified types
    */
-  public static TypeSet withTypes(Collection<Class<?>> src) {
-    return withTypes(src, false);
+  public static TypeSet of(boolean autoExpand, Class<?>... types) {
+    return copyOf(List.of(types), autoExpand);
   }
 
   /**
-   * Returns a {@code TypeSet} instance that will never contain any other types than the ones in the
-   * specified souurce collection. Calling {@link #contains(Object) contains} on it will return true
-   * if either the specified type itself or any of its super types is present in the set, but if the
-   * type itself is not present in the set, it will not be added to it. The instance can also be
-   * configured to return {@code true} if the corresponding wrapper type c.q. primitive type is
-   * present in the set.
+   * Returns a {@code TypeSet} for the specified types.
    *
-   * @param src The souurce collection from which to create the {@code TypeSet}.
-   * @param autobox Enables/disables the "auto-boxing" and "auto-unboxing" feature
-   * @return A {@code TypeSet} configured as described above
+   * @param expectedSize An estimate of the final size of the auto-expanding set.See {@link
+   *     TypeMap.Builder#autoExpand(int) TypeMap} for more information about this parameter.
+   * @param autobox Whether to enable "autoboxing"
+   * @param types The types to add to the {@code Set}.
+   * @return A {@code TypeSet} for the specified types
    */
-  public static TypeSet withTypes(Collection<Class<?>> src, boolean autobox) {
-    Check.notNull(src, "src");
+  public static TypeSet of(int expectedSize, boolean autobox, Class<?>... types) {
+    return copyOf(List.of(types), expectedSize, autobox);
+  }
+
+  /**
+   * Returns a {@code TypeSet} for the specified types.
+   *
+   * @param autoExpand Whether to enable auto-expansion. See {@link
+   *     TypeMap.Builder#autoExpand(boolean) TypeMap} for more information about this parameter.
+   * @param autobox Whether to enable "autoboxing"
+   * @param types The types to add to the {@code Set}.
+   * @return A {@code TypeSet} for the specified types
+   */
+  public static TypeSet of(boolean autoExpand, boolean autobox, Class<?>... types) {
+    return copyOf(List.of(types), autoExpand, autobox);
+  }
+
+  /**
+   * Converts the specified {@code Collection} to a non-auto-expanding, autoboxing {@code TypeSet}.
+   *
+   * @param src The {@code Collection} to convert
+   * @return A non-auto-expanding, autoboxing {@code TypeSet}
+   */
+  public static TypeSet copyOf(Collection<Class<?>> src) {
+    return copyOf(src, 2, true);
+  }
+
+  /**
+   * Converts the specified {@code Collection} to an auto-expanding, autoboxing {@code TypeSet}.
+   *
+   * @param src The {@code Collection} to convert
+   * @param expectedSize An estimate of the final size of the auto-expanding set.See {@link
+   *     TypeMap.Builder#autoExpand(int) TypeMap} for more information about this parameter.
+   * @return An auto-expanding, autoboxing {@code TypeSet}
+   */
+  public static TypeSet copyOf(Collection<Class<?>> src, int expectedSize) {
+    return copyOf(src, expectedSize, true);
+  }
+
+  /**
+   * Converts the specified {@code Collection} to an auto-expanding, autoboxing {@code TypeSet}.
+   *
+   * @param src The {@code Collection} to convert
+   * @param autoExpand Whether to enable auto-expansion. See {@link
+   *     TypeMap.Builder#autoExpand(boolean) TypeMap} for more information about this parameter.
+   * @return An auto-expanding, autoboxing {@code TypeSet}
+   */
+  public static TypeSet copyOf(Collection<Class<?>> src, boolean autoExpand) {
+    return copyOf(src, autoExpand, true);
+  }
+
+  /**
+   * Converts the specified {@code Collection} to a {@code TypeSet}.
+   *
+   * @param src The {@code Collection} to convert
+   * @param expectedSize An estimate of the final size of the auto-expanding set. See {@link
+   *     TypeMap.Builder#autoExpand(int) TypeMap} for more information about this parameter.
+   * @param autobox Whether to enable "autoboxing"
+   * @return A {@code TypeSet} containing the types in the specified collection
+   */
+  public static TypeSet copyOf(Collection<Class<?>> src, int expectedSize, boolean autobox) {
+    return new TypeSet(src, expectedSize, autobox);
+  }
+
+  /**
+   * Converts the specified {@code Collection} to a {@code TypeSet}.
+   *
+   * @param src The {@code Collection} to convert
+   * @param autoExpand Whether to enable auto-expansion. See {@link
+   *     TypeMap.Builder#autoExpand(boolean) TypeMap} for more information about this parameter.
+   * @param autobox Whether to enable "autoboxing"
+   * @return A {@code TypeSet} containing the types in the specified collection
+   */
+  public static TypeSet copyOf(Collection<Class<?>> src, boolean autoExpand, boolean autobox) {
+    if (autoExpand) {
+      return copyOf(src, 2, autobox);
+    } else if (src.getClass() == TypeSet.class) {
+      TypeSet ts = (TypeSet) src;
+      if (ts.map.autobox == autobox) {
+        return ts;
+      }
+    }
     return new TypeSet(src, autobox);
-  }
-
-  /**
-   * Returns a {@code TypeSet} instance that will grow as new subtypes are presented to the {@link
-   * #contains(Object) method}. The set is expected to grow to about twice the length of the
-   * specified array.
-   *
-   * @param types The types contained in the set
-   * @return A {@code TypeSet} configured as described above
-   */
-  public static TypeSet extending(Class<?>... types) {
-    return extending(false, types);
-  }
-
-  /**
-   * Returns a {@code TypeSet} instance that will grow as new subtypes are presented to the {@link
-   * #contains(Object) method}. The instance can also be configured to return {@code true} if the
-   * corresponding wrapper type.
-   *
-   * @param expectedSize The expected size of the set
-   * @param types
-   * @return
-   */
-  public static TypeSet extending(int expectedSize, Class<?>... types) {
-    return extending(expectedSize, false, types);
-  }
-
-  /**
-   * Returns a {@code TypeSet} instance that will grow as new subtypes are presented to the {@link
-   * #contains(Object) method}. The instance can also be configured to return {@code true} if the
-   * corresponding wrapper type c.q. primitive type is present in the set.
-   *
-   * @param autobox
-   * @param types
-   * @return
-   */
-  public static TypeSet extending(boolean autobox, Class<?>... types) {
-    return extending(0, autobox, types);
-  }
-
-  /**
-   * @param expectedSize
-   * @param autobox
-   * @param types
-   * @return
-   */
-  public static TypeSet extending(int expectedSize, boolean autobox, Class<?>... types) {
-    Check.notNull(types, "types");
-    return extending(List.of(types), expectedSize, autobox);
-  }
-
-  public static TypeSet extending(Collection<Class<?>> types) {
-    return extending(types, 0);
-  }
-
-  public static TypeSet extending(Collection<Class<?>> types, int expectedSize) {
-    return extending(types, expectedSize, false);
-  }
-
-  public static TypeSet extending(Collection<Class<?>> types, boolean autobox) {
-    return extending(types, 0, autobox);
-  }
-
-  public static TypeSet extending(Collection<Class<?>> types, int expectedSize, boolean autobox) {
-    Check.notNull(types, "types");
-    return new TypeSet(types, expectedSize, autobox);
   }
 
   private TypeSet(Collection<? extends Class<?>> s, boolean autobox) {

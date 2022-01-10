@@ -18,7 +18,7 @@ public class TypeTreeSetTest {
   @Test
   public void test01() {
     TypeTreeSet tts =
-        TypeTreeSet.withTypes(
+        TypeTreeSet.of(
             true,
             FileOutputStream.class,
             StringBuilder.class,

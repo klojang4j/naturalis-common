@@ -38,8 +38,8 @@ public interface IntList {
     if (other.getClass() == UnmodifiableIntList.class) {
       return other;
     } else if (other.getClass() == IntArrayList.class) {
-      // With IntArrayList we know for a fact that toArray() always returns a fresh copy of its
-      // internal int array; no need to copy it again.
+      // With IntArrayList we know for a fact that toArray() always returns a
+      // fresh copy of its internal int array; no need to copy it again.
       return new UnmodifiableIntList(other.toArray());
     }
     int[] buf = new int[other.size()];

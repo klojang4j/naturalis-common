@@ -8,18 +8,16 @@ import static nl.naturalis.common.ClassMethods.*;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
- * A specialized {@link Map} implementation used to concisely associate a single value or action
- * (i&#46;e&#46; lambdas) to multiple Java types. If the requested type is not present, but one of
- * its super types is, it will return the value associated with the super type. The map can
- * optionally also be configured to "autobox" (and unbox) types: if the requested type is a
- * primitive type, and there is no entry for it in the map, but there is one for the corresponding
- * wrapper type, then the map will return the value associated with the wrapper type (and vice
- * versa).
+ * A specialized {@link Map} implementation used to map types to values. Its main feature is that,
+ * if the requested type is not present, but one of its super types is, it will return the value
+ * associated with the super type. A {@code TypeMap} does not allow {@code null} keys or values. If
+ * you add {@code Object.class} to the map, it is guaranteed to always return a non-null value.
  *
  * <p>The {@code TypeTreeMap} class behaves just like the {@link TypeMap} class, but is internally
- * backed by a {@link TreeMap}. See the class comments of {@link TypeMap} for more info. The keys of
- * a {@code TypeTreeMap} are sorted in ascending order of abstraction. That is, any two keys, the
- * one that comes first will never be a supertype of the one following it.
+ * backed by a {@link TreeMap}. See the class comments for {@link TypeMap} to get a complete
+ * description of its features. The keys of a {@code TypeTreeMap} are sorted in ascending order of
+ * abstraction. That is, for any two keys, the one that comes first will never be a supertype of the
+ * one following it.
  *
  * @see TypeMap
  * @see TypeTreeSet
@@ -109,7 +107,7 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
     @SuppressWarnings("unchecked")
     public <W> TypeTreeMap<W> freeze() {
       if (bumped.length > 0 && !tmp.keySet().containsAll(Set.of(bumped))) {
-        throw new IllegalStateException("Bumped classes must have been added too");
+        throw new IllegalStateException("All bumped types must also be added to the map");
       }
       if (autoExpand) {
         return (TypeTreeMap<W>) new TypeTreeMap<>(tmp, autoExpand, autobox, bumped);
@@ -185,14 +183,26 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
       boolean autobox,
       Class<?>[] bumped) {
     super(autoExpand, autobox);
-    Comparator<Class<?>> cmp = new TypeTreeMapHelper(bumped).getComparator();
+    Comparator<Class<?>> cmp = new TTMComparatorFactory(bumped).getComparator();
     TreeMap<Class<?>, V> tmp = new TreeMap<>(cmp);
-    m.forEach(
-        (k, v) -> {
-          Check.that(k).is(notNull(), ERR_NULL_KEY);
-          Check.that(v).is(notNull(), ERR_NULL_VAL, k.getName());
-          tmp.put(k, v);
-        });
+    if (m instanceof AbstractTypeMap) {
+      tmp.putAll(m); // Null checks already done
+    } else {
+      m.forEach(
+          (k, v) -> {
+            Check.that(k).is(notNull(), ERR_NULL_KEY);
+            Check.that(v).is(notNull(), ERR_NULL_VAL, k.getName());
+            tmp.put(k, v);
+          });
+    }
+    this.backend = tmp;
+  }
+
+  // Special-purpose constructor for TypeTreeSet.prettySort
+  TypeTreeMap(Map<? extends Class<?>, ? extends V> m) {
+    super(false, false);
+    TreeMap<Class<?>, V> tmp = new TreeMap<>(new PrettyTypeMapComparator());
+    tmp.putAll(m);
     this.backend = tmp;
   }
 

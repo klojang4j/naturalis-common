@@ -1,14 +1,15 @@
 package nl.naturalis.common.collection;
 
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.lt;
+import nl.naturalis.common.check.Check;
+import nl.naturalis.common.function.ThrowingIntConsumer;
 
 import java.util.Arrays;
 import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import nl.naturalis.common.check.Check;
-import nl.naturalis.common.function.ThrowingIntConsumer;
+
+import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonChecks.lt;
 
 final class UnmodifiableIntList implements IntList {
 
@@ -85,11 +86,13 @@ final class UnmodifiableIntList implements IntList {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj == null) return false;
-    if (obj.getClass() == UnmodifiableIntList.class) {
+    if (obj == null) {
+      return false;
+    } else if (obj.getClass() == UnmodifiableIntList.class) {
       return this == obj || Arrays.equals(buf, ((UnmodifiableIntList) obj).buf);
     } else if (obj.getClass() == IntArrayList.class) {
-      return Arrays.equals(buf, ((IntArrayList) obj).buf);
+      IntArrayList that = ((IntArrayList) obj);
+      return size() == that.size() && Arrays.equals(buf, 0, buf.length, that.buf, 0, buf.length);
     } else if (obj instanceof IntList) {
       IntList that = (IntList) obj;
       return size() == that.size() && Arrays.equals(buf, that.toArray());

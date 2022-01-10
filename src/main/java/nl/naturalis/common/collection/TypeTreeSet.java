@@ -1,63 +1,162 @@
 package nl.naturalis.common.collection;
 
+import nl.naturalis.common.check.Check;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import nl.naturalis.common.check.Check;
+
+import static java.util.Arrays.asList;
+import static nl.naturalis.common.check.CommonChecks.deepNotNull;
+import static nl.naturalis.common.collection.TypeTreeMap.EMPTY_TYPE_ARRAY;
 
 /**
- * A {@code Set} implementation that orders the {@code Class} objects it contains in ascending order
- * of abstraction. That is, for any two elements in the set, the one that comes first will never be
- * a super type of the one that comes second and, conversely, the one that comes second will never
- * be a subtype of the one that comes first. If the set contains {@code Object.class}, that will be
- * the last element in the set. A {@code TypeTreeSet} can also be configured to return true from its
- * {@link Set#contains(Object) contains} method if the specified type is a primitive type (e.g.
- * {@code boolean.class}) and the set either contains the primitive type itself or its corresponding
- * wrapper type ({@code Boolean.class}). This will then also work the other way round.
+ * A specialized {@link Set} implementation for Java types. It returns {@code true} from its {@link
+ * Set#contains(Object) contains} method if the set contains the specified type <i>or any of its
+ * super types</i>. Its elements are ordered in ascending order of abstraction. That is, for any two
+ * elements in the set, the one that comes first will never be a super type of the one that comes
+ * second and, conversely, the one that comes second will never be a subtype of the one that comes
+ * first. If the set contains {@code Object.class}, that will be the last element in the set. As
+ * with {@link TypeMap} and {@link TypeTreeMap} you can optionally enable "autoboxing" and
+ * auto-expansion. See {@link TypeMap} for a description of these features.
  *
- * <p>This {@code Set} implementation is backed by a {@link TypeTreeMap}.
+ * <p>A {@code TypeTreeSet} is unmodifiable and does not allow {@code null} values. It is backed by
+ * a {@link TypeTreeMap}.
  *
+ * @see TypeMap
+ * @see TypeSet
  * @see TypeTreeMap
  * @author Ayco Holleman
  */
 public class TypeTreeSet extends AbstractTypeSet {
 
-  public static TypeTreeSet withTypes(Class<?>... types) {
-    return withTypes(false, types);
+  /**
+   * Returns a new {@code Collection} in which the types are sorted from less abstract to more
+   * abstract. This method is mainly meant for printing purposes. The new collection is in fact more
+   * rigorously and "nicely" sorted that a regular {@code TypeTreeSet}, but is therefore also very
+   * inefficient. Not recommended for normal programming. This is how the types in the new {@code
+   * Collection} are sorted:
+   *
+   * <p>
+   *
+   * <ol>
+   *   <li>Primitive types
+   *   <li>{@code enum} types
+   *   <li>Normal classes except {@code Object.class} - the longer the distance to {@code
+   *       Object.class} the earlier in the {@code Collection}
+   *   <li>Interfaces - sub-interfaces before super-interfaces
+   *   <li>Array types - internally sorted by the type of their elements
+   *   <li>{@code Object.class}
+   *   <li>Alphabetically by simple class name
+   * </ol>
+   *
+   * @param c The {@code Collection} to sort
+   * @return A new {@code Collection} in which the types are sorted from less abstract to more
+   *     abstract
+   */
+  public static Collection<Class<?>> prettySort(Collection<Class<?>> c) {
+    return new TypeTreeMap(toMap(c)).keySet();
   }
 
-  public static TypeTreeSet withTypes(boolean autobox, Class<?>... types) {
+  /**
+   * Sorts the types in the specified collection from less abstract to more abstract and then
+   * returns their class names in a {@code List}.
+   *
+   * @param c The {@code Collection} to sort
+   * @return A {@code List} of class names, sorted from less abstract to more abstract
+   */
+  public static List<String> sortAndGetNames(Collection<Class<?>> c) {
+    return new TypeTreeMap(toMap(c)).typeNames();
+  }
+
+  /**
+   * Sorts the types in the specified collection from less abstract to more abstract and then
+   * returns their class names in a {@code List}.
+   *
+   * @param c The {@code Collection} to sort
+   * @return A {@code List} of class names, sorted from less abstract to more abstract
+   */
+  public static List<String> sortAndGetSimpleNames(Collection<Class<?>> c) {
+    return new TypeTreeMap(toMap(c)).simpleTypeNames();
+  }
+
+  /**
+   * Returns a non-auto-expanding, autoboxing {@code TypeTreeSet} for the specified types.
+   *
+   * @param types The types to add to the {@code Set}.
+   * @return A non-auto-expanding, autoboxing {@code TypeTreeSet} for the specified types
+   */
+  public static TypeTreeSet of(Class<?>... types) {
+    return of(false, true, types);
+  }
+
+  /**
+   * Returns an autoboxing {@code TypeTreeSet} for the specified types.
+   *
+   * @param autoExpand Whether to enable auto-expansion (see {@link TypeMap})
+   * @param types The types to add to the {@code Set}.
+   * @return An autoboxing {@code TypeTreeSet} for the specified types
+   */
+  public static TypeTreeSet of(boolean autoExpand, Class<?>... types) {
+    return of(autoExpand, true, types);
+  }
+
+  /**
+   * Returns a {@code TypeTreeSet} for the specified types.
+   *
+   * @param autoExpand Whether to enable auto-expansion. See {@link
+   *     TypeMap.Builder#autoExpand(boolean) TypeMap} for more information about this parameter.
+   * @param autobox Whether to enable "autoboxing"
+   * @param types The types to add to the {@code Set}.
+   * @return A {@code TypeTreeSet} for the specified types
+   */
+  public static TypeTreeSet of(boolean autoExpand, boolean autobox, Class<?>... types) {
     Check.notNull(types, "types");
-    return withTypes(List.of(types), autobox);
+    return new TypeTreeSet(asList(types), autoExpand, autobox);
   }
 
-  public static TypeTreeSet withTypes(Collection<Class<?>> src) {
-    return withTypes(src, false);
+  /**
+   * Converts the specified {@code Collection} to a non-auto-expanding, autoboxing {@code
+   * TypeTreeSet}.
+   *
+   * @param c The {@code Collection} to convert
+   * @return A non-auto-expanding, autoboxing {@code TypeTreeSet}
+   */
+  public static TypeTreeSet copyOf(Collection<Class<?>> c) {
+    return copyOf(c, false, true);
   }
 
-  public static TypeTreeSet withTypes(Collection<Class<?>> src, boolean autobox) {
-    Check.notNull(src, "src");
-    return new TypeTreeSet(src, false, autobox);
+  /**
+   * Converts the specified {@code Collection} to an autoboxing {@code TypeTreeSet}.
+   *
+   * @param c The {@code Collection} to convert
+   * @param autoExpand Whether to enable auto-expansion (see {@link TypeMap})
+   * @return An autoboxing {@code TypeTreeSet}
+   */
+  public static TypeTreeSet copyOf(Collection<Class<?>> c, boolean autoExpand) {
+    return copyOf(c, autoExpand, true);
   }
 
-  public static TypeTreeSet extending(Class<?>... types) {
-    return extending(false, types);
-  }
-
-  public static TypeTreeSet extending(boolean autobox, Class<?>... types) {
-    Check.notNull(types, "types");
-    return extending(Set.of(types), autobox);
-  }
-
-  public static TypeTreeSet extending(Collection<Class<?>> types) {
-    return extending(types, true);
-  }
-
-  public static TypeTreeSet extending(Collection<Class<?>> types, boolean autobox) {
-    return new TypeTreeSet(types, true, autobox);
+  /**
+   * Converts the specified {@code Collection} to a {@code TypeTreeSet}.
+   *
+   * @param c The {@code Collection} to convert
+   * @param autoExpand Whether to enable auto-expansion (see {@link TypeMap})
+   * @param autobox Whether to enable "autoboxing"
+   * @return A {@code TypeTreeSet}
+   */
+  public static TypeTreeSet copyOf(Collection<Class<?>> c, boolean autoExpand, boolean autobox) {
+    Check.that(c).is(deepNotNull());
+    if (c.getClass() == TypeTreeSet.class) {
+      TypeTreeSet tts = (TypeTreeSet) c;
+      if (tts.map.autoExpand == autoExpand && tts.map.autobox == autobox) {
+        return tts;
+      }
+    }
+    return new TypeTreeSet(c, false, true);
   }
 
   private TypeTreeSet(Collection<? extends Class<?>> s, boolean autoExpand, boolean autobox) {
-    super(new TypeTreeMap<>(toMap(s), autoExpand, autobox, TypeTreeMap.EMPTY_TYPE_ARRAY));
+    super(new TypeTreeMap<>(toMap(s), autoExpand, autobox, EMPTY_TYPE_ARRAY));
   }
 }

@@ -27,7 +27,7 @@ abstract class AbstractTypeSet implements Set<Class<?>> {
     return m;
   }
 
-  private final AbstractTypeMap<Object> map;
+  final AbstractTypeMap<Object> map;
 
   AbstractTypeSet(AbstractTypeMap<Object> map) {
     this.map = map;
@@ -112,11 +112,11 @@ abstract class AbstractTypeSet implements Set<Class<?>> {
   }
 
   public List<String> prettyTypeNames() {
-    return map.prettyTypeNames();
+    return map.typeNames();
   }
 
   public List<String> prettySimpleTypeNames() {
-    return map.prettySimpleTypeNames();
+    return map.simpleTypeNames();
   }
 
   @Override

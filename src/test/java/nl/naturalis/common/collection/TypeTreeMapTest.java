@@ -72,7 +72,7 @@ public class TypeTreeMapTest {
             int.class,
             MyArrayList2.class);
 
-    Set<Class<?>> set2 = new TreeSet<>(new TypeTreeMapHelper(new Class[0]).getComparator());
+    Set<Class<?>> set2 = new TreeSet<>(new TTMComparatorFactory(new Class[0]).getComparator());
     set2.addAll(set);
     set2.forEach(c -> System.out.println(ClassMethods.simpleClassName(c)));
   }

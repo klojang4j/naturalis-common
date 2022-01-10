@@ -1,17 +1,15 @@
 package nl.naturalis.common.collection;
 
-import static nl.naturalis.common.check.CommonChecks.greaterThan;
-import static nl.naturalis.common.check.CommonChecks.gt;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.lt;
+import nl.naturalis.common.check.Check;
+import nl.naturalis.common.function.ThrowingIntConsumer;
+import nl.naturalis.common.util.ExpansionType;
 
 import java.util.Arrays;
 import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import nl.naturalis.common.check.Check;
-import nl.naturalis.common.function.ThrowingIntConsumer;
-import nl.naturalis.common.util.ExpansionType;
+
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * A {@code List} of {@code int} values. The backing array is exposed via the {@link #toArray()}
@@ -172,11 +170,13 @@ public class IntArrayList implements IntList {
   @Override
   @SuppressWarnings("unlikely-arg-type")
   public boolean equals(Object obj) {
-    if (obj == null) return false;
-    if (obj.getClass() == UnmodifiableIntList.class) {
-      return ((UnmodifiableIntList) obj).equals(this);
+    if (this == obj) {
+      return true;
+    } else if (obj == null) {
+      return false;
+    } else if (obj.getClass() == UnmodifiableIntList.class) {
+      return obj.equals(this);
     } else if (obj.getClass() == IntArrayList.class) {
-      if (this == obj) return true;
       IntArrayList that = (IntArrayList) obj;
       return cnt == that.cnt && Arrays.equals(buf, 0, cnt, that.buf, 0, cnt);
     } else if (obj instanceof IntList) {

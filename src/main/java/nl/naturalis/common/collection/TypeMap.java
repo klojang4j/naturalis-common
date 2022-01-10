@@ -10,26 +10,34 @@ import static nl.naturalis.common.ClassMethods.*;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
- * A specialized {@link Map} implementation used to concisely associate a single value or action
- * (i&#46;e&#46; lambdas) to multiple Java types. If the requested type is not present, but one of
- * its super types is, it will return the value associated with the super type. The map can
- * optionally also be configured to "autobox" (and unbox) types: if the requested type is a
+ * A specialized {@link Map} implementation used to map types to values. Its main feature is that,
+ * if the requested type is not present, but one of its super types is, it will return the value
+ * associated with the super type. A {@code TypeMap} does not allow {@code null} keys or values. If
+ * you add {@code Object.class} to the map, it is guaranteed to always return a non-null value.
+ *
+ * <h4>Autoboxing</h4>
+ *
+ * <p>The map is configured by default to "autobox" (and unbox) types: if the requested type is a
  * primitive type, and there is no entry for it in the map, but there is one for the corresponding
  * wrapper type, then the map will return the value associated with the wrapper type (and vice
- * versa).
+ * versa). You can {@link #autobox disable} the autoboxing feature.
+ *
+ * <h4>Auto-expansion</h4>
+ *
+ * <p>A {@code TypeMap} unmodifiable. All map-altering methods will throw an {@link
+ * UnsupportedOperationException}. However, the map can be configured to auto-expand internally: if
+ * the requested type is not present, but one of its super types is, then the requested type will
+ * tacitly be added to the map, acquiring the value associated with the super type. Thus, when the
+ * subtype is requested again, it will result in a direct hit. Auto-expansion is enabled by default
+ * for the {@code TypeMap} class, but it is disabled by default for its sibling class, the {@link
+ * TypeTreeMap}.
+ *
+ * <h4>Type-lookup Logic</h4>
  *
  * <p>When looking for a super type of the requested type, the map will first climb the type's class
  * hierarchy up to, but not including {@code Object.class}; then it will climb up the type's
  * interfaces (if any); and finally it will check to see if it contains an entry for {@code
  * Object.class}.
- *
- * <p>A {@code TypeMap} does not allow {@code null} keys or values, and is unmodifiable. All
- * map-altering methods will throw an {@link UnsupportedOperationException}. However, the map can be
- * configured to auto-expand internally: if the requested type is not present, but one of its super
- * types is, then the requested type will tacitly be added to the map with the same value as the
- * super type's value. Thus, when the type is requested again, it will result in a direct hit. N.B.
- * Auto-expansion is enabled by default for the {@code TypeMap} class, bit it is disabled by default
- * for its sibling class, {@link TypeTreeMap}.
  *
  * @param <V> The type of the values in the {@code Map}
  * @author Ayco Holleman
@@ -65,10 +73,10 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
     }
 
     /**
-     * Enables the auto-expand feature. See description above. If the {@code expectedSize} argument
-     * is less than or equal to the total number of entries you {@link #add(Class, Object) added},
-     * it will be interpreted as a multiplier. So, for example, 3 would mean that you expect the map
-     * to grow to about three times its original size.
+     * Enables the auto-expansion feature. See description above. If the {@code expectedSize}
+     * argument is less than or equal to the total number of entries you {@link #add(Class, Object)
+     * added}, it will be interpreted as a multiplier. So, for example, 3 would mean that you expect
+     * the map to grow to about three times its original size.
      *
      * @param expectedSize An estimate of the final size of the auto-expanding map
      * @return This {@code Builder} instance
@@ -193,7 +201,7 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
    *
    * @param <U> The type of the values in the {@code Map}
    * @param src The {@code Map} to convert
-   * @param expectedSize The expected size of the map
+   * @param expectedSize An estimate of the final size of the auto-expanding map
    * @param autobox Whether to enable the "autoboxing" feature (see class comments)
    * @return An auto-expanding {@code TypeMap}
    */
