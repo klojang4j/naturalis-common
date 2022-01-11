@@ -11,7 +11,7 @@ class PrettyTypeMapComparator implements Comparator<Class<?>> {
     if (c1 == c2) {
       return 0;
     }
-    if(c1.isPrimitive() && c2.isPrimitive()) {
+    if (c1.isPrimitive() && c2.isPrimitive()) {
       return c1.getSimpleName().compareTo(c2.getSimpleName());
     }
     if (c1.isPrimitive()) {
@@ -20,7 +20,7 @@ class PrettyTypeMapComparator implements Comparator<Class<?>> {
     if (c2.isPrimitive()) {
       return 1;
     }
-    if(isWrapper(c1) && isWrapper(c2)) {
+    if (isWrapper(c1) && isWrapper(c2)) {
       return c1.getSimpleName().compareTo(c2.getSimpleName());
     }
     if (isWrapper(c1)) {
@@ -41,24 +41,24 @@ class PrettyTypeMapComparator implements Comparator<Class<?>> {
     if (c2 == Object.class) {
       return -1;
     }
-    if (c1.isArray() && c2.isArray()) {
-      return compare(c1.getComponentType(), c2.getComponentType());
-    }
     if (c1.isArray()) {
+      if (c2.isArray()) {
+        return compare(c1.getComponentType(), c2.getComponentType());
+      }
       return 1;
     }
     if (c2.isArray()) {
       return -1;
     }
-    if (c1.isInterface() && c2.isInterface()) {
-      if (getAllInterfaces(c1).size() < getAllInterfaces(c2).size()) {
-        return 1;
-      }
-      if (getAllInterfaces(c1).size() > getAllInterfaces(c2).size()) {
-        return -1;
-      }
-    }
     if (c1.isInterface()) {
+      if (c2.isInterface()) {
+        if (getAllInterfaces(c1).size() < getAllInterfaces(c2).size()) {
+          return 1;
+        }
+        if (getAllInterfaces(c1).size() > getAllInterfaces(c2).size()) {
+          return -1;
+        }
+      }
       return 1;
     }
     if (c2.isInterface()) {

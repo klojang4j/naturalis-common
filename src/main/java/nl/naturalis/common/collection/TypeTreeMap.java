@@ -183,7 +183,7 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
       boolean autobox,
       Class<?>[] bumped) {
     super(autoExpand, autobox);
-    Comparator<Class<?>> cmp = new TTMComparatorFactory(bumped).getComparator();
+    Comparator<Class<?>> cmp = new TypeComparatorFactory(bumped).getComparator();
     TreeMap<Class<?>, V> tmp = new TreeMap<>(cmp);
     if (m instanceof AbstractTypeMap) {
       tmp.putAll(m); // Null checks already done

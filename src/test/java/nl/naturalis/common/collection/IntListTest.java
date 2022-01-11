@@ -1,10 +1,12 @@
 package nl.naturalis.common.collection;
 
+import nl.naturalis.common.ClassMethods;
 import org.junit.Test;
 
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class IntListTest {
 
@@ -26,4 +28,5 @@ public class IntListTest {
     assertEquals(IntList.of(3, 5, 7, 9, 11), ial);
     assertEquals(ial, IntList.of(3, 5, 7, 9, 11));
   }
+
 }

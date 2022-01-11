@@ -44,7 +44,7 @@ public class TypeTreeMapHelperTest {
                 Enum.class,
                 Iterable.class,
                 Number.class));
-    Collections.sort(l, new TTMComparatorFactory(new Class[0]).getComparator());
+    Collections.sort(l, new TypeComparatorFactory(new Class[0]).getComparator());
     l.forEach(c -> System.out.println(ClassMethods.simpleClassName(c)));
     assertTrue(l.indexOf(Collection.class) < l.indexOf(Iterable.class));
     assertTrue(l.indexOf(Set.class) < l.indexOf(Collection.class));

@@ -1,5 +1,6 @@
 package nl.naturalis.common.collection;
 
+import nl.naturalis.common.ClassMethods;
 import org.junit.Test;
 
 import java.io.Closeable;
@@ -10,6 +11,7 @@ import java.util.List;
 
 import static nl.naturalis.common.CollectionMethods.implode;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class PrettyTypeMapComparatorTest {
 
@@ -43,5 +45,10 @@ public class PrettyTypeMapComparatorTest {
       // System.out.println(implode(sorted, " "));
       assertEquals(expected, implode(sorted, " "));
     }
+  }
+
+  @Test
+  public void test01() {
+    assertTrue(ClassMethods.isA(String[].class, Object.class));
   }
 }

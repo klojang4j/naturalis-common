@@ -2,11 +2,11 @@ package nl.naturalis.common.collection;
 
 import java.util.Comparator;
 
-class TTMComparatorFactory {
+class TypeComparatorFactory {
 
   private final Class<?>[] bumped;
 
-  TTMComparatorFactory(Class<?>[] bumped) {
+  TypeComparatorFactory(Class<?>[] bumped) {
     this.bumped = bumped;
   }
 
