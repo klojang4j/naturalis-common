@@ -1,7 +1,7 @@
 package nl.naturalis.common;
 
 /**
- * Defines objects that can meaningfully be said to be empty, e&#46;g&#46; when all their fields are
+ * Defines objects that can meaningfully be said to be empty. For example when all their fields are
  * null. Classes implementing this interface get special treatment in methods like {@link
  * ObjectMethods#isEmpty(Object)}.
  *
@@ -13,9 +13,9 @@ public interface Emptyable {
   public static final Emptyable EMPTY = () -> true;
 
   /**
-   * Returns whether or not the object can be said to be empty.
+   * Returns whether the object can be said to be empty.
    *
-   * @return
+   * @return Whether the object can be said to be empty
    */
   boolean isEmpty();
 }

@@ -1,18 +1,20 @@
 package nl.naturalis.common.unsafe;
 
+import nl.naturalis.common.ArrayMethods;
+import nl.naturalis.common.check.Check;
+
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.IntFunction;
 import java.util.stream.Stream;
-import nl.naturalis.common.ArrayMethods;
-import nl.naturalis.common.check.Check;
+
 import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
 import static nl.naturalis.common.check.CommonChecks.gte;
 
 /**
  * A fixed-size {@code List} implementation that does not perform range checking and exposes its
  * backing array. Useful for package-private and/or intra-modular list exchanges with a high number
- * if reads and/or writes on the list. Since this is a fixed-size list, you can immediately {@code
+ * of reads and/or writes on the list. Since this is a fixed-size list, you can immediately {@code
  * get} and {@code set} values, provided you specify a valid list index. All {@code add} methods
  * throw an {@code UnsupportedOperationException}; list manipulation <i>must</i> be done via the
  * {@code set} method. The {@code remove} methods, however, have been repurposed to nullify list
@@ -40,7 +42,7 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
   }
 
   /**
-   * Creates a new {@code UnsafeList} using the specified function the create a backing array of the
+   * Creates a new {@code UnsafeList} using the specified function to create a backing array of the
    * specified size.
    *
    * @param constructor A function that produces the backing array
@@ -55,7 +57,7 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
   /**
    * Creates a new {@code UnsafeList} from the specified {@code Collection}.
    *
-   * @param c The collection from which to created the {@code UnsafeList}
+   * @param c The collection from which to create the {@code UnsafeList}
    */
   @SuppressWarnings("unchecked")
   public UnsafeList(Collection<? extends E> c) {
@@ -133,9 +135,9 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
 
   /**
    * Repurposed to nullify the element at the specified index. Note, however, that this method will
-   * throw an {@link UnsupportedOperationException} if the type parameter for this {@UnsafeList} is
-   * {@code Integer}, because Java's auto-boxing/auto-unboxing feature would make the method
-   * indistinguishable from {@code remove(Object o)}.
+   * throw an {@link UnsupportedOperationException} if the type parameter for this {@code
+   * UnsafeList} is {@code Integer}, because Java's auto-boxing/auto-unboxing feature would make the
+   * method indistinguishable from {@code remove(Object o)}.
    */
   @Override
   public E remove(int index) {
@@ -156,7 +158,7 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
   /**
    * Repurposed to nullify the first list element that equals specified object. Note, however, that
    * this method will throw an {@link UnsupportedOperationException} if the type parameter for this
-   * {@UnsafeList} is {@code Integer}, because Java's auto-boxing/auto-unboxing would make the
+   * {@code UnsafeList} is {@code Integer}, because Java's auto-boxing/auto-unboxing would make the
    * method indistinguishable from {@code remove(int index)}.
    */
   @Override

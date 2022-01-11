@@ -14,7 +14,8 @@ public interface Relation<T, U> {
 
   /**
    * Returns the converse of this relation, swapping subject and object in the relationship. For
-   * example, the converse of <i>X contains Y</i> is <i>Y contains X</i> (or <i>X element-of Y</i>).
+   * example, the converse of {@code X contains Y} is {@code Y contains X} (or {@code X element-of
+   * Y}).
    *
    * @return The converse of this {@code Relation}
    */
@@ -23,16 +24,16 @@ public interface Relation<T, U> {
   }
 
   /**
-   * Returns the negation of the this relation.
+   * Returns the negation of this {@code Relation}.
    *
-   * @return The negation of the this relation
+   * @return The negation of this {@code Relation}
    */
   default Relation<T, U> negate() {
     return (x, y) -> !exists(x, y);
   }
 
   /**
-   * Whether or not the relationship between {@code subject} and {@code object} exists.
+   * Whether the relationship between {@code subject} and {@code object} exists.
    *
    * @param subject The subject of the relation (the entity from which the relationship extends)
    * @param object The object of the relation (the entity to which the relationship extends)
