@@ -28,8 +28,8 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
   private final E[] data;
 
   /**
-   * Creates a new {@code UnsafeList} for the specified element type and with the specified
-   * <i>size</i> (not capacity). All elements in the list are null.
+   * Creates a new {@code UnsafeList} for the specified element type and with the specified size
+   * (and capacity).
    *
    * @param clazz The class of the list elements
    * @param size The desired size of the list

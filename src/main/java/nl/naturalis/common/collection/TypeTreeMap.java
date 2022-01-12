@@ -50,17 +50,17 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
     }
 
     /**
-     * Enables the automatic addition of new subtypes. By default auto-expansion is disabled.
+     * Whether to enable auto-expansion. By default auto-expansion is disabled.
      *
      * @return This {@code Builder} instance
      */
-    public Builder<U> autoExpand() {
-      this.autoExpand = true;
+    public Builder<U> autoExpand(boolean autoExpand) {
+      this.autoExpand = autoExpand;
       return this;
     }
 
     /**
-     * Whether to enable the "autoboxing" feature. See description above. By default, autoboxing is
+     * Whether to enable the "autoboxing" feature. See description above. By default autoboxing is
      * enabled.
      *
      * @return This {@code Builder} instance
@@ -85,7 +85,7 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
     }
 
     /**
-     * Associates the specified type with the specified value
+     * Associates the specified type with the specified value.
      *
      * @param type The type
      * @param value The value
@@ -107,7 +107,7 @@ public class TypeTreeMap<V> extends AbstractTypeMap<V> {
     @SuppressWarnings("unchecked")
     public <W> TypeTreeMap<W> freeze() {
       if (bumped.length > 0 && !tmp.keySet().containsAll(Set.of(bumped))) {
-        throw new IllegalStateException("All bumped types must also be added to the map");
+        throw new IllegalStateException("Bumped types must also be added to the map");
       }
       if (autoExpand) {
         return (TypeTreeMap<W>) new TypeTreeMap<>(tmp, autoExpand, autobox, bumped);
