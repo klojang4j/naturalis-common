@@ -20,13 +20,6 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
   final boolean autoExpand;
   final boolean autobox;
 
-  /*
-   * The expectedSize parameter *can* be used by subclasses to create a backing map of a certain
-   * size, if applicable. (It is not applicable for TreeTypeMap since that class is backed by a
-   * TreeMap, which cannot be given a size through its constructors.) However, the mere presence of
-   * this parameter signals that an auto-expanding instance is requested. Thus the backing map
-   * provided by the subclasses must not be unmodifiable.
-   */
   AbstractTypeMap(boolean autoExpand, boolean autobox) {
     this.autoExpand = autoExpand;
     this.autobox = autobox;
@@ -163,7 +156,7 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
 
   @Override
   public Set<Entry<Class<?>, V>> entrySet() {
-    return autoExpand ? Set.copyOf(backend().entrySet()) : backend().entrySet();
+    return Collections.unmodifiableSet(backend().entrySet());
   }
 
   @Override

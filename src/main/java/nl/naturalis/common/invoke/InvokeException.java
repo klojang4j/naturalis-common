@@ -3,6 +3,8 @@ package nl.naturalis.common.invoke;
 import java.util.function.Function;
 import nl.naturalis.common.ClassMethods;
 import static nl.naturalis.common.ArrayMethods.implode;
+import static nl.naturalis.common.ClassMethods.simpleClassName;
+import static nl.naturalis.common.ExceptionMethods.getRootCause;
 
 public class InvokeException extends RuntimeException {
 
@@ -11,6 +13,10 @@ public class InvokeException extends RuntimeException {
   private static final String ERR_EXCLUDES = "No properties remain after excluding %s from %s";
   private static final String ERR_NOT_READABLE =
       "Cannot read beans of type %s (bean must be instance of %s)";
+
+  public static InvokeException missingNoArgConstructor(Class<?> clazz) {
+    return new InvokeException("Missing no-arg constructor on %s", simpleClassName(clazz));
+  }
 
   public static <T> InvokeException typeMismatch(BeanReader<? super T> reader, T bean) {
     String name0 = ClassMethods.className(bean);
@@ -34,6 +40,10 @@ public class InvokeException extends RuntimeException {
       return s -> new InvokeException(ERR_EXCLUDES, implode(properties), clazz);
     }
     return s -> new InvokeException(ERR_INCLUDES, implode(properties), clazz);
+  }
+
+  public static InvokeException wrap(Throwable t) {
+    return new InvokeException(getRootCause(t).toString());
   }
 
   InvokeException(String message, Object... msgArgs) {

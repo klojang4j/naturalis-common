@@ -30,10 +30,8 @@ import static nl.naturalis.common.check.Messages.*;
  */
 public class CommonChecks {
 
-  // Associates checks with String.format message patterns
   static final IdentityHashMap<Object, Formatter> MESSAGE_PATTERNS;
-  // Stores the names of the checks
-  static final IdentityHashMap<Object, String> CHECK_NAMES;
+  static final IdentityHashMap<Object, String> NAMES;
 
   private static ArrayList<Tuple<Object, Formatter>> tmp0 = new ArrayList<>(50);
   private static ArrayList<Tuple<Object, String>> tmp1 = new ArrayList<>(50);
@@ -413,6 +411,10 @@ public class CommonChecks {
    * @return A {@code Relation}
    */
   public static <E, C extends Collection<? super E>> Relation<C, E> containing() {
+    return Collection::contains;
+  }
+
+  public static <E, C extends Collection<? super E>> Relation<C, E> containing(E element) {
     return Collection::contains;
   }
 
@@ -849,40 +851,39 @@ public class CommonChecks {
    */
   public static <T extends Number, U extends Number> Relation<T, Pair<U>> between() {
     return (x, y) -> {
-      if (x.getClass() != y.getFirst().getClass()) {
-        if (x.getClass() == BigDecimal.class || y.getFirst().getClass() == BigDecimal.class) {
+      if (x.getClass() != y.one().getClass()) {
+        if (x.getClass() == BigDecimal.class || y.one().getClass() == BigDecimal.class) {
           BigDecimal bd0 = NumberMethods.convert(x, BigDecimal.class);
-          BigDecimal bd1 = NumberMethods.convert(y.getFirst(), BigDecimal.class);
-          BigDecimal bd2 = NumberMethods.convert(y.getSecond(), BigDecimal.class);
+          BigDecimal bd1 = NumberMethods.convert(y.one(), BigDecimal.class);
+          BigDecimal bd2 = NumberMethods.convert(y.two(), BigDecimal.class);
           return bd0.compareTo(bd1) >= 0 && bd0.compareTo(bd2) < 0;
         }
         double d0 = x.doubleValue();
-        double d1 = y.getFirst().doubleValue();
-        double d2 = y.getSecond().doubleValue();
+        double d1 = y.one().doubleValue();
+        double d2 = y.two().doubleValue();
         return d0 >= d1 && d0 < d2;
       }
       if (x.getClass() == Integer.class) {
         int n = (Integer) x;
-        return n >= (Integer) y.getFirst() && n < (Integer) y.getSecond();
+        return n >= (Integer) y.one() && n < (Integer) y.two();
       } else if (x.getClass() == Double.class) {
         double n = (Double) x;
-        return n >= (Double) y.getFirst() && n < (Double) y.getSecond();
+        return n >= (Double) y.one() && n < (Double) y.two();
       } else if (x.getClass() == Long.class) {
         long n = (Long) x;
-        return n >= (Long) y.getFirst() && n < (Long) y.getSecond();
+        return n >= (Long) y.one() && n < (Long) y.two();
       } else if (x.getClass() == Byte.class) {
         byte n = (Byte) x;
-        return n >= (Byte) y.getFirst() && n < (Float) y.getSecond();
+        return n >= (Byte) y.one() && n < (Float) y.two();
       } else if (x.getClass() == Float.class) {
         float n = (Float) x;
-        return n >= (Float) y.getFirst() && n < (Float) y.getSecond();
+        return n >= (Float) y.one() && n < (Float) y.two();
       } else if (x.getClass() == Short.class) {
         short n = (Short) x;
-        return n >= (Short) y.getFirst() && n < (Short) y.getSecond();
+        return n >= (Short) y.one() && n < (Short) y.two();
       } else if (x.getClass() == BigDecimal.class) {
         BigDecimal n = (BigDecimal) x;
-        return n.compareTo((BigDecimal) y.getFirst()) >= 0
-            && n.compareTo((BigDecimal) y.getSecond()) < 0;
+        return n.compareTo((BigDecimal) y.one()) >= 0 && n.compareTo((BigDecimal) y.two()) < 0;
       }
       return Check.fail("Ouch, a new type of number: %s", x.getClass());
     };
@@ -900,40 +901,39 @@ public class CommonChecks {
    */
   public static <T extends Number> Relation<T, Pair<T>> inRangeClosed() {
     return (x, y) -> {
-      if (x.getClass() != y.getFirst().getClass()) {
-        if (x.getClass() == BigDecimal.class || y.getFirst().getClass() == BigDecimal.class) {
+      if (x.getClass() != y.one().getClass()) {
+        if (x.getClass() == BigDecimal.class || y.one().getClass() == BigDecimal.class) {
           BigDecimal bd0 = NumberMethods.convert(x, BigDecimal.class);
-          BigDecimal bd1 = NumberMethods.convert(y.getFirst(), BigDecimal.class);
-          BigDecimal bd2 = NumberMethods.convert(y.getSecond(), BigDecimal.class);
+          BigDecimal bd1 = NumberMethods.convert(y.one(), BigDecimal.class);
+          BigDecimal bd2 = NumberMethods.convert(y.two(), BigDecimal.class);
           return bd0.compareTo(bd1) >= 0 && bd0.compareTo(bd2) <= 0;
         }
         double d0 = x.doubleValue();
-        double d1 = y.getFirst().doubleValue();
-        double d2 = y.getSecond().doubleValue();
+        double d1 = y.one().doubleValue();
+        double d2 = y.two().doubleValue();
         return d0 >= d1 && d0 <= d2;
       }
       if (x.getClass() == Integer.class) {
         int n = (Integer) x;
-        return n >= (Integer) y.getFirst() && n <= (Integer) y.getSecond();
+        return n >= (Integer) y.one() && n <= (Integer) y.two();
       } else if (x.getClass() == Double.class) {
         double n = (Double) x;
-        return n >= (Double) y.getFirst() && n <= (Double) y.getSecond();
+        return n >= (Double) y.one() && n <= (Double) y.two();
       } else if (x.getClass() == Long.class) {
         long n = (Long) x;
-        return n >= (Long) y.getFirst() && n <= (Long) y.getSecond();
+        return n >= (Long) y.one() && n <= (Long) y.two();
       } else if (x.getClass() == Byte.class) {
         byte n = (Byte) x;
-        return n >= (Byte) y.getFirst() && n <= (Float) y.getSecond();
+        return n >= (Byte) y.one() && n <= (Float) y.two();
       } else if (x.getClass() == Float.class) {
         float n = (Float) x;
-        return n >= (Float) y.getFirst() && n <= (Float) y.getSecond();
+        return n >= (Float) y.one() && n <= (Float) y.two();
       } else if (x.getClass() == Short.class) {
         short n = (Short) x;
-        return n >= (Short) y.getFirst() && n <= (Short) y.getSecond();
+        return n >= (Short) y.one() && n <= (Short) y.two();
       } else if (x.getClass() == BigDecimal.class) {
         BigDecimal n = (BigDecimal) x;
-        return n.compareTo((BigDecimal) y.getFirst()) >= 0
-            && n.compareTo((BigDecimal) y.getSecond()) <= 0;
+        return n.compareTo((BigDecimal) y.one()) >= 0 && n.compareTo((BigDecimal) y.two()) <= 0;
       }
       return Check.fail("Ouch, a new type of number: %s", x.getClass());
     };
@@ -1181,9 +1181,9 @@ public class CommonChecks {
 
   static {
     MESSAGE_PATTERNS = new IdentityHashMap<>(tmp0.size());
-    CHECK_NAMES = new IdentityHashMap<>(tmp1.size());
+    NAMES = new IdentityHashMap<>(tmp1.size());
     tmp0.forEach(tuple -> tuple.insertInto(MESSAGE_PATTERNS));
-    tmp1.forEach(tuple -> tuple.insertInto(CHECK_NAMES));
+    tmp1.forEach(tuple -> tuple.insertInto(NAMES));
     tmp0 = null;
     tmp1 = null;
   }
@@ -1191,31 +1191,27 @@ public class CommonChecks {
   private static final String suffix = "()";
 
   static String nameOf(Predicate<?> test) {
-    return ifNotNull(CHECK_NAMES.get(test), name -> name + suffix, Predicate.class.getSimpleName());
+    return ifNotNull(NAMES.get(test), name -> name + suffix, Predicate.class.getSimpleName());
   }
 
   static String nameOf(IntPredicate test) {
-    return ifNotNull(
-        CHECK_NAMES.get(test), name -> name + suffix, IntPredicate.class.getSimpleName());
+    return ifNotNull(NAMES.get(test), name -> name + suffix, IntPredicate.class.getSimpleName());
   }
 
   static String nameOf(Relation<?, ?> test) {
-    return ifNotNull(CHECK_NAMES.get(test), name -> name + suffix, Relation.class.getSimpleName());
+    return ifNotNull(NAMES.get(test), name -> name + suffix, Relation.class.getSimpleName());
   }
 
   static String nameOf(IntRelation test) {
-    return ifNotNull(
-        CHECK_NAMES.get(test), name -> name + suffix, IntRelation.class.getSimpleName());
+    return ifNotNull(NAMES.get(test), name -> name + suffix, IntRelation.class.getSimpleName());
   }
 
   static String nameOf(ObjIntRelation<?> test) {
-    return ifNotNull(
-        CHECK_NAMES.get(test), name -> name + suffix, ObjIntRelation.class.getSimpleName());
+    return ifNotNull(NAMES.get(test), name -> name + suffix, ObjIntRelation.class.getSimpleName());
   }
 
   static String nameOf(IntObjRelation<?> test) {
-    return ifNotNull(
-        CHECK_NAMES.get(test), name -> name + suffix, IntObjRelation.class.getSimpleName());
+    return ifNotNull(NAMES.get(test), name -> name + suffix, IntObjRelation.class.getSimpleName());
   }
 
   private static void setMessagePattern(Object test, Formatter message) {

@@ -48,7 +48,6 @@ public class CheckTest {
     assertEquals(ObjectCheck.class, check.getClass());
   }
 
-  // greaterThan() works with Number instances, not ints, but the compiler is fine with it
   @Test(expected = IllegalArgumentException.class)
   public void greaterThan01() {
     Check.that(2, "fooArg").is(greaterThan(), 4);
@@ -75,7 +74,7 @@ public class CheckTest {
   }
 
   /*
-   * Gotcha: intstanceOf() takes an object so forces the int argument to be boxed. In other words
+   * Gotcha: instanceOf() takes an object so forces the int argument to be boxed. In other words
    * it's pointless and misleading to do an instanceOf check on an int argument.
    */
   @Test(expected = IllegalArgumentException.class)

@@ -8,7 +8,7 @@ import java.util.function.*;
 import java.util.stream.IntStream;
 
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
-import static nl.naturalis.common.check.CommonChecks.CHECK_NAMES;
+import static nl.naturalis.common.check.CommonChecks.NAMES;
 import static nl.naturalis.common.check.CommonChecks.eq;
 import static nl.naturalis.common.check.CommonGetters.formatProperty;
 import static nl.naturalis.common.check.Messages.createMessage;
@@ -1692,7 +1692,7 @@ public abstract class Check<T, E extends Exception> {
     }
     String fmt = FormatNormalizer.normalize(pattern);
     Object[] all = new Object[msgArgs.length + 5];
-    all[0] = CHECK_NAMES.getOrDefault(test, test.getClass().getSimpleName());
+    all[0] = NAMES.getOrDefault(test, test.getClass().getSimpleName());
     all[1] = Messages.toStr(subject);
     all[2] = ifNotNull(subject, Check::className);
     all[3] = argName;

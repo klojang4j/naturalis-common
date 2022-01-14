@@ -24,7 +24,7 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * @author Ayco Holleman
  * @param <V> The type of the values in the {@code Map}
  */
-public class TypeTreeMap<V> extends AbstractTypeMap<V> {
+public final class TypeTreeMap<V> extends AbstractTypeMap<V> {
 
   static final Class<?>[] EMPTY_TYPE_ARRAY = new Class[0];
 

@@ -1,9 +1,11 @@
 package nl.naturalis.common.function;
 
+import java.util.function.Function;
+
 /**
- * Defines some kind of relationship between two objects. For example, if object x is a {@code
- * Collection} and object y is an element of it, then the relation <i>X contains Y</i> exists
- * between these two objects.
+ * Defines a relationship between two objects. For example, if object x is a {@code Collection} and
+ * object y is an element of it, then the relation <i>X contains Y</i> exists between these two
+ * objects.
  *
  * @author Ayco Holleman
  * @param <T> The type of the subject of the relation
@@ -30,6 +32,10 @@ public interface Relation<T, U> {
    */
   default Relation<T, U> negate() {
     return (x, y) -> !exists(x, y);
+  }
+
+  default <V> Relation<T,V> or(Function<V,Relation<T,V>> other) {
+    return null;
   }
 
   /**

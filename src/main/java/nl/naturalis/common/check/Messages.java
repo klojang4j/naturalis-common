@@ -264,7 +264,7 @@ class Messages {
       } else {
         fmt = "%s must be >= %s and < %s (was %s)";
       }
-      return format(fmt, md.argName(), pair.getFirst(), pair.getSecond(), md.argument());
+      return format(fmt, md.argName(), pair.one(), pair.two(), md.argument());
     };
   }
 
@@ -277,7 +277,7 @@ class Messages {
       } else {
         fmt = "%s must be >= %s and <= %s (was %s)";
       }
-      return format(fmt, md.argName(), pair.getFirst(), pair.getSecond(), md.argument());
+      return format(fmt, md.argName(), pair.one(), pair.two(), md.argument());
     };
   }
 

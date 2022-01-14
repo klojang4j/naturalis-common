@@ -6,7 +6,7 @@ import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.invoke.BeanWriter;
-import static nl.naturalis.common.ArrayMethods.isOneOf;
+
 import static nl.naturalis.common.ArrayMethods.pack;
 import static nl.naturalis.common.ClassMethods.box;
 import static nl.naturalis.common.ClassMethods.isA;
@@ -76,22 +76,12 @@ public class Morph<T> {
       return (T) obj;
     } else if (toType.isArray()) {
       return toArray(obj);
-    } else if (isOneOf(toType, List.class, ArrayList.class, Collection.class)) {
-      return toCollection1(obj, ArrayList::new);
-    } else if (toType == Set.class || toType == HashSet.class) {
-      return toCollection1(obj, HashSet::new);
-    } else if (toType == LinkedList.class) {
-      return toCollection2(obj, LinkedList::new);
-    } else if (toType == LinkedHashSet.class) {
-      return toCollection2(obj, LinkedHashSet::new);
-    } else if (toType == TreeSet.class) {
-      return toCollection2(obj, TreeSet::new);
     } else if (isA(toType, Collection.class)) {
-      throw new TypeConversionException(obj, toType);
+      return (T) MorphTable0.getInstance().morph(obj, (Class<Collection<?>>) toType);
     }
     // If we get to this point we know for sure the target
     // type is not an array and not a Collection.
-    else if (myType.isArray()) {
+    if (myType.isArray()) {
       return Array.getLength(obj) == 0
           ? (T) getDefaultValue(toType)
           : convert(Array.get(obj, 0), toType);

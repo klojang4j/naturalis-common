@@ -1,54 +1,30 @@
 package nl.naturalis.common;
 
+import nl.naturalis.common.check.Check;
+
 /**
  * A generic, immutable container of two objects of the same type.
  *
  * @author Ayco Holleman
  * @param <T>
  */
-public final class Pair<T> {
+public record Pair<T>(T one, T two) {
 
   /**
-   * Returns a new {@code Pair} consisting of the specified objects.
+   * Returns a new {@code Pair} consisting of the specified elements.
    *
-   * @param <U> The type of the objects
-   * @param first The first element of the {@code Pair}
-   * @param second The second element of the {@code Pair}
-   * @return A new {@code Pair} consisting of the specified objects
+   * @param <U> The type of the elements
+   * @param one The first element of the {@code Pair}
+   * @param two The second element of the {@code Pair}
+   * @return A new {@code Pair} consisting of the specified elements
    */
-  public static <U> Pair<U> of(U first, U second) {
-    return new Pair<>(first, second);
+  public static <U> Pair<U> of(U one, U two) {
+    return new Pair<>(one, two);
   }
 
-  private final T one;
-  private final T two;
-
-  /**
-   * Constructs a new {@code Pair} from the specified objects.
-   *
-   * @param first The first element of the {@code Pair}
-   * @param second The second element of the {@code Pair}
-   */
-  private Pair(T first, T second) {
-    one = first;
-    two = second;
+  public  Pair(T one, T two) {
+    this.one = Check.notNull(one).ok();
+    this.two = Check.notNull(two).ok();
   }
 
-  /**
-   * Returns the first element of this {@code Pair}.
-   *
-   * @return The first element of this {@code Pair}.
-   */
-  public T getFirst() {
-    return one;
-  }
-
-  /**
-   * Returns the second element of this {@code Pair}.
-   *
-   * @return The second element of this {@code Pair}.
-   */
-  public T getSecond() {
-    return two;
-  }
 }

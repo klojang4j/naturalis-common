@@ -9,20 +9,19 @@ public class TypeConversionException extends RuntimeException {
   private final Object objectToConvert;
   private final Class<?> targetType;
 
-  public TypeConversionException(Object objectToConvert, Class<?> targetType) {
-    super(getDefaultMessage(objectToConvert, targetType));
-    this.objectToConvert = objectToConvert;
+  public TypeConversionException(Object obj, Class<?> targetType) {
+    super(defaultMessage(obj, targetType));
+    this.objectToConvert = obj;
     this.targetType = targetType;
   }
 
-  public TypeConversionException(
-      Object objectToConvert, Class<?> targetType, String message, Object... msgArgs) {
-    super(format(message, msgArgs));
-    this.objectToConvert = objectToConvert;
+  public TypeConversionException(Object obj, Class<?> targetType, String msg, Object... msgArgs) {
+    super(defaultMessage(obj, targetType) + ". " + format(msg, msgArgs));
+    this.objectToConvert = obj;
     this.targetType = targetType;
   }
 
-  static String getDefaultMessage(Object obj, Class<?> type) {
+  static String defaultMessage(Object obj, Class<?> type) {
     Check.notNull(type, "type");
     String cn0 = className(type);
     if (obj == null) {

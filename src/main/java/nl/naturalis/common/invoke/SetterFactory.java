@@ -25,7 +25,7 @@ public class SetterFactory {
 
   /**
    * Returns the public {@link Setter setters} for the specified class. The returned {@code Map}
-   * maps maps property names to {@code Setter} instances.
+   * maps property names to {@code Setter} instances.
    *
    * @param clazz The class for which to retrieve the public setters
    * @return The public setters of the specified class
