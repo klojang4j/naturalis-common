@@ -3,6 +3,7 @@ package nl.naturalis.common.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
+import nl.naturalis.common.TypeConversionException;
 import org.junit.Test;
 
 public class EnumParserTest {
@@ -61,7 +62,7 @@ public class EnumParserTest {
     assertSame("06", TestEnum.FIFTH_DAY_IN_A_ROW, e);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = TypeConversionException.class)
   public void parse02() {
     EnumParser<TestEnum> parser = new EnumParser<>(TestEnum.class);
     parser.parse("day*one");

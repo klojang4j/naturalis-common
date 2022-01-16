@@ -1,14 +1,16 @@
 package nl.naturalis.common.util;
 
-import nl.naturalis.common.Pair;
+import nl.naturalis.common.TypeConversionException;
 import nl.naturalis.common.check.Check;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonChecks.keyIn;
+import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
  * Parses strings into enum constants. Internally {@code EnumParser} maintains a string-to-enum map
@@ -37,8 +39,6 @@ import static nl.naturalis.common.check.CommonChecks.*;
 public class EnumParser<T extends Enum<T>> {
 
   private static final String BAD_KEY = "Non-unique key: ${arg}";
-  private static final String BAD_VALUE = "Cannot parse ${arg} into enum constant of ${0}";
-  private static final String BAD_ORDINAL = "Invalid ordinal value for enum ${0}: ${arg}";
 
   /**
    * The default normalization function. Removes spaces, hyphens and underscores and returns an
@@ -55,7 +55,7 @@ public class EnumParser<T extends Enum<T>> {
    * Creates an <code>EnumParser</code> for the specified enum class, using the {@link
    * #DEFAULT_NORMALIZER}.
    *
-   * @param enumClass
+   * @param enumClass The enum class
    */
   public EnumParser(Class<T> enumClass) {
     this(enumClass, DEFAULT_NORMALIZER);
@@ -93,29 +93,22 @@ public class EnumParser<T extends Enum<T>> {
   }
 
   /**
-   * Parses the specified value into an enum constant. The argument must be either an {@code
-   * Integer} specifying the enum constant's ordinal value or a {@code String} corresponding to the
-   * enum constant's name or {@code toString()} value.
+   * Parses the specified value into an enum constant. The argument is stringified using its {@code
+   * toString{}} method, then normalized and then looked up in the internally maintained
+   * string-to-constant table.
    *
-   * @param value The ordinal value or string to be parsed into an enum constant.
+   * @param value The value to be mapped an enum constant.
    * @return The enum constant
-   * @throws IllegalArgumentException If the string could not be mapped to one of the enum's
-   *     constants.
+   * @throws TypeConversionException If the value was {@code null} or could not be mapped to one of
+   *     the enum's constants.
    */
-  @SuppressWarnings("unchecked")
-  public T parse(Object value) throws IllegalArgumentException {
-    String name = enumClass.getName();
-    Check.that(value).is(notNull(), BAD_VALUE, name);
-    if (value.getClass() == enumClass) {
-      return (T) value;
-    } else if (value.getClass() == Integer.class) {
-      int i = (Integer) value;
-      T[] consts = enumClass.getEnumConstants();
-      Check.that(i).is(between(), Pair.of(0, consts.length), BAD_ORDINAL, name);
-      return consts[i];
-    }
-    return Check.that(normalizer.apply(value.toString()))
-        .is(keyIn(), lookups, BAD_VALUE, value, name)
-        .ok(lookups::get);
+  public T parse(Object value) throws TypeConversionException {
+    Check.on(badValue(value), value).is(notNull());
+    String key = normalizer.apply(value.toString());
+    return Check.on(badValue(value), lookups.get(key)).is(notNull()).ok();
+  }
+
+  private Function<String, TypeConversionException> badValue(Object value) {
+    return s -> new TypeConversionException(value, enumClass);
   }
 }

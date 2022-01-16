@@ -4,6 +4,8 @@ import nl.naturalis.common.check.Check;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -12,13 +14,27 @@ import static java.lang.Character.toLowerCase;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.stream.Collectors.joining;
 import static nl.naturalis.common.CollectionMethods.swapAndFreeze;
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonChecks.array;
 /**
  * Methods for inspecting types.
  *
  * @author Ayco Holleman
  */
 public class ClassMethods {
+
+  private static final Set<Class<?>> PRIMITIVE_NUMBERS =
+      Set.of(int.class, double.class, long.class, float.class, short.class, byte.class);
+
+  private static final Set<Class<?>> NUMBER_TYPES =
+      Set.of(
+          Integer.class,
+          Double.class,
+          Long.class,
+          Float.class,
+          Short.class,
+          Byte.class,
+          BigDecimal.class,
+          BigInteger.class);
 
   // primitive-to-wrapper
   private static final Map<Class<?>, Class<?>> P2W =
@@ -40,11 +56,8 @@ public class ClassMethods {
           boolean.class,
           Boolean.class);
 
-  // wrappper-to-primitve
+  // wrapper-to-primitive
   private static final Map<Class<?>, Class<?>> W2P = swapAndFreeze(P2W);
-
-  private static final Set<Class<?>> PRIMITIVE_NUMBERS =
-      Set.of(int.class, double.class, long.class, float.class, short.class, byte.class);
 
   private static final Set<Class<?>> PRIMITIVE_ARRAYS =
       Set.of(
@@ -61,6 +74,15 @@ public class ClassMethods {
       Set.of(int[].class, double[].class, long[].class, float[].class, short[].class, byte[].class);
 
   private ClassMethods() {}
+
+  public static Set<Class<?>> getPrimitiveNumberTypes() {
+    return PRIMITIVE_NUMBERS;
+  }
+
+  public static Set<Class<?>> getNumberTypes() {
+    return NUMBER_TYPES;
+  }
+
   /**
    * Tests whether the 1st argument is an instance of the 2nd argument. Equivalent to <code>
    * superOrInterface.isInstance(objectToTest)</code>. Since this method is overloaded with {@code
@@ -100,42 +122,41 @@ public class ClassMethods {
    * Equivalent to {@code clazz.isPrimitive()}.
    *
    * @param clazz The class to test
-   * @return Whether or not it is one of the primitive types
+   * @return Whether it is one of the primitive types
    */
   public static boolean isPrimitive(Class<?> clazz) {
     return clazz.isPrimitive();
   }
 
   /**
-   * Returns whether or not the specified class is one of the primitive number classes.
+   * Returns whether the specified class is one of the primitive number classes.
    *
    * @param clazz The class to test
-   * @return Whether or not the specified class is one of the primitive number classes
+   * @return Whether the specified class is one of the primitive number classes
    */
-  public static final boolean isPrimitiveNumber(Class<?> clazz) {
+  public static boolean isPrimitiveNumber(Class<?> clazz) {
     return PRIMITIVE_NUMBERS.contains(Check.notNull(clazz).ok());
   }
 
   /**
-   * Returns whether or not the specified is one of the primitive wrapper classes.
+   * Returns whether the specified is one of the primitive wrapper classes.
    *
    * @param clazz The class to test
-   * @return Whether or not the specified is one of the primitive wrapper classes
+   * @return Whether the specified is one of the primitive wrapper classes
    */
   public static boolean isWrapper(Class<?> clazz) {
-    return W2P.keySet().contains(clazz);
+    return W2P.containsKey(clazz);
   }
 
   /**
-   * Returns whether or not instances of the first class will be auto-unboxed into instances of the
-   * second class. This method does not check whether the first class actually is a wrapper class
-   * and the second a primitive class. If either is not true, the method will simply return {@code
-   * false}.
+   * Returns whether instances of the first class will be auto-unboxed into instances of the second
+   * class. This method does not check whether the first class actually is a wrapper class and the
+   * second a primitive class. If either is not true, the method will return {@code false}.
    *
    * @param classToTest The class to test
    * @param primitiveClass Supposedly a primitively class
-   * @return Whether or not instances of the first class will be auto-unboxed into instances of the
-   *     second class
+   * @return Whether instances of the first class will be auto-unboxed into instances of the second
+   *     class
    */
   public static boolean isAutoUnboxedAs(Class<?> classToTest, Class<?> primitiveClass) {
     Check.notNull(classToTest);
@@ -144,15 +165,14 @@ public class ClassMethods {
   }
 
   /**
-   * Returns whether or not instances of the first class will be auto-unboxed into instances of the
-   * second class. This method does not check whether the first class actually is a wrapper class
-   * and the second a primitive class. If either is not true, the method will simply return {@code
-   * false}.
+   * Returns whether instances of the first class will be auto-unboxed into instances of the second
+   * class. This method does not check whether the first class actually is a wrapper class and the
+   * second a primitive class. If either is not true, the method will return {@code false}.
    *
    * @param classToTest The class to test
    * @param wrapperClass Supposedly a wrapper class
-   * @return Whether or not instances of the first class will be auto-unboxed into instances of the
-   *     second class
+   * @return Whether instances of the first class will be auto-unboxed into instances of the second
+   *     class
    */
   public static boolean isAutoBoxedAs(Class<?> classToTest, Class<?> wrapperClass) {
     Check.notNull(classToTest);
@@ -160,25 +180,35 @@ public class ClassMethods {
     return W2P.get(wrapperClass) == classToTest;
   }
 
-  public static Class<?> box(Class<?> primitiveClass) {
-    return Check.notNull(primitiveClass)
-        .has(Class::isPrimitive, yes(), "Not a primitive class: %s", primitiveClass)
-        .ok(P2W::get);
-  }
-
-  public static Class<?> unbox(Class<?> wrapperClass) {
-    return Check.that(wrapperClass)
-        .is(keyIn(), W2P, "Not a wrapper class: %s", wrapperClass)
-        .ok(W2P::get);
+  /**
+   * If the specified class is a primitive type, returns the corresponding primitive wrapper class,
+   * else the specified class itself.
+   *
+   * @param clazz The (primitive) class
+   * @return The corresponding wrapper class
+   */
+  public static Class<?> box(Class<?> clazz) {
+    return Check.notNull(clazz).ok().isPrimitive() ? P2W.get(clazz) : clazz;
   }
 
   /**
-   * Returns whether or not the specified object is a primitive array or a {@code Class} object
+   * If the specified class is a primitive wrapper class, returns the corresponding primitive type,
+   * else the specified class itself.
+   *
+   * @param clazz The (wrapper) class
+   * @return The corresponding primitive class
+   */
+  public static Class<?> unbox(Class<?> clazz) {
+    return isWrapper(Check.notNull(clazz).ok()) ? W2P.get(clazz) : clazz;
+  }
+
+  /**
+   * Returns whether the specified object is a primitive array or a {@code Class} object
    * representing a primitive array. Defers to {@link #isPrimitiveArray(Class)} if the specified
    * object is a {@code Class} object.
    *
    * @param obj The object to test
-   * @return Whether or not it is a primitive array class
+   * @return Whether it is a primitive array class
    */
   public static boolean isPrimitiveArray(Object obj) {
     Check.notNull(obj);
@@ -189,22 +219,22 @@ public class ClassMethods {
   }
 
   /**
-   * Returns whether or not the class is a primitive array class.
+   * Returns whether the class is a primitive array class.
    *
    * @param clazz The class to test
-   * @return Whether or not it is a primitive array class
+   * @return Whether it is a primitive array class
    */
   public static boolean isPrimitiveArray(Class<?> clazz) {
     return PRIMITIVE_ARRAYS.contains(Check.notNull(clazz).ok());
   }
 
   /**
-   * Returns whether or not the specified object is a primitive number array or a {@code Class}
-   * object representing a primitive number array. Defers to {@link #isPrimitiveNumberArray(Class)}
-   * if the specified object is a {@code Class} object.
+   * Returns whether the specified object is a primitive number array or a {@code Class} object
+   * representing a primitive number array. Defers to {@link #isPrimitiveNumberArray(Class)} if the
+   * specified object is a {@code Class} object.
    *
    * @param obj The object to test
-   * @return Whether or not it is a primitive array class
+   * @return Whether it is a primitive array class
    */
   public static boolean isPrimitiveNumberArray(Object obj) {
     Check.notNull(obj);
@@ -215,10 +245,10 @@ public class ClassMethods {
   }
 
   /**
-   * Returns whether or not the class represents an array of primitive numbers.
+   * Returns whether the class represents an array of primitive numbers.
    *
    * @param clazz The class to test
-   * @return Whether or not it is a primitive array class
+   * @return Whether it is a primitive array class
    */
   public static boolean isPrimitiveNumberArray(Class<?> clazz) {
     return PRIM_NUM_ARRAYS.contains(Check.notNull(clazz).ok());
@@ -244,12 +274,12 @@ public class ClassMethods {
 
   /**
    * Returns true if and only if both {@code Class} objects represent interfaces and the first
-   * interface directly or indirectly extends the the second interface.
+   * interface directly or indirectly extends the second interface.
    *
    * @param classToTest The {@code Class} object to test
    * @param baseClass The {@code Class} object to test it against
-   * @return Whether or not the first argument is an interface that directly or indirectly extends
-   *     the second interface
+   * @return Whether the first argument is an interface that directly or indirectly extends the
+   *     second interface
    */
   public static boolean hasAncestor(Class<?> classToTest, Class<?> baseClass) {
     Check.notNull(classToTest, "classToTest");
@@ -264,12 +294,12 @@ public class ClassMethods {
 
   /**
    * Returns true if and only if both {@code Class} objects represent interfaces and the first
-   * interface directly or indirectly extends the the second interface.
+   * interface directly or indirectly extends the second interface.
    *
    * @param classToTest The {@code Class} object to test
    * @param superInterface The {@code Class} object to test it against
-   * @return Whether or not the first argument is an interface that directly or indirectly extends
-   *     the second interface
+   * @return Whether the first argument is an interface that directly or indirectly extends the
+   *     second interface
    */
   public static boolean hasAncestorInterface(Class<?> classToTest, Class<?> superInterface) {
     Check.notNull(classToTest, "classToTest");
@@ -282,6 +312,14 @@ public class ClassMethods {
     return getAllInterfaces(classToTest).contains(superInterface);
   }
 
+  /**
+   * Returns the entire interface hierarchy for the specified class or interface. Returns an empty
+   * set if the argument is a top-level interface, or if the class neither directly nor indirectly
+   * implements any interface.
+   *
+   * @param clazz The {@code Class} object for which to retrieve the interface hierarchy
+   * @return The interface hierarchy for the specified {@code Class} object
+   */
   public static Set<Class<?>> getAllInterfaces(Class<?> clazz) {
     Set<Class<?>> interfaces = new LinkedHashSet<>();
     collectInterfaces(interfaces, clazz);
@@ -420,9 +458,8 @@ public class ClassMethods {
   }
 
   /**
-   * Returns all methods of the specified bean class than can be identified as setters. See {@link
-   * #getPropertyNameFromGetter(Method, boolean)} for an explanation of the {@code strict}
-   * parameter.
+   * Returns all getters of the specified class. See {@link #getPropertyNameFromGetter(Method,
+   * boolean)} for an explanation of the {@code strict} parameter.
    *
    * @param beanClass The bean class from which to extract the getter methods
    * @return The getters on the specified bean class
@@ -447,7 +484,7 @@ public class ClassMethods {
   }
 
   /**
-   * Returns all methods of the specified bean class that can be identified as setters.
+   * Returns all setters of the specified class.
    *
    * @see #getPropertyNameFromSetter(Method)
    * @param beanClass The bean class from which to extract the setter methods
@@ -481,7 +518,7 @@ public class ClassMethods {
    * Boolean} (rather than {@code boolean}) are allowed to have a name starting with "is".
    *
    * @param m The method from which to extract a property name
-   * @param strict Whether or not to be strict as regards the method name
+   * @param strict Whether to be strict as regards the method name
    * @return The name of the property corresponding to the method
    */
   public static String getPropertyNameFromGetter(Method m, boolean strict) {

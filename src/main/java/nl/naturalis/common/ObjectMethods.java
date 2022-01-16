@@ -711,8 +711,7 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the default value for the specified class: the primitive default for primitive classes;
-   * {@code null} for any other class.
+   * Returns the primitive default for primitive types; {@code null} for any other type.
    *
    * @param <T> The type of the class
    * @param clazz The class for which to retrieve the default value

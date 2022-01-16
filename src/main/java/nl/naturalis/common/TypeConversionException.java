@@ -3,6 +3,7 @@ package nl.naturalis.common;
 import nl.naturalis.common.check.Check;
 import static java.lang.String.format;
 import static nl.naturalis.common.ClassMethods.className;
+import static nl.naturalis.common.ClassMethods.simpleClassName;
 
 public class TypeConversionException extends RuntimeException {
 
@@ -22,20 +23,10 @@ public class TypeConversionException extends RuntimeException {
   }
 
   static String defaultMessage(Object obj, Class<?> type) {
-    Check.notNull(type, "type");
-    String cn0 = className(type);
     if (obj == null) {
-      return format("Cannot convert null into instance of %s", cn0);
+      return format("Cannot convert null to %s", className(type));
     }
-    if (obj.getClass() == String.class) {
-      return format("Cannot convert \"%s\" into instance of %s", obj, cn0);
-    }
-    if (Number.class.isInstance(obj)) {
-      String fmt = "Cannot convert %s %s into instance of %s";
-      return format(fmt, obj.getClass().getSimpleName(), obj, cn0);
-    }
-    String cn1 = className(obj.getClass());
-    return format("Cannot convert instance of %s into instance of %s", cn1, cn0);
+    return format("Cannot convert %s to %s", className(obj), className(type));
   }
 
   public Object getObjectToConvert() {

@@ -190,7 +190,9 @@ public class Bool {
                 ? getBoolean((String) obj)
                 : obj instanceof Number
                     ? getBoolean((Number) obj)
-                    : obj.getClass() == Character.class ? getBoolean(obj) : noCanDo(obj);
+                    : obj.getClass() == Character.class
+                        ? getBoolean(((Character) obj).charValue())
+                        : noCanDo(obj);
   }
 
   /**

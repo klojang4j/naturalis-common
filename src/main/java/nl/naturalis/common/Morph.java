@@ -1,27 +1,22 @@
 package nl.naturalis.common;
 
-import java.lang.reflect.Array;
-import java.util.*;
-import java.util.function.IntFunction;
-import java.util.function.Supplier;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.invoke.BeanWriter;
 
+import java.lang.reflect.Array;
+import java.util.Collection;
+
 import static nl.naturalis.common.ArrayMethods.pack;
-import static nl.naturalis.common.ClassMethods.box;
 import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.ClassMethods.isAutoUnboxedAs;
-import static nl.naturalis.common.ClassMethods.isPrimitiveNumber;
 import static nl.naturalis.common.ObjectMethods.getDefaultValue;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
- * Performs a wide variety of type and value conversions, more or less akin to loosely-typed
- * languages. However this class is not intended as an exact emulation of the type conversions
- * happening there. Rather it brings together separate conversion classes and methods in
- * naturalis-common in order to convert as much as possible into as much as possible. This class is
- * used by the {@link BeanWriter} class to perform type conversions on the values passed to its
- * {@link BeanWriter#set(Object, String, Object) set} method.
+ * Performs a wide variety of type conversions. The conversions try to strike a balance between
+ * being lenient without becoming outlandish or contrived.This class is optionally used by the
+ * {@link BeanWriter} class to perform type conversions on the values passed to its {@link
+ * BeanWriter#set(Object, String, Object) set} method.
  *
  * <p>The list of conversions performed by this class it too large to enumerate. Generally, however,
  * the following applies:
@@ -29,6 +24,7 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  * @see NumberMethods#convert(Number, Class)
  * @see NumberMethods#parse(String, Class)
  * @see Bool
+ * @see nl.naturalis.common.util.EnumParser
  * @author Ayco Holleman
  * @param <T> The type to which incoming values will be converted
  */
@@ -70,114 +66,33 @@ public class Morph<T> {
     Class<T> toType = this.targetType;
     if (obj == null) {
       return getDefaultValue(toType);
-    }
-    Class myType = obj.getClass();
-    if (toType.isInstance(obj) || isAutoUnboxedAs(myType, toType)) {
+    } else if (toType.isInstance(obj)) {
       return (T) obj;
+    } else if (isAutoUnboxedAs(obj.getClass(), toType)) {
+      return (T) obj;
+    } else if (toType == String.class) {
+      return (T) obj.toString();
     } else if (toType.isArray()) {
       return toArray(obj);
     } else if (isA(toType, Collection.class)) {
-      return (T) MorphTable0.getInstance().morph(obj, (Class<Collection<?>>) toType);
+      return MorphTable0.getInstance().morph(obj, toType);
     }
-    // If we get to this point we know for sure the target
-    // type is not an array and not a Collection.
+    Class myType = obj.getClass();
     if (myType.isArray()) {
-      return Array.getLength(obj) == 0
-          ? (T) getDefaultValue(toType)
-          : convert(Array.get(obj, 0), toType);
+      boolean empty = Array.getLength(obj) == 0;
+      return empty ? getDefaultValue(toType) : convert(Array.get(obj, 0), toType);
     } else if (isA(myType, Collection.class)) {
-      Collection collection = (Collection) obj;
-      return collection.size() == 0
-          ? (T) getDefaultValue(toType)
-          : convert(collection.iterator().next(), toType);
-    } else if (toType == boolean.class || toType == Boolean.class) {
-      return (T) Bool.from(obj);
-    } else if (isPrimitiveNumber(toType)) {
-      return toPrimitiveNumber(obj);
-    } else if (isA(toType, Number.class)) {
-      return toNumber(obj);
+      Collection coll = (Collection) obj;
+      boolean empty = coll.size() == 0;
+      return empty ? getDefaultValue(toType) : convert(coll.iterator().next(), toType);
+    }
+    Object out = MorphTable1.getInstance().morph(obj, toType);
+    if (out != null) {
+      return (T) out;
     } else if (toType.isEnum()) {
-      return toEnum(obj);
-    } else if (toType == char.class || toType == Character.class) {
-      return toChar(obj);
-    } else if (toType == String.class) {
-      return (T) obj.toString();
+      return (T) MorphTable2.getInstance().morph(obj, toType);
     }
     throw new TypeConversionException(obj, toType);
-  }
-
-  private T toEnum(Object obj) {
-    if (isA(obj.getClass(), Number.class)) {
-      Integer i = new NumberConverter<>(Integer.class).convert((Number) obj);
-      return checkOrdinal(i, obj);
-    } else if (obj.getClass() == char.class || obj.getClass() == Character.class) {
-      char c = (Character) obj;
-      if (c >= '0' && c <= '9') {
-        return checkOrdinal(c - 48, obj);
-      }
-    } else {
-      String s = stringify(obj);
-      try {
-        int i = new NumberParser<>(Integer.class).parse(s);
-        return checkOrdinal(i, obj);
-      } catch (TypeConversionException e) {
-      }
-      for (Object o : targetType.getEnumConstants()) {
-        Enum enum0 = (Enum) o;
-        if (enum0.name().equals(s)) {
-          return (T) enum0;
-        }
-        String s0 = enum0.toString();
-        if (s0 != enum0.name() && s0 != null && s0.equals(s)) {
-          return (T) enum0;
-        }
-      }
-    }
-    throw new TypeConversionException(obj, targetType);
-  }
-
-  private T checkOrdinal(int ordinal, Object obj) {
-    Class<T> toType = this.targetType;
-    if (ordinal < 0 || ordinal >= toType.getEnumConstants().length) {
-      String fmt = "Invalid ordinal value for enum %s: %d";
-      String msg = String.format(fmt, toType.getName(), ordinal);
-      throw new TypeConversionException(obj, toType, msg);
-    }
-    return toType.getEnumConstants()[ordinal];
-  }
-
-  private T toPrimitiveNumber(Object obj) {
-    Class myType = obj.getClass();
-    Class toType = targetType;
-    if (isA(myType, Number.class)) {
-      return (T) new NumberConverter(box(toType)).convert((Number) obj);
-    } else if (myType.isEnum()) {
-      return (T) (Integer) ArrayMethods.find(myType.getEnumConstants(), obj);
-    } else if (myType == Character.class) {
-      return charToNumber(obj, box(toType));
-    }
-    return (T) new NumberParser(box(toType)).parse(stringify(obj));
-  }
-
-  private T toNumber(Object obj) {
-    Class myType = obj.getClass();
-    Class toType = targetType;
-    if (isA(myType, Number.class)) {
-      return (T) new NumberConverter(toType).convert((Number) obj);
-    } else if (myType.isEnum()) {
-      return (T) (Integer) ArrayMethods.find(myType.getEnumConstants(), obj);
-    } else if (myType == Character.class) {
-      return charToNumber(obj, box(toType));
-    }
-    return (T) new NumberParser(toType).parse(stringify(obj));
-  }
-
-  private T toChar(Object obj) {
-    String s = stringify(obj);
-    if (s.length() == 1) {
-      return (T) (Character) s.charAt(0);
-    }
-    throw new TypeConversionException(obj, targetType);
   }
 
   private T toArray(Object obj) {
@@ -212,53 +127,7 @@ public class Morph<T> {
     return (T) array;
   }
 
-  private T toCollection1(Object obj, IntFunction<Collection> constructor) {
-    if (isA(obj.getClass(), Collection.class)) {
-      return (T) new ArrayList((Collection) obj);
-    } else if (obj.getClass().isArray()) {
-      return (T) arrayToCollection(obj, constructor);
-    }
-    return (T) singletonCollection(obj, constructor);
-  }
-
-  private T toCollection2(Object obj, Supplier<Collection> c) {
-    if (isA(obj.getClass(), Collection.class)) {
-      return (T) new ArrayList((Collection) obj);
-    } else if (obj.getClass().isArray()) {
-      return (T) arrayToCollection(obj, c.get());
-    }
-    return (T) singletonCollection(obj, c.get());
-  }
-
-  private static Collection singletonCollection(Object obj, IntFunction<Collection> constructor) {
-    return singletonCollection(obj, constructor.apply(1));
-  }
-
-  private static Collection singletonCollection(Object obj, Collection c) {
-    c.add(obj);
-    return c;
-  }
-
-  private static Collection arrayToCollection(Object obj, IntFunction<Collection> constructor) {
-    return arrayToCollection(obj, constructor.apply(Array.getLength(obj)));
-  }
-
-  private static Collection arrayToCollection(Object obj, Collection c) {
-    for (int i = 0; i < Array.getLength(obj); ++i) {
-      c.add(Array.get(obj, i));
-    }
-    return c;
-  }
-
-  private T charToNumber(Object obj, Class targetType) {
-    char c = (Character) obj;
-    if (c >= '0' && c <= '9') {
-      return (T) new NumberConverter(targetType).convert(c - 48);
-    }
-    throw new TypeConversionException(obj, targetType);
-  }
-
-  private static String stringify(Object obj) {
+  static String stringify(Object obj) {
     return Check.that(obj.toString()).is(notNull(), "obj.toString() must not return null").ok();
   }
 }

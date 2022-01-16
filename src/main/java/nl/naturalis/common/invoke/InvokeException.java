@@ -1,7 +1,9 @@
 package nl.naturalis.common.invoke;
 
-import java.util.function.Function;
 import nl.naturalis.common.ClassMethods;
+
+import java.util.function.Function;
+
 import static nl.naturalis.common.ArrayMethods.implode;
 import static nl.naturalis.common.ClassMethods.simpleClassName;
 import static nl.naturalis.common.ExceptionMethods.getRootCause;
@@ -16,6 +18,10 @@ public class InvokeException extends RuntimeException {
 
   public static InvokeException missingNoArgConstructor(Class<?> clazz) {
     return new InvokeException("Missing no-arg constructor on %s", simpleClassName(clazz));
+  }
+
+  public static Function<String, InvokeException> cannotInstantiate(Class<?> clazz) {
+    return s -> new InvokeException("Cannot instantiate %s", simpleClassName(clazz));
   }
 
   public static <T> InvokeException typeMismatch(BeanReader<? super T> reader, T bean) {
@@ -43,6 +49,9 @@ public class InvokeException extends RuntimeException {
   }
 
   public static InvokeException wrap(Throwable t) {
+    if(t instanceof InvokeException ie) {
+      return ie;
+    }
     return new InvokeException(getRootCause(t).toString());
   }
 
