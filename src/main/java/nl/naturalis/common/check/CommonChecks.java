@@ -28,6 +28,7 @@ import static nl.naturalis.common.check.Messages.*;
  *
  * @author Ayco Holleman
  */
+@SuppressWarnings("rawtypes")
 public class CommonChecks {
 
   static final IdentityHashMap<Object, Formatter> MESSAGE_PATTERNS;
@@ -235,7 +236,7 @@ public class CommonChecks {
    * Verifies that the argument is an existing, regular file. Equivalent to {@link File#isFile()
    * File::isFile}.
    *
-   * @return A {@code Predicate}
+   * @return A {@code Predicate} implementing the test described above
    */
   public static Predicate<File> file() {
     return File::isFile;
@@ -250,7 +251,7 @@ public class CommonChecks {
    * Verifies that the argument is an existing directory. Equivalent to {@link File#isDirectory()
    * File::isDirectory}.
    *
-   * @return A {@code Predicate}
+   * @return A {@code Predicate} implementing the test described above
    */
   public static Predicate<File> directory() {
     return File::isDirectory;
@@ -294,7 +295,7 @@ public class CommonChecks {
    * Verifies that the argument is a writable file (implies that the file exists). Equivalent to
    * {@link File#canWrite() File::canWrite}.
    *
-   * @return
+   * @return A {@code Predicate} implementing the test described above
    */
   public static Predicate<File> writable() {
     return File::canWrite;
@@ -387,14 +388,14 @@ public class CommonChecks {
   }
 
   /**
-   * If the argument is a {@link Class} object, verifies that {@code argument.isArray()} is {code
-   * true}, else verifies that {@code argument.getClass().isArray()} is {@code true}.
+   * Ensures that the arguments is an array or, if the argument is a {@code Class} object, that is
+   * an array type.
    *
    * @param <T> The type of the argument
-   * @return A {@code Predicate}
+   * @return A {@code Predicate} implementing the test described above
    */
   public static <T> Predicate<T> array() {
-    return x -> x.getClass() == Class.class ? ((Class<?>) x).isArray() : x.getClass().isArray();
+    return x -> x.getClass() == Class.class ? ((Class) x).isArray() : x.getClass().isArray();
   }
 
   static {
@@ -578,7 +579,7 @@ public class CommonChecks {
   /**
    * Verifies that a {@code String} is present, ignoring case, in a {@code List} of strings.
    *
-   * @return
+   * @return A {@code Relation} implementing the test described above
    */
   public static Relation<String, List<String>> equalsIgnoreCase() {
     return (x, y) -> y.stream().anyMatch(s -> s.equalsIgnoreCase(x));

@@ -35,7 +35,7 @@ public final class StringMethods {
    * StringBuilder}.
    *
    * @param sb The {@code StringBuilder} to append the value to
-   * @param The value
+   * @param val The value to append
    * @return The {@code StringBuilder}
    */
   public static StringBuilder append(StringBuilder sb, Object val) {
@@ -378,8 +378,7 @@ public final class StringMethods {
    *
    * @param subject The string to search
    * @param substr The substring to search for
-   * @param ignoreCase Whether or not to ignore case while matching {@code substr} against {@code
-   *     subject}
+   * @param ignoreCase Whether to ignore case while matching {@code substr} against {@code subject}
    * @return The number of occurrences of {@code substr} within {@code subject}
    */
   public static int count(Object subject, String substr, boolean ignoreCase) {
@@ -416,8 +415,7 @@ public final class StringMethods {
    *
    * @param subject The string to search
    * @param substr The substring to search for
-   * @param ignoreCase Whether or not to ignore case while matching {@code substr} against {@code
-   *     subject}
+   * @param ignoreCase Whether to ignore case while matching {@code substr} against {@code subject}
    * @return The number of non-overlapping occurrences of {@code substr} within {@code subject}
    */
   public static int countDiscrete(Object subject, String substr, boolean ignoreCase) {
@@ -485,7 +483,7 @@ public final class StringMethods {
     } else {
       strs.add(str.substring(i));
     }
-    return strs.toArray(new String[strs.size()]);
+    return strs.toArray(String[]::new);
   }
 
   /**
@@ -568,27 +566,26 @@ public final class StringMethods {
   }
 
   /**
-   * Whether or not the specified string ends with any of the specified suffixes. They suffixes must
-   * not be null or empty.
+   * Whether the specified string ends with any of the specified suffixes.
    *
    * @param subject The string to test
-   * @param ignoreCase Whether or not to ignore case
+   * @param ignoreCase Whether to ignore case
    * @param suffixes The suffixes to test
    * @return The first suffix found to be equal to the end of the string, or null if the string
    *     ended in none of the specified suffixes
    */
   public static String endsWith(Object subject, boolean ignoreCase, Collection<String> suffixes) {
     Check.notNull(suffixes, "suffixes");
-    return endsWith(subject, ignoreCase, suffixes.toArray(new String[suffixes.size()]));
+    return endsWith(subject, ignoreCase, suffixes.toArray(String[]::new));
   }
 
   /**
-   * Whether or not {@code subject} ends with any of the specified suffixes. They suffixes must not
-   * be null or empty. Returns the first suffix found to be equal to the end of the string, or null
-   * if the string ended in none of the specified suffixes.
+   * Whether {@code subject} ends with any of the specified suffixes. Returns the first suffix found
+   * to be equal to the end of the string, or null if the string ended in none of the specified
+   * suffixes.
    *
    * @param subject The string to test
-   * @param ignoreCase Whether or not to ignore case
+   * @param ignoreCase Whether to ignore case
    * @param suffixes The suffixes to test
    * @return The first suffix found to be equal to the end of the string, or null if the string
    *     ended in none of the specified suffixes
@@ -690,7 +687,7 @@ public final class StringMethods {
   }
 
   /**
-   * Whether or not the specified string is null or empty.
+   * Whether the specified string is null or empty.
    *
    * @param subject The string
    * @return Whether it is null or blank
@@ -700,7 +697,7 @@ public final class StringMethods {
   }
 
   /**
-   * Whether or not the specified string is null or blank.
+   * Whether the specified string is null or blank.
    *
    * @param subject The string
    * @return Whether it is null or blank
@@ -710,7 +707,7 @@ public final class StringMethods {
   }
 
   /**
-   * Whether or not the specified string neither null nor empty.
+   * Whether the specified string neither null nor empty.
    *
    * @param object The string to check
    * @return Whether it is neither null nor blank
@@ -720,7 +717,7 @@ public final class StringMethods {
   }
 
   /**
-   * Whether or not the specified string neither null nor blank.
+   * Whether the specified string neither null nor blank.
    *
    * @param object The string to check
    * @return Whether it is neither null nor blank
@@ -744,9 +741,9 @@ public final class StringMethods {
    * Removes all occurrences of the specified prefixes from the start of a string. The returned
    * string will no longer start with any of the specified prefixes.
    *
-   * @param subject
-   * @param ignoreCase
-   * @param prefixes
+   * @param subject The string to manipulate
+   * @param prefixes The prefixes to chop off the left of the string
+   * @return A string that does not start with any of the specified prefixes
    */
   public static String lchop(Object subject, Collection<String> prefixes) {
     return lchop(subject, false, prefixes);
@@ -780,7 +777,7 @@ public final class StringMethods {
    * string will no longer start with any of the specified prefixes.
    *
    * @param subject The string to remove the prefixes from
-   * @param ignoreCase Whether or not to ignore case
+   * @param ignoreCase Whether to ignore case
    * @param prefixes The prefixes to remove
    */
   public static String lchop(Object subject, boolean ignoreCase, String... prefixes) {
@@ -839,84 +836,6 @@ public final class StringMethods {
       i = str.indexOf(lineSep, i + lineSep.length());
     }
     return new int[] {line, index - pos};
-  }
-
-  /**
-   * PHP-style implode method, concatenating the collection elements with &#34;, &#34; as separator
-   * string.
-   *
-   * @param collection The collection to implode
-   * @return A concatenation of the elements in the collection.
-   */
-  public static String implode(Collection<?> collection) {
-    return implode(collection, ", ");
-  }
-
-  /**
-   * PHP-style implode method, concatenating the collection elements using the specified separator
-   * string.
-   *
-   * @param collection The collection to implode
-   * @param separator The separator string
-   * @return A concatenation of the elements in the collection.
-   */
-  public static String implode(Collection<?> collection, String separator) {
-    return implode(collection, separator, -1);
-  }
-
-  /**
-   * PHP-style implode method, concatenating the collection elements using the specified separator
-   * string.
-   *
-   * @param collection The collection to implode
-   * @param separator The separator string
-   * @param limit The maximum number of elements to collect. Specify -1 for no maximum. Any other
-   *     negative integer results in an {@link IllegalArgumentException}.
-   * @return A concatenation of the elements in the collection.
-   */
-  public static String implode(Collection<?> collection, String separator, int limit) {
-    return implode(collection, Objects::toString, separator, limit);
-  }
-
-  /**
-   * PHP-style implode method, concatenating the collection elements using the specified stringifier
-   * function and the specified separator string.
-   *
-   * @param collection The collection to implode
-   * @param stringifier The stringification function to apply to the elements in the collection
-   * @param separator The separator string
-   * @return A concatenation of the elements in the collection.
-   */
-  public static <T> String implode(
-      Collection<T> collection, Function<T, String> stringifier, String separator) {
-    return implode(collection, stringifier, separator, -1);
-  }
-
-  /**
-   * PHP-style implode method, concatenating the collection elements using the specified stringifier
-   * function and the specified separator string.
-   *
-   * @param collection The collection to implode
-   * @param stringifier The stringification function to apply to the elements in the collection
-   * @param separator The separator string
-   * @param limit The maximum number of elements to collect. Specify -1 for no maximum. Any other
-   *     negative integer results in an {@link IllegalArgumentException}.
-   * @return A concatenation of the elements in the collection.
-   */
-  public static <T> String implode(
-      Collection<T> collection, Function<T, String> stringifier, String separator, int limit) {
-    Check.notNull(collection, "collection");
-    Check.notNull(separator, "separator");
-    Check.that(limit, "limit").is(gte(), -1);
-    Stream<T> stream = collection.stream();
-    if (limit != -1 && limit < collection.size()) {
-      stream = stream.limit(limit);
-    }
-    try {
-      return stream.map(stringifier).collect(Collectors.joining(separator));
-    } catch (NullPointerException e) {
-      return Check.fail("Stringifier function not designed to handle null elements");
-    }
   }
 
   /**
@@ -979,7 +898,7 @@ public final class StringMethods {
    */
   public static String lpad(Object subject, int width, char padChar, String delimiter) {
     Check.that(width, "width").is(gte(), 0);
-    String s = ifNotNull(subject, Object::toString, EMPTY);
+    String s = subject == null ? EMPTY : subject.toString();
     String d = ifNull(delimiter, EMPTY);
     if (s.length() >= width) {
       return s + d;
@@ -1075,7 +994,7 @@ public final class StringMethods {
    */
   public static String pad(Object subject, int width, char padChar, String delimiter) {
     Check.that(width, "width").is(gte(), 0);
-    String s = ifNotNull(subject, Object::toString, EMPTY);
+    String s = subject == null ? EMPTY : subject.toString();
     String d = ifNull(delimiter, EMPTY);
     if (s.length() >= width) {
       return s + d;
@@ -1083,13 +1002,9 @@ public final class StringMethods {
     StringBuilder sb = new StringBuilder(width + d.length());
     int left = (width - s.length()) / 2;
     int right = width - left - s.length();
-    for (int i = 0; i < left; ++i) {
-      sb.append(padChar);
-    }
+    sb.append(String.valueOf(padChar).repeat(left));
     sb.append(s);
-    for (int i = 0; i < right; ++i) {
-      sb.append(padChar);
-    }
+    sb.append(String.valueOf(padChar).repeat(Math.max(0, right)));
     sb.append(d);
     return sb.toString();
   }
@@ -1098,8 +1013,8 @@ public final class StringMethods {
    * Removes all occurrences of the specified suffixes from the end of a string. The returned string
    * will no longer end with any of the specified suffixes.
    *
-   * @param subject
-   * @param suffixes
+   * @param subject The string to manipulate
+   * @param suffixes The suffixes to chop off the string
    */
   public static String rchop(Object subject, Collection<String> suffixes) {
     return rchop(subject, false, suffixes);
@@ -1109,9 +1024,10 @@ public final class StringMethods {
    * Removes all occurrences of the specified suffixes from the end of a string. The returned string
    * will no longer end with any of the specified suffixes.
    *
-   * @param subject
-   * @param ignoreCase
-   * @param suffixes
+   * @param subject The string to manipulate
+   * @param ignoreCase Whether to ignore case while chopping off suffixes
+   * @param suffixes The suffixes to chop off the string
+   * @return A String that does not end with any of the specified suffixes
    */
   public static String rchop(Object subject, boolean ignoreCase, Collection<String> suffixes) {
     return rchop(subject, ignoreCase, suffixes.toArray(String[]::new));
@@ -1121,9 +1037,9 @@ public final class StringMethods {
    * Removes all occurrences of the specified suffixes from the end of a string. The returned string
    * will no longer end with any of the specified suffixes.
    *
-   * @param subject
-   * @param ignoreCase
-   * @param suffixes
+   * @param subject The string to manipulate
+   * @param suffixes The suffixes to chop off the right of the string
+   * @return A String that does not end with any of the specified suffixes
    */
   public static String rchop(Object subject, String... suffixes) {
     return rchop(subject, false, suffixes);
@@ -1133,9 +1049,9 @@ public final class StringMethods {
    * Removes all occurrences of the specified suffixes from the end of a string. The returned string
    * will no longer end with any of the specified suffixes.
    *
-   * @param subject
-   * @param ignoreCase
-   * @param suffixes
+   * @param subject The string to manipulate
+   * @param ignoreCase Whether to ignore case while chopping off suffixes
+   * @param suffixes A String that does not end with any of the specified suffixes
    */
   public static String rchop(Object subject, boolean ignoreCase, String... suffixes) {
     Check.that(suffixes, "suffixes").is(deepNotNull());
@@ -1178,32 +1094,27 @@ public final class StringMethods {
   }
 
   /**
-   * Right-pads a string to the specified width using the specified padding character and then
-   * appends the specified delimiter.
+   * Right-pads a string to the specified width using the specified padding character and appends
+   * the specified suffix.
    *
    * @param subject An object whose {@code toString()} method produces the string to be padded. Null
    *     is treated as the empty string.
    * @param width The total length of the padded string. If the string itself is wider than the
    *     specified width, the string is printed without padding.
    * @param padChar The character used to right-pad the string.
-   * @param delimiter A delimiter to append to the padded string. Specify null or an empty string to
-   *     indicate that no delimiter should be appended.
+   * @param suffix A suffix to append to the padded string.
    * @return The right-padded string
    */
-  public static String rpad(Object subject, int width, char padChar, String delimiter) {
+  public static String rpad(Object subject, int width, char padChar, String suffix) {
     Check.that(width, "width").is(gte(), 0);
-    String s = ifNotNull(subject, Object::toString, EMPTY);
-    String d = ifNull(delimiter, EMPTY);
-    if (s.length() >= width) {
-      return s + d;
+    Check.notNull(suffix, "delimiter");
+    String str = subject == null ? EMPTY : subject.toString();
+    if (str.length() >= width) {
+      return str + suffix;
     }
-    StringBuilder sb = new StringBuilder(width + d.length());
-    sb.append(s);
-    for (int i = s.length(); i < width; ++i) {
-      sb.append(padChar);
-    }
-    sb.append(d);
-    return sb.toString();
+    StringBuilder sb = new StringBuilder(width + suffix.length());
+    String padding = String.valueOf(padChar);
+    return append(sb, str, padding.repeat(width - str.length()), suffix).toString();
   }
 
   /**
@@ -1242,7 +1153,7 @@ public final class StringMethods {
           continue LOOP;
         }
       }
-      break LOOP;
+      break;
     }
     return i == str0.length() - 1 ? str0 : str0.substring(0, i + 1);
   }

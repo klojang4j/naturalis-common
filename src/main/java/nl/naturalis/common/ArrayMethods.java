@@ -8,11 +8,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static java.lang.System.arraycopy;
+import static java.util.stream.Collectors.joining;
 import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.length;
@@ -30,6 +30,7 @@ public class ArrayMethods {
 
   static final String START_INDEX = "Start index";
   static final String END_INDEX = "End index";
+  static final String DEFAULT_IMPLODE_SEPARATOR = ", ";
 
   // Maximum length of an array
   private static final int MAX_SIZE = Integer.MAX_VALUE;
@@ -258,28 +259,27 @@ public class ArrayMethods {
   }
 
   /**
-   * PHP-style implode method, concatenating the array elements with &#34;, &#34; as separator
+   * PHP-style implode method, concatenating the array elements with ", " (comma+space) as separator
    * string.
    *
    * @param array The collection to implode
    * @return A concatenation of the elements in the collection.
    */
-  public static String implode(Object[] array) {
+  public static <T> String implode(T[] array) {
     return implode(array, ", ");
   }
 
   /**
-   * PHP-style implode method, concatenating the array elements using the specified separator
+   * PHP-style implode method, concatenating the array elements with ", " (comma+space) as separator
    * string.
    *
    * @param array The array to implode
-   * @param separator The separator string
-   * @return A concatenation of the elements in the array.
+   * @param stringifier A function converting the array elements to strings
+   * @return A concatenation of the elements in the collection.
    */
-  public static String implode(Object[] array, String separator) {
-    Check.notNull(array, "array");
-    Check.notNull(separator, "separator");
-    return Arrays.stream(array).map(Objects::toString).collect(Collectors.joining(separator));
+  public static <T> String implode(T[] array, Function<T, String> stringifier) {
+    Check.notNull(array);
+    return implode(array, stringifier, DEFAULT_IMPLODE_SEPARATOR, 0, array.length);
   }
 
   /**
@@ -288,21 +288,41 @@ public class ArrayMethods {
    *
    * @param array The array to implode
    * @param separator The separator string
-   * @param limit The maximum number of elements to collect. Specify -1 for no maximum. Any other
-   *     negative integer results in an {@link IllegalArgumentException}. Specifying a number
-   *     greater than the number of elements in the array works as though {@link #implode(Object[],
-   *     String) no limit was specified}.
    * @return A concatenation of the elements in the array.
    */
-  public static String implode(Object[] array, String separator, int limit) {
+  public static <T> String implode(T[] array, String separator) {
+    Check.notNull(array);
+    return implode(array, Objects::toString, separator, 0, array.length);
+  }
+
+  /**
+   * PHP-style implode method, concatenating the array elements using the specified separator
+   * string.
+   *
+   * @param array The array to implode
+   * @param stringifier A function converting the array elements to strings
+   * @param separator The separator string
+   * @return A concatenation of the elements in the array.
+   */
+  public static <T> String implode(T[] array, Function<T, String> stringifier, String separator) {
+    Check.notNull(array);
+    return implode(array, stringifier, separator, 0, array.length);
+  }
+
+  /**
+   * PHP-style implode method, concatenating the array elements using the specified separator
+   * string.
+   *
+   * @param array The array to implode
+   * @param limit The maximum number of elements to collect. Specify -1 for no maximum. Specifying a
+   *     number greater than the length of the array is OK. It will be clamped to the array length.
+   * @return A concatenation of the elements in the array.
+   */
+  public static <T> String implode(T[] array, int limit) {
     Check.notNull(array, "array");
-    Check.notNull(separator, "separator");
     Check.that(limit, "limit").is(gte(), -1);
-    Stream<?> stream = Arrays.stream(array);
-    if (limit < array.length) {
-      stream = stream.limit(limit);
-    }
-    return stream.map(Objects::toString).collect(Collectors.joining(separator));
+    int x = limit == -1 ? array.length : Math.min(limit, array.length);
+    return implode(array, Objects::toString, DEFAULT_IMPLODE_SEPARATOR, 0, x);
   }
 
   /**
@@ -310,19 +330,20 @@ public class ArrayMethods {
    * string.
    *
    * @param array The array to implode
+   * @param stringifier A function converting the array elements to strings
    * @param separator The separator string
    * @param from The index of the element to begin the concatenation with (inclusive)
    * @param to The index of the element to end the concatenation with (exclusive)
    * @return A concatenation of the elements in the array.
    */
-  public static String implode(Object[] array, String separator, int from, int to) {
+  public static <T> String implode(
+      T[] array, Function<T, String> stringifier, String separator, int from, int to) {
     Check.notNull(array, "array");
+    Check.notNull(stringifier, "stringifier");
     Check.notNull(separator, "separator");
     Check.that(from, "from").is(gte(), 0).is(lte(), array.length);
     Check.that(to, "to").is(gte(), from).is(lte(), array.length);
-    return Arrays.stream(array, from, to)
-        .map(Objects::toString)
-        .collect(Collectors.joining(separator));
+    return Arrays.stream(array, from, to).map(stringifier).collect(joining(separator));
   }
 
   /**

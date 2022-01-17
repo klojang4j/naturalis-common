@@ -1,15 +1,10 @@
 package nl.naturalis.common;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.Function;
 import org.junit.Test;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+
 import static nl.naturalis.common.ArrayMethods.pack;
 import static nl.naturalis.common.StringMethods.*;
+import static org.junit.Assert.*;
 
 public class StringMethodsTest {
 
@@ -362,30 +357,5 @@ public class StringMethodsTest {
     assertArrayEquals(pack("", "", ".dors", "", ".lat", "", ""), split("||.dors||.lat||", '|'));
     assertArrayEquals(pack(), split(null, '|'));
     assertArrayEquals(pack("", ""), split("|", '|'));
-  }
-
-  @Test
-  public void implode00() {
-    Collection<Class<?>> coll =
-        List.of(StringMethods.class, ArrayMethods.class, ClassMethods.class);
-    Function<Class<?>, String> stringifier = c -> c.getSimpleName().toLowerCase();
-    String s = implode(coll, stringifier, ";");
-    assertEquals("stringmethods;arraymethods;classmethods", s);
-  }
-
-  @Test
-  public void implode01() {
-    Collection<Class<?>> coll = List.of();
-    Function<Class<?>, String> stringifier = c -> c.getSimpleName().toLowerCase();
-    String s = implode(coll, stringifier, ";");
-    assertEquals("", s);
-  }
-
-  @Test(expected = IllegalArgumentException.class) // Not NPE!
-  public void implode02() {
-    Collection<Class<?>> coll =
-        Arrays.asList(StringMethods.class, null, ArrayMethods.class, ClassMethods.class);
-    Function<Class<?>, String> stringifier = c -> c.getSimpleName().toLowerCase();
-    implode(coll, stringifier, ";");
   }
 }

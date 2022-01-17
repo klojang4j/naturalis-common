@@ -13,11 +13,9 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
-import static nl.naturalis.common.ArrayMethods.END_INDEX;
-import static nl.naturalis.common.ArrayMethods.START_INDEX;
+import static nl.naturalis.common.ArrayMethods.*;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.*;
 
@@ -227,7 +225,7 @@ public class CollectionMethods {
    * @param <V> The type of the values and the list elements
    * @param list The {@code List} to convert.
    * @param keyExtractor The key-extraction function
-   * @return An unmodfiable {@code Map}
+   * @return An unmodifiable {@code Map}
    */
   public static <K, V> Map<K, V> toUnmodifiableMap(
       List<V> list, Function<? super V, ? extends K> keyExtractor) {
@@ -271,8 +269,8 @@ public class CollectionMethods {
   }
 
   /**
-   * Returns a mutable {@link EnumMap} with all enum constants set to non-null values. The number if
-   * values must exactly equal the number of enum constants and they are assigned according to
+   * Returns a mutable {@link EnumMap} with all enum constants set to non-null values. The number of
+   * values must exactly equal the number of enum constants, and they are assigned according to
    * ordinal number. This method throws an {@link IllegalArgumentException} if the number of values
    * is not exactly equal to the number of constants in the enum class, or if any of the values is
    * null.
@@ -298,20 +296,6 @@ public class CollectionMethods {
   }
 
   /**
-   * Returns a tightly-sized copy of the specified map.
-   *
-   * @param <K> The type of the keys
-   * @param <V> The type of the values
-   * @param map The {@code Map} to copy
-   * @return A tightly-sized copy of the specified map
-   */
-  public static <K, V> Map<K, V> tightHashMap(Map<K, V> map) {
-    HashMap<K, V> copy = new HashMap<>(map.size() + 1, 1F);
-    copy.putAll(map);
-    return copy;
-  }
-
-  /**
    * Prints the specified {@code Map} to the specified {@code OutputStream}. Each key-value pair is
    * on a new line.
    *
@@ -334,7 +318,7 @@ public class CollectionMethods {
   public static <T> HashSet<T> newHashSet(T... elems) {
     Check.notNull(elems, "elems");
     HashSet<T> set = new HashSet<>(elems.length);
-    Arrays.stream(elems).forEach(set::add);
+    set.addAll(Arrays.asList(elems));
     return set;
   }
 
@@ -349,7 +333,7 @@ public class CollectionMethods {
   public static <T> LinkedHashSet<T> newLinkedHashSet(T... elems) {
     Check.notNull(elems, "elems");
     LinkedHashSet<T> set = new LinkedHashSet<>(elems.length);
-    Arrays.stream(elems).forEach(set::add);
+    set.addAll(Arrays.asList(elems));
     return set;
   }
 
@@ -480,7 +464,7 @@ public class CollectionMethods {
   public static <E, L extends List<E>> L initializedList(IntFunction<E> valueGenerator, int size) {
     Check.notNull(valueGenerator, "valueGenerator");
     Check.that(size, "size").is(gte(), 0);
-    return (L) IntStream.range(0, size).mapToObj(valueGenerator::apply).collect(toList());
+    return (L) IntStream.range(0, size).mapToObj(valueGenerator).collect(toList());
   }
 
   /**
@@ -627,7 +611,7 @@ public class CollectionMethods {
    */
   public static <T, U> Set<U> convertAndFreeze(
       Set<? extends T> source, Function<? super T, ? extends U> converter) {
-    return source.stream().map(converter::apply).collect(toUnmodifiableSet());
+    return source.stream().map(converter).collect(toUnmodifiableSet());
   }
 
   /**
@@ -643,7 +627,7 @@ public class CollectionMethods {
    */
   public static <T, U> List<U> freezeIntoList(
       Collection<? extends T> source, Function<? super T, ? extends U> converter) {
-    return source.stream().map(converter::apply).collect(toUnmodifiableList());
+    return source.stream().map(converter).collect(toUnmodifiableList());
   }
 
   /**
@@ -659,70 +643,110 @@ public class CollectionMethods {
    */
   public static <T, U> Set<U> freezeIntoSet(
       Collection<? extends T> source, Function<? super T, ? extends U> converter) {
-    return source.stream().map(converter::apply).collect(toUnmodifiableSet());
+    return source.stream().map(converter).collect(toUnmodifiableSet());
   }
 
   /**
-   * PHP-style implode method, concatenating the array elements with &#34;, &#34; as separator
-   * string.
+   * PHP-style implode method, concatenating the collection elements with ", " (comma+space) as
+   * separator string.
    *
-   * @param c The collection to implode
+   * @param collection The collection to implode
    * @return A concatenation of the elements in the collection.
    */
-  public static String implode(Collection<?> c) {
-    return implode(c, ", ");
+  public static <T> String implode(Collection<T> collection) {
+    return implode(collection, ", ");
   }
 
   /**
-   * PHP-style implode method, concatenating the array elements using the specified separator
+   * PHP-style implode method, concatenating the collection elements with ", " (comma+space) as
+   * separator string.
+   *
+   * @param collection The collection to implode
+   * @param stringifier A function converting the collection elements to strings
+   * @return A concatenation of the elements in the collection.
+   */
+  public static <T> String implode(Collection<T> collection, Function<T, String> stringifier) {
+    Check.notNull(collection);
+    return implode(collection, stringifier, DEFAULT_IMPLODE_SEPARATOR, 0, collection.size());
+  }
+
+  /**
+   * PHP-style implode method, concatenating the collection elements using the specified separator
    * string.
    *
-   * @param c The collection to implode
+   * @param collection The collection to implode
    * @param separator The separator string
    * @return A concatenation of the elements in the collection.
    */
-  public static String implode(Collection<?> c, String separator) {
-    return c.stream().map(Objects::toString).collect(Collectors.joining(separator));
+  public static <T> String implode(Collection<T> collection, String separator) {
+    Check.notNull(collection);
+    return implode(collection, Objects::toString, separator, 0, collection.size());
   }
 
   /**
-   * PHP-style implode method, concatenating the array elements using the specified separator
+   * PHP-style implode method, concatenating the collection elements using the specified separator
    * string.
    *
-   * @param c The collection to implode
+   * @param collection The collection to implode
+   * @param stringifier A function converting the collection elements to strings
    * @param separator The separator string
-   * @param limit The maximum number of elements to collect. Specify -1 for no maximum. Any other
-   *     negative integer results in an {@link IllegalArgumentException}.
    * @return A concatenation of the elements in the collection.
    */
-  public static String implode(Collection<?> c, String separator, int limit) {
-    Check.notNull(c, "c");
-    Check.notNull(separator, "separator");
+  public static <T> String implode(
+      Collection<T> collection, Function<T, String> stringifier, String separator) {
+    Check.notNull(collection);
+    return implode(collection, stringifier, separator, 0, collection.size());
+  }
+
+  /**
+   * PHP-style implode method, concatenating the collection elements using the specified separator
+   * string.
+   *
+   * @param collection The collection to implode
+   * @param limit The maximum number of elements to collect. Specify -1 for no maximum. Specifying a
+   *     number greater than the length of the collection is OK. It will be clamped to the
+   *     collection length.
+   * @return A concatenation of the elements in the collection.
+   */
+  public static <T> String implode(Collection<T> collection, int limit) {
+    Check.notNull(collection, "collection");
     Check.that(limit, "limit").is(gte(), -1);
-    Stream<?> stream = c.stream();
-    if (limit != -1 || limit < c.size()) {
-      stream = stream.limit(limit);
-    }
-    return stream.map(Objects::toString).collect(Collectors.joining(separator));
+    int x = limit == -1 ? collection.size() : Math.min(limit, collection.size());
+    return implode(collection, Objects::toString, DEFAULT_IMPLODE_SEPARATOR, 0, x);
   }
 
   /**
-   * PHP-style implode method, concatenating the array elements using the specified separator
+   * PHP-style implode method, concatenating the collection elements using the specified separator
    * string.
    *
-   * @param c The collection to implode
+   * @param collection The collection to implode
+   * @param stringifier A function converting the collection elements to strings
    * @param separator The separator string
    * @param from The index of the element to begin the concatenation with (inclusive)
    * @param to The index of the element to end the concatenation with (exclusive)
    * @return A concatenation of the elements in the collection.
    */
-  public static String implode(Collection<?> c, String separator, int from, int to) {
-    Check.notNull(c, "c");
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public static <T> String implode(
+      Collection<T> collection,
+      Function<T, String> stringifier,
+      String separator,
+      int from,
+      int to) {
+    Check.notNull(collection, "collection");
+    Check.notNull(stringifier, "stringifier");
     Check.notNull(separator, "separator");
-    Check.that(from, "from").is(gte(), 0).is(lte(), c.size());
-    Check.that(to, "to").is(gte(), from).is(lte(), c.size());
-    return List.copyOf(c).subList(from, to).stream()
-        .map(Objects::toString)
-        .collect(Collectors.joining(separator));
+    Check.that(from, "from").is(gte(), 0).is(lte(), collection.size());
+    Check.that(to, "to").is(gte(), from).is(lte(), collection.size());
+    if (from == 0) {
+      return collection.stream().limit(to).map(stringifier).collect(joining(separator));
+    } else if (collection instanceof List) {
+      return ((List<T>) collection)
+          .subList(from, to).stream().map(stringifier).collect(joining(separator));
+    }
+    return (String)
+        Arrays.stream(collection.toArray(), from, to)
+            .map((Function) stringifier)
+            .collect(joining(separator));
   }
 }

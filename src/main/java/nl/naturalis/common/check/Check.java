@@ -207,7 +207,7 @@ import static nl.naturalis.common.check.Messages.createMessage;
  */
 public abstract class Check<T, E extends Exception> {
 
-  static final String DEF_ARG_NAME = "value";
+  static final String DEF_ARG_NAME = "argument";
 
   private static final Function<String, IllegalArgumentException> DEF_EXC_FACTORY =
       IllegalArgumentException::new;
@@ -269,15 +269,6 @@ public abstract class Check<T, E extends Exception> {
    */
   public static <U> Check<U, IllegalArgumentException> notNull(U arg)
       throws IllegalArgumentException {
-    /*
-     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-     * NB we construct the Check instance right here, rather than calling
-     * another static factory method, e.g. notNull(arg, DEFAULT_ARG_NAME).
-     * In performance tests it turned out that for some reason the JVM had
-     * a hard time inlining these calls, making the notNull check about 20%
-     * slower than a "manual" not null check.
-     * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-     */
     if (arg == null) {
       String msg = createMessage(CommonChecks.notNull(), false, DEF_ARG_NAME, null);
       throw DEF_EXC_FACTORY.apply(msg);

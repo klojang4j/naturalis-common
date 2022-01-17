@@ -1,16 +1,14 @@
 package nl.naturalis.common;
 
-import static nl.naturalis.common.CollectionMethods.asList;
-import static nl.naturalis.common.CollectionMethods.newLinkedHashSet;
+import org.junit.Test;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import static nl.naturalis.common.CollectionMethods.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.junit.Test;
 
 public class CollectionMethodsTest {
 
@@ -109,12 +107,35 @@ public class CollectionMethodsTest {
   @Test
   public void implode01() {
     List<String> chars = List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
-    assertEquals("234", implode(chars, "", 2, 5));
+    assertEquals("234", implode(chars, Objects::toString, "", 2, 5));
   }
 
   @Test
   public void implode02() {
     List<String> chars = List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
-    assertEquals("2/3/4", implode(chars, "/", 2, 5));
+    assertEquals("2/3/4", implode(chars, Objects::toString, "/", 2, 5));
+  }
+
+  @Test
+  public void implode03() {
+    Collection<Class<?>> coll =
+        List.of(StringMethods.class, ArrayMethods.class, ClassMethods.class);
+    Function<Class<?>, String> stringifier = c -> c.getSimpleName().toLowerCase();
+    String s = implode(coll, stringifier, ";");
+    assertEquals("stringmethods;arraymethods;classmethods", s);
+  }
+
+  @Test
+  public void implode04() {
+    Collection<Class<?>> coll = List.of();
+    Function<Class<?>, String> stringifier = c -> c.getSimpleName().toLowerCase();
+    String s = implode(coll, stringifier, ";");
+    assertEquals("", s);
+  }
+
+  public void implode05() {
+    Collection<Class<?>> coll =
+        Arrays.asList(StringMethods.class, null, ArrayMethods.class, ClassMethods.class);
+    assertEquals("stringmethods;null:arraymethods;classmethods", implode(coll));
   }
 }

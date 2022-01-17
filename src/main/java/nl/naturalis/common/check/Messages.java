@@ -1,6 +1,7 @@
 package nl.naturalis.common.check;
 
 import nl.naturalis.common.ArrayMethods;
+import nl.naturalis.common.CollectionMethods;
 import nl.naturalis.common.Pair;
 import nl.naturalis.common.StringMethods;
 import nl.naturalis.common.collection.TypeSet;
@@ -104,7 +105,7 @@ class Messages {
   static Formatter msgDeepNotNull() {
     return md -> {
       if (md.negated()) { // Negation is nonsense, but OK
-        format("%s must be null or contain one or more null values", md.argName());
+        return format("%s must be null or contain one or more null values", md.argName());
       }
       return format("%s must not be null or contain null values", md.argName());
     };
@@ -648,11 +649,11 @@ class Messages {
     } else if (val instanceof Collection) {
       Collection c = (Collection) val;
       return concat(
-          simpleClassName(val), "[", c.size(), "] of [", StringMethods.implode(c, ", ", 10), "]");
+          simpleClassName(val), "[", c.size(), "] of [", CollectionMethods.implode(c, 10), "]");
     } else if (val.getClass().isArray()) {
       Object[] a = asArray(val);
       return concat(
-          simpleClassName(val), "[", a.length, "] of [", ArrayMethods.implode(a, ", ", 10), "]");
+          simpleClassName(val), "[", a.length, "] of [", ArrayMethods.implode(a, 10), "]");
     } else if (val.getClass() != Object.class) {
       try {
         // If the class has its own toString() method, it's probably informative
