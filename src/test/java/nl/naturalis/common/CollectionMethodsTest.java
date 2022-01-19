@@ -3,7 +3,6 @@ package nl.naturalis.common;
 import org.junit.Test;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static nl.naturalis.common.CollectionMethods.*;
@@ -114,23 +113,6 @@ public class CollectionMethodsTest {
   public void implode02() {
     List<String> chars = List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     assertEquals("2/3/4", implode(chars, Objects::toString, "/", 2, 5));
-  }
-
-  @Test
-  public void implode03() {
-    Collection<Class<?>> coll =
-        List.of(StringMethods.class, ArrayMethods.class, ClassMethods.class);
-    Function<Class<?>, String> stringifier = c -> c.getSimpleName().toLowerCase();
-    String s = implode(coll, stringifier, ";");
-    assertEquals("stringmethods;arraymethods;classmethods", s);
-  }
-
-  @Test
-  public void implode04() {
-    Collection<Class<?>> coll = List.of();
-    Function<Class<?>, String> stringifier = c -> c.getSimpleName().toLowerCase();
-    String s = implode(coll, stringifier, ";");
-    assertEquals("", s);
   }
 
   public void implode05() {

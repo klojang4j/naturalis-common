@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
 import static nl.naturalis.common.ArrayMethods.*;
@@ -647,61 +648,35 @@ public class CollectionMethods {
   }
 
   /**
-   * PHP-style implode method, concatenating the collection elements with ", " (comma+space) as
-   * separator string.
+   * PHP-style implode method, concatenating the collection elements with {@link
+   * ArrayMethods#DEFAULT_IMPLODE_SEPARATOR}.
    *
+   * @see ArrayMethods#implode(Object[])
    * @param collection The collection to implode
    * @return A concatenation of the elements in the collection.
    */
   public static <T> String implode(Collection<T> collection) {
-    return implode(collection, ", ");
+    return implode(collection, DEFAULT_IMPLODE_SEPARATOR);
   }
 
   /**
-   * PHP-style implode method, concatenating the collection elements with ", " (comma+space) as
-   * separator string.
+   * PHP-style implode method, concatenating the collection elements with the specified separator.
    *
-   * @param collection The collection to implode
-   * @param stringifier A function converting the collection elements to strings
-   * @return A concatenation of the elements in the collection.
-   */
-  public static <T> String implode(Collection<T> collection, Function<T, String> stringifier) {
-    Check.notNull(collection);
-    return implode(collection, stringifier, DEFAULT_IMPLODE_SEPARATOR, 0, collection.size());
-  }
-
-  /**
-   * PHP-style implode method, concatenating the collection elements using the specified separator
-   * string.
-   *
+   * @see ArrayMethods#implode(Object[], String)
    * @param collection The collection to implode
    * @param separator The separator string
    * @return A concatenation of the elements in the collection.
    */
   public static <T> String implode(Collection<T> collection, String separator) {
     Check.notNull(collection);
-    return implode(collection, Objects::toString, separator, 0, collection.size());
+    return implode(collection, Objects::toString, separator, 0, -1);
   }
 
   /**
-   * PHP-style implode method, concatenating the collection elements using the specified separator
-   * string.
+   * PHP-style implode method, concatenating at most {@code limit} collection elements with {@link
+   * ArrayMethods#DEFAULT_IMPLODE_SEPARATOR}.
    *
-   * @param collection The collection to implode
-   * @param stringifier A function converting the collection elements to strings
-   * @param separator The separator string
-   * @return A concatenation of the elements in the collection.
-   */
-  public static <T> String implode(
-      Collection<T> collection, Function<T, String> stringifier, String separator) {
-    Check.notNull(collection);
-    return implode(collection, stringifier, separator, 0, collection.size());
-  }
-
-  /**
-   * PHP-style implode method, concatenating the collection elements using the specified separator
-   * string.
-   *
+   * @see ArrayMethods#implode(Object[], int)
    * @param collection The collection to implode
    * @param limit The maximum number of elements to collect. Specify -1 for no maximum. Specifying a
    *     number greater than the length of the collection is OK. It will be clamped to the
@@ -709,21 +684,21 @@ public class CollectionMethods {
    * @return A concatenation of the elements in the collection.
    */
   public static <T> String implode(Collection<T> collection, int limit) {
-    Check.notNull(collection, "collection");
-    Check.that(limit, "limit").is(gte(), -1);
-    int x = limit == -1 ? collection.size() : Math.min(limit, collection.size());
-    return implode(collection, Objects::toString, DEFAULT_IMPLODE_SEPARATOR, 0, x);
+    return implode(collection, Objects::toString, DEFAULT_IMPLODE_SEPARATOR, 0, -1);
   }
 
   /**
-   * PHP-style implode method, concatenating the collection elements using the specified separator
-   * string.
+   * PHP-style implode method.
    *
+   * @see ArrayMethods#implode(Object[], Function, String, int, int)
    * @param collection The collection to implode
    * @param stringifier A function converting the collection elements to strings
    * @param separator The separator string
    * @param from The index of the element to begin the concatenation with (inclusive)
-   * @param to The index of the element to end the concatenation with (exclusive)
+   * @param to The index of the element to end the concatenation with (exclusive). The specified
+   *     number will be clamped to {@code collection.size()} (i.e. it's OK to specify a number
+   *     greater than {@code collection.size()}). You can specify -1 as a shorthand for {@code
+   *     collection.size()}.
    * @return A concatenation of the elements in the collection.
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
@@ -733,20 +708,20 @@ public class CollectionMethods {
       String separator,
       int from,
       int to) {
-    Check.notNull(collection, "collection");
+    int sz = Check.notNull(collection, "collection").ok(Collection::size);
     Check.notNull(stringifier, "stringifier");
     Check.notNull(separator, "separator");
-    Check.that(from, "from").is(gte(), 0).is(lte(), collection.size());
-    Check.that(to, "to").is(gte(), from).is(lte(), collection.size());
+    Check.that(from, "from").is(gte(), 0).is(lte(), sz);
+    int x = to == -1 ? sz : Math.min(to, sz);
+    Check.that(x, "to").is(gte(), from);
     if (from == 0) {
-      return collection.stream().limit(to).map(stringifier).collect(joining(separator));
+      Stream<T> stream = x == sz ? collection.stream() : collection.stream().limit(x);
+      return stream.map(stringifier).collect(joining(separator));
     } else if (collection instanceof List) {
-      return ((List<T>) collection)
-          .subList(from, to).stream().map(stringifier).collect(joining(separator));
+      List<T> sublist = ((List<T>) collection).subList(from, x);
+      return sublist.stream().map(stringifier).collect(joining(separator));
     }
-    return (String)
-        Arrays.stream(collection.toArray(), from, to)
-            .map((Function) stringifier)
-            .collect(joining(separator));
+    Stream stream = Arrays.stream(collection.toArray(), from, x);
+    return (String) stream.map((Function) stringifier).collect(joining(separator));
   }
 }

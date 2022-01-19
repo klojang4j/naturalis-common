@@ -1,10 +1,12 @@
 package nl.naturalis.common;
 
+import nl.naturalis.common.check.Check;
+
 import java.lang.reflect.Array;
 import java.util.function.IntBinaryOperator;
-import nl.naturalis.common.check.Check;
+
+import static nl.naturalis.common.check.CommonChecks.gt;
 import static nl.naturalis.common.check.CommonChecks.negative;
-import static nl.naturalis.common.check.CommonChecks.positive;
 
 /** @author Ayco Holleman */
 public class MathMethods {
@@ -88,8 +90,8 @@ public class MathMethods {
    */
   public static int getPageIndex(int itemIndex, int rowCount, int columnCount) {
     Check.that(itemIndex, "itemIndex").isNot(negative());
-    Check.that(rowCount, "rowCount").is(positive());
-    Check.that(columnCount, "columnCount").is(positive());
+    Check.that(rowCount, "rowCount").is(gt(), 0);
+    Check.that(columnCount, "columnCount").is(gt(), 0);
     return itemIndex / (rowCount * columnCount);
   }
 

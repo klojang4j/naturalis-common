@@ -5,23 +5,20 @@ import nl.naturalis.common.check.Check;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static nl.naturalis.common.ArrayMethods.*;
-import static nl.naturalis.common.ObjectMethods.*;
+import static nl.naturalis.common.ObjectMethods.ifNull;
+import static nl.naturalis.common.ObjectMethods.ifTrue;
 import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
- * Methods for working with strings. Most methods are friendly towards batch-wise print jobs, trying
- * to make the best of their input. They are are null-safe with respect to the string to be
- * manipulated and they never return null (unless indicated otherwise). The string to be manipulated
- * is named {@code subject} and is passed in as an {@link Object}. If the argument is null, an empty
- * string is returned. Otherwise manipulation is done on the string resulting from {@link
- * Object#toString() Object.toString}.
+ * Methods for working with strings. Many of them are geared towards printing strings. Instead of
+ * accepting a {@code String} argument, they will take an {@code Object} (with parameter name {@code
+ * subject}). If the object is {@code null}, they will return an empty string, else they will call
+ * {@code toString()} on the object and manipulate the resulting {@code String}. In other words,
+ * they are null-safe with respect to the string to be manipulated, and they will never return
+ * {@code null} themselves.
  */
 public final class StringMethods {
 
@@ -318,6 +315,7 @@ public final class StringMethods {
 
   /**
    * Counts the number of occurrences of the specified character within the specified string.
+   * Returns 0 (zero) if {@code subject} is {@code null}.
    *
    * @param subject The string in which to count the number of occurrences
    * @param c The character the search for
@@ -339,6 +337,7 @@ public final class StringMethods {
 
   /**
    * Counts the number of occurrences of the specified character within the specified string.
+   * Returns 0 (zero) if {@code subject} is {@code null}.
    *
    * @param subject The string in which to count the number of occurrences
    * @param c The character the search for
@@ -362,7 +361,8 @@ public final class StringMethods {
 
   /**
    * Counts the number of occurrences of {@code substr} within {@code subject}. The string to search
-   * for must not be null or empty and is not treated as a regular expression.
+   * for (the {@code substr} argument) must not be null or empty and is not treated as a regular
+   * expression.
    *
    * @param subject The string to search
    * @param substr The substring to search for
@@ -432,58 +432,6 @@ public final class StringMethods {
       j = str.indexOf(substr, j + substr.length());
     }
     return i;
-  }
-
-  /**
-   * Equivalent to {@link #split(Object, char, int)}.
-   *
-   * @param subject The string to split
-   * @param separator The separator used to split the string
-   * @return An array containing the string segments
-   */
-  public static String[] split(Object subject, char separator) {
-    return split(subject, separator, 0);
-  }
-
-  /**
-   * Splits the specified string along the specified separator using the specified limit to limit
-   * the number of segments extracted from the string. Specify 0 (zero) for {@code limit} if you
-   * want to entire string to be processed.
-   *
-   * @param subject The string to split
-   * @param separator The separator used to split the string
-   * @param limit The maximum number of segments to extract from the string
-   * @return An array containing at most {@code limit} string segments
-   */
-  public static String[] split(Object subject, char separator, int limit) {
-    Check.that(limit).isNot(negative());
-    if (isEmpty(subject)) {
-      return EMPTY_STRING_ARRAY;
-    }
-    String str = subject.toString();
-    ArrayList<String> strs;
-    if (limit == 0) {
-      strs = new ArrayList<>();
-      limit = str.length();
-    } else {
-      strs = new ArrayList<>(limit);
-    }
-    int i = 0;
-    for (int j = 0; j < str.length(); ++j) {
-      if (str.charAt(j) == separator) {
-        strs.add(str.substring(i, j));
-        if (--limit == 0) {
-          break;
-        }
-        i = j + 1;
-      }
-    }
-    if (str.charAt(str.length() - 1) == separator) {
-      strs.add(EMPTY);
-    } else {
-      strs.add(str.substring(i));
-    }
-    return strs.toArray(String[]::new);
   }
 
   /**
@@ -730,8 +678,8 @@ public final class StringMethods {
    * Returns the 1st argument if it is not a whitespace-only string, else the 2nd argument.
    *
    * @see ObjectMethods#ifNull(Object, Object)
-   * @param subject
-   * @param dfault
+   * @param subject The string to return if not null
+   * @param dfault The replacement string
    */
   public static String ifBlank(Object subject, String dfault) {
     return isBlank(subject) ? dfault : subject.toString();
@@ -753,9 +701,10 @@ public final class StringMethods {
    * Removes all occurrences of the specified prefixes from the start of a string. The returned
    * string will no longer start with any of the specified prefixes.
    *
-   * @param subject
-   * @param ignoreCase
-   * @param prefixes
+   * @param subject The string to remove the prefixes from
+   * @param ignoreCase Whether to ignore case while chopping off suffixes
+   * @param prefixes The prefixes to chop off the string
+   * @return A String that does not start with any of the specified suffixes
    */
   public static String lchop(Object subject, boolean ignoreCase, Collection<String> prefixes) {
     return lchop(subject, ignoreCase, prefixes.toArray(String[]::new));
@@ -865,7 +814,7 @@ public final class StringMethods {
    * @return The left-padded string
    */
   public static String lpad(Object obj, int width) {
-    return lpad(obj, width, ' ', null);
+    return lpad(obj, width, ' ', EMPTY);
   }
 
   /**
@@ -879,7 +828,7 @@ public final class StringMethods {
    * @return The left-padded string
    */
   public static String lpad(Object obj, int width, char padChar) {
-    return lpad(obj, width, padChar, null);
+    return lpad(obj, width, padChar, EMPTY);
   }
 
   /**
@@ -903,13 +852,11 @@ public final class StringMethods {
     if (s.length() >= width) {
       return s + d;
     }
-    StringBuilder sb = new StringBuilder(width + d.length());
-    for (int i = s.length(); i < width; ++i) {
-      sb.append(padChar);
-    }
-    sb.append(s);
-    sb.append(d);
-    return sb.toString();
+    return new StringBuilder(width + d.length())
+        .append(String.valueOf(padChar).repeat(width - s.length()))
+        .append(s)
+        .append(d)
+        .toString();
   }
 
   /**
@@ -948,7 +895,7 @@ public final class StringMethods {
           continue LOOP;
         }
       }
-      break LOOP;
+      break;
     }
     return i == 0 ? str0 : str0.substring(i);
   }
@@ -958,7 +905,9 @@ public final class StringMethods {
    *
    * @param subject An object whose {@code toString()} method produces the string to be padded. Null
    *     is treated as the empty string.
-   * @param width
+   * @param width The total length of the padded string. If the string itself is wider than the
+   *     specified width, the string is printed without padding.
+   * @return The left- and right-padded string plus the terminator
    */
   public static String pad(Object subject, int width) {
     return pad(subject, width, ' ', null);
@@ -1076,7 +1025,7 @@ public final class StringMethods {
    * @return The right-padded string
    */
   public static String rpad(Object subject, int width) {
-    return rpad(subject, width, ' ', null);
+    return rpad(subject, width, ' ', EMPTY);
   }
 
   /**
@@ -1090,7 +1039,7 @@ public final class StringMethods {
    * @return The right-padded string
    */
   public static String rpad(Object subject, int width, char padChar) {
-    return rpad(subject, width, padChar, null);
+    return rpad(subject, width, padChar, EMPTY);
   }
 
   /**
@@ -1219,8 +1168,8 @@ public final class StringMethods {
   }
 
   /**
-   * Returns everything from (and including) the first occurrence of the specified character
-   * sequence, or the entire string if it does not contain that character sequence.
+   * Returns everything from (including) the first occurrence of the specified character sequence,
+   * or the entire string if it does not contain that character sequence.
    *
    * @param str The string to take a substring from
    * @param from The character sequence from which to take the substring
@@ -1231,7 +1180,7 @@ public final class StringMethods {
   }
 
   /**
-   * Returns everything from (and including) the first or last occurrence of the specified character
+   * Returns everything from (including) the first or last occurrence of the specified character
    * sequence, or the entire string if it does not contain that character sequence.
    *
    * @param str The string to take a substring from
@@ -1247,7 +1196,7 @@ public final class StringMethods {
   }
 
   /**
-   * Returns everything from (and including) the first occurrence of the specified character, or the
+   * Returns everything from (including) the first occurrence of the specified character, or the
    * entire string if it does not contain that character.
    *
    * @param str The string to take a substring from
@@ -1259,8 +1208,8 @@ public final class StringMethods {
   }
 
   /**
-   * Returns everything from (and including) the first or last occurrence of the specified
-   * character, or the entire string if it does not contain that character.
+   * Returns everything from (including) the first or last occurrence of the specified character, or
+   * the entire string if it does not contain that character.
    *
    * @param str The string to take a substring from
    * @param from The character up to which to take the substring
@@ -1274,7 +1223,7 @@ public final class StringMethods {
   }
 
   /**
-   * Returns everything after (and not including) the first occurrence of the specified character
+   * Returns everything after (not including) the first occurrence of the specified character
    * sequence, or the entire string if it does not contain that character sequence.
    *
    * @param str The string to take a substring from
@@ -1286,7 +1235,7 @@ public final class StringMethods {
   }
 
   /**
-   * Returns everything from (and not including) the first or last occurrence of the specified
+   * Returns everything after (not including) the first or last occurrence of the specified
    * character sequence, or the entire string if it does not contain that character sequence.
    *
    * @param str The string to take a substring from
@@ -1304,7 +1253,7 @@ public final class StringMethods {
   }
 
   /**
-   * Returns everything from (and not including) the first occurrence of the specified character, or
+   * Returns everything after (not including) the first occurrence of the specified character, or
    * the entire string if it does not contain that character.
    *
    * @param str The string to take a substring from
@@ -1316,7 +1265,7 @@ public final class StringMethods {
   }
 
   /**
-   * Returns everything after (and not including) the first or last occurrence of the specified
+   * Returns everything after (not including) the first or last occurrence of the specified
    * character, or the entire string if it does not contain that character.
    *
    * @param str The string to take a substring from
@@ -1371,7 +1320,7 @@ public final class StringMethods {
   }
 
   /**
-   * Returns everything up to (and not including) the first or last occurrence of the specified
+   * Returns everything up to (not including) the first or last occurrence of the specified
    * character within the string, or the entire string if it does not contain that character.
    *
    * @param str The string to take a substring from

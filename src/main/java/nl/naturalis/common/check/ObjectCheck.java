@@ -5,14 +5,13 @@ import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 
 import java.util.function.Function;
-import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 import static nl.naturalis.common.ArrayMethods.isOneOf;
 import static nl.naturalis.common.check.InvalidCheckException.notApplicable;
 import static nl.naturalis.common.check.Messages.createMessage;
 
-class ObjectCheck<T, E extends Exception> extends Check<T, E> {
+final class ObjectCheck<T, E extends Exception> extends Check<T, E> {
 
   private static final String ERR_INT_VALUE = "Cannot return int value for %s";
   private static final String ERR_NULL_TO_INT = ERR_INT_VALUE + " (was null)";
@@ -32,44 +31,6 @@ class ObjectCheck<T, E extends Exception> extends Check<T, E> {
       return this;
     }
     throw exception(test, message, msgArgs);
-  }
-
-  @Override
-  public Check<T, E> is(IntPredicate test) throws E {
-    if (applicable()) {
-      int i = (((Number) arg).intValue());
-      if (test.test(i)) {
-        return this;
-      }
-      String msg = createMessage(test, false, argName, i);
-      throw excFactory.apply(msg);
-    }
-    throw notApplicable(test, arg, argName);
-  }
-
-  @Override
-  public Check<T, E> isNot(IntPredicate test) throws E {
-    if (applicable()) {
-      int i = (((Number) arg).intValue());
-      if (!test.test(i)) {
-        return this;
-      }
-      String msg = createMessage(test, true, argName, i);
-      throw excFactory.apply(msg);
-    }
-    throw notApplicable(test, arg, argName);
-  }
-
-  @Override
-  public Check<T, E> is(IntPredicate test, String message, Object... msgArgs) throws E {
-    if (applicable()) {
-      int i = (((Number) arg).intValue());
-      if (test.test(i)) {
-        return this;
-      }
-      throw exception(test, message, msgArgs);
-    }
-    throw notApplicable(test, arg, argName);
   }
 
   @Override

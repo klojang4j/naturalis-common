@@ -1,17 +1,22 @@
 package nl.naturalis.common;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.*;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.invoke.Getter;
 import nl.naturalis.common.invoke.GetterFactory;
 import nl.naturalis.common.unsafe.UnsafeByteArrayOutputStream;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static nl.naturalis.common.ArrayMethods.implode;
+import static java.util.Comparator.comparing;
+import static nl.naturalis.common.ArrayMethods.primplode;
 import static nl.naturalis.common.StringMethods.lpad;
-import static java.util.Comparator.*;
 
 public class PrintMethods {
 
@@ -82,7 +87,7 @@ public class PrintMethods {
     if (o == null) {
       return "null";
     } else if (o.getClass().isArray()) {
-      return "[" + implode(o) + "]";
+      return "[" + primplode(o) + "]";
     }
     return o.toString();
   }

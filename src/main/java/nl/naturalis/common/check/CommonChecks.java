@@ -19,12 +19,33 @@ import static nl.naturalis.common.ObjectMethods.ifNotNull;
 import static nl.naturalis.common.check.Messages.*;
 
 /**
- * Defines various common tests for arguments. These tests have short, informative error messages
- * associated with them so you don't have to invent them yourself. Many of them are plain,
- * unadorned, method references and only check what they advertise to be checking. Unless documented
- * otherwise, they <i>will not</i> do a preliminary null check. The will throw a raw, unprocessed
- * {@link NullPointerException} if the argument is null. They rely upon being embedded within in
- * chain of checks, the first of which should be a null check (most likely {@link #notNull()}).
+ * Defines various common tests for arguments. The tests have short, informative error messages
+ * associated with them so you don't have to invent them yourself. Unless specified otherwise, they
+ * <i>only</i> test what they advertise to be testing. They <b>will not</b> do a preliminary null
+ * check! If the argument might be {@code null}, always precede them with the {@link #notNull()}
+ * check. Otherwise, a raw, unprocessed {@link NullPointerException} will be thrown from the test
+ * <i>itself</i>, rather than the application code.
+ *
+ * <blockquote>
+ *
+ * <pre>{@cod
+ *  Check.notNull(file, "file").is(readable());
+ *  // Or:
+ *  Check.that(file, "file").is(notNull()).is(readable());
+ * }</pre>
+ *
+ * </blockquote>
+ *
+ * The {@code CommonChecks} also contains a few static exception factories that you can use in
+ * combination with {@code Check.on(...)}:
+ *
+ * <blockquote>
+ *
+ * <pre>{@cod
+ *  Check.on(illegalState(), file, "file").is(notNull()).is(readable());
+ * }</pre>
+ *
+ * </blockquote>
  *
  * @author Ayco Holleman
  */
@@ -40,7 +61,6 @@ public class CommonChecks {
   private CommonChecks() {}
 
   /* ++++++++++++++ Predicate ++++++++++++++ */
-
   /**
    * Verifies that the argument is null. Equivalent to {@link Objects#isNull(Object)
    * Objects::isNull}.
@@ -74,8 +94,16 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is true. If the argument is a Boolean rather than a boolean and the
-   * argument might be null, you should not use this check. Use {@link #nullOr() nullOr(true)}.
+   * Verifies that the argument is {@code true}. If the argument is a {@code Boolean} rather than a
+   * {@code boolean} and the argument might be null, use {@link #nullOr() nullOr(true)}.
+   *
+   * <blockquote>
+   *
+   * <pre>{@code
+   * Check.that(list.isEmpty()).is(yes());
+   * }</pre>
+   *
+   * </blockquote>
    *
    * @return A {@code Predicate}
    */
@@ -89,8 +117,8 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is true. If the argument is a Boolean rather than a boolean and the
-   * argument might be null, you should not use this check. Use {@link #nullOr() nullOr(false)}.
+   * Verifies that the argument is {@code false}. If the argument is a {@code Boolean} rather than a
+   * {@code boolean} and the argument might be null, use {@link #nullOr() nullOr(false)}.
    *
    * @return A {@code Predicate}
    */
@@ -139,8 +167,9 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is recursively non-empty as per {@link
-   * ObjectMethods#isDeepNotEmpty(Object) ObjectMethods.isDeepNotEmpty}.
+   * Verifies that the argument is recursively non-empty. Can be used to ensure an array or
+   * collection is not {@code null}, not empty, and does not contain any null-or-empty elements. See
+   * {@link ObjectMethods#isDeepNotEmpty(Object) ObjectMethods.isDeepNotEmpty}.
    *
    * @see ObjectMethods#isDeepNotEmpty(Object)
    * @param <T> The type of the argument
@@ -311,7 +340,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is an even number.
    *
-   * @return An {@code IntPredicate}
+   * @return A {@code Predicate} implementing the test described above
    */
   public static IntPredicate even() {
     return x -> x % 2 == 0;
@@ -325,7 +354,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is an odd number.
    *
-   * @return An {@code IntPredicate}
+   * @return A {@code Predicate} implementing the test described above
    */
   public static IntPredicate odd() {
     return x -> x % 2 == 1;
@@ -337,12 +366,13 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is greater than zero.
+   * Verifies that the argument is greater than zero. It the argument is an {@code int}, you are
+   * better off using the {@link #gt()} check, performancewise.
    *
-   * @return An {@code IntPredicate}
+   * @return A {@code Predicate} implementing the test described above
    */
-  public static IntPredicate positive() {
-    return x -> x > 0;
+  public static <T extends Number> Predicate<T> positive() {
+    return x -> x.doubleValue() > 0D;
   }
 
   static {
@@ -353,10 +383,10 @@ public class CommonChecks {
   /**
    * Verifies that the argument is greater than zero.
    *
-   * @return An {@code IntPredicate}
+   * @return A {@code Predicate} implementing the test described above
    */
-  public static IntPredicate negative() {
-    return x -> x < 0;
+  public static <T extends Number> Predicate<T> negative() {
+    return x -> x.doubleValue() < 0D;
   }
 
   static {
@@ -1009,7 +1039,8 @@ public class CommonChecks {
   /**
    * Verifies that the argument is 0 (zero).
    *
-   * @return An {@code IntPredicate} establishing that the argument is equal to zero
+   * @return A {@code Predicate} implementing the test described above establishing that the
+   *     argument is equal to zero
    */
   public static IntPredicate zero() {
     return (x) -> x == 0;
@@ -1121,30 +1152,6 @@ public class CommonChecks {
   }
 
   /* ++++++++++++++ Miscellaneous ++++++++++++++ */
-
-  /**
-   * (Not a check) Converts the specified {@code Predicate} into an {@code IntPredicate}. Can be
-   * used to force the compiler to interpret a lambda as an {@code IntPredicate} rather than a
-   * {@code Predicate}.
-   *
-   * @param predicate A {@code Predicate}, supposedly in the form of a lambda
-   * @return The {@code IntPredicate} version of the {@code Predicate}
-   */
-  public static IntPredicate asInt(Predicate<Integer> predicate) {
-    return FunctionalMethods.asInt(predicate);
-  }
-
-  /**
-   * (Not a check) Simply returns the argument. Can be used to force the compiler to interpret a
-   * lambda as a {@code Predicate} rather than an {@code IntPredicate}.
-   *
-   * @param <T> The type of the argument being tested
-   * @param predicate A {@code Predicate}, supposedly in the form of a lambda
-   * @return The argument
-   */
-  public static <T> Predicate<T> asObj(Predicate<T> predicate) {
-    return FunctionalMethods.asObj(predicate);
-  }
 
   /**
    * (Not a check) Shortcut for {@link IllegalStateException#IllegalStateException(String)

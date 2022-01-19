@@ -1,84 +1,60 @@
 package nl.naturalis.common.check;
 
 import nl.naturalis.common.ArrayMethods;
-import nl.naturalis.common.CollectionMethods;
 import nl.naturalis.common.Pair;
-import nl.naturalis.common.StringMethods;
 import nl.naturalis.common.collection.TypeSet;
-import nl.naturalis.common.function.IntObjRelation;
-import nl.naturalis.common.function.IntRelation;
-import nl.naturalis.common.function.ObjIntRelation;
-import nl.naturalis.common.function.Relation;
 
 import java.io.File;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
-import java.util.function.IntPredicate;
-import java.util.function.Predicate;
 
 import static java.lang.String.format;
-import static nl.naturalis.common.ArrayMethods.asArray;
+import static nl.naturalis.common.ArrayMethods.DEFAULT_IMPLODE_SEPARATOR;
+import static nl.naturalis.common.ArrayMethods.primplode;
 import static nl.naturalis.common.ClassMethods.className;
 import static nl.naturalis.common.ClassMethods.simpleClassName;
-import static nl.naturalis.common.StringMethods.concat;
+import static nl.naturalis.common.CollectionMethods.implode;
 import static nl.naturalis.common.StringMethods.ellipsis;
 import static nl.naturalis.common.check.CommonChecks.MESSAGE_PATTERNS;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({"rawtypes", "unchecked"})
 class Messages {
 
   private static final String ERR_INVALID_VALUE = "Invalid value for %s: %s";
 
-  static String createMessage(Predicate test, boolean negated, String argName, Object argValue) {
-    MessageData md = new MessageData(test, negated, argName, argValue);
+  static String createMessage(Object predicate, boolean negated, String argName, Object argValue) {
+    MsgArgs md = new MsgArgs(predicate, negated, argName, argValue);
     return message(md);
   }
 
-  static String createMessage(IntPredicate test, boolean negated, String argName, int argValue) {
-    return message(new MessageData(test, negated, argName, argValue));
-  }
-
   static String createMessage(
-      Relation relation, boolean negated, String argName, Object subject, Object object) {
-    return message(new MessageData(relation, negated, argName, subject, object));
+      Object relation, boolean negated, String argName, Object argValue, Object object) {
+    return message(new MsgArgs(relation, negated, argName, argValue, object));
   }
 
-  static String createMessage(
-      IntRelation relation, boolean negated, String argName, int subject, int object) {
-    return message(new MessageData(relation, negated, argName, subject, object));
-  }
-
-  static String createMessage(
-      ObjIntRelation relation, boolean negated, String argName, Object subject, int object) {
-    return message(new MessageData(relation, negated, argName, subject, object));
-  }
-
-  static String createMessage(
-      IntObjRelation relation, boolean negated, String argName, int subject, Object object) {
-    return message(new MessageData(relation, negated, argName, subject, object));
-  }
-
-  private static String message(MessageData md) {
+  private static String message(MsgArgs md) {
     Formatter formatter = MESSAGE_PATTERNS.get(md.check());
     if (formatter != null) {
       return formatter.apply(md);
     }
-    return String.format(ERR_INVALID_VALUE, md.argName(), toStr(md.argument()));
+    return String.format(ERR_INVALID_VALUE, md.argName(), toStr(md.arg()));
   }
 
   static Formatter msgNull() {
     return md -> {
       if (md.negated()) {
-        return msgNotNull().apply(md);
+        return msgNotNull().apply(md.flip());
       }
-      return format("%s must be null (was %s)", md.argName(), toStr(md.argument()));
+      return format("%s must be null (was %s)", md.argName(), toStr(md.arg()));
     };
   }
 
   static Formatter msgNotNull() {
     return md -> {
       if (md.negated()) {
-        return msgNull().apply(md);
+        return msgNull().apply(md.flip());
       }
       return format("%s must not be null", md.argName());
     };
@@ -87,7 +63,7 @@ class Messages {
   static Formatter msgYes() {
     return md -> {
       if (md.negated()) {
-        return msgNo().apply(md);
+        return msgNo().apply(md.flip());
       }
       return format("%s must be true (was false)", md.argName());
     };
@@ -96,7 +72,7 @@ class Messages {
   static Formatter msgNo() {
     return md -> {
       if (md.negated()) {
-        return msgYes().apply(md);
+        return msgYes().apply(md.flip());
       }
       return format("%s must be false (was true)", md.argName());
     };
@@ -126,7 +102,7 @@ class Messages {
       if (md.negated()) {
         return format("%s must not be null or empty", md.argName());
       }
-      return format("%s must be empty (was %s)", md.argName(), toStr(md.argument()));
+      return format("%s must be empty (was %s)", md.argName(), toStr(md.arg()));
     };
   }
 
@@ -135,27 +111,27 @@ class Messages {
       if (md.negated()) {
         return format("%s must not be null or blank", md.argName());
       }
-      return format("%s must be null or blank (was %s)", md.argName(), md.argument());
+      return format("%s must be null or blank (was %s)", md.argName(), md.arg());
     };
   }
 
   static Formatter msgInteger() {
     return md -> {
       if (md.negated()) {
-        return format("%s must not be an integer (was %s)", md.argName(), md.argument());
+        return format("%s must not be an integer (was %s)", md.argName(), md.arg());
       }
       String fmt = "%s must be an integer (was %s)";
-      return format(fmt, md.argName(), md.argument(), className(md.argument()));
+      return format(fmt, md.argName(), md.arg(), className(md.arg()));
     };
   }
 
   static Formatter msgNumber() {
     return md -> {
       if (md.negated()) {
-        return format("%s must not be a number (was %s)", md.argName(), md.argument());
+        return format("%s must not be a number (was %s)", md.argName(), md.arg());
       }
       String fmt = "%s must be a number (was %s)";
-      return format(fmt, md.argName(), md.argument(), className(md.argument()));
+      return format(fmt, md.argName(), md.arg(), className(md.arg()));
     };
   }
 
@@ -163,20 +139,20 @@ class Messages {
     return md -> {
       if (md.negated()) { // Must be an interesting application
         String fmt = "%s must not be valid TCP/UDP port (was %s)";
-        return format(fmt, md.argName(), md.argument());
+        return format(fmt, md.argName(), md.arg());
       }
       String fmt = "%s must be valid TCP/UDP port (was %s)";
-      return format(fmt, md.argName(), md.argument());
+      return format(fmt, md.argName(), md.arg());
     };
   }
 
   static Formatter msgEqualTo() {
     return md -> {
       if (md.negated()) {
-        return format("%s must not be equal to %s", toStr(md.object()));
+        return format("%s must not be equal to %s", md.argName(), toStr(md.object()));
       }
       String fmt = "%s must be equal to %s (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
     };
   }
 
@@ -184,10 +160,10 @@ class Messages {
     return md -> {
       if (md.negated()) {
         String fmt = "%s must not be equal ignoring case to any of %s (was %s)";
-        return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+        return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
       }
       String fmt = "%s must be equal ignoring case to any of %s (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
     };
   }
 
@@ -200,7 +176,7 @@ class Messages {
       }
       String fmt = "%s must be %s (was %s)";
       String id0 = className(md.object()) + '@' + System.identityHashCode(md.object());
-      String id1 = className(md.argument()) + '@' + System.identityHashCode(md.argument());
+      String id1 = className(md.arg()) + '@' + System.identityHashCode(md.arg());
       return format(fmt, md.argName(), id0, id1);
     };
   }
@@ -212,7 +188,7 @@ class Messages {
         return format(fmt, md.argName(), md.object());
       }
       String fmt = "%s.size() must be equal to %s (was %s)";
-      return format(fmt, md.argName(), md.object(), ((Collection) md.argument()).size());
+      return format(fmt, md.argName(), md.object(), ((Collection) md.arg()).size());
     };
   }
 
@@ -222,7 +198,7 @@ class Messages {
         return msgSizeLTE().apply(md.flip());
       }
       String fmt = "%s.size() must be > %s (was %s)";
-      return format(fmt, md.argName(), md.object(), ((Collection) md.argument()).size());
+      return format(fmt, md.argName(), md.object(), ((Collection) md.arg()).size());
     };
   }
 
@@ -232,7 +208,7 @@ class Messages {
         return msgSizeLT().apply(md.flip());
       }
       String fmt = "%s.size() must be >= %s (was %s)";
-      return format(fmt, md.argName(), md.object(), ((Collection) md.argument()).size());
+      return format(fmt, md.argName(), md.object(), ((Collection) md.arg()).size());
     };
   }
 
@@ -242,7 +218,7 @@ class Messages {
         return msgSizeGTE().apply(md.flip());
       }
       String fmt = "%s.size() must be < %s (was %s)";
-      return format(fmt, md.argName(), md.object(), ((Collection) md.argument()).size());
+      return format(fmt, md.argName(), md.object(), ((Collection) md.arg()).size());
     };
   }
 
@@ -252,7 +228,7 @@ class Messages {
         return msgSizeGT().apply(md.flip());
       }
       String fmt = "%s.size() must be <= %s (was %s)";
-      return format(fmt, md.argName(), md.object(), ((Collection) md.argument()).size());
+      return format(fmt, md.argName(), md.object(), ((Collection) md.arg()).size());
     };
   }
 
@@ -265,7 +241,7 @@ class Messages {
       } else {
         fmt = "%s must be >= %s and < %s (was %s)";
       }
-      return format(fmt, md.argName(), pair.one(), pair.two(), md.argument());
+      return format(fmt, md.argName(), pair.one(), pair.two(), md.arg());
     };
   }
 
@@ -278,7 +254,7 @@ class Messages {
       } else {
         fmt = "%s must be >= %s and <= %s (was %s)";
       }
-      return format(fmt, md.argName(), pair.one(), pair.two(), md.argument());
+      return format(fmt, md.argName(), pair.one(), pair.two(), md.arg());
     };
   }
 
@@ -286,10 +262,10 @@ class Messages {
     return md -> {
       if (md.negated()) {
         String fmt = "%s must < 0 or >= %s (was %s)";
-        return format(fmt, md.argName(), md.object(), md.argument());
+        return format(fmt, md.argName(), md.object(), md.arg());
       }
       String fmt = "%s must be >= 0 and < %s (was %s)";
-      return format(fmt, md.argName(), md.object(), md.argument());
+      return format(fmt, md.argName(), md.object(), md.arg());
     };
   }
 
@@ -297,42 +273,42 @@ class Messages {
     return md -> {
       if (md.negated()) {
         String fmt = "%s must < 0 or > %s (was %s)";
-        return format(fmt, md.argName(), md.object(), md.argument());
+        return format(fmt, md.argName(), md.object(), md.arg());
       }
       String fmt = "%s must be >= 0 and <= %s (was %s)";
-      return format(fmt, md.argName(), md.object(), md.argument());
+      return format(fmt, md.argName(), md.object(), md.arg());
     };
   }
 
   static Formatter msgFile() {
     return md -> {
-      File f = (File) md.argument();
+      File f = (File) md.arg();
       if (md.negated()) {
-        return format("File already exists: %s", ((File) md.argument()).getAbsolutePath());
+        return format("File already exists: %s", ((File) md.arg()).getAbsolutePath());
       } else if (f.isDirectory()) {
         // File indeed exists, but alas is a directory
         return format("%s must not be a directory (was %s)", md.argName(), f.getAbsolutePath());
       }
       // File not present at all
-      return format("File not found: %s", ((File) md.argument()).getAbsolutePath());
+      return format("File not found: %s", ((File) md.arg()).getAbsolutePath());
     };
   }
 
   static Formatter msgDirectory() {
     return md -> {
-      File f = (File) md.argument();
+      File f = (File) md.arg();
       if (md.negated()) {
-        return format("Directory already exists: %s", ((File) md.argument()).getAbsolutePath());
+        return format("Directory already exists: %s", ((File) md.arg()).getAbsolutePath());
       } else if (f.isDirectory()) {
         return format("%s must not be a file (was %s)", md.argName(), f.getAbsolutePath());
       }
-      return format("Missing directory: %s", ((File) md.argument()).getAbsolutePath());
+      return format("Missing directory: %s", ((File) md.arg()).getAbsolutePath());
     };
   }
 
   static Formatter msgPresent() {
     return md -> {
-      File f = (File) md.argument();
+      File f = (File) md.arg();
       if (md.negated()) {
         if (f.isDirectory()) {
           return format("Directory already exists: %s", f.getAbsolutePath());
@@ -345,7 +321,7 @@ class Messages {
 
   static Formatter msgReadable() {
     return md -> {
-      File f = (File) md.argument();
+      File f = (File) md.arg();
       if (!f.exists()) {
         return format("No such file/directory: %s", f.getAbsolutePath());
       }
@@ -364,7 +340,7 @@ class Messages {
 
   static Formatter msgWritable() {
     return md -> {
-      File f = (File) md.argument();
+      File f = (File) md.arg();
       if (!f.exists()) {
         return format("No such file/directory: %s", f.getAbsolutePath());
       }
@@ -386,7 +362,7 @@ class Messages {
       if (md.negated()) {
         return msgOdd().apply(md.flip());
       }
-      return format("%s must be even (was %d)", md.argName(), md.argument());
+      return format("%s must be even (was %s)", md.argName(), md.arg());
     };
   }
 
@@ -395,21 +371,21 @@ class Messages {
       if (md.negated()) {
         return msgEven().apply(md.flip());
       }
-      return format("%s must be odd (was %d)", md.argName(), md.argument());
+      return format("%s must be odd (was %s)", md.argName(), md.arg());
     };
   }
 
   static Formatter msgPositive() {
     return md -> {
       String not = md.negated() ? " not" : "";
-      return format("%s must%s be positive (was %d)", md.argName(), not, md.argument());
+      return format("%s must%s be positive (was %s)", md.argName(), not, md.arg());
     };
   }
 
   static Formatter msgNegative() {
     return md -> {
       String not = md.negated() ? " not" : "";
-      return format("%s must%s be negative (was %d)", md.argName(), not, md.argument());
+      return format("%s must%s be negative (was %s)", md.argName(), not, md.arg());
     };
   }
 
@@ -417,10 +393,10 @@ class Messages {
     return md -> {
       if (md.negated()) {
         String fmt = "%s must not be null or %s (was %s)";
-        return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+        return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
       }
       String fmt = "%s must be null or %s (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
     };
   }
 
@@ -438,10 +414,10 @@ class Messages {
     return md -> {
       if (md.negated()) {
         String fmt = "%s must not be element of %s (was %s)";
-        return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+        return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
       }
       String fmt = "%s must be element of %s (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
     };
   }
 
@@ -449,10 +425,10 @@ class Messages {
     return md -> {
       if (md.negated()) {
         String fmt = "%s must not be superset of %s (was %s)";
-        return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+        return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
       }
       String fmt = "%s must be superset of %s (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
     };
   }
 
@@ -460,10 +436,10 @@ class Messages {
     return md -> {
       if (md.negated()) {
         String fmt = "%s must not be subset of %s (was %s)";
-        return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+        return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
       }
       String fmt = "%s must be subset of %s (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
     };
   }
 
@@ -480,10 +456,10 @@ class Messages {
     return md -> {
       if (md.negated()) {
         String fmt = "%s must not be key in %s (parameter \"%s\")";
-        return format(fmt, toStr(md.argument()), toStr(md.object()), md.argName());
+        return format(fmt, toStr(md.arg()), toStr(md.object()), md.argName());
       }
       String fmt = "%s must be key in %s (parameter \"%s\")";
-      return format(fmt, toStr(md.argument()), toStr(md.object()), md.argName());
+      return format(fmt, toStr(md.arg()), toStr(md.object()), md.argName());
     };
   }
 
@@ -500,10 +476,10 @@ class Messages {
     return md -> {
       if (md.negated()) {
         String fmt = "%s must not be value in %s (was %s)";
-        return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+        return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
       }
       String fmt = "%s must be value in %s (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
     };
   }
 
@@ -513,7 +489,7 @@ class Messages {
         return format("%s must not be zero", md.argName());
       }
       String fmt = "%s must be zero (was %s)";
-      return format(fmt, md.argName(), md.argument());
+      return format(fmt, md.argName(), md.arg());
     };
   }
 
@@ -523,7 +499,7 @@ class Messages {
         return msgNe().apply(md.flip());
       }
       String fmt = "%s must be equal to %s (was %s)";
-      return format(fmt, md.argName(), md.object(), md.argument());
+      return format(fmt, md.argName(), md.object(), md.arg());
     };
   }
 
@@ -543,7 +519,7 @@ class Messages {
         return msgAtMost().apply(md.flip());
       }
       String fmt = "%s must be > %s (was %s)";
-      return format(fmt, md.argName(), md.object(), md.argument());
+      return format(fmt, md.argName(), md.object(), md.arg());
     };
   }
 
@@ -553,7 +529,7 @@ class Messages {
         return msgLessThan().apply(md.flip());
       }
       String fmt = "%s must be >= %s (was %s)";
-      return format(fmt, md.argName(), md.object(), md.argument());
+      return format(fmt, md.argName(), md.object(), md.arg());
     };
   }
 
@@ -563,7 +539,7 @@ class Messages {
         return msgAtLeast().apply(md.flip());
       }
       String fmt = "%s must be < %s (was %s)";
-      return format(fmt, md.argName(), md.object(), md.argument());
+      return format(fmt, md.argName(), md.object(), md.arg());
     };
   }
 
@@ -573,7 +549,7 @@ class Messages {
         return msgGreaterThan().apply(md.flip());
       }
       String fmt = "%s must be <= %s (was %s)";
-      return format(fmt, md.argName(), md.object(), md.argument());
+      return format(fmt, md.argName(), md.object(), md.arg());
     };
   }
 
@@ -581,10 +557,10 @@ class Messages {
     return md -> {
       if (md.negated()) {
         String fmt = "%s must not end with \"%s\" (was %s)";
-        return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+        return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
       }
       String fmt = "%s must end with \"%s\" (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
     };
   }
 
@@ -592,10 +568,10 @@ class Messages {
     return md -> {
       if (md.negated()) {
         String fmt = "%s must not contain \"%s\" (was %s)";
-        return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+        return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
       }
       String fmt = "%s must contain \"%s\" (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.argument()));
+      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
     };
   }
 
@@ -607,8 +583,8 @@ class Messages {
       }
       String fmt = "%s must be instance of %s (was %s)";
       String cn0 = className(md.object());
-      String cn1 = className(md.argument());
-      return format(fmt, md.argName(), cn0, cn1, toStr(md.argument()));
+      String cn1 = className(md.arg());
+      return format(fmt, md.argName(), cn0, cn1, toStr(md.arg()));
     };
   }
 
@@ -616,10 +592,10 @@ class Messages {
     return md -> {
       if (md.negated()) {
         String fmt = "%s must not be an array (was %s)";
-        return format(fmt, md.argName(), className(md.argument()));
+        return format(fmt, md.argName(), className(md.arg()));
       }
       String fmt = "%s must be an array (was %s)";
-      return format(fmt, md.argName(), className(md.argument()));
+      return format(fmt, md.argName(), className(md.arg()));
     };
   }
 
@@ -627,10 +603,10 @@ class Messages {
     return md -> {
       if (md.negated()) {
         String fmt = "%s must not be multiple of %s (was %s)";
-        return format(fmt, md.argName(), md.argument());
+        return format(fmt, md.argName(), md.arg());
       }
       String fmt = "%s must be multiple of %s (was %s)";
-      return format(fmt, md.argName(), md.argument());
+      return format(fmt, md.argName(), md.arg());
     };
   }
 
@@ -638,30 +614,63 @@ class Messages {
       TypeSet.of(Number.class, Boolean.class, Character.class, Enum.class);
 
   static String toStr(Object val) {
+    Class type = val.getClass();
     if (val == null) {
       return "null";
-    } else if (DECENT_TO_STRING.contains(val.getClass())) {
+    } else if (DECENT_TO_STRING.contains(type)) {
       return val.toString();
     } else if (val instanceof CharSequence) {
-      return ellipsis(val.toString(), 40);
-    } else if (val.getClass() == Class.class) {
+      return '"' + ellipsis(val.toString(), 40) + '"';
+    } else if (type == Class.class) {
       return simpleClassName(val);
     } else if (val instanceof Collection) {
-      Collection c = (Collection) val;
-      return concat(
-          simpleClassName(val), "[", c.size(), "] of [", CollectionMethods.implode(c, 10), "]");
-    } else if (val.getClass().isArray()) {
-      Object[] a = asArray(val);
-      return concat(
-          simpleClassName(val), "[", a.length, "] of [", ArrayMethods.implode(a, 10), "]");
-    } else if (val.getClass() != Object.class) {
+      return stringifyCollection((Collection) val);
+    } else if (type.isArray()) {
+      return stringifyArray(val);
+    } else if (type != Object.class) {
       try {
-        // If the class has its own toString() method, it's probably informative
-        val.getClass().getDeclaredMethod("toString");
-        return val.toString();
-      } catch (Exception e) {
+        // If the class has its own toString() method, it's probably interesting
+        type.getDeclaredMethod("toString");
+        return ellipsis(val.toString(), 40);
+      } catch (NoSuchMethodException e) {
+        // ...
       }
     }
-    return simpleClassName(val) + '@' + System.identityHashCode(val);
+    return classNameAbbrev(type) + '@' + System.identityHashCode(val);
+  }
+
+  private static String stringifyCollection(Collection c) {
+    String sep = DEFAULT_IMPLODE_SEPARATOR;
+    String imploded = ellipsis(implode(c, Messages::toStr, sep, 0, 10), 40);
+    return new StringBuilder(32)
+        .append(simpleClassName(c))
+        .append('[')
+        .append(c.size())
+        .append("] of [")
+        .append(imploded)
+        .append(c.size() > 10 ? "... " : "")
+        .append(']')
+        .toString();
+  }
+
+  private static String stringifyArray(Object array) {
+    String sep = DEFAULT_IMPLODE_SEPARATOR;
+    String imploded = ellipsis(primplode(array, Messages::toStr, sep, 0, 10), 40);
+    int len = Array.getLength(array);
+    return new StringBuilder(32)
+        .append(simpleClassName(array))
+        .append('[')
+        .append(len)
+        .append("] of [")
+        .append(imploded)
+        .append(len > 10 ? "... " : "")
+        .append(']')
+        .toString();
+  }
+
+  private static String classNameAbbrev(Class type) {
+    String[] pkgs = type.getPackageName().split("\\.");
+    String pkg = ArrayMethods.implode(pkgs, s -> s.substring(0, 1), ".", 0, -1);
+    return pkg + '.' + simpleClassName(type);
   }
 }

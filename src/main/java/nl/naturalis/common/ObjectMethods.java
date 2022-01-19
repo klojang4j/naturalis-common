@@ -155,8 +155,8 @@ public class ObjectMethods {
    *   <li>{@code arg} is an empty {@link Collection}
    *   <li>{@code arg} is an empty {@link Map}
    *   <li>{@code arg} is a zero-length array
-   *   <li>{@code arg} is an empty {@link Optional} or an {@code Optional} containing an empty
-   *       object
+   *   <li>{@code arg} is an empty {@link Optional} <b>or</b> an {@code Optional} containing an
+   *       empty object
    *   <li>{@code arg} is a zero-size {@link Sizeable}
    *   <li>{@code arg} is an empty {@link Emptyable}
    * </ul>

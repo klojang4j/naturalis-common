@@ -33,7 +33,7 @@ import static nl.naturalis.common.check.Messages.createMessage;
  * you can't. The latter is mainly meant to be used in combination with the {@link CommonChecks}
  * class. This class is a grab bag of common checks for arguments. These checks are already
  * associated with short, informative error messages, so you don't have to invent them yourself.
- * This allows for very concise precondition checking. For example:
+ * This allows for concise precondition checking:
  *
  * <blockquote>
  *
@@ -48,8 +48,8 @@ import static nl.naturalis.common.check.Messages.createMessage;
  * <h4>Custom error messages</h4>
  *
  * <p>If you prefer to send out a custom error message, you van do so by specifying a {@code
- * String.format} message pattern and zero or more message argument. Note, however, that the
- * following message arguments are tacitly prepended your own message arguments:
+ * String.format} message pattern and zero or more message arguments. Note, however, that the
+ * following five message arguments are tacitly prefixed to your own message arguments:
  *
  * <ol>
  *   <li>The name of the check that was executed. E.g. "gt" or "notNull". Within the message pattern
@@ -68,9 +68,9 @@ import static nl.naturalis.common.check.Messages.createMessage;
  *       {@link IntPredicate} this message argument will be {@code null}.
  * </ol>
  *
- * <p>Thus, if your custom message only needs to reference these elements of the check, you don't,
- * in fact, need to specify any message arguments yourself at all. The first of your own message
- * arguments can be referenced from within the message pattern as <code>${0}</code> or <code>%6$s
+ * <p>Thus, if your custom message only needs to reference these elements of the check, you don't
+ * need to specify any message arguments yourself at all. The first of your own message arguments
+ * can be referenced from within the message pattern as <code>${0}</code> or <code>%6$s
  * </code>, the second as <code>${1}</code> or <code>%7$s</code>, etc.
  *
  * <p>Examples:
@@ -92,15 +92,14 @@ import static nl.naturalis.common.check.Messages.createMessage;
  *
  * <h4>Checking argument properties</h4>
  *
- * <p>>A {@code Check} object lets you validate not just arguments but also argument properties. For
- * example:
+ * <p>>A {@code Check} object lets you validate not just arguments but also argument properties:
  *
  * <blockquote>
  *
  * <pre>{@code
  * Check.notNull(name, "name").has(String::length, "length", gte(), 10);
- * Check.notNull(employee, "employee").has(Employee::getAge, "age", lt(), 50);
- * Check.notNull(employees, "emps").has(Collection::size, "size", gte(), 100);
+ * Check.notNull(employee).has(Employee::getAge, "age", lt(), 50);
+ * Check.notNull(employees).has(Collection::size, "size", gte(), 100);
  * }</pre>
  *
  * </blockquote>
@@ -113,64 +112,17 @@ import static nl.naturalis.common.check.Messages.createMessage;
  * <pre>{@code
  * // import static nl.naturalis.common.check.CommonChecks.gte;
  * // import static nl.naturalis.common.check.CommonGetters.size;
- * Check.notNull(employees, "emps").has(size(), gte(), 100);
- * // Auto-generated error message: "emps.size() must be >= 100 (was 42)"
+ * Check.notNull(employees, "employees").has(size(), gte(), 100);
+ * // Auto-generated error message: "employees.size() must be >= 100 (was 42)"
  * }</pre>
  *
  * </blockquote>
  *
  * <p>Note that the words "getter" and "property" are suggestive of what is being validated, but
- * also misleading. All that is required as the first argument to the {@link #has(Function,
- * Predicate) has} and {@link #notHas(Function, Predicate) notHas} methods is a function that takes
- * the argument and returns the value to be validated. That could be a method reference like {@code
- * Person::getFirstName}, but it could just as well be a function that transforms the argument
- * itself, like the square root of an {@code int} argument or the uppercase version of a {@code
- * String} argument.
- *
- * <h4>Lambdas</h4>
- *
- * <p>You don't <i>have to</i> use the checks from the {@code CommonChecks} class. You can also
- * provide method references and lambdas expressing the test you want the argument to pass. When
- * passing a lambda implementing a {@code Predicate} or {@code IntPredicate}, however, you will
- * likely run into compilation problems (not occurring with method references and lambdas
- * implementing a {@link Relation}): the compiler will be unable to decide whether it is dealing
- * with a {@code Predicate} or an {@code IntPredicate} - an unfortunate side effect of the
- * combination of type erasure and auto-boxing. This will result in a compiler error like <i>The
- * method is(Predicate&lt;String&gt;) is ambiguous for the type Check&lt;String,
- * IllegalArgumentException&gt;</i>:
- *
- * <blockquote>
- *
- * <pre>{@code
- * // Won't compile even though it's clear this can't be an IntPredicate:
- * Check.that(fullName).is(s -> s.charAt(0) == 'A');
- * }</pre>
- *
- * </blockquote>
- *
- * <p>To resolve this, simply specify the type of the lambda parameter:
- *
- * <blockquote>
- *
- * <pre>{@code
- * Check.that(fullName).is((String s) -> s.charAt(0) == 'A');
- * }</pre>
- *
- * </blockquote>
- *
- * <p>Alternatively, you can use the {@link CommonChecks#asObj(Predicate) asObj} and {@link
- * CommonChecks#asInt(Predicate) asInt} utility methods:
- *
- * <blockquote>
- *
- * <pre>{@code
- * // import static nl.naturalis.common.check.CommonChecks.asInt;
- * // import static nl.naturalis.common.check.CommonChecks.asObj;
- * Check.that(numChairs).is(asInt(x -> x <= 10)); // IntPredicate
- * Check.that(numChairs).is(asObj(x -> x <= 10)); // Predicate<Integer>
- * }</pre>
- *
- * </blockquote>
+ * also misleading. All that is required is a function that takes the argument and returns the value
+ * to be validated. That could be a method reference like {@code Person::getFirstName}, but it could
+ * just as well be a function that transforms the argument itself, like the square root of an {@code
+ * int} argument or the uppercase version of a {@code String} argument.
  *
  * <h4>Changing the Exception type</h4>
  *
@@ -213,7 +165,7 @@ public abstract class Check<T, E extends Exception> {
       IllegalArgumentException::new;
 
   /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing integers.
+   * Static factory method. Returns a new {@code Check} instance suitable for testing integers.
    *
    * @param arg The argument
    * @return A {@code Check} object suitable for testing integers
@@ -223,7 +175,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * Static factory method. Returns a new {@code Check} instance suitable for testing the provided
    * argument.
    *
    * @param <U> The type of the argument
@@ -235,7 +187,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing integers.
+   * Static factory method. Returns a new {@code Check} instance suitable for testing integers.
    *
    * @param arg The argument
    * @param argName The name of the argument
@@ -246,7 +198,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * Static factory method. Returns a new {@code Check} instance suitable for testing the provided
    * argument.
    *
    * @param <U> The type of the argument
@@ -259,7 +211,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * Static factory method. Returns a new {@code Check} instance suitable for testing the provided
    * argument. The argument will have already passed the {@link CommonChecks#notNull() notNull}
    * test.
    *
@@ -277,7 +229,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * Static factory method. Returns a new {@code Check} instance suitable for testing the provided
    * argument. The argument will have already passed the {@link CommonChecks#notNull() notNull}
    * test.
    *
@@ -296,7 +248,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * Static factory method. Returns a new {@code Check} instance suitable for testing the provided
    * argument. The argument will have already passed the {@link CommonChecks#notNull() notNull}
    * test.
    *
@@ -319,7 +271,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * Static factory method. Returns a new {@code Check} instance suitable for testing the provided
    * argument. The argument will have already passed the {@link CommonChecks#notNull() notNull}
    * test.
    *
@@ -344,7 +296,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing integers.
+   * Static factory method. Returns a new {@code Check} instance suitable for testing integers.
    *
    * @param excFactory A {@code Function} that will produce the exception if a test fails. The
    *     {@code Function} will be passed a {@code String} (the error message) and must return the
@@ -359,7 +311,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * Static factory method. Returns a new {@code Check} instance suitable for testing the provided
    * argument.
    *
    * @param <U> The type of the argument
@@ -375,7 +327,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing integers.
+   * Static factory method. Returns a new {@code Check} instance suitable for testing integers.
    *
    * @param excFactory A {@code Function} that will produce the exception if a test fails. The
    *     {@code Function} will be passed a {@code String} (the error message) and must return the
@@ -391,7 +343,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} object suitable for testing the provided
+   * Static factory method. Returns a new {@code Check} instance suitable for testing the provided
    * argument.
    *
    * @param <U> The type of the argument
@@ -424,7 +376,7 @@ public abstract class Check<T, E extends Exception> {
   }
 
   /**
-   * Throws an exception created by the specified exception factory.
+   * Throws the exception created by the specified exception factory.
    *
    * @param <U> The type of the object that would have been returned if it had passed the checks
    * @param <X> The type of the exception
@@ -451,7 +403,7 @@ public abstract class Check<T, E extends Exception> {
    */
   public static <U, X extends Exception> U fail(
       Function<String, X> excFactory, String msg, Object... msgArgs) throws X {
-    return Check.on(excFactory, 1).is(eq(), 0, msg, msgArgs).ok(i -> (U) null);
+    return Check.on(excFactory, 1).is(eq(), 0, msg, msgArgs).ok(i -> null);
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -528,55 +480,6 @@ public abstract class Check<T, E extends Exception> {
    * @throws E If the test fails
    */
   public Check<T, E> isNot(Predicate<T> test, String message, Object... msgArgs) throws E {
-    return is(test.negate(), message, msgArgs);
-  }
-
-  /**
-   * Verifies that the argument passes the test expressed through the specified {@code
-   * IntPredicate}. Although not required this method is meant to be used with an {@code
-   * IntPredicate} from the {@link CommonChecks} class so that an informative error message is
-   * generated upon failure.
-   *
-   * @param test An {@code Predicate} expressing the test
-   * @return This {@code Check} object
-   * @throws E If the test fails
-   */
-  public abstract Check<T, E> is(IntPredicate test) throws E;
-
-  /**
-   * Verifies that the argument ducks the test expressed through the specified {@code IntPredicate}.
-   * Although not required this method is meant to be used with an {@code IntPredicate} from the
-   * {@link CommonChecks} class so that an informative error message is generated upon failure.
-   *
-   * @param test An {@code IntPredicate} expressing the test
-   * @return This {@code Check} object
-   * @throws E If the test fails
-   */
-  public abstract Check<T, E> isNot(IntPredicate test) throws E;
-
-  /**
-   * Verifies that the argument passes the test expressed through the specified {@code
-   * IntPredicate}. Allows you to provide a custom error message.
-   *
-   * @param test An {@code IntPredicate} expressing the test
-   * @param message The error message
-   * @param msgArgs The message arguments
-   * @return This {@code Check} object
-   * @throws E If the test fails
-   */
-  public abstract Check<T, E> is(IntPredicate test, String message, Object... msgArgs) throws E;
-
-  /**
-   * Verifies that the argument ducks the test expressed through the specified {@code IntPredicate}.
-   * Allows you to provide a custom error message.
-   *
-   * @param test An {@code IntPredicate} expressing the test
-   * @param message The error message
-   * @param msgArgs The message arguments
-   * @return This {@code Check} object
-   * @throws E If the test fails
-   */
-  public Check<T, E> isNot(IntPredicate test, String message, Object... msgArgs) throws E {
     return is(test.negate(), message, msgArgs);
   }
 

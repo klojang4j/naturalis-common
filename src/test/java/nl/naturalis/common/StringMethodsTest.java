@@ -2,7 +2,6 @@ package nl.naturalis.common;
 
 import org.junit.Test;
 
-import static nl.naturalis.common.ArrayMethods.pack;
 import static nl.naturalis.common.StringMethods.*;
 import static org.junit.Assert.*;
 
@@ -347,15 +346,5 @@ public class StringMethodsTest {
   @Test
   public void concat00() {
     assertEquals("There are 7 days in a week", concat("There are ", 7, ' ', "days in a ", "week"));
-  }
-
-  @Test
-  public void split00() {
-    assertArrayEquals(pack(".dors", ".lat"), split(".dors|.lat", '|'));
-    assertArrayEquals(pack(".dors", ".lat", ""), split(".dors|.lat|", '|'));
-    assertArrayEquals(pack("", ".dors", ".lat", ""), split("|.dors|.lat|", '|'));
-    assertArrayEquals(pack("", "", ".dors", "", ".lat", "", ""), split("||.dors||.lat||", '|'));
-    assertArrayEquals(pack(), split(null, '|'));
-    assertArrayEquals(pack("", ""), split("|", '|'));
   }
 }

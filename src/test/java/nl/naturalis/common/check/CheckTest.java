@@ -247,30 +247,6 @@ public class CheckTest {
   }
 
   @Test
-  public void asObj01() {
-    StringBuilder sb = new StringBuilder("AYCO");
-    // Won't compile:
-    // Check.that(sb).is(x -> x.charAt(0) == 'A');
-    Check.that(sb).is(asObj(x -> x.charAt(0) == 'A'));
-  }
-
-  @Test
-  public void asObj02() {
-    int i = 100;
-    // Won't compile:
-    // Check.that(i).is(x -> x == 100);
-    Check.that(i).is(asObj(x -> x == 100)); // Predicate<Integer>
-  }
-
-  @Test
-  public void asInt01() {
-    int i = 100;
-    // Won't compile:
-    // Check.that(i).is(x -> x == 100);
-    Check.that(i).is(asInt(x -> x == 100)); // IntPredicate
-  }
-
-  @Test
   public void testNotApplicable01() {
     try {
       Check.that("s", "foo").is(indexOf(), List.of("X", "Y", "Z"));

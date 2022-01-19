@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 
 import static java.lang.System.arraycopy;
@@ -28,9 +29,14 @@ public class ArrayMethods {
   /** A zero-length String array */
   public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
+  /**
+   * Default separator for the various {@code implode} methods in this class and in {@link
+   * CollectionMethods}: ", " (comma+space).
+   */
+  public static final String DEFAULT_IMPLODE_SEPARATOR = ", ";
+
   static final String START_INDEX = "Start index";
   static final String END_INDEX = "End index";
-  static final String DEFAULT_IMPLODE_SEPARATOR = ", ";
 
   // Maximum length of an array
   private static final int MAX_SIZE = Integer.MAX_VALUE;
@@ -91,7 +97,7 @@ public class ArrayMethods {
    *
    * @param <T> The type of the elements in the returned array
    * @param val The value to convert
-   * @return The pecified value <i>in</i> or <i>as</i> an array
+   * @return The specified value <i>in</i> or <i>as</i> an array
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   public static <T> T[] asArray(Object val) {
@@ -174,24 +180,24 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns {@code true} if the specified array contains the specfied value, {@code false}
+   * Returns {@code true} if the specified array contains the specified value, {@code false}
    * otherwise.
    *
    * @param value The value to search for
    * @param array The array to search
-   * @return Whether or not the array contans the value
+   * @return Whether the array contains the value
    */
   public static boolean inArray(int value, int... array) {
     return indexOf(array, value) != -1;
   }
 
   /**
-   * Returns {@code true} if the specified array contains the specfied value, {@code false}
+   * Returns {@code true} if the specified array contains the specified value, {@code false}
    * otherwise.
    *
    * @param value The value to search for (may be null)
    * @param array The array to search
-   * @return Whether or not the array contans the value
+   * @return Whether the array contains the value
    */
   @SafeVarargs
   public static <T> boolean inArray(T value, T... array) {
@@ -199,12 +205,12 @@ public class ArrayMethods {
   }
 
   /**
-   * Returns {@code true} if the specified array contains the specfied reference, {@code false}
+   * Returns {@code true} if the specified array contains the specified reference, {@code false}
    * otherwise.
    *
    * @param ref The reference to search for
    * @param array The array to search
-   * @return Whether or not the array contans the specfied referenc
+   * @return Whether the array contains the specified reference
    */
   @SafeVarargs
   public static <T> boolean isOneOf(T ref, T... array) {
@@ -240,100 +246,194 @@ public class ArrayMethods {
     return (T[]) Array.newInstance(template.getClass().getComponentType(), length);
   }
 
-  public static String implode(Object array) {
-    return implode(array, ", ");
+  /**
+   * PHP-style implode method, concatenating the array elements with {@link
+   * #DEFAULT_IMPLODE_SEPARATOR}. Optimized for {@code int[]} arrays.
+   *
+   * @param array The array to implode
+   * @return A concatenation of the elements in the array.
+   */
+  public static String implodeInts(int[] array) {
+    return implodeInts(array, DEFAULT_IMPLODE_SEPARATOR);
   }
 
-  public static String implode(Object array, String separator) {
-    Check.notNull(array, "array").is(array());
-    Check.notNull(separator, "separator");
-    int sz = Array.getLength(array);
-    StringBuilder sb = new StringBuilder(sz * 8);
-    for (int i = 0; i < sz; ++i) {
-      if (i != 0) {
-        sb.append(separator);
-      }
-      sb.append(Array.get(array, i));
-    }
-    return sb.toString();
+  private static final IntFunction<String> INT_TO_STR = i -> "" + i;
+
+  /**
+   * PHP-style implode method, concatenating the array elements using the specified separator.
+   * Optimized for {@code int[]} arrays.
+   *
+   * @param array The array to implode
+   * @param separator The separator string
+   * @return A concatenation of the elements in the array.
+   */
+  public static String implodeInts(int[] array, String separator) {
+    return implodeInts(array, INT_TO_STR, separator, 0, -1);
   }
 
   /**
-   * PHP-style implode method, concatenating the array elements with ", " (comma+space) as separator
-   * string.
+   * PHP-style implode method, concatenating at most {@code limit} array elements with {@link
+   * #DEFAULT_IMPLODE_SEPARATOR}. This method is primarily meant to implode primitive arrays,
+   * although you <i>can</i> use it to implode any type of array. An {@link
+   * IllegalArgumentException} is thrown if {@code array} is not an array.
    *
+   * @param array The array to implode
+   * @param limit The maximum number of elements to collect. The specified number will be clamped to
+   *     {@code array.length} (i.e. it's OK to specify a number greater than {@code array.length}).
+   *     You can specify -1 as a shorthand for {@code array.length}.
+   * @return A concatenation of the elements in the array.
+   */
+  public static String implodeInts(int[] array, int limit) {
+    return implodeInts(array, INT_TO_STR, DEFAULT_IMPLODE_SEPARATOR, 0, -1);
+  }
+
+  /**
+   * PHP-style implode method, optimized for {@code int[]} arrays.
+   *
+   * @see CollectionMethods#implode(Collection, Function, String, int, int)
+   * @param array The array to implode
+   * @param stringifier A function converting the array elements to strings
+   * @param separator The separator string
+   * @param from The index of the element to begin the concatenation with (inclusive)
+   * @param to The index of the element to end the concatenation with (exclusive). The specified
+   *     number will be clamped to {@code array.length} (i.e. it's OK to specify a number greater
+   *     than {@code array.length}). You can specify -1 as a shorthand for {@code array.length}.
+   * @return A concatenation of the elements in the array.
+   */
+  public static String implodeInts(
+      int[] array, IntFunction<String> stringifier, String separator, int from, int to) {
+    Check.notNull(array, "array");
+    Check.notNull(separator, "separator");
+    Check.that(from, "from").is(gte(), 0).is(lte(), array.length);
+    int x = to == -1 ? array.length : Math.min(to, array.length);
+    Check.that(x, "to").is(gte(), from);
+    return Arrays.stream(array, from, x).mapToObj(stringifier).collect(joining(separator));
+  }
+
+  /**
+   * PHP-style implode method, concatenating the array elements with {@link
+   * #DEFAULT_IMPLODE_SEPARATOR}. This method is primarily meant to implode primitive arrays,
+   * although you <i>can</i> use it to implode any type of array. An {@link
+   * IllegalArgumentException} is thrown if {@code array} is not an array.
+   *
+   * @see CollectionMethods#implode(Collection, String)
+   * @param array The array to implode
+   * @return A concatenation of the elements in the array.
+   */
+  public static String primplode(Object array) {
+    return primplode(array, Objects::toString, DEFAULT_IMPLODE_SEPARATOR, 0, -1);
+  }
+
+  /**
+   * PHP-style implode method, concatenating the array elements using the specified separator. This
+   * method is primarily meant to implode primitive arrays, although you <i>can</i> use it to
+   * implode any type of array. An {@link IllegalArgumentException} is thrown if {@code array} is
+   * not an array.
+   *
+   * @see CollectionMethods#implode(Collection, String)
+   * @param array The array to implode
+   * @param separator The separator string
+   * @return A concatenation of the elements in the array.
+   */
+  public static String primplode(Object array, String separator) {
+    return primplode(array, Objects::toString, separator, 0, -1);
+  }
+
+  /**
+   * PHP-style implode method, concatenating at most {@code limit} array elements {@link
+   * #DEFAULT_IMPLODE_SEPARATOR}. This method is primarily meant to implode primitive arrays,
+   * although you <i>can</i> use it to implode any type of array. An {@link
+   * IllegalArgumentException} is thrown if {@code array} is not an array.
+   *
+   * @param array The array to implode
+   * @param limit The maximum number of elements to collect. The specified number will be clamped to
+   *     {@code array.length} (i.e. it's OK to specify a number greater than {@code array.length}).
+   *     You can specify -1 as a shorthand for {@code array.length}.
+   * @return A concatenation of the elements in the array.
+   */
+  public static String primplode(Object array, int limit) {
+    return primplode(array, Objects::toString, DEFAULT_IMPLODE_SEPARATOR, 0, limit);
+  }
+
+  /**
+   * PHP-style implode method. This method is primarily meant to implode primitive arrays, although
+   * you <i>can</i> use it to implode any type of array. An {@link IllegalArgumentException} is
+   * thrown if {@code array} is not an array.
+   *
+   * @see CollectionMethods#implode(Collection, Function, String, int, int)
+   * @param array The array to implode
+   * @param stringifier A function converting the array elements to strings
+   * @param separator The separator string
+   * @param from The index of the element to begin the concatenation with (inclusive)
+   * @param to The index of the element to end the concatenation with (exclusive). The specified
+   *     number will be clamped to {@code array.length} (i.e. it's OK to specify a number greater
+   *     than {@code array.length}). You can specify -1 as a shorthand for {@code array.length}.
+   * @return A concatenation of the elements in the array.
+   */
+  public static String primplode(
+      Object array, Function<Object, String> stringifier, String separator, int from, int to) {
+    int len = Check.notNull(array, "array").is(array()).ok(Array::getLength);
+    Check.notNull(separator, "separator");
+    Check.that(from, "from").is(gte(), 0).is(lte(), len);
+    int x = to == -1 ? len : Math.min(to, len);
+    Check.that(x, "to").is(gte(), from);
+    return IntStream.range(from, x)
+        .mapToObj(i -> Array.get(array, i))
+        .map(stringifier)
+        .collect(joining(separator));
+  }
+
+  /**
+   * PHP-style implode method, concatenating the array elements with {@link
+   * #DEFAULT_IMPLODE_SEPARATOR}.
+   *
+   * @see CollectionMethods#implode(Collection)
    * @param array The collection to implode
    * @return A concatenation of the elements in the collection.
    */
   public static <T> String implode(T[] array) {
-    return implode(array, ", ");
+    return implode(array, DEFAULT_IMPLODE_SEPARATOR);
   }
 
   /**
-   * PHP-style implode method, concatenating the array elements with ", " (comma+space) as separator
-   * string.
+   * PHP-style implode method, concatenating the array elements using the specified separator.
    *
-   * @param array The array to implode
-   * @param stringifier A function converting the array elements to strings
-   * @return A concatenation of the elements in the collection.
-   */
-  public static <T> String implode(T[] array, Function<T, String> stringifier) {
-    Check.notNull(array);
-    return implode(array, stringifier, DEFAULT_IMPLODE_SEPARATOR, 0, array.length);
-  }
-
-  /**
-   * PHP-style implode method, concatenating the array elements using the specified separator
-   * string.
-   *
+   * @see CollectionMethods#implode(Collection, String)
    * @param array The array to implode
    * @param separator The separator string
    * @return A concatenation of the elements in the array.
    */
   public static <T> String implode(T[] array, String separator) {
     Check.notNull(array);
-    return implode(array, Objects::toString, separator, 0, array.length);
+    return implode(array, Objects::toString, separator, 0, -1);
   }
 
   /**
-   * PHP-style implode method, concatenating the array elements using the specified separator
-   * string.
+   * PHP-style implode method, concatenating at most {@code limit} array elements with ", "
+   * (comma+space) as separator.
    *
+   * @see CollectionMethods#implode(Collection, int)
    * @param array The array to implode
-   * @param stringifier A function converting the array elements to strings
-   * @param separator The separator string
-   * @return A concatenation of the elements in the array.
-   */
-  public static <T> String implode(T[] array, Function<T, String> stringifier, String separator) {
-    Check.notNull(array);
-    return implode(array, stringifier, separator, 0, array.length);
-  }
-
-  /**
-   * PHP-style implode method, concatenating the array elements using the specified separator
-   * string.
-   *
-   * @param array The array to implode
-   * @param limit The maximum number of elements to collect. Specify -1 for no maximum. Specifying a
-   *     number greater than the length of the array is OK. It will be clamped to the array length.
+   * @param limit The maximum number of elements to collect. The specified number will be clamped to
+   *     {@code array.length} (i.e. it's OK to specify a number greater than {@code array.length}).
+   *     You can specify -1 as a shorthand for {@code array.length}.
    * @return A concatenation of the elements in the array.
    */
   public static <T> String implode(T[] array, int limit) {
-    Check.notNull(array, "array");
-    Check.that(limit, "limit").is(gte(), -1);
-    int x = limit == -1 ? array.length : Math.min(limit, array.length);
-    return implode(array, Objects::toString, DEFAULT_IMPLODE_SEPARATOR, 0, x);
+    return implode(array, Objects::toString, DEFAULT_IMPLODE_SEPARATOR, 0, limit);
   }
 
   /**
-   * PHP-style implode method, concatenating the array elements using the specified separator
-   * string.
+   * PHP-style implode method.
    *
+   * @see CollectionMethods#implode(Collection, Function, String, int, int)
    * @param array The array to implode
    * @param stringifier A function converting the array elements to strings
    * @param separator The separator string
    * @param from The index of the element to begin the concatenation with (inclusive)
-   * @param to The index of the element to end the concatenation with (exclusive)
+   * @param to The index of the element to end the concatenation with (exclusive). The specified
+   *     number will be clamped to {@code array.length} (i.e. it's OK to specify a number greater
+   *     than {@code array.length}). You can specify -1 as a shorthand for {@code array.length}.
    * @return A concatenation of the elements in the array.
    */
   public static <T> String implode(
@@ -342,8 +442,9 @@ public class ArrayMethods {
     Check.notNull(stringifier, "stringifier");
     Check.notNull(separator, "separator");
     Check.that(from, "from").is(gte(), 0).is(lte(), array.length);
-    Check.that(to, "to").is(gte(), from).is(lte(), array.length);
-    return Arrays.stream(array, from, to).map(stringifier).collect(joining(separator));
+    int x = to == -1 ? array.length : Math.min(to, array.length);
+    Check.that(x, "to").is(gte(), from);
+    return Arrays.stream(array, from, x).map(stringifier).collect(joining(separator));
   }
 
   /**
@@ -660,7 +761,7 @@ public class ArrayMethods {
   }
 
   /**
-   * Converts the specified specified {@code int} array to an {@code Integer} array.
+   * Converts the specified {@code int} array to an {@code Integer} array.
    *
    * @param values The {@code int} array
    * @return The {@code Integer} array

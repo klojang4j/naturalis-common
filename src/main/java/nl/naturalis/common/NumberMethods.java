@@ -2,8 +2,7 @@ package nl.naturalis.common;
 
 import static nl.naturalis.common.StringMethods.isEmpty;
 import static nl.naturalis.common.StringMethods.isNotEmpty;
-import static nl.naturalis.common.check.CommonChecks.negative;
-import static nl.naturalis.common.check.CommonChecks.positive;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -17,10 +16,10 @@ import nl.naturalis.common.check.Check;
 public class NumberMethods {
 
   /**
-   * Returns whether or not the specified string represents a valid integer.
+   * Returns whether the specified string represents a valid integer.
    *
    * @param str The string
-   * @return Whether or not the specified string represents a valid integer
+   * @return Whether the specified string represents a valid integer
    */
   public static boolean isInteger(String str) {
     if (isNotEmpty(str)) {
@@ -35,12 +34,11 @@ public class NumberMethods {
   }
 
   /**
-   * Returns whether or not the specified string represents a plain, positive integer, consisting of
-   * digits only, without plus or minus sign, without leading zeros, and fitting into a 32-bit
-   * integer.
+   * Returns whether the specified string represents a plain, positive integer, consisting of digits
+   * only, without plus or minus sign, without leading zeros, and fitting into a 32-bit integer.
    *
    * @param str The string
-   * @return Whether or not the specified string is a valid, digit-only integer
+   * @return Whether the specified string is a valid, digit-only integer
    */
   public static boolean isPlainInt(String str) {
     if (isEmpty(str)) {
@@ -58,10 +56,10 @@ public class NumberMethods {
   }
 
   /**
-   * Returns whether or not the specified string represents a valid {@code short}.
+   * Returns whether the specified string represents a valid {@code short}.
    *
    * @param str The string
-   * @return Whether or not the specified string represents a valid {@code short}.
+   * @return Whether the specified string represents a valid {@code short}.
    */
   public static boolean isShort(String str) {
     if (!isEmpty(str) && str.codePoints().allMatch(Character::isDigit)) {
@@ -75,11 +73,11 @@ public class NumberMethods {
   }
 
   /**
-   * Returns whether or not the specified string consists of digits only, without plus or minus
-   * sign, without leading zeros, and fitting into a 16-bit integer.
+   * Returns whether the specified string consists of digits only, without plus or minus sign,
+   * without leading zeros, and fitting into a 16-bit integer.
    *
    * @param str The string
-   * @return Whether or not the specified string is a valid, digit-only integer
+   * @return Whether the specified string is a valid, digit-only integer
    */
   public static boolean isPlainShort(String str) {
     if (isEmpty(str)) {
@@ -160,13 +158,13 @@ public class NumberMethods {
   }
 
   /**
-   * Returns whether or not the specified {@code Number} can be converted into an instance of the
-   * specified {@code Number} class without loss of information.
+   * Returns whether the specified {@code Number} can be converted into an instance of the specified
+   * {@code Number} class without loss of information.
    *
    * @param <T> The type of {@code Number} to convert to
    * @param number The {@code Number} to convert
    * @param targetType The type of {@code Number} to convert to
-   * @return Whether or not conversion will be lossless
+   * @return Whether conversion will be lossless
    */
   public static <T extends Number> boolean fitsInto(Number number, Class<T> targetType) {
     Class<?> myType = Check.notNull(number, "number").ok(Object::getClass);
@@ -246,24 +244,24 @@ public class NumberMethods {
   }
 
   /**
-   * Returns whether or not {@code subject} lies within the specified range.
+   * Returns whether {@code subject} lies within the specified range.
    *
    * @param subject The integer to test
    * @param lowerBoundInclusive The lower bound of the range (inclusive)
    * @param upperBoundExclusive The upper bound of the range (exclusive)
-   * @return Whether or not {@code subject} lies within the specified range
+   * @return Whether {@code subject} lies within the specified range
    */
   public static boolean isBetween(int subject, int lowerBoundInclusive, int upperBoundExclusive) {
     return subject >= lowerBoundInclusive && subject < upperBoundExclusive;
   }
 
   /**
-   * Returns whether or not {@code subject} lies within the specified range.
+   * Returns whether {@code subject} lies within the specified range.
    *
    * @param subject The integer to test
    * @param lowerBoundInclusive The lower bound of the range (inclusive)
    * @param upperBoundInclusive The upper bound of the range (inclusive)
-   * @return Whether or not {@code subject} lies within the specified range
+   * @return Whether {@code subject} lies within the specified range
    */
   public static boolean inRangeClosed(
       int subject, int lowerBoundInclusive, int upperBoundInclusive) {
@@ -271,18 +269,16 @@ public class NumberMethods {
   }
 
   /**
-   * Here, once and for all, for those who suffer mental blackouts when engaging with zero-based
-   * counting and exclusive upper boundaries, the first of four Winnie-the-Pooh methods.
-   *
-   * <p>Returns the zero-based number (a.k.a. index) of the last page.
+   * Returns the zero-based number (a.k.a. index) of the last page, given the specified row count
+   * and page size (rows per page).
    *
    * @param rowCount The total number of rows (or elements) to divide up into pages (or slices)
    * @param pageSize The maximum number of rows per page (or elements per slice)
    * @return The zero-based (a.k.a. index) number of the last page
    */
   public static int getLastPage(int rowCount, int pageSize) {
-    Check.that(rowCount).isNot(negative());
-    Check.that(pageSize).is(positive());
+    Check.that(rowCount, "rowCount").isNot(negative());
+    Check.that(pageSize, "pageSize").is(gt(), 0);
     if (rowCount == 0) {
       return 0;
     }
@@ -290,11 +286,9 @@ public class NumberMethods {
   }
 
   /**
-   * Here, once and for all, for those who suffer mental blackouts when engaging with zero-based
-   * counting and exclusive upper boundaries, the second of four Winnie-the-Pooh methods.
-   *
-   * <p>Returns the total number of pages you need for the specified row count (a.k.a. the {@code
-   * to} index).
+   * Returns the total number of pages required for the specified row count, given the specified
+   * page size (rows per page). A.k.a. the number you should use as the {@code to} index in loops or
+   * list operations.
    *
    * @param rowCount The total number of rows (or elements) to divide up into pages (or slices)
    * @param pageSize The maximum number of rows per page (or elements per slice)
@@ -305,34 +299,28 @@ public class NumberMethods {
   }
 
   /**
-   * Here, once and for all, for those who suffer mental blackouts when engaging with zero-based
-   * counting and exclusive upper boundaries, the third of four Winnie-the-Pooh methods.
+   * Returns the number of rows in the last page, given the specified row count and page size (rows
+   * per page). That's just {@code rowCount % pageSize}.
    *
-   * <p>Returns the number of rows in the last page, for those who have really been thinking about
-   * it for way too long.
-   *
-   * @param rowCount
-   * @param pageSize
+   * @param rowCount The total number of rows (or elements) to divide up into pages (or slices)
+   * @param pageSize The maximum number of rows per page (or elements per slice)
    * @return The number of rows in the last page
    */
-  public static int getRowCountInLastPage(int rowCount, int pageSize) {
-    Check.that(rowCount).isNot(negative());
-    Check.that(pageSize).is(positive());
+  public static int rowsOnLastPage(int rowCount, int pageSize) {
+    Check.that(rowCount, "rowCount").is(gte(), 0);
+    Check.that(pageSize, "pageSize").is(gt(), 0);
     return rowCount % pageSize;
   }
 
   /**
-   * Here, once and for all, for those who suffer mental blackouts when engaging with zero-based
-   * counting and exclusive upper boundaries, the last of four Winnie-the-Pooh methods.
+   * Returns the number of empty rows in the last page.
    *
-   * <p>Returns the number of unoccupied rows in the last page.
-   *
-   * @param rowCount
-   * @param pageSize
+   * @param rowCount The total number of rows (or elements) to divide up into pages (or slices)
+   * @param pageSize The maximum number of rows per page (or elements per slice)
    * @return The number of unoccupied rows in the last page
    */
-  public static int countEmptyRowsInLastPage(int rowCount, int pageSize) {
-    return pageSize - getRowCountInLastPage(rowCount, pageSize);
+  public static int emptyRowsOnLastPage(int rowCount, int pageSize) {
+    return pageSize - rowsOnLastPage(rowCount, pageSize);
   }
 
   private NumberMethods() {}
