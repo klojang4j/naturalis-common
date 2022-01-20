@@ -320,8 +320,8 @@ public class ArrayMethods {
    * @param array The array to implode
    * @return A concatenation of the elements in the array.
    */
-  public static String primplode(Object array) {
-    return primplode(array, Objects::toString, DEFAULT_IMPLODE_SEPARATOR, 0, -1);
+  public static String implodeAny(Object array) {
+    return implodeAny(array, Objects::toString, DEFAULT_IMPLODE_SEPARATOR, 0, -1);
   }
 
   /**
@@ -335,8 +335,8 @@ public class ArrayMethods {
    * @param separator The separator string
    * @return A concatenation of the elements in the array.
    */
-  public static String primplode(Object array, String separator) {
-    return primplode(array, Objects::toString, separator, 0, -1);
+  public static String implodeAny(Object array, String separator) {
+    return implodeAny(array, Objects::toString, separator, 0, -1);
   }
 
   /**
@@ -351,14 +351,14 @@ public class ArrayMethods {
    *     You can specify -1 as a shorthand for {@code array.length}.
    * @return A concatenation of the elements in the array.
    */
-  public static String primplode(Object array, int limit) {
-    return primplode(array, Objects::toString, DEFAULT_IMPLODE_SEPARATOR, 0, limit);
+  public static String implodeAny(Object array, int limit) {
+    return implodeAny(array, Objects::toString, DEFAULT_IMPLODE_SEPARATOR, 0, limit);
   }
 
   /**
-   * PHP-style implode method. This method is primarily meant to implode primitive arrays, although
-   * you <i>can</i> use it to implode any type of array. An {@link IllegalArgumentException} is
-   * thrown if {@code array} is not an array.
+   * PHP-style implode method. This method is primarily meant to implode primitive arrays, but you
+   * <i>can</i> use it to implode any type of array. An {@link IllegalArgumentException} is thrown
+   * if {@code array} is not an array.
    *
    * @see CollectionMethods#implode(Collection, Function, String, int, int)
    * @param array The array to implode
@@ -370,7 +370,7 @@ public class ArrayMethods {
    *     than {@code array.length}). You can specify -1 as a shorthand for {@code array.length}.
    * @return A concatenation of the elements in the array.
    */
-  public static String primplode(
+  public static String implodeAny(
       Object array, Function<Object, String> stringifier, String separator, int from, int to) {
     int len = Check.notNull(array, "array").is(array()).ok(Array::getLength);
     Check.notNull(separator, "separator");

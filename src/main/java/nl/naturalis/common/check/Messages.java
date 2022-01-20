@@ -12,7 +12,6 @@ import java.util.Set;
 
 import static java.lang.String.format;
 import static nl.naturalis.common.ArrayMethods.DEFAULT_IMPLODE_SEPARATOR;
-import static nl.naturalis.common.ArrayMethods.primplode;
 import static nl.naturalis.common.ClassMethods.className;
 import static nl.naturalis.common.ClassMethods.simpleClassName;
 import static nl.naturalis.common.CollectionMethods.implode;
@@ -681,7 +680,7 @@ class Messages {
   private static String arrayToString(Object array) {
     String sep = DEFAULT_IMPLODE_SEPARATOR;
     int len = Array.getLength(array);
-    String imploded = trim(primplode(array, Messages::toStr, sep, 0, 10), len);
+    String imploded = trim(ArrayMethods.implodeAny(array, Messages::toStr, sep, 0, 10), len);
     return new StringBuilder(32)
         .append(simpleClassName(array))
         .append('[')

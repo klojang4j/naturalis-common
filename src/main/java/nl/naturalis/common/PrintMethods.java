@@ -15,7 +15,7 @@ import java.util.TreeSet;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Comparator.comparing;
-import static nl.naturalis.common.ArrayMethods.primplode;
+import static nl.naturalis.common.ArrayMethods.implodeAny;
 import static nl.naturalis.common.StringMethods.lpad;
 
 public class PrintMethods {
@@ -87,7 +87,7 @@ public class PrintMethods {
     if (o == null) {
       return "null";
     } else if (o.getClass().isArray()) {
-      return "[" + primplode(o) + "]";
+      return "[" + implodeAny(o) + "]";
     }
     return o.toString();
   }
