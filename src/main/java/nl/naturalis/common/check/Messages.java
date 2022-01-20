@@ -6,8 +6,8 @@ import nl.naturalis.common.collection.TypeSet;
 
 import java.io.File;
 import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import static java.lang.String.format;
@@ -23,6 +23,12 @@ import static nl.naturalis.common.check.CommonChecks.MESSAGE_PATTERNS;
 class Messages {
 
   private static final String ERR_INVALID_VALUE = "Invalid value for %s: %s";
+
+  /*
+   * Max. display width (characters) for argument values and for values used as the object in
+   * Relation-type checks.
+   */
+  private static final int MAX_ARG_WIDTH = 50;
 
   static String createMessage(Object predicate, boolean negated, String argName, Object argValue) {
     MsgArgs md = new MsgArgs(predicate, negated, argName, argValue);
@@ -80,20 +86,24 @@ class Messages {
 
   static Formatter msgDeepNotNull() {
     return md -> {
-      if (md.negated()) { // Negation is nonsense, but OK
-        return format("%s must be null or contain one or more null values", md.argName());
+      if (md.negated()) { // Negation is total nonsense, but OK
+        return format(
+            "%s must be null or contain one or more null values (was %s)",
+            md.argName(), toStr(md.arg()));
       }
-      return format("%s must not be null or contain null values", md.argName());
+      return format(
+          "%s must not be null or contain null values (was %s)", md.argName(), toStr(md.arg()));
     };
   }
 
   static Formatter msgDeepNotEmpty() {
     return md -> {
-      if (md.negated()) { // Idem
-        String fmt = "%s must be empty or contain or contain or more empty values";
-        return format(fmt, md.argName());
+      if (md.negated()) { // idem
+        String fmt = "%s must be empty or contain or one or more empty values (was %s)";
+        return format(fmt, md.argName(), toStr(md.arg()));
       }
-      return format("%s must not be empty or contain empty values", md.argName());
+      return format(
+          "%s must not be empty or contain empty values (was %s)", md.typeAndName(), md.arg());
     };
   }
 
@@ -614,24 +624,27 @@ class Messages {
       TypeSet.of(Number.class, Boolean.class, Character.class, Enum.class);
 
   static String toStr(Object val) {
-    Class type = val.getClass();
     if (val == null) {
       return "null";
-    } else if (DECENT_TO_STRING.contains(type)) {
+    }
+    Class type = val.getClass();
+    if (DECENT_TO_STRING.contains(type)) {
       return val.toString();
     } else if (val instanceof CharSequence) {
-      return '"' + ellipsis(val.toString(), 40) + '"';
+      return ellipsis(val.toString(), MAX_ARG_WIDTH);
     } else if (type == Class.class) {
       return simpleClassName(val);
     } else if (val instanceof Collection) {
-      return stringifyCollection((Collection) val);
+      return collectionToString((Collection) val);
+    } else if (val instanceof Map) {
+      return mapToString((Map) val);
     } else if (type.isArray()) {
-      return stringifyArray(val);
+      return arrayToString(val);
     } else if (type != Object.class) {
       try {
         // If the class has its own toString() method, it's probably interesting
         type.getDeclaredMethod("toString");
-        return ellipsis(val.toString(), 40);
+        return ellipsis(val.toString(), MAX_ARG_WIDTH);
       } catch (NoSuchMethodException e) {
         // ...
       }
@@ -639,33 +652,61 @@ class Messages {
     return classNameAbbrev(type) + '@' + System.identityHashCode(val);
   }
 
-  private static String stringifyCollection(Collection c) {
+  private static String collectionToString(Collection c) {
     String sep = DEFAULT_IMPLODE_SEPARATOR;
-    String imploded = ellipsis(implode(c, Messages::toStr, sep, 0, 10), 40);
+    String imploded = trim(implode(c, Messages::toStr, sep, 0, 10), c.size());
     return new StringBuilder(32)
         .append(simpleClassName(c))
         .append('[')
         .append(c.size())
         .append("] of [")
         .append(imploded)
-        .append(c.size() > 10 ? "... " : "")
         .append(']')
         .toString();
   }
 
-  private static String stringifyArray(Object array) {
+  private static String mapToString(Map m) {
     String sep = DEFAULT_IMPLODE_SEPARATOR;
-    String imploded = ellipsis(primplode(array, Messages::toStr, sep, 0, 10), 40);
+    String imploded = trim(implode(m.entrySet(), Messages::entryToString, sep, 0, 10), m.size());
+    return new StringBuilder(32)
+        .append(simpleClassName(m))
+        .append('[')
+        .append(m.size())
+        .append("] of {")
+        .append(imploded)
+        .append('}')
+        .toString();
+  }
+
+  private static String arrayToString(Object array) {
+    String sep = DEFAULT_IMPLODE_SEPARATOR;
     int len = Array.getLength(array);
+    String imploded = trim(primplode(array, Messages::toStr, sep, 0, 10), len);
     return new StringBuilder(32)
         .append(simpleClassName(array))
         .append('[')
         .append(len)
         .append("] of [")
         .append(imploded)
-        .append(len > 10 ? "... " : "")
         .append(']')
         .toString();
+  }
+
+  private static String entryToString(Map.Entry entry) {
+    return toStr(entry.getKey()) + ": " + toStr(entry.getValue());
+  }
+
+  private static String trim(String imploded, int sz) {
+    if (sz > 10) {
+      if (imploded.length() > MAX_ARG_WIDTH) {
+        imploded = ellipsis(imploded, MAX_ARG_WIDTH);
+      } else {
+        imploded += "...";
+      }
+    } else if (imploded.length() > MAX_ARG_WIDTH) {
+      imploded = ellipsis(imploded, MAX_ARG_WIDTH);
+    }
+    return imploded;
   }
 
   private static String classNameAbbrev(Class type) {

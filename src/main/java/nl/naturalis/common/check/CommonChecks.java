@@ -135,6 +135,9 @@ public class CommonChecks {
    * Verifies that the argument is empty. See {@link ObjectMethods#isEmpty(Object)
    * ObjectMethods::isEmpty} for what counts as an empty object.
    *
+   * <p>This check performs an implicit null check, so can be safely executed without (or instead
+   * of) executing the {@link #notNull()} check first.
+   *
    * @param <T> The type of the argument
    * @return A {@code Predicate}
    */
@@ -152,6 +155,9 @@ public class CommonChecks {
    * contain any null values. The array or {@code Collection} may still be zero-sized though. Useful
    * for validating varargs arguments. Use {@link #deepNotEmpty()} if you want the array or {@code
    * Collection} to contain at least one element.
+   *
+   * <p>This check performs an implicit null check, so can be safely executed without (or instead
+   * of) executing the {@link #notNull()} check first.
    *
    * @see ObjectMethods#isDeepNotNull(Object)
    * @param <T> The type of the argument
@@ -171,6 +177,9 @@ public class CommonChecks {
    * collection is not {@code null}, not empty, and does not contain any null-or-empty elements. See
    * {@link ObjectMethods#isDeepNotEmpty(Object) ObjectMethods.isDeepNotEmpty}.
    *
+   * <p>This check performs an implicit null check, so can be safely executed without (or instead
+   * of) executing the {@link #notNull()} check first.
+   *
    * @see ObjectMethods#isDeepNotEmpty(Object)
    * @param <T> The type of the argument
    * @return A {@code Predicate}
@@ -185,9 +194,11 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that a {@code String} argument is null or contains whitespace only. Mainly meant to be
-   * called from the {code isNot} methods of the {@code Check} class, in which case it performs an
-   * implicit null check.
+   * Verifies that a {@code String} argument is null or contains whitespace only. Probably more
+   * useful when called from an {@link Check#isNot(Predicate) isNot} method.
+   *
+   * <p>This check performs an implicit null check, so can be safely executed without (or instead
+   * of) executing the {@link #notNull()} check first.
    *
    * @return A {@code Predicate}
    */

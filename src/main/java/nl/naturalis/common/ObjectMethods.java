@@ -89,43 +89,42 @@ public class ObjectMethods {
   private ObjectMethods() {}
 
   /**
-   * Whether or not the specified {@code String} is null or empty.
+   * Whether the specified {@code String} is null or empty.
    *
    * @param arg The {@code String} to check
-   * @return Whether or not it is null or empty
+   * @return Whether it is null or empty
    */
   public static boolean isEmpty(String arg) {
     return arg == null || arg.isEmpty();
   }
 
   /**
-   * Returns whether or not the specified {@code Collection} is null or empty.
+   * Returns whether the specified {@code Collection} is null or empty.
    *
    * @param arg The {@code Collection} to check
-   * @return Whether or not it is null or empty
+   * @return Whether it is null or empty
    */
   public static boolean isEmpty(Collection arg) {
     return arg == null || arg.isEmpty();
   }
 
   /**
-   * Returns whether or not the specified {@code Map} is null or empty.
+   * Returns whether the specified {@code Map} is null or empty.
    *
    * @param arg The {@code Map} to check
-   * @return Whether or not it is null or empty
+   * @return Whether it is null or empty
    */
   public static boolean isEmpty(Map arg) {
     return arg == null || arg.isEmpty();
   }
 
   /**
-   * Returns whether or not the specified {@code Optional} is empty or contains an empty object.
-   * This is the only {@code isNotEmpty} method that will actually throw an {@code
-   * IllegalArgumentException} if the argument is null as {@code Optional} objects should never be
-   * null.
+   * Returns whether the specified {@code Optional} is empty or contains an empty object. This is
+   * the only {@code isNotEmpty} method that will actually throw an {@code IllegalArgumentException}
+   * if the argument is null as {@code Optional} objects should never be null.
    *
    * @param arg The {@code Optional} to check
-   * @return Whether or not it is empty or contains an empty object
+   * @return Whether it is empty or contains an empty object
    */
   public static boolean isEmpty(Optional arg) {
     Check.that(arg).is(notNull(), ERR_NULL_OPTIONAL);
@@ -133,19 +132,19 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns whether or not the specified array is null or empty.
+   * Returns whether the specified array is null or empty.
    *
    * @param arg The array to check
-   * @return Whether or not it is null or empty
+   * @return Whether it is null or empty
    */
   public static boolean isEmpty(Object[] arg) {
     return arg == null || arg.length == 0;
   }
 
   /**
-   * Returns whether or not the specified argument is null or empty. This method is (and can be)
-   * used for broad-stroke methods like {@link #ifEmpty(Object, Object)} and {@link
-   * CommonChecks#empty()}. Returns {@code true} if <i>any</i> of the following applies:
+   * Returns whether the specified argument is null or empty. This method is (and can be) used for
+   * broad-stroke methods like {@link #ifEmpty(Object, Object)} and {@link CommonChecks#empty()}.
+   * Returns {@code true} if <i>any</i> of the following applies:
    *
    * <p>
    *
@@ -164,7 +163,7 @@ public class ObjectMethods {
    * <p>Otherwise this method returns {@code false}.
    *
    * @param arg The argument to check
-   * @return Whether or not it is null or empty
+   * @return Whether it is null or empty
    */
   public static boolean isEmpty(Object arg) {
     return arg == null
@@ -180,43 +179,43 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns whether or not the specified {@code String} is neither null nor empty.
+   * Returns whether the specified {@code String} is neither null nor empty.
    *
    * @param arg The {@code String} to check
-   * @return Whether or not it is neither null nor empty
+   * @return Whether it is neither null nor empty
    */
   public static boolean isNotEmpty(String arg) {
     return !isEmpty(arg);
   }
 
   /**
-   * Returns whether or not the specified {@code Collection} is neither null nor empty.
+   * Returns whether the specified {@code Collection} is neither null nor empty.
    *
    * @param arg The {@code Collection} to check
-   * @return Whether or not it is neither null nor empty
+   * @return Whether it is neither null nor empty
    */
   public static boolean isNotEmpty(Collection arg) {
     return !isEmpty(arg);
   }
 
   /**
-   * Returns whether or not the specified {@code Map} is neither null nor empty.
+   * Returns whether the specified {@code Map} is neither null nor empty.
    *
    * @param arg The {@code Map} to check
-   * @return Whether or not it is neither null nor empty
+   * @return Whether it is neither null nor empty
    */
   public static boolean isNotEmpty(Map arg) {
     return !isEmpty(arg);
   }
 
   /**
-   * Returns whether or not the specified {@code Optional} neither empty nor contains an empty
-   * object. This is the only {@code isNotEmpty} method that will actually throw an {@code
+   * Returns whether the specified {@code Optional} neither empty nor contains an empty object. This
+   * is the only {@code isNotEmpty} method that will actually throw an {@code
    * IllegalArgumentException} if the argument is null as {@code Optional} objects should never be
    * null.
    *
    * @param arg The {@code Optional} to check
-   * @return Whether or not it is neither empty nor contains an empty object
+   * @return Whether it is neither empty nor contains an empty object
    * @throws IllegalArgumentException If the argument is null
    */
   public static boolean isNotEmpty(Optional arg) throws IllegalArgumentException {
@@ -224,10 +223,10 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns whether or not the specified {@code Optional} is neither null nor empty.
+   * Returns whether the specified {@code Optional} is neither null nor empty.
    *
    * @param arg The {@code String} to check
-   * @return Whether or not it is neither null nor empty
+   * @return Whether it is neither null nor empty
    */
   public static boolean isNotEmpty(Object[] arg) {
     return !isEmpty(arg);
@@ -250,7 +249,7 @@ public class ObjectMethods {
    * </ul>
    *
    * @param arg The object to be tested
-   * @return Whether or not it is empty
+   * @return Whether it is empty
    */
   public static boolean isNotEmpty(Object arg) {
     return !isEmpty(arg);
@@ -278,7 +277,7 @@ public class ObjectMethods {
    * </ul>
    *
    * @param obj The object to be tested
-   * @return Whether or not it is recursively non-empty
+   * @return Whether it is recursively non-empty
    */
   public static boolean isDeepNotEmpty(Object obj) {
     return obj != null
@@ -310,12 +309,11 @@ public class ObjectMethods {
 
   /**
    * Verifies that the argument is not null and, in case of an array, {@link Collection} or {@link
-   * Map}, does not contain any null values.It may still be an empty array, {@code Collection} or
-   * {@code Map}, however. If the argument is a {@code Map}, the check is only done on its values,
-   * not its keys.
+   * Map}, does not contain any null values. It may still be an empty array, {@code Collection} or
+   * {@code Map}. For maps, both keys and values are checked.
    *
    * @param arg The object to be tested
-   * @return Whether or not it is not null and does not contain any null values
+   * @return Whether it is not null and does not contain any null values
    */
   public static boolean isDeepNotNull(Object arg) {
     if (arg == null) {
@@ -325,7 +323,12 @@ public class ObjectMethods {
     } else if (arg instanceof Collection) {
       return ((Collection) arg).stream().allMatch(notNull());
     } else if (arg instanceof Map) {
-      return ((Map) arg).values().stream().allMatch(notNull());
+      for (Object o : ((Map) arg).entrySet()) {
+        Map.Entry e = (Map.Entry) o;
+        if (e.getKey() == null || e.getValue() == null) {
+          return false;
+        }
+      } // return true
     }
     return true;
   }
@@ -365,7 +368,7 @@ public class ObjectMethods {
    *
    * @param arg0 The 1st of the pair of objects to compare
    * @param arg1 The 2nd of the pair of objects to compare
-   * @return Whether or not the provided arguments are equal using empty-equals-null semantics
+   * @return Whether the provided arguments are equal using empty-equals-null semantics
    */
   public static boolean e2nEquals(Object arg0, Object arg1) {
     return arg0 == null ? isEmpty(arg1) : arg1 == null ? isEmpty(arg0) : Objects.equals(arg0, arg1);
@@ -376,8 +379,7 @@ public class ObjectMethods {
    *
    * @param arg0 The 1st of the pair of objects to compare
    * @param arg1 The 2nd of the pair of objects to compare
-   * @return Whether or not the provided arguments are deeply equal using empty-equals-null
-   *     semantics
+   * @return Whether the provided arguments are deeply equal using empty-equals-null semantics
    */
   public static boolean e2nDeepEquals(Object arg0, Object arg1) {
     return arg0 == null ? isEmpty(arg1) : arg1 == null ? isEmpty(arg0) : eq(arg0, arg1);

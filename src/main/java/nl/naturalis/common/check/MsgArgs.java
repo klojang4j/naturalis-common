@@ -1,5 +1,7 @@
 package nl.naturalis.common.check;
 
+import static nl.naturalis.common.ClassMethods.simpleClassName;
+
 /*
  * check .....: the check that was executed (e.g. notNull(), gte() or Objects::nonNull or a lambda)
  * negated ...: whether the check was executed in the isNot(..) or notHas(...) methods
@@ -15,6 +17,10 @@ record MsgArgs(Object check, boolean negated, String argName, Object arg, Object
 
   MsgArgs flip() {
     return new MsgArgs(check, !negated, argName, arg, object);
+  }
+
+  String typeAndName() {
+    return arg == null? argName: simpleClassName(arg) +  ' ' + argName;
   }
 
 }
