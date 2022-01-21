@@ -10,10 +10,10 @@ package nl.naturalis.common;
 public interface Emptyable {
 
   /** A generic empty object */
-  public static final Emptyable EMPTY_INSTANCE = () -> true;
+  public static final Emptyable EMPTY_OBJECT = () -> true;
 
   /** A generic non-empty object */
-  public static final Emptyable NON_EMPTY_INSTANCE = () -> false;
+  public static final Emptyable NON_EMPTY_OBJECT = () -> false;
 
   /**
    * Returns whether the object can be said to be empty.

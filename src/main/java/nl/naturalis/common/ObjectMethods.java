@@ -265,8 +265,8 @@ public class ObjectMethods {
    *   <li>{@code obj} is a non-empty {@link CharSequence}
    *   <li>{@code obj} is a non-empty {@link Collection} containing only <i>deep-not-empty</i>
    *       elements
-   *   <li>{@code obj} is a non-empty {@link Map} containing only <i>deep-not-empty</i> values (keys
-   *       are not considered)
+   *   <li>{@code obj} is a non-empty {@link Map} containing only <i>deep-not-empty</i> keys and
+   *       values
    *   <li>{@code obj} is a non-zero-length {@code Object[]} containing only <i>deep-not-empty</i>
    *       elements
    *   <li>{@code obj} is a non-zero-length array of primitives
@@ -297,7 +297,12 @@ public class ObjectMethods {
   }
 
   private static boolean dne(Map map) {
-    return !map.isEmpty() && map.values().stream().allMatch(ObjectMethods::isDeepNotEmpty);
+    return !map.isEmpty() && map.entrySet().stream().allMatch(ObjectMethods::entryDeepNotEmpty);
+  }
+
+  private static boolean entryDeepNotEmpty(Object obj) {
+    Map.Entry e = (Map.Entry) obj;
+    return isDeepNotEmpty(e.getKey()) && isDeepNotEmpty(e.getValue());
   }
 
   private static boolean dne(Object[] arr) {
@@ -311,7 +316,7 @@ public class ObjectMethods {
   /**
    * Verifies that the argument is not null and, in case of an array, {@link Collection} or {@link
    * Map}, does not contain any null values. It may still be an empty array, {@code Collection} or
-   * {@code Map}. For maps, both keys and values are checked.
+   * {@code Map}.
    *
    * @param arg The object to be tested
    * @return Whether it is not null and does not contain any null values
@@ -340,7 +345,7 @@ public class ObjectMethods {
    *
    * @param <T> The type of the argument
    * @param arg The argument
-   * @return The argument itself if not empty or {@code null}
+   * @return The argument itself if not empty, else {@code null}
    */
   public static <T> T e2n(T arg) {
     return isEmpty(arg) ? null : arg;
@@ -348,9 +353,11 @@ public class ObjectMethods {
 
   /**
    * Tests the provided arguments for equality using <i>empty-equals-null</i> semantics. This is
-   * roughly equivalent to {@code Objects.equals(e2n(arg0), e2n(arg1))}, except that empty (but
-   * non-null) instances of different types (e.g. {@code String} and {@code Set}) are generally not
-   * equal to each other. (An empty {@code HashSet}, however, is equal to an empty {@code TreeSet}.)
+   * roughly equivalent to {@code Objects.equals(e2n(arg0), e2n(arg1))}, except that {@code
+   * e2nEquals} <i>does</i> take the type of the two arguments into account. So an empty {@code
+   * String} is not equal to an empty {@code ArrayList} and an empty {@code ArrayList} is not equal
+   * to an empty {@code HashSet}. (An empty {@code HashSet} <i>is</i> equal to an empty {@code
+   * TreeSet}, but that's just common Collection Framework behaviour.)
    *
    * <p>
    *
@@ -363,7 +370,7 @@ public class ObjectMethods {
    *       object
    *   <li>{@code null} equals an empty {@link Emptyable}
    *   <li>{@code null} equals a zero-size {@link Sizeable}
-   *   <li>A empty intance of one type is not equal to a empty instance of another non-comparable
+   *   <li>A empty instance of one type is not equal to a empty instance of another non-comparable
    *       type
    * </ol>
    *
@@ -387,11 +394,9 @@ public class ObjectMethods {
   }
 
   /**
-   * Generates a hash code for the provided object using using <i>empty-equals-null</i> semantics.
-   * Null and {@link #isEmpty(Object) empty} objects (whatever their type) all have the same hash
-   * code: 0 (zero). Therefore a {@link TreeMap} or {@link TreeSet} using on
-   * <i>empty-equals-null</i> semantics may have to fall fall back more often on {@link
-   * #e2nEquals(Object, Object) e2nEquals} or {@link #e2nDeepEquals(Object, Object) e2nDeepEquals}.
+   * Generates a hash code for the provided object using <i>empty-equals-null</i> semantics. {@link
+   * #isEmpty(Object) empty} objects (whatever their type and including {@code null}) all have the
+   * same hash code: 0 (zero)!
    *
    * @param obj The object to generate a hash code for
    * @return The hash code
@@ -498,7 +503,7 @@ public class ObjectMethods {
    *
    * @param <T> The input and return type
    * @param condition The condition to evaluate
-   * @param value The value value to return or to apply the transformation to
+   * @param value The value to return or to apply the transformation to
    * @param then The operation to apply if the condition evaluates to {@code true}
    * @return {@code value}, possibly transformed by the unary operator
    */
@@ -513,7 +518,7 @@ public class ObjectMethods {
    * @param <T> The type of the objects involved
    * @param subject The value to test and possibly return
    * @param relation The test
-   * @param object The value to to test against
+   * @param object The value to test against
    * @param alternative The value to return if the
    * @return either {@code subject} or {@code alternative}
    */
@@ -542,7 +547,7 @@ public class ObjectMethods {
    * @param <T> The type of the objects involved
    * @param subject The value to test and possibly return
    * @param relation The test
-   * @param object The value to to test against
+   * @param object The value to test against
    * @param alternative The value to return if the
    * @return either {@code subject} or {@code alternative}
    */
@@ -556,7 +561,7 @@ public class ObjectMethods {
    *
    * @param subject The value to test and possibly return
    * @param relation The test
-   * @param object The value to to test against
+   * @param object The value to test against
    * @param alternative The value to return if the
    * @return either {@code subject} or {@code alternative}
    */
@@ -570,7 +575,7 @@ public class ObjectMethods {
    *
    * @param <T> The return type
    * @param condition The condition to evaluate
-   * @param value The value value to return or to apply the transformation to
+   * @param value The value to return or to apply the transformation to
    * @param then The operation to apply if the condition evaluates to {@code false}
    * @return {@code value}, possibly transformed by the unary operator
    */
@@ -717,12 +722,12 @@ public class ObjectMethods {
    * Returns the primitive default for primitive types; {@code null} for any other type.
    *
    * @param <T> The type of the class
-   * @param clazz The class for which to retrieve the default value
+   * @param type The class for which to retrieve the default value
    * @return The default value
    */
   @SuppressWarnings("unchecked")
-  public static <T> T getDefaultValue(Class<T> clazz) {
-    return (T) (Check.notNull(clazz).ok().isPrimitive() ? PRIMITIVE_DEFAULTS.get(clazz) : null);
+  public static <T> T getDefaultValue(Class<T> type) {
+    return (T) (Check.notNull(type).ok().isPrimitive() ? PRIMITIVE_DEFAULTS.get(type) : null);
   }
 
   /**

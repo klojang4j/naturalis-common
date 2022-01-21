@@ -1,5 +1,6 @@
 package nl.naturalis.common.check;
 
+import nl.naturalis.common.Emptyable;
 import nl.naturalis.common.Sizeable;
 import org.junit.Test;
 
@@ -7,8 +8,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static nl.naturalis.common.ArrayMethods.*;
-import static nl.naturalis.common.Emptyable.EMPTY_INSTANCE;
-import static nl.naturalis.common.Emptyable.NON_EMPTY_INSTANCE;
+import static nl.naturalis.common.Emptyable.EMPTY_OBJECT;
+import static nl.naturalis.common.Emptyable.NON_EMPTY_OBJECT;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static org.junit.Assert.assertTrue;
 
@@ -86,7 +87,7 @@ public class CommonChecksTest {
   public void empty01() {
     Check.that(null).is(empty());
     Check.that("").is(empty());
-    Check.that(EMPTY_INSTANCE).is(empty());
+    Check.that(EMPTY_OBJECT).is(empty());
     Check.that(Optional.empty()).is(empty());
     Check.that(Optional.of("")).is(empty());
     Check.that(List.of()).is(empty());
@@ -101,7 +102,7 @@ public class CommonChecksTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void empty02() {
-    Check.that(NON_EMPTY_INSTANCE).is(empty());
+    Check.that(NON_EMPTY_OBJECT).is(empty());
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -127,7 +128,15 @@ public class CommonChecksTest {
     Check.that(pack("FOO")).is(deepNotNull());
     Check.that(List.of()).is(deepNotNull());
     Check.that(List.of("FOO")).is(deepNotNull());
+    Check.that(Set.of()).is(deepNotNull());
+    Check.that(Set.of("BAR")).is(deepNotNull());
     Check.that(Map.of()).is(deepNotNull());
+    Check.that(Map.of("John", "Smith")).is(deepNotNull());
+    Check.that(Optional.of("BAR")).is(deepNotNull());
+    Check.that(Emptyable.EMPTY_OBJECT).is(deepNotNull());
+    Check.that(Emptyable.NON_EMPTY_OBJECT).is(deepNotNull());
+    Check.that((Sizeable) () -> 0).is(deepNotNull());
+    Check.that((Sizeable) () -> 42).is(deepNotNull());
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -171,5 +180,80 @@ public class CommonChecksTest {
     Map<String, Object> m = new HashMap<>();
     m.put("XXX", null);
     Check.that(m).is(deepNotNull());
+  }
+
+  @Test
+  public void deepNotEmpty00() {
+    Check.that(7).is(deepNotEmpty());
+    Check.that(LocalDateTime.now()).is(deepNotEmpty());
+    Check.that("FOO").is(deepNotEmpty());
+    Check.that(pack("FOO")).is(deepNotEmpty());
+    Check.that(List.of("FOO")).is(deepNotEmpty());
+    Check.that(Set.of("FOO")).is(deepNotEmpty());
+    Check.that(Map.of("John", "Smith")).is(deepNotEmpty());
+    Check.that(Optional.of(Map.of("weekend", List.of("saturday", "sunday")))).is(deepNotEmpty());
+    Check.that(Emptyable.NON_EMPTY_OBJECT).is(deepNotEmpty());
+    Check.that((Sizeable) () -> 42).is(deepNotEmpty());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void deepNotEmpty01() {
+    Check.that(null).is(deepNotEmpty());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void deepNotEmpty02() {
+    Check.that("").is(deepNotEmpty());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void deepNotEmpty03() {
+    Check.that(EMPTY_STRING_ARRAY).is(deepNotEmpty());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void deepNotEmpty04() {
+    Check.that(pack("a", null, "b")).is(deepNotEmpty());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void deepNotEmpty05() {
+    Check.that(pack("a", "", "b")).is(deepNotEmpty());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void deepNotEmpty06() {
+    Check.that(pack("a", "b", pack("1", "2", pack("X", "Y", pack(EMPTY_STRING_ARRAY)))))
+        .is(deepNotEmpty());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void deepNotEmpty07() {
+    Check.that(List.of()).is(deepNotEmpty());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void deepNotEmpty08() {
+    Check.that(List.of(Set.of())).is(deepNotEmpty());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void deepNotEmpty09() {
+    Check.that(List.of(Set.of(Optional.empty()))).is(deepNotEmpty());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void deepNotEmpty10() {
+    Check.that(List.of(Set.of(Optional.of(EMPTY_OBJECT)))).is(deepNotEmpty());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void deepNotEmpty11() {
+    Check.that(Map.of("", "Smith")).is(deepNotEmpty());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void deepNotEmpty12() {
+    Check.that(Map.of("John", (Sizeable) () -> 0)).is(deepNotEmpty());
   }
 }

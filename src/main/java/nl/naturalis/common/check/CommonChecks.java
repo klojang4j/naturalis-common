@@ -173,10 +173,10 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is recursively non-empty. Can be used to ensure an array or
-   * collection is not {@code null}, not empty, and does not contain any null-or-empty elements. See
-   * {@link ObjectMethods#isDeepNotEmpty(Object) ObjectMethods.isDeepNotEmpty}. This check does not
-   * test for reference circularity, so will probably crash your JVM (with a {@link
+   * Verifies that the argument is not null, not empty, and, if it is an array, {@link Map} or
+   * {@link Collection}, that it does not contain any null or empty values. See {@link
+   * ObjectMethods#isEmpty(Object) ObjectMethods::isEmpty} for what counts as an empty object. This
+   * check does not test for circular references, so will probably crash your JVM (with a {@link
    * StackOverflowError}) if there are any.
    *
    * <p>This check performs an implicit null check, so can be safely executed without (or instead
