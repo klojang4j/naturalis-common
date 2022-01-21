@@ -276,6 +276,7 @@ public class ObjectMethods {
    *   <li>{@code obj} is a non-null object of any other type
    * </ul>
    *
+   * @see CommonChecks#deepNotEmpty()
    * @param obj The object to be tested
    * @return Whether it is recursively non-empty
    */

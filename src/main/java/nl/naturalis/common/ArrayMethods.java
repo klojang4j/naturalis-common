@@ -312,9 +312,9 @@ public class ArrayMethods {
 
   /**
    * PHP-style implode method, concatenating the array elements with {@link
-   * #DEFAULT_IMPLODE_SEPARATOR}. This method is primarily meant to implode primitive arrays,
-   * although you <i>can</i> use it to implode any type of array. An {@link
-   * IllegalArgumentException} is thrown if {@code array} is not an array.
+   * #DEFAULT_IMPLODE_SEPARATOR}. This method is primarily meant to implode primitive arrays, but
+   * you <i>can</i> use it to implode any type of array. An {@link IllegalArgumentException} is
+   * thrown if {@code array} is not an array.
    *
    * @see CollectionMethods#implode(Collection, String)
    * @param array The array to implode
@@ -326,9 +326,8 @@ public class ArrayMethods {
 
   /**
    * PHP-style implode method, concatenating the array elements using the specified separator. This
-   * method is primarily meant to implode primitive arrays, although you <i>can</i> use it to
-   * implode any type of array. An {@link IllegalArgumentException} is thrown if {@code array} is
-   * not an array.
+   * method is primarily meant to implode primitive arrays, but you <i>can</i> use it to implode any
+   * type of array. An {@link IllegalArgumentException} is thrown if {@code array} is not an array.
    *
    * @see CollectionMethods#implode(Collection, String)
    * @param array The array to implode
@@ -341,9 +340,9 @@ public class ArrayMethods {
 
   /**
    * PHP-style implode method, concatenating at most {@code limit} array elements {@link
-   * #DEFAULT_IMPLODE_SEPARATOR}. This method is primarily meant to implode primitive arrays,
-   * although you <i>can</i> use it to implode any type of array. An {@link
-   * IllegalArgumentException} is thrown if {@code array} is not an array.
+   * #DEFAULT_IMPLODE_SEPARATOR}. This method is primarily meant to implode primitive arrays, but
+   * you <i>can</i> use it to implode any type of array. An {@link IllegalArgumentException} is
+   * thrown if {@code array} is not an array.
    *
    * @param array The array to implode
    * @param limit The maximum number of elements to collect. The specified number will be clamped to

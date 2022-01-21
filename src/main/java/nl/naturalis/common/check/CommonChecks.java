@@ -151,10 +151,10 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is not null and, if it is an array or {@code Collection}, does not
-   * contain any null values. The array or {@code Collection} may still be zero-sized though. Useful
-   * for validating varargs arguments. Use {@link #deepNotEmpty()} if you want the array or {@code
-   * Collection} to contain at least one element.
+   * Verifies that the argument is not null and, if it is an array, {@link Map} or {@link
+   * Collection}, that it does not contain any null values. This check still allows the array, map
+   * or collection to be empty (zero-sized). Use {@link #deepNotEmpty()} if you want to disallow
+   * this, too.
    *
    * <p>This check performs an implicit null check, so can be safely executed without (or instead
    * of) executing the {@link #notNull()} check first.
@@ -175,7 +175,9 @@ public class CommonChecks {
   /**
    * Verifies that the argument is recursively non-empty. Can be used to ensure an array or
    * collection is not {@code null}, not empty, and does not contain any null-or-empty elements. See
-   * {@link ObjectMethods#isDeepNotEmpty(Object) ObjectMethods.isDeepNotEmpty}.
+   * {@link ObjectMethods#isDeepNotEmpty(Object) ObjectMethods.isDeepNotEmpty}. This check does not
+   * test for reference circularity, so will probably crash your JVM (with a {@link
+   * StackOverflowError}) if there are any.
    *
    * <p>This check performs an implicit null check, so can be safely executed without (or instead
    * of) executing the {@link #notNull()} check first.
