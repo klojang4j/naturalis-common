@@ -245,7 +245,7 @@ public class MessagesTest {
     dir.mkdir();
     File file = new File(System.getProperty("java.io.tmpdir") + "/__foo_123_456__");
     MsgArgs args = new MsgArgs(file(), false, "nero", file);
-    System.out.println(msgFile().apply(args));
+    System.out.println(msgFile().apply(args)); //
     if (!SYSOUT_ONLY) {
       assertEquals(
           "nero must not be a directory (was /tmp/__foo_123_456__)", msgFile().apply(args));
