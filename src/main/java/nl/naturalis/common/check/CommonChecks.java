@@ -14,7 +14,6 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
-import static nl.naturalis.common.ArrayMethods.isOneOf;
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
 import static nl.naturalis.common.check.Messages.*;
 
@@ -28,10 +27,10 @@ import static nl.naturalis.common.check.Messages.*;
  *
  * <blockquote>
  *
- * <pre>{@cod
- *  Check.notNull(file, "file").is(readable());
- *  // Or:
- *  Check.that(file, "file").is(notNull()).is(readable());
+ * <pre>{@code
+ * Check.notNull(file, "file").is(readable());
+ * // Or:
+ * Check.that(file, "file").is(notNull()).is(readable());
  * }</pre>
  *
  * </blockquote>
@@ -41,8 +40,8 @@ import static nl.naturalis.common.check.Messages.*;
  *
  * <blockquote>
  *
- * <pre>{@cod
- *  Check.on(illegalState(), file, "file").is(notNull()).is(readable());
+ * <pre>{@code
+ * Check.on(illegalState(), file, "file").is(notNull()).is(readable());
  * }</pre>
  *
  * </blockquote>
@@ -229,52 +228,6 @@ public class CommonChecks {
   }
 
   /**
-   * If the argument is a {@code Class} object, verify that it either extends {@link Number} or is
-   * one of the primitive number types. Otherwise verify that {@code argument.getClass()} either
-   * extends {@link Number} or is one of the primitive number types.
-   *
-   * @return A {@code Predicate}
-   */
-  public static <T> Predicate<T> number() {
-    return x -> {
-      Class<?> c = x.getClass() == Class.class ? (Class<?>) x : x.getClass();
-      return x instanceof Number
-          || isOneOf(c, int.class, long.class, byte.class, double.class, float.class, short.class);
-    };
-  }
-
-  static {
-    setMessagePattern(number(), msgNumber());
-    setName(number(), "number");
-  }
-
-  /**
-   * Verifies that a {@code String} argument is a valid port number. More precisely: that it can be
-   * included as the port segment of a URL. That is: the string must not be blank, it must not start
-   * with '+' or '-' and it must be a positive {@code short} value (max 65535). This test performs a
-   * preliminary null check.
-   *
-   * @return A {@code Predicate}
-   */
-  public static Predicate<String> validPort() {
-    return str -> {
-      if (StringMethods.isBlank(str)) {
-        return false;
-      }
-      char c = str.charAt(0);
-      if (c == '+' || c == '-') {
-        return false;
-      }
-      return NumberMethods.isPlainShort(str);
-    };
-  }
-
-  static {
-    setMessagePattern(validPort(), msgValidPort());
-    setName(validPort(), "validPort");
-  }
-
-  /**
    * Verifies that the argument is an existing, regular file. Equivalent to {@link File#isFile()
    * File::isFile}.
    *
@@ -305,17 +258,18 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is an existing file of any type.
+   * Verifies that the argument is an existing file of any type.Equivalent to {@link File#exists()
+   * File::exists}.
    *
    * @return A {@code Predicate}
    */
-  public static Predicate<File> present() {
-    return f -> !f.exists();
+  public static Predicate<File> onFileSystem() {
+    return File::exists;
   }
 
   static {
-    setMessagePattern(present(), msgPresent());
-    setName(present(), "present");
+    setMessagePattern(onFileSystem(), msgOnFileSystem());
+    setName(onFileSystem(), "onFileSystem");
   }
 
   /**
@@ -379,7 +333,7 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is greater than zero. It the argument is an {@code int}, you are
+   * Verifies that the argument is greater than zero. If the argument is an {@code int}, you are
    * better off using the {@link #gt()} check, performancewise.
    *
    * @return A {@code Predicate} implementing the test described above
@@ -451,14 +405,10 @@ public class CommonChecks {
    * Collection#contains(Object) Collection::contains}.
    *
    * @param <E> The type of the elements in the {@code Collection}
-   * @param <C> The type of the argument
-   * @return A {@code Relation}
+   * @param <C> The type of the collection
+   * @return A {@code Relation} implementing the test described above
    */
   public static <E, C extends Collection<? super E>> Relation<C, E> containing() {
-    return Collection::contains;
-  }
-
-  public static <E, C extends Collection<? super E>> Relation<C, E> containing(E element) {
     return Collection::contains;
   }
 
@@ -776,7 +726,7 @@ public class CommonChecks {
    * Verifies that that {@code Collection} has a size equal to some integer value. Mainly meant to
    * be called from the {@code has} methods of the {@code Check} class. In other words, when testing
    * a {@code Collection}-type property of the argument rather than the argument itself. If the
-   * argument is itself a {@code Collection}, you can test this more concicely using {@code
+   * argument is itself a {@code Collection}, you can test this more concisely using {@code
    * Check.that(myCollection).has(size(), eq(), 42)}.
    *
    * @see CommonGetters#size()
@@ -798,7 +748,7 @@ public class CommonChecks {
    * Verifies that that {@code Collection} has a size greater than some integer value. Mainly meant
    * to be called from the {@code has} methods of the {@code Check} class. In other words, when
    * testing a {@code Collection}-type property of the argument rather than the argument itself. If
-   * the argument is itself a {@code Collection}, you can test this more concicely using {@code
+   * the argument is itself a {@code Collection}, you can test this more concisely using {@code
    * Check.that(myCollection).has(size(), gt(), 42)}.
    *
    * @see CommonGetters#size()
@@ -820,7 +770,7 @@ public class CommonChecks {
    * Verifies that that {@code Collection} has a size equal to, or greater than some integer value.
    * Mainly meant to be called from the {@code has} methods of the {@code Check} class. In other
    * words, when testing a {@code Collection}-type property of the argument rather than the argument
-   * itself. If the argument is itself a {@code Collection}, you can test this more concicely using
+   * itself. If the argument is itself a {@code Collection}, you can test this more concisely using
    * {@code Check.that(myCollection).has(size(), gte(), 42)}.
    *
    * @see CommonGetters#size()
@@ -842,7 +792,7 @@ public class CommonChecks {
    * Verifies that that {@code Collection} has a size less than some integer value. Mainly meant to
    * be called from the {@code has} methods of the {@code Check} class. In other words, when testing
    * a {@code Collection}-type property of the argument rather than the argument itself. If the
-   * argument is itself a {@code Collection}, you can test this more concicely using {@code
+   * argument is itself a {@code Collection}, you can test this more concisely using {@code
    * Check.that(myCollection).has(size(), lt(), 42)}.
    *
    * @see CommonGetters#size()
@@ -864,7 +814,7 @@ public class CommonChecks {
    * Verifies that that {@code Collection} has a size less than, or equal to some integer value.
    * Mainly meant to be called from the {@code has} methods of the {@code Check} class. In other
    * words, when testing a {@code Collection}-type property of the argument rather than the argument
-   * itself. If the argument is itself a {@code Collection}, you can test this more concicely using
+   * itself. If the argument is itself a {@code Collection}, you can test this more concisely using
    * {@code Check.that(myCollection).has(size(), eq(), 42)}.
    *
    * @see CommonGetters#size()
@@ -1151,7 +1101,7 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is a whole mulitple of a particular integer.
+   * Verifies that the argument is a whole multiple of a particular integer.
    *
    * @return An {@code IntRelation}
    */

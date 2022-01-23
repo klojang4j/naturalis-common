@@ -10,7 +10,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static nl.naturalis.common.StringMethods.lpad;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
@@ -108,7 +110,7 @@ public class IOMethods {
 
   /**
    * Creates a new, empty file in the file system's temp directory. Equivalent to <code>
-   * createTempFile(IOMethods.class, ".tmp", true)</code>.
+   * createTempFile(IOMethods.class, "tmp", true)</code>.
    *
    * @return A {@code File} object for a new, empty file in the file system's temp directory
    * @throws IOException If an I/O error occurs
@@ -119,19 +121,7 @@ public class IOMethods {
 
   /**
    * Creates a new, empty file in the file system's temp directory. Equivalent to <code>
-   * createTempFile(IOMethods.class, extension, true)</code>.
-   *
-   * @param extension The extension to append to the generated file name
-   * @return A {@code File} object for a new, empty file in the file system's temp directory
-   * @throws IOException If an I/O error occurs
-   */
-  public static File createTempFile(String extension) throws IOException {
-    return createTempFile(IOMethods.class, extension, true);
-  }
-
-  /**
-   * Creates a new, empty file in the file system's temp directory. Equivalent to <code>
-   * createTempFile(requester ".tmp", true)</code>.
+   * createTempFile(requester "tmp", true)</code>.
    *
    * @param requester The class requesting the temp file (simple name will become part of the file
    *     name)
@@ -144,7 +134,7 @@ public class IOMethods {
 
   /**
    * Creates a {@code File} object with a unique file name, located file system's temp directory.
-   * Equivalent to <code>createTempFile(requester ".tmp", touch)</code>.
+   * Equivalent to <code>createTempFile(requester "tmp", touch)</code>.
    *
    * @param requester The class requesting the temp file (simple name will become part of the file
    *     name)
@@ -152,11 +142,11 @@ public class IOMethods {
    * @throws IOException If an I/O error occurs
    */
   public static File createTempFile(Class<?> requester, boolean touch) throws IOException {
-    return createTempFile(requester, ".tmp", touch);
+    return createTempFile(requester, "tmp", touch);
   }
 
   /**
-   * Creates a {@code File} object with a unique file name, located file system's temp directory.
+   * Creates a {@code File} object with a unique file name, located in file system's temp directory.
    * Using {@link File#createTempFile(String, String)} may fail if temporary files are created in
    * rapid succession as it seems to use only System.currentTimeMillis() to invent a file name. This
    * method has a 100% chance of generating a unique file name.
@@ -170,28 +160,98 @@ public class IOMethods {
    */
   public static synchronized File createTempFile(
       Class<?> requester, String extension, boolean touch) throws IOException {
+    String path = getPath(requester, extension);
+    File f = new File(path);
+    if (touch) {
+      Check.on(IOException::new, f).isNot(onFileSystem(), "File exists already: ${arg}");
+      f.createNewFile();
+    }
+    return f;
+  }
+
+  /**
+   * Creates a new, empty directory in the file system's temp directory. Equivalent to <code>
+   * createTempFile(IOMethods.class, ".dir", true)</code>.
+   *
+   * @return A {@code File} object for a new, empty directory in the file system's temp directory
+   * @throws IOException If an I/O error occurs
+   */
+  public static File createTempDir() throws IOException {
+    return createTempDir(IOMethods.class);
+  }
+
+  /**
+   * Creates a new, empty file in the file system's temp directory. Equivalent to <code>
+   * createTempFile(requester ".dir", true)</code>.
+   *
+   * @param requester The class requesting the temp file (simple name will become part of the file
+   *     name)
+   * @return A {@code File} object for a new, empty file in the file system's temp directory
+   * @throws IOException If an I/O error occurs
+   */
+  public static File createTempDir(Class<?> requester) throws IOException {
+    return createTempDir(requester, true);
+  }
+
+  /**
+   * Creates a {@code File} object with a unique file name, located file system's temp directory.
+   * Equivalent to <code>createTempFile(requester "dir", touch)</code>.
+   *
+   * @param requester The class requesting the temp file (simple name will become part of the file
+   *     name)
+   * @return A {@code File} object for a new, empty directory in the file system's temp directory
+   * @throws IOException If an I/O error occurs
+   */
+  public static File createTempDir(Class<?> requester, boolean touch) throws IOException {
+    return createTempFile(requester, "dir", touch);
+  }
+
+  /**
+   * Creates a {@code File} object with a unique file name, located in file system's temp directory.
+   * Using {@link File#createTempFile(String, String)} may fail if temporary files are created in
+   * rapid succession as it seems to use only System.currentTimeMillis() to invent a file name. This
+   * method has a 100% chance of generating a unique file name.
+   *
+   * @param requester The class requesting the temp directory (simple name will become part of the
+   *     file name)
+   * @param extension The extension to append to the generated directory name
+   * @param touch Whether to actually create the directory on the file system
+   * @return A {@code File} object for a new, empty directory in the file system's temp directory
+   * @throws IOException If an I/O error occurs
+   */
+  public static synchronized File createTempDir(Class<?> requester, String extension, boolean touch)
+      throws IOException {
+    String path = getPath(requester, extension);
+    File f = new File(path);
+    if (touch) {
+      Check.on(IOException::new, f).isNot(onFileSystem(), "File exists already: ${arg}");
+      f.mkdir();
+    }
+    return f;
+  }
+
+  private static String getPath(Class<?> requester, String extension) {
+    Check.notNull(requester, "requester");
+    Check.that(extension, "extension").isNot(blank());
     String path =
         StringMethods.append(
                 new StringBuilder(64),
                 System.getProperty("java.io.tmpdir"),
                 "/",
-                requester.getSimpleName(),
-                tempCount++,
+                requester.getSimpleName().toLowerCase(),
+                ".",
+                Thread.currentThread().getName().toLowerCase(),
+                ".",
+                lpad(counter.incrementAndGet(), 6, '0'),
+                ".",
                 System.currentTimeMillis(),
+                ".",
                 extension)
             .toString();
-    File f = new File(path);
-    if (touch) {
-      if (f.createNewFile()) {
-        return f;
-      }
-      String fmt = "Failed to created temp file %s (already existed)";
-      throw new IOException(String.format(fmt, path));
-    }
-    return f;
+    return path;
   }
 
-  private static int tempCount = 100000;
+  private static final AtomicInteger counter = new AtomicInteger();
 
   /**
    * Deletes the file or directory denoted by the specified path. Directories need not be empty. If

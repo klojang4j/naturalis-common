@@ -1,12 +1,13 @@
 package nl.naturalis.common;
 
-import static nl.naturalis.common.StringMethods.isEmpty;
-import static nl.naturalis.common.StringMethods.isNotEmpty;
-import static nl.naturalis.common.check.CommonChecks.*;
+import nl.naturalis.common.check.Check;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import nl.naturalis.common.check.Check;
+
+import static nl.naturalis.common.StringMethods.isEmpty;
+import static nl.naturalis.common.StringMethods.isNotEmpty;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * Methods for working with {@code Number} instances.
@@ -16,7 +17,9 @@ import nl.naturalis.common.check.Check;
 public class NumberMethods {
 
   /**
-   * Returns whether the specified string represents a valid integer.
+   * Returns whether the specified string represents a valid integer. This method delegates to
+   * {@link BigDecimal#intValueExact()} and is therefore stricter than {@link
+   * Integer#parseInt(String)}.
    *
    * @param str The string
    * @return Whether the specified string represents a valid integer
@@ -24,8 +27,7 @@ public class NumberMethods {
   public static boolean isInteger(String str) {
     if (isNotEmpty(str)) {
       try {
-        BigInteger bi = new BigInteger(str);
-        bi.intValueExact();
+        new BigInteger(str).intValueExact();
         return true;
       } catch (NumberFormatException | ArithmeticException e) {
       }
@@ -34,7 +36,7 @@ public class NumberMethods {
   }
 
   /**
-   * Returns whether the specified string represents a plain, positive integer, consisting of digits
+   * Returns whether the specified string represents a plain, non-negative integer, consisting of digits
    * only, without plus or minus sign, without leading zeros, and fitting into a 32-bit integer.
    *
    * @param str The string
@@ -132,7 +134,7 @@ public class NumberMethods {
   /**
    * Parses the specified string into an {@code Integer}. Throws an {@link TypeConversionException}
    * if the string is not a number or if the number is too big to fit into an {@code Integer}. This
-   * method delegates to {@link BigDecimal#intValueExact()} and is therefore more strict than {@link
+   * method delegates to {@link BigDecimal#intValueExact()} and is therefore stricter than {@link
    * Integer#parseInt(String)}.
    *
    * @param s The string to be parsed

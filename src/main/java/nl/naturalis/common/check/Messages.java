@@ -109,7 +109,7 @@ class Messages {
   static Formatter msgEmpty() {
     return md -> {
       if (md.negated()) {
-        return format("%s must not be null or empty", md.argName());
+        return format("%s must not be null or empty (was %s)", md.argName(), toStr(md.arg()));
       }
       return format("%s must be empty (was %s)", md.argName(), toStr(md.arg()));
     };
@@ -118,9 +118,9 @@ class Messages {
   static Formatter msgBlank() {
     return md -> {
       if (md.negated()) {
-        return format("%s must not be null or blank", md.argName());
+        return format("%s must not be null or blank (was %s)", md.argName(), toStr(md.arg()));
       }
-      return format("%s must be null or blank (was %s)", md.argName(), md.arg());
+      return format("%s must be null or blank (was %s)", md.argName(), toStr(md.arg()));
     };
   }
 
@@ -131,27 +131,6 @@ class Messages {
       }
       String fmt = "%s must be an integer (was %s)";
       return format(fmt, md.argName(), md.arg(), className(md.arg()));
-    };
-  }
-
-  static Formatter msgNumber() {
-    return md -> {
-      if (md.negated()) {
-        return format("%s must not be a number (was %s)", md.argName(), md.arg());
-      }
-      String fmt = "%s must be a number (was %s)";
-      return format(fmt, md.argName(), md.arg(), className(md.arg()));
-    };
-  }
-
-  static Formatter msgValidPort() {
-    return md -> {
-      if (md.negated()) { // Must be an interesting application
-        String fmt = "%s must not be valid TCP/UDP port (was %s)";
-        return format(fmt, md.argName(), md.arg());
-      }
-      String fmt = "%s must be valid TCP/UDP port (was %s)";
-      return format(fmt, md.argName(), md.arg());
     };
   }
 
@@ -293,13 +272,13 @@ class Messages {
     return md -> {
       File f = (File) md.arg();
       if (md.negated()) {
-        return format("File already exists: %s", ((File) md.arg()).getAbsolutePath());
+        return format("File already exists: %s", md.arg());
       } else if (f.isDirectory()) {
-        // File indeed exists, but alas is a directory
-        return format("%s must not be a directory (was %s)", md.argName(), f.getAbsolutePath());
+        // File indeed exists, but is a directory
+        return format("%s must not be a directory (was %s)", md.argName(), f);
       }
       // File not present at all
-      return format("File not found: %s", ((File) md.arg()).getAbsolutePath());
+      return format("File not found: %s", md.arg());
     };
   }
 
@@ -307,15 +286,15 @@ class Messages {
     return md -> {
       File f = (File) md.arg();
       if (md.negated()) {
-        return format("Directory already exists: %s", ((File) md.arg()).getAbsolutePath());
+        return format("Directory already exists: %s", md.arg());
       } else if (f.isDirectory()) {
-        return format("%s must not be a file (was %s)", md.argName(), f.getAbsolutePath());
+        return format("%s must not be a file (was %s)", md.argName(), f);
       }
-      return format("Missing directory: %s", ((File) md.arg()).getAbsolutePath());
+      return format("Directory not found: %s", md.arg());
     };
   }
 
-  static Formatter msgPresent() {
+  static Formatter msgOnFileSystem() {
     return md -> {
       File f = (File) md.arg();
       if (md.negated()) {
@@ -630,6 +609,9 @@ class Messages {
     if (DECENT_TO_STRING.contains(type)) {
       return val.toString();
     } else if (val instanceof CharSequence) {
+      if (((CharSequence) val).toString().isBlank()) {
+        return "\"" + val + "\"";
+      }
       return ellipsis(val.toString(), MAX_ARG_WIDTH);
     } else if (type == Class.class) {
       return simpleClassName(val);
@@ -652,40 +634,47 @@ class Messages {
   }
 
   private static String collectionToString(Collection c) {
+    String scn = simpleClassName(c) + "[" + c.size() + "]";
+    if (c.size() == 0) {
+      return scn;
+    }
     String sep = DEFAULT_IMPLODE_SEPARATOR;
     String imploded = trim(implode(c, Messages::toStr, sep, 0, 10), c.size());
     return new StringBuilder(32)
-        .append(simpleClassName(c))
-        .append('[')
-        .append(c.size())
-        .append("] of [")
+        .append(scn)
+        .append(" of [")
         .append(imploded)
         .append(']')
         .toString();
   }
 
   private static String mapToString(Map m) {
+    String scn = simpleClassName(m) + "[" + m.size() + "]";
+    if (m.size() == 0) {
+      return scn;
+    }
     String sep = DEFAULT_IMPLODE_SEPARATOR;
     String imploded = trim(implode(m.entrySet(), Messages::entryToString, sep, 0, 10), m.size());
     return new StringBuilder(32)
-        .append(simpleClassName(m))
-        .append('[')
-        .append(m.size())
-        .append("] of {")
+        .append(scn)
+        .append(" of {")
         .append(imploded)
         .append('}')
         .toString();
   }
 
   private static String arrayToString(Object array) {
-    String sep = DEFAULT_IMPLODE_SEPARATOR;
     int len = Array.getLength(array);
+    String scn = simpleClassName(array);
+    scn = scn.replaceFirst("\\[]", "[" + len + "]");
+    if (len == 0) {
+      return scn;
+    }
+    String sep = DEFAULT_IMPLODE_SEPARATOR;
     String imploded = trim(ArrayMethods.implodeAny(array, Messages::toStr, sep, 0, 10), len);
     return new StringBuilder(32)
-        .append(simpleClassName(array))
-        .append('[')
-        .append(len)
-        .append("] of [")
+        .append(scn)
+        .append(" of [")
         .append(imploded)
         .append(']')
         .toString();

@@ -2,7 +2,6 @@ package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
 
-import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -85,18 +84,17 @@ public class ClassMethods {
 
   /**
    * Tests whether the 1st argument is an instance of the 2nd argument. Equivalent to <code>
-   * superOrInterface.isInstance(objectToTest)</code>. Since this method is overloaded with {@code
+   * superOrInterface.isInstance(instance)</code>. Since this method is overloaded with {@code
    * Class} as the type of the first parameter, <i>you cannot and should not use this method to test
-   * the {@code Class} object itself</i>, even though it does implement some interfaces (like {@link
-   * Serializable}).
+   * the {@code Class.class} object itself</i>
    *
    * @param instance The object to test
    * @param superOrInterface The class or interface to test the object against
    * @return Whether the 1st argument is an instance of the 2nd argument
    */
   public static boolean isA(Object instance, Class<?> superOrInterface) {
-    Check.notNull(instance, "objectToTest");
-    if (instance == Class.class) {
+    Check.notNull(instance, "instance");
+    if (instance.getClass() == Class.class) {
       return isA((Class<?>) instance, superOrInterface);
     }
     Check.notNull(superOrInterface, "superOrInterface");
@@ -108,14 +106,14 @@ public class ClassMethods {
    * forgetting what "assign from" even means. Equivalent to <code>
    * superOrInterface.isAssignableFrom(classToTest)</code>.
    *
-   * @param classToTest The class to test
+   * @param clazz The class to test
    * @param superOrInterface The class or interface to test the class against
    * @return Whether the 1st argument extends or implements the 2nd argument
    */
-  public static boolean isA(Class<?> classToTest, Class<?> superOrInterface) {
-    Check.notNull(classToTest, "classToTest");
+  public static boolean isA(Class<?> clazz, Class<?> superOrInterface) {
+    Check.notNull(clazz, "classToTest");
     Check.notNull(superOrInterface, "superOrInterface");
-    return superOrInterface.isAssignableFrom(classToTest);
+    return superOrInterface.isAssignableFrom(clazz);
   }
 
   /**

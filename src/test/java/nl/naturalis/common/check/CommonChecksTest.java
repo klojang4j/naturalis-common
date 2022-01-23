@@ -1,9 +1,12 @@
 package nl.naturalis.common.check;
 
 import nl.naturalis.common.Emptyable;
+import nl.naturalis.common.IOMethods;
 import nl.naturalis.common.Sizeable;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -165,7 +168,7 @@ public class CommonChecksTest {
     l.add(null);
     l.add("BAR");
     l.add(null);
-    Check.that(null).is(deepNotNull());
+    Check.that(l).is(deepNotNull());
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -194,6 +197,7 @@ public class CommonChecksTest {
     Check.that(Optional.of(Map.of("weekend", List.of("saturday", "sunday")))).is(deepNotEmpty());
     Check.that(Emptyable.NON_EMPTY_OBJECT).is(deepNotEmpty());
     Check.that((Sizeable) () -> 42).is(deepNotEmpty());
+    assertTrue(true);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -255,5 +259,87 @@ public class CommonChecksTest {
   @Test(expected = IllegalArgumentException.class)
   public void deepNotEmpty12() {
     Check.that(Map.of("John", (Sizeable) () -> 0)).is(deepNotEmpty());
+  }
+
+  @Test
+  public void blank00() {
+    Check.that("foo").isNot(blank());
+    assertTrue(true);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void blank01() {
+    Check.that("foo").is(blank());
+  }
+
+  @Test
+  public void blank02() {
+    String s = null;
+    Check.that(s).is(blank());
+    assertTrue(true);
+  }
+
+  @Test
+  public void blank03() {
+    Check.that("     ").is(blank());
+    assertTrue(true);
+  }
+
+  @Test
+  public void integer00() {
+    Check.that("42").is(integer());
+    assertTrue(true);
+  }
+
+  @Test
+  public void integer01() {
+    Check.that("42.5").isNot(integer());
+    assertTrue(true);
+  }
+
+  @Test
+  public void integer02() {
+    Check.that("").isNot(integer());
+    assertTrue(true);
+  }
+
+  @Test
+  public void integer03() {
+    Check.that((String) null).isNot(integer());
+    assertTrue(true);
+  }
+
+  @Test
+  public void integer04() {
+    Check.that("" + Long.MAX_VALUE).isNot(integer());
+    assertTrue(true);
+  }
+
+  @Test
+  public void integer05() {
+    Check.that("0000042").is(integer());
+    assertTrue(true);
+  }
+
+  @Test
+  public void file00() throws IOException {
+    File f = IOMethods.createTempFile(getClass(), true);
+    try {
+      Check.that(f).is(file());
+    } finally {
+      f.delete();
+    }
+    Check.that(f).isNot(file());
+  }
+
+  @Test
+  public void directory00() throws IOException {
+    File dir = IOMethods.createTempDir();
+    try {
+      Check.that(dir).is(directory());
+    } finally {
+      dir.delete();
+    }
+    Check.that(dir).isNot(directory());
   }
 }

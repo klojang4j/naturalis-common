@@ -210,7 +210,7 @@ public class NioSwapOutputStream extends SwapOutputStream {
   // Empties the contents of the buffer into the swap file
   private void sendToSwapFile() throws IOException {
     if (chan == null) {
-      Check.on(IOException::new, swapFile).is(present());
+      Check.on(IOException::new, swapFile).is(onFileSystem());
       chan = FileChannel.open(swapFile.toPath(), CREATE_NEW, WRITE);
       swapped = true;
     }
