@@ -45,20 +45,18 @@ public class ArraySwapOutputStream extends SwapOutputStream {
     }
   }
 
-  // The internal buffer
   private final byte buf[];
 
-  // The number wriiten to the buffer
   private int cnt;
 
   // The output stream to the swap file before the recall, or the output stream that the recalled
   // data was written to
   private OutputStream out;
 
-  // Whether or not we had a buffer flow and thus had to swap to file
+  // Whether we had a buffer flow and thus had to swap to file
   private boolean swapped;
 
-  // Whether or not data has been recalled - and hence write actions are now taking place on the
+  // Whether data has been recalled - and hence write actions are now taking place on the
   // output stream that the recalled data was written to
   private boolean recalled;
 
@@ -167,7 +165,7 @@ public class ArraySwapOutputStream extends SwapOutputStream {
   void prepareRecall() throws IOException {}
 
   // Allow subclasses to override this method in order to wrap the recall output stream in another
-  // outstream that does the reverse of their write actions (zip/unzip)
+  // output stream that does the reverse of their write actions (zip/unzip)
   OutputStream wrap(OutputStream target) {
     return target;
   }

@@ -203,7 +203,7 @@ public class IOMethods {
    * @throws IOException If an I/O error occurs
    */
   public static File createTempDir(Class<?> requester, boolean touch) throws IOException {
-    return createTempFile(requester, "dir", touch);
+    return createTempDir(requester, "dir", touch);
   }
 
   /**

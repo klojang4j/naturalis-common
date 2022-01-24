@@ -1,26 +1,22 @@
 package nl.naturalis.common.io;
 
-import java.io.BufferedOutputStream;
+import nl.naturalis.common.check.Check;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
-import nl.naturalis.common.check.Check;
 
 /**
- * An {@code OutputStream} that can read back the data that were written to it. Data written to a
- * {@code SwapOutputStream} first fills up an internal buffer. If (and only if) the buffer reaches
- * full capacity, a swap file is created to sink the data into. Thus, whatever the amount of data
- * written to the {@code SwapOutputStream}, it can always be recalled. It is transparent to clients
- * whether data has actually been swapped out of memory.
+ * An {@code OutputStream} that can read back the data written to it. Data written to a {@code
+ * SwapOutputStream} first fills up an internal buffer. If (and only if) the buffer reaches full
+ * capacity, a swap file is created to sink the data into. Thus, whatever the amount of data written
+ * to the {@code SwapOutputStream}, it can always be recalled. It is transparent to clients whether
+ * data has actually been swapped out of memory.
  *
- * <p>{@code SwapOutputStream} and its subclasses are not thread-safe. Except for the {@link
- * #cleanup()} method all method calls need to be synchronized using a lock on the entire instance
- * (or something equivalently exclusive).
+ * <p>{@code SwapOutputStream} and its subclasses are not thread-safe.
  *
- * <p>{@code SwapOutputStream} and its subclasses effectively are a sort of {@link
- * BufferedOutputStream}. Therefore, with respect to performance, it is pointless to wrap a {@code
- * SwapOutputStream} into a {@code BufferedOutputStream}.
+ * <p>It is pointless to wrap a {@code SwapOutputStream} into a {@code BufferedOutputStream}.
  *
  * @author Ayco Holleman
  */

@@ -54,17 +54,17 @@ public class NioSwapOutputStream extends SwapOutputStream {
   // Temporary storage when flushing the buffer to an output stream
   private final byte[] tmp;
 
-  // FileChannel writing to he swap file
+  // FileChannel writing to the swap file
   private FileChannel chan;
 
   // The output stream to write the recalled data to and the target of all write actions following
   // the recall
   private OutputStream out;
 
-  // Whether or not we had a buffer flow and thus had to swap to file
+  // Whether we had a buffer flow and thus had to swap to file
   private boolean swapped;
 
-  // Whether or not data has been recalled - and hence write actions are now taking place on the
+  // Whether data has been recalled - and hence write actions are now taking place on the
   // output stream that the recalled data was written to
   private boolean recalled;
 

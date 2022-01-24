@@ -287,7 +287,7 @@ class Messages {
       File f = (File) md.arg();
       if (md.negated()) {
         return format("Directory already exists: %s", md.arg());
-      } else if (f.isDirectory()) {
+      } else if (f.isFile()) {
         return format("%s must not be a file (was %s)", md.argName(), f);
       }
       return format("Directory not found: %s", md.arg());

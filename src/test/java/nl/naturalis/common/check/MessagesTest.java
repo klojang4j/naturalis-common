@@ -4,6 +4,7 @@ import nl.naturalis.common.IOMethods;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -221,49 +222,59 @@ public class MessagesTest {
   }
 
   @Test
-  public void msgFile00() {
-    MsgArgs args = new MsgArgs(file(), false, "zembla", new File("/foo/bar/blob.txt"));
-    System.out.println(msgFile().apply(args));
-    if (!SYSOUT_ONLY) {
-      assertEquals("File not found: /foo/bar/blob.txt", msgFile().apply(args));
+  public void msgFile00() throws IOException {
+    File f = IOMethods.createTempFile();
+    try {
+      MsgArgs args = new MsgArgs(file(), false, "zembla", f);
+      System.out.println(msgFile().apply(args));
+      if (!SYSOUT_ONLY) {
+        assertEquals("File not found: " + f, msgFile().apply(args));
+      }
+    } finally {
+      f.delete();
     }
   }
 
   @Test
-  public void msgFile00_not() {
-    MsgArgs args = new MsgArgs(file(), true, "zembla", new File("/foo/bar/blob.txt"));
-    System.out.println(msgFile().apply(args));
-    if (!SYSOUT_ONLY) {
-      assertEquals("File already exists: /foo/bar/blob.txt", msgFile().apply(args));
+  public void msgFile00_not() throws IOException {
+    File f = IOMethods.createTempFile();
+    try {
+      MsgArgs args = new MsgArgs(file(), true, "zembla", f);
+      System.out.println(msgFile().apply(args));
+      if (!SYSOUT_ONLY) {
+        assertEquals("File already exists: " + f, msgFile().apply(args));
+      }
+    } finally {
+      f.delete();
     }
   }
 
   @Test
-  public void msgFile01() {
-    long time = System.currentTimeMillis();
-    File dir = new File(System.getProperty("java.io.tmpdir") + "/__foo_123_456__");
-    dir.mkdir();
-    File file = new File(System.getProperty("java.io.tmpdir") + "/__foo_123_456__");
-    MsgArgs args = new MsgArgs(file(), false, "nero", file);
-    System.out.println(msgFile().apply(args)); //
-    if (!SYSOUT_ONLY) {
-      assertEquals(
-          "nero must not be a directory (was /tmp/__foo_123_456__)", msgFile().apply(args));
+  public void msgDir00() throws IOException {
+    File f = IOMethods.createTempDir();
+    try {
+      MsgArgs args = new MsgArgs(directory(), false, "zembla", f);
+      System.out.println(msgDirectory().apply(args));
+      if (!SYSOUT_ONLY) {
+        assertEquals("Directory not found: " + f, msgDirectory().apply(args));
+      }
+    } finally {
+      f.delete();
     }
-    dir.delete();
   }
 
   @Test
-  public void msgFile01_not() {
-    File dir = new File(System.getProperty("java.io.tmpdir") + "/__foo_234_457__");
-    dir.mkdir();
-    File file = new File(System.getProperty("java.io.tmpdir") + "/__foo_234_457__");
-    MsgArgs args = new MsgArgs(file(), true, "nero", file);
-    System.out.println(msgFile().apply(args));
-    if (!SYSOUT_ONLY) {
-      assertEquals("File already exists: /tmp/__foo_234_457__", msgFile().apply(args));
+  public void msgDir00_not() throws IOException {
+    File f = IOMethods.createTempDir();
+    try {
+      MsgArgs args = new MsgArgs(directory(), true, "zembla", f);
+      System.out.println(msgDirectory().apply(args));
+      if (!SYSOUT_ONLY) {
+        assertEquals("Directory already exists: " + f, msgDirectory().apply(args));
+      }
+    } finally {
+      f.delete();
     }
-    dir.delete();
   }
 
   @Test
