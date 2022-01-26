@@ -2,6 +2,8 @@ package nl.naturalis.common;
 
 import org.junit.Test;
 
+import java.util.List;
+
 import static nl.naturalis.common.ArrayMethods.*;
 import static org.junit.Assert.*;
 
@@ -56,9 +58,9 @@ public class ArrayMethodsTest {
   @Test
   public void inArray01() {
     int[] array = {1, 2, 4, 8, 16};
-    assertTrue(inArray(1, array));
-    assertTrue(inArray(16, array));
-    assertFalse(inArray(23, array));
+    assertTrue(inIntArray(1, array));
+    assertTrue(inIntArray(16, array));
+    assertFalse(inIntArray(23, array));
   }
 
   @Test
@@ -78,6 +80,13 @@ public class ArrayMethodsTest {
   }
 
   @Test
+  public void indexOf00() {
+    assertEquals(2, indexOf(new String[] {"a", "b", "c", "d", "e"}, "c"));
+    assertEquals(2, indexOf(new String[] {"a", "b", null, "d", "e"}, null));
+    assertEquals(-1, indexOf(new String[] {"a", "b", null, "d", "e"}, "FOO"));
+  }
+
+  @Test
   public void indexOf01() {
     int[] array = {1, 2, 4, 8, 16};
     assertEquals(0, indexOf(array, 1));
@@ -88,17 +97,32 @@ public class ArrayMethodsTest {
   @Test
   public void find01() {
     String s0 = "Hello";
-    String s1 = "World";
-    /*
-     * Interesting, we have to use brute force to get a new string, otherwise the compiler detects
-     * and coalesces the two occurrences of "World".
-     */
+    // Use constructor. Otherwise compiler detects we're using the same
+    // string twice and creates just one instance.
+    String s1 = new String("World");
     String s2 = new String("World");
-    String[] ss = pack(s0, s1, s2);
-    assertEquals("01", 0, find(ss, s0));
-    assertEquals("02", 1, find(ss, s1));
-    assertEquals("03", 2, find(ss, s2));
-    assertEquals("04", -1, find(ss, new String("Hello")));
+    String[] strings = pack(s0, s1, s2);
+    assertEquals(0, find(strings, s0));
+    assertEquals(1, find(strings, s1));
+    assertEquals(2, find(strings, s2));
+    assertEquals(-1, find(strings, new String("Hello")));
+    assertEquals(-1, find(strings, new String("World")));
+  }
+
+  @Test
+  public void inIntArray00() {
+    assertTrue(inIntArray(2, 0, 4, 6, 3, 2));
+    assertFalse(inIntArray(2, 0, 4, 6, 3, 9));
+  }
+
+  @Test
+  public void inArray00() {
+    assertTrue(inArray("a", null, "a", "b", "c", "d"));
+    assertTrue(inArray(null, null, "a", "b", "c", "d"));
+    assertTrue(inArray("c", null, "a", "b", "c", "d"));
+    assertTrue(inArray("", null, ""));
+    assertFalse(inArray("FOO", null, "a", "b", "c", "d"));
+    assertFalse(inArray("FOO"));
   }
 
   @Test
@@ -185,5 +209,48 @@ public class ArrayMethodsTest {
     Integer[] ints = {1, 2, null, 4, 5};
     int[] expected = {1, 2, 42, 4, 5};
     assertArrayEquals(expected, asPrimitiveArray(ints, 42));
+  }
+
+  @Test
+  public void asWrapperArray00() {
+    assertArrayEquals(new Integer[] {1, 2, 3, 4, 5}, asWrapperArray(new int[] {1, 2, 3, 4, 5}));
+    assertArrayEquals(new Long[] {1L, 2L, 3L, 4L, 5L}, asWrapperArray(new long[] {1, 2, 3, 4, 5}));
+    assertArrayEquals(
+        new Double[] {1D, 2D, 3D, 4D, 5D}, asWrapperArray(new double[] {1, 2, 3, 4, 5}));
+    assertArrayEquals(
+        new Float[] {1F, 2F, 3F, 4F, 5F}, asWrapperArray(new float[] {1, 2, 3, 4, 5}));
+    assertArrayEquals(new Short[] {1, 2, 3, 4, 5}, asWrapperArray(new short[] {1, 2, 3, 4, 5}));
+    assertArrayEquals(new Byte[] {1, 2, 3, 4, 5}, asWrapperArray(new byte[] {1, 2, 3, 4, 5}));
+    assertArrayEquals(new Character[] {1, 2, 3, 4, 5}, asWrapperArray(new char[] {1, 2, 3, 4, 5}));
+    assertArrayEquals(
+        new Boolean[] {Boolean.FALSE, Boolean.FALSE, Boolean.TRUE},
+        asWrapperArray(new boolean[] {false, false, true}));
+    assertArrayEquals(new Integer[0], asWrapperArray(new int[0]));
+  }
+
+  @Test
+  public void asList00() {
+    assertEquals(List.of(1, 2, 3), asList(new int[] {1, 2, 3}));
+    assertEquals(List.of(1L, 2L, 3L), asList(new long[] {1, 2, 3}));
+    assertEquals(List.of(1D, 2D, 3D), asList(new double[] {1, 2, 3}));
+    assertEquals(List.of(1F, 2F, 3F), asList(new float[] {1, 2, 3}));
+    assertEquals(List.of((short) 1, (short) 2, (short) 3), asList(new short[] {1, 2, 3}));
+    assertEquals(List.of((byte) 1, (byte) 2, (byte) 3), asList(new byte[] {1, 2, 3}));
+    assertEquals(List.of((char) 1, (char) 2, (char) 3), asList(new char[] {1, 2, 3}));
+    assertEquals(List.of(Boolean.FALSE, Boolean.TRUE), asList(new boolean[] {false, true}));
+    assertNotEquals(List.of(1, 2, 3), new long[] {1, 2, 3});
+  }
+
+  @Test
+  public void cloak00() {
+    assertEquals(List.of(1, 2, 3), cloak(new int[] {1, 2, 3}));
+    assertEquals(List.of(1L, 2L, 3L), cloak(new long[] {1, 2, 3}));
+    assertEquals(List.of(1D, 2D, 3D), cloak(new double[] {1, 2, 3}));
+    assertEquals(List.of(1F, 2F, 3F), cloak(new float[] {1, 2, 3}));
+    assertEquals(List.of((short) 1, (short) 2, (short) 3), cloak(new short[] {1, 2, 3}));
+    assertEquals(List.of((byte) 1, (byte) 2, (byte) 3), cloak(new byte[] {1, 2, 3}));
+    assertEquals(List.of((char) 1, (char) 2, (char) 3), cloak(new char[] {1, 2, 3}));
+    assertEquals(List.of(Boolean.FALSE, Boolean.TRUE), cloak(new boolean[] {false, true}));
+    assertNotEquals(List.of(1, 2, 3), new long[] {1, 2, 3});
   }
 }

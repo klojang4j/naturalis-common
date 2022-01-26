@@ -20,6 +20,13 @@ public class InvokeException extends RuntimeException {
     return new InvokeException("Missing no-arg constructor on %s", simpleClassName(clazz));
   }
 
+  public static InvokeException noSuchConstructor(Class<?> clazz,Class<?>... params) {
+    return new InvokeException(
+            "No such constructor: %s(%s)",
+            simpleClassName(clazz),
+            implode(params, ClassMethods::simpleClassName, ", ", 0, -1));
+  }
+
   public static Function<String, InvokeException> cannotInstantiate(Class<?> clazz) {
     return s -> new InvokeException("Cannot instantiate %s", simpleClassName(clazz));
   }

@@ -2,6 +2,7 @@ package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.unsafe.ArrayCloakList;
+import nl.naturalis.common.x.invoke.InvokeUtils;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -16,7 +17,6 @@ import static java.lang.System.arraycopy;
 import static java.util.stream.Collectors.joining;
 import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.check.CommonGetters.length;
 
 /** Methods for working with arrays. */
 public final class ArrayMethods {
@@ -38,9 +38,6 @@ public final class ArrayMethods {
   static final String START_INDEX = "Start index";
   static final String END_INDEX = "End index";
 
-  // Maximum length of an array
-  private static final int MAX_SIZE = Integer.MAX_VALUE;
-
   /**
    * Appends the specified object to the specified array.
    *
@@ -49,11 +46,11 @@ public final class ArrayMethods {
    * @return A concatenation of {@code array} and {@code obj}
    */
   public static <T> T[] append(T[] array, T obj) {
-    Check.notNull(array, "array").has(length(), lt(), MAX_SIZE);
-    T[] res = fromTemplate(array, array.length + 1);
-    arraycopy(array, 0, res, 0, array.length);
-    res[array.length] = obj;
-    return res;
+    Check.notNull(array, "array");
+    T[] arr = fromTemplate(array, array.length + 1);
+    arraycopy(array, 0, arr, 0, array.length);
+    arr[array.length] = obj;
+    return arr;
   }
 
   /**
@@ -68,14 +65,14 @@ public final class ArrayMethods {
   @SafeVarargs
   public static <T> T[] append(T[] array, T obj0, T obj1, T... moreObjs) {
     Check.notNull(array, "array");
-    Check.notNull(moreObjs, "moreObjs").has(length(), x -> MAX_SIZE - array.length - 2 - x >= 0);
+    Check.notNull(moreObjs, "moreObjs");
     int sz = array.length + 2 + moreObjs.length;
-    T[] res = fromTemplate(array, sz);
-    arraycopy(array, 0, res, 0, array.length);
-    res[array.length] = obj0;
-    res[array.length + 1] = obj1;
-    arraycopy(moreObjs, 0, res, array.length + 2, moreObjs.length);
-    return res;
+    T[] arr = fromTemplate(array, sz);
+    arraycopy(array, 0, arr, 0, array.length);
+    arr[array.length] = obj0;
+    arr[array.length + 1] = obj1;
+    arraycopy(moreObjs, 0, arr, array.length + 2, moreObjs.length);
+    return arr;
   }
 
   /**
@@ -137,7 +134,7 @@ public final class ArrayMethods {
    * @param array The array to search
    * @return Whether the array contains the value
    */
-  public static boolean inArray(int value, int... array) {
+  public static boolean inIntArray(int value, int... array) {
     return indexOf(array, value) != -1;
   }
 
@@ -164,7 +161,7 @@ public final class ArrayMethods {
    */
   @SafeVarargs
   public static <T> boolean isOneOf(T ref, T... array) {
-    return Arrays.stream(Check.notNull(array, "array").ok()).anyMatch(t -> t == ref);
+    return find(array, ref) != -1;
   }
 
   /**
@@ -174,10 +171,8 @@ public final class ArrayMethods {
    * @param <T> The type of the elements in the requested array
    * @param template An array with the same length and element type as the requested array
    */
-  @SuppressWarnings("unchecked")
   public static <T> T[] fromTemplate(T[] template) {
-    Check.notNull(template, "template");
-    return (T[]) Array.newInstance(template.getClass().getComponentType(), template.length);
+    return fromTemplate(template, template.length);
   }
 
   /**
@@ -189,11 +184,10 @@ public final class ArrayMethods {
    * @param length The desired length of the new array
    * @return A new array with the same length and element type as the specified array
    */
-  @SuppressWarnings("unchecked")
   public static <T> T[] fromTemplate(T[] template, int length) {
     Check.notNull(template, "template");
     Check.that(length, "length").is(gte(), 0);
-    return (T[]) Array.newInstance(template.getClass().getComponentType(), length);
+    return InvokeUtils.newArray(template.getClass(), length);
   }
 
   /**
@@ -528,7 +522,7 @@ public final class ArrayMethods {
    * @return A new array containing the specified object and the elements of the specified array
    */
   public static <T> T[] prefix(T[] array, T obj) {
-    Check.notNull(array, "array").has(length(), lt(), MAX_SIZE);
+    Check.notNull(array, "array");
     T[] res = fromTemplate(array, array.length + 1);
     res[0] = obj;
     arraycopy(array, 0, res, 1, array.length);
@@ -548,7 +542,7 @@ public final class ArrayMethods {
   @SafeVarargs
   public static <T> T[] prefix(T[] array, T obj0, T obj1, T... moreObjs) {
     Check.notNull(array, "array");
-    Check.notNull(moreObjs, "moreObjs").has(length(), x -> MAX_SIZE - array.length - 2 - x >= 0);
+    Check.notNull(moreObjs, "moreObjs");
     int sz = array.length + 2 + moreObjs.length;
     T[] res = fromTemplate(array, sz);
     res[0] = obj0;
@@ -559,165 +553,161 @@ public final class ArrayMethods {
   }
 
   /**
-   * Converts the specified {@code int} array into a fixed-size, but mutable {@code List<Integer>}.
+   * Converts the specified {@code int} array into an unmodifiable {@code List<Integer>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Integer> asList(int[] values) {
-    return Arrays.asList(asWrapperArray(values));
+    return List.of(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code float} array into a fixed-size, but mutable {@code List<Float>}.
+   * Converts the specified {@code float} array into an unmodifiable {@code List<Float>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Float> asList(float[] values) {
-    return Arrays.asList(asWrapperArray(values));
+    return List.of(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code double} array into a fixed-size, but mutable {@code
-   * List<Double>}.
+   * Converts the specified {@code double} array into an unmodifiable {@code List<Double>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Double> asList(double[] values) {
-    return Arrays.asList(asWrapperArray(values));
+    return List.of(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code long} array into a fixed-size, but mutable {@code List<Long>}.
+   * Converts the specified {@code long} array into an unmodifiable {@code List<Long>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Long> asList(long[] values) {
-    return Arrays.asList(asWrapperArray(values));
+    return List.of(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code short} array into a fixed-size, but mutable {@code List<Short>}.
+   * Converts the specified {@code short} array into an unmodifiable {@code List<Short>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Short> asList(short[] values) {
-    return Arrays.asList(asWrapperArray(values));
+    return List.of(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code byte} array into a fixed-size, but mutable {@code List<Byte>}.
+   * Converts the specified {@code byte} array into an unmodifiable {@code List<Byte>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Byte> asList(byte[] values) {
-    return Arrays.asList(asWrapperArray(values));
+    return List.of(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified{@code char} array into a fixed-size, but mutable {@code
-   * List<Character>}.
+   * Converts the specified{@code char} array into an unmodifiable {@code List<Character>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Character> asList(char[] values) {
-    return Arrays.asList(asWrapperArray(values));
+    return List.of(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code char} array into a fixed-size, but mutable {@code
-   * List<Character>}.
+   * Converts the specified {@code char} array into an unmodifiable {@code List<Character>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Boolean> asList(boolean[] values) {
-    return Arrays.asList(asWrapperArray(values));
+    return List.of(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code int} array into an {@link ArrayCloakList <Integer>}.
+   * Converts the specified {@code int} array into an {@link ArrayCloakList<Integer>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
-  public static List<Integer> asUnsafeList(int[] values) {
+  public static List<Integer> cloak(int[] values) {
     return new ArrayCloakList<>(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code float} array into an {@link ArrayCloakList <Float>}.
+   * Converts the specified {@code double} array into an {@link ArrayCloakList<Double>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
-  public static List<Float> asUnsafeList(float[] values) {
+  public static List<Double> cloak(double[] values) {
     return new ArrayCloakList<>(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code double} array into an {@link ArrayCloakList <Double>}.
+   * Converts the specified {@code long} array into an {@link ArrayCloakList<Long>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
-  public static List<Double> asUnsafeList(double[] values) {
+  public static List<Long> cloak(long[] values) {
+    return new ArrayCloakList<>(asWrapperArray(values));
+  }
+  /**
+   * Converts the specified {@code float} array into an {@link ArrayCloakList<Float>}.
+   *
+   * @param values the array elements.
+   * @return a {@code List} containing the same elements in the same order
+   */
+  public static List<Float> cloak(float[] values) {
     return new ArrayCloakList<>(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code long} array into an {@link ArrayCloakList <Long>}.
+   * Converts the specified {@code short} array into an {@link ArrayCloakList<Short>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
-  public static List<Long> asUnsafeList(long[] values) {
+  public static List<Short> cloak(short[] values) {
     return new ArrayCloakList<>(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code short} array into an {@link ArrayCloakList <Short>}.
+   * Converts the specified {@code byte} array into an {@link ArrayCloakList<Byte>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
-  public static List<Short> asUnsafeList(short[] values) {
+  public static List<Byte> cloak(byte[] values) {
     return new ArrayCloakList<>(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code byte} array into an {@link ArrayCloakList <Byte>}.
+   * Converts the specified {@code char} array into an {@link ArrayCloakList<Character>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
-  public static List<Byte> asUnsafeList(byte[] values) {
+  public static List<Character> cloak(char[] values) {
     return new ArrayCloakList<>(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code char} array into an {@link ArrayCloakList <Character>}.
+   * Converts the specified {@code char} array into an {@link ArrayCloakList<Character>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
-  public static List<Character> asUnsafeList(char[] values) {
-    return new ArrayCloakList<>(asWrapperArray(values));
-  }
-
-  /**
-   * Converts the specified {@code char} array into an {@link ArrayCloakList <Character>}.
-   *
-   * @param values the array elements.
-   * @return a {@code List} containing the same elements in the same order
-   */
-  public static List<Boolean> asUnsafeList(boolean[] values) {
+  public static List<Boolean> cloak(boolean[] values) {
     return new ArrayCloakList<>(asWrapperArray(values));
   }
 
@@ -733,9 +723,9 @@ public final class ArrayMethods {
    */
   public static int[] asPrimitiveArray(Integer[] values, int dfault) {
     Check.notNull(values);
-    int[] vals = new int[values.length];
-    IntStream.range(0, values.length).forEach(i -> vals[i] = ifNull(values[i], dfault));
-    return vals;
+    int[] arr = new int[values.length];
+    IntStream.range(0, values.length).forEach(i -> arr[i] = ifNull(values[i], dfault));
+    return arr;
   }
 
   /**
@@ -761,10 +751,27 @@ public final class ArrayMethods {
    * @return The {@code Integer} array
    */
   public static Integer[] asWrapperArray(int[] values) {
-    Check.notNull(values);
-    Integer[] vals = new Integer[values.length];
-    IntStream.range(0, values.length).forEach(i -> vals[i] = values[i]);
-    return vals;
+    return Check.notNull(values).ok(Arrays::stream).boxed().toArray(Integer[]::new);
+  }
+
+  /**
+   * Converts the specified {@code double} array to a {@code Double} array.
+   *
+   * @param values The {@code double} array
+   * @return The {@code Double} array
+   */
+  public static Double[] asWrapperArray(double[] values) {
+    return Check.notNull(values).ok(Arrays::stream).boxed().toArray(Double[]::new);
+  }
+
+  /**
+   * Converts the specified {@code long} array to a {@code Long} array.
+   *
+   * @param values The {@code long} array
+   * @return The {@code Long} array
+   */
+  public static Long[] asWrapperArray(long[] values) {
+    return Check.notNull(values).ok(Arrays::stream).boxed().toArray(Long[]::new);
   }
 
   /**
@@ -775,35 +782,7 @@ public final class ArrayMethods {
    */
   public static Float[] asWrapperArray(float[] values) {
     Check.notNull(values);
-    Float[] vals = new Float[values.length];
-    IntStream.range(0, values.length).forEach(i -> vals[i] = values[i]);
-    return vals;
-  }
-
-  /**
-   * Converts the specified {@code double} array to a {@code Double} array.
-   *
-   * @param values The {@code double} array
-   * @return The {@code Double} array
-   */
-  public static Double[] asWrapperArray(double[] values) {
-    Check.notNull(values);
-    Double[] vals = new Double[values.length];
-    IntStream.range(0, values.length).forEach(i -> vals[i] = values[i]);
-    return vals;
-  }
-
-  /**
-   * Converts the specified {@code long} array to a {@code Long} array.
-   *
-   * @param values The {@code long} array
-   * @return The {@code Long} array
-   */
-  public static Long[] asWrapperArray(long[] values) {
-    Check.notNull(values);
-    Long[] vals = new Long[values.length];
-    IntStream.range(0, values.length).forEach(i -> vals[i] = values[i]);
-    return vals;
+    return IntStream.range(0, values.length).mapToObj(i -> values[i]).toArray(Float[]::new);
   }
 
   /**
@@ -814,9 +793,7 @@ public final class ArrayMethods {
    */
   public static Short[] asWrapperArray(short[] values) {
     Check.notNull(values);
-    Short[] vals = new Short[values.length];
-    IntStream.range(0, values.length).forEach(i -> vals[i] = values[i]);
-    return vals;
+    return IntStream.range(0, values.length).mapToObj(i -> values[i]).toArray(Short[]::new);
   }
 
   /**
@@ -827,9 +804,7 @@ public final class ArrayMethods {
    */
   public static Byte[] asWrapperArray(byte[] values) {
     Check.notNull(values);
-    Byte[] vals = new Byte[values.length];
-    IntStream.range(0, values.length).forEach(i -> vals[i] = values[i]);
-    return vals;
+    return IntStream.range(0, values.length).mapToObj(i -> values[i]).toArray(Byte[]::new);
   }
 
   /**
@@ -840,9 +815,7 @@ public final class ArrayMethods {
    */
   public static Character[] asWrapperArray(char[] values) {
     Check.notNull(values);
-    Character[] vals = new Character[values.length];
-    IntStream.range(0, values.length).forEach(i -> vals[i] = values[i]);
-    return vals;
+    return IntStream.range(0, values.length).mapToObj(i -> values[i]).toArray(Character[]::new);
   }
 
   /**
@@ -853,8 +826,6 @@ public final class ArrayMethods {
    */
   public static Boolean[] asWrapperArray(boolean[] values) {
     Check.notNull(values);
-    Boolean[] vals = new Boolean[values.length];
-    IntStream.range(0, values.length).forEach(i -> vals[i] = values[i]);
-    return vals;
+    return IntStream.range(0, values.length).mapToObj(i -> values[i]).toArray(Boolean[]::new);
   }
 }

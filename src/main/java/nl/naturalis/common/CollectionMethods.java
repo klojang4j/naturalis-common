@@ -107,19 +107,19 @@ public class CollectionMethods {
     } else if (val instanceof Object[]) {
       objs = new ArrayCloakList((Object[]) val);
     } else if (val.getClass() == int[].class) {
-      objs = ArrayMethods.asUnsafeList((int[]) val);
+      objs = ArrayMethods.cloak((int[]) val);
     } else if (val.getClass() == double[].class) {
-      objs = ArrayMethods.asUnsafeList((double[]) val);
+      objs = ArrayMethods.cloak((double[]) val);
     } else if (val.getClass() == byte[].class) {
-      objs = ArrayMethods.asUnsafeList((byte[]) val);
+      objs = ArrayMethods.cloak((byte[]) val);
     } else if (val.getClass() == short[].class) {
-      objs = ArrayMethods.asUnsafeList((short[]) val);
+      objs = ArrayMethods.cloak((short[]) val);
     } else if (val.getClass() == float[].class) {
-      objs = ArrayMethods.asUnsafeList((float[]) val);
+      objs = ArrayMethods.cloak((float[]) val);
     } else if (val.getClass() == char[].class) {
-      objs = ArrayMethods.asUnsafeList((char[]) val);
+      objs = ArrayMethods.cloak((char[]) val);
     } else if (val.getClass() == boolean[].class) {
-      objs = ArrayMethods.asUnsafeList((boolean[]) val);
+      objs = ArrayMethods.cloak((boolean[]) val);
     } else {
       objs = Collections.singletonList(val);
     }
