@@ -1,19 +1,9 @@
 package nl.naturalis.common;
 
-import static nl.naturalis.common.ArrayMethods.append;
-import static nl.naturalis.common.ArrayMethods.concat;
-import static nl.naturalis.common.ArrayMethods.find;
-import static nl.naturalis.common.ArrayMethods.fromTemplate;
-import static nl.naturalis.common.ArrayMethods.inArray;
-import static nl.naturalis.common.ArrayMethods.indexOf;
-import static nl.naturalis.common.ArrayMethods.pack;
-import static nl.naturalis.common.ArrayMethods.prefix;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import static nl.naturalis.common.ArrayMethods.*;
+import static org.junit.Assert.*;
 
 public class ArrayMethodsTest {
 
@@ -100,8 +90,8 @@ public class ArrayMethodsTest {
     String s0 = "Hello";
     String s1 = "World";
     /*
-     * Interesting, we have to use brute force to get a new string, otherwise the compiler
-     * apparently detects and coalesces the two occurrences of "World".
+     * Interesting, we have to use brute force to get a new string, otherwise the compiler detects
+     * and coalesces the two occurrences of "World".
      */
     String s2 = new String("World");
     String[] ss = pack(s0, s1, s2);
@@ -133,5 +123,67 @@ public class ArrayMethodsTest {
     String[] expected = {"1", "2", "3", "4", "5", "6", "7", "a", "b", "c"};
     String[] actual = prefix(a, "1", "2", "3", "4", "5", "6", "7");
     assertArrayEquals(expected, actual);
+  }
+
+  @Test
+  public void implodeInts00() {
+    int[] ints = {1, 2, 3, 4, 5};
+    assertEquals("2|4", implodeInts(ints, i -> "" + (2 * i), "|", 0, 2));
+    assertEquals("2|4|6|8|10", implodeInts(ints, i -> "" + (2 * i), "|", 0, -1));
+    assertEquals("2|4|6|8|10", implodeInts(ints, i -> "" + (2 * i), "|", 0, 100));
+    assertEquals("4|6|8|10", implodeInts(ints, i -> "" + (2 * i), "|", 1, 100));
+    assertEquals("4|6|8", implodeInts(ints, i -> "" + (2 * i), "|", 1, 4));
+    assertEquals("1|2|3", implodeInts(ints, "|", 3));
+    assertEquals("1|2|3|4|5", implodeInts(ints, "|"));
+    assertEquals("1, 2, 3", implodeInts(ints, 3));
+    assertEquals("1, 2, 3, 4, 5", implodeInts(ints));
+  }
+
+  @Test
+  public void implodeAny00() {
+    long[] longs = {1, 2, 3, 4, 5};
+    assertEquals("2|4", implodeAny(longs, l -> "" + (2 * (long) l), "|", 0, 2));
+    assertEquals("2|4|6|8|10", implodeAny(longs, l -> "" + (2 * (long) l), "|", 0, -1));
+    assertEquals("2|4|6|8|10", implodeAny(longs, l -> "" + (2 * (long) l), "|", 0, 100));
+    assertEquals("4|6|8|10", implodeAny(longs, l -> "" + (2 * (long) l), "|", 1, 100));
+    assertEquals("4|6|8", implodeAny(longs, l -> "" + (2 * (long) l), "|", 1, 4));
+    assertEquals("1|2|3", implodeAny(longs, "|", 3));
+    assertEquals("1|2|3|4|5", implodeAny(longs, "|"));
+    assertEquals("1, 2, 3", implodeAny(longs, 3));
+    assertEquals("1, 2, 3, 4, 5", implodeAny(longs));
+  }
+
+  @Test
+  public void implode00() {
+    Integer[] ints = {1, 2, 3, 4, 5};
+    assertEquals("2|4", implode(ints, i -> "" + (2 * (int) i), "|", 0, 2));
+    assertEquals("2|4|6|8|10", implode(ints, i -> "" + (2 * (int) i), "|", 0, -1));
+    assertEquals("2|4|6|8|10", implode(ints, i -> "" + (2 * (int) i), "|", 0, 100));
+    assertEquals("4|6|8|10", implode(ints, i -> "" + (2 * (int) i), "|", 1, 100));
+    assertEquals("4|6|8", implode(ints, i -> "" + (2 * (int) i), "|", 1, 4));
+    assertEquals("1|2|3", implode(ints, "|", 3));
+    assertEquals("1|2|3|4|5", implode(ints, "|"));
+    assertEquals("1, 2, 3", implode(ints, 3));
+    assertEquals("1, 2, 3, 4, 5", implode(ints));
+  }
+
+  @Test
+  public void asPrimitiveArray00() {
+    Integer[] ints = {1, 2, 3, 4, 5};
+    int[] expected = {1, 2, 3, 4, 5};
+    assertArrayEquals(expected, asPrimitiveArray(ints));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void asPrimitiveArray01() {
+    Integer[] ints = {1, 2, null, 4, 5};
+    asPrimitiveArray(ints);
+  }
+
+  @Test
+  public void asPrimitiveArray02() {
+    Integer[] ints = {1, 2, null, 4, 5};
+    int[] expected = {1, 2, 42, 4, 5};
+    assertArrayEquals(expected, asPrimitiveArray(ints, 42));
   }
 }

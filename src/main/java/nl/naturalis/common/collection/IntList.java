@@ -9,6 +9,7 @@ import java.util.stream.IntStream;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.ThrowingIntConsumer;
 
+/** The ubiquitous true {@code int} list while we await Valhalla. */
 public interface IntList {
 
   /**

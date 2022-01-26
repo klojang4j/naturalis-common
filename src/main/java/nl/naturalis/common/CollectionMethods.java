@@ -2,7 +2,7 @@ package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.ThrowingFunction;
-import nl.naturalis.common.unsafe.UnsafeList;
+import nl.naturalis.common.unsafe.ArrayCloakList;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -85,7 +85,7 @@ public class CollectionMethods {
    *   <li>If the value is {@code null} it is converted using {@code
    *       Collections.singletonList(val)}.
    *   <li>If the value already is a {@code List} it is returned as-is (it is <i>not</i> converted
-   *       to an {@link UnsafeList}).
+   *       to an {@link ArrayCloakList}).
    *   <li>If the value is a {@code Collection} it is converted to an {@code UnsafeList}.
    *   <li>If the value is an instance of {@code Object[]} to an {@code UnsafeList}.
    *   <li>If the value is an array of a primitive type to an {@code UnsafeList}.
@@ -103,9 +103,9 @@ public class CollectionMethods {
     } else if (val instanceof List) {
       objs = (List) val;
     } else if (val instanceof Collection) {
-      objs = new UnsafeList((Collection) val);
+      objs = new ArrayCloakList((Collection) val);
     } else if (val instanceof Object[]) {
-      objs = new UnsafeList((Object[]) val);
+      objs = new ArrayCloakList((Object[]) val);
     } else if (val.getClass() == int[].class) {
       objs = ArrayMethods.asUnsafeList((int[]) val);
     } else if (val.getClass() == double[].class) {
@@ -648,8 +648,8 @@ public class CollectionMethods {
   }
 
   /**
-   * PHP-style implode method, concatenating the collection elements with {@link
-   * ArrayMethods#DEFAULT_IMPLODE_SEPARATOR}.
+   * PHP-style implode method, concatenating the collection elements using ", " (comma-space) as
+   * separator.
    *
    * @see ArrayMethods#implode(Object[])
    * @param collection The collection to implode
@@ -673,8 +673,8 @@ public class CollectionMethods {
   }
 
   /**
-   * PHP-style implode method, concatenating at most {@code limit} collection elements with {@link
-   * ArrayMethods#DEFAULT_IMPLODE_SEPARATOR}.
+   * PHP-style implode method, concatenating at most {@code limit} collection elements using ", "
+   * (comma-space) as separator.
    *
    * @see ArrayMethods#implode(Object[], int)
    * @param collection The collection to implode
@@ -684,7 +684,22 @@ public class CollectionMethods {
    * @return A concatenation of the elements in the collection.
    */
   public static <T> String implode(Collection<T> collection, int limit) {
-    return implode(collection, Objects::toString, DEFAULT_IMPLODE_SEPARATOR, 0, -1);
+    return implode(collection, DEFAULT_IMPLODE_SEPARATOR, limit);
+  }
+
+  /**
+   * PHP-style implode method, concatenating at most {@code limit} collection elements using the
+   * specified separator.
+   *
+   * @see ArrayMethods#implode(Object[], String, int)
+   * @param collection The collection to implode
+   * @param limit The maximum number of elements to collect. Specify -1 for no maximum. Specifying a
+   *     number greater than the length of the collection is OK. It will be clamped to the
+   *     collection length.
+   * @return A concatenation of the elements in the collection.
+   */
+  public static <T> String implode(Collection<T> collection, String separator, int limit) {
+    return implode(collection, Objects::toString, separator, 0, -1);
   }
 
   /**

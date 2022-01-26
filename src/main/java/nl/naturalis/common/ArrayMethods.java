@@ -1,7 +1,7 @@
 package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.unsafe.UnsafeList;
+import nl.naturalis.common.unsafe.ArrayCloakList;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -19,7 +19,7 @@ import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.length;
 
 /** Methods for working with arrays. */
-public class ArrayMethods {
+public final class ArrayMethods {
 
   private ArrayMethods() {}
 
@@ -76,56 +76,6 @@ public class ArrayMethods {
     res[array.length + 1] = obj1;
     arraycopy(moreObjs, 0, res, array.length + 2, moreObjs.length);
     return res;
-  }
-
-  /**
-   * Returns the specified value <i>in</i> or <i>as</i> an array.
-   *
-   * <p>
-   *
-   * <ul>
-   *   <li>If the value is {@code null}, a one-element array is returned with {@code null} as the
-   *       value of the element
-   *   <li>If the value is a {@code Collection}, the collection is converted to an array using
-   *       {@link Collection#toArray()}
-   *   <li>If the value is an array of a non-primitive type, it is returned as-is
-   *   <li>If the value is an array of a primitive type, an array of the corresponding wrapper type
-   *       is returned
-   *   <li>Otherwise a one-element array is returned with the specified value as the value of the
-   *       element
-   * </ul>
-   *
-   * @param <T> The type of the elements in the returned array
-   * @param val The value to convert
-   * @return The specified value <i>in</i> or <i>as</i> an array
-   */
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  public static <T> T[] asArray(Object val) {
-    T[] objs;
-    if (val == null) {
-      objs = (T[]) new Object[1];
-    } else if (val instanceof Collection) {
-      objs = (T[]) ((Collection) val).toArray();
-    } else if (val instanceof Object[]) {
-      objs = (T[]) val;
-    } else if (val.getClass() == int[].class) {
-      objs = (T[]) asWrapperArray((int[]) val);
-    } else if (val.getClass() == double[].class) {
-      objs = (T[]) asWrapperArray((double[]) val);
-    } else if (val.getClass() == byte[].class) {
-      objs = (T[]) asWrapperArray((byte[]) val);
-    } else if (val.getClass() == short[].class) {
-      objs = (T[]) asWrapperArray((short[]) val);
-    } else if (val.getClass() == float[].class) {
-      objs = (T[]) asWrapperArray((float[]) val);
-    } else if (val.getClass() == char[].class) {
-      objs = (T[]) asWrapperArray((char[]) val);
-    } else if (val.getClass() == boolean[].class) {
-      objs = (T[]) asWrapperArray((boolean[]) val);
-    } else {
-      objs = (T[]) new Object[] {val};
-    }
-    return objs;
   }
 
   /**
@@ -247,8 +197,8 @@ public class ArrayMethods {
   }
 
   /**
-   * PHP-style implode method, concatenating the array elements with {@link
-   * #DEFAULT_IMPLODE_SEPARATOR}. Optimized for {@code int[]} arrays.
+   * PHP-style implode method, concatenating the array elements using ", " (comma-space) as
+   * separator. Optimized for {@code int[]} arrays.
    *
    * @param array The array to implode
    * @return A concatenation of the elements in the array.
@@ -268,14 +218,12 @@ public class ArrayMethods {
    * @return A concatenation of the elements in the array.
    */
   public static String implodeInts(int[] array, String separator) {
-    return implodeInts(array, INT_TO_STR, separator, 0, -1);
+    return implodeInts(array, separator, -1);
   }
 
   /**
-   * PHP-style implode method, concatenating at most {@code limit} array elements with {@link
-   * #DEFAULT_IMPLODE_SEPARATOR}. This method is primarily meant to implode primitive arrays,
-   * although you <i>can</i> use it to implode any type of array. An {@link
-   * IllegalArgumentException} is thrown if {@code array} is not an array.
+   * PHP-style implode method, concatenating at most {@code limit} array elements using ", "
+   * (comma-space) as separator.
    *
    * @param array The array to implode
    * @param limit The maximum number of elements to collect. The specified number will be clamped to
@@ -284,7 +232,22 @@ public class ArrayMethods {
    * @return A concatenation of the elements in the array.
    */
   public static String implodeInts(int[] array, int limit) {
-    return implodeInts(array, INT_TO_STR, DEFAULT_IMPLODE_SEPARATOR, 0, -1);
+    return implodeInts(array, DEFAULT_IMPLODE_SEPARATOR, limit);
+  }
+
+  /**
+   * PHP-style implode method, concatenating at most {@code limit} array elements using the
+   * specified separator.
+   *
+   * @param array The array to implode
+   * @param separator The separator string
+   * @param limit The maximum number of elements to collect. The specified number will be clamped to
+   *     {@code array.length} (i.e. it's OK to specify a number greater than {@code array.length}).
+   *     You can specify -1 as a shorthand for {@code array.length}.
+   * @return A concatenation of the elements in the array.
+   */
+  public static String implodeInts(int[] array, String separator, int limit) {
+    return implodeInts(array, INT_TO_STR, separator, 0, limit);
   }
 
   /**
@@ -311,10 +274,10 @@ public class ArrayMethods {
   }
 
   /**
-   * PHP-style implode method, concatenating the array elements with {@link
-   * #DEFAULT_IMPLODE_SEPARATOR}. This method is primarily meant to implode primitive arrays, but
-   * you <i>can</i> use it to implode any type of array. An {@link IllegalArgumentException} is
-   * thrown if {@code array} is not an array.
+   * PHP-style implode method, concatenating the array elements using ", " (comma-space) as
+   * separator. This method is primarily meant to implode primitive arrays, but you <i>can</i> use
+   * it to implode any type of array. An {@link IllegalArgumentException} is thrown if {@code array}
+   * is not an array.
    *
    * @see CollectionMethods#implode(Collection, String)
    * @param array The array to implode
@@ -335,14 +298,14 @@ public class ArrayMethods {
    * @return A concatenation of the elements in the array.
    */
   public static String implodeAny(Object array, String separator) {
-    return implodeAny(array, Objects::toString, separator, 0, -1);
+    return implodeAny(array, separator, -1);
   }
 
   /**
-   * PHP-style implode method, concatenating at most {@code limit} array elements {@link
-   * #DEFAULT_IMPLODE_SEPARATOR}. This method is primarily meant to implode primitive arrays, but
-   * you <i>can</i> use it to implode any type of array. An {@link IllegalArgumentException} is
-   * thrown if {@code array} is not an array.
+   * PHP-style implode method, concatenating at most {@code limit} array elements using ", "
+   * (comma-space) as separator. This method is primarily meant to implode primitive arrays, but you
+   * <i>can</i> use it to implode any type of array. An {@link IllegalArgumentException} is thrown
+   * if {@code array} is not an array.
    *
    * @param array The array to implode
    * @param limit The maximum number of elements to collect. The specified number will be clamped to
@@ -351,7 +314,23 @@ public class ArrayMethods {
    * @return A concatenation of the elements in the array.
    */
   public static String implodeAny(Object array, int limit) {
-    return implodeAny(array, Objects::toString, DEFAULT_IMPLODE_SEPARATOR, 0, limit);
+    return implodeAny(array, DEFAULT_IMPLODE_SEPARATOR, limit);
+  }
+
+  /**
+   * PHP-style implode method, concatenating at most {@code limit} array elements using the
+   * specified separator. This method is primarily meant to implode primitive arrays, but you
+   * <i>can</i> use it to implode any type of array. An {@link IllegalArgumentException} is thrown
+   * if {@code array} is not an array.
+   *
+   * @param array The array to implode
+   * @param limit The maximum number of elements to collect. The specified number will be clamped to
+   *     {@code array.length} (i.e. it's OK to specify a number greater than {@code array.length}).
+   *     You can specify -1 as a shorthand for {@code array.length}.
+   * @return A concatenation of the elements in the array.
+   */
+  public static String implodeAny(Object array, String separator, int limit) {
+    return implodeAny(array, Objects::toString, separator, 0, limit);
   }
 
   /**
@@ -383,8 +362,8 @@ public class ArrayMethods {
   }
 
   /**
-   * PHP-style implode method, concatenating the array elements with {@link
-   * #DEFAULT_IMPLODE_SEPARATOR}.
+   * PHP-style implode method, concatenating the array elements using ", " (comma-space) as
+   * separator.
    *
    * @see CollectionMethods#implode(Collection)
    * @param array The collection to implode
@@ -408,7 +387,7 @@ public class ArrayMethods {
   }
 
   /**
-   * PHP-style implode method, concatenating at most {@code limit} array elements with ", "
+   * PHP-style implode method, concatenating at most {@code limit} array elements using ", "
    * (comma+space) as separator.
    *
    * @see CollectionMethods#implode(Collection, int)
@@ -419,7 +398,23 @@ public class ArrayMethods {
    * @return A concatenation of the elements in the array.
    */
   public static <T> String implode(T[] array, int limit) {
-    return implode(array, Objects::toString, DEFAULT_IMPLODE_SEPARATOR, 0, limit);
+    return implode(array, DEFAULT_IMPLODE_SEPARATOR, limit);
+  }
+
+  /**
+   * PHP-style implode method, concatenating at most {@code limit} array elements using the
+   * specified separator.
+   *
+   * @see CollectionMethods#implode(Collection, String, int)
+   * @param array The array to implode
+   * @param separator The separator string
+   * @param limit The maximum number of elements to collect. The specified number will be clamped to
+   *     {@code array.length} (i.e. it's OK to specify a number greater than {@code array.length}).
+   *     You can specify -1 as a shorthand for {@code array.length}.
+   * @return A concatenation of the elements in the array.
+   */
+  public static <T> String implode(T[] array, String separator, int limit) {
+    return implode(array, Objects::toString, separator, 0, limit);
   }
 
   /**
@@ -647,83 +642,83 @@ public class ArrayMethods {
   }
 
   /**
-   * Converts the specified {@code int} array into an {@link UnsafeList<Integer>}.
+   * Converts the specified {@code int} array into an {@link ArrayCloakList <Integer>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Integer> asUnsafeList(int[] values) {
-    return new UnsafeList<>(asWrapperArray(values));
+    return new ArrayCloakList<>(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code float} array into an {@link UnsafeList<Float>}.
+   * Converts the specified {@code float} array into an {@link ArrayCloakList <Float>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Float> asUnsafeList(float[] values) {
-    return new UnsafeList<>(asWrapperArray(values));
+    return new ArrayCloakList<>(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code double} array into an {@link UnsafeList<Double>}.
+   * Converts the specified {@code double} array into an {@link ArrayCloakList <Double>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Double> asUnsafeList(double[] values) {
-    return new UnsafeList<>(asWrapperArray(values));
+    return new ArrayCloakList<>(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code long} array into an {@link UnsafeList<Long>}.
+   * Converts the specified {@code long} array into an {@link ArrayCloakList <Long>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Long> asUnsafeList(long[] values) {
-    return new UnsafeList<>(asWrapperArray(values));
+    return new ArrayCloakList<>(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code short} array into an {@link UnsafeList<Short>}.
+   * Converts the specified {@code short} array into an {@link ArrayCloakList <Short>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Short> asUnsafeList(short[] values) {
-    return new UnsafeList<>(asWrapperArray(values));
+    return new ArrayCloakList<>(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code byte} array into an {@link UnsafeList<Byte>}.
+   * Converts the specified {@code byte} array into an {@link ArrayCloakList <Byte>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Byte> asUnsafeList(byte[] values) {
-    return new UnsafeList<>(asWrapperArray(values));
+    return new ArrayCloakList<>(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code char} array into an {@link UnsafeList<Character>}.
+   * Converts the specified {@code char} array into an {@link ArrayCloakList <Character>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Character> asUnsafeList(char[] values) {
-    return new UnsafeList<>(asWrapperArray(values));
+    return new ArrayCloakList<>(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code char} array into an {@link UnsafeList<Character>}.
+   * Converts the specified {@code char} array into an {@link ArrayCloakList <Character>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Boolean> asUnsafeList(boolean[] values) {
-    return new UnsafeList<>(asWrapperArray(values));
+    return new ArrayCloakList<>(asWrapperArray(values));
   }
 
   private static final String ERR_NO_NULLS = "Array must not contain null values";
@@ -752,11 +747,11 @@ public class ArrayMethods {
    */
   public static int[] asPrimitiveArray(Integer[] values) {
     Check.notNull(values);
-    int[] vals = new int[values.length];
+    int[] arr = new int[values.length];
     for (int i = 0; i < values.length; ++i) {
-      vals[i] = Check.that(values[i]).is(notNull(), ERR_NO_NULLS).ok();
+      arr[i] = Check.that(values[i]).is(notNull(), ERR_NO_NULLS).ok();
     }
-    return vals;
+    return arr;
   }
 
   /**

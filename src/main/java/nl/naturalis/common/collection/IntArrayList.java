@@ -12,8 +12,7 @@ import java.util.stream.IntStream;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
- * A {@code List} of {@code int} values. The backing array is exposed via the {@link #toArray()}
- * method, which returns the backing array itself, rather than a copy of it.
+ * A {@code List} of {@code int} values.
  *
  * @author Ayco Holleman
  */

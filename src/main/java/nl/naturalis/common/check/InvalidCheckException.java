@@ -12,8 +12,8 @@ import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
 
 /**
- * Thrown if a check on an argument cannot actually be applied to that argument, or if the check
- * fails for reasons not within its remit.
+ * Thrown if a check on an argument cannot actually be applied to that argument. This is a "bad"
+ * exception because it doesn't mean that your code is invalid, but the test itself.
  *
  * @author Ayco Holleman
  */

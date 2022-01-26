@@ -9,14 +9,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class UnsafeListTest {
+public class ArrayCloakListTest {
 
-  public UnsafeListTest() {}
+  public ArrayCloakListTest() {}
 
   @Test
   public void testInit00() {
     List<String> list0 = new ArrayList<>(List.of("Hello", ", ", "World", "!"));
-    UnsafeList<String> list1 = new UnsafeList<>(list0);
+    ArrayCloakList<String> list1 = new ArrayCloakList<>(list0);
     assertEquals(4, list1.size());
     assertEquals("Hello", list1.get(0));
     assertEquals(", ", list1.get(1));
@@ -26,19 +26,19 @@ public class UnsafeListTest {
 
   @Test(expected = UnsupportedOperationException.class)
   public void testInit01() {
-    UnsafeList<Integer> list = new UnsafeList<>(Integer.class, 4);
+    ArrayCloakList<Integer> list = new ArrayCloakList<>(Integer.class, 4);
     list.add(8);
   }
 
   @Test(expected = ArrayIndexOutOfBoundsException.class)
   public void testInit02() {
-    UnsafeList<Integer> list = new UnsafeList<>(Integer[]::new, 4);
+    ArrayCloakList<Integer> list = new ArrayCloakList<>(Integer[]::new, 4);
     list.set(-1, 8);
   }
 
   @Test
   public void testInit03() {
-    UnsafeList<Integer> list = new UnsafeList<>(Integer.class, 4);
+    ArrayCloakList<Integer> list = new ArrayCloakList<>(Integer.class, 4);
     list.set(0, 8);
     list.set(2, 4);
     assertArrayEquals(new Integer[] {8, null, 4, null}, list.toArray(Integer[]::new));
@@ -46,7 +46,7 @@ public class UnsafeListTest {
 
   @Test
   public void testInit04() {
-    UnsafeList<Integer> list = new UnsafeList<>(Integer[]::new, 4);
+    ArrayCloakList<Integer> list = new ArrayCloakList<>(Integer[]::new, 4);
     list.set(0, 8);
     list.set(2, 4);
     assertTrue(list.contains(null));
@@ -58,7 +58,7 @@ public class UnsafeListTest {
 
   @Test(expected = UnsupportedOperationException.class)
   public void testInit05a() {
-    UnsafeList<Integer> list = new UnsafeList<>(Integer.class, 4);
+    ArrayCloakList<Integer> list = new ArrayCloakList<>(Integer.class, 4);
     list.set(0, 8);
     list.set(2, 4);
     list.remove(4);
@@ -66,77 +66,77 @@ public class UnsafeListTest {
 
   @Test
   public void testInit05b() {
-    UnsafeList<Long> list = new UnsafeList<>(Long.class, 4);
+    ArrayCloakList<Long> list = new ArrayCloakList<>(Long.class, 4);
     list.set(0, 8L);
     list.set(2, 4L);
     list.remove(2);
-    assertArrayEquals(new Long[] {8L, null, null, null}, list.getBackingArray());
+    assertArrayEquals(new Long[] {8L, null, null, null}, list.uncloak());
   }
 
   @Test
   public void testInit05c() {
-    UnsafeList<Long> list = new UnsafeList<>(Long[]::new, 4);
+    ArrayCloakList<Long> list = new ArrayCloakList<>(Long[]::new, 4);
     list.set(0, 8L);
     list.set(2, 4L);
     list.remove(8L);
-    assertArrayEquals(new Long[] {null, null, 4L, null}, list.getBackingArray());
+    assertArrayEquals(new Long[] {null, null, 4L, null}, list.uncloak());
   }
 
   @Test
   public void testInit05d() {
-    UnsafeList<Short> list = new UnsafeList<>(Short.class, 4);
+    ArrayCloakList<Short> list = new ArrayCloakList<>(Short.class, 4);
     list.set(0, (short) 8);
     list.set(2, (short) 4);
     list.remove(2);
-    assertArrayEquals(new Short[] {8, null, null, null}, list.getBackingArray());
+    assertArrayEquals(new Short[] {8, null, null, null}, list.uncloak());
   }
 
   @Test
   public void testInit06() {
-    UnsafeList<String> list = new UnsafeList<>(String.class, 4);
+    ArrayCloakList<String> list = new ArrayCloakList<>(String.class, 4);
     list.set(0, "Hello");
     list.set(2, "World");
     list.remove("World");
-    assertArrayEquals(new String[] {"Hello", null, null, null}, list.getBackingArray());
+    assertArrayEquals(new String[] {"Hello", null, null, null}, list.uncloak());
   }
 
   @Test
   public void testInit07() {
-    UnsafeList<String> list = new UnsafeList<>(String[]::new, 4);
+    ArrayCloakList<String> list = new ArrayCloakList<>(String[]::new, 4);
     list.set(0, "Hello");
     list.set(2, "World");
     list.removeAll(List.of("a", "b", "World"));
-    assertArrayEquals(new String[] {"Hello", null, null, null}, list.getBackingArray());
+    assertArrayEquals(new String[] {"Hello", null, null, null}, list.uncloak());
   }
 
   @Test
   public void testInit08() {
-    UnsafeList<String> list = new UnsafeList<>(String.class, 4);
+    ArrayCloakList<String> list = new ArrayCloakList<>(String.class, 4);
     list.set(0, "Hello");
     list.set(2, "World");
     list.removeAll(List.of("a", "b", "World", "Hello"));
-    assertArrayEquals(new String[] {null, null, null, null}, list.getBackingArray());
+    assertArrayEquals(new String[] {null, null, null, null}, list.uncloak());
   }
 
   @Test
   public void testInit09() {
-    UnsafeList<String> list = new UnsafeList<>(String.class, 4);
+    ArrayCloakList<String> list = new ArrayCloakList<>(String.class, 4);
     list.set(0, "Hello");
     list.set(2, "World");
     list.set(3, "World");
     list.remove("World");
-    assertArrayEquals(new String[] {"Hello", null, null, "World"}, list.getBackingArray());
+    assertArrayEquals(new String[] {"Hello", null, null, "World"}, list.uncloak());
   }
 
   @Test
   public void testInit10() {
-    UnsafeList<String> list = new UnsafeList<>(String[]::new, 4);
+    ArrayCloakList<String> list = new ArrayCloakList<>(String[]::new, 4);
     list.set(0, "Hello");
     list.set(1, "Foo");
     list.set(2, "World");
     list.set(3, "Bar");
     list.retainAll(List.of("Foo", "Bar"));
-    assertArrayEquals(new String[] {null, "Foo", null, "Bar"}, list.getBackingArray());
+    assertArrayEquals(new String[] {null, "Foo", null, "Bar"}, list.uncloak());
   }
 
   @Test(expected = ClassCastException.class)
@@ -145,8 +145,8 @@ public class UnsafeListTest {
     List l = new ArrayList();
     l.add(new File("/foo"));
     l.add(new File("/foo/bar"));
-    UnsafeList<String> ul = new UnsafeList<>(l);
-    assertEquals(Object[].class, ul.getBackingArray().getClass());
+    ArrayCloakList<String> ul = new ArrayCloakList<>(l);
+    assertEquals(Object[].class, ul.uncloak().getClass());
     ul.get(0).charAt(0);
   }
 }

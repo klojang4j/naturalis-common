@@ -31,14 +31,15 @@ import static nl.naturalis.common.check.Messages.createMessage;
  *
  * All checks come in two variants: one where you can provide a custom error message and one where
  * you can't. The latter is mainly meant to be used in combination with the {@link CommonChecks}
- * class. This class is a grab bag of common checks for arguments. These checks are already
- * associated with short, informative error messages, so you don't have to invent them yourself.
- * This allows for concise precondition checking:
+ * class. This class is a grab bag of common checks for arguments. They are already associated with
+ * short, informative error messages, so you don't have to invent them yourself.
  *
  * <blockquote>
  *
  * <pre>{@code
- * // import static nl.naturalis.common.check.CommonChecks.gt;
+ * import static nl.naturalis.common.check.CommonChecks.gt;
+ * ...
+ * ...
  * Check.that(numChairs, "numChairs").is(gt(), 0);
  * // Auto-generated error message: "numChairs must be > 0 (was -3)"
  * }</pre>
@@ -53,7 +54,9 @@ import static nl.naturalis.common.check.Messages.createMessage;
  *
  * <ol>
  *   <li>The name of the check that was executed. E.g. "gt" or "notNull". Within the message pattern
- *       this message argument can be referenced as <code>${test}</code> or <code>%1$s</code>.
+ *       this message argument can be referenced using a standard {@code printf} indexed message
+ *       argument: <code>%1$s</code>. Perhaps easier to remember, you can also use ${test} to
+ *       reference this message argument.
  *   <li>The argument being validated. Within the message pattern this message argument can be
  *       referenced as <code>${arg}</code> or <code>%2$s</code>.
  *   <li>The simple class name of the argument, or {@code null} if the argument was {@code null}.
@@ -61,16 +64,16 @@ import static nl.naturalis.common.check.Messages.createMessage;
  *       ${type}</code> or <code>%3$s</code>.
  *   <li>The name of the argument. Within the message pattern this message argument can be
  *       referenced as <code>${name}</code> or <code>%4$s</code>.
- *   <li>The object of the relationship in case the check took the form of a {@link Relation} or one
- *       of its sister interfaces. E.g. for {@code gt} that would be the number that the argument
- *       must exceed. Within the message pattern this message argument can be referenced as <code>
- *       ${obj}</code> or <code>%5$s</code>. For checks expressed through a {@link Predicate} or
- *       {@link IntPredicate} this message argument will be {@code null}.
+ *   <li>The object of the relationship in case the check took the form of a {@link Relation}. E.g.
+ *       for the {@code gt} (greater-than) check that would be the number that the argument must
+ *       exceed. Within the message pattern this message argument can be referenced as <code>
+ *       ${obj}</code> or <code>%5$s</code>. For checks expressed through a {@link Predicate} this
+ *       message argument will be {@code null}.
  * </ol>
  *
- * <p>Thus, if your custom message only needs to reference these elements of the check, you don't
- * need to specify any message arguments yourself at all. The first of your own message arguments
- * can be referenced from within the message pattern as <code>${0}</code> or <code>%6$s
+ * <p>Thus, if your custom message only references these elements of the check, you don't need to
+ * specify any message arguments yourself at all. The first of your own message arguments can be
+ * referenced from within the message pattern as <code>${0}</code> or <code>%6$s
  * </code>, the second as <code>${1}</code> or <code>%7$s</code>, etc.
  *
  * <p>Examples:
@@ -83,9 +86,9 @@ import static nl.naturalis.common.check.Messages.createMessage;
  * // Or as pure printf-style format string:
  * Check.that(word).is(keyIn(), dictionary, "Missing key: %2$s");
  *
- * Check.that(word).is(keyIn(), dictionary, "You forgot about ${0}");
+ * Check.that(word).is(keyIn(), dictionary, "You forgot about ${0}", "your spelling");
  * // Or as pure printf-style format string:
- * Check.that(word).is(keyIn(), dictionary, "You forgot about %6$s");
+ * Check.that(word).is(keyIn(), dictionary, "You forgot about %6$s", "your spelling");
  * }</pre>
  *
  * </blockquote>
@@ -155,7 +158,7 @@ import static nl.naturalis.common.check.Messages.createMessage;
  *
  * @author Ayco Holleman
  * @param <T> The type of the object being validated
- * @param <E> The type of exception thrown if the object is invalid
+ * @param <E> The type of exception thrown if the argument fails a test
  */
 public abstract class Check<T, E extends Exception> {
 

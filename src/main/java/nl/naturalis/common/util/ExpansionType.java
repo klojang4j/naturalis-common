@@ -5,13 +5,13 @@ import static nl.naturalis.common.check.CommonChecks.atMost;
 
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.unsafe.UnsafeByteArrayOutputStream;
-import nl.naturalis.common.unsafe.UnsafeList;
+import nl.naturalis.common.unsafe.ArrayCloakList;
 
 /**
  * Defines ways to increase the capacity of data structures that automatically grow as they fill up
  * (for example list-like data structures).
  *
- * @see UnsafeList
+ * @see ArrayCloakList
  * @see UnsafeByteArrayOutputStream
  * @author Ayco Holleman
  */

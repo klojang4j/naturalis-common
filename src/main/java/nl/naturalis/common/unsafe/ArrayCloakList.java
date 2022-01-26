@@ -12,18 +12,19 @@ import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
 import static nl.naturalis.common.check.CommonChecks.gte;
 
 /**
- * A fixed-size {@code List} implementation that does not perform range checking and exposes its
- * backing array. Useful for package-private and/or intra-modular list exchanges with a high number
- * of reads and/or writes on the list. Since this is a fixed-size list, you can immediately {@code
- * get} and {@code set} values, provided you specify a valid list index. All {@code add} methods
- * throw an {@code UnsupportedOperationException}; list manipulation <i>must</i> be done via the
- * {@code set} method. The {@code remove} methods, however, have been repurposed to nullify list
- * elements.
+ * A fixed-size, but mutable {@code List} implementation intended for situations where an array
+ * temporarily needs to take on the guise of a {@code List}. When creating an {@code ArrayCloakList}
+ * from an array, the array is not copied; it just becomes the backing array. Whichever way it was
+ * created, the backing array is exposed via the {@link #uncloak()} method. The {@code set} and
+ * {@code get} methods don't perform boundary checks and all {@code add}-like methods throw an
+ * {@link UnsupportedOperationException}. The {@code remove} methods, however, have been repurposed
+ * to nullify list elements. Since this is a fixed-size list, you can immediately {@code get} and
+ * {@code set} values.
  *
  * @param <E> The type of the list elements
  * @author Ayco Holleman
  */
-public class UnsafeList<E> implements List<E>, RandomAccess {
+public class ArrayCloakList<E> implements List<E>, RandomAccess {
 
   private final E[] data;
 
@@ -35,7 +36,7 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
    * @param size The desired size of the list
    */
   @SuppressWarnings("unchecked")
-  public UnsafeList(Class<E> clazz, int size) {
+  public ArrayCloakList(Class<E> clazz, int size) {
     Check.notNull(clazz, "clazz");
     Check.that(size, "size").is(gte(), 0);
     this.data = (E[]) Array.newInstance(clazz, size);
@@ -48,7 +49,7 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
    * @param constructor A function that produces the backing array
    * @param size The size of the backing array
    */
-  public UnsafeList(IntFunction<E[]> constructor, int size) {
+  public ArrayCloakList(IntFunction<E[]> constructor, int size) {
     Check.notNull(constructor, "constructor");
     Check.that(size, "size").is(gte(), 0);
     this.data = constructor.apply(size);
@@ -60,7 +61,7 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
    * @param c The collection from which to create the {@code UnsafeList}
    */
   @SuppressWarnings("unchecked")
-  public UnsafeList(Collection<? extends E> c) {
+  public ArrayCloakList(Collection<? extends E> c) {
     Check.notNull(c);
     this.data = (E[]) c.toArray();
   }
@@ -72,7 +73,7 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
    *
    * @param array The array from which to create the {@code UnsafeList}
    */
-  public UnsafeList(E[] array) {
+  public ArrayCloakList(E[] array) {
     this.data = array;
   }
 
@@ -264,7 +265,7 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
   public List<E> subList(int fromIndex, int toIndex) {
     E[] elems = ArrayMethods.fromTemplate(data, toIndex - fromIndex);
     System.arraycopy(data, fromIndex, elems, 0, elems.length);
-    return new UnsafeList<>(elems);
+    return new ArrayCloakList<>(elems);
   }
 
   @Override
@@ -279,8 +280,8 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
       return true;
     } else if (obj == null) {
       return false;
-    } else if (obj.getClass() == UnsafeList.class) {
-      return Arrays.deepEquals(data, ((UnsafeList) obj).data);
+    } else if (obj.getClass() == ArrayCloakList.class) {
+      return Arrays.deepEquals(data, ((ArrayCloakList) obj).data);
     } else if (obj instanceof List) {
       List other = (List) obj;
       if (size() == other.size()) {
@@ -301,7 +302,7 @@ public class UnsafeList<E> implements List<E>, RandomAccess {
    *
    * @return The backing array of this {@code UnsafeList}
    */
-  public E[] getBackingArray() {
+  public E[] uncloak() {
     return data;
   }
 
