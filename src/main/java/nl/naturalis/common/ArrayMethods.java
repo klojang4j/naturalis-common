@@ -493,7 +493,9 @@ public final class ArrayMethods {
   }
 
   /**
-   * Simply returns the specified array, but allows for leaner code.
+   * Simply returns the specified array, but allows for leaner code. This method will allow the
+   * varargs array to be {@code null}, in which case it returns {@code null} (<code>
+   * pack(null) == null</code>).
    *
    * <blockquote>
    *

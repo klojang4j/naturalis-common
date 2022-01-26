@@ -3,6 +3,7 @@ package nl.naturalis.common;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Objects;
 
 import static nl.naturalis.common.ArrayMethods.*;
 import static org.junit.Assert.*;
@@ -252,5 +253,13 @@ public class ArrayMethodsTest {
     assertEquals(List.of((char) 1, (char) 2, (char) 3), cloak(new char[] {1, 2, 3}));
     assertEquals(List.of(Boolean.FALSE, Boolean.TRUE), cloak(new boolean[] {false, true}));
     assertNotEquals(List.of(1, 2, 3), new long[] {1, 2, 3});
+  }
+
+  @Test
+  public void pack00() {
+    assertArrayEquals(new String[] {"a", "b", "c"}, pack("a", "b", "c"));
+    assertArrayEquals(new String[0], pack());
+    assertArrayEquals(new Integer[0], pack());
+    assertNull(pack(null)); // Hm, do we like this?
   }
 }
