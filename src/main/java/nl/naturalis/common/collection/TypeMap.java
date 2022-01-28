@@ -23,12 +23,9 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * <h4>Auto-expansion</h4>
  *
  * <p>A {@code TypeMap} unmodifiable. All map-altering methods will throw an {@link
- * UnsupportedOperationException}. However, the map can be configured to auto-expand internally: if
- * the requested type is not present, but one of its super types is, then the requested type will
- * tacitly be added to the map, acquiring the value associated with the super type. Thus, when the
- * subtype is requested again, it will result in a direct hit. Auto-expansion is enabled by default
- * for the {@code TypeMap} class, but it is disabled by default for its sibling class, the {@link
- * TypeTreeMap}.
+ * UnsupportedOperationException}. However, the map can be configured to automatically absorb
+ * subtypes of types that already are in the map. Thus, when the subtype is requested again, it will
+ * result in a direct hit. Auto-expansion is disabled by default.
  *
  * <h4>Type-lookup Logic</h4>
  *
@@ -51,7 +48,7 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
   public static final class Builder<U> {
     private final Class<U> valueType;
     private final HashMap<Class<?>, U> tmp = new HashMap<>();
-    private Integer expectedSize = 2;
+    private Integer expectedSize = null;
     private boolean autobox = true;
 
     private Builder(Class<U> valueType) {
@@ -60,8 +57,7 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
 
     /**
      * Whether to enable the auto-expand feature. See description above. Specifying {@code true} is
-     * equivalent to calling {@link #autoExpand(int) autoExpand(2)}. By default auto-expansion is
-     * enabled.
+     * equivalent to calling {@link #autoExpand(int) autoExpand(2)}.
      *
      * @return This {@code Builder} instance
      */
@@ -133,14 +129,7 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
    * @return A non-auto-expanding, non-autoboxing {@code TypeMap}
    */
   public static <U> TypeMap<U> copyOf(Map<Class<?>, U> src) {
-    Check.notNull(src);
-    if (src.getClass() == TypeMap.class) {
-      TypeMap<U> tm = (TypeMap<U>) src;
-      if (!tm.autobox && !tm.autoExpand) {
-        return tm;
-      }
-    }
-    return copyOf(src, false);
+    return copyOf(src, true);
   }
 
   /**
@@ -153,12 +142,6 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
    */
   public static <U> TypeMap<U> copyOf(Map<Class<?>, U> src, boolean autobox) {
     Check.that(src, "src").is(deepNotNull());
-    if (src.getClass() == TypeMap.class) {
-      TypeMap<U> tm = (TypeMap<U>) src;
-      if (tm.autobox == autobox && !tm.autoExpand) {
-        return tm;
-      }
-    }
     return new TypeMap<>(src, autobox);
   }
 

@@ -24,7 +24,7 @@ public class TypeMapTest {
     assertEquals("Short", s);
     s = m.get(Integer.class);
     assertEquals("Number", s);
-    assertEquals(4, m.size());
+    assertEquals(3, m.size());
   }
 
   @Test
