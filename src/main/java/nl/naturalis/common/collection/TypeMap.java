@@ -3,10 +3,8 @@ package nl.naturalis.common.collection;
 import nl.naturalis.common.check.Check;
 
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.Map;
 
-import static nl.naturalis.common.ClassMethods.*;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
@@ -112,11 +110,7 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
     }
 
     /**
-     * Returns an unmodifiable {@code TypeMap} with the configured types and behaviour. If
-     * autoboxing was enabled, but auto-expansion was disabled, the map will first tacitly be
-     * enlarged with the wrapper types corresponding to the primitive types in the map (without
-     * overwriting already-present wrapper types), and with the primitive types corresponding to the
-     * wrapper types in the map (without overwriting already-present primitive types).
+     * Returns an unmodifiable {@code TypeMap} with the configured types and behaviour.
      *
      * @param <W> The type of the values in the returned {@code TypeMap}
      * @return S new {@code TypeMap} instance with the configured types and behaviour
@@ -124,16 +118,6 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
     @SuppressWarnings("unchecked")
     public <W> TypeMap<W> freeze() {
       if (expectedSize == null) { // No auto-expand
-        if (autobox) {
-          tmp.forEach(
-              (k, v) -> {
-                if (k.isPrimitive() && !tmp.containsKey(box(k))) {
-                  tmp.put(box(k), v);
-                } else if (isWrapper(k) && !tmp.containsKey(unbox(k))) {
-                  tmp.put(unbox(k), v);
-                }
-              });
-        }
         return (TypeMap<W>) new TypeMap<>(tmp, autobox);
       }
       int sz = expectedSize > tmp.size() ? expectedSize : tmp.size() * expectedSize;
@@ -168,7 +152,7 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
    * @return A non-auto-expanding {@code TypeMap}
    */
   public static <U> TypeMap<U> copyOf(Map<Class<?>, U> src, boolean autobox) {
-    Check.notNull(src);
+    Check.that(src, "src").is(deepNotNull());
     if (src.getClass() == TypeMap.class) {
       TypeMap<U> tm = (TypeMap<U>) src;
       if (tm.autobox == autobox && !tm.autoExpand) {
@@ -206,7 +190,7 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
    * @return An auto-expanding {@code TypeMap}
    */
   public static <U> TypeMap<U> copyOf(Map<Class<?>, U> src, int expectedSize, boolean autobox) {
-    Check.notNull(src, "src");
+    Check.that(src, "src").is(deepNotNull());
     Check.that(expectedSize, "expectedSize").is(gt(), 1);
     int sz = expectedSize > src.size() ? expectedSize : expectedSize * src.size();
     return new TypeMap<>(src, sz, autobox);
@@ -232,15 +216,10 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
     this.backend = Map.copyOf(m); // implicit check on null keys & values
   }
 
-  TypeMap(Map<? extends Class<?>, ? extends V> m, int sz, boolean autobox) {
+  TypeMap(Map<Class<?>, ? extends V> m, int sz, boolean autobox) {
     super(true, autobox);
-    Map<Class<?>, V> tmp = new IdentityHashMap<>(sz);
-    m.forEach(
-        (k, v) -> {
-          Check.that(k).is(notNull(), ERR_NULL_KEY);
-          Check.that(v).is(notNull(), ERR_NULL_VAL, k.getName());
-          tmp.put(k, v);
-        });
+    Map<Class<?>, V> tmp = new HashMap<>(1 + sz * 4 / 3);
+    tmp.putAll(m);
     this.backend = tmp;
   }
 

@@ -78,4 +78,32 @@ public class TypeMapTest {
             .freeze();
     assertEquals("ArrayList", m.get(MyArrayList.class));
   }
+
+  @Test
+  public void test06() {
+    TypeMap<String> m =
+        TypeMap.build(String.class).add(List.class, "List").add(Object.class, "Object").freeze();
+    assertEquals("List", m.get(ArrayList.class));
+  }
+
+  @Test
+  public void test07() {
+    TypeMap<String> m =
+        TypeMap.build(String.class)
+            .add(List[].class, "List[]")
+            .add(Object.class, "Object")
+            .freeze();
+    assertEquals("List[]", m.get(ArrayList[].class));
+  }
+
+  @Test
+  public void test08() {
+    TypeMap<String> m =
+        TypeMap.build(String.class)
+            .add(Object[].class, "Object[]")
+            .add(Object.class, "Object")
+            .freeze();
+    assertEquals(2, m.size());
+    assertEquals("Object[]", m.get(ArrayList[].class));
+  }
 }

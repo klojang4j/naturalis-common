@@ -185,16 +185,7 @@ public final class TypeTreeMap<V> extends AbstractTypeMap<V> {
     super(autoExpand, autobox);
     Comparator<Class<?>> cmp = new TypeComparatorFactory(bumped).getComparator();
     TreeMap<Class<?>, V> tmp = new TreeMap<>(cmp);
-    if (m instanceof AbstractTypeMap) {
-      tmp.putAll(m); // Null checks already done
-    } else {
-      m.forEach(
-          (k, v) -> {
-            Check.that(k).is(notNull(), ERR_NULL_KEY);
-            Check.that(v).is(notNull(), ERR_NULL_VAL, k.getName());
-            tmp.put(k, v);
-          });
-    }
+    tmp.putAll(m);
     this.backend = tmp;
   }
 

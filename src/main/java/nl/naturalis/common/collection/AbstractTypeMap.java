@@ -1,14 +1,14 @@
 package nl.naturalis.common.collection;
 
-import java.util.*;
-
 import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.Tuple;
 import nl.naturalis.common.check.Check;
+
+import java.util.*;
+
 import static java.util.stream.Collectors.toUnmodifiableList;
-import static nl.naturalis.common.ClassMethods.box;
-import static nl.naturalis.common.ClassMethods.isWrapper;
-import static nl.naturalis.common.ClassMethods.unbox;
+import static nl.naturalis.common.ClassMethods.*;
+import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.check.CommonChecks.sameAs;
 import static nl.naturalis.common.check.CommonGetters.type;
 
@@ -43,7 +43,6 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
 
   @Override
   public boolean containsKey(Object key) {
-    Check.notNull(key, "key").has(type(), sameAs(), Class.class);
     Class<?> type = (Class<?>) key;
     Tuple<Class<?>, V> entry = find(type);
     if (entry == null) {
@@ -60,19 +59,28 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
     if (v != null) {
       return Tuple.of(k, v);
     }
+    if (k.isArray()) {
+      return findArrayType(k);
+    }
+    return findSimpleType(k);
+  }
+
+  private Tuple<Class<?>, V> findSimpleType(Class<?> k) {
     if (k.isInterface()) {
-      Tuple<Class<?>, V> t = climbInterfaces(k);
+      Tuple<Class<?>, V> t = climbInterfaces(k, false);
       if (t != null) {
         return t;
       }
     }
-    for (Class<?> c = k.getSuperclass(); c != null; c = c.getSuperclass()) {
-      if (null != (v = backend().get(c))) {
+    Class<?> root = Object.class;
+    for (Class<?> c = k.getSuperclass(); ifNull(c, root) != root; c = c.getSuperclass()) {
+      V v = backend().get(c);
+      if (v != null) {
         return Tuple.of(c, v);
       }
     }
-    for (Class<?> c = k; c != null; c = c.getSuperclass()) {
-      Tuple<Class<?>, V> t = climbInterfaces(c);
+    for (Class<?> c = k; ifNull(c, root) != root; c = c.getSuperclass()) {
+      Tuple<Class<?>, V> t = climbInterfaces(c, false);
       if (t != null) {
         return t;
       }
@@ -83,7 +91,7 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
       }
       if (isWrapper(k)) {
         Class<?> c = unbox(k);
-        v = backend().get(c);
+        V v = backend().get(c);
         if (v != null) {
           return Tuple.of(c, v);
         }
@@ -92,20 +100,57 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
     return null;
   }
 
-  private Tuple<Class<?>, V> climbInterfaces(Class<?> clazz) {
-    V v;
-    for (Class<?> c : clazz.getInterfaces()) {
-      if (null != (v = backend().get(c))) {
-        return Tuple.of(c, v);
-      }
-    }
-    for (Class<?> c : clazz.getInterfaces()) {
-      Tuple<Class<?>, V> t = climbInterfaces(c);
+  private Tuple<Class<?>, V> findArrayType(Class<?> k) {
+    Class<?> elementType = k.componentType();
+    if (elementType.isInterface()) {
+      Tuple<Class<?>, V> t = climbInterfaces(elementType, true);
       if (t != null) {
         return t;
       }
     }
-    v = backend().get(Object.class);
+    for (Class<?> c = elementType.getSuperclass(); c != null; c = c.getSuperclass()) {
+      Class<?> arrayType = c.arrayType();
+      V v = backend().get(arrayType);
+      if (v != null) {
+        return Tuple.of(arrayType, v);
+      }
+    }
+    for (Class<?> c = elementType; c != null; c = c.getSuperclass()) {
+      Tuple<Class<?>, V> t = climbInterfaces(c, true);
+      if (t != null) {
+        return t;
+      }
+    }
+    if (autobox) {
+      if (elementType.isPrimitive()) {
+        return find(box(elementType).arrayType());
+      }
+      if (isWrapper(elementType)) {
+        Class<?> c = unbox(elementType).arrayType();
+        V v = backend().get(c);
+        if (v != null) {
+          return Tuple.of(c, v);
+        }
+      }
+    }
+    return null;
+  }
+
+  private Tuple<Class<?>, V> climbInterfaces(Class<?> clazz, boolean array) {
+    for (Class<?> c : clazz.getInterfaces()) {
+      Class<?> c0 = array ? c.arrayType() : c;
+      V v = backend().get(c0);
+      if (v != null) {
+        return Tuple.of(c0, v);
+      }
+    }
+    for (Class<?> c : clazz.getInterfaces()) {
+      Tuple<Class<?>, V> t = climbInterfaces(c, array);
+      if (t != null) {
+        return t;
+      }
+    }
+    V v = backend().get(Object.class);
     return v == null ? null : Tuple.of(Object.class, v);
   }
 

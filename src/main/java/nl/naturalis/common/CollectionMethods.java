@@ -1,206 +1,65 @@
 package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.collection.TypeMap;
 import nl.naturalis.common.function.ThrowingFunction;
-import nl.naturalis.common.unsafe.ArrayCloakList;
+import nl.naturalis.common.x.invoke.InvokeUtils;
 
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
-import static nl.naturalis.common.ArrayMethods.*;
+import static nl.naturalis.common.ArrayMethods.DEFAULT_IMPLODE_SEPARATOR;
+import static nl.naturalis.common.ArrayMethods.START_INDEX;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.*;
 
 /** Methods extending the Java Collection framework. */
 public class CollectionMethods {
 
-  private static final String ERR_MAP_VALUES_NON_UNIQUE = "Map values must be unique";
-
   private CollectionMethods() {}
 
+  private static final String ERR_MAP_VALUES_NON_UNIQUE = "Map values must be unique";
+  private static final List<?> LIST_OF_NULL = Collections.singletonList(null);
+
+  private static final TypeMap<Function<Object, List>> LISTIFIERS =
+      TypeMap.build(Function.class)
+          .autobox(false)
+          .autoExpand(false)
+          .add(List.class, FunctionalMethods.cast())
+          .add(Collections.class, o -> new ArrayList<>((Collection) o))
+          .add(int[].class, o -> ArrayMethods.asList((int[]) o))
+          .add(double[].class, o -> ArrayMethods.asList((double[]) o))
+          .add(long[].class, o -> ArrayMethods.asList((long[]) o))
+          .add(byte[].class, o -> ArrayMethods.asList((byte[]) o))
+          .add(char[].class, o -> ArrayMethods.asList((char[]) o))
+          .add(float[].class, o -> ArrayMethods.asList((float[]) o))
+          .add(short[].class, o -> ArrayMethods.asList((short[]) o))
+          .add(boolean[].class, o -> ArrayMethods.asList((boolean[]) o))
+          .add(Object[].class, o -> Arrays.asList((Object[]) o))
+          .add(Object.class, Arrays::asList)
+          .freeze();
+
   /**
-   * Returns the specified value as a {@code List}. This method behaves as follows:
+   * Returns a non-empty {@code List} containing or wrapping the specified value. If the value
+   * already is a {@code List}, it is returned as-is. Other types of collections will yield a {@code
+   * List} containing the values in the collection. Arrays will yield a {@code List} containing the
+   * values in the array. Single values (including {@code null}) will yield a {@code List}
+   * containing just that value. In other words, this method takes the shortest path to "listify"
+   * the value and there is no guarantee about the type of {@code List} you get.
    *
-   * <p>
-   *
-   * <ul>
-   *   <li>If the value is {@code null} it is converted using {@code
-   *       Collections.singletonList(val)}.
-   *   <li>If the value already is a {@code List} it is returned as-is.
-   *   <li>If the value is a {@code Collection} it is converted to a fixed-size, but mutable {@code
-   *       List}
-   *   <li>If the value is an array it is converted to a fixed-size, but mutable {@code List}
-   *   <li>In any other case the value is converted using {@code Collections.singletonList(val)}.
-   * </ul>
-   *
+   * @see ArrayMethods#asWrapperArray(int[])
+   * @see ArrayMethods#asList(int[])
    * @param val The value to convert
    * @return The value converted to a {@code List}
    */
   @SuppressWarnings({"rawtypes"})
   public static List<?> asList(Object val) {
-    List objs;
-    if (val == null) {
-      objs = Collections.singletonList(val);
-    } else if (val instanceof List) {
-      objs = (List) val;
-    } else if (val instanceof Collection) {
-      objs = Arrays.asList(((Collection) val).toArray());
-    } else if (val instanceof Object[]) {
-      objs = Arrays.asList((Object[]) val);
-    } else if (val.getClass() == int[].class) {
-      objs = ArrayMethods.asList((int[]) val);
-    } else if (val.getClass() == double[].class) {
-      objs = ArrayMethods.asList((double[]) val);
-    } else if (val.getClass() == byte[].class) {
-      objs = ArrayMethods.asList((byte[]) val);
-    } else if (val.getClass() == short[].class) {
-      objs = ArrayMethods.asList((short[]) val);
-    } else if (val.getClass() == float[].class) {
-      objs = ArrayMethods.asList((float[]) val);
-    } else if (val.getClass() == char[].class) {
-      objs = ArrayMethods.asList((char[]) val);
-    } else if (val.getClass() == boolean[].class) {
-      objs = ArrayMethods.asList((boolean[]) val);
-    } else {
-      objs = Collections.singletonList(val);
-    }
-    return objs;
-  }
-
-  /**
-   * Returns the specified value as a {@code List}. This method behaves as follows:
-   *
-   * <p>
-   *
-   * <ul>
-   *   <li>If the value is {@code null} it is converted using {@code
-   *       Collections.singletonList(val)}.
-   *   <li>If the value already is a {@code List} it is returned as-is (it is <i>not</i> converted
-   *       to an {@link ArrayCloakList}).
-   *   <li>If the value is a {@code Collection} it is converted to an {@code UnsafeList}.
-   *   <li>If the value is an instance of {@code Object[]} to an {@code UnsafeList}.
-   *   <li>If the value is an array of a primitive type to an {@code UnsafeList}.
-   *   <li>In any other case the value is converted using {@code Collections.singletonList(val)}.
-   * </ul>
-   *
-   * @param val The value to convert
-   * @return The value converted to a {@code List}
-   */
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  public static List<?> asUnsafeList(Object val) {
-    List objs;
-    if (val == null) {
-      objs = Collections.singletonList(val);
-    } else if (val instanceof List) {
-      objs = (List) val;
-    } else if (val instanceof Collection) {
-      objs = new ArrayCloakList((Collection) val);
-    } else if (val instanceof Object[]) {
-      objs = new ArrayCloakList((Object[]) val);
-    } else if (val.getClass() == int[].class) {
-      objs = ArrayMethods.cloak((int[]) val);
-    } else if (val.getClass() == double[].class) {
-      objs = ArrayMethods.cloak((double[]) val);
-    } else if (val.getClass() == byte[].class) {
-      objs = ArrayMethods.cloak((byte[]) val);
-    } else if (val.getClass() == short[].class) {
-      objs = ArrayMethods.cloak((short[]) val);
-    } else if (val.getClass() == float[].class) {
-      objs = ArrayMethods.cloak((float[]) val);
-    } else if (val.getClass() == char[].class) {
-      objs = ArrayMethods.cloak((char[]) val);
-    } else if (val.getClass() == boolean[].class) {
-      objs = ArrayMethods.cloak((boolean[]) val);
-    } else {
-      objs = Collections.singletonList(val);
-    }
-    return objs;
-  }
-
-  private static final String ERR_NO_NULLS = "List must not contain null values";
-
-  /**
-   * Converts the specified {@code List} to an {@code int} array. The {@code List} must not contain
-   * null values.
-   *
-   * @param list The {@code List}
-   * @return An {@code int} array
-   */
-  public static int[] asIntArray(List<Integer> list) {
-    Check.notNull(list);
-    int[] arr = new int[list.size()];
-    int i = 0;
-    for (Integer e : list) {
-      arr[i++] = Check.that(e).is(notNull(), ERR_NO_NULLS).ok();
-    }
-    return arr;
-  }
-
-  /**
-   * Returns the specified list if it is not empty else an immutable list containing only the
-   * specified element.
-   *
-   * @param <T>
-   * @param list
-   * @param e0
-   * @return
-   */
-  public static <T> List<T> ifEmpty(List<T> list, T e0) {
-    return ObjectMethods.isEmpty(list) ? Collections.singletonList(e0) : list;
-  }
-
-  /**
-   * Returns the specified list if it is not empty else an immutable list containing the specified
-   * elements.
-   *
-   * @param <T>
-   * @param list
-   * @param e0
-   * @param e1
-   * @param moreElems
-   * @return
-   */
-  @SafeVarargs
-  public static <T> List<T> ifEmpty(List<T> list, T e0, T e1, T... moreElems) {
-    return ObjectMethods.isEmpty(list) ? List.of(ArrayMethods.prefix(moreElems, e0, e1)) : list;
-  }
-
-  /**
-   * Returns the specified set if it is not empty else an immutable set containing only the
-   * specified element.
-   *
-   * @param <T>
-   * @param set
-   * @param e0
-   * @return
-   */
-  public static <T> Set<T> ifEmpty(Set<T> set, T e0) {
-    return ObjectMethods.isEmpty(set) ? Collections.singleton(e0) : set;
-  }
-
-  /**
-   * Returns the specified set if it is not empty else an immutable set containing the specified
-   * elements.
-   *
-   * @param <T>
-   * @param set
-   * @param e0
-   * @param e1
-   * @param moreElems
-   * @return
-   */
-  @SafeVarargs
-  public static <T> Set<T> ifEmpty(Set<T> set, T e0, T e1, T... moreElems) {
-    return ObjectMethods.isEmpty(set) ? Set.of(ArrayMethods.prefix(moreElems, e0, e1)) : set;
+    return val == null ? LIST_OF_NULL : LISTIFIERS.get(val.getClass()).apply(val);
   }
 
   /**
@@ -234,12 +93,12 @@ public class CollectionMethods {
   }
 
   /**
-   * Returns a mutable {@link HashMap} containing the provided key-value pairs.
+   * Returns a {@link HashMap} initialized with the specified key-value pairs.
    *
    * @param <K> The type of the keys
    * @param <V> The type of the values
    * @param kvPairs An array alternating between keys and values
-   * @return a new {@code HashMap}
+   * @return A {@code HashMap} initialized with the specified key-value pairs
    */
   @SuppressWarnings("unchecked")
   public static <K, V> HashMap<K, V> newHashMap(Object... kvPairs) {
@@ -252,12 +111,12 @@ public class CollectionMethods {
   }
 
   /**
-   * Returns a mutable {@link LinkedHashMap} containing the provided key-value pairs.
+   * Returns a {@link LinkedHashMap} initialized with the specified key-value pairs.
    *
-   * @param <K>
-   * @param <V>
-   * @param kvPairs
-   * @return
+   * @param <K> The type of the keys
+   * @param <V> The type of the values
+   * @param kvPairs An array alternating between keys and values
+   * @return A {@code LinkedHashMap} initialized with the specified key-value pairs
    */
   @SuppressWarnings("unchecked")
   public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(Object... kvPairs) {
@@ -270,11 +129,10 @@ public class CollectionMethods {
   }
 
   /**
-   * Returns a mutable {@link EnumMap} with all enum constants set to non-null values. The number of
-   * values must exactly equal the number of enum constants, and they are assigned according to
-   * ordinal number. This method throws an {@link IllegalArgumentException} if the number of values
-   * is not exactly equal to the number of constants in the enum class, or if any of the values is
-   * null.
+   * Returns an {@link EnumMap} with all enum constants set to non-null values. The number of values
+   * must exactly equal the number of enum constants, and they are assigned according to ordinal
+   * number. This method throws an {@link IllegalArgumentException} if the number of values is not
+   * exactly equal to the number of constants in the enum class, or if any of the values is null.
    *
    * @param <K> The key type
    * @param <V> The value type
@@ -294,48 +152,6 @@ public class CollectionMethods {
       map.put(consts[i], values[i]);
     }
     return (M) map;
-  }
-
-  /**
-   * Prints the specified {@code Map} to the specified {@code OutputStream}. Each key-value pair is
-   * on a new line.
-   *
-   * @param map The map to print
-   * @param out The {@code OutputStream} to print to
-   */
-  public static void printMap(Map<?, ?> map, OutputStream out) {
-    PrintStream ps = out.getClass() == PrintStream.class ? (PrintStream) out : new PrintStream(out);
-    map.forEach((k, v) -> ps.printf("%20s : %s%n", k, v));
-  }
-
-  /**
-   * Returns a mutable {@link HashSet} containing the provided elements.
-   *
-   * @param <T> The type of the elements
-   * @param elems The elements
-   * @return A {@code HashSet} containing the elements
-   */
-  @SafeVarargs
-  public static <T> HashSet<T> newHashSet(T... elems) {
-    Check.notNull(elems, "elems");
-    HashSet<T> set = new HashSet<>(elems.length);
-    set.addAll(Arrays.asList(elems));
-    return set;
-  }
-
-  /**
-   * Returns a mutable {@link LinkedHashSet} containing the provided elements.
-   *
-   * @param <T> The type of the elements
-   * @param elems The elements
-   * @return A {@code HashSet} containing the elements
-   */
-  @SafeVarargs
-  public static <T> LinkedHashSet<T> newLinkedHashSet(T... elems) {
-    Check.notNull(elems, "elems");
-    LinkedHashSet<T> set = new LinkedHashSet<>(elems.length);
-    set.addAll(Arrays.asList(elems));
-    return set;
   }
 
   /**
@@ -395,16 +211,16 @@ public class CollectionMethods {
   }
 
   /**
-   * Returns a sublist of the provided list starting with starting with element {@code from} and
-   * containing at most {@code length} elements. The returned list is backed the original list, so
-   * changing its elements will affect the original list as well.
+   * Returns a sublist of the provided list starting with element {@code from} and containing at
+   * most {@code length} elements. The returned list is backed by the original list, so changing its
+   * elements will affect the original list as well.
    *
    * <p>
    *
    * <ol>
    *   <li>If {@code from} is negative, it is taken relative to the end of the list.
-   *   <li>If {@code length} is negative, the sublist is taken in the opposite direction, with
-   *       {@code from} now becoming the <i>last</i> element of the sublist
+   *   <li>If {@code length} is negative, the sublist is taken in the opposite direction, with the
+   *       element at {@code from} now becoming the <i>last</i> element of the sublist
    * </ol>
    *
    * @param list The {@code List} to extract a sublist from
@@ -415,24 +231,29 @@ public class CollectionMethods {
   public static <T> List<T> sublist(List<T> list, int from, int length) {
     Check.notNull(list, "list");
     int sz = list.size();
+    int start;
     if (from < 0) {
-      from = Check.that(sz + from, START_INDEX).is(gte(), 0).intValue();
+      start = from + sz;
+      Check.that(start, "start index").is(gte(), 0);
     } else {
-      Check.that(from, START_INDEX).is(lte(), sz);
+      start = from;
+      Check.that(start, "start index").is(lte(), sz);
     }
-    int to;
+    int end;
     if (length >= 0) {
-      to = Check.that(from + length, END_INDEX).is(lte(), sz).intValue();
+      end = start + length;
     } else {
-      to = Check.that(from + 1, END_INDEX).is(lte(), sz).intValue();
-      from = Check.that(to + length, START_INDEX).is(gte(), 0).intValue();
+      end = start + 1;
+      start = end + length;
+      Check.that(start, START_INDEX).is(gte(), 0);
     }
-    return list.subList(from, to);
+    Check.that(end, "end index").is(lte(), sz);
+    return list.subList(start, end);
   }
 
   /**
-   * Creates a new, modifiable {@code List} of the specified size with all elements initialized to
-   * specified value (must not be null).
+   * Creates a fixed-size, but mutable {@code List} of the specified size with all elements
+   * initialized to specified value (must not be null).
    *
    * @param <E> The type of the elements
    * @param <L> The type of the {@code List}
@@ -445,43 +266,8 @@ public class CollectionMethods {
   public static <E, L extends List<E>> L initializedList(E initVal, int size) {
     Check.notNull(initVal, "initVal");
     Check.that(size, "size").is(gte(), 0);
-    E[] array = (E[]) Array.newInstance(initVal.getClass(), size);
+    E[] array = InvokeUtils.newArray(initVal.getClass().arrayType(), size);
     Arrays.fill(array, 0, size, initVal);
-    return (L) asList(array);
-  }
-
-  /**
-   * Creates a new, modifiable {@code List} of the specified size whose elements are initialized
-   * using the specified value generator.
-   *
-   * @param <E> The type of the elements
-   * @param <L> The type of the {@code List}
-   * @param valueGenerator A function that generates a value based on the list index
-   * @param size The desired size of the {@code List}
-   * @return A new, modifiable {@code List} of the specified size whose elements are initialized
-   *     using the specified value generator.
-   */
-  @SuppressWarnings("unchecked")
-  public static <E, L extends List<E>> L initializedList(IntFunction<E> valueGenerator, int size) {
-    Check.notNull(valueGenerator, "valueGenerator");
-    Check.that(size, "size").is(gte(), 0);
-    return (L) IntStream.range(0, size).mapToObj(valueGenerator).collect(toList());
-  }
-
-  /**
-   * Creates a new, modifiable {@code List} of the specified size with all elements initialized to
-   * null.
-   *
-   * @param <E> The type of the elements
-   * @param <L> The type of the {@code List}
-   * @param clazz The class of the elements
-   * @param size The desired size of the {@code List}
-   * @return A new, modifiable {@code List} of the specified size with all elements initialized to
-   *     null.
-   */
-  @SuppressWarnings("unchecked")
-  public static <E, L extends List<E>> L initializedList(Class<E> clazz, int size) {
-    E[] array = (E[]) Array.newInstance(clazz, size);
     return (L) asList(array);
   }
 
@@ -495,7 +281,7 @@ public class CollectionMethods {
    * @return A new {@code Map} where keys and values are swapped
    */
   public static <K, V> Map<V, K> swap(Map<K, V> map) {
-    return swap(map, HashMap::new);
+    return swap(map, i -> new HashMap(1 + map.size() * 4 / 3));
   }
 
   /**

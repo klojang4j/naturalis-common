@@ -1,4 +1,4 @@
-package nl.naturalis.common.unsafe;
+package nl.naturalis.common.collection;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,17 +13,6 @@ public class ArrayCloakListTest {
 
   public ArrayCloakListTest() {}
 
-  @Test
-  public void testInit00() {
-    List<String> list0 = new ArrayList<>(List.of("Hello", ", ", "World", "!"));
-    ArrayCloakList<String> list1 = new ArrayCloakList<>(list0);
-    assertEquals(4, list1.size());
-    assertEquals("Hello", list1.get(0));
-    assertEquals(", ", list1.get(1));
-    assertEquals("World", list1.get(2));
-    assertEquals("!", list1.get(3));
-  }
-
   @Test(expected = UnsupportedOperationException.class)
   public void testInit01() {
     ArrayCloakList<Integer> list = new ArrayCloakList<>(Integer.class, 4);
@@ -32,7 +21,7 @@ public class ArrayCloakListTest {
 
   @Test(expected = ArrayIndexOutOfBoundsException.class)
   public void testInit02() {
-    ArrayCloakList<Integer> list = new ArrayCloakList<>(Integer[]::new, 4);
+    ArrayCloakList<Integer> list = new ArrayCloakList<>(Integer.class, 4);
     list.set(-1, 8);
   }
 
@@ -46,7 +35,7 @@ public class ArrayCloakListTest {
 
   @Test
   public void testInit04() {
-    ArrayCloakList<Integer> list = new ArrayCloakList<>(Integer[]::new, 4);
+    ArrayCloakList<Integer> list = new ArrayCloakList<>(Integer.class, 4);
     list.set(0, 8);
     list.set(2, 4);
     assertTrue(list.contains(null));
@@ -75,7 +64,7 @@ public class ArrayCloakListTest {
 
   @Test
   public void testInit05c() {
-    ArrayCloakList<Long> list = new ArrayCloakList<>(Long[]::new, 4);
+    ArrayCloakList<Long> list = new ArrayCloakList<>(Long.class, 4);
     list.set(0, 8L);
     list.set(2, 4L);
     list.remove(8L);
@@ -102,7 +91,7 @@ public class ArrayCloakListTest {
 
   @Test
   public void testInit07() {
-    ArrayCloakList<String> list = new ArrayCloakList<>(String[]::new, 4);
+    ArrayCloakList<String> list = new ArrayCloakList<>(String.class, 4);
     list.set(0, "Hello");
     list.set(2, "World");
     list.removeAll(List.of("a", "b", "World"));
@@ -130,23 +119,12 @@ public class ArrayCloakListTest {
 
   @Test
   public void testInit10() {
-    ArrayCloakList<String> list = new ArrayCloakList<>(String[]::new, 4);
+    ArrayCloakList<String> list = new ArrayCloakList<>(String.class, 4);
     list.set(0, "Hello");
     list.set(1, "Foo");
     list.set(2, "World");
     list.set(3, "Bar");
     list.retainAll(List.of("Foo", "Bar"));
     assertArrayEquals(new String[] {null, "Foo", null, "Bar"}, list.uncloak());
-  }
-
-  @Test(expected = ClassCastException.class)
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  public void test1001() {
-    List l = new ArrayList();
-    l.add(new File("/foo"));
-    l.add(new File("/foo/bar"));
-    ArrayCloakList<String> ul = new ArrayCloakList<>(l);
-    assertEquals(Object[].class, ul.uncloak().getClass());
-    ul.get(0).charAt(0);
   }
 }

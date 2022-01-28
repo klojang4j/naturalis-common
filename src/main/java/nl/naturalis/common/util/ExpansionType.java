@@ -5,7 +5,7 @@ import static nl.naturalis.common.check.CommonChecks.atMost;
 
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.unsafe.UnsafeByteArrayOutputStream;
-import nl.naturalis.common.unsafe.ArrayCloakList;
+import nl.naturalis.common.collection.ArrayCloakList;
 
 /**
  * Defines ways to increase the capacity of data structures that automatically grow as they fill up

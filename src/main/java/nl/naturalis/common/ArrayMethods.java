@@ -1,7 +1,7 @@
 package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.unsafe.ArrayCloakList;
+import nl.naturalis.common.collection.ArrayCloakList;
 import nl.naturalis.common.x.invoke.InvokeUtils;
 
 import java.lang.reflect.Array;

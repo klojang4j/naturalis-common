@@ -1,89 +1,81 @@
-package nl.naturalis.common.unsafe;
+package nl.naturalis.common.collection;
 
 import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.x.invoke.InvokeUtils;
 
-import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.IntFunction;
 import java.util.stream.Stream;
 
 import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
 import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonChecks.instanceOf;
+import static nl.naturalis.common.check.CommonGetters.type;
 
 /**
  * A fixed-size, but mutable {@code List} implementation intended for situations where an array
- * temporarily needs to take on the guise of a {@code List}. When creating an {@code ArrayCloakList}
- * from an array, the array is not copied; it just becomes the backing array. Whichever way it was
- * created, the backing array is exposed via the {@link #uncloak()} method. The {@code set} and
- * {@code get} methods don't perform boundary checks and all {@code add}-like methods throw an
- * {@link UnsupportedOperationException}. The {@code remove} methods, however, have been repurposed
- * to nullify list elements. Since this is a fixed-size list, you can immediately {@code get} and
- * {@code set} values.
+ * temporarily needs to take on the guise of a {@code List}. This {@code List} implementation is
+ * much like the one you get from {@link Arrays#asList(Object[]) Arrays.asList} in that it swallows
+ * rather than copies the array you provide it with. However, it will also "spit out" the original
+ * array rather than a copy of it (see {@link #uncloak()}). The {@code set} and {@code get} methods
+ * don't perform bounds-checking and all {@code add}-like methods throw an {@link
+ * UnsupportedOperationException}. The {@code remove} methods, however, have been repurposed to
+ * nullify list elements (thus exposing nullification as a simple {@code (Int)Consumer} function.
  *
  * @param <E> The type of the list elements
  * @author Ayco Holleman
  */
 public class ArrayCloakList<E> implements List<E>, RandomAccess {
 
+  private final Class<E> elementType;
   private final E[] data;
 
   /**
-   * Creates a new {@code UnsafeList} for the specified element type and with the specified size
+   * Creates a new {@code ArrayCloakList} for the specified element type and with the specified size
    * (and capacity).
    *
-   * @param clazz The class of the list elements
+   * @param elementType The class of the list elements
    * @param size The desired size of the list
    */
-  @SuppressWarnings("unchecked")
-  public ArrayCloakList(Class<E> clazz, int size) {
-    Check.notNull(clazz, "clazz");
+  public ArrayCloakList(Class<E> elementType, int size) {
     Check.that(size, "size").is(gte(), 0);
-    this.data = (E[]) Array.newInstance(clazz, size);
+    this.elementType = Check.notNull(elementType, "elementType").ok();
+    this.data = InvokeUtils.newArray(elementType.arrayType(), size);
   }
 
   /**
-   * Creates a new {@code UnsafeList} using the specified function to create a backing array of the
-   * specified size.
+   * Creates a new {@code ArrayCloakList} from the specified array.
    *
-   * @param constructor A function that produces the backing array
-   * @param size The size of the backing array
-   */
-  public ArrayCloakList(IntFunction<E[]> constructor, int size) {
-    Check.notNull(constructor, "constructor");
-    Check.that(size, "size").is(gte(), 0);
-    this.data = constructor.apply(size);
-  }
-
-  /**
-   * Creates a new {@code UnsafeList} from the specified {@code Collection}.
-   *
-   * @param c The collection from which to create the {@code UnsafeList}
-   */
-  @SuppressWarnings("unchecked")
-  public ArrayCloakList(Collection<? extends E> c) {
-    Check.notNull(c);
-    this.data = (E[]) c.toArray();
-  }
-
-  /**
-   * Creates a new {@code UnsafeList} from the specified array. The array is "swallowed" by the
-   * {@code UnsafeList}, so any externally performed updates on the array are visible to the {@code
-   * UnsafeList}.
-   *
-   * @param array The array from which to create the {@code UnsafeList}
+   * @param array The array from which to create the {@code ArrayCloakList}
    */
   public ArrayCloakList(E[] array) {
-    this.data = array;
+    this.data = Check.notNull(array).ok();
+    this.elementType = (Class<E>) array.getClass().getComponentType();
   }
 
+  /**
+   * Returns the element at the specified index.
+   *
+   * @param index The array index
+   * @return The element at the specified index
+   */
   @Override
   public E get(int index) {
     return data[index];
   }
 
+  /**
+   * Sets the array element at the specified index to the specified value.
+   *
+   * @param index The array index
+   * @param element The value
+   * @return The original value at the specified index
+   */
   @Override
   public E set(int index, E element) {
+    if (element != null) {
+      Check.that(element, "element").has(type(), instanceOf(), elementType);
+    }
     E e = data[index];
     data[index] = element;
     return e;
@@ -137,41 +129,39 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   /**
    * Repurposed to nullify the element at the specified index. Note, however, that this method will
    * throw an {@link UnsupportedOperationException} if the type parameter for this {@code
-   * UnsafeList} is {@code Integer}, because Java's auto-boxing/auto-unboxing feature would make the
-   * method indistinguishable from {@code remove(Object o)}.
+   * ArrayCloakList} is {@code Integer}, because Java's auto-boxing/auto-unboxing feature would make
+   * the method indistinguishable from {@code remove(Object o)}.
    */
   @Override
   public E remove(int index) {
+    if (elementType == Integer.class) {
+      String msg =
+          "Method remove(int) not supported for ArrayCloakList<Integer>. "
+              + "Auto-boxing makes it indistinguishable from remove(Object)";
+      throw new UnsupportedOperationException(msg);
+    }
     if (size() == 0) {
       return null;
     }
-    if (data[0].getClass() == Integer.class) {
-      String msg =
-          "Method remove(int index) not supported for UnsafeList<Integer>. "
-              + "Auto-boxing makes it indistinguishable from remove(Object o)";
-      throw new UnsupportedOperationException(msg);
-    }
-    E e = data[index];
-    data[index] = null;
-    return e;
+    return set(index, null);
   }
 
   /**
    * Repurposed to nullify the first list element that equals specified object. Note, however, that
    * this method will throw an {@link UnsupportedOperationException} if the type parameter for this
-   * {@code UnsafeList} is {@code Integer}, because Java's auto-boxing/auto-unboxing would make the
-   * method indistinguishable from {@code remove(int index)}.
+   * {@code ArrayCloakList} is {@code Integer}, because Java's auto-boxing/auto-unboxing feature
+   * would make the method indistinguishable from {@code remove(int index)}.
    */
   @Override
   public boolean remove(Object o) {
+    if (elementType == Integer.class) {
+      String msg =
+          "Method remove(Object) not supported for ArrayCloakList<Integer>. "
+              + "Auto-unboxing makes it indistinguishable from remove(int)";
+      throw new UnsupportedOperationException(msg);
+    }
     if (size() == 0) {
       return false;
-    }
-    if (data[0].getClass() == Integer.class) {
-      String msg =
-          "Method remove(int index) not supported for UnsafeList<Integer>. "
-              + "Auto-unboxing makes it indistinguishable from remove(Object o)";
-      throw new UnsupportedOperationException(msg);
     }
     Check.notNull(o);
     for (int i = 0; i < data.length; ++i) {
@@ -298,9 +288,9 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   }
 
   /**
-   * Returns the backing array of this {@code UnsafeList}.
+   * Returns the backing array of this {@code ArrayCloakList}.
    *
-   * @return The backing array of this {@code UnsafeList}
+   * @return The backing array of this {@code ArrayCloakList}
    */
   public E[] uncloak() {
     return data;
