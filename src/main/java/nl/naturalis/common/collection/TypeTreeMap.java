@@ -109,19 +109,6 @@ public final class TypeTreeMap<V> extends AbstractTypeMap<V> {
       if (bumped.length > 0 && !tmp.keySet().containsAll(Set.of(bumped))) {
         throw new IllegalStateException("Bumped types must also be added to the map");
       }
-      if (autoExpand) {
-        return (TypeTreeMap<W>) new TypeTreeMap<>(tmp, autoExpand, autobox, bumped);
-      }
-      if (autobox) {
-        tmp.forEach(
-            (k, v) -> {
-              if (k.isPrimitive() && !tmp.containsKey(box(k))) {
-                tmp.put(box(k), v);
-              } else if (isWrapper(k) && !tmp.containsKey(unbox(k))) {
-                tmp.put(unbox(k), v);
-              }
-            });
-      }
       return (TypeTreeMap<W>) new TypeTreeMap<>(tmp, autoExpand, autobox, bumped);
     }
   }
@@ -178,10 +165,7 @@ public final class TypeTreeMap<V> extends AbstractTypeMap<V> {
   private final TreeMap<Class<?>, V> backend;
 
   TypeTreeMap(
-      Map<? extends Class<?>, ? extends V> m,
-      boolean autoExpand,
-      boolean autobox,
-      Class<?>[] bumped) {
+      Map<Class<?>, ? extends V> m, boolean autoExpand, boolean autobox, Class<?>[] bumped) {
     super(autoExpand, autobox);
     Comparator<Class<?>> cmp = new TypeComparatorFactory(bumped).getComparator();
     TreeMap<Class<?>, V> tmp = new TreeMap<>(cmp);
@@ -190,7 +174,7 @@ public final class TypeTreeMap<V> extends AbstractTypeMap<V> {
   }
 
   // Special-purpose constructor for TypeTreeSet.prettySort
-  TypeTreeMap(Map<? extends Class<?>, ? extends V> m) {
+  TypeTreeMap(Map<Class<?>, ? extends V> m) {
     super(false, false);
     TreeMap<Class<?>, V> tmp = new TreeMap<>(new PrettyTypeMapComparator());
     tmp.putAll(m);

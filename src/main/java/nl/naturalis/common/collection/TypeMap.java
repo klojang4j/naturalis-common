@@ -194,9 +194,9 @@ public class TypeMap<V> extends AbstractTypeMap<V> {
 
   private final Map<Class<?>, V> backend;
 
-  TypeMap(Map<? extends Class<?>, ? extends V> m, boolean autobox) {
+  TypeMap(Map<Class<?>, ? extends V> m, boolean autobox) {
     super(false, autobox);
-    this.backend = Map.copyOf(m); // implicit check on null keys & values
+    this.backend = Map.copyOf(m);
   }
 
   TypeMap(Map<Class<?>, ? extends V> m, int sz, boolean autobox) {
