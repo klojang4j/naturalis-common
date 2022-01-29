@@ -11,7 +11,11 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * A specialized {@link Map} implementation used to map types to values. Its main feature is that,
  * if the requested type is not present, but one of its super types is, it will return the value
  * associated with the super type. A {@code TypeMap} does not allow {@code null} keys or values. If
- * you add {@code Object.class} to the map, it is guaranteed to always return a non-null value.
+ * the map contains {@code Object.class}, it is guaranteed to always return a non-null value. Note
+ * that this is actually a deviation from Java's type hierarchy since primitive types do not extend
+ * {@code Object.class}. However, the main goal of the {@code TypeMap} class is to elegantly provide
+ * default values for groups of types through their common ancestor, and we want {@code
+ * Object.class} to give us the ultimate, last-resort, fall-back value.
  *
  * <h4>Autoboxing</h4>
  *
@@ -37,7 +41,7 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * @param <V> The type of the values in the {@code Map}
  * @author Ayco Holleman
  */
-public class TypeMap<V> extends AbstractTypeMap<V> {
+public final class TypeMap<V> extends AbstractTypeMap<V> {
 
   /**
    * A builder class for {@code TypeMap} instances.

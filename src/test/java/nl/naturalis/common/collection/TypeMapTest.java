@@ -6,8 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class TypeMapTest {
 
@@ -30,7 +29,7 @@ public class TypeMapTest {
   @Test
   public void test01() {
     TypeMap<String> m =
-        TypeMap.build(String.class).add(Object.class, "Object").autoExpand(2).freeze();
+        TypeMap.build(String.class).add(Object.class, "Object").autoExpand(true).freeze();
     assertEquals(1, m.size());
     assertTrue(m.containsKey(Integer.class));
     assertEquals(2, m.size());
@@ -105,5 +104,36 @@ public class TypeMapTest {
             .freeze();
     assertEquals(2, m.size());
     assertEquals("Object[]", m.get(ArrayList[].class));
+  }
+
+  @Test
+  public void test09() {
+    TypeMap<String> m =
+        TypeMap.build(String.class)
+            .add(Object[].class, "Object[]")
+            .add(Object.class, "Object")
+            .freeze();
+    assertEquals("Object", m.get(Object.class));
+  }
+
+  @Test
+  public void test10() {
+    TypeMap<String> m =
+        TypeMap.build(String.class).autobox(true).add(Object.class, "Object").freeze();
+    assertEquals("Object", m.get(int.class));
+  }
+
+  @Test
+  public void test11() {
+    TypeMap<String> m =
+        TypeMap.build(String.class).autobox(false).add(Object.class, "Object").freeze();
+    assertEquals("Object", m.get(int.class));
+  }
+
+  @Test
+  public void test12() {
+    TypeMap<String> m =
+        TypeMap.build(String.class).autobox(false).add(Object.class, "Object").freeze();
+    assertEquals("Object", m.get(int[].class));
   }
 }

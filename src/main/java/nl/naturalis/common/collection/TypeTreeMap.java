@@ -10,8 +10,8 @@ import static nl.naturalis.common.check.CommonChecks.*;
 /**
  * A specialized {@link Map} implementation used to map types to values. Its main feature is that,
  * if the requested type is not present, but one of its super types is, it will return the value
- * associated with the super type. A {@code TypeMap} does not allow {@code null} keys or values. If
- * you add {@code Object.class} to the map, it is guaranteed to always return a non-null value.
+ * associated with the super type. A {@code TypeTreeMap} does not allow {@code null} keys or values.
+ * If you add {@code Object.class} to the map, it is guaranteed to always return a non-null value.
  *
  * <p>The {@code TypeTreeMap} class behaves just like the {@link TypeMap} class, but is internally
  * backed by a {@link TreeMap}. See the class comments for {@link TypeMap} to get a complete

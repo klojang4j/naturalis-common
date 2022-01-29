@@ -1,14 +1,14 @@
 package nl.naturalis.common.collection;
 
 import nl.naturalis.common.ClassMethods;
-import nl.naturalis.common.Tuple;
+import nl.naturalis.common.Tuple2;
 import nl.naturalis.common.check.Check;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.stream.Collectors.toUnmodifiableList;
 import static nl.naturalis.common.ClassMethods.*;
-import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.check.CommonChecks.sameAs;
 import static nl.naturalis.common.check.CommonGetters.type;
 
@@ -31,33 +31,34 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
   public V get(Object key) {
     Check.notNull(key, "key").has(type(), sameAs(), Class.class);
     Class<?> type = (Class<?>) key;
-    Tuple<Class<?>, V> entry = find(type);
+    Tuple2<Class<?>, V> entry = find(type);
     if (entry == null) {
       return null;
     }
-    if (autoExpand && type != entry.getLeft()) {
-      backend().put(type, entry.getRight());
+    if (autoExpand && type != entry.one()) {
+      backend().put(type, entry.two());
     }
-    return entry.getRight();
+    return entry.two();
   }
 
   @Override
   public boolean containsKey(Object key) {
+    Check.notNull(key, "key").has(type(), sameAs(), Class.class);
     Class<?> type = (Class<?>) key;
-    Tuple<Class<?>, V> entry = find(type);
+    Tuple2<Class<?>, V> entry = find(type);
     if (entry == null) {
       return false;
     }
-    if (autoExpand && type != entry.getLeft()) {
-      backend().put(type, entry.getRight());
+    if (autoExpand && type != entry.one()) {
+      backend().put(type, entry.two());
     }
     return true;
   }
 
-  private Tuple<Class<?>, V> find(Class<?> k) {
+  private Tuple2<Class<?>, V> find(Class<?> k) {
     V v = backend().get(k);
     if (v != null) {
-      return Tuple.of(k, v);
+      return Tuple2.of(k, v);
     }
     if (k.isArray()) {
       return findArrayType(k);
@@ -65,22 +66,21 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
     return findSimpleType(k);
   }
 
-  private Tuple<Class<?>, V> findSimpleType(Class<?> k) {
+  private Tuple2<Class<?>, V> findSimpleType(Class<?> k) {
     if (k.isInterface()) {
-      Tuple<Class<?>, V> t = climbInterfaces(k, false);
-      if (t != null) {
-        return t;
-      }
+      Tuple2<Class<?>, V> t = climbInterfaces(k, false);
+      return t == null ? defaultValue() : t;
     }
-    Class<?> root = Object.class;
-    for (Class<?> c = k.getSuperclass(); ifNull(c, root) != root; c = c.getSuperclass()) {
+    // We don't want to search for Object.class just yet.
+    // It should be our last resort.
+    for (Class<?> c = k.getSuperclass(); c != null && c != Object.class; c = c.getSuperclass()) {
       V v = backend().get(c);
       if (v != null) {
-        return Tuple.of(c, v);
+        return Tuple2.of(c, v);
       }
     }
-    for (Class<?> c = k; ifNull(c, root) != root; c = c.getSuperclass()) {
-      Tuple<Class<?>, V> t = climbInterfaces(c, false);
+    for (Class<?> c = k; c != null && c != Object.class; c = c.getSuperclass()) {
+      Tuple2<Class<?>, V> t = climbInterfaces(c, false);
       if (t != null) {
         return t;
       }
@@ -93,30 +93,28 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
         Class<?> c = unbox(k);
         V v = backend().get(c);
         if (v != null) {
-          return Tuple.of(c, v);
+          return Tuple2.of(c, v);
         }
       }
     }
-    return null;
+    return defaultValue();
   }
 
-  private Tuple<Class<?>, V> findArrayType(Class<?> k) {
+  private Tuple2<Class<?>, V> findArrayType(Class<?> k) {
     Class<?> elementType = k.componentType();
     if (elementType.isInterface()) {
-      Tuple<Class<?>, V> t = climbInterfaces(elementType, true);
-      if (t != null) {
-        return t;
-      }
+      Tuple2<Class<?>, V> t = climbInterfaces(elementType, true);
+      return t == null ? defaultValue() : t;
     }
     for (Class<?> c = elementType.getSuperclass(); c != null; c = c.getSuperclass()) {
       Class<?> arrayType = c.arrayType();
       V v = backend().get(arrayType);
       if (v != null) {
-        return Tuple.of(arrayType, v);
+        return Tuple2.of(arrayType, v);
       }
     }
     for (Class<?> c = elementType; c != null; c = c.getSuperclass()) {
-      Tuple<Class<?>, V> t = climbInterfaces(c, true);
+      Tuple2<Class<?>, V> t = climbInterfaces(c, true);
       if (t != null) {
         return t;
       }
@@ -129,29 +127,39 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
         Class<?> c = unbox(elementType).arrayType();
         V v = backend().get(c);
         if (v != null) {
-          return Tuple.of(c, v);
+          return Tuple2.of(c, v);
         }
       }
     }
-    return null;
+    return defaultValue();
   }
 
-  private Tuple<Class<?>, V> climbInterfaces(Class<?> clazz, boolean array) {
+  private AtomicReference<Tuple2<Class<?>, V>> defVal;
+
+  private Tuple2<Class<?>, V> defaultValue() {
+    if (defVal == null) {
+      V v = backend().get(Object.class);
+      Tuple2<Class<?>, V> t = v == null ? null : Tuple2.of(Object.class, v);
+      defVal = new AtomicReference<>(t);
+    }
+    return defVal.getPlain();
+  }
+
+  private Tuple2<Class<?>, V> climbInterfaces(Class<?> clazz, boolean array) {
     for (Class<?> c : clazz.getInterfaces()) {
       Class<?> c0 = array ? c.arrayType() : c;
       V v = backend().get(c0);
       if (v != null) {
-        return Tuple.of(c0, v);
+        return Tuple2.of(c0, v);
       }
     }
     for (Class<?> c : clazz.getInterfaces()) {
-      Tuple<Class<?>, V> t = climbInterfaces(c, array);
+      Tuple2<Class<?>, V> t = climbInterfaces(c, array);
       if (t != null) {
         return t;
       }
     }
-    V v = backend().get(Object.class);
-    return v == null ? null : Tuple.of(Object.class, v);
+    return null;
   }
 
   @Override
