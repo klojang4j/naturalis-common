@@ -2,10 +2,14 @@ package nl.naturalis.common.collection;
 
 import org.junit.Test;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static nl.naturalis.common.collection.AbstractTypeMap.ANY_NUMBER;
+import static nl.naturalis.common.collection.AbstractTypeMap.ANY_NUMBER_ARRAY;
 import static org.junit.Assert.*;
 
 public class TypeMapTest {
@@ -135,5 +139,39 @@ public class TypeMapTest {
     TypeMap<String> m =
         TypeMap.build(String.class).autobox(false).add(Object.class, "Object").freeze();
     assertEquals("Object", m.get(int[].class));
+  }
+
+  @Test
+  public void test13() {
+    TypeMap<String> m =
+        TypeMap.build(String.class)
+            .autobox(true)
+            .add(ANY_NUMBER, "ANY_NUMBER")
+            .add(BigInteger.class, "BigInteger")
+            .add(double.class, "double")
+            .add(Object.class, "Object")
+            .freeze();
+    assertEquals("ANY_NUMBER", m.get(int.class));
+    assertEquals("ANY_NUMBER", m.get(BigDecimal.class));
+    assertEquals("ANY_NUMBER", m.get(Number.class));
+    assertEquals("BigInteger", m.get(BigInteger.class));
+    assertEquals("double", m.get(Double.class));
+  }
+
+  @Test
+  public void test14() {
+    TypeMap<String> m =
+        TypeMap.build(String.class)
+            .autobox(true)
+            .add(ANY_NUMBER_ARRAY, "ANY_NUMBER_ARRAY")
+            .add(BigInteger[].class, "BigInteger[]")
+            .add(double[].class, "double[]")
+            .add(Object.class, "Object")
+            .freeze();
+    assertEquals("ANY_NUMBER_ARRAY", m.get(int[].class));
+    assertEquals("ANY_NUMBER_ARRAY", m.get(BigDecimal[].class));
+    assertEquals("ANY_NUMBER_ARRAY", m.get(Number[].class));
+    assertEquals("BigInteger[]", m.get(BigInteger[].class));
+    assertEquals("double[]", m.get(Double[].class));
   }
 }
