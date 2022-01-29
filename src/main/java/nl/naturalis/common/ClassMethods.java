@@ -3,8 +3,6 @@ package nl.naturalis.common;
 import nl.naturalis.common.check.Check;
 
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -20,20 +18,6 @@ import static nl.naturalis.common.check.CommonChecks.array;
  * @author Ayco Holleman
  */
 public class ClassMethods {
-
-  private static final Set<Class<?>> PRIMITIVE_NUMBERS =
-      Set.of(int.class, double.class, long.class, float.class, short.class, byte.class);
-
-  private static final Set<Class<?>> NUMBER_TYPES =
-      Set.of(
-          Integer.class,
-          Double.class,
-          Long.class,
-          Float.class,
-          Short.class,
-          Byte.class,
-          BigDecimal.class,
-          BigInteger.class);
 
   // primitive-to-wrapper
   private static final Map<Class<?>, Class<?>> P2W =
@@ -58,29 +42,7 @@ public class ClassMethods {
   // wrapper-to-primitive
   private static final Map<Class<?>, Class<?>> W2P = swapAndFreeze(P2W);
 
-  private static final Set<Class<?>> PRIMITIVE_ARRAYS =
-      Set.of(
-          int[].class,
-          double[].class,
-          long[].class,
-          float[].class,
-          short[].class,
-          byte[].class,
-          boolean[].class,
-          char[].class);
-
-  private static final Set<Class<?>> PRIM_NUM_ARRAYS =
-      Set.of(int[].class, double[].class, long[].class, float[].class, short[].class, byte[].class);
-
   private ClassMethods() {}
-
-  public static Set<Class<?>> getPrimitiveNumberTypes() {
-    return PRIMITIVE_NUMBERS;
-  }
-
-  public static Set<Class<?>> getNumberTypes() {
-    return NUMBER_TYPES;
-  }
 
   /**
    * Tests whether the 1st argument is an instance of the 2nd argument. Equivalent to <code>
@@ -117,23 +79,116 @@ public class ClassMethods {
   }
 
   /**
-   * Equivalent to {@code clazz.isPrimitive()}.
-   *
-   * @param clazz The class to test
-   * @return Whether it is one of the primitive types
-   */
-  public static boolean isPrimitive(Class<?> clazz) {
-    return clazz.isPrimitive();
-  }
-
-  /**
-   * Returns whether the specified class is one of the primitive number classes.
+   * Returns whether the specified class is one of the primitive number classes. Note that this does
+   * not include {@code char.class}, just like {@link Character} does not extend {@link Number}.
    *
    * @param clazz The class to test
    * @return Whether the specified class is one of the primitive number classes
    */
   public static boolean isPrimitiveNumber(Class<?> clazz) {
-    return PRIMITIVE_NUMBERS.contains(Check.notNull(clazz).ok());
+    Check.notNull(clazz);
+    return clazz.isPrimitive() && clazz != boolean.class && clazz != char.class;
+  }
+
+  /**
+   * Returns whether the specified class is a {@link #isPrimitiveNumber primitive number} or extends
+   * {@link Number} (including {@code Number} itself).
+   *
+   * @param clazz The class to test
+   * @return Whether the specified class is a {@link #isPrimitiveNumber primitive number} or extends
+   *     {@code Number}
+   */
+  public static boolean isNumerical(Class<?> clazz) {
+    Check.notNull(clazz);
+    return Number.class.isAssignableFrom(clazz)
+        || (clazz.isPrimitive() && clazz != boolean.class && clazz != char.class);
+  }
+
+  /**
+   * Returns whether the specified object is a primitive array or a {@code Class} object
+   * representing a primitive array. Defers to {@link #isPrimitiveArray(Class)} if the specified
+   * object is a {@code Class} object.
+   *
+   * @param obj The object to test
+   * @return Whether it is a primitive array class
+   */
+  public static boolean isPrimitiveArray(Object obj) {
+    Check.notNull(obj);
+    if (obj.getClass() == Class.class) {
+      return isPrimitiveArray((Class<?>) obj);
+    }
+    return isPrimitiveArray(obj.getClass());
+  }
+
+  /**
+   * Returns whether the class is a primitive array class.
+   *
+   * @param clazz The class to test
+   * @return Whether it is a primitive array class
+   */
+  public static boolean isPrimitiveArray(Class<?> clazz) {
+    return clazz.isArray() && clazz.getComponentType().isPrimitive();
+  }
+
+  /**
+   * Returns whether the specified object is a primitive number array or a {@code Class} object
+   * representing a primitive number array. Defers to {@link #isPrimitiveNumberArray(Class)} if the
+   * specified object is a {@code Class} object.
+   *
+   * @param obj The object to test
+   * @return Whether it is a primitive array class
+   */
+  public static boolean isPrimitiveNumberArray(Object obj) {
+    Check.notNull(obj);
+    if (obj.getClass() == Class.class) {
+      return isPrimitiveArray((Class<?>) obj);
+    }
+    return isPrimitiveArray(obj.getClass());
+  }
+
+  /**
+   * Returns whether the specified class represents an array of primitive numbers.
+   *
+   * @param clazz The class to test
+   * @return Whether it is a primitive array class
+   */
+  public static boolean isPrimitiveNumberArray(Class<?> clazz) {
+    Check.notNull(clazz);
+    return clazz.isArray()
+        && clazz.getComponentType().isPrimitive()
+        && clazz.getComponentType() != boolean.class
+        && clazz.getComponentType() != char.class;
+  }
+
+  /**
+   * Returns whether the specified object is an array of a {@link #isNumerical numerical type} or a
+   * {@code Class} object representing an array of a numerical type.
+   *
+   * @param obj The object to test
+   * @return Whether it is an array of a {@code #isNumerical numerical type} or a {@code Class}
+   *     object representing an array of a numerical type
+   */
+  public static boolean isNumericalArray(Object obj) {
+    Check.notNull(obj);
+    if (obj.getClass() == Class.class) {
+      return isNumericalArray((Class<?>) obj);
+    }
+    return isNumericalArray(obj.getClass());
+  }
+
+  /**
+   * Returns whether the specified class represents an array of a {@link #isNumerical numerical
+   * type}.
+   *
+   * @param clazz The class to test
+   * @return whether it represents an array of a numerical type
+   */
+  public static boolean isNumericalArray(Class<?> clazz) {
+    Check.notNull(clazz);
+    Class<?> c;
+    return clazz.isArray()
+        && (Number.class.isAssignableFrom(c = clazz.getComponentType())
+            || (c.isPrimitive() && c != boolean.class && c != char.class));
   }
 
   /**
@@ -198,58 +253,6 @@ public class ClassMethods {
    */
   public static Class<?> unbox(Class<?> clazz) {
     return isWrapper(Check.notNull(clazz).ok()) ? W2P.get(clazz) : clazz;
-  }
-
-  /**
-   * Returns whether the specified object is a primitive array or a {@code Class} object
-   * representing a primitive array. Defers to {@link #isPrimitiveArray(Class)} if the specified
-   * object is a {@code Class} object.
-   *
-   * @param obj The object to test
-   * @return Whether it is a primitive array class
-   */
-  public static boolean isPrimitiveArray(Object obj) {
-    Check.notNull(obj);
-    if (obj.getClass() == Class.class) {
-      return isPrimitiveArray((Class<?>) obj);
-    }
-    return isPrimitiveArray(obj.getClass());
-  }
-
-  /**
-   * Returns whether the class is a primitive array class.
-   *
-   * @param clazz The class to test
-   * @return Whether it is a primitive array class
-   */
-  public static boolean isPrimitiveArray(Class<?> clazz) {
-    return PRIMITIVE_ARRAYS.contains(Check.notNull(clazz).ok());
-  }
-
-  /**
-   * Returns whether the specified object is a primitive number array or a {@code Class} object
-   * representing a primitive number array. Defers to {@link #isPrimitiveNumberArray(Class)} if the
-   * specified object is a {@code Class} object.
-   *
-   * @param obj The object to test
-   * @return Whether it is a primitive array class
-   */
-  public static boolean isPrimitiveNumberArray(Object obj) {
-    Check.notNull(obj);
-    if (obj.getClass() == Class.class) {
-      return isPrimitiveArray((Class<?>) obj);
-    }
-    return isPrimitiveArray(obj.getClass());
-  }
-
-  /**
-   * Returns whether the class represents an array of primitive numbers.
-   *
-   * @param clazz The class to test
-   * @return Whether it is a primitive array class
-   */
-  public static boolean isPrimitiveNumberArray(Class<?> clazz) {
-    return PRIM_NUM_ARRAYS.contains(Check.notNull(clazz).ok());
   }
 
   public static List<Class<?>> getAncestors(Class<?> clazz) {

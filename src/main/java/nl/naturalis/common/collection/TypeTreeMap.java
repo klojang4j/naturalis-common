@@ -4,23 +4,12 @@ import nl.naturalis.common.check.Check;
 
 import java.util.*;
 
-import static nl.naturalis.common.ClassMethods.*;
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonChecks.deepNotNull;
+import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
 /**
- * A specialized {@link Map} implementation used to map types to values. Its main feature is that,
- * if the requested type is not present, but one of its super types is, it will return the value
- * associated with the super type. A {@code TypeTreeMap} does not allow {@code null} keys or values.
- * If you add {@code Object.class} to the map, it is guaranteed to always return a non-null value.
+ * A subclass of {@link AbstractTypeMap} that is internally backed by a {@link TreeMap}.
  *
- * <p>The {@code TypeTreeMap} class behaves just like the {@link TypeMap} class, but is internally
- * backed by a {@link TreeMap}. See the class comments for {@link TypeMap} to get a complete
- * description of its features. The keys of a {@code TypeTreeMap} are sorted in ascending order of
- * abstraction. That is, for any two keys, the one that comes first will never be a supertype of the
- * one following it.
- *
- * @see TypeMap
- * @see TypeTreeSet
  * @author Ayco Holleman
  * @param <V> The type of the values in the {@code Map}
  */
@@ -95,6 +84,20 @@ public final class TypeTreeMap<V> extends AbstractTypeMap<V> {
       Check.notNull(type, "type");
       Check.notNull(value, "value").is(instanceOf(), valueType);
       tmp.put(type, value);
+      return this;
+    }
+
+    /**
+     * Associates the specified value with the specified types.
+     *
+     * @param value The value
+     * @param types The types to associate the value with
+     * @return This {@code Builder} instance
+     */
+    public Builder<U> addMultiple(U value, Class<?>... types) {
+      Check.notNull(value, "value").is(instanceOf(), valueType);
+      Check.that(types, "types").is(deepNotNull());
+      Arrays.stream(types).forEach(t -> tmp.put(t, value));
       return this;
     }
 

@@ -12,7 +12,63 @@ import static nl.naturalis.common.ClassMethods.*;
 import static nl.naturalis.common.check.CommonChecks.sameAs;
 import static nl.naturalis.common.check.CommonGetters.type;
 
-abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
+/**
+ * A specialized {@link Map} implementation used to map types to values. Its main feature is that,
+ * if the requested type is not present, but one of its super types is, it will return the value
+ * associated with the super type. A {@code TypeMap} does not allow {@code null} keys or values. If
+ * the map contains {@code Object.class}, it is guaranteed to always return a non-null value. Note
+ * that this is actually a deviation from Java's type hierarchy since primitive types do not extend
+ * {@code Object.class}. However, the main goal of the {@code TypeMap} class is to elegantly provide
+ * default values for groups of types through their common ancestor, and we want {@code
+ * Object.class} to give us the ultimate, last-resort, fall-back value.
+ *
+ * <h4>Autoboxing</h4>
+ *
+ * <p>The map is configured by default to "autobox" (and unbox) types: if the requested type is a
+ * primitive type, and there is no entry for it in the map, but there is one for the corresponding
+ * wrapper type, then the map will return the value associated with the wrapper type (and vice
+ * versa). You can {@link #autobox disable} the autoboxing feature.
+ *
+ * <h4>Auto-expansion</h4>
+ *
+ * <p>A {@code TypeMap} unmodifiable. All map-altering methods will throw an {@link
+ * UnsupportedOperationException}. However, the map can be configured to automatically absorb
+ * subtypes of types that already are in the map. Thus, when the subtype is requested again, it will
+ * result in a direct hit. Auto-expansion is disabled by default.
+ *
+ * <h4>Type-lookup Logic</h4>
+ *
+ * <p>When looking for a super type of the requested type, the map will first climb the type's class
+ * hierarchy up to, but not including {@code Object.class}; then it will climb up the type's
+ * interfaces (if any); and finally it will check to see if it contains an entry for {@code
+ * Object.class}.
+ *
+ * @see TypeMap
+ * @see TypeTreeMap
+ * @param <V> The type of the values in the {@code Map}
+ * @author Ayco Holleman
+ */
+public abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
+
+  private static interface AnyNumber {}
+
+  private static interface AnyNumberArray {}
+
+  /**
+   * Special type constant. If this type is present in the map, it will provide the default value
+   * for any {@link ClassMethods#isNumerical(Class) type of number}. This allows you to keep the map
+   * very small (especially with "autoboxing" and auto-expansion disabled) while still having all
+   * numerical types covered. No real-world class can extend {@code ANY_NUMBER} as it is an
+   * internally defined, non-accessible class.
+   */
+  public static final Class<?> ANY_NUMBER = AnyNumber.class;
+
+  /**
+   * Special type constant. If this type is present in a {@link TypeMap} or {@link TypeTreeMap}, it
+   * will provide the default value for any type of {@link ClassMethods#isNumericalArray(Class)
+   * numerical array}. See also {@link #ANY_NUMBER}.
+   */
+  public static final Class<?> ANY_NUMBER_ARRAY = AnyNumberArray.class;
 
   static final String ERR_NULL_KEY = "Source map must not contain null keys";
   static final String ERR_NULL_VAL = "Illegal null value for type ${0}";
@@ -97,6 +153,9 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
         }
       }
     }
+    if (isNumerical(k) && defaultNumberValue() != null) {
+      return defaultNumberValue();
+    }
     return defaultValue();
   }
 
@@ -131,10 +190,15 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
         }
       }
     }
+    if (isNumerical(elementType) && defaultNumArrayValue() != null) {
+      return defaultNumArrayValue();
+    }
     return defaultValue();
   }
 
   private AtomicReference<Tuple2<Class<?>, V>> defVal;
+  private AtomicReference<Tuple2<Class<?>, V>> defNumberVal;
+  private AtomicReference<Tuple2<Class<?>, V>> defNumArrayVal;
 
   private Tuple2<Class<?>, V> defaultValue() {
     if (defVal == null) {
@@ -143,6 +207,24 @@ abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
       defVal = new AtomicReference<>(t);
     }
     return defVal.getPlain();
+  }
+
+  private Tuple2<Class<?>, V> defaultNumberValue() {
+    if (defNumberVal == null) {
+      V v = backend().get(ANY_NUMBER);
+      Tuple2<Class<?>, V> t = v == null ? null : Tuple2.of(ANY_NUMBER, v);
+      defNumberVal = new AtomicReference<>(t);
+    }
+    return defNumberVal.getPlain();
+  }
+
+  private Tuple2<Class<?>, V> defaultNumArrayValue() {
+    if (defNumArrayVal == null) {
+      V v = backend().get(ANY_NUMBER_ARRAY);
+      Tuple2<Class<?>, V> t = v == null ? null : Tuple2.of(ANY_NUMBER_ARRAY, v);
+      defNumArrayVal = new AtomicReference<>(t);
+    }
+    return defNumArrayVal.getPlain();
   }
 
   private Tuple2<Class<?>, V> climbInterfaces(Class<?> clazz, boolean array) {

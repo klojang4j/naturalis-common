@@ -2,41 +2,14 @@ package nl.naturalis.common.collection;
 
 import nl.naturalis.common.check.Check;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
- * A specialized {@link Map} implementation used to map types to values. Its main feature is that,
- * if the requested type is not present, but one of its super types is, it will return the value
- * associated with the super type. A {@code TypeMap} does not allow {@code null} keys or values. If
- * the map contains {@code Object.class}, it is guaranteed to always return a non-null value. Note
- * that this is actually a deviation from Java's type hierarchy since primitive types do not extend
- * {@code Object.class}. However, the main goal of the {@code TypeMap} class is to elegantly provide
- * default values for groups of types through their common ancestor, and we want {@code
- * Object.class} to give us the ultimate, last-resort, fall-back value.
- *
- * <h4>Autoboxing</h4>
- *
- * <p>The map is configured by default to "autobox" (and unbox) types: if the requested type is a
- * primitive type, and there is no entry for it in the map, but there is one for the corresponding
- * wrapper type, then the map will return the value associated with the wrapper type (and vice
- * versa). You can {@link #autobox disable} the autoboxing feature.
- *
- * <h4>Auto-expansion</h4>
- *
- * <p>A {@code TypeMap} unmodifiable. All map-altering methods will throw an {@link
- * UnsupportedOperationException}. However, the map can be configured to automatically absorb
- * subtypes of types that already are in the map. Thus, when the subtype is requested again, it will
- * result in a direct hit. Auto-expansion is disabled by default.
- *
- * <h4>Type-lookup Logic</h4>
- *
- * <p>When looking for a super type of the requested type, the map will first climb the type's class
- * hierarchy up to, but not including {@code Object.class}; then it will climb up the type's
- * interfaces (if any); and finally it will check to see if it contains an entry for {@code
- * Object.class}.
+ * A subclass of {@link AbstractTypeMap} that is internally backed by a {@link HashMap}.
  *
  * @param <V> The type of the values in the {@code Map}
  * @author Ayco Holleman
@@ -106,6 +79,20 @@ public final class TypeMap<V> extends AbstractTypeMap<V> {
       Check.notNull(type, "type");
       Check.notNull(value, "value").is(instanceOf(), valueType);
       tmp.put(type, value);
+      return this;
+    }
+
+    /**
+     * Associates the specified value with the specified types.
+     *
+     * @param value The value
+     * @param types The types to associate the value with
+     * @return This {@code Builder} instance
+     */
+    public Builder<U> addMultiple(U value, Class<?>... types) {
+      Check.notNull(value, "value").is(instanceOf(), valueType);
+      Check.that(types, "types").is(deepNotNull());
+      Arrays.stream(types).forEach(t -> tmp.put(t, value));
       return this;
     }
 
