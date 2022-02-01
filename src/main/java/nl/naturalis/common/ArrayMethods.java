@@ -230,6 +230,18 @@ public final class ArrayMethods {
   }
 
   /**
+   * PHP-style implode method, concatenating at most {@code limit} array elements using ", "
+   * (comma-space) as separator.
+   *
+   * @param array The array to implode
+   * @param stringifier A {@code Function} that converts the array elements to strings
+   * @return A concatenation of the elements in the array.
+   */
+  public static String implodeInts(int[] array, IntFunction<String> stringifier) {
+    return implodeInts(array, stringifier, DEFAULT_IMPLODE_SEPARATOR, 0, -1);
+  }
+
+  /**
    * PHP-style implode method, concatenating at most {@code limit} array elements using the
    * specified separator.
    *
@@ -249,7 +261,7 @@ public final class ArrayMethods {
    *
    * @see CollectionMethods#implode(Collection, Function, String, int, int)
    * @param array The array to implode
-   * @param stringifier A function converting the array elements to strings
+   * @param stringifier A {@code Function} that converts the array elements to strings
    * @param separator The separator string
    * @param from The index of the element to begin the concatenation with (inclusive)
    * @param to The index of the element to end the concatenation with (exclusive). The specified
@@ -296,6 +308,21 @@ public final class ArrayMethods {
   }
 
   /**
+   * PHP-style implode method, concatenating the array elements using ", " (comma-space) as
+   * separator. This method is primarily meant to implode primitive arrays, but you <i>can</i> use
+   * it to implode any type of array. An {@link IllegalArgumentException} is thrown if {@code array}
+   * is not an array.
+   *
+   * @see CollectionMethods#implode(Collection, String)
+   * @param array The array to implode
+   * @param stringifier A {@code Function} that converts the array elements to strings
+   * @return A concatenation of the elements in the array.
+   */
+  public static String implodeAny(Object array, Function<Object, String> stringifier) {
+    return implodeAny(array, stringifier, DEFAULT_IMPLODE_SEPARATOR, 0, -1);
+  }
+
+  /**
    * PHP-style implode method, concatenating at most {@code limit} array elements using ", "
    * (comma-space) as separator. This method is primarily meant to implode primitive arrays, but you
    * <i>can</i> use it to implode any type of array. An {@link IllegalArgumentException} is thrown
@@ -334,7 +361,7 @@ public final class ArrayMethods {
    *
    * @see CollectionMethods#implode(Collection, Function, String, int, int)
    * @param array The array to implode
-   * @param stringifier A function converting the array elements to strings
+   * @param stringifier A {@code Function} that converts the array elements to strings
    * @param separator The separator string
    * @param from The index of the element to begin the concatenation with (inclusive)
    * @param to The index of the element to end the concatenation with (exclusive). The specified
@@ -396,6 +423,19 @@ public final class ArrayMethods {
   }
 
   /**
+   * PHP-style implode method, concatenating at most {@code limit} array elements using ", "
+   * (comma+space) as separator.
+   *
+   * @see CollectionMethods#implode(Collection, int)
+   * @param array The array to implode
+   * @param stringifier A {@code Function} that converts the array elements to strings
+   * @return A concatenation of the elements in the array.
+   */
+  public static <T> String implode(T[] array, Function<T, String> stringifier) {
+    return implode(array, stringifier, DEFAULT_IMPLODE_SEPARATOR, 0, -1);
+  }
+
+  /**
    * PHP-style implode method, concatenating at most {@code limit} array elements using the
    * specified separator.
    *
@@ -416,7 +456,7 @@ public final class ArrayMethods {
    *
    * @see CollectionMethods#implode(Collection, Function, String, int, int)
    * @param array The array to implode
-   * @param stringifier A function converting the array elements to strings
+   * @param stringifier A {@code Function} that converts the array elements to strings
    * @param separator The separator string
    * @param from The index of the element to begin the concatenation with (inclusive)
    * @param to The index of the element to end the concatenation with (exclusive). The specified
@@ -488,14 +528,12 @@ public final class ArrayMethods {
    * @param array The array
    * @return a {@code Stream} of its indices
    */
-  public static <T> IntStream streamIndices(T[] array) {
+  private static <T> IntStream streamIndices(T[] array) {
     return Check.notNull(array).ok(x -> IntStream.range(0, x.length));
   }
 
   /**
-   * Simply returns the specified array, but allows for leaner code. This method will allow the
-   * varargs array to be {@code null}, in which case it returns {@code null} (<code>
-   * pack(null) == null</code>).
+   * Simply returns the specified array, but allows for leaner code.
    *
    * <blockquote>
    *

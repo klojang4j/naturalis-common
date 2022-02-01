@@ -13,7 +13,7 @@ import static nl.naturalis.common.CollectionMethods.implode;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class PrettyTypeMapComparatorTest {
+public class PrettyTypeComparatorTest {
 
   @Test
   public void test00() {

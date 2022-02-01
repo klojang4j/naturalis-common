@@ -50,23 +50,22 @@ import static nl.naturalis.common.check.CommonGetters.type;
  */
 public abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
 
-  private static interface AnyNumber {}
+  private interface AnyNumber {}
 
-  private static interface AnyNumberArray {}
+  private interface AnyNumberArray {}
 
   /**
    * Special type constant. If this type is present in the map, it will provide the default value
    * for any {@link ClassMethods#isNumerical(Class) type of number}. This allows you to keep the map
    * very small (especially with "autoboxing" and auto-expansion disabled) while still having all
-   * numerical types covered. No real-world class can extend {@code ANY_NUMBER} as it is an
-   * internally defined, non-accessible class.
+   * numerical types covered.
    */
   public static final Class<?> ANY_NUMBER = AnyNumber.class;
 
   /**
-   * Special type constant. If this type is present in a {@link TypeMap} or {@link TypeTreeMap}, it
-   * will provide the default value for any type of {@link ClassMethods#isNumericalArray(Class)
-   * numerical array}. See also {@link #ANY_NUMBER}.
+   * Special type constant. If this type is present in the map, it will provide the default value
+   * for any type of {@link ClassMethods#isNumericalArray(Class) numerical array}. See also {@link
+   * #ANY_NUMBER}.
    */
   public static final Class<?> ANY_NUMBER_ARRAY = AnyNumberArray.class;
 

@@ -9,7 +9,7 @@ public class MutableIntTest {
   @Test
   public void test00() {
     MutableInt i = new MutableInt();
-    int j = i.ipp();
+    int j = i.pp();
     assertEquals(0, j);
     assertEquals(1, i.get());
   }

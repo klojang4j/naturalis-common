@@ -123,7 +123,7 @@ public class SearchReplace {
                     String es = cnt == 1 ? "" : "es";
                     System.out.println("+  " + relative + ": " + cnt + " match" + es);
                     contents = matcher.replaceAll(replace);
-                    total.ipp();
+                    total.pp();
                     Files.writeString(file, contents, StandardOpenOption.TRUNCATE_EXISTING);
                   }
                 } else {
@@ -133,7 +133,7 @@ public class SearchReplace {
                     String es = cnt == 1 ? "" : "es";
                     System.out.println("+  " + relative + ": " + cnt + " match" + es);
                     contents = contents.replace(search, replace);
-                    total.ipp();
+                    total.pp();
                     Files.writeString(file, contents, StandardOpenOption.TRUNCATE_EXISTING);
                   }
                 }

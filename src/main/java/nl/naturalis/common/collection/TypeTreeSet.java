@@ -11,17 +11,15 @@ import static nl.naturalis.common.check.CommonChecks.deepNotNull;
 import static nl.naturalis.common.collection.TypeTreeMap.EMPTY_TYPE_ARRAY;
 
 /**
- * A specialized {@link Set} implementation for Java types. It returns {@code true} from its {@link
- * Set#contains(Object) contains} method if the set contains the specified type <i>or any of its
- * super types</i>. Its elements are ordered in ascending order of abstraction. That is, for any two
- * elements in the set, the one that comes first will never be a super type of the one that comes
- * second and, conversely, the one that comes second will never be a subtype of the one that comes
- * first. If the set contains {@code Object.class}, that will be the last element in the set. As
- * with {@link TypeMap} and {@link TypeTreeMap} you can optionally enable "autoboxing" and
- * auto-expansion. See {@link TypeMap} for a description of these features.
- *
- * <p>A {@code TypeTreeSet} is unmodifiable and does not allow {@code null} values. It is backed by
- * a {@link TypeTreeMap}.
+ * A specialized {@link Set} implementation for {@code Class} objects. It returns {@code true} from
+ * its {@link Set#contains(Object) contains} method if the set contains the specified type <i>or any
+ * of its super types</i>. Its elements are ordered in ascending order of abstraction. That is, for
+ * any two elements in the set, the one that comes first will never be a super type of the one that
+ * comes second and, conversely, the one that comes second will never be a subtype of the one that
+ * comes first. As with {@link TypeMap} and {@link TypeTreeMap} you can optionally enable
+ * "autoboxing" and auto-expansion. See {@link TypeMap} for a description of these features. A
+ * {@code TypeTreeSet} is unmodifiable and does not allow {@code null} values. It is backed by a
+ * {@link TypeTreeMap}.
  *
  * @see TypeMap
  * @see TypeSet
@@ -31,11 +29,13 @@ import static nl.naturalis.common.collection.TypeTreeMap.EMPTY_TYPE_ARRAY;
 public class TypeTreeSet extends AbstractTypeSet {
 
   /**
-   * Returns a new {@code Collection} in which the types are sorted from less abstract to more
-   * abstract. This method is mainly meant for printing purposes. The new collection is in fact more
-   * rigorously and "nicely" sorted that a regular {@code TypeTreeSet}, but is therefore also very
-   * inefficient. Not recommended for normal programming. This is how the types in the new {@code
-   * Collection} are sorted:
+   * Returns a new {@code Collection} with a near-total ordering of the types in the specified
+   * {@code Collection}, roughly according to the Java type hierarchy. A regular {@code TypeTreeSet}
+   * imposes just enough order to efficiently climb the type hierarchy of the types it contains. The
+   * {@link java.util.Comparator} used to produce this {@code Collection} is much more rigorous (and
+   * that much more inefficient), although the exact order of the types is still somewhat dependent
+   * on the encounter order of the types in the source collection. This is how the types in the new
+   * {@code Collection} are sorted:
    *
    * <p>
    *

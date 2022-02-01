@@ -122,9 +122,47 @@ public class CollectionMethodsTest {
     assertEquals("2/3/4", implode(chars, Objects::toString, "/", 2, 5));
   }
 
-  public void implode05() {
+  @Test
+  public void implode03() {
     Collection<Class<?>> coll =
-        Arrays.asList(StringMethods.class, null, ArrayMethods.class, ClassMethods.class);
-    assertEquals("stringmethods;null:arraymethods;classmethods", implode(coll));
+        Arrays.asList(StringMethods.class, ArrayMethods.class, ClassMethods.class);
+    assertEquals(
+        "StringMethods, ArrayMethods, ClassMethods", implode(coll, ClassMethods::simpleClassName));
+  }
+
+  @Test
+  public void freeze00() {
+    Map<String, Integer> src = initializeMap(10, "foo", 1, "bar", 2, "baz", 3);
+    Map<String, String> map0 = freeze(src, String::valueOf);
+    Map<String, String> expected0 = Map.of("foo", "1", "bar", "2", "baz", "3");
+    Map<String, Short> map1 = freeze(src, i -> (short) (i * 3));
+    Map<String, Short> expected1 = Map.of("foo", (short) 3, "bar", (short) 6, "baz", (short) 9);
+    assertEquals(expected1, map1);
+  }
+
+  @Test
+  public void freezeIntoList00() {
+    List<Integer> src = Arrays.asList(1, 2, 3);
+    List<Integer> list0 = freezeIntoList(src, i -> i * 2);
+    assertEquals(List.of(2, 4, 6), list0);
+    List<String> list1 = freezeIntoList(src, String::valueOf);
+    assertEquals(List.of("1", "2", "3"), list1);
+  }
+
+  @Test
+  public void freezeIntoSet00() {
+    List<Integer> src = Arrays.asList(1, 2, 3);
+    Set<Integer> set0 = freezeIntoSet(src, i -> i * 2);
+    assertEquals(Set.of(2, 4, 6), set0);
+    Set<String> set1 = freezeIntoSet(src, String::valueOf);
+    assertEquals(Set.of("1", "2", "3"), set1);
+  }
+
+  @Test
+  public void freezeIntoMap00() {
+    List<Integer> src = Arrays.asList(1, 2, 3);
+    Map<String, Integer> map0 = freezeIntoMap(src, i -> String.valueOf(i * 2));
+    Map<String, Integer> expected = Map.of("2", 1, "4", 2, "6", 3);
+    assertEquals(expected, map0);
   }
 }

@@ -1,6 +1,6 @@
 package nl.naturalis.common.util;
 
-public class MutableInt {
+public final class MutableInt {
 
   private int i;
 
@@ -10,11 +10,15 @@ public class MutableInt {
     i = value;
   }
 
+  public MutableInt(MutableInt other) {
+    i = other.i;
+  }
+
   public int get() {
     return i;
   }
 
-  public int ipp() {
+  public int pp() {
     return i++;
   }
 
@@ -22,11 +26,11 @@ public class MutableInt {
     return ++i;
   }
 
-  public int mmi() {
+  public int mm() {
     return i--;
   }
 
-  public int imm() {
+  public int mmi() {
     return --i;
   }
 
@@ -34,40 +38,72 @@ public class MutableInt {
     return i += j;
   }
 
+  public int plusIs(MutableInt other) {
+    return i += other.i;
+  }
+
   public int minIs(int j) {
     return i -= j;
+  }
+
+  public int minIs(MutableInt other) {
+    return i -= other.i;
   }
 
   public int set(int j) {
     return i = j;
   }
 
-  public int reset() {
-    return i = 0;
-  }
-
   public boolean eq(int j) {
     return i == j;
+  }
+
+  public boolean eq(MutableInt other) {
+    return i == other.i;
   }
 
   public boolean ne(int j) {
     return i != j;
   }
 
+  public boolean ne(MutableInt other) {
+    return i != other.i;
+  }
+
   public boolean gt(int j) {
     return i > j;
+  }
+
+  public boolean gt(MutableInt other) {
+    return i > other.i;
   }
 
   public boolean lt(int j) {
     return i < j;
   }
 
+  public boolean lt(MutableInt other) {
+    return i < other.i;
+  }
+
   public boolean gte(int j) {
     return i >= j;
   }
 
+  public boolean gte(MutableInt other) {
+    return i >= other.i;
+  }
+
   public boolean lte(int j) {
     return i <= j;
+  }
+
+  public boolean lte(MutableInt other) {
+    return i <= other.i;
+  }
+
+  public int reset() {
+    return i = 0;
   }
 
   @Override

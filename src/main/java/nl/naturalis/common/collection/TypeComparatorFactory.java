@@ -10,9 +10,9 @@ class TypeComparatorFactory {
     this.bumped = bumped;
   }
 
-  Comparator<Class<?>> getComparator() {
+  static Comparator<Class<?>> getComparator(Class<?>[] bumped) {
     if (bumped.length == 0) {
-      return new BasicTypeMapComparator();
+      return new BasicTypeComparator();
     }
     return (c1, c2) -> {
       if (c1 == c2) {
@@ -26,7 +26,7 @@ class TypeComparatorFactory {
           return 1;
         }
       }
-      return new BasicTypeMapComparator().compare(c1, c2);
+      return new BasicTypeComparator().subBeforeSuper(c1, c2);
     };
   }
 }

@@ -12,9 +12,11 @@ import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Map.Entry;
 import static java.util.stream.Collectors.*;
 import static nl.naturalis.common.ArrayMethods.DEFAULT_IMPLODE_SEPARATOR;
 import static nl.naturalis.common.ArrayMethods.START_INDEX;
+import static nl.naturalis.common.ClassMethods.className;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.*;
 
@@ -30,7 +32,7 @@ public class CollectionMethods {
       TypeMap.build(Function.class)
           .autobox(false)
           .autoExpand(false)
-          .add(List.class, FunctionalMethods.cast())
+          .add(List.class, List.class::cast)
           .add(Collections.class, o -> new ArrayList<>((Collection) o))
           .add(int[].class, o -> ArrayMethods.asList((int[]) o))
           .add(double[].class, o -> ArrayMethods.asList((double[]) o))
@@ -45,12 +47,12 @@ public class CollectionMethods {
           .freeze();
 
   /**
-   * Returns a non-empty {@code List} containing or wrapping the specified value. If the value
-   * already is a {@code List}, it is returned as-is. Other types of collections will yield a {@code
-   * List} containing the values in the collection. Arrays will yield a {@code List} containing the
-   * values in the array. Single values (including {@code null}) will yield a {@code List}
-   * containing just that value. In other words, this method takes the shortest path to "listify"
-   * the value and there is no guarantee about the type of {@code List} you get.
+   * Converts the specified object to a {@code List}. If the value already is a {@code List}, it is
+   * returned as-is. Other types of collections will yield a {@code List} containing the values in
+   * the collection. Arrays will yield a {@code List} containing the values in the array. Single
+   * values (including {@code null}) will yield a {@code List} containing just that value. In other
+   * words, this method takes the shortest path to "listify" the value and there is no guarantee
+   * about the type of {@code List} you get.
    *
    * @see ArrayMethods#asWrapperArray(int[])
    * @see ArrayMethods#asList(int[])
@@ -63,67 +65,58 @@ public class CollectionMethods {
   }
 
   /**
-   * Shortcut for the ubiquitous <code>
-   * list.stream().collect(Collectors.toMap(keyExtractor, Function.identity()))</code>.
+   * Creates a fixed-size, but modifiable {@code List} of the specified size with all elements
+   * initialized to specified value (must not be null).
    *
-   * @param <K> The type of the keys
-   * @param <V> The type of the values and the list elements
-   * @param list The {@code List} to convert.
-   * @param keyExtractor The key-extraction function
-   * @return A modifiable {@code Map}
+   * @param <E> The type of the elements
+   * @param initVal The initial value of the elements (must not be null)
+   * @param size The desired size of the {@code List}
+   * @return A new, modifiable {@code List} of the specified size with all elements initialized to
+   *     the specified value
    */
-  public static <K, V> Map<K, V> toMap(
-      List<V> list, Function<? super V, ? extends K> keyExtractor) {
-    return list.stream().collect(Collectors.toMap(keyExtractor, Function.identity()));
+  @SuppressWarnings("unchecked")
+  public static <E> List<E> initializeList(E initVal, int size) {
+    Check.notNull(initVal, "initVal");
+    Check.that(size, "size").is(gte(), 0);
+    E[] array = InvokeUtils.newArray(initVal.getClass().arrayType(), size);
+    Arrays.fill(array, 0, size, initVal);
+    return (List<E>) Arrays.asList(array);
   }
 
   /**
-   * Shortcut for <code>
-   * list.stream().collect(Collectors.toUnmodifiableMap(keyExtractor, Function.identity()))</code>.
-   *
-   * @param <K> The type of the keys
-   * @param <V> The type of the values and the list elements
-   * @param list The {@code List} to convert.
-   * @param keyExtractor The key-extraction function
-   * @return An unmodifiable {@code Map}
-   */
-  public static <K, V> Map<K, V> toUnmodifiableMap(
-      List<V> list, Function<? super V, ? extends K> keyExtractor) {
-    return list.stream().collect(Collectors.toUnmodifiableMap(keyExtractor, Function.identity()));
-  }
-
-  /**
-   * Returns a {@link HashMap} initialized with the specified key-value pairs.
+   * Returns a modifiable {@link Map} initialized with the specified key-value pairs.
    *
    * @param <K> The type of the keys
    * @param <V> The type of the values
+   * @param capacity The initial capacity of the map. If you specify a number less than the number
+   *     of key-value pairs (half the length of the varargs array), it will be taken as a
+   *     multiplier. For example, 2 would mean that you expect the map to grow to about twice its
+   *     initial size.
    * @param kvPairs An array alternating between keys and values
    * @return A {@code HashMap} initialized with the specified key-value pairs
    */
   @SuppressWarnings("unchecked")
-  public static <K, V> HashMap<K, V> newHashMap(Object... kvPairs) {
+  public static <K, V> Map<K, V> initializeMap(int capacity, Object... kvPairs) {
+    Check.that(capacity, "capacity").is(gt(), 0);
     Check.notNull(kvPairs, "kvPairs").has(length(), even());
-    HashMap<K, V> map = new HashMap<>(kvPairs.length);
+    int sz = capacity < kvPairs.length / 2 ? capacity * kvPairs.length : capacity;
+    HashMap<K, V> map = new HashMap<>(1 + sz * 4 / 3);
     for (int i = 0; i < kvPairs.length; i += 2) {
-      map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
-    }
-    return map;
-  }
-
-  /**
-   * Returns a {@link LinkedHashMap} initialized with the specified key-value pairs.
-   *
-   * @param <K> The type of the keys
-   * @param <V> The type of the values
-   * @param kvPairs An array alternating between keys and values
-   * @return A {@code LinkedHashMap} initialized with the specified key-value pairs
-   */
-  @SuppressWarnings("unchecked")
-  public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(Object... kvPairs) {
-    Check.notNull(kvPairs, "kvPairs").has(length(), even());
-    LinkedHashMap<K, V> map = new LinkedHashMap<>(kvPairs.length);
-    for (int i = 0; i < kvPairs.length; i += 2) {
-      map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
+      Object key = kvPairs[i];
+      Object val = kvPairs[i + 1];
+      K k;
+      V v;
+      try {
+        k = key == null ? null : (K) key;
+      } catch (ClassCastException e) {
+        return Check.fail("Invalid key type at position ${0}: ${1}", i, className(key));
+      }
+      try {
+        v = val == null ? null : (V) val;
+      } catch (ClassCastException e) {
+        return Check.fail("Invalid value type at position ${0}: ${1}", i + 1, className(val));
+      }
+      map.put(k, v);
     }
     return map;
   }
@@ -250,27 +243,6 @@ public class CollectionMethods {
     Check.that(end, "end index").is(lte(), sz);
     return list.subList(start, end);
   }
-
-  /**
-   * Creates a fixed-size, but mutable {@code List} of the specified size with all elements
-   * initialized to specified value (must not be null).
-   *
-   * @param <E> The type of the elements
-   * @param <L> The type of the {@code List}
-   * @param initVal The initial value of the elements (must not be null)
-   * @param size The desired size of the {@code List}
-   * @return A new, modifiable {@code List} of the specified size with all elements initialized to
-   *     the specified value
-   */
-  @SuppressWarnings("unchecked")
-  public static <E, L extends List<E>> L initializedList(E initVal, int size) {
-    Check.notNull(initVal, "initVal");
-    Check.that(size, "size").is(gte(), 0);
-    E[] array = InvokeUtils.newArray(initVal.getClass().arrayType(), size);
-    Arrays.fill(array, 0, size, initVal);
-    return (L) asList(array);
-  }
-
   /**
    * Returns a new {@code Map} where keys and values are swapped. The specified {@code Map} must not
    * contain duplicate values. An {@link IllegalArgumentException} is thrown if it does.
@@ -328,41 +300,49 @@ public class CollectionMethods {
    * @param <K> The type of the keys of the input and output {@code Map}
    * @param <V> The type of the values of the input {@code Map}
    * @param <W> The type of the values of the output {@code Map}
-   * @param source The input {@code Map}
+   * @param src The input {@code Map}
    * @param converter A {@code Function} that converts the values of the input {@code Map}
    * @return An unmodifiable {@code Map} where the values of the input {@code Map} have been
    *     converted using the specified {@code Function}
    */
   @SuppressWarnings("unchecked")
-  public static <K, V, W> Map<K, W> convertAndFreeze(
-      Map<K, V> source, Function<? super V, ? extends W> converter) {
-    return Map.ofEntries(
-        source.entrySet().stream()
-            .map(e -> Map.entry(e.getKey(), converter.apply(e.getValue())))
-            .toArray(Map.Entry[]::new));
+  public static <K, V, W> Map<K, W> freeze(
+      Map<K, V> src, Function<? super V, ? extends W> converter) {
+    return src.entrySet().stream()
+        .map(e -> changeMapValue(e, converter))
+        .collect(Collectors.toUnmodifiableMap(Entry::getKey, Entry::getValue));
+  }
+
+  private static <K, V, W> Map.Entry<K, W> changeMapValue(
+      Map.Entry<K, V> e, Function<? super V, ? extends W> f) {
+    return Map.entry(e.getKey(), f.apply(e.getValue()));
   }
 
   /**
    * Returns an unmodifiable {@code Map} where the values of the input {@code Map} have been
    * converted using the specified {@code BiFunction}. This method passes both the key and the value
-   * to the converter function so you can make the conversion key-dependent, or so mention the key
-   * when the conversion fails.
+   * to the converter function so you can make the conversion key-dependent, or so you can mention
+   * the key if the conversion fails.
    *
    * @param <K> The type of the keys of the input and output {@code Map}
    * @param <V> The type of the values of the input {@code Map}
    * @param <W> The type of the values of the output {@code Map}
-   * @param source The input {@code Map}
+   * @param src The input {@code Map}
    * @param converter A {@code Function} that converts the values of the input {@code Map}
    * @return An unmodifiable {@code Map} where the values of the input {@code Map} have been
    *     converted using the specified {@code Function}
    */
   @SuppressWarnings("unchecked")
-  public static <K, V, W> Map<K, W> convertAndFreeze(
-      Map<K, V> source, BiFunction<? super K, ? super V, ? extends W> converter) {
-    return Map.ofEntries(
-        source.entrySet().stream()
-            .map(e -> Map.entry(e.getKey(), converter.apply(e.getKey(), e.getValue())))
-            .toArray(Map.Entry[]::new));
+  public static <K, V, W> Map<K, W> freeze(
+      Map<K, V> src, BiFunction<? super K, ? super V, ? extends W> converter) {
+    return src.entrySet().stream()
+        .map(e -> changeMapValue(e, converter))
+        .collect(Collectors.toUnmodifiableMap(Entry::getKey, Entry::getValue));
+  }
+
+  private static <K, V, W> Map.Entry<K, W> changeMapValue(
+      Map.Entry<K, V> e, BiFunction<? super K, ? super V, ? extends W> f) {
+    return Map.entry(e.getKey(), f.apply(e.getKey(), e.getValue()));
   }
 
   /**
@@ -371,17 +351,17 @@ public class CollectionMethods {
    *
    * @param <T> The type of the elements in the source list
    * @param <U> The type of the elements in the returned list
-   * @param source The source list
+   * @param src The source list
    * @param converter The conversion function
    * @return An unmodifiable {@code List} containing the values that result from applying the
    *     specified function to the source list's elements
    */
   @SuppressWarnings("unchecked")
-  public static <T, U, E extends Throwable> List<U> convertAndFreeze(
-      List<? extends T> source, ThrowingFunction<? super T, ? extends U, E> converter) throws E {
-    Object[] objs = new Object[source.size()];
-    for (int i = 0; i < source.size(); ++i) {
-      objs[i] = converter.apply(source.get(i));
+  public static <T, U, E extends Throwable> List<U> freeze(
+      List<? extends T> src, ThrowingFunction<? super T, ? extends U, E> converter) throws E {
+    Object[] objs = new Object[src.size()];
+    for (int i = 0; i < src.size(); ++i) {
+      objs[i] = converter.apply(src.get(i));
     }
     return (List<U>) List.of(objs);
   }
@@ -392,29 +372,33 @@ public class CollectionMethods {
    *
    * @param <T> The type of the elements in the source set
    * @param <U> The type of the elements in the returned set
-   * @param source The source set
+   * @param src The source set
    * @param converter The conversion function
    * @return An unmodifiable {@code Set} containing the values that result from applying the
    */
-  public static <T, U> Set<U> convertAndFreeze(
-      Set<? extends T> source, Function<? super T, ? extends U> converter) {
-    return source.stream().map(converter).collect(toUnmodifiableSet());
+  public static <T, U, E extends Throwable> Set<U> freeze(
+      Set<? extends T> src, ThrowingFunction<? super T, ? extends U, E> converter) throws E {
+    Object[] objs = new Object[src.size()];
+    Iterator<? extends T> iterator = src.iterator();
+    for (int i = 0; i < src.size(); ++i) {
+      objs[i] = converter.apply(iterator.next());
+    }
+    return (Set<U>) Set.of(objs);
   }
 
   /**
-   * Returns an unmodifiable {@code List} containing the values that result from applying the
-   * specified function to the source collection's elements.
+   * Shortcut method. Returns:
    *
    * @param <T> The type of the elements in the source set
    * @param <U> The type of the elements in the returned list
-   * @param source The source list
+   * @param src The source list
    * @param converter The conversion function
    * @return An unmodifiable {@code List} containing the values that result from applying the
    *     specified function to the source collection's elements
    */
   public static <T, U> List<U> freezeIntoList(
-      Collection<? extends T> source, Function<? super T, ? extends U> converter) {
-    return source.stream().map(converter).collect(toUnmodifiableList());
+      Collection<? extends T> src, Function<? super T, ? extends U> converter) {
+    return src.stream().map(converter).collect(toUnmodifiableList());
   }
 
   /**
@@ -423,14 +407,36 @@ public class CollectionMethods {
    *
    * @param <T> The type of the elements in the source set
    * @param <U> The type of the elements in the returned list
-   * @param source The source list
+   * @param src The source list
    * @param converter The conversion function
    * @return An unmodifiable {@code Set} containing the values that result from applying the
    *     specified function to the source collection's elements
    */
   public static <T, U> Set<U> freezeIntoSet(
-      Collection<? extends T> source, Function<? super T, ? extends U> converter) {
-    return source.stream().map(converter).collect(toUnmodifiableSet());
+      Collection<? extends T> src, Function<? super T, ? extends U> converter) {
+    return src.stream().map(converter).collect(toUnmodifiableSet());
+  }
+
+  /**
+   * Shortcut method. Returns:
+   *
+   * <blockquote>
+   *
+   * <pre>{@code
+   * list.stream().collect(Collectors.toUnmodifiableMap(keyExtractor, Function.identity()))
+   * }</pre>
+   *
+   * </blockquote>
+   *
+   * @param <K> The type of the keys
+   * @param <V> The type of the values and the list elements
+   * @param src The {@code List} to convert.
+   * @param keyExtractor The key-extraction function
+   * @return An unmodifiable {@code Map}
+   */
+  public static <K, V> Map<K, V> freezeIntoMap(
+      Collection<V> src, Function<? super V, ? extends K> keyExtractor) {
+    return src.stream().collect(Collectors.toUnmodifiableMap(keyExtractor, Function.identity()));
   }
 
   /**
@@ -474,6 +480,19 @@ public class CollectionMethods {
   }
 
   /**
+   * PHP-style implode method, concatenating at most {@code limit} collection elements using ", "
+   * (comma-space) as separator.
+   *
+   * @see ArrayMethods#implode(Object[], Function)
+   * @param collection The collection to implode
+   * @param stringifier A {@code Function} that converts the collection elements to strings
+   * @return A concatenation of the elements in the collection.
+   */
+  public static <T> String implode(Collection<T> collection, Function<T, String> stringifier) {
+    return implode(collection, stringifier, DEFAULT_IMPLODE_SEPARATOR, 0, -1);
+  }
+
+  /**
    * PHP-style implode method, concatenating at most {@code limit} collection elements using the
    * specified separator.
    *
@@ -493,7 +512,7 @@ public class CollectionMethods {
    *
    * @see ArrayMethods#implode(Object[], Function, String, int, int)
    * @param collection The collection to implode
-   * @param stringifier A function converting the collection elements to strings
+   * @param stringifier A {@code Function} that converts the collection elements to strings
    * @param separator The separator string
    * @param from The index of the element to begin the concatenation with (inclusive)
    * @param to The index of the element to end the concatenation with (exclusive). The specified

@@ -9,9 +9,9 @@ import java.util.stream.IntStream;
 import static java.lang.Character.isUpperCase;
 import static java.lang.Character.toLowerCase;
 import static java.lang.reflect.Modifier.isStatic;
-import static java.util.stream.Collectors.joining;
 import static nl.naturalis.common.CollectionMethods.swapAndFreeze;
 import static nl.naturalis.common.check.CommonChecks.array;
+
 /**
  * Methods for inspecting types.
  *
@@ -45,10 +45,24 @@ public class ClassMethods {
   private ClassMethods() {}
 
   /**
-   * Tests whether the 1st argument is an instance of the 2nd argument. Equivalent to <code>
-   * superOrInterface.isInstance(instance)</code>. Since this method is overloaded with {@code
-   * Class} as the type of the first parameter, <i>you cannot and should not use this method to test
-   * the {@code Class.class} object itself</i>
+   * Performs a brute-force cast to {@code <R>} of the specified object. Mainly meant to be used as
+   * a method reference. The argument is allowed to be {@code null}.
+   *
+   * @param obj The object whose type to cast
+   * @param <T> The type of the object
+   * @param <R> The type to case it to
+   * @return An instance of type {@code <R>}
+   */
+  @SuppressWarnings({"unchecked"})
+  public static <T, R> R cast(T obj) {
+    return (R) obj;
+  }
+
+  /**
+   * Tests whether the 1st argument is an instance of the specified class or interface. Equivalent
+   * to <code>superOrInterface.isInstance(instance)</code>. Since this method is overloaded with
+   * {@code Class} as the type of the first parameter, you cannot and should not use this method to
+   * test whether a {@code Class} object itself is an instance of something.
    *
    * @param instance The object to test
    * @param superOrInterface The class or interface to test the object against
@@ -64,7 +78,7 @@ public class ClassMethods {
   }
 
   /**
-   * Tests whether the 1st argument extends or implements the 2nd argument. In case you keep
+   * Tests whether the first class extends or implements the second class. In case you keep
    * forgetting what "assign from" even means. Equivalent to <code>
    * superOrInterface.isAssignableFrom(classToTest)</code>.
    *
@@ -255,8 +269,14 @@ public class ClassMethods {
     return isWrapper(Check.notNull(clazz).ok()) ? W2P.get(clazz) : clazz;
   }
 
+  /**
+   * Returns the superclasses of the specified class up to, and including {@code Object.class}.
+   *
+   * @param clazz The class for which to get the superclasses
+   * @return The superclasses of the specified class.
+   */
   public static List<Class<?>> getAncestors(Class<?> clazz) {
-    Check.notNull(clazz);
+    Check.notNull(clazz).isNot(Class::isInterface, "Cannot get ancestors for interface (${arg})");
     List<Class<?>> l = new ArrayList<>(5);
     for (Class<?> x = clazz.getSuperclass(); x != null; x = x.getSuperclass()) {
       l.add(x);
@@ -265,7 +285,7 @@ public class ClassMethods {
   }
 
   public static int countAncestors(Class<?> clazz) {
-    Check.notNull(clazz);
+    Check.notNull(clazz).isNot(Class::isInterface, "Cannot get ancestors for interface (${arg})");
     int i = 0;
     for (Class<?> x = clazz.getSuperclass(); x != null; x = x.getSuperclass()) {
       ++i;
@@ -274,54 +294,16 @@ public class ClassMethods {
   }
 
   /**
-   * Returns true if and only if both {@code Class} objects represent interfaces and the first
-   * interface directly or indirectly extends the second interface.
-   *
-   * @param classToTest The {@code Class} object to test
-   * @param baseClass The {@code Class} object to test it against
-   * @return Whether the first argument is an interface that directly or indirectly extends the
-   *     second interface
-   */
-  public static boolean hasAncestor(Class<?> classToTest, Class<?> baseClass) {
-    Check.notNull(classToTest, "classToTest");
-    Check.notNull(baseClass, "baseClass");
-    for (Class<?> c = classToTest.getSuperclass(); c != null; c = c.getSuperclass()) {
-      if (c == baseClass) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Returns true if and only if both {@code Class} objects represent interfaces and the first
-   * interface directly or indirectly extends the second interface.
-   *
-   * @param classToTest The {@code Class} object to test
-   * @param superInterface The {@code Class} object to test it against
-   * @return Whether the first argument is an interface that directly or indirectly extends the
-   *     second interface
-   */
-  public static boolean hasAncestorInterface(Class<?> classToTest, Class<?> superInterface) {
-    Check.notNull(classToTest, "classToTest");
-    Check.notNull(superInterface, "superInterface");
-    if (!classToTest.isInterface()
-        || !superInterface.isInterface()
-        || classToTest.getInterfaces().length == 0) {
-      return false;
-    }
-    return getAllInterfaces(classToTest).contains(superInterface);
-  }
-
-  /**
-   * Returns the entire interface hierarchy for the specified class or interface. Returns an empty
-   * set if the argument is a top-level interface, or if the class neither directly nor indirectly
-   * implements any interface.
+   * Returns the entire interface hierarchy, both "horizontal" amd "vertical", associated with
+   * specified class or interface. Returns an empty set if the argument is a top-level interface, or
+   * if the class is a regular class that does not implement any interface (either directly, or
+   * indirectly)and neither directly nor indirectly through its superclasses).
    *
    * @param clazz The {@code Class} object for which to retrieve the interface hierarchy
    * @return The interface hierarchy for the specified {@code Class} object
    */
   public static Set<Class<?>> getAllInterfaces(Class<?> clazz) {
+    Check.notNull(clazz);
     Set<Class<?>> interfaces = new LinkedHashSet<>();
     collectInterfaces(interfaces, clazz);
     for (Class<?> c = clazz.getSuperclass(); c != null; c = c.getSuperclass()) {
@@ -571,10 +553,7 @@ public class ClassMethods {
     String fmt = "Method %s %s(%s) in class %s is not a %s";
     String rt = simpleClassName(m.getReturnType());
     String clazz = className(m.getDeclaringClass());
-    String params =
-        Arrays.stream(m.getParameterTypes())
-            .map(ClassMethods::simpleClassName)
-            .collect(joining(", "));
+    String params = ArrayMethods.implode(m.getParameterTypes(), ClassMethods::simpleClassName);
     String type = asGetter ? "getter" : "setter";
     String msg = String.format(fmt, rt, m.getName(), params, clazz, type);
     return new IllegalArgumentException(msg);

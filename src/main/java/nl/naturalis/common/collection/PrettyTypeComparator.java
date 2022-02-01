@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 import static nl.naturalis.common.ClassMethods.*;
 
-class PrettyTypeMapComparator implements Comparator<Class<?>> {
+class PrettyTypeComparator implements Comparator<Class<?>> {
 
   @Override
   public int compare(Class<?> c1, Class<?> c2) {

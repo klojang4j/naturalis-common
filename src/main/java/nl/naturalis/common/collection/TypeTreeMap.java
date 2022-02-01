@@ -170,7 +170,7 @@ public final class TypeTreeMap<V> extends AbstractTypeMap<V> {
   TypeTreeMap(
       Map<Class<?>, ? extends V> m, boolean autoExpand, boolean autobox, Class<?>[] bumped) {
     super(autoExpand, autobox);
-    Comparator<Class<?>> cmp = new TypeComparatorFactory(bumped).getComparator();
+    Comparator<Class<?>> cmp = TypeComparatorFactory.getComparator(bumped);
     TreeMap<Class<?>, V> tmp = new TreeMap<>(cmp);
     tmp.putAll(m);
     this.backend = tmp;
@@ -179,7 +179,7 @@ public final class TypeTreeMap<V> extends AbstractTypeMap<V> {
   // Special-purpose constructor for TypeTreeSet.prettySort
   TypeTreeMap(Map<Class<?>, ? extends V> m) {
     super(false, false);
-    TreeMap<Class<?>, V> tmp = new TreeMap<>(new PrettyTypeMapComparator());
+    TreeMap<Class<?>, V> tmp = new TreeMap<>(new PrettyTypeComparator());
     tmp.putAll(m);
     this.backend = tmp;
   }

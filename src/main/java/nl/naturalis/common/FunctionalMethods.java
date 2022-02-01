@@ -7,10 +7,6 @@ import java.util.function.*;
 /** Methods assisting in functional programming */
 public class FunctionalMethods {
 
-  public static <R> Function<?, R> cast() {
-    return x -> (R) x;
-  }
-
   /**
    * Converts the specified {@code Predicate} into an {@code IntPredicate}. Can be used to force the
    * compiler to interpret a lambda as an {@code IntPredicate} rather than a {@code Predicate}.

@@ -5,13 +5,12 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A specialized {@link Set} implementation for Java types. It returns {@code true} from its {@link
- * Set#contains(Object) contains} method if the set contains the specified type <i>or any of its
- * super types</i>. As with {@link TypeMap} and {@link TypeTreeMap} you can optionally enable
- * "autoboxing" and auto-expansion. See {@link TypeMap} for a description of these features.
- *
- * <p>A {@code TypeSet} is unmodifiable and does not allow {@code null} values. It is backed by a
- * {@link TypeMap}.
+ * A specialized {@link Set} implementation for {@code Class} objects. It returns {@code true} from
+ * its {@link Set#contains(Object) contains} method if the set contains the specified type <i>or any
+ * of its super types</i>. As with {@link TypeMap} and {@link TypeTreeMap}, you can optionally
+ * enable "autoboxing" and auto-expansion. See {@link AbstractTypeMap} for a description of these
+ * features. A {@code TypeSet} is unmodifiable and does not allow {@code null} values. It is backed
+ * by a {@link TypeMap}.
  *
  * @see TypeMap
  * @see TypeSet
