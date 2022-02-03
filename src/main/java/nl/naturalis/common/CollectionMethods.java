@@ -148,62 +148,6 @@ public class CollectionMethods {
   }
 
   /**
-   * Returns a sublist containing all but the last element of the provided list. The returned list
-   * is backed by the original list, so changing its elements will affect the original list as well.
-   *
-   * @param <T> The type of the elements in the list
-   * @param list The list to shrink
-   * @return A sublist containing all but the last element of the provided list
-   */
-  public static <T> List<T> shrink(List<T> list) {
-    return shrink(list, 1);
-  }
-
-  /**
-   * Returns a sublist containing all but the last {@code by} elements of the provided list. The
-   * returned list is backed the original list, so changing its elements will affect the original
-   * list as well.
-   *
-   * @param <T> The type of the elements in the list
-   * @param list The list to shrink
-   * @param by The number of elements by which to shrink the list
-   * @return A sublist containing all but the last {@code by} elements of the provided list
-   */
-  public static <T> List<T> shrink(List<T> list, int by) {
-    Check.that(list, "list").isNot(empty());
-    Check.that(by, "by").is(validToIndex(), list);
-    int sz = list.size();
-    return sz == by ? Collections.emptyList() : list.subList(0, sz - by);
-  }
-
-  /**
-   * Left-shifts the provided list by one element. The returned list is backed by the original list,
-   * so changing its elements will affect the original list as well.
-   *
-   * @param <T> The type of the elements in the list
-   * @param list The {@code List} whose elements to shift
-   * @return A sublist containing all but the first element of the provided list
-   */
-  public static <T> List<T> shift(List<T> list) {
-    return shift(list, 1);
-  }
-
-  /**
-   * Left-shifts the provided list by the specified number of elements. The returned list is backed
-   * by the original list, so changing its elements will affect the original list as well.
-   *
-   * @param <T> The type of the elements in the list
-   * @param list The {@code List} whose elements to shift
-   * @param by The number of elements to removed from the list
-   * @return A sublist containing all but the first {@code by} elements of the provided list
-   */
-  public static <T> List<T> shift(List<T> list, int by) {
-    int sz = Check.that(list, "list").isNot(empty()).ok().size();
-    Check.that(by, "by").is(validToIndex(), list);
-    return sz == by ? Collections.emptyList() : list.subList(by, sz);
-  }
-
-  /**
    * Returns a sublist of the provided list starting with element {@code from} and containing at
    * most {@code length} elements. The returned list is backed by the original list, so changing its
    * elements will affect the original list as well.
@@ -285,12 +229,11 @@ public class CollectionMethods {
    */
   @SuppressWarnings("unchecked")
   public static <K, V> Map<V, K> swapAndFreeze(Map<K, V> map) {
-    Check.notNull(map);
+    Check.notNull(map, "map").has(keySet(), deepNotNull()).has(values(), deepNotNull());
     Check.that(map.values()).has(size(), eq(), map.size(), ERR_MAP_VALUES_NON_UNIQUE);
-    return Map.ofEntries(
-        map.entrySet().stream()
-            .map(e -> Map.entry(e.getValue(), e.getKey()))
-            .toArray(Map.Entry[]::new));
+    return map.entrySet().stream()
+        .map(e -> Map.entry(e.getValue(), e.getKey()))
+        .collect(Collectors.toUnmodifiableMap(Entry::getKey, Entry::getValue));
   }
 
   /**

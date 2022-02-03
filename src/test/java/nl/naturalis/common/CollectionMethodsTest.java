@@ -165,4 +165,42 @@ public class CollectionMethodsTest {
     Map<String, Integer> expected = Map.of("2", 1, "4", 2, "6", 3);
     assertEquals(expected, map0);
   }
+
+  @Test
+  public void swap00() {
+    Map<String, Integer> src = Map.of("a", 1, "b", 2, "c", 3);
+    Map<Integer, String> swapped = swap(src);
+    Map<Integer, String> expected = Map.of(1, "a", 2, "b", 3, "c");
+    assertEquals(expected, swapped);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void swap01() {
+    Map<String, Integer> src = Map.of("a", 1, "b", 2, "c", 2);
+    swap(src);
+  }
+
+  @Test
+  public void swap02() {
+    Map<String, Integer> src = Map.of("a", 1, "b", 2, "c", 3);
+    Map<Integer, String> swapped = swap(src, LinkedHashMap::new);
+    Map<Integer, String> expected = Map.of(1, "a", 2, "b", 3, "c");
+    assertEquals(expected, swapped);
+    assertEquals(LinkedHashMap.class, swapped.getClass());
+  }
+
+  @Test
+  public void swapAndFreeze00() {
+    Map<String, Integer> src = Map.of("a", 1, "b", 2, "c", 3);
+    Map<Integer, String> swapped = swapAndFreeze(src);
+    Map<Integer, String> expected = Map.of(1, "a", 2, "b", 3, "c");
+    assertEquals(expected, swapped);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void swapAndFreeze01() {
+    Map<String, Integer> src = new HashMap<>(Map.of("a", 1, "b", 2, "c", 3));
+    src.put("4", null);
+    swapAndFreeze(src);
+  }
 }

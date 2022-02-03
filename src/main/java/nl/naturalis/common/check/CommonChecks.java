@@ -723,11 +723,8 @@ public class CommonChecks {
   /* ++++++++++++++ ObjIntRelation ++++++++++++++ */
 
   /**
-   * Verifies that that {@code Collection} has a size equal to some integer value. Mainly meant to
-   * be called from the {@code has} methods of the {@code Check} class. In other words, when testing
-   * a {@code Collection}-type property of the argument rather than the argument itself. If the
-   * argument is itself a {@code Collection}, you can test this more concisely using {@code
-   * Check.that(myCollection).has(size(), eq(), 42)}.
+   * Verifies that a {@code Collection} has a size equal to some integer value. Mainly meant to be
+   * called from the {@code has} methods of the {@code Check} class.
    *
    * @see CommonGetters#size()
    * @see #eq()
@@ -745,10 +742,10 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that that {@code Collection} has a size greater than some integer value. Mainly meant
-   * to be called from the {@code has} methods of the {@code Check} class. In other words, when
-   * testing a {@code Collection}-type property of the argument rather than the argument itself. If
-   * the argument is itself a {@code Collection}, you can test this more concisely using {@code
+   * Verifies that a {@code Collection} has a size greater than some integer value. Mainly meant to
+   * be called from the {@code has} methods of the {@code Check} class. In other words, when testing
+   * a {@code Collection}-type property of the argument rather than the argument itself. If the
+   * argument is itself a {@code Collection}, you can test this more concisely using {@code
    * Check.that(myCollection).has(size(), gt(), 42)}.
    *
    * @see CommonGetters#size()

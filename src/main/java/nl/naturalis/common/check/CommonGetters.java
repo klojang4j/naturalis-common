@@ -183,6 +183,22 @@ public class CommonGetters {
     tmp.put(mapSize(), tmp.get(size())); // recycle
   }
 
+  public static <K, V> Function<Map<K, V>, Set<? extends K>> keySet() {
+    return Map::keySet;
+  }
+
+  static {
+    tmp.put(values(), "%s.keySet()");
+  }
+
+  public static <K, V> Function<Map<K, V>, Collection<? extends V>> values() {
+    return Map::values;
+  }
+
+  static {
+    tmp.put(values(), "%s.values()");
+  }
+
   /**
    * A {@code Function} that returns the size of a {@code List}. Equivalent to {@code List::size}.
    * Can be used if there already is a {@code size()} method in the class in which to execute a size
