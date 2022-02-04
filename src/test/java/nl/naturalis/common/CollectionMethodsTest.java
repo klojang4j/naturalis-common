@@ -2,12 +2,15 @@ package nl.naturalis.common;
 
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.time.DayOfWeek;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static nl.naturalis.common.CollectionMethods.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static nl.naturalis.common.check.CommonGetters.toStr;
+import static org.junit.Assert.*;
 
 public class CollectionMethodsTest {
 
@@ -44,6 +47,11 @@ public class CollectionMethodsTest {
     assertEquals(List.of((short) 1, (short) 2, (short) 3), asList(new short[] {1, 2, 3}));
     assertEquals(List.of((byte) 1, (byte) 2, (byte) 3), asList(new byte[] {1, 2, 3}));
     assertEquals(List.of((char) 1, (char) 2, (char) 3), asList(new char[] {1, 2, 3}));
+    Set<Integer> s = new LinkedHashSet<>();
+    s.add(1);
+    s.add(2);
+    s.add(3);
+    assertEquals(List.of(1, 2, 3), asList(s));
     assertEquals(
         List.of(Boolean.TRUE, Boolean.FALSE, Boolean.TRUE),
         asList(new boolean[] {true, false, true}));
@@ -53,55 +61,55 @@ public class CollectionMethodsTest {
   }
 
   @Test
-  public void sublistA() {
+  public void sublist00() {
     List<String> chars = List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     assertEquals("234", concat(sublist(chars, 2, 3)));
   }
 
   @Test
-  public void sublistB() {
+  public void sublist01() {
     List<String> chars = List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     assertEquals("234", concat(sublist(chars, 4, -3)));
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void sublistC() {
+  public void sublist02() {
     List<String> chars = List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     sublist(chars, 4, -50);
   }
 
   @Test
-  public void sublistD() {
+  public void sublist03() {
     List<String> chars = List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     assertEquals("89", concat(sublist(chars, -2, 2)));
   }
 
   @Test
-  public void sublistE() {
+  public void sublist04() {
     List<String> chars = List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     assertEquals("78", concat(sublist(chars, -2, -2)));
   }
 
   @Test
-  public void sublistF() {
+  public void sublist05() {
     List<String> chars = List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     assertEquals("4567", concat(sublist(chars, -3, -4)));
   }
 
   @Test
-  public void sublistG() {
+  public void sublist06() {
     List<String> chars = List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     assertEquals("", concat(sublist(chars, 10, 0)));
   }
 
   @Test
-  public void sublistH() {
+  public void sublist07() {
     List<String> chars = List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     assertEquals("", concat(sublist(chars, 9, 0)));
   }
 
   @Test
-  public void sublistI() {
+  public void sublist08() {
     List<String> chars = List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     assertEquals("", concat(sublist(chars, 0, 0)));
   }
@@ -131,6 +139,92 @@ public class CollectionMethodsTest {
   }
 
   @Test
+  public void implode04() {
+    assertEquals("0, 1, 2", implode(List.of("0", "1", "2")));
+  }
+
+  @Test
+  public void implode05() {
+    assertEquals("0, 1", implode(List.of("0", "1", "2"), 2));
+  }
+
+  @Test
+  public void implode06() {
+    assertEquals("0|1|2", implode(List.of("0", "1", "2"), "|", 20));
+  }
+
+  @Test
+  public void implode07() {
+    Set<Integer> s = new LinkedHashSet<>();
+    s.add(1);
+    s.add(2);
+    s.add(3);
+    assertEquals("2|3", implode(s, toStr(), "|", 1, 20));
+  }
+
+  @Test
+  public void implode08() {
+    Set<Integer> s = new LinkedHashSet<>();
+    s.add(1);
+    s.add(2);
+    s.add(3);
+    assertEquals("2|3", implode(s, toStr(), "|", 1, -1));
+  }
+
+  @Test
+  public void implode09() {
+    List<Integer> l = List.of(1, 2, 3);
+    assertEquals("2|3", implode(l, toStr(), "|", 1, -1));
+  }
+
+  @Test
+  public void initializeList00() {
+    List<String> l = initializeList("FOO", 5);
+    assertEquals(List.of("FOO", "FOO", "FOO", "FOO", "FOO"), l);
+  }
+
+  @Test
+  public void initializeList01() {
+    List<String> l = initializeList("FOO", 0);
+    assertEquals(List.of(), l);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void initializeList02() {
+    initializeList(null, 5);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void initializeList03() {
+    initializeList("FOO", -1);
+  }
+
+  @Test
+  public void initializeMap00() {
+    Map<String, Integer> m = initializeMap(10, "a", 1, "b", 2, "c", null);
+    assertEquals(3, m.size());
+    assertEquals(Integer.valueOf(1), m.get("a"));
+    assertEquals(Integer.valueOf(2), m.get("b"));
+    assertTrue(m.containsKey("c"));
+    assertNull(m.get("c"));
+  }
+
+  @Test
+  public void initializeMap01() {
+    Map<String, Integer> m = initializeMap(1, "a", 1, "b", 2, "c", null);
+    assertEquals(3, m.size());
+    assertEquals(Integer.valueOf(1), m.get("a"));
+    assertEquals(Integer.valueOf(2), m.get("b"));
+    assertTrue(m.containsKey("c"));
+    assertNull(m.get("c"));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void initializeMap02() {
+    initializeMap(0, "a", new File("/"), "b", 2, "c", null);
+  }
+
+  @Test
   public void freeze00() {
     Map<String, Integer> src = initializeMap(10, "foo", 1, "bar", 2, "baz", 3);
     Map<String, String> map0 = freeze(src, String::valueOf);
@@ -141,27 +235,75 @@ public class CollectionMethodsTest {
   }
 
   @Test
-  public void freezeIntoList00() {
+  public void freeze01() {
+    Map<Integer, Integer> src = initializeMap(10, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6);
+    Map<Integer, Integer> out =
+        freeze(
+            src,
+            (k, v) -> {
+              if (k % 3 == 0) {
+                return k;
+              }
+              return v * 2;
+            });
+    Map<Integer, Integer> expected = initializeMap(10, 1, 2, 2, 4, 3, 3, 4, 8, 5, 10, 6, 6);
+    assertEquals(expected, out);
+  }
+
+  @Test
+  public void freeze02() {
+    List<Integer> out = freeze(List.of(1, 2, 3), i -> -i);
+    assertEquals(List.of(-1, -2, -3), out);
+  }
+
+  @Test
+  public void freeze03() {
+    Set<Integer> out = freeze(Set.of(1, 2, 3), i -> -i);
+    assertEquals(Set.of(-1, -2, -3), out);
+  }
+
+  @Test(expected = FileNotFoundException.class)
+  public void freeze04() throws FileNotFoundException {
+    freeze(
+        Set.of(1, 2, 3),
+        i -> {
+          if (i == 2) {
+            throw new FileNotFoundException();
+          }
+          return 1;
+        });
+  }
+
+  @Test
+  public void deepFreeze00() {
+    Map<Integer, String> src = initializeMap(10, 1, "foo", 2, "bar", 3, "baz");
+    Map<Integer, Integer> out = deepFreeze(src, e -> Map.entry(e.getValue().length(), e.getKey()));
+    assertEquals(1, out.size());
+    assertTrue(out.containsKey(3));
+  }
+
+  @Test
+  public void collectionToList00() {
     List<Integer> src = Arrays.asList(1, 2, 3);
-    List<Integer> list0 = freezeIntoList(src, i -> i * 2);
+    List<Integer> list0 = collectionToList(src, i -> i * 2);
     assertEquals(List.of(2, 4, 6), list0);
-    List<String> list1 = freezeIntoList(src, String::valueOf);
+    List<String> list1 = collectionToList(src, String::valueOf);
     assertEquals(List.of("1", "2", "3"), list1);
   }
 
   @Test
-  public void freezeIntoSet00() {
+  public void collectionToSet00() {
     List<Integer> src = Arrays.asList(1, 2, 3);
-    Set<Integer> set0 = freezeIntoSet(src, i -> i * 2);
+    Set<Integer> set0 = collectionToSet(src, i -> i * 2);
     assertEquals(Set.of(2, 4, 6), set0);
-    Set<String> set1 = freezeIntoSet(src, String::valueOf);
+    Set<String> set1 = collectionToSet(src, String::valueOf);
     assertEquals(Set.of("1", "2", "3"), set1);
   }
 
   @Test
-  public void freezeIntoMap00() {
+  public void collectionToMap00() {
     List<Integer> src = Arrays.asList(1, 2, 3);
-    Map<String, Integer> map0 = freezeIntoMap(src, i -> String.valueOf(i * 2));
+    Map<String, Integer> map0 = collectionToMap(src, i -> String.valueOf(i * 2));
     Map<String, Integer> expected = Map.of("2", 1, "4", 2, "6", 3);
     assertEquals(expected, map0);
   }
@@ -202,5 +344,26 @@ public class CollectionMethodsTest {
     Map<String, Integer> src = new HashMap<>(Map.of("a", 1, "b", 2, "c", 3));
     src.put("4", null);
     swapAndFreeze(src);
+  }
+
+  @Test
+  public void saturatedEnumMap00() {
+    Map<DayOfWeek, String> m =
+        saturatedEnumMap(
+            DayOfWeek.class,
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday");
+    Arrays.stream(DayOfWeek.values())
+        .forEach(dow -> assertEquals(dow.name().toLowerCase(), m.get(dow)));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void saturatedEnumMap01() {
+    saturatedEnumMap(DayOfWeek.class, "monday", "tuesday", "saturday", "sunday");
   }
 }
