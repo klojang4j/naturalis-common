@@ -2,14 +2,14 @@ package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
-import static nl.naturalis.common.ArrayMethods.*;
+import static nl.naturalis.common.ArrayMethods.END_INDEX;
+import static nl.naturalis.common.ArrayMethods.START_INDEX;
 import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.ObjectMethods.ifTrue;
-import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
@@ -1121,7 +1121,7 @@ public final class StringMethods {
    * @param from The start index within {@code string} (may be negative)
    * @return The substring
    */
-  public static String substring(String str, int from) {
+  public static String substr(String str, int from) {
     Check.notNull(str, "str");
     int sz = str.length();
     if (from < 0) {
@@ -1140,31 +1140,74 @@ public final class StringMethods {
    *
    * <ol>
    *   <li>If {@code from} is negative, it is taken relative to the end of the string.
-   *   <li>If {@code length} is negative, the substring is taken in the opposite direction, with
-   *       {@code from} now becoming the <i>last</i> character of the substring.
+   *   <li>If {@code length} is negative, the substring is taken in the opposite direction, with the
+   *       character at {@code from} now becoming the <i>last</i> character of the substring.
    * </ol>
    *
+   * @see CollectionMethods#sublist(List, int, int)
    * @param str The {@code String} to extract a substring from. <i>Must not be null.</i>
    * @param from The start index within {@code string} (may be negative)
    * @param length The desired length of the substring
    * @return The substring
    */
-  public static String substring(String str, int from, int length) {
+  public static String substr(String str, int from, int length) {
     Check.notNull(str, "str");
     int sz = str.length();
+    int start;
     if (from < 0) {
-      from = Check.that(sz + from, START_INDEX).is(gte(), 0).intValue();
+      start = from + sz;
+      Check.that(start, START_INDEX).is(gte(), 0);
     } else {
-      Check.that(from, START_INDEX).is(lte(), sz);
+      start = from;
+      Check.that(start, START_INDEX).is(lte(), sz);
     }
-    int to;
+    int end;
     if (length >= 0) {
-      to = Check.that(from + length, END_INDEX).is(lte(), sz).intValue();
+      end = start + length;
     } else {
-      to = Check.that(from + 1, END_INDEX).is(lte(), sz).intValue();
-      from = Check.that(to + length, START_INDEX).is(gte(), 0).intValue();
+      end = start + 1;
+      start = end + length;
+      Check.that(start, START_INDEX).is(gte(), 0);
     }
-    return str.substring(from, to);
+    Check.that(end, END_INDEX).is(lte(), sz);
+    return str.substring(start, end);
+  }
+
+  /**
+   * Returns the index of the nth occurrence of the specified substring within {@code subject}. If
+   * {@code subject} is {@code null}, or if there is no nth occurrence of the specified substring,
+   * the return value will be -1.
+   *
+   * @param subject The string to search
+   * @param substr The substring to search for (must not be null or empty)
+   * @param occurrence The occurrence number of the substring (1 means: get index of 1st occurrence)
+   * @return The index of the nth occurrence of the specified substring
+   */
+  public static int indexOf(Object subject, String substr, int occurrence) {
+    Check.that(substr, "search").isNot(empty());
+    Check.that(occurrence, "occurrence").is(gt(), 0);
+    if (subject == null) {
+      return -1;
+    }
+    String str = subject.toString();
+    if (substr.length() == 1) {
+      char c = substr.charAt(0);
+      for (int i = 0; i < str.length(); ++i) {
+        if (str.charAt(i) == c && --occurrence == 0) {
+          return i;
+        }
+      }
+      return -1;
+    }
+    int idx = str.indexOf(substr);
+    while (--occurrence > 0) {
+      int from = idx + substr.length();
+      if (from > str.length() - substr.length()) {
+        return -1;
+      }
+      idx = str.indexOf(substr, from);
+    }
+    return idx;
   }
 
   /**
@@ -1184,42 +1227,21 @@ public final class StringMethods {
    * sequence, or the entire string if it does not contain that character sequence.
    *
    * @param str The string to take a substring from
-   * @param from The character sequence from which to take the substring
+   * @param search The character sequence from which to take the substring
    * @param last Whether to use the first of last occurrence of {@code from}
    * @return The substring
    */
-  public static String substrFrom(String str, String from, boolean last) {
+  public static String substrFrom(String str, String search, boolean last) {
     Check.notNull(str, "str");
-    Check.that(from, "from").isNot(empty());
-    int i = last ? str.lastIndexOf(from) : str.indexOf(from);
+    Check.that(search, "search").isNot(empty());
+    int i = last ? str.lastIndexOf(search) : str.indexOf(search);
     return i == -1 ? str : str.substring(i);
   }
 
-  /**
-   * Returns everything from (including) the first occurrence of the specified character, or the
-   * entire string if it does not contain that character.
-   *
-   * @param str The string to take a substring from
-   * @param from The character up to which to take the substring
-   * @return The substring
-   */
-  public static String substrFrom(String str, char from) {
-    return substrFrom(str, from, false);
-  }
-
-  /**
-   * Returns everything from (including) the first or last occurrence of the specified character, or
-   * the entire string if it does not contain that character.
-   *
-   * @param str The string to take a substring from
-   * @param from The character up to which to take the substring
-   * @param last Whether to use the first of last occurrence of {@code to}
-   * @return The substring
-   */
-  public static String substrFrom(String str, char from, boolean last) {
+  public static String substrFrom(String str, String search, int occurrence) {
     Check.notNull(str, "str");
-    int i = last ? str.lastIndexOf(from) : str.indexOf(from);
-    return i == -1 ? str : str.substring(i);
+    Check.that(search, "search").isNot(empty());
+    return null;
   }
 
   /**
@@ -1253,33 +1275,6 @@ public final class StringMethods {
   }
 
   /**
-   * Returns everything after (not including) the first occurrence of the specified character, or
-   * the entire string if it does not contain that character.
-   *
-   * @param str The string to take a substring from
-   * @param after The character after which to take the substring
-   * @return The substring
-   */
-  public static String substrAfter(String str, char after) {
-    return substrAfter(str, after, false);
-  }
-
-  /**
-   * Returns everything after (not including) the first or last occurrence of the specified
-   * character, or the entire string if it does not contain that character.
-   *
-   * @param str The string to take a substring from
-   * @param after The character after which to take the substring
-   * @param last Whether to use the first of last occurrence of {@code after}
-   * @return The substring
-   */
-  public static String substrAfter(String str, char after, boolean last) {
-    Check.notNull(str, "str");
-    int i = last ? str.lastIndexOf(after) : str.indexOf(after);
-    return i == str.length() - 1 ? EMPTY : i == -1 ? str : str.substring(i + 1);
-  }
-
-  /**
    * Returns the substring up to (and not including) the first occurrence of the specified
    * character, or the entire string if it does not contain that character.
    *
@@ -1287,8 +1282,8 @@ public final class StringMethods {
    * @param to The character sequence up to which to take the substring
    * @return The substring
    */
-  public static String substrTo(String str, String to) {
-    return substrTo(str, to, false);
+  public static String substrBefore(String str, String to) {
+    return substrBefore(str, to, false);
   }
 
   /**
@@ -1300,50 +1295,11 @@ public final class StringMethods {
    * @param last Whether to use the first of last occurrence of {@code to}
    * @return The substring
    */
-  public static String substrTo(String str, String to, boolean last) {
+  public static String substrBefore(String str, String to, boolean last) {
     Check.notNull(str, "str");
     Check.that(to, "to").isNot(empty());
     int i = last ? str.lastIndexOf(to) : str.indexOf(to);
     return i == -1 ? str : str.substring(0, i);
-  }
-
-  /**
-   * Returns everything up to (not including) the first occurrence of the specified character within
-   * the string, or the entire string if it does not contain that character.
-   *
-   * @param str The string to take a substring from
-   * @param to The character up to which to take the substring
-   * @return The substring
-   */
-  public static String substrTo(String str, char to) {
-    return substrTo(str, to, false);
-  }
-
-  /**
-   * Returns everything up to (not including) the first or last occurrence of the specified
-   * character within the string, or the entire string if it does not contain that character.
-   *
-   * @param str The string to take a substring from
-   * @param to The character up to which to take the substring
-   * @param last Whether to use the first of last occurrence of {@code to}
-   * @return The substring
-   */
-  public static String substrTo(String str, char to, boolean last) {
-    Check.notNull(str, "str");
-    int i = last ? str.lastIndexOf(to) : str.indexOf(to);
-    return i == -1 ? str : str.substring(0, i);
-  }
-
-  public static String substrTo(String str, char c, int occurrence) {
-    Check.notNull(str, "str");
-    Check.that(occurrence, "occurrence").is(gt(), 0);
-    int x = occurrence;
-    for (int i = 0; i < str.length(); ++i) {
-      if (str.charAt(i) == c && --x == 0) {
-        return str.substring(0, i);
-      }
-    }
-    return fail("Occurrences of '%s' in \"%s\": %d. Expected: %d.", c, str, x, occurrence);
   }
 
   /**

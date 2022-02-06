@@ -225,7 +225,7 @@ public class CheckTest {
     Employee emp = new Employee();
     emp.setId(3);
     emp.setFullName("John Smith");
-    Check.that(emp, "emp").has(toStr(), equalTo(), "John Smith (3)");
+    Check.that(emp, "emp").has(asString(), equalTo(), "John Smith (3)");
   }
 
   @Test

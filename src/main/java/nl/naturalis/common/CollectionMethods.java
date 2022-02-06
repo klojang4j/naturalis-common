@@ -14,8 +14,7 @@ import java.util.stream.Stream;
 
 import static java.util.Map.Entry;
 import static java.util.stream.Collectors.*;
-import static nl.naturalis.common.ArrayMethods.DEFAULT_IMPLODE_SEPARATOR;
-import static nl.naturalis.common.ArrayMethods.START_INDEX;
+import static nl.naturalis.common.ArrayMethods.*;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.*;
 
@@ -157,10 +156,10 @@ public class CollectionMethods {
     int start;
     if (from < 0) {
       start = from + sz;
-      Check.that(start, "start index").is(gte(), 0);
+      Check.that(start, START_INDEX).is(gte(), 0);
     } else {
       start = from;
-      Check.that(start, "start index").is(lte(), sz);
+      Check.that(start, START_INDEX).is(lte(), sz);
     }
     int end;
     if (length >= 0) {
@@ -170,7 +169,7 @@ public class CollectionMethods {
       start = end + length;
       Check.that(start, START_INDEX).is(gte(), 0);
     }
-    Check.that(end, "end index").is(lte(), sz);
+    Check.that(end, END_INDEX).is(lte(), sz);
     return list.subList(start, end);
   }
   /**

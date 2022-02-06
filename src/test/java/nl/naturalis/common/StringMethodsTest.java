@@ -35,44 +35,44 @@ public class StringMethodsTest {
   @Test
   public void count01() {
     String s = "This is This is This is BLISS!";
-    assertEquals("01", 3, count(s, "This is"));
-    assertEquals("02", 6, count(s, "is"));
-    assertEquals("03", 7, count(s, "is", true));
+    assertEquals(3, count(s, "This is"));
+    assertEquals(6, count(s, "is"));
+    assertEquals(7, count(s, "is", true));
     s = "aaaaaa";
-    assertEquals("03", 5, count(s, "aa"));
+    assertEquals(5, count(s, "aa"));
   }
 
   @Test
   public void countDiscrete01() {
     String s = "This is This is This is BLISS!";
-    assertEquals("01", 3, countDiscrete(s, "This is"));
-    assertEquals("02", 6, countDiscrete(s, "is"));
-    assertEquals("03", 7, countDiscrete(s, "is", true));
+    assertEquals(3, countDiscrete(s, "This is"));
+    assertEquals(6, countDiscrete(s, "is"));
+    assertEquals(7, countDiscrete(s, "is", true));
     s = "aaaaaa";
-    assertEquals("03", 3, countDiscrete(s, "aa"));
+    assertEquals(3, countDiscrete(s, "aa"));
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void duration01() {
     String s = interval(1000L, 10001L);
-    assertEquals("01", "00:00:09.001", s);
+    assertEquals("00:00:09.001", s);
     s = interval(1000L, 40080L);
-    assertEquals("02", "00:00:39.080", s);
+    assertEquals("00:00:39.080", s);
     s = interval(1000L, 3641689L);
-    assertEquals("03", "01:00:40.689", s);
+    assertEquals("01:00:40.689", s);
     s = interval(1000L, 123641689L);
-    assertEquals("04", "34:20:40.689", s);
+    assertEquals("34:20:40.689", s);
     s = interval(1000L, 5123641689L);
-    assertEquals("05", "1423:14:00.689", s);
+    assertEquals("1423:14:00.689", s);
     s = interval(1000L, 995123641689L);
-    assertEquals("05", "276423:14:00.689", s);
+    assertEquals("276423:14:00.689", s);
     s = interval(1000L, 1000L);
-    assertEquals("05", "00:00:00.000", s);
+    assertEquals("00:00:00.000", s);
     s = interval(9000L, 1000L); // Negative time interval
   }
 
   @Test
-  public void ellipsis_01() {
+  public void ellipsis01() {
     String hello = "Hello World, how are you?";
     assertEquals("Hello W...", ellipsis(hello, 10));
     assertEquals("H...", ellipsis(hello, 4));
@@ -80,105 +80,143 @@ public class StringMethodsTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void ellipsis_02() {
+  public void ellipsis02() {
     // maxWidth must be greater than the length of the ellipsis dots (3)
     assertEquals("Hello W...", ellipsis("Hello World, how are you?", 3));
   }
 
   @Test
-  public void endsWith_01() {
+  public void endsWith01() {
     String s = "The cat is both dead and alive";
-    assertTrue("01", null != endsWith(s, true, "ALIVE", "test"));
-    assertTrue("02", null != endsWith(s, true, "test", "ALIVE"));
-    assertTrue("03", null != endsWith(s, true, "test", "a", "b", "ALIVE", "c"));
-    assertTrue("04", null == endsWith(s, false, "DEAD", "ALIVE"));
-    assertTrue("05", null == endsWith(s, true, "dead", "and"));
+    assertTrue(null != endsWith(s, true, "ALIVE", "test"));
+    assertTrue(null != endsWith(s, true, "test", "ALIVE"));
+    assertTrue(null != endsWith(s, true, "test", "a", "b", "ALIVE", "c"));
+    assertTrue(null == endsWith(s, false, "DEAD", "ALIVE"));
+    assertTrue(null == endsWith(s, true, "dead", "and"));
   }
 
   @Test
-  public void substr_2args01() {
-    assertEquals("05", "ever", substring("whatever", -4));
-    assertEquals("05", "ever", substring("whatever", 4));
-    assertEquals("06", "tever", substring("whatever", -5));
-    assertEquals("07", "ver", substring("whatever", 5));
+  public void substr00() {
+    assertEquals("ever", substr("whatever", -4));
+    assertEquals("ever", substr("whatever", 4));
+    assertEquals("tever", substr("whatever", -5));
+    assertEquals("ver", substr("whatever", 5));
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void substr_2args02() {
-    substring("", -1);
+  public void substr01() {
+    substr("", -1);
   }
 
   @Test
-  public void substr_3args01() {
-    assertEquals("01", "", substring("", 0, 0));
-    assertEquals("02", "what", substring("whatever", 0, 4));
-    assertEquals("03", "ever", substring("whatever", -4, 4));
-    assertEquals("04", "eve", substring("whatever", -4, 3));
-    assertEquals("05", "e", substring("whatever", -4, 1));
-    assertEquals("06", "e", substring("whatever", 4, 1));
-    assertEquals("07", "", substring("whatever", 0, 0));
-    assertEquals("08", "", substring("whatever", 1, 0));
-    assertEquals("09", "", substring("whatever", 7, 0));
-    assertEquals("10", "r", substring("whatever", 7, 1));
+  public void substr02() {
+    assertEquals("", substr("", 0, 0));
+    assertEquals("what", substr("whatever", 0, 4));
+    assertEquals("ever", substr("whatever", -4, 4));
+    assertEquals("eve", substr("whatever", -4, 3));
+    assertEquals("e", substr("whatever", -4, 1));
+    assertEquals("e", substr("whatever", 4, 1));
+    assertEquals("", substr("whatever", 0, 0));
+    assertEquals("", substr("whatever", 1, 0));
+    assertEquals("", substr("whatever", 7, 0));
+    assertEquals("r", substr("whatever", 7, 1));
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void substr_3args02() {
-    substring("whatever", 250, 3);
+  public void substr03() {
+    substr("whatever", 250, 3);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void substr_3args03() {
-    substring("whatever", -4, 250);
+  public void substr04() {
+    substr("whatever", -4, 250);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void substr_3args04() {
-    substring("whatever", -250, 4);
+  public void substr05() {
+    substr("whatever", -250, 4);
   }
 
   @Test
-  public void substr_3args05() {
-    assertEquals("01", "w", substring("whatever", 0, -1));
-    assertEquals("02", "h", substring("whatever", 1, -1));
-    assertEquals("03", "ha", substring("whatever", 2, -2));
-    assertEquals("04", "hate", substring("whatever", 4, -4));
-    assertEquals("05", "r", substring("whatever", 7, -1));
-    assertEquals("06", "r", substring("whatever", -1, -1));
-    assertEquals("07", "er", substring("whatever", -1, -2));
-    assertEquals("08", "eve", substring("whatever", -2, -3));
+  public void substr06() {
+    assertEquals("w", substr("whatever", 0, -1));
+    assertEquals("h", substr("whatever", 1, -1));
+    assertEquals("ha", substr("whatever", 2, -2));
+    assertEquals("hate", substr("whatever", 4, -4));
+    assertEquals("r", substr("whatever", 7, -1));
+    assertEquals("r", substr("whatever", -1, -1));
+    assertEquals("er", substr("whatever", -1, -2));
+    assertEquals("eve", substr("whatever", -2, -3));
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void substr_3args06() {
-    substring("whatever", 2, -100);
+  public void substr07() {
+    substr("whatever", 2, -100);
   }
 
   @Test
-  public void ltrim_one_char() {
-    assertEquals("01", "", ltrim(null, 'a'));
-    assertEquals("02", "", ltrim("", 'a'));
-    assertEquals("03", "", ltrim("a", 'a'));
-    assertEquals("04", "", ltrim("aa", 'a'));
-    assertEquals("05", "", ltrim("aaa", 'a'));
-    assertEquals("06", "b", ltrim("b", 'a'));
-    assertEquals("07", "b", ltrim("aaab", 'a'));
-    assertEquals("08", "bb", ltrim("aaabb", 'a'));
-    assertEquals("09", "bb", ltrim("bb", 'a'));
-    assertEquals("10", "bba", ltrim("bba", 'a'));
-    assertEquals("11", "bbaa", ltrim("bbaa", 'a'));
+  public void indexOf00() {
+    assertEquals(0, indexOf("012345678901234", "0", 1));
+    assertEquals(0, indexOf("012345678901234", "012", 1));
+    assertEquals(0, indexOf("012345678901234", "0123456", 1));
+
+    assertEquals(10, indexOf("012345678901234", "0", 2));
+    assertEquals(10, indexOf("012345678901234", "012", 2));
+    assertEquals(-1, indexOf("012345678901234", "0123456", 2));
+
+    assertEquals(20, indexOf("01234567890123456789012", "0", 3));
+    assertEquals(20, indexOf("01234567890123456789012", "012", 3));
+    assertEquals(-1, indexOf("01234567890123456789012", "0123", 3));
+
+    assertEquals(9, indexOf("01234567890123456789012", "9", 1));
+    assertEquals(9, indexOf("01234567890123456789012", "90", 1));
+
+    assertEquals(-1, indexOf(null, "0123", 1));
+    assertEquals(-1, indexOf("", "0123", 1));
+    assertEquals(0, indexOf("0", "0", 1));
+    assertEquals(0, indexOf("01", "01", 1));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void indexOf01() {
+    indexOf("01345", null, 1);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void indexOf02() {
+    indexOf("01345", "", 1);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void indexOf03() {
+    indexOf("01345", "1", 0);
+  }
+
+  @Test
+  public void ltrim_char() {
+    assertEquals("", ltrim(null, 'a'));
+    assertEquals("", ltrim("", 'a'));
+    assertEquals("", ltrim("a", 'a'));
+    assertEquals("", ltrim("aa", 'a'));
+    assertEquals("", ltrim("aaa", 'a'));
+    assertEquals("b", ltrim("b", 'a'));
+    assertEquals("b", ltrim("aaab", 'a'));
+    assertEquals("bb", ltrim("aaabb", 'a'));
+    assertEquals("bb", ltrim("bb", 'a'));
+    assertEquals("bba", ltrim("bba", 'a'));
+    assertEquals("bbaa", ltrim("bbaa", 'a'));
   }
 
   @Test
   public void ltrim_string() {
-    assertEquals("01", "", ltrim(null, "a"));
-    assertEquals("02", "", ltrim("", "abc"));
-    assertEquals("03", "", ltrim("a", "abc"));
-    assertEquals("04", "", ltrim("ab", "abc"));
-    assertEquals("05", "", ltrim("abc", "abc"));
-    assertEquals("06", "", ltrim("acb", "abc"));
-    assertEquals("07", "db", ltrim("adb", "abc"));
-    assertEquals("07", "da", ltrim("abcda", "abc"));
+    assertEquals("", ltrim(null, "a"));
+    assertEquals("", ltrim("", "abc"));
+    assertEquals("", ltrim("a", "abc"));
+    assertEquals("", ltrim("ab", "abc"));
+    assertEquals("", ltrim("abc", "abc"));
+    assertEquals("", ltrim("acb", "abc"));
+    assertEquals("db", ltrim("adb", "abc"));
+    assertEquals("da", ltrim("abcda", "abc"));
   }
 
   @Test
@@ -188,41 +226,41 @@ public class StringMethodsTest {
   }
 
   @Test
-  public void rtrim01() {
-    assertEquals("01", "", ltrim(null, 'a'));
-    assertEquals("02", "", rtrim("", 'a'));
-    assertEquals("03", "", rtrim("a", 'a'));
-    assertEquals("04", "", rtrim("aa", 'a'));
-    assertEquals("05", "", rtrim("aaa", 'a'));
-    assertEquals("06", "b", rtrim("b", 'a'));
-    assertEquals("07", "b", rtrim("baaa", 'a'));
-    assertEquals("08", "bb", rtrim("bbaaa", 'a'));
-    assertEquals("09", "bb", rtrim("bb", 'a'));
-    assertEquals("10", "abb", rtrim("abb", 'a'));
-    assertEquals("11", "aabb", rtrim("aabb", 'a'));
+  public void rtrim00() {
+    assertEquals("", ltrim(null, 'a'));
+    assertEquals("", rtrim("", 'a'));
+    assertEquals("", rtrim("a", 'a'));
+    assertEquals("", rtrim("aa", 'a'));
+    assertEquals("", rtrim("aaa", 'a'));
+    assertEquals("b", rtrim("b", 'a'));
+    assertEquals("b", rtrim("baaa", 'a'));
+    assertEquals("bb", rtrim("bbaaa", 'a'));
+    assertEquals("bb", rtrim("bb", 'a'));
+    assertEquals("abb", rtrim("abb", 'a'));
+    assertEquals("aabb", rtrim("aabb", 'a'));
   }
 
   @Test
+  public void rtrim01() {
+    assertEquals("", ltrim(null, "a"));
+    assertEquals("", rtrim("", "a"));
+    assertEquals("", rtrim("a", "a"));
+    assertEquals("", rtrim("aab", "ab"));
+    assertEquals("", rtrim("aab", "ba"));
+    assertEquals("", rtrim("aab", "cba"));
+    assertEquals("aabd", rtrim("aabd", "cba"));
+    assertEquals("aab", rtrim("aabdef", "fde"));
+    assertEquals("a", rtrim("abdef", "gfdeb"));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
   public void rtrim02() {
-    assertEquals("01", "", ltrim(null, "a"));
-    assertEquals("02", "", rtrim("", "a"));
-    assertEquals("03", "", rtrim("a", "a"));
-    assertEquals("04", "", rtrim("aab", "ab"));
-    assertEquals("05", "", rtrim("aab", "ba"));
-    assertEquals("06", "", rtrim("aab", "cba"));
-    assertEquals("07", "aabd", rtrim("aabd", "cba"));
-    assertEquals("08", "aab", rtrim("aabdef", "fde"));
-    assertEquals("09", "a", rtrim("abdef", "gfdeb"));
+    assertEquals("", rtrim("a", null));
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void rtrim03() {
-    assertEquals("01", "", rtrim("a", null));
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void rtrim04() {
-    assertEquals("01", "", rtrim("a", ""));
+    assertEquals("", rtrim("a", ""));
   }
 
   @Test
@@ -241,83 +279,80 @@ public class StringMethodsTest {
 
   @Test
   public void lpad01() {
-    assertEquals("01", "hello", lpad("hello", 5));
-    assertEquals("02", " hello", lpad("hello", 6));
-    assertEquals("03", "  hello", lpad("hello", 7));
-    assertEquals("04", "       ", lpad("", 7));
-    assertEquals("05", "       ", lpad(null, 7));
-    assertEquals("06", "hello", lpad("hello", 0));
+    assertEquals("hello", lpad("hello", 5));
+    assertEquals(" hello", lpad("hello", 6));
+    assertEquals("  hello", lpad("hello", 7));
+    assertEquals("       ", lpad("", 7));
+    assertEquals("       ", lpad(null, 7));
+    assertEquals("hello", lpad("hello", 0));
   }
 
   @Test
   public void lpad02() {
-    assertEquals("01", "hello|", lpad("hello", 5, '.', "|"));
-    assertEquals("02", ".hello|", lpad("hello", 6, '.', "|"));
-    assertEquals("03", "..hello|", lpad("hello", 7, '.', "|"));
-    assertEquals("04", ".......|", lpad("", 7, '.', "|"));
-    assertEquals("05", ".......|", lpad(null, 7, '.', "|"));
-    assertEquals("06", "hello|", lpad("hello", 0, '.', "|"));
+    assertEquals("hello|", lpad("hello", 5, '.', "|"));
+    assertEquals(".hello|", lpad("hello", 6, '.', "|"));
+    assertEquals("..hello|", lpad("hello", 7, '.', "|"));
+    assertEquals(".......|", lpad("", 7, '.', "|"));
+    assertEquals(".......|", lpad(null, 7, '.', "|"));
+    assertEquals("hello|", lpad("hello", 0, '.', "|"));
   }
 
   @Test
   public void rpad01() {
-    assertEquals("01", "hello", rpad("hello", 5));
-    assertEquals("02", "hello ", rpad("hello", 6));
-    assertEquals("03", "hello  ", rpad("hello", 7));
-    assertEquals("04", "       ", rpad("", 7));
-    assertEquals("05", "       ", rpad(null, 7));
-    assertEquals("06", "hello", rpad("hello", 0));
+    assertEquals("hello", rpad("hello", 5));
+    assertEquals("hello ", rpad("hello", 6));
+    assertEquals("hello  ", rpad("hello", 7));
+    assertEquals("       ", rpad("", 7));
+    assertEquals("       ", rpad(null, 7));
+    assertEquals("hello", rpad("hello", 0));
   }
 
   @Test
   public void rpad02() {
-    assertEquals("01", "hello|", rpad("hello", 5, '.', "|"));
-    assertEquals("02", "hello.|", rpad("hello", 6, '.', "|"));
-    assertEquals("03", "hello..|", rpad("hello", 7, '.', "|"));
-    assertEquals("04", ".......|", rpad("", 7, '.', "|"));
-    assertEquals("05", ".......|", rpad(null, 7, '.', "|"));
-    assertEquals("06", "hello|", rpad("hello", 0, '.', "|"));
+    assertEquals("hello|", rpad("hello", 5, '.', "|"));
+    assertEquals("hello.|", rpad("hello", 6, '.', "|"));
+    assertEquals("hello..|", rpad("hello", 7, '.', "|"));
+    assertEquals(".......|", rpad("", 7, '.', "|"));
+    assertEquals(".......|", rpad(null, 7, '.', "|"));
+    assertEquals("hello|", rpad("hello", 0, '.', "|"));
   }
 
   @Test
   public void pad01() {
-    assertEquals("01", "hello", pad("hello", 5));
-    assertEquals("02", "hello ", pad("hello", 6));
-    assertEquals("03", " hello ", pad("hello", 7));
-    assertEquals("04", " hello  ", pad("hello", 8));
-    assertEquals("05", "  hello  ", pad("hello", 9));
-    assertEquals("06", "hello", pad("hello", 0));
+    assertEquals("hello", pad("hello", 5));
+    assertEquals("hello ", pad("hello", 6));
+    assertEquals(" hello ", pad("hello", 7));
+    assertEquals(" hello  ", pad("hello", 8));
+    assertEquals("  hello  ", pad("hello", 9));
+    assertEquals("hello", pad("hello", 0));
   }
 
   @Test
   public void pad02() {
-    assertEquals("01", "hello|", pad("hello", 5, '.', "|"));
-    assertEquals("02", "hello.|", pad("hello", 6, '.', "|"));
-    assertEquals("03", ".hello.|", pad("hello", 7, '.', "|"));
-    assertEquals("04", ".......|", pad("", 7, '.', "|"));
-    assertEquals("05", ".......|", pad(null, 7, '.', "|"));
-    assertEquals("06", "hello|", pad("hello", 0, '.', "|"));
+    assertEquals("hello|", pad("hello", 5, '.', "|"));
+    assertEquals("hello.|", pad("hello", 6, '.', "|"));
+    assertEquals(".hello.|", pad("hello", 7, '.', "|"));
+    assertEquals(".......|", pad("", 7, '.', "|"));
+    assertEquals(".......|", pad(null, 7, '.', "|"));
+    assertEquals("hello|", pad("hello", 0, '.', "|"));
   }
 
   @Test
-  public void substrFromAfter() {
+  public void substrFrom00() {
     String input = "/home/john/tmp/test.html";
-    assertEquals("01", "home/john/tmp/test.html", substrAfter(input, '/'));
-    assertEquals("02", "home/john/tmp/test.html", substrAfter(input, "/"));
-    assertEquals("03", "john/tmp/test.html", substrFrom(input, 'j'));
-    assertEquals("04", "john/tmp/test.html", substrFrom(input, "john"));
-    assertEquals("05", "ohn/tmp/test.html", substrAfter(input, 'j'));
-    assertEquals("06", "/tmp/test.html", substrAfter(input, "john"));
-    assertEquals("07", "l", substrFrom(input, 'l'));
-    assertEquals("08", "html", substrFrom(input, "html"));
-    assertEquals("09", "", substrAfter(input, 'l'));
-    assertEquals("10", "", substrAfter(input, "html"));
-    assertEquals("11", input, substrAfter(input, 'x'));
-    assertEquals("12", input, substrAfter(input, "x"));
-    assertEquals("13", "test.html", substrAfter(input, '/', true));
-    assertEquals("14", "test.html", substrAfter(input, "/", true));
-    assertEquals("15", "/test.html", substrFrom(input, '/', true));
-    assertEquals("16", "/test.html", substrFrom(input, "/te", true));
+    assertEquals("john/tmp/test.html", substrFrom(input, "john"));
+    assertEquals("html", substrFrom(input, "html"));
+    assertEquals("/test.html", substrFrom(input, "/te", true));
+  }
+
+  @Test
+  public void substrAfter00() {
+    String input = "/home/john/tmp/test.html";
+    assertEquals("home/john/tmp/test.html", substrAfter(input, "/"));
+    assertEquals("/tmp/test.html", substrAfter(input, "john"));
+    assertEquals("", substrAfter(input, "html"));
+    assertEquals(input, substrAfter(input, "x"));
+    assertEquals("test.html", substrAfter(input, "/", true));
   }
 
   @Test

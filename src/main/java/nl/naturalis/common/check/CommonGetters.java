@@ -1,46 +1,56 @@
 package nl.naturalis.common.check;
 
-import static nl.naturalis.common.ObjectMethods.ifNotNull;
+import nl.naturalis.common.NumberMethods;
 
 import java.lang.reflect.Array;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
-import nl.naturalis.common.NumberMethods;
 
 /**
  * Defines various functions that retrieve some oft-used property of a well-known class. For
  * example: {@link Object#toString() Object::toString}. They can optionally be used as the first
  * argument to the various {@code has(...)} methods of the {@link Check} class. The advantage of
- * using these functions rather than the method references they return is that they are already
- * associated with the name of the property they expose, so generating an error message requires
- * very little hand-crafting. For example:
+ * using these functions rather than the method references they return is that they have been
+ * associated with a description of the property they expose, so generating an error message
+ * requires very little hand-crafting. For example:
  *
- * <p>
+ * <blockquote>
  *
- * <pre>
+ * <pre>{@code
  * Check.that(car, "car").has(stringValue(), equalTo(), "BMW");
  * // Error message: "car.toString() must be equal to BMW (was Toyota)"
- * </pre>
+ * }</pre>
  *
- * <p>Some functions, are in fact not really getters (no-arg methods called on the argument), but
- * rather single-argument methods which get passed the argument. For example:
+ * </blockquote>
  *
- * <p>
+ * <p>Note that the word "getter" is suggestive, but also misleading. The functions defined here
+ * really are just that: single-argument functions that get passed the argument being validated:
  *
- * <pre>
+ * <blockquote>
+ *
+ * <pre>{@code
  * Check.that(temperature, "temperature").has(abs(), lt(), 20);
  * // Error message: "abs(temperature) must be &lt; 20 (was -39)"
- * </pre>
+ * }</pre>
  *
- * <p>Most methods in this class return plain method references. <b>None of them do a preliminary
- * null-check on the argument.</b> They rely upon being embedded within in chain of checks on a
- * {@link Check} object, the first of which should be a <i>not-null</i> check.
+ * </blockquote>
+ *
+ * <p>As with the checks in the {@link CommonChecks} class, <i>none of the functions defined here
+ * execute a preliminary null check</i>. Most of them simply return a method reference. They rely
+ * upon being embedded in chain of checks on a {@link Check} object, the first of which should be
+ * the {@link CommonChecks#notNull() not-null} check. Also note that there's nothing stopping you
+ * from using the functions defined here for other purposes than precondition checking. For example:
+ *
+ * <blockquote>
+ *
+ * <pre>{@code
+ * myMap.entrySet().stream().map(e -> { some conversion }).collect(toMap(key(), value()));
+ * // in stead of:
+ * myMap.entrySet().stream().map(e -> { some conversion }).collect(toMap(Entry::getKey, Entry::getValue));
+ * }</pre>
+ *
+ * </blockquote>
  *
  * @author Ayco Holleman
  */
@@ -57,12 +67,12 @@ public class CommonGetters {
    * @param <T> The type of the object on which to call {@code toString{}}.
    * @return A {@code Function} that returns the result of calling {@code toString()} on the object.
    */
-  public static <T> Function<T, String> toStr() {
+  public static <T> Function<T, String> asString() {
     return Object::toString;
   }
 
   static {
-    tmp.put(toStr(), "%s.toString()");
+    tmp.put(asString(), "%s.toString()");
   }
 
   /**
@@ -183,6 +193,13 @@ public class CommonGetters {
     tmp.put(mapSize(), tmp.get(size())); // recycle
   }
 
+  /**
+   * A {@code Function} that returns the keys of a {@code Map}. Equivalent to {@code Map::keySet}.
+   *
+   * @param <K> The type of the keys in the map
+   * @param <V> The type of the values in the map
+   * @return A {@code Function} that returns the keys of a {@code Map}
+   */
   public static <K, V> Function<Map<K, V>, Set<? extends K>> keySet() {
     return Map::keySet;
   }
@@ -252,12 +269,12 @@ public class CommonGetters {
    * @param <T> The type of the {@code Number}
    * @return A {@code Function} that returns the absolute value of a {@code Number}
    */
-  public static <T extends Number> Function<T, T> absoluteValue() {
+  public static <T extends Number> Function<T, T> absNumber() {
     return NumberMethods::abs;
   }
 
   static {
-    tmp.put(absoluteValue(), tmp.get(abs()));
+    tmp.put(absNumber(), tmp.get(abs()));
   }
 
   /**
@@ -297,7 +314,11 @@ public class CommonGetters {
   /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
   static String formatProperty(String argName, Object getter) {
-    return ifNotNull(names.get(getter), fmt -> String.format(fmt, argName), argName + ".?");
+    String fmt = names.get(getter);
+    if (fmt == null) {
+      return argName;
+    }
+    return String.format(fmt, argName);
   }
 
   static {
