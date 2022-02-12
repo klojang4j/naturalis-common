@@ -6,19 +6,20 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import static java.lang.Character.toLowerCase;
 import static nl.naturalis.common.ArrayMethods.END_INDEX;
 import static nl.naturalis.common.ArrayMethods.START_INDEX;
 import static nl.naturalis.common.ObjectMethods.ifNull;
-import static nl.naturalis.common.ObjectMethods.ifTrue;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * Methods for working with strings. Many of them are geared towards printing strings. Instead of
- * accepting a {@code String} argument, they will take an {@code Object} (with parameter name {@code
- * subject}). If the object is {@code null}, they will return an empty string, else they will call
- * {@code toString()} on the object and manipulate the resulting {@code String}. In other words,
- * they are null-safe with respect to the string to be manipulated, and they will never return
- * {@code null} themselves.
+ * accepting a {@code String} argument, they will take an {@code Object}. The parameter name will
+ * then be "{@code subject}". If the object is {@code null}, these methods will usually return an
+ * empty string, else they will call {@code toString()} on the object and process the resulting
+ * {@code String}. In other words, these methods are null-safe with respect to the string to be
+ * processed, and they will never return {@code null} themselves. For ease of reading the {@code
+ * subject} parameter will still be referred to as a {@code String}.
  */
 public final class StringMethods {
 
@@ -267,7 +268,7 @@ public final class StringMethods {
    * @param val7 Another value
    * @param val8 Another value
    * @param val9 Another value
-   * @param moreData Some more values
+   * @param moreData More values
    * @return The {@code StringBuilder}
    */
   public static StringBuilder append(
@@ -314,58 +315,11 @@ public final class StringMethods {
   }
 
   /**
-   * Counts the number of occurrences of the specified character within the specified string.
-   * Returns 0 (zero) if {@code subject} is {@code null}.
-   *
-   * @param subject The string in which to count the number of occurrences
-   * @param c The character the search for
-   * @return The number of occurrences of the specified character within the specified string
-   */
-  public static int count(Object subject, char c) {
-    if (subject == null) {
-      return 0;
-    }
-    String str = subject.toString();
-    int x = 0;
-    for (int i = 0; i < str.length(); ++i) {
-      if (str.charAt(i) == c) {
-        ++x;
-      }
-    }
-    return x;
-  }
-
-  /**
-   * Counts the number of occurrences of the specified character within the specified string.
-   * Returns 0 (zero) if {@code subject} is {@code null}.
-   *
-   * @param subject The string in which to count the number of occurrences
-   * @param c The character the search for
-   * @param limit Imposes an upper limit on the number of occurrences to count
-   * @return The number of occurrences of the specified character within the specified string
-   */
-  public static int count(Object subject, char c, int limit) {
-    Check.that(limit).is(positive());
-    if (subject == null) {
-      return 0;
-    }
-    String str = subject.toString();
-    int x = 0;
-    for (int i = 0; i < str.length() && x < limit; ++i) {
-      if (str.charAt(i) == c) {
-        ++x;
-      }
-    }
-    return x;
-  }
-
-  /**
-   * Counts the number of occurrences of {@code substr} within {@code subject}. The string to search
-   * for (the {@code substr} argument) must not be null or empty and is not treated as a regular
-   * expression.
+   * Counts the number of occurrences of {@code substr} within {@code subject}. Returns 0 (zero) if
+   * {@code subject} is {@code null}.
    *
    * @param subject The string to search
-   * @param substr The substring to search for
+   * @param substr The substring to search for (must not be {@code null} or empty)
    * @return The number of occurrences of {@code substr} within {@code subject}
    */
   public static int count(Object subject, String substr) {
@@ -373,65 +327,132 @@ public final class StringMethods {
   }
 
   /**
-   * Counts the number of occurrences of {@code substr} within {@code subject}. The string to search
-   * for must not be null or empty and is not treated as a regular expression.
+   * Counts the number of occurrences of {@code substr} within {@code subject}. Returns 0 (zero) if
+   * {@code subject} is {@code null}.
    *
    * @param subject The string to search
-   * @param substr The substring to search for
-   * @param ignoreCase Whether to ignore case while matching {@code substr} against {@code subject}
+   * @param substr The substring to search for (must not be {@code null} or empty)
+   * @param ignoreCase Whether to ignore case while comparing substrings
    * @return The number of occurrences of {@code substr} within {@code subject}
    */
   public static int count(Object subject, String substr, boolean ignoreCase) {
+    return count(subject, substr, ignoreCase, 0);
+  }
+
+  /**
+   * Counts the number of occurrences of {@code substr} within {@code subject}. Returns 0 (zero) if
+   * {@code subject} is {@code null}.
+   *
+   * @param subject The string to search
+   * @param substr The substring to search for (must not be {@code null} or empty)
+   * @param ignoreCase Whether to ignore case while comparing substrings
+   * @param limit The maximum number of occurrences the count. You may specify 0 (zero) for "no
+   *     maximum".
+   * @return The number of occurrences of {@code substr} within {@code subject} (will not exceed
+   *     {@code limit})
+   */
+  public static int count(Object subject, String substr, boolean ignoreCase, int limit) {
     Check.that(substr, "substr").isNot(empty());
-    if (subject == null) {
+    Check.that(limit, "limit").is(gte(), 0);
+    String str;
+    if (subject == null || (str = subject.toString()).length() < substr.length()) {
       return 0;
     }
-    String str = ifTrue(ignoreCase, subject.toString(), String::toLowerCase);
-    substr = ifTrue(ignoreCase, substr, String::toLowerCase);
-    int i = 0;
-    int j = str.indexOf(substr);
-    while (j != -1) {
-      ++i;
-      j = str.indexOf(substr, j + 1);
+    if (substr.length() == 1) {
+      return count(str, substr.charAt(0), ignoreCase, limit);
     }
-    return i;
+    int count = 0;
+    for (int i = 0; i <= str.length() - substr.length(); ++i) {
+      if (str.regionMatches(ignoreCase, i, substr, 0, substr.length())) {
+        if (++count == limit) {
+          break;
+        }
+      }
+    }
+    return count;
   }
 
   /**
    * Counts the number of non-overlapping occurrences of {@code substr} within {@code subject}. The
    * string to search for must not be null or empty and is not treated as a regular expression.
+   * Returns 0 (zero) if {@code subject} is {@code null}.
    *
    * @param subject The string to search
    * @param substr The substring to search for
    * @return The number of non-overlapping occurrences of {@code substr} within {@code subject}
    */
   public static int countDiscrete(Object subject, String substr) {
-    return countDiscrete(subject, substr, false);
+    return countDiscrete(subject, substr, false, 0);
   }
 
   /**
    * Counts the number of non-overlapping occurrences of {@code substr} within {@code subject}. The
    * string to search for must not be null or empty and is not treated as a regular expression.
+   * Returns 0 (zero) if {@code subject} is {@code null}.
    *
    * @param subject The string to search
    * @param substr The substring to search for
-   * @param ignoreCase Whether to ignore case while matching {@code substr} against {@code subject}
+   * @param ignoreCase Whether to ignore case while comparing substrings
    * @return The number of non-overlapping occurrences of {@code substr} within {@code subject}
    */
   public static int countDiscrete(Object subject, String substr, boolean ignoreCase) {
+    return countDiscrete(subject, substr, ignoreCase, 0);
+  }
+
+  /**
+   * Counts the number of non-overlapping occurrences of {@code substr} within {@code subject}.
+   * Returns 0 (zero) if {@code subject} is {@code null}.
+   *
+   * @param subject The string to search
+   * @param substr The substring to search for
+   * @param ignoreCase Whether to ignore case while comparing substrings
+   * @param limit The maximum number of occurrences the count. You may specify 0 (zero) for "no
+   *     maximum".
+   * @return The number of non-overlapping occurrences of {@code substr} within {@code subject}
+   *     (will not exceed {@code limit})
+   */
+  public static int countDiscrete(Object subject, String substr, boolean ignoreCase, int limit) {
     Check.that(substr, "substr").isNot(empty());
-    if (subject == null) {
+    Check.that(limit, "limit").is(gte(), 0);
+    String str;
+    if (subject == null || (str = subject.toString()).length() < substr.length()) {
       return 0;
     }
-    String str = ifTrue(ignoreCase, subject.toString(), String::toLowerCase);
-    substr = ifTrue(ignoreCase, substr, String::toLowerCase);
-    int i = 0;
-    int j = str.indexOf(substr);
-    while (j != -1) {
-      ++i;
-      j = str.indexOf(substr, j + substr.length());
+    if (substr.length() == 1) {
+      return count(str, substr.charAt(0), ignoreCase, limit);
     }
-    return i;
+    int count = 0;
+    int i = 0;
+    do {
+      if (str.regionMatches(ignoreCase, i, substr, 0, substr.length())) {
+        if (++count == limit) {
+          break;
+        }
+        i += substr.length();
+      } else {
+        i += 1;
+      }
+    } while (i <= str.length() - substr.length());
+    return count;
+  }
+
+  private static int count(String str, char c, boolean ignoreCase, int limit) {
+    int count = 0;
+    if (ignoreCase) {
+      char c0 = toLowerCase(c);
+      for (int i = 0; i < str.length(); ++i) {
+        if (toLowerCase(str.charAt(i)) == c0 && ++count == limit) {
+          break;
+        }
+      }
+    } else {
+      for (int i = 0; i < str.length(); ++i) {
+        if (str.charAt(i) == c && ++count == limit) {
+          break;
+        }
+      }
+    }
+    return count;
   }
 
   /**
@@ -468,52 +489,6 @@ public final class StringMethods {
   }
 
   /**
-   * Returns a human-friendly representation of the duration between the specified start and now.
-   * Example: 540:00:12.630
-   *
-   * @param start The start time
-   * @return A human-friendly representation of the duration between the specified start and now
-   */
-  public static String interval(long start) {
-    return interval(start, System.currentTimeMillis());
-  }
-
-  /**
-   * Returns a human-friendly representation of the duration of the specified time interval.
-   * Example: 00:08:07.041
-   *
-   * @param start The start time
-   * @param end The end time
-   * @return A human-friendly representation of the duration of the specified time interval
-   */
-  public static String interval(long start, long end) {
-    Check.that(end).is(atLeast(), start, "Negative time interval");
-    return duration(end - start);
-  }
-
-  /**
-   * Returns a human-friendly representation of the specified duration in milliseconds.
-   *
-   * @param millis The duration in millisecond
-   * @return A human-friendly representation of the specified duration in milliseconds
-   */
-  public static String duration(long millis) {
-    long h = millis / (60 * 60 * 1000);
-    millis %= (60 * 60 * 1000);
-    long m = millis / (60 * 1000);
-    millis %= (60 * 1000);
-    long s = millis / 1000;
-    millis %= 1000;
-    return append(
-            new StringBuilder(12),
-            lpad(h, 2, '0', ":"),
-            lpad(m, 2, '0', ":"),
-            lpad(s, 2, '0', "."),
-            lpad(millis, 3, '0'))
-        .toString();
-  }
-
-  /**
    * Whether the specified string ends with any of the specified suffixes.
    *
    * @param subject The string to test
@@ -540,23 +515,28 @@ public final class StringMethods {
    */
   public static String endsWith(Object subject, boolean ignoreCase, String... suffixes) {
     Check.that(suffixes, "suffixes").is(deepNotEmpty());
-    if (subject != null) {
-      String str = subject.toString();
-      for (String suf : suffixes) {
-        if (str.regionMatches(ignoreCase, str.length() - suf.length(), suf, 0, suf.length())) {
-          return suf;
-        }
+    String str;
+    if (subject == null || (str = subject.toString()).isEmpty()) {
+      return null;
+    }
+    return endsWith0(str, ignoreCase, suffixes);
+  }
+
+  private static String endsWith0(String str, boolean ignoreCase, String[] suffixes) {
+    for (String suf : suffixes) {
+      if (str.regionMatches(ignoreCase, str.length() - suf.length(), suf, 0, suf.length())) {
+        return suf;
       }
     }
     return null;
   }
 
   /**
-   * Prefixes to specified prefix to {@code subject} if it did not already have that prefix. If
-   * {@code subject} is null, {@code prefix} is returned.
+   * Prefixes to specified prefix to {@code subject} if it did not already start with that prefix.
+   * Returns {@code prefix} if {@code subject} is null,
    *
-   * @param subject The {@code String} to which to append the suffix
-   * @param prefix The prefix
+   * @param subject The {@code String} to which to append the prefix
+   * @param prefix The prefix (must not be {@code null})
    * @return A string that is guaranteed to start with {@code prefix}
    */
   public static String ensurePrefix(Object subject, String prefix) {
@@ -569,26 +549,12 @@ public final class StringMethods {
   }
 
   /**
-   * Prefixes to specified prefix to {@code subject} if it did not already have that prefix. If
-   * {@code subject} is null, {@code prefix} is returned.
-   *
-   * @param subject The {@code String} to which to append the suffix
-   * @param prefix The prefix
-   */
-  public static String ensurePrefix(Object subject, char prefix) {
-    if (subject == null) {
-      return String.valueOf(prefix);
-    }
-    String str = subject.toString();
-    return str.charAt(0) == prefix ? subject.toString() : prefix + str;
-  }
-
-  /**
    * Appends to specified suffix to {@code subject} if it did not already have that suffix. If
    * {@code subject} is null, {@code suffix} is returned.
    *
    * @param subject The {@code String} to which to append the suffix
-   * @param suffix The suffix
+   * @param suffix The suffix (must not be {@code null})
+   * @return A string that is guaranteed to end with {@code suffix}
    */
   public static String ensureSuffix(Object subject, String suffix) {
     Check.notNull(suffix, "suffix");
@@ -597,41 +563,6 @@ public final class StringMethods {
     }
     String str = subject.toString();
     return str.endsWith(suffix) ? str : str + suffix;
-  }
-
-  /**
-   * Appends to specified suffix to {@code str} if it did not already have that suffix.
-   *
-   * @param subject The {@code String} to which to append the suffix
-   * @param suffix The suffix
-   */
-  public static String ensureSuffix(Object subject, char suffix) {
-    if (subject == null) {
-      return String.valueOf(suffix);
-    }
-    String str = subject.toString();
-    return str.charAt(str.length() - 1) == suffix ? str : str + suffix;
-  }
-
-  /**
-   * Returns the {@code toString()} version of {@code subject} with the first character converted to
-   * lowercase. If the argument is null or an empty string, an empty string is returned.
-   *
-   * @param subject An object whose {@code toString()} version is to be manipulated
-   * @return The {@code toString()} version of {@code subject} with the first character converted to
-   *     lowercase
-   */
-  public static String firstCharToLowerCase(Object subject) {
-    if (subject == null) {
-      return EMPTY;
-    }
-    String str = subject.toString();
-    if (str.isEmpty() || Character.isLowerCase(str.charAt(0))) {
-      return str;
-    }
-    StringBuilder sb = new StringBuilder(str.length()).append(str);
-    sb.setCharAt(0, Character.toLowerCase(str.charAt(0)));
-    return sb.toString();
   }
 
   /**
@@ -689,31 +620,6 @@ public final class StringMethods {
    * Removes all occurrences of the specified prefixes from the start of a string. The returned
    * string will no longer start with any of the specified prefixes.
    *
-   * @param subject The string to manipulate
-   * @param prefixes The prefixes to chop off the left of the string
-   * @return A string that does not start with any of the specified prefixes
-   */
-  public static String lchop(Object subject, Collection<String> prefixes) {
-    return lchop(subject, false, prefixes);
-  }
-
-  /**
-   * Removes all occurrences of the specified prefixes from the start of a string. The returned
-   * string will no longer start with any of the specified prefixes.
-   *
-   * @param subject The string to remove the prefixes from
-   * @param ignoreCase Whether to ignore case while chopping off suffixes
-   * @param prefixes The prefixes to chop off the string
-   * @return A String that does not start with any of the specified suffixes
-   */
-  public static String lchop(Object subject, boolean ignoreCase, Collection<String> prefixes) {
-    return lchop(subject, ignoreCase, prefixes.toArray(String[]::new));
-  }
-
-  /**
-   * Removes all occurrences of the specified prefixes from the start of a string. The returned
-   * string will no longer start with any of the specified prefixes.
-   *
    * @param subject The string to remove the prefixes from
    * @param prefixes The prefixes to remove
    */
@@ -730,78 +636,98 @@ public final class StringMethods {
    * @param prefixes The prefixes to remove
    */
   public static String lchop(Object subject, boolean ignoreCase, String... prefixes) {
-    Check.that(prefixes, "prefixes").is(deepNotNull());
-    if (subject == null) {
+    Check.that(prefixes, "prefixes").is(deepNotEmpty());
+    String str;
+    if (subject == null || (str = subject.toString()).isEmpty()) {
       return EMPTY;
     }
-    String s0 = subject.toString();
-    boolean changed;
+    boolean found;
+    int offset = 0;
     do {
-      changed = false;
+      found = false;
       for (String prefix : prefixes) {
-        if (!prefix.isEmpty() && s0.regionMatches(ignoreCase, 0, prefix, 0, prefix.length())) {
-          s0 = s0.substring(prefix.length());
-          changed = true;
+        if (str.regionMatches(ignoreCase, offset, prefix, 0, prefix.length())) {
+          offset += prefix.length();
+          found = true;
         }
       }
-    } while (changed);
-    return s0;
+    } while (found);
+    return str.substring(offset);
   }
 
   /**
-   * Returns the line number and column number of the character at the specified index, given the
-   * system-defined line separator.
+   * Removes all occurrences of the specified suffixes from the end of a string. The returned string
+   * will no longer end with any of the specified suffixes.
    *
-   * @param str The string to search
-   * @param index The string index to determine the line and column number of
-   * @return A two-element array containing the line line number and column number of the character
-   *     at the specified index
+   * @param subject The string to manipulate
+   * @param suffixes The suffixes to chop off the right of the string
+   * @return A String that does not end with any of the specified suffixes
    */
-  public static int[] getLineAndColumn(String str, int index) {
-    return getLineAndColumn(str, index, System.lineSeparator());
+  public static String rchop(Object subject, String... suffixes) {
+    return rchop(subject, false, suffixes);
   }
 
   /**
-   * Returns the line number and column number of the character at the specified index, given the
-   * specified line separator.
+   * Removes all occurrences of the specified suffixes from the end of a string. The returned string
+   * will no longer end with any of the specified suffixes.
    *
-   * @param str The string to search
-   * @param index The string index to determine the line and column number of
-   * @param lineSep The line separator
-   * @return A two-element array containing the line number and column number of the character at
-   *     the specified index
+   * @param subject The string to manipulate
+   * @param ignoreCase Whether to ignore case while chopping off suffixes
+   * @param suffixes A String that does not end with any of the specified suffixes
    */
-  public static int[] getLineAndColumn(String str, int index, String lineSep) {
-    Check.notNull(str, "str");
-    Check.that(index, "index").is(gte(), 0).is(lt(), str.length());
-    Check.that(lineSep, "lineSep").isNot(empty());
-    if (index == 0) {
-      return new int[] {0, 0};
+  public static String rchop(Object subject, boolean ignoreCase, String... suffixes) {
+    Check.that(suffixes, "suffixes").is(deepNotEmpty());
+    String str;
+    if (subject == null || (str = subject.toString()).isEmpty()) {
+      return EMPTY;
     }
-    int line = 0, pos = 0, i = str.indexOf(lineSep);
-    while (i != -1 && i < index) {
-      ++line;
-      pos = i + lineSep.length();
-      i = str.indexOf(lineSep, i + lineSep.length());
-    }
-    return new int[] {line, index - pos};
+    boolean found;
+    int offset = str.length();
+    do {
+      found = false;
+      for (String suffix : suffixes) {
+        int sl = suffix.length();
+        if (str.regionMatches(ignoreCase, offset - sl, suffix, 0, sl)) {
+          offset -= sl;
+          found = true;
+        }
+      }
+    } while (found);
+    return str.substring(0, offset);
   }
 
   /**
-   * Uppercases the first character of {@code subject}.
+   * Ensures that the first character of the specified string is not a lowercase character.
    *
-   * @param subject An object to call {@code toString()} on
-   * @return The resulting string with the first character converted to upper case
+   * @param subject The string
+   * @return The same string except that the first character is not a lowercase character
    */
-  public static String initCap(Object subject) {
-    Check.notNull(subject);
-    String s = subject.toString();
-    if (s.isBlank()) {
-      return s;
+  public static String firstToUpper(Object subject) {
+    String s;
+    if (subject == null || (s = subject.toString()).isEmpty()) {
+      return EMPTY;
     }
-    char[] chars = s.toCharArray();
-    chars[0] = Character.toUpperCase(chars[0]);
-    return String.valueOf(chars);
+    if (Character.isLowerCase(s.charAt(0))) {
+      return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+    }
+    return s;
+  }
+
+  /**
+   * Ensures that the first character of the specified string is not an uppercase character.
+   *
+   * @param subject The string
+   * @return The same string except that the first character is not an uppercase character
+   */
+  public static String firstToLower(Object subject) {
+    String s;
+    if (subject == null || (s = subject.toString()).isEmpty()) {
+      return EMPTY;
+    }
+    if (Character.isUpperCase(s.charAt(0))) {
+      return Character.toLowerCase(s.charAt(0)) + s.substring(1);
+    }
+    return s;
   }
 
   /**
@@ -858,48 +784,6 @@ public final class StringMethods {
         .append(d)
         .toString();
   }
-
-  /**
-   * Left-trims the specified string. The resulting string will not start with the specified
-   * character.
-   *
-   * @param subject The {@code String} to trim
-   * @param c The character to trim off the {@code String}
-   * @return The left-trimmed {@code String} or the input string if it did not start with the
-   *     specified character
-   */
-  public static String ltrim(Object subject, char c) {
-    return ltrim(subject, String.valueOf(c));
-  }
-
-  /**
-   * Left-trims all characters contained in {@code chars} from the specified specified string. The
-   * resulting string will not start with any of the charachters contained in {@code chars}.
-   *
-   * @param subject The {@code String} to trim
-   * @param chars The character to trim off the {@code String}
-   * @return The left-trimmed {@code String} or the input string if it did not start with any of the
-   *     specified characters
-   */
-  public static String ltrim(Object subject, String chars) {
-    Check.that(chars, "chars").isNot(empty());
-    if (subject == null) {
-      return EMPTY;
-    }
-    String str0 = subject.toString();
-    int i = 0;
-    LOOP:
-    for (; i < str0.length(); ++i) {
-      for (int j = 0; j < chars.length(); ++j) {
-        if (str0.charAt(i) == chars.charAt(j)) {
-          continue LOOP;
-        }
-      }
-      break;
-    }
-    return i == 0 ? str0 : str0.substring(i);
-  }
-
   /**
    * Centers (left- and right-pads) a string within the specified width using the space character.
    *
@@ -957,64 +841,6 @@ public final class StringMethods {
     sb.append(d);
     return sb.toString();
   }
-
-  /**
-   * Removes all occurrences of the specified suffixes from the end of a string. The returned string
-   * will no longer end with any of the specified suffixes.
-   *
-   * @param subject The string to manipulate
-   * @param suffixes The suffixes to chop off the string
-   */
-  public static String rchop(Object subject, Collection<String> suffixes) {
-    return rchop(subject, false, suffixes);
-  }
-
-  /**
-   * Removes all occurrences of the specified suffixes from the end of a string. The returned string
-   * will no longer end with any of the specified suffixes.
-   *
-   * @param subject The string to manipulate
-   * @param ignoreCase Whether to ignore case while chopping off suffixes
-   * @param suffixes The suffixes to chop off the string
-   * @return A String that does not end with any of the specified suffixes
-   */
-  public static String rchop(Object subject, boolean ignoreCase, Collection<String> suffixes) {
-    return rchop(subject, ignoreCase, suffixes.toArray(String[]::new));
-  }
-
-  /**
-   * Removes all occurrences of the specified suffixes from the end of a string. The returned string
-   * will no longer end with any of the specified suffixes.
-   *
-   * @param subject The string to manipulate
-   * @param suffixes The suffixes to chop off the right of the string
-   * @return A String that does not end with any of the specified suffixes
-   */
-  public static String rchop(Object subject, String... suffixes) {
-    return rchop(subject, false, suffixes);
-  }
-
-  /**
-   * Removes all occurrences of the specified suffixes from the end of a string. The returned string
-   * will no longer end with any of the specified suffixes.
-   *
-   * @param subject The string to manipulate
-   * @param ignoreCase Whether to ignore case while chopping off suffixes
-   * @param suffixes A String that does not end with any of the specified suffixes
-   */
-  public static String rchop(Object subject, boolean ignoreCase, String... suffixes) {
-    Check.that(suffixes, "suffixes").is(deepNotNull());
-    if (subject == null) {
-      return EMPTY;
-    }
-    String s0 = subject.toString();
-    String suf;
-    while (null != (suf = endsWith(s0, ignoreCase, suffixes))) {
-      s0 = s0.substring(0, s0.length() - suf.length());
-    }
-    return s0;
-  }
-
   /**
    * Right-pads a string to the specified width using the space character (' ').
    *
@@ -1067,24 +893,39 @@ public final class StringMethods {
   }
 
   /**
-   * Right-trims the specified string. The resulting string will not end with the specified
-   * character.
-   *
-   * @param subject The {@code String} to trim
-   * @param c The character to trim off the {@code String}
-   * @return The right-trimmed {@code String} or the input string if it did not end with the
-   *     specified character
-   */
-  public static String rtrim(Object subject, char c) {
-    return rtrim(subject, String.valueOf(c));
-  }
-
-  /**
-   * Right-trims all characters contained in {@code chars} from the specified specified string. The
-   * resulting string will not end with any of the charachters contained in {@code chars}.
+   * Left-trims all characters contained in {@code chars} from the specified string. The resulting
+   * string will not start with any of the characters contained in {@code chars}.
    *
    * @param subject The {@code String} to trim
    * @param chars The character to trim off the {@code String}
+   * @return The left-trimmed {@code String} or the input string if it did not start with any of the
+   *     specified characters
+   */
+  public static String ltrim(Object subject, String chars) {
+    Check.that(chars, "chars").isNot(empty());
+    if (subject == null) {
+      return EMPTY;
+    }
+    String str = subject.toString();
+    int i = 0;
+    LOOP:
+    for (; i < str.length(); ++i) {
+      for (int j = 0; j < chars.length(); ++j) {
+        if (str.charAt(i) == chars.charAt(j)) {
+          continue LOOP;
+        }
+      }
+      break;
+    }
+    return i == 0 ? str : str.substring(i);
+  }
+
+  /**
+   * Right-trims all characters contained in {@code chars} from the specified string. The resulting
+   * string will not end with any of the characters contained in {@code chars}.
+   *
+   * @param subject The {@code String} to trim
+   * @param chars The character to trim off the {@code String} (must not be {@code null} or empty)
    * @return The right-trimmed {@code String} or the input string if it did not end with any of the
    *     specified characters
    */
@@ -1093,18 +934,30 @@ public final class StringMethods {
     if (subject == null) {
       return EMPTY;
     }
-    String str0 = subject.toString();
-    int i = str0.length() - 1;
+    String str = subject.toString();
+    int i = str.length() - 1;
     LOOP:
     for (; i >= 0; --i) {
       for (int j = 0; j < chars.length(); ++j) {
-        if (str0.charAt(i) == chars.charAt(j)) {
+        if (str.charAt(i) == chars.charAt(j)) {
           continue LOOP;
         }
       }
       break;
     }
-    return i == str0.length() - 1 ? str0 : str0.substring(0, i + 1);
+    return i == str.length() - 1 ? str : str.substring(0, i + 1);
+  }
+
+  /**
+   * Left and right-trims the specified string. The resulting string will neither start nor end with
+   * any of the specified characters.
+   *
+   * @param subject The {@code String} to trim
+   * @param chars The character to trim off the {@code String} (must not be {@code null} or empty)
+   * @return The trimmed {@code String}.
+   */
+  public static String trim(Object subject, String chars) {
+    return rtrim(ltrim(subject, chars), chars);
   }
 
   /**
@@ -1176,7 +1029,8 @@ public final class StringMethods {
   /**
    * Returns the index of the nth occurrence of the specified substring within {@code subject}. If
    * {@code subject} is {@code null}, or if there is no nth occurrence of the specified substring,
-   * the return value will be -1.
+   * the return value will be -1. You can specify a negative occurrence to search backwards from the
+   * end of the string.
    *
    * @param subject The string to search
    * @param substr The substring to search for (must not be null or empty)
@@ -1184,145 +1038,146 @@ public final class StringMethods {
    * @return The index of the nth occurrence of the specified substring
    */
   public static int indexOf(Object subject, String substr, int occurrence) {
-    Check.that(substr, "search").isNot(empty());
-    Check.that(occurrence, "occurrence").is(gt(), 0);
-    if (subject == null) {
+    Check.that(substr, "substr").isNot(empty());
+    Check.that(occurrence, "occurrence").is(ne(), 0);
+    String str;
+    if (subject == null || (str = subject.toString()).length() < substr.length()) {
       return -1;
     }
-    String str = subject.toString();
     if (substr.length() == 1) {
-      char c = substr.charAt(0);
-      for (int i = 0; i < str.length(); ++i) {
-        if (str.charAt(i) == c && --occurrence == 0) {
-          return i;
-        }
-      }
-      return -1;
+      return occurrence > 0
+          ? charPosIndexOf(str, substr.charAt(0), occurrence)
+          : charNegIndexOf(str, substr.charAt(0), occurrence);
     }
-    int idx = str.indexOf(substr);
-    while (--occurrence > 0) {
-      int from = idx + substr.length();
-      if (from > str.length() - substr.length()) {
-        return -1;
+    return occurrence > 0
+        ? strPosIndexOf(str, substr, occurrence)
+        : strNegIndexOf(str, substr, occurrence);
+  }
+
+  private static int charPosIndexOf(String str, char c, int occurrence) {
+    for (int i = 0; i < str.length(); ++i) {
+      if (str.charAt(i) == c && --occurrence == 0) {
+        return i;
       }
-      idx = str.indexOf(substr, from);
     }
-    return idx;
+    return -1;
+  }
+
+  private static int charNegIndexOf(String str, char c, int occurrence) {
+    for (int i = str.length() - 1; i >= 0; --i) {
+      if (str.charAt(i) == c && ++occurrence == 0) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  private static int strPosIndexOf(String str, String substr, int occurrence) {
+    for (int i = 0; i <= str.length() - substr.length(); ++i) {
+      if (str.regionMatches(i, substr, 0, substr.length()) && --occurrence == 0) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  private static int strNegIndexOf(String str, String substr, int occurrence) {
+    for (int i = str.length() - substr.length(); i >= 0; --i) {
+      if (str.regionMatches(i, substr, 0, substr.length()) && ++occurrence == 0) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   /**
-   * Returns everything from (including) the first occurrence of the specified character sequence,
-   * or the entire string if it does not contain that character sequence.
+   * Returns everything up to (not including) the nth occurrence of the specified substring, or the
+   * entire string if there is no nth occurrence of the substring. If the type of {@code subject} is
+   * {@code String}, you can do a reference comparison between input and output string to ascertain
+   * whether the substring was found. Returns an empty string if {@code subject} is {@code null}.
+   * You can specify a negative occurrence to search backwards from the end of the string.
    *
-   * @param str The string to take a substring from
-   * @param from The character sequence from which to take the substring
-   * @return The substring
+   * @param subject The string to search
+   * @param substr The substring to search for
+   * @param occurrence The occurrence count of the substring
+   * @return Everything to (not including) the nth occurrence of the specified substring
    */
-  public static String substrFrom(String str, String from) {
-    return substrFrom(str, from, false);
+  public static String substrBefore(Object subject, String substr, int occurrence) {
+    int idx = indexOf(subject, substr, occurrence);
+    if (idx == -1) {
+      return subject == null ? EMPTY : subject.toString();
+    }
+    return subject.toString().substring(0, idx);
   }
 
   /**
-   * Returns everything from (including) the first or last occurrence of the specified character
-   * sequence, or the entire string if it does not contain that character sequence.
+   * Returns everything up to, <i>and including</i> the nth occurrence of the specified substring,
+   * or the entire string if there is no nth occurrence of the substring. If the type of {@code
+   * subject} is {@code String}, you can do a reference comparison between input and output string
+   * to ascertain whether the substring was found. Returns an empty string if {@code subject} is
+   * {@code null}. You can specify a negative occurrence to search backwards from the end of the
+   * string.
    *
-   * @param str The string to take a substring from
-   * @param search The character sequence from which to take the substring
-   * @param last Whether to use the first of last occurrence of {@code from}
-   * @return The substring
+   * @param subject The string to search
+   * @param substr The substring to search for
+   * @param occurrence The occurrence count of the substring
+   * @return Everything up to, and including the nth occurrence of the specified substring
    */
-  public static String substrFrom(String str, String search, boolean last) {
-    Check.notNull(str, "str");
-    Check.that(search, "search").isNot(empty());
-    int i = last ? str.lastIndexOf(search) : str.indexOf(search);
-    return i == -1 ? str : str.substring(i);
-  }
-
-  public static String substrFrom(String str, String search, int occurrence) {
-    Check.notNull(str, "str");
-    Check.that(search, "search").isNot(empty());
-    return null;
-  }
-
-  /**
-   * Returns everything after (not including) the first occurrence of the specified character
-   * sequence, or the entire string if it does not contain that character sequence.
-   *
-   * @param str The string to take a substring from
-   * @param after The character sequence after which to take the substring
-   * @return The substring
-   */
-  public static String substrAfter(String str, String after) {
-    return substrAfter(str, after, false);
+  public static String substrTo(Object subject, String substr, int occurrence) {
+    int idx = indexOf(subject, substr, occurrence);
+    if (idx == -1) {
+      return subject == null ? EMPTY : subject.toString();
+    }
+    if (subject.getClass() == String.class) {
+      String s = subject.toString();
+      return idx + substr.length() == s.length()
+          ? new String(s)
+          : s.substring(0, idx + substr.length());
+    }
+    return subject.toString().substring(0, idx + substr.length());
   }
 
   /**
-   * Returns everything after (not including) the first or last occurrence of the specified
-   * character sequence, or the entire string if it does not contain that character sequence.
+   * Returns everything from (inclusive) the nth occurrence of the specified substring, or the
+   * entire string if there is no nth occurrence of the substring.If the type of {@code subject} is
+   * {@code String}, you can do a reference comparison between input and output string to ascertain
+   * whether the substring was found. Returns an empty string if {@code subject} is {@code null}.
+   * You can specify a negative occurrence to search backwards from the end of the string.
    *
-   * @param str The string to take a substring from
-   * @param after The character sequence after which to take the substring (must not be null or
-   *     empty)
-   * @param last Whether to use the first of last occurrence of {@code after}
-   * @return The substring
+   * @param subject The string to search
+   * @param substr The substring to search for
+   * @param occurrence The occurrence count of the substring
+   * @return Everything from (inclusive) the nth occurrence of the specified substring
    */
-  public static String substrAfter(String str, String after, boolean last) {
-    Check.notNull(str, "str");
-    Check.that(after, "from").isNot(empty());
-    int i = last ? str.lastIndexOf(after) : str.indexOf(after);
-    int j = after.length();
-    return i + j == str.length() ? EMPTY : i == -1 ? str : str.substring(i + j);
+  public static String substrFrom(Object subject, String substr, int occurrence) {
+    int idx = indexOf(subject, substr, occurrence);
+    if (idx == -1) {
+      return subject == null ? EMPTY : subject.toString();
+    }
+    if (subject.getClass() == String.class) {
+      String s = subject.toString();
+      return idx == 0 ? new String(s) : s.substring(idx);
+    }
+    return subject.toString().substring(idx);
   }
 
   /**
-   * Returns the substring up to (and not including) the first occurrence of the specified
-   * character, or the entire string if it does not contain that character.
+   * Returns everything after (not including) the nth occurrence of the specified substring, or the
+   * entire string there is no nth occurrence of the substring. If the type of {@code subject} is
+   * {@code String}, you can do a reference comparison between input and output string to ascertain
+   * whether the substring was found. Returns an empty string if {@code subject} is {@code null}.
+   * You can specify a negative occurrence to search backwards from the end of the string.
    *
-   * @param str The string to take a substring from
-   * @param to The character sequence up to which to take the substring
-   * @return The substring
+   * @param subject The string to search
+   * @param substr The substring to search for
+   * @param occurrence The occurrence count of the substring
+   * @return Everything after (not including) the nth occurrence of the specified substring
    */
-  public static String substrBefore(String str, String to) {
-    return substrBefore(str, to, false);
-  }
-
-  /**
-   * Returns the substring up to (not including) the first or last occurrence of the specified
-   * character, or the entire string if it does not contain that character.
-   *
-   * @param str The string to take a substring from
-   * @param to The character sequence up to which to take the substring
-   * @param last Whether to use the first of last occurrence of {@code to}
-   * @return The substring
-   */
-  public static String substrBefore(String str, String to, boolean last) {
-    Check.notNull(str, "str");
-    Check.that(to, "to").isNot(empty());
-    int i = last ? str.lastIndexOf(to) : str.indexOf(to);
-    return i == -1 ? str : str.substring(0, i);
-  }
-
-  /**
-   * Left and right-trims the specified string. The resulting string will neither start nor end with
-   * the specified character.
-   *
-   * @param subject The {@code String} to trim
-   * @param c The character to trim off the {@code String}
-   * @return The trimmed {@code String}.
-   */
-  public static String trim(Object subject, char c) {
-    return rtrim(ltrim(subject, c), c);
-  }
-
-  /**
-   * Left and right-trims the specified string. The resulting string will neither start nor end with
-   * any of the specified characters.
-   *
-   * @param subject The {@code String} to trim
-   * @param chars The character to trim off the {@code String}
-   * @return The trimmed {@code String}.
-   */
-  public static String trim(Object subject, String chars) {
-    return rtrim(ltrim(subject, chars), chars);
+  public static String substrAfter(Object subject, String substr, int occurrence) {
+    int idx = indexOf(subject, substr, occurrence);
+    if (idx == -1) {
+      return subject == null ? EMPTY : subject.toString();
+    }
+    return subject.toString().substring(idx + substr.length());
   }
 }

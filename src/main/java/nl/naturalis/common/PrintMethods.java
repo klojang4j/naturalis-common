@@ -16,7 +16,9 @@ import java.util.TreeSet;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Comparator.comparing;
 import static nl.naturalis.common.ArrayMethods.implodeAny;
+import static nl.naturalis.common.StringMethods.append;
 import static nl.naturalis.common.StringMethods.lpad;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 public class PrintMethods {
 
@@ -78,6 +80,51 @@ public class PrintMethods {
     print(obj, out);
     return new String(out.getBackingArray(), 0, out.size(), UTF_8);
   }
+  /**
+   * Returns a human-friendly representation of the duration between the specified start and now.
+   * Example: 540:00:12.630
+   *
+   * @param start The start time
+   * @return A human-friendly representation of the duration between the specified start and now
+   */
+  public static String interval(long start) {
+    return interval(start, System.currentTimeMillis());
+  }
+
+  /**
+   * Returns a human-friendly representation of the duration of the specified time interval.
+   * Example: 00:08:07.041
+   *
+   * @param start The start time
+   * @param end The end time
+   * @return A human-friendly representation of the duration of the specified time interval
+   */
+  public static String interval(long start, long end) {
+    Check.that(end).is(atLeast(), start, "Negative time interval");
+    return duration(end - start);
+  }
+
+  /**
+   * Returns a human-friendly representation of the specified duration in milliseconds.
+   *
+   * @param millis The duration in millisecond
+   * @return A human-friendly representation of the specified duration in milliseconds
+   */
+  public static String duration(long millis) {
+    long h = millis / (60 * 60 * 1000);
+    millis %= (60 * 60 * 1000);
+    long m = millis / (60 * 1000);
+    millis %= (60 * 1000);
+    long s = millis / 1000;
+    millis %= 1000;
+    return append(
+            new StringBuilder(12),
+            lpad(h, 2, '0', ":"),
+            lpad(m, 2, '0', ":"),
+            lpad(s, 2, '0', "."),
+            lpad(millis, 3, '0'))
+        .toString();
+  }
 
   private static void printKV(PrintStream ps, Object k, Object v, int maxlen) {
     ps.append(lpad(k, maxlen)).append(" : ").append(toStr(v));
@@ -90,5 +137,44 @@ public class PrintMethods {
       return "[" + implodeAny(o) + "]";
     }
     return o.toString();
+  }
+
+  /**
+   * Returns the line number and column number of the character at the specified index, given the
+   * system-defined line separator.
+   *
+   * @param str The string to search
+   * @param index The string index to determine the line and column number of
+   * @return A two-element array containing the line number and column number of the character at
+   *     the specified index
+   */
+  public static int[] getLineAndColumn(String str, int index) {
+    return getLineAndColumn(str, index, System.lineSeparator());
+  }
+
+  /**
+   * Returns the line number and column number of the character at the specified index, given the
+   * specified line separator.
+   *
+   * @param str The string to search
+   * @param index The string index to determine the line and column number of
+   * @param lineSep The line separator
+   * @return A two-element array containing the line number and column number of the character at
+   *     the specified index
+   */
+  public static int[] getLineAndColumn(String str, int index, String lineSep) {
+    Check.notNull(str, "str");
+    Check.that(index, "index").is(gte(), 0).is(lt(), str.length());
+    Check.that(lineSep, "lineSep").isNot(empty());
+    if (index == 0) {
+      return new int[] {0, 0};
+    }
+    int line = 0, pos = 0, i = str.indexOf(lineSep);
+    while (i != -1 && i < index) {
+      ++line;
+      pos = i + lineSep.length();
+      i = str.indexOf(lineSep, i + lineSep.length());
+    }
+    return new int[] {line, index - pos};
   }
 }

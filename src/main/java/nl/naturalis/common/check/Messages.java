@@ -102,7 +102,8 @@ class Messages {
         return format(fmt, md.argName(), toStr(md.arg()));
       }
       return format(
-          "%s must not be empty or contain empty values (was %s)", md.typeAndName(), md.arg());
+          "%s must not be empty or contain empty values (was %s)",
+          md.typeAndName(), toStr(md.arg()));
     };
   }
 
@@ -608,9 +609,12 @@ class Messages {
     Class type = val.getClass();
     if (DECENT_TO_STRING.contains(type)) {
       return val.toString();
-    } else if (val instanceof CharSequence) {
-      if (((CharSequence) val).toString().isBlank()) {
-        return "\"" + val + "\"";
+    } else if (val instanceof CharSequence cs) {
+      if(cs.toString().isEmpty()) {
+        return "<EMPTY_STRING>";
+      }
+      else if (cs.toString().isBlank()) {
+        return "<BLANK_STRING["+cs.length()+"]>";
       }
       return ellipsis(val.toString(), MAX_ARG_WIDTH);
     } else if (type == Class.class) {

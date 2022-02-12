@@ -2,10 +2,116 @@ package nl.naturalis.common;
 
 import org.junit.Test;
 
+import java.time.DayOfWeek;
+import java.util.List;
+
 import static nl.naturalis.common.StringMethods.*;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class StringMethodsTest {
+
+  @Test
+  public void append00() {
+    assertEquals("", append(new StringBuilder(), "").toString());
+    assertEquals("null", append(new StringBuilder(), null).toString());
+    assertEquals("12", append(new StringBuilder(), 1, '2').toString());
+    assertEquals("12345", append(new StringBuilder(), 1, '2', "345").toString());
+    assertEquals("12345 ", append(new StringBuilder(), 1, '2', "345", ' ').toString());
+    assertEquals(
+        "12345 SUNDAY",
+        append(new StringBuilder(), 1, '2', "345", ' ', DayOfWeek.SUNDAY).toString());
+    assertEquals(
+        "12345 SUNDAY ",
+        append(new StringBuilder(), 1, '2', "345", ' ', DayOfWeek.SUNDAY, " ").toString());
+    assertEquals(
+        "12345 SUNDAY 1.2",
+        append(new StringBuilder(), 1, '2', "345", ' ', DayOfWeek.SUNDAY, " ", 1.2).toString());
+    assertEquals(
+        "12345 SUNDAY 1.2750",
+        append(new StringBuilder(), 1, '2', "345", ' ', DayOfWeek.SUNDAY, " ", 1.2, (short) 750)
+            .toString());
+    assertEquals(
+        "12345 SUNDAY 1.2750[1, 3]",
+        append(
+                new StringBuilder(),
+                1,
+                '2',
+                "345",
+                ' ',
+                DayOfWeek.SUNDAY,
+                " ",
+                1.2,
+                (short) 750,
+                List.of(1, 3))
+            .toString());
+    assertEquals(
+        "12345 SUNDAY 1.2750[1, 3] ",
+        append(
+                new StringBuilder(),
+                1,
+                '2',
+                "345",
+                ' ',
+                DayOfWeek.SUNDAY,
+                " ",
+                1.2,
+                (short) 750,
+                List.of(1, 3),
+                ' ')
+            .toString());
+    assertEquals(
+        "12345 SUNDAY 1.2750[1, 3] null",
+        append(
+                new StringBuilder(),
+                1,
+                '2',
+                "345",
+                ' ',
+                DayOfWeek.SUNDAY,
+                " ",
+                1.2,
+                (short) 750,
+                List.of(1, 3),
+                ' ',
+                (Integer) null)
+            .toString());
+    assertEquals(
+        "12345 SUNDAY 1.2750[1, 3] null",
+        append(
+                new StringBuilder(),
+                1,
+                '2',
+                "345",
+                ' ',
+                DayOfWeek.SUNDAY,
+                " ",
+                1.2,
+                (short) 750,
+                List.of(1, 3),
+                ' ',
+                null,
+                "")
+            .toString());
+    assertEquals(
+        "12345 SUNDAY 1.2750[1, 3] null333",
+        append(
+                new StringBuilder(),
+                1,
+                '2',
+                "345",
+                ' ',
+                DayOfWeek.SUNDAY,
+                " ",
+                1.2,
+                (short) 750,
+                List.of(1, 3),
+                ' ',
+                null,
+                "",
+                333)
+            .toString());
+  }
 
   @Test
   public void fromToIndex00() {
@@ -34,41 +140,82 @@ public class StringMethodsTest {
 
   @Test
   public void count01() {
-    String s = "This is This is This is BLISS!";
-    assertEquals(3, count(s, "This is"));
-    assertEquals(6, count(s, "is"));
-    assertEquals(7, count(s, "is", true));
-    s = "aaaaaa";
-    assertEquals(5, count(s, "aa"));
+    String THIS_IS_BLISS = "This is This is This is BLISS!";
+    assertEquals(3, count(THIS_IS_BLISS, "This is"));
+    assertEquals(6, count(THIS_IS_BLISS, "is"));
+    assertEquals(7, count(THIS_IS_BLISS, "is", true));
+
+    assertEquals(6, count(">>>>>>", ">"));
+    assertEquals(5, count(">>>>>>", ">>"));
+    assertEquals(4, count(">>>>>>", ">>>"));
+    assertEquals(3, count(">>>>>>", ">>>>"));
+    assertEquals(2, count(">>>>>>", ">>>>>"));
+    assertEquals(1, count(">>>>>>", ">>>>>>"));
+    assertEquals(0, count(">>>>>>", ">>>>>>>"));
+    assertEquals(0, count(">>>>>>", ">>>>>>>>"));
+
+    assertEquals(4, count("ZZZZZZ", "z", true, 4));
+    assertEquals(4, count("ZZZZZZ", "Z", false, 4));
+
+    assertEquals(6, count(">>>>>>", ">", true, 0));
+    assertEquals(6, count(">>>>>>", ">", true, 1000));
+    assertEquals(1, count(">>>>>>", ">>", false, 1));
+    assertEquals(2, count(">>>>>>", ">>", false, 2));
+    assertEquals(5, count(">>>>>>", ">>", false, 0));
+    assertEquals(5, count(">>>>>>", ">>", false, 750));
+
+    assertEquals(0, count("", "FOO"));
+    assertEquals(0, count(null, "FOO"));
+
+    assertEquals(0, count("foo", "FOO", false));
+    assertEquals(1, count("foo", "FOO", true));
   }
 
   @Test
   public void countDiscrete01() {
-    String s = "This is This is This is BLISS!";
-    assertEquals(3, countDiscrete(s, "This is"));
-    assertEquals(6, countDiscrete(s, "is"));
-    assertEquals(7, countDiscrete(s, "is", true));
-    s = "aaaaaa";
-    assertEquals(3, countDiscrete(s, "aa"));
+    String THIS_IS_BLISS = "This is This is This is BLISS!";
+    assertEquals(3, countDiscrete(THIS_IS_BLISS, "This is"));
+    assertEquals(6, countDiscrete(THIS_IS_BLISS, "is"));
+    assertEquals(7, countDiscrete(THIS_IS_BLISS, "is", true, 0));
+    String A12 = "AAAA" + "AAAA" + "AAAA";
+    assertEquals(0, countDiscrete(A12, "a"));
+    assertEquals(12, countDiscrete(A12, "a", true));
+    assertEquals(6, countDiscrete(A12, "Aa", true));
+    assertEquals(4, countDiscrete(A12, "AaA", true));
+    assertEquals(3, countDiscrete(A12, "AaAa", true));
+    assertEquals(2, countDiscrete(A12, "AaAaA", true));
+    assertEquals(2, countDiscrete(A12, "AaAaAa", true));
+    assertEquals(1, countDiscrete(A12, "AaAaAaA", true));
+    assertEquals(1, countDiscrete(A12, "AaAaAaAa", true));
+    assertEquals(1, countDiscrete(A12, "AaAaAaAaA", true));
+    assertEquals(1, countDiscrete(A12, "AaAaAaAaAa", true));
+    assertEquals(1, countDiscrete(A12, "AaAaAaAaAaA", true));
+    assertEquals(1, countDiscrete(A12, "AaAaAaAaAaAa", true));
+    assertEquals(0, countDiscrete(A12, "AaAaAaAaAaAaA", true));
+    assertEquals(0, countDiscrete(A12, "AaAaAaAaAaAaAa", true));
+    assertEquals(3, countDiscrete(A12, "a", true, 3));
+    assertEquals(12, countDiscrete(A12, "a", true, 0));
+    assertEquals(12, countDiscrete(A12, "a", true, 888));
+    assertEquals(6, countDiscrete(A12, "Aa", true, 0));
+    assertEquals(6, countDiscrete(A12, "Aa", true, 777));
+    assertEquals(1, countDiscrete(A12, "Aa", true, 1));
+    assertEquals(2, countDiscrete(A12, "Aa", true, 2));
+    assertEquals(0, countDiscrete("", "FOO"));
+    assertEquals(0, countDiscrete(null, "FOO"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void duration01() {
-    String s = interval(1000L, 10001L);
-    assertEquals("00:00:09.001", s);
-    s = interval(1000L, 40080L);
-    assertEquals("00:00:39.080", s);
-    s = interval(1000L, 3641689L);
-    assertEquals("01:00:40.689", s);
-    s = interval(1000L, 123641689L);
-    assertEquals("34:20:40.689", s);
-    s = interval(1000L, 5123641689L);
-    assertEquals("1423:14:00.689", s);
-    s = interval(1000L, 995123641689L);
-    assertEquals("276423:14:00.689", s);
-    s = interval(1000L, 1000L);
-    assertEquals("00:00:00.000", s);
-    s = interval(9000L, 1000L); // Negative time interval
+  @Test
+  public void isBlank00() {
+    assertTrue(isBlank(null));
+    assertFalse(isNotBlank(null));
+    assertTrue(isBlank(""));
+    assertFalse(isNotBlank(""));
+    assertTrue(isBlank("\t"));
+    assertFalse(isNotBlank("\t"));
+    assertTrue(isBlank("\t\r\n \t"));
+    assertFalse(isNotBlank("\t\r\n \t"));
+    assertFalse(isBlank("\t\r\n \ta"));
+    assertTrue(isNotBlank("\t\r\n \ta"));
   }
 
   @Test
@@ -77,6 +224,7 @@ public class StringMethodsTest {
     assertEquals("Hello W...", ellipsis(hello, 10));
     assertEquals("H...", ellipsis(hello, 4));
     assertEquals("Hello World, how are you?", ellipsis(hello, 100));
+    assertEquals("", ellipsis(null, 100));
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -86,13 +234,16 @@ public class StringMethodsTest {
   }
 
   @Test
-  public void endsWith01() {
+  public void endsWith00() {
     String s = "The cat is both dead and alive";
-    assertTrue(null != endsWith(s, true, "ALIVE", "test"));
-    assertTrue(null != endsWith(s, true, "test", "ALIVE"));
-    assertTrue(null != endsWith(s, true, "test", "a", "b", "ALIVE", "c"));
-    assertTrue(null == endsWith(s, false, "DEAD", "ALIVE"));
-    assertTrue(null == endsWith(s, true, "dead", "and"));
+    assertNotNull(endsWith(s, true, "ALIVE", "test"));
+    assertNotNull(endsWith(s, true, "test", "ALIVE"));
+    assertNotNull(endsWith(s, true, "test", "a", "b", "ALIVE", "c"));
+    assertNotNull(endsWith(s, true, List.of("test", "a", "b", "ALIVE", "c")));
+    assertNull(endsWith(s, false, "DEAD", "ALIVE"));
+    assertNull(endsWith(s, true, "dead", "and"));
+    assertNull(endsWith(null, false, "ab", "cd"));
+    assertNull(endsWith("", false, "ab", "cd"));
   }
 
   @Test
@@ -138,6 +289,30 @@ public class StringMethodsTest {
   }
 
   @Test
+  public void ensurePrefix00() {
+    assertEquals("ABC", ensurePrefix(null, "ABC"));
+    assertEquals("ABC", ensurePrefix("", "ABC"));
+    assertEquals("ABC", ensurePrefix("ABC", "ABC"));
+    assertEquals("ABCDE", ensurePrefix("DE", "ABC"));
+    assertEquals("ABCDE", ensurePrefix("ABCDE", "ABC"));
+    assertEquals("ABCFRIDAY", ensurePrefix(DayOfWeek.FRIDAY, "ABC"));
+    assertEquals("", ensurePrefix(null, ""));
+    assertEquals("", ensurePrefix("", ""));
+  }
+
+  @Test
+  public void ensureSuffix00() {
+    assertEquals("XYZ", ensureSuffix(null, "XYZ"));
+    assertEquals("XYZ", ensureSuffix("", "XYZ"));
+    assertEquals("XYZ", ensureSuffix("XYZ", "XYZ"));
+    assertEquals("WXYZ", ensureSuffix("WXYZ", "XYZ"));
+    assertEquals("ABXYZ", ensureSuffix("AB", "XYZ"));
+    assertEquals("9XYZ", ensureSuffix(9, "XYZ"));
+    assertEquals("", ensureSuffix(null, ""));
+    assertEquals("", ensureSuffix("", ""));
+  }
+
+  @Test
   public void substr06() {
     assertEquals("w", substr("whatever", 0, -1));
     assertEquals("h", substr("whatever", 1, -1));
@@ -159,22 +334,24 @@ public class StringMethodsTest {
     assertEquals(0, indexOf("012345678901234", "0", 1));
     assertEquals(0, indexOf("012345678901234", "012", 1));
     assertEquals(0, indexOf("012345678901234", "0123456", 1));
-
     assertEquals(10, indexOf("012345678901234", "0", 2));
     assertEquals(10, indexOf("012345678901234", "012", 2));
     assertEquals(-1, indexOf("012345678901234", "0123456", 2));
-
     assertEquals(20, indexOf("01234567890123456789012", "0", 3));
     assertEquals(20, indexOf("01234567890123456789012", "012", 3));
     assertEquals(-1, indexOf("01234567890123456789012", "0123", 3));
-
     assertEquals(9, indexOf("01234567890123456789012", "9", 1));
     assertEquals(9, indexOf("01234567890123456789012", "90", 1));
-
     assertEquals(-1, indexOf(null, "0123", 1));
     assertEquals(-1, indexOf("", "0123", 1));
     assertEquals(0, indexOf("0", "0", 1));
     assertEquals(0, indexOf("01", "01", 1));
+    assertEquals(-1, indexOf("abc", "123", 1));
+    assertEquals(-1, indexOf("abc", "123", 2));
+    assertEquals(-1, indexOf("abc", "1", 1));
+    assertEquals(-1, indexOf("abc", "1", 2));
+    assertEquals(-1, indexOf("abc", "1", -1));
+    assertEquals(-1, indexOf("abc", "1", -2));
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -193,22 +370,128 @@ public class StringMethodsTest {
   }
 
   @Test
-  public void ltrim_char() {
-    assertEquals("", ltrim(null, 'a'));
-    assertEquals("", ltrim("", 'a'));
-    assertEquals("", ltrim("a", 'a'));
-    assertEquals("", ltrim("aa", 'a'));
-    assertEquals("", ltrim("aaa", 'a'));
-    assertEquals("b", ltrim("b", 'a'));
-    assertEquals("b", ltrim("aaab", 'a'));
-    assertEquals("bb", ltrim("aaabb", 'a'));
-    assertEquals("bb", ltrim("bb", 'a'));
-    assertEquals("bba", ltrim("bba", 'a'));
-    assertEquals("bbaa", ltrim("bbaa", 'a'));
+  public void indexOf04() {
+    assertEquals(10, indexOf("012345678901234", "0", -1));
+    assertEquals(10, indexOf("012345678901234", "012", -1));
+    assertEquals(0, indexOf("012345678901234", "0123456", -1));
+
+    assertEquals(0, indexOf("012345678901234", "0", -2));
+    assertEquals(0, indexOf("012345678901234", "012", -2));
+    assertEquals(1, indexOf("012345678901234", "123", -2));
   }
 
   @Test
-  public void ltrim_string() {
+  public void substrBefore00() {
+    String subject = "012345678901234567890123";
+    assertEquals("", substrBefore(subject, "012", 1));
+    assertEquals("0123456789", substrBefore(subject, "012", 2));
+    assertEquals("01234567890123456789", substrBefore(subject, "012", 3));
+    assertSame(subject, substrBefore(subject, "012", 4));
+    assertEquals("0", substrBefore(subject, "1", 1));
+    assertEquals("0", substrBefore(subject, "12", 1));
+    assertSame(subject, substrBefore(subject, "012", -4));
+    assertEquals("", substrBefore(subject, "012", -3));
+    assertEquals("0123456789", substrBefore(subject, "012", -2));
+    assertEquals("01234567890123456789", substrBefore(subject, "012", -1));
+    assertEquals("", substrBefore(null, "abc", 2));
+    assertEquals("class java", substrBefore(String.class, ".", 1));
+    assertEquals("class java.", substrBefore(String.class, "lang", 1));
+    assertEquals("class java.lang", substrBefore(String.class, ".", 2));
+  }
+
+  @Test
+  public void substrTo00() {
+    String subject = "012345678901234567890123";
+    assertEquals("012", substrTo(subject, "012", 1));
+    assertEquals("0123456789012", substrTo(subject, "012", 2));
+    assertEquals("01234567890123456789012", substrTo(subject, "012", 3));
+    assertEquals(subject, substrTo(subject, "3", 3));
+    assertNotSame(subject, substrTo(subject, "3", 3));
+    assertSame(subject, substrTo(subject, "012", 4));
+    assertEquals("01", substrTo(subject, "1", 1));
+    assertEquals("012", substrTo(subject, "12", 1));
+    assertSame(subject, substrTo(subject, "012", -4));
+    assertEquals("012", substrTo(subject, "012", -3));
+    assertEquals("0123456789012", substrTo(subject, "012", -2));
+    assertEquals("01234567890123456789012", substrTo(subject, "012", -1));
+    assertEquals("", substrTo(null, "abc", 2));
+    assertEquals("class java.", substrTo(String.class, ".", 1));
+    assertEquals("class java.lang", substrTo(String.class, "lang", 1));
+    assertEquals("class java.lang.", substrTo(String.class, ".", 2));
+  }
+
+  @Test
+  public void substrFrom00() {
+    String subject = "012345678901234567890123";
+    String s = substrFrom(subject, "012", 1);
+    assertEquals(subject, substrFrom(subject, "012", 1));
+    assertNotSame(subject, substrFrom(subject, "012", 1));
+    assertSame(subject, substrFrom(subject, "FOO", 1));
+    assertEquals("01234567890123", substrFrom(subject, "012", 2));
+    assertEquals("0123", substrFrom(subject, "012", 3));
+    assertSame(subject, substrFrom(subject, "012", 4));
+    assertEquals("12345678901234567890123", substrFrom(subject, "1", 1));
+    assertEquals("12345678901234567890123", substrFrom(subject, "12", 1));
+    assertSame(subject, substrFrom(subject, "012", -4));
+    assertEquals(subject, substrFrom(subject, "012", -3));
+    assertNotSame(subject, substrFrom(subject, "012", -3));
+    assertEquals("01234567890123", substrFrom(subject, "012", -2));
+    assertEquals("0123", substrFrom(subject, "012", -1));
+    assertEquals("", substrFrom(null, "abc", 2));
+    assertEquals(".lang.String", substrFrom(String.class, ".", 1));
+    assertEquals("lang.String", substrFrom(String.class, "lang", 1));
+    assertEquals(".String", substrFrom(String.class, ".", 2));
+  }
+
+  @Test
+  public void substrAfter00() {
+    String subject = "012345678901234567890123";
+    assertEquals("345678901234567890123", substrAfter(subject, "012", 1));
+    assertEquals("34567890123", substrAfter(subject, "012", 2));
+    assertEquals("3", substrAfter(subject, "012", 3));
+    assertEquals("", substrAfter(subject, "0123", 3));
+    assertSame(subject, substrAfter(subject, "012", 4));
+    assertSame(subject, substrAfter(subject, "012", -4));
+    assertEquals("345678901234567890123", substrAfter(subject, "012", -3));
+    assertEquals("34567890123", substrAfter(subject, "012", -2));
+    assertEquals("3", substrAfter(subject, "012", -1));
+    assertEquals("", substrAfter(subject, "0123", -1));
+    assertEquals("", substrAfter(null, "abc", 2));
+    assertEquals("lang.String", substrAfter(String.class, ".", 1));
+    assertEquals(".String", substrAfter(String.class, "lang", 1));
+    assertEquals("String", substrAfter(String.class, ".", 2));
+  }
+
+  @Test
+  public void lchop00() {
+    assertEquals("", lchop(null, "ab"));
+    assertEquals("", lchop("", "ab"));
+    assertEquals("cd", lchop("cd", "ab"));
+    assertEquals("cd", lchop("cd", "a"));
+    assertEquals("cdefg", lchop("abcdefg", "ab"));
+    assertEquals("g", lchop("abcdefg", "ab", "cd", "ef"));
+    assertEquals("cdefg", lchop("abcdefg", "ab", "d", "ef"));
+    assertEquals("abcdefg", lchop("abcdefg", "AB"));
+    assertEquals("cdefg", lchop("abcdefg", true, "AB"));
+    assertEquals("", lchop("abcdefg", true, "AB", "CDEFG"));
+  }
+
+  @Test
+  public void rchop00() {
+    assertEquals("", rchop(null, "hi"));
+    assertEquals("", rchop("", "hi"));
+    assertEquals("hi", rchop("hi", "HI"));
+    assertEquals("", rchop("hi", true, "HI"));
+    assertEquals("abcdefghij", rchop("abcdefghij", true, "HI"));
+    assertEquals("abcdefg", rchop("abcdefghi", true, "HI"));
+    assertEquals("abcdef", rchop("abcdefghi", true, "HI", "G"));
+    assertEquals("ab", rchop("abcdefghi", "g", "hi", "cd", "ef"));
+    assertEquals("ab", rchop("abcdefghi", "g", "hi", "cd", "ef", "abc"));
+    assertEquals("", rchop("abcdefghi", "g", "hi", "cd", "ef", "ab"));
+  }
+
+  @Test
+  public void ltrim00() {
     assertEquals("", ltrim(null, "a"));
     assertEquals("", ltrim("", "abc"));
     assertEquals("", ltrim("a", "abc"));
@@ -220,29 +503,8 @@ public class StringMethodsTest {
   }
 
   @Test
-  public void rchop01() {
-    String s = "TheCatIsBothDeadAndAliveButMoreDeadThanAlive";
-    assertEquals("TheCatIsBoth", rchop(s, true, "dead", "and", "alive", "but", "more", "than"));
-  }
-
-  @Test
   public void rtrim00() {
-    assertEquals("", ltrim(null, 'a'));
-    assertEquals("", rtrim("", 'a'));
-    assertEquals("", rtrim("a", 'a'));
-    assertEquals("", rtrim("aa", 'a'));
-    assertEquals("", rtrim("aaa", 'a'));
-    assertEquals("b", rtrim("b", 'a'));
-    assertEquals("b", rtrim("baaa", 'a'));
-    assertEquals("bb", rtrim("bbaaa", 'a'));
-    assertEquals("bb", rtrim("bb", 'a'));
-    assertEquals("abb", rtrim("abb", 'a'));
-    assertEquals("aabb", rtrim("aabb", 'a'));
-  }
-
-  @Test
-  public void rtrim01() {
-    assertEquals("", ltrim(null, "a"));
+    assertEquals("", rtrim(null, "a"));
     assertEquals("", rtrim("", "a"));
     assertEquals("", rtrim("a", "a"));
     assertEquals("", rtrim("aab", "ab"));
@@ -254,31 +516,27 @@ public class StringMethodsTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void rtrim02() {
+  public void rtrim01() {
     assertEquals("", rtrim("a", null));
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void rtrim03() {
+  public void rtrim02() {
     assertEquals("", rtrim("a", ""));
   }
 
   @Test
-  public void lchop01() {
-    String s = "TheCatIsBothDeadAndAliveButMoreDeadThanAlive";
-    assertEquals("BothDeadAndAliveButMoreDeadThanAlive", lchop(s, true, "the", "cat", "is"));
-    assertEquals("BothDeadAndAliveButMoreDeadThanAlive", lchop(s, true, "dog", "is", "the", "cat"));
-    assertEquals(
-        "",
-        lchop(
-            s, true, "dog", "is", "the", "cat", "both", "dead", "and", "alive", "more", "BUT",
-            "than"));
-    assertEquals("", lchop(s, true, "TheCatIsBothDeadAndAliveButMoreDeadThanAlive", ""));
-    assertEquals("TheCatIsBothDeadAndAliveButMoreDeadThanAlive", lchop(s, true, "", ""));
+  public void trim00() {
+    assertEquals("", trim(null, "ab"));
+    assertEquals("", trim("", "ab"));
+    assertEquals("cdef", trim("abcdefab", "ab"));
+    assertEquals("bcdefab", trim("abcdefab", "a"));
+    assertEquals("abcdefa", trim("abcdefab", "b"));
+    assertEquals("abcdefab", trim("abcdefab", "cdef"));
   }
 
   @Test
-  public void lpad01() {
+  public void lpad00() {
     assertEquals("hello", lpad("hello", 5));
     assertEquals(" hello", lpad("hello", 6));
     assertEquals("  hello", lpad("hello", 7));
@@ -288,27 +546,29 @@ public class StringMethodsTest {
   }
 
   @Test
-  public void lpad02() {
+  public void lpad01() {
     assertEquals("hello|", lpad("hello", 5, '.', "|"));
     assertEquals(".hello|", lpad("hello", 6, '.', "|"));
     assertEquals("..hello|", lpad("hello", 7, '.', "|"));
     assertEquals(".......|", lpad("", 7, '.', "|"));
     assertEquals(".......|", lpad(null, 7, '.', "|"));
     assertEquals("hello|", lpad("hello", 0, '.', "|"));
+    assertEquals("<<<hello", lpad("hello", 8, '<'));
   }
 
   @Test
-  public void rpad01() {
+  public void rpad00() {
     assertEquals("hello", rpad("hello", 5));
     assertEquals("hello ", rpad("hello", 6));
     assertEquals("hello  ", rpad("hello", 7));
     assertEquals("       ", rpad("", 7));
     assertEquals("       ", rpad(null, 7));
     assertEquals("hello", rpad("hello", 0));
+    assertEquals("hello>>>", rpad("hello", 8, '>'));
   }
 
   @Test
-  public void rpad02() {
+  public void rpad01() {
     assertEquals("hello|", rpad("hello", 5, '.', "|"));
     assertEquals("hello.|", rpad("hello", 6, '.', "|"));
     assertEquals("hello..|", rpad("hello", 7, '.', "|"));
@@ -318,17 +578,19 @@ public class StringMethodsTest {
   }
 
   @Test
-  public void pad01() {
+  public void pad00() {
     assertEquals("hello", pad("hello", 5));
     assertEquals("hello ", pad("hello", 6));
     assertEquals(" hello ", pad("hello", 7));
     assertEquals(" hello  ", pad("hello", 8));
     assertEquals("  hello  ", pad("hello", 9));
+    assertEquals(".hello..", pad("hello", 8, '.'));
+    assertEquals("..hello..", pad("hello", 9, '.'));
     assertEquals("hello", pad("hello", 0));
   }
 
   @Test
-  public void pad02() {
+  public void pad01() {
     assertEquals("hello|", pad("hello", 5, '.', "|"));
     assertEquals("hello.|", pad("hello", 6, '.', "|"));
     assertEquals(".hello.|", pad("hello", 7, '.', "|"));
@@ -338,48 +600,50 @@ public class StringMethodsTest {
   }
 
   @Test
-  public void substrFrom00() {
-    String input = "/home/john/tmp/test.html";
-    assertEquals("john/tmp/test.html", substrFrom(input, "john"));
-    assertEquals("html", substrFrom(input, "html"));
-    assertEquals("/test.html", substrFrom(input, "/te", true));
-  }
-
-  @Test
-  public void substrAfter00() {
-    String input = "/home/john/tmp/test.html";
-    assertEquals("home/john/tmp/test.html", substrAfter(input, "/"));
-    assertEquals("/tmp/test.html", substrAfter(input, "john"));
-    assertEquals("", substrAfter(input, "html"));
-    assertEquals(input, substrAfter(input, "x"));
-    assertEquals("test.html", substrAfter(input, "/", true));
-  }
-
-  @Test
   public void getLineAndColumn00() {
     String s = "To be\nOr not to be\nThat is the question\n Whether 't is nobler\nIn the mind";
     int idx = 0;
-    assertArrayEquals(new int[] {0, 0}, getLineAndColumn(s, idx, "\n"));
+    assertArrayEquals(new int[] {0, 0}, PrintMethods.getLineAndColumn(s, idx, "\n"));
     idx = s.indexOf("not");
-    assertArrayEquals(new int[] {1, 3}, getLineAndColumn(s, idx, "\n"));
+    assertArrayEquals(new int[] {1, 3}, PrintMethods.getLineAndColumn(s, idx, "\n"));
     idx = s.indexOf("is");
-    assertArrayEquals(new int[] {2, 5}, getLineAndColumn(s, idx, "\n"));
+    assertArrayEquals(new int[] {2, 5}, PrintMethods.getLineAndColumn(s, idx, "\n"));
     idx = s.indexOf("mind");
-    assertArrayEquals(new int[] {4, 7}, getLineAndColumn(s, idx, "\n"));
+    assertArrayEquals(new int[] {4, 7}, PrintMethods.getLineAndColumn(s, idx, "\n"));
     idx = s.indexOf("\n"); // hmmm ...
-    assertArrayEquals(new int[] {0, 5}, getLineAndColumn(s, idx, "\n"));
+    assertArrayEquals(new int[] {0, 5}, PrintMethods.getLineAndColumn(s, idx, "\n"));
   }
 
   @Test
-  public void initCap00() {
-    String s = initCap("helloWorld");
-    assertEquals("HelloWorld", s);
-    s = initCap(" helloWorld");
-    assertEquals(" helloWorld", s);
+  public void firstToUpper00() {
+    assertEquals("Hello", firstToUpper("hello"));
+    assertEquals("H", firstToUpper("h"));
+    assertSame("+hello", firstToUpper("+hello"));
+    assertSame(" hello", firstToUpper(" hello"));
+    assertEquals("", firstToUpper(""));
+    assertEquals("", firstToUpper(null));
+  }
+
+  @Test
+  public void firstToLower00() {
+    assertEquals("hello", firstToLower("Hello"));
+    assertEquals("h", firstToLower("H"));
+    assertSame("+hello", firstToLower("+hello"));
+    assertSame(" Hello", firstToLower(" Hello"));
+    assertEquals("", firstToLower(""));
+    assertEquals("", firstToLower(null));
   }
 
   @Test
   public void concat00() {
     assertEquals("There are 7 days in a week", concat("There are ", 7, ' ', "days in a ", "week"));
+  }
+
+  @Test
+  public void ifBlank00() {
+    assertEquals("abc", ifBlank(null, "abc"));
+    assertEquals("abc", ifBlank("", "abc"));
+    assertEquals("abc", ifBlank("\r\n", "abc"));
+    assertEquals("abcd", ifBlank("abcd", "abc"));
   }
 }

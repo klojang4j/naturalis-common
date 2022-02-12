@@ -1,6 +1,6 @@
 package nl.naturalis.common.check;
 
-import static nl.naturalis.common.StringMethods.duration;
+import static nl.naturalis.common.PrintMethods.duration;
 import static nl.naturalis.common.check.CommonChecks.lt;
 import static nl.naturalis.common.check.CommonChecks.lte;
 import static nl.naturalis.common.check.CommonChecks.ne;

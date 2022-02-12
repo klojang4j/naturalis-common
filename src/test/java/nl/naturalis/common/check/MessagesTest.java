@@ -16,11 +16,12 @@ import static org.junit.Assert.assertEquals;
 public class MessagesTest {
 
   /*
-   * If we change something that will affect all messages, it's best to disable the assertions, so
-   * we can update the expected strings without being distracted by all the test failures.
-   *
-   * SET TO FALSE BEFORE GIT PUSH !!!
-   */
+  * SET TO FALSE BEFORE GIT PUSH !!!
+
+  * If we change something that will affect all messages, it's best to disable the assertions, so
+  * we can update the expected strings without being distracted by all the test failures.
+  *
+  */
   private static final boolean SYSOUT_ONLY = false;
 
   @Test
@@ -199,7 +200,8 @@ public class MessagesTest {
     MsgArgs args = new MsgArgs(blank(), true, "morpheus", "");
     System.out.println(msgBlank().apply(args));
     if (!SYSOUT_ONLY) {
-      assertEquals("morpheus must not be null or blank (was \"\")", msgBlank().apply(args));
+      assertEquals(
+          "morpheus must not be null or blank (was <EMPTY_STRING>)", msgBlank().apply(args));
     }
   }
 
