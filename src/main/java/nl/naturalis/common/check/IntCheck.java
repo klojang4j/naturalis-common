@@ -21,7 +21,7 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
     if (test.exists(arg, object)) {
       return this;
     }
-    String msg = createMessage(test, false, argName, arg, object);
+    String msg = createMessage(test, false, getArgName(arg), arg, object);
     throw excFactory.apply(msg);
   }
 
@@ -30,7 +30,7 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    String msg = createMessage(test, true, argName, arg, object);
+    String msg = createMessage(test, true, argName, getArgName(arg), object);
     throw excFactory.apply(msg);
   }
 
@@ -49,7 +49,7 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
     if (test.exists(arg, object)) {
       return this;
     }
-    String msg = createMessage(test, false, argName, arg, object);
+    String msg = createMessage(test, false, getArgName(arg), arg, object);
     throw excFactory.apply(msg);
   }
 
@@ -58,7 +58,7 @@ final class IntCheck<E extends Exception> extends Check<Integer, E> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    String msg = createMessage(test, true, argName, arg, object);
+    String msg = createMessage(test, true, getArgName(arg), arg, object);
     throw excFactory.apply(msg);
   }
 

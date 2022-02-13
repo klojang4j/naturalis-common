@@ -15,7 +15,7 @@ public class FunctionalMethods {
    * @return The {@code IntPredicate} version of the {@code Predicate}
    */
   public static IntPredicate asInt(Predicate<Integer> predicate) {
-    return x -> predicate.test(Integer.valueOf(x));
+    return predicate::test;
   }
 
   /**

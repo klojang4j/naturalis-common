@@ -1145,6 +1145,43 @@ public class CommonChecks {
     return UnsupportedOperationException::new;
   }
 
+  /**
+   * (Not a check) Simply returns the specified {@code IntPredicate}. You must use this method if
+   * you pass a custom lambda or method reference to the {@link Check#is(IntPredicate)} and {@link
+   * Check#isNot(IntPredicate)} methods. Otherwise the compiler will not be able to tell whether the
+   * lambda in fact <i>is</i> an {@code IntPredicate} rather than an {@code Predicate}. You will
+   * never have to use this method for any of the checks in this class, and you will also never have
+   * to use this method if the target of your lambda or method reference is a {@link Relation} or
+   * any of its sister interfaces.
+   *
+   * @see Check#is(Predicate)
+   * @see Check#is(IntPredicate)
+   * @param intPredicate An {@code IntPredicate}
+   * @return The same {@code IntPredicate}
+   */
+  public static IntPredicate asInt(IntPredicate intPredicate) {
+    return intPredicate;
+  }
+
+  /**
+   * (Not a check) Simply returns the specified {@code Predicate}. You must use this method if you
+   * pass a custom lambda or method reference to the {@link Check#is(Predicate)} and {@link
+   * Check#isNot(Predicate)} methods. Otherwise the compiler will not be able to tell whether the
+   * lambda in fact <i>is</i> a {@code Predicate} rather than an {@code IntPredicate}. You will
+   * never have to use this method for any of the checks in this class, and you will also never have
+   * to use this method if the target of your lambda or method reference is a {@link Relation} or
+   * any of its sister interfaces.
+   *
+   * @see Check#is(Predicate)
+   * @see Check#is(IntPredicate)
+   * @param predicate A {@code Predicate}
+   * @param <T> The type of the object being tested
+   * @return The same {@code Predicate}
+   */
+  public static <T> Predicate<T> asObj(Predicate<T> predicate) {
+    return predicate;
+  }
+
   /* ++++++++++++++ END OF CHECKS ++++++++++++++ */
 
   static {

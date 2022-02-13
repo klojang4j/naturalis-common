@@ -2,275 +2,196 @@ package nl.naturalis.common.check;
 
 import org.junit.Test;
 
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.Collection;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 
 import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.check.CommonGetters.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-/**
- * NB A lot of these tests don't make any assertion, but just verify that we can code them as we do
- * in the first place without the compiler warning about ambiguities. The "that" static factory
- * methods and the "and" instance methods are so heavily overloaded that we had to help the compiler
- * determining the type of the lambdas. (E.g. That's why we have the "andAsInt" methods.)
- */
 @SuppressWarnings({"rawtypes"})
 public class CheckTest {
 
-  @Test(expected = IOException.class)
-  public void that01() throws IOException {
-    Check.on(IOException::new, 3 > 5).is(yes());
-  }
-
-  @Test(expected = IOException.class)
-  public void that02() throws IOException {
-    Check.on(IOException::new, 5 > 3).is(no());
-  }
-
   @Test
-  public void that03() {
-    Check check = Check.that(3, "fooArg").is(notNull());
-    assertEquals(IntCheck.class, check.getClass());
-  }
-
-  @Test
-  public void that04() {
-    Check check = Check.that(5, "fooArg");
-    assertEquals(IntCheck.class, check.getClass());
-  }
-
-  @Test
-  public void that05() {
-    Check check = Check.that(Integer.valueOf(9), "fooArg");
-    assertEquals(ObjectCheck.class, check.getClass());
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void greaterThan01() {
-    Check.that(2, "fooArg").is(greaterThan(), 4);
-    assertTrue(true);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void greaterThan02() {
-    Check.that(2, "fooArg").is(greaterThan(), Integer.valueOf(4));
-    assertTrue(true);
-  }
-
-  // gt() works with ints, not Number instances, but the compiler is fine with it
-  @Test
-  public void gt01() {
-    Check.that(Integer.valueOf(6), "fooArg").is(gt(), Integer.valueOf(4));
-    assertTrue(true);
-  }
-
-  @Test
-  public void gt02() {
-    Check.that(Integer.valueOf(6), "fooArg").is(gt(), 4);
-    assertTrue(true);
-  }
-
-  /*
-   * Gotcha: instanceOf() takes an object so forces the int argument to be boxed. In other words
-   * it's pointless and misleading to do an instanceOf check on an int argument.
-   */
-  @Test(expected = IllegalArgumentException.class)
-  public void instanceOf01() {
-    Check.that(9, "fooArg").is(instanceOf(), int.class);
-  }
-
-  @Test
-  public void instanceOf02() {
-    Check.that(9, "fooArg").is(instanceOf(), Integer.class);
-    assertTrue(true);
-  }
-
-  @Test
-  public void size05() {
-    Check.that(List.of("a", "b", "c", "d", "e"), "fooArg").is(sizeGTE(), 3);
-    assertTrue(true);
-  }
-
-  @Test
-  public void size07() {
-    Check.that("Hello, World!", "fooArg").has(strlen(), gt(), 3);
-    assertTrue(true);
-  }
-
-  @Test
-  public void size08() {
-    Check.that(List.of("a", "b", "c", "d", "e"), "fooArg").has(size(), lte(), 10);
-    assertTrue(true);
-  }
-
-  @Test
-  public void size09() {
-    Collection<String> c = List.of("a", "b", "c", "d", "e");
-    Check.that(c, "fooArg").has(size(), lte(), 10);
-    assertTrue(true);
-  }
-
-  /*
-   * The point here is that we can write these tests down in the first place without compilation
-   * errors. Note the parameter typing in one of the lambdas, forced upon us by the compiler.
-   */
-  @Test
-  public void has01() {
-    Employee emp = new Employee();
-    emp.setId(3);
-    emp.setFullName("John Smith");
-    emp.setAge(43);
-    emp.setHobbies("Skating", "Scoccer");
-    Check.notNull(emp, "employee")
-        .has(Employee::getId, "id", gte(), 0)
-        .has(Employee::getId, "id", (int x, int y) -> x > y, 0)
-        .has(Employee::getHobbies, "hobbies", (x, y) -> x.contains(y), "Skating")
-        .has(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
-        .has(Employee::getHobbies, (x, y) -> x.contains(y), "Skating", "Skating is not optional")
-        .has(Employee::getFullName, "fullName", s -> s.length() < 200)
-        .has(Employee::getAge, gte(), 16, "Employee must be at least %d", 16)
-        .has(Employee::getAge, atLeast(), 16, "Employee must be at least %d", 16)
-        .ok();
-    assertTrue(true);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void has02() {
-    Employee employee = new Employee();
-    employee.setAge(12);
-    Check.notNull(employee, "employee").has(Employee::getAge, "age", gte(), 16).ok();
-    assertTrue(true);
-  }
-
-  @Test(expected = IOException.class)
-  public void has03() throws IOException {
-    Employee employee = new Employee();
-    employee.setHobbies(List.of("Skating", "Scuba diving"));
-    Check.notNull(IOException::new, employee, "employee")
-        .has(Employee::getHobbies, Collection::contains, "Scoccer", "Scoccer required hobby")
-        .ok();
-    assertTrue(true);
-  }
-
-  @Test(expected = IOException.class)
-  public void has04() throws IOException {
-    Employee employee = new Employee();
-    employee.setId(-23);
-    Check.notNull(IOException::new, employee, "employee")
-        .has(Employee::getId, gt(), 0, "Id must not be negative")
-        .ok();
-    assertTrue(true);
-  }
-
-  @Test
-  public void has05() {
-    Employee employee = new Employee();
-    employee.setScores(new float[] {3.2F, 103.2F, 0.8F});
-    Check.notNull(employee, "employee").has(Employee::getScores, "justSomeLuckyNumbers", array());
-    assertTrue(true);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void has06() {
-    Employee employee = new Employee();
-    employee.setId(7);
-    Check.notNull(employee, "employee").has(Employee::getId, "id", array());
-    assertTrue(true);
-  }
-
-  @Test
-  public void has07() {
-    Employee[] employees = new Employee[10];
-    Check.notNull(employees, "employees").has(Array::getLength, "length", lt(), 100);
-    assertTrue(true);
-  }
-
-  @Test
-  public void has07a() {
-    Employee[] employees = new Employee[10];
+  public void is00() {
     try {
-      Check.notNull(employees, "employees").has(length(), gt(), 100);
+      String foo = null;
+      Check.that(foo, "foo").is(notNull());
     } catch (IllegalArgumentException e) {
-      assertEquals("employees.length must be > 100 (was 10)", e.getMessage());
-      return;
-    }
-    fail();
-  }
-
-  /*
-   * Again note the forced typing of lambda parameters. It doesn't even really matter whether you
-   * choose int or Integer. The compiler must apparently just get a starting point from where it can
-   * start boxing/unboxing,
-   */
-  @Test
-  public void hasInt() {
-    Employee emp = new Employee();
-    emp.setId(3);
-    Check.notNull(emp, "employee")
-        .has(Employee::getId, "id", (Integer x) -> x != 2)
-        .has(Employee::getId, (Integer x) -> x != 2, "id must not be 2")
-        .has(Employee::getId, equalTo().negate(), 2, "id must not be 2")
-        .has(Employee::getId, (int x) -> x > 0, "Id must be positive")
-        .has(Employee::getId, "id", gt(), 0)
-        .has(Employee::getId, "id", ne(), 2)
-        .has(Employee::getId, "id", equalTo().negate(), 2);
-    assertTrue(true);
-  }
-
-  @Test
-  public void str() {
-    Employee emp = new Employee();
-    emp.setId(3);
-    emp.setFullName("John Smith");
-    Check.that(emp, "emp").has(asString(), equalTo(), "John Smith (3)");
-  }
-
-  @Test
-  public void strlen01() {
-    String s = "Hello, world!";
-    Check.that(s).has(strlen(), gt(), 2);
-    assertTrue(true);
-  }
-
-  @Test(expected = IllegalStateException.class)
-  public void strlen02() {
-    String s = "Hello, world!";
-    Check.on(IllegalStateException::new, s).has(strlen(), lt(), 2);
-  }
-
-  @Test
-  public void abs01() {
-    Check.that(-7).has(abs(), eq(), 7);
-  }
-
-  @Test
-  public void testNotApplicable01() {
-    try {
-      Check.that("s", "foo").is(indexOf(), List.of("X", "Y", "Z"));
-    } catch (InvalidCheckException e) {
       System.out.println(e.getMessage());
-      assertEquals(
-          "Error while checking foo: java.lang.String cannot be subject of indexOf()",
-          e.getMessage());
+      assertEquals("foo must not be null", e.getMessage());
       return;
     }
-    fail();
+    fail("should not be here");
   }
 
   @Test
-  public void testNotApplicable02() {
+  public void is01() {
     try {
-      Check.that("s").is(indexOf(), List.of("X", "Y", "Z"));
-    } catch (InvalidCheckException e) {
+      String foo = null;
+      Check.that(foo, "foo").is((String s) -> s != null);
+    } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals(
-          "Error while checking String: java.lang.String cannot be subject of indexOf()",
-          e.getMessage());
+      assertEquals("Invalid value for foo: null", e.getMessage());
       return;
     }
-    fail();
+    fail("should not be here");
+  }
+
+  @Test
+  public void is02() {
+    try {
+      String foo = null;
+      Check.that(foo, "foo").is(asObj(s -> s != null));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Invalid value for foo: null", e.getMessage());
+      return;
+    }
+    fail("should not be here");
+  }
+
+  @Test
+  public void is03() {
+    try {
+      String foo = null;
+      Check.that(foo, "foo").is((Predicate<String>) (s -> s != null));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Invalid value for foo: null", e.getMessage());
+      return;
+    }
+    fail("should not be here");
+  }
+
+  @Test
+  public void is04() {
+    try {
+      String foo = null;
+      Check.that(foo, "foo").is(asObj(Objects::nonNull));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Invalid value for foo: null", e.getMessage());
+      return;
+    }
+    fail("should not be here");
+  }
+
+  @Test
+  public void is05() {
+    try {
+      String foo = null;
+      Check.that(foo, "foo").is((Predicate<String>) Objects::nonNull);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Invalid value for foo: null", e.getMessage());
+      return;
+    }
+    fail("should not be here");
+  }
+
+  @Test
+  public void is06() {
+    try {
+      Check.that(List.of(), "list").isNot(empty());
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("list must not be null or empty (was ListN[0])", e.getMessage());
+      return;
+    }
+    fail("should not be here");
+  }
+
+  @Test
+  public void is07() {
+    try {
+      Check.that(List.of(), "list").isNot(asObj(List::isEmpty));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Invalid value for list: ListN[0]", e.getMessage());
+      return;
+    }
+    fail("should not be here");
+  }
+
+  @Test
+  public void is08() {
+    try {
+      Check.that(List.of(), "list").isNot(asObj(l -> l.isEmpty()));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Invalid value for list: ListN[0]", e.getMessage());
+      return;
+    }
+    fail("should not be here");
+  }
+
+  @Test
+  public void is09() {
+    try {
+      Check.that("abc").is((String s) -> s.endsWith("xyz"));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Invalid value for String: abc", e.getMessage());
+      return;
+    }
+    fail("should not be here");
+  }
+
+  @Test
+  public void intIs01() {
+    try {
+      Check.that(3).is(asInt(i -> i != 3));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      // assertEquals("Invalid value for foo: 3", e.getMessage());
+      return;
+    }
+    fail("should not be here");
+  }
+
+  @Test
+  public void intIs02() {
+    try {
+      Check.that(3, "foo").is(asInt(i -> i != 3));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Invalid value for foo: 3", e.getMessage());
+      return;
+    }
+    fail("should not be here");
+  }
+
+  private static boolean notEqualsThree(int i) {
+    return i != 3;
+  }
+
+  @Test
+  public void is101() {
+    try {
+      Check.that(3, "foo").is(asInt(CheckTest::notEqualsThree));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Invalid value for foo: 3", e.getMessage());
+      return;
+    }
+    fail("should not be here");
+  }
+
+  @Test
+  public void is102() {
+    try {
+      int foo = 3;
+      Check.that(foo, "foo").is((IntPredicate) (i -> i != 3));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Invalid value for foo: 3", e.getMessage());
+      return;
+    }
+    fail("should not be here");
   }
 }

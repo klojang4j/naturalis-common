@@ -11,6 +11,7 @@ import static java.lang.Character.toLowerCase;
 import static java.lang.reflect.Modifier.isStatic;
 import static nl.naturalis.common.CollectionMethods.swapAndFreeze;
 import static nl.naturalis.common.check.CommonChecks.array;
+import static nl.naturalis.common.check.CommonChecks.asObj;
 
 /**
  * Methods for inspecting types.
@@ -276,7 +277,8 @@ public class ClassMethods {
    * @return The superclasses of the specified class.
    */
   public static List<Class<?>> getAncestors(Class<?> clazz) {
-    Check.notNull(clazz).isNot(Class::isInterface, "Cannot get ancestors for interface (${arg})");
+    Check.notNull(clazz)
+        .isNot(asObj(Class::isInterface), "Cannot get ancestors for interface types");
     List<Class<?>> l = new ArrayList<>(5);
     for (Class<?> x = clazz.getSuperclass(); x != null; x = x.getSuperclass()) {
       l.add(x);
@@ -285,7 +287,8 @@ public class ClassMethods {
   }
 
   public static int countAncestors(Class<?> clazz) {
-    Check.notNull(clazz).isNot(Class::isInterface, "Cannot get ancestors for interface (${arg})");
+    Check.notNull(clazz)
+        .isNot(asObj(Class::isInterface), "Cannot get ancestors for interface types");
     int i = 0;
     for (Class<?> x = clazz.getSuperclass(); x != null; x = x.getSuperclass()) {
       ++i;

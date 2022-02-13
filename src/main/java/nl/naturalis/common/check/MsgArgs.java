@@ -23,4 +23,8 @@ record MsgArgs(Object check, boolean negated, String argName, Object arg, Object
     return arg == null? argName: simpleClassName(arg) +  ' ' + argName;
   }
 
+  String not() {
+    return negated? " not" : "";
+  }
+
 }

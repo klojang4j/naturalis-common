@@ -40,10 +40,10 @@ final class ObjectCheck<T, E extends Exception> extends Check<T, E> {
       if (test.exists(i, object)) {
         return this;
       }
-      String msg = createMessage(test, false, argName, i, object);
+      String msg = createMessage(test, false, getArgName(arg), i, object);
       throw excFactory.apply(msg);
     }
-    throw notApplicable(test, arg, argName);
+    throw notApplicable(test, arg, getArgName(arg));
   }
 
   @Override
@@ -53,10 +53,10 @@ final class ObjectCheck<T, E extends Exception> extends Check<T, E> {
       if (!test.exists(i, object)) {
         return this;
       }
-      String msg = createMessage(test, true, argName, i, object);
+      String msg = createMessage(test, true, getArgName(arg), i, object);
       throw excFactory.apply(msg);
     }
-    throw notApplicable(test, arg, argName);
+    throw notApplicable(test, arg, getArgName(arg));
   }
 
   @Override
@@ -69,7 +69,7 @@ final class ObjectCheck<T, E extends Exception> extends Check<T, E> {
       }
       throw exception(test, object, message, msgArgs);
     }
-    throw notApplicable(test, arg, argName);
+    throw notApplicable(test, arg, getArgName(arg));
   }
 
   @Override
@@ -91,9 +91,9 @@ final class ObjectCheck<T, E extends Exception> extends Check<T, E> {
       if (!test.exists(i, object)) {
         return this;
       }
-      throw excFactory.apply(createMessage(test, true, argName, i, object));
+      throw excFactory.apply(createMessage(test, true, getArgName(arg), i, object));
     }
-    throw notApplicable(test, arg, argName);
+    throw notApplicable(test, arg, getArgName(arg));
   }
 
   @Override
@@ -105,7 +105,7 @@ final class ObjectCheck<T, E extends Exception> extends Check<T, E> {
       }
       throw exception(test, object, message, msgArgs);
     }
-    throw notApplicable(test, arg, argName);
+    throw notApplicable(test, arg, getArgName(arg));
   }
 
   @Override
@@ -116,21 +116,23 @@ final class ObjectCheck<T, E extends Exception> extends Check<T, E> {
   @Override
   public int intValue() throws E {
     if (arg == null) {
-      String msg = String.format(ERR_NULL_TO_INT, argName);
+      String msg = String.format(ERR_NULL_TO_INT, getArgName(arg));
       throw excFactory.apply(msg);
     } else if (arg instanceof Number) {
       Number n = (Number) arg;
       if (NumberMethods.fitsInto(n, Integer.class)) {
         return n.intValue();
       }
-      String msg = String.format(ERR_NUMBER_TO_INT, argName, n);
+      String msg = String.format(ERR_NUMBER_TO_INT, getArgName(arg), n);
       throw excFactory.apply(msg);
     }
-    String msg = String.format(ERR_OBJECT_TO_INT, argName, arg.getClass().getName());
+    String msg = String.format(ERR_OBJECT_TO_INT, getArgName(arg), arg.getClass().getName());
     throw excFactory.apply(msg);
   }
 
+  @SuppressWarnings({"raw-types"})
   private boolean applicable() {
-    return isOneOf(arg.getClass(), Integer.class, Short.class, Byte.class);
+    Class c = arg.getClass();
+    return c == Integer.class || c == Short.class || c == Byte.class;
   }
 }
