@@ -1146,40 +1146,108 @@ public class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code IntPredicate}. You must use this method if
-   * you pass a custom lambda or method reference to the {@link Check#is(IntPredicate)} and {@link
-   * Check#isNot(IntPredicate)} methods. Otherwise the compiler will not be able to tell whether the
-   * lambda in fact <i>is</i> an {@code IntPredicate} rather than an {@code Predicate}. You will
-   * never have to use this method for any of the checks in this class, and you will also never have
-   * to use this method if the target of your lambda or method reference is a {@link Relation} or
-   * any of its sister interfaces.
+   * (Not a check) Simply returns the specified {@code IntPredicate}. You can use this method when
+   * passing a lambda or method reference to the {@code Check.is()} and {@code Check.isNot()}
+   * methods. The compiler will not be able to establish whether the lambda is supposed to be a
+   * {@code Predicate} or {@code IntPredicate}. This method clears that up for the compiler. You
+   * could also hard-cast the lambda to an {@code IntPredicate}, but this method, when statically
+   * imported, is less verbose. Note that you will never have to use this method for any of the
+   * checks in this class.
    *
    * @see Check#is(Predicate)
    * @see Check#is(IntPredicate)
-   * @param intPredicate An {@code IntPredicate}
+   * @param lambdaOrMethodReference A lambda or method reference
    * @return The same {@code IntPredicate}
    */
-  public static IntPredicate asInt(IntPredicate intPredicate) {
-    return intPredicate;
+  public static IntPredicate asInt(IntPredicate lambdaOrMethodReference) {
+    return lambdaOrMethodReference;
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code Predicate}. You must use this method if you
-   * pass a custom lambda or method reference to the {@link Check#is(Predicate)} and {@link
-   * Check#isNot(Predicate)} methods. Otherwise the compiler will not be able to tell whether the
-   * lambda in fact <i>is</i> a {@code Predicate} rather than an {@code IntPredicate}. You will
-   * never have to use this method for any of the checks in this class, and you will also never have
-   * to use this method if the target of your lambda or method reference is a {@link Relation} or
-   * any of its sister interfaces.
+   * (Not a check) Simply returns the specified {@code Predicate}. You can use this method when
+   * passing a lambda or method reference to the {@code Check.is()} and {@code Check.isNot()}
+   * methods. The compiler will not be able to establish whether the lambda is supposed to be a
+   * {@code Predicate} or {@code IntPredicate}. This method clears that up for the compiler. You
+   * could also hard-cast the lambda to a {@code Predicate}, but this method, when statically
+   * imported, is less verbose. Note that you will never have to use this method for any of the
+   * checks in this class.
    *
    * @see Check#is(Predicate)
    * @see Check#is(IntPredicate)
-   * @param predicate A {@code Predicate}
+   * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the object being tested
    * @return The same {@code Predicate}
    */
-  public static <T> Predicate<T> asObj(Predicate<T> predicate) {
-    return predicate;
+  public static <T> Predicate<T> asObj(Predicate<T> lambdaOrMethodReference) {
+    return lambdaOrMethodReference;
+  }
+
+  /**
+   * (Not a check) Simply returns the specified {@code Relation}. You can use this method when
+   * passing a lambda or method reference to the {@code Check.is()} and {@code Check.isNot()}
+   * methods. The compiler will not be able to establish whether the lambda is supposed to be a
+   * {@code Relation} or one of its sister interfaces. This method clears that up for the compiler.
+   * You could also hard-cast the lambda to a {@code Relation}, but this method, when statically
+   * imported, is less verbose. Note that you will never have to use this method for any of the
+   * checks in this class.
+   *
+   * @param lambdaOrMethodReference A lambda or method reference
+   * @param <T> The type of the subject of the {@code Relation}
+   * @param <U> The type of the object of the {@code Relation}
+   * @return The same {@code Relation}
+   */
+  public static <T, U> Relation<T, U> objObj(Relation<T, U> lambdaOrMethodReference) {
+    return lambdaOrMethodReference;
+  }
+
+  /**
+   * (Not a check) Simply returns the specified {@code ObjIntRelation}. You can use this method when
+   * passing a lambda or method reference to the {@code Check.is()} and {@code Check.isNot()}
+   * methods. The compiler will not be able to establish whether the lambda is supposed to be a
+   * {@code Relation} or one of its sister interfaces. You could also hard-cast the lambda to an
+   * {@code ObjIntRelation}, but this method, when statically imported, is less verbose. This method
+   * clears that up for the compiler. Note that you will never have to use this method for any of
+   * the checks in this class.
+   *
+   * @param lambdaOrMethodReference A lambda or method reference
+   * @param <T> The type of the subject of the {@code Relation}
+   * @return The same {@code ObjIntRelation}
+   */
+  public static <T> ObjIntRelation<T> objInt(ObjIntRelation<T> lambdaOrMethodReference) {
+    return lambdaOrMethodReference;
+  }
+
+  /**
+   * (Not a check) Simply returns the specified {@code IntObjRelation}. You can use this method when
+   * passing a lambda or method reference to the {@code Check.is()} and {@code Check.isNot()}
+   * methods. The compiler will not be able to establish whether the lambda is supposed to be a
+   * {@code Relation} or one of its sister interfaces. This method clears that up for the compiler.
+   * You could also hard-cast the lambda to an {@code IntObjRelation}, but this method, when
+   * statically imported, is less verbose. Note that you will never have to use this method for any
+   * of the checks in this class.
+   *
+   * @param lambdaOrMethodReference A lambda or method reference
+   * @param <T> The type of the object of the {@code Relation}
+   * @return The same {@code IntObjRelation}
+   */
+  public static <T> IntObjRelation<T> intObj(IntObjRelation<T> lambdaOrMethodReference) {
+    return lambdaOrMethodReference;
+  }
+
+  /**
+   * (Not a check) Simply returns the specified {@code IntObjRelation}. You can use this method when
+   * passing a lambda or method reference to the {@code Check.is()} and {@code Check.isNot()}
+   * methods. The compiler will not be able to establish whether the lambda is supposed to be a
+   * {@code Relation} or one of its sister interfaces. This method clears that up for the compiler.
+   * You could also hard-cast the lambda to an {@code IntRelation}, but this method, when statically
+   * imported, is less verbose. Note that you will never have to use this method for any of the
+   * checks in this class.
+   *
+   * @param lambdaOrMethodReference A lambda or method reference
+   * @return The same {@code IntRelation}
+   */
+  public static IntRelation intInt(IntRelation lambdaOrMethodReference) {
+    return lambdaOrMethodReference;
   }
 
   /* ++++++++++++++ END OF CHECKS ++++++++++++++ */

@@ -427,33 +427,30 @@ public abstract class Check<T, E extends Exception> {
    * the {@link CommonChecks} class so that an informative error message is generated if the
    * argument fails the test.
    *
-   * <p>If you provide a lambda or method reference, you will have to explicitly declare the type of
-   * the lambda parameter, otherwise this method will clash with {@link #is(IntPredicate)}:
+   * <p>When providing a lambda or method reference, you will have to make it clear to the compiler
+   * that it actually <i>is</i> a {@code Predicate}, because the compiler will not be able to
+   * distinguish it from an {@code IntPredicate}. It will complain about an <b>Ambiguous method
+   * call</b>. You can circumvent this in three ways:
+   *
+   * <ol>
+   *   <li>Specify the type of the lambda parameter (not an option when providing a method
+   *       reference)
+   *   <li>Use the {@link CommonChecks#asObj asObj} utility method from the {@code CommonChecks}
+   *       class
+   *   <li>Cast the lambda or method reference to an {@code IntPredicate}
+   * </ol>
    *
    * <blockquote>
    *
    * <pre>{@code
    * Check.that("abc").is(s -> s.endsWith("xyz")); // WON'T COMPILE !
    * Check.that("abc").is((String s) -> s.endsWith("xyz")); // Will compile
-   * }</pre>
-   *
-   * </blockquote>
-   *
-   * <p>Alternatively, you can use the {@link CommonChecks#asObj(Predicate) CommonChecks.asObj}
-   * utility method, or cast the entire lambda to {@code Predicate}:
-   *
-   * <blockquote>
-   *
-   * <pre>{@code
    * Check.that("abc").is(asObj(s -> s.endsWith("xyz"))); // Will compile
    * Check.that("abc").is((Predicate<String>) (s -> s.endsWith("xyz"))); // Verbose, but compiles
    * }</pre>
    *
-   * </blockquote>
-   *
-   * <p>Note that you will never have to do any of this when passing a check from the {@link
-   * CommonChecks}, or when passing a lambda or method reference that implements {@link Relation} or
-   * one of its sister interfaces.
+   * <p>Note that you will never have to do any of this when using the checks from the {@code
+   * CommonChecks} class.
    *
    * @param test A {@code Predicate} expressing the test
    * @return This {@code Check} object
@@ -473,34 +470,30 @@ public abstract class Check<T, E extends Exception> {
    * IntPredicate} from the {@link CommonChecks} class so that an informative error message is
    * generated if the argument fails the test.
    *
-   * <p>If you provide a lambda or method reference, you will have to explicitly declare the type of
-   * the lambda parameter ({@code int}), otherwise this method will clash with {@link
-   * #is(Predicate)}:
+   * <p>When providing a lambda or method reference, you will have to make it clear to the compiler
+   * that it actually <i>is</i> a {@code Predicate}, because the compiler will not be able to
+   * distinguish it from an {@code IntPredicate}. It will complain about an <b>Ambiguous method
+   * call</b>. You can circumvent this in three ways:
+   *
+   * <ol>
+   *   <li>Specify the type of the lambda parameter (not an option when providing a method
+   *       reference)
+   *   <li>Use the {@link CommonChecks#asInt(IntPredicate)} asInt} utility method from the {@code
+   *       CommonChecks} class
+   *   <li>Cast the lambda or method reference to an {@code IntPredicate}
+   * </ol>
    *
    * <blockquote>
    *
    * <pre>{@code
    * Check.that(8).is(i -> i > 5); // WON'T COMPILE !
    * Check.that(8).is((int i) -> i > 5); // Will compile
-   * }</pre>
-   *
-   * </blockquote>
-   *
-   * <p>Alternatively, you can use the {@link CommonChecks#asInt(IntPredicate) CommonChecks.asInt}
-   * utility method, or cast the entire lambda to {@code IntPredicate}:
-   *
-   * <blockquote>
-   *
-   * <pre>{@code
    * Check.that(8).is(asInt(i -> i > 5)); // Will compile
    * Check.that(8).is((IntPredicate) (i -> i > 5)); // Verbose, but compiles
    * }</pre>
    *
-   * </blockquote>
-   *
-   * <p>Note that you will never have to do any of this when passing a check from the {@link
-   * CommonChecks}, or when passing a lambda or method reference that implements {@link IntRelation}
-   * or one of its sister interfaces.
+   * <p>Note that you will never have to do any of this when using the checks from the {@code
+   * CommonChecks} class.
    *
    * @param test An {@code IntPredicate} expressing the test
    * @return This {@code Check} object
@@ -618,6 +611,36 @@ public abstract class Check<T, E extends Exception> {
    * the {@link CommonChecks} class so that an informative error message is generated if the
    * argument fails the test.
    *
+   * <p>When providing a lambda or method reference, you will have to make it clear to the compiler
+   * that it actually <i>is</i> a {@code Relation}, because the compiler will not be able to
+   * distinguish its sister interfaces ({@link IntRelation}, etc.). It will complain about an
+   * <b>Ambiguous method call</b>. You can circumvent this in three ways:
+   *
+   * <ol>
+   *   <li>Specify the types of the lambda parameters (not an option when providing a method
+   *       reference)
+   *   <li>Use the {@link CommonChecks#objObj(Relation)} objObj} utility method from the {@code
+   *       CommonChecks} class
+   *   <li>Cast the lambda or method reference to a {@code Relation}
+   * </ol>
+   *
+   * <blockquote>
+   *
+   * <pre>{@code
+   * Check.that(map).is((x, y) -> x.containsKey(y), "Hello World"); // WON'T COMPILE !
+   * Check.that(map).is(Map::containsKey, "Greeting");// WON'T COMPILE !
+   * // use objObj method:
+   * Check.that(map).is(objObj((x, y) -> x.containsKey(y)), "Greeting");
+   * Check.that(map).is(objObj(Map::containsKey), "Greeting");
+   * // Specify the type of the lambda parameters (verbose, but compiles):
+   * Check.that(map).is((Map<String, Object> x, String y) -> x.containsKey(y), "Greeting");
+   * // Cast the entire lambda or method reference (verbose, but compiles):
+   * Check.that(map).is((Relation<Map<String, Object>, String>) Map::containsKey, "Greeting");
+   * }</pre>
+   *
+   * <p>Note that you will never have to do any of this when using the checks from the {@code
+   * CommonChecks} class.
+   *
    * @param <U> The type of the object of the relationship
    * @param test The relation to verify between the argument (as the subject of the relationship)
    *     and the specified value (as the object of the relationship)
@@ -699,6 +722,22 @@ public abstract class Check<T, E extends Exception> {
    * ObjIntRelation} from the {@link CommonChecks} class so that an informative error message is
    * generated if the argument fails the test.
    *
+   * <p>When providing a lambda or method reference, you will have to make it clear to the compiler
+   * that it actually <i>is</i> an {@code ObjIntRelation}, because the compiler will not be able to
+   * distinguish its sister interfaces ({@link Relation}, etc.). It will complain about an
+   * <b>Ambiguous method call</b>. You can circumvent this in three ways:
+   *
+   * <ol>
+   *   <li>Specify the types of the lambda parameters (not an option when providing a method
+   *       reference)
+   *   <li>Use the {@link CommonChecks#objInt(ObjIntRelation)} objInt} utility method from the
+   *       {@code CommonChecks} class
+   *   <li>Cast the lambda or method reference to an {@code ObjIntRelation}
+   * </ol>
+   *
+   * <p>Note that you will never have to do any of this when using the checks from the {@code
+   * CommonChecks} class.
+   *
    * @param test The relation to verify between the argument (as the subject of the relationship)
    *     and the specified value (as the object of the relationship)
    * @param object The object of the relationship
@@ -776,6 +815,22 @@ public abstract class Check<T, E extends Exception> {
    * IntObjRelation} from the {@link CommonChecks} class so that an informative error message is
    * generated if the argument fails the test.
    *
+   * <p>When providing a lambda or method reference, you will have to make it clear to the compiler
+   * that it actually <i>is</i> an {@code IntObjRelation}, because the compiler will not be able to
+   * distinguish its sister interfaces ({@link Relation}, etc.). It will complain about an
+   * <b>Ambiguous method call</b>. You can circumvent this in three ways:
+   *
+   * <ol>
+   *   <li>Specify the types of the lambda parameters (not an option when providing a method
+   *       reference)
+   *   <li>Use the {@link CommonChecks#intObj(IntObjRelation)} intObj} utility method from the
+   *       {@code CommonChecks} class
+   *   <li>Cast the lambda or method reference to an {@code IntObjRelation}
+   * </ol>
+   *
+   * <p>Note that you will never have to do any of this when using the checks from the {@code
+   * CommonChecks} class.
+   *
    * @param <U> The type of the object of the relationship
    * @param test The relation to verify between the argument (as the subject of the relationship)
    *     and the specified value (as the object of the relationship)
@@ -839,6 +894,22 @@ public abstract class Check<T, E extends Exception> {
    * Although not strictly required, this method is meant to be used with an {@code IntRelation}
    * from the {@link CommonChecks} class so that an informative error message is generated if the
    * argument fails the test.
+   *
+   * <p>When providing a lambda or method reference, you will have to make it clear to the compiler
+   * that it actually <i>is</i> an {@code IntRelation}, because the compiler will not be able to
+   * distinguish its sister interfaces ({@link Relation}, etc.). It will complain about an
+   * <b>Ambiguous method call</b>. You can circumvent this in three ways:
+   *
+   * <ol>
+   *   <li>Specify the types of the lambda parameters (not an option when providing a method
+   *       reference)
+   *   <li>Use the {@link CommonChecks#intInt(IntRelation)} intInt} utility method from the {@code
+   *       CommonChecks} class
+   *   <li>Cast the lambda or method reference to an {@code IntRelation}
+   * </ol>
+   *
+   * <p>Note that you will never have to do any of this when using the checks from the {@code
+   * CommonChecks} class.
    *
    * @param test The relation to verify between the argument (as the subject of the relationship)
    *     and the specified value (as the object of the relationship)

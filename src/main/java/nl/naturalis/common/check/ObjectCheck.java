@@ -118,13 +118,12 @@ final class ObjectCheck<T, E extends Exception> extends Check<T, E> {
     if (arg == null) {
       String msg = String.format(ERR_NULL_TO_INT, getArgName(arg));
       throw excFactory.apply(msg);
-    } else if (arg instanceof Number) {
-      Number n = (Number) arg;
-      if (NumberMethods.fitsInto(n, Integer.class)) {
-        return n.intValue();
-      }
-      String msg = String.format(ERR_NUMBER_TO_INT, getArgName(arg), n);
-      throw excFactory.apply(msg);
+    } else if (arg.getClass() == Integer.class) {
+      return (Integer) arg;
+    } else if (arg.getClass() == Short.class) {
+      return (Short) arg;
+    } else if (arg.getClass() == Byte.class) {
+      return (Byte) arg;
     }
     String msg = String.format(ERR_OBJECT_TO_INT, getArgName(arg), arg.getClass().getName());
     throw excFactory.apply(msg);

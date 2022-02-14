@@ -30,8 +30,8 @@ class Messages {
   private static final int MAX_ARG_WIDTH = 50;
 
   static String createMessage(Object predicate, boolean negated, String argName, Object argValue) {
-    MsgArgs md = new MsgArgs(predicate, negated, argName, argValue);
-    return message(md);
+    MsgArgs args = new MsgArgs(predicate, negated, argName, argValue);
+    return message(args);
   }
 
   static String createMessage(
@@ -39,266 +39,266 @@ class Messages {
     return message(new MsgArgs(relation, negated, argName, argValue, object));
   }
 
-  private static String message(MsgArgs md) {
-    Formatter formatter = MESSAGE_PATTERNS.get(md.check());
+  private static String message(MsgArgs args) {
+    Formatter formatter = MESSAGE_PATTERNS.get(args.check());
     if (formatter != null) {
-      return formatter.apply(md);
+      return formatter.apply(args);
     }
-    return String.format(ERR_INVALID_VALUE, md.argName(), toStr(md.arg()));
+    return String.format(ERR_INVALID_VALUE, args.argName(), toStr(args.arg()));
   }
 
   static Formatter msgNull() {
-    return md -> {
-      if (md.negated()) {
-        return msgNotNull().apply(md.flip());
+    return args -> {
+      if (args.negated()) {
+        return msgNotNull().apply(args.flip());
       }
-      return format("%s must be null (was %s)", md.argName(), toStr(md.arg()));
+      return format("%s must be null (was %s)", args.argName(), toStr(args.arg()));
     };
   }
 
   static Formatter msgNotNull() {
-    return md -> {
-      if (md.negated()) {
-        return msgNull().apply(md.flip());
+    return args -> {
+      if (args.negated()) {
+        return msgNull().apply(args.flip());
       }
-      return format("%s must not be null", md.argName());
+      return format("%s must not be null", args.argName());
     };
   }
 
   static Formatter msgYes() {
-    return md -> {
-      if (md.negated()) {
-        return msgNo().apply(md.flip());
+    return args -> {
+      if (args.negated()) {
+        return msgNo().apply(args.flip());
       }
-      return format("%s must be true (was false)", md.argName());
+      return format("%s must be true (was false)", args.argName());
     };
   }
 
   static Formatter msgNo() {
-    return md -> {
-      if (md.negated()) {
-        return msgYes().apply(md.flip());
+    return args -> {
+      if (args.negated()) {
+        return msgYes().apply(args.flip());
       }
-      return format("%s must be false (was true)", md.argName());
+      return format("%s must be false (was true)", args.argName());
     };
   }
 
   static Formatter msgDeepNotNull() {
-    return md -> {
-      if (md.negated()) { // Negation is total nonsense, but OK
+    return args -> {
+      if (args.negated()) { // Negation is total nonsense, but OK
         return format(
             "%s must be null or contain one or more null values (was %s)",
-            md.argName(), toStr(md.arg()));
+            args.argName(), toStr(args.arg()));
       }
       return format(
-          "%s must not be null or contain null values (was %s)", md.argName(), toStr(md.arg()));
+          "%s must not be null or contain null values (was %s)", args.argName(), toStr(args.arg()));
     };
   }
 
   static Formatter msgDeepNotEmpty() {
-    return md -> {
-      if (md.negated()) { // idem
+    return args -> {
+      if (args.negated()) { // idem
         String fmt = "%s must be empty or contain or one or more empty values (was %s)";
-        return format(fmt, md.argName(), toStr(md.arg()));
+        return format(fmt, args.argName(), toStr(args.arg()));
       }
       return format(
           "%s must not be empty or contain empty values (was %s)",
-          md.typeAndName(), toStr(md.arg()));
+          args.typeAndName(), toStr(args.arg()));
     };
   }
 
   static Formatter msgEmpty() {
-    return md -> {
-      if (md.negated()) {
-        return format("%s must not be null or empty (was %s)", md.argName(), toStr(md.arg()));
+    return args -> {
+      if (args.negated()) {
+        return format("%s must not be null or empty (was %s)", args.argName(), toStr(args.arg()));
       }
-      return format("%s must be empty (was %s)", md.argName(), toStr(md.arg()));
+      return format("%s must be empty (was %s)", args.argName(), toStr(args.arg()));
     };
   }
 
   static Formatter msgBlank() {
-    return md -> {
-      if (md.negated()) {
-        return format("%s must not be null or blank (was %s)", md.argName(), toStr(md.arg()));
+    return args -> {
+      if (args.negated()) {
+        return format("%s must not be null or blank (was %s)", args.argName(), toStr(args.arg()));
       }
-      return format("%s must be null or blank (was %s)", md.argName(), toStr(md.arg()));
+      return format("%s must be null or blank (was %s)", args.argName(), toStr(args.arg()));
     };
   }
 
   static Formatter msgInteger() {
-    return md -> {
-      if (md.negated()) {
-        return format("%s must not be an integer (was %s)", md.argName(), md.arg());
+    return args -> {
+      if (args.negated()) {
+        return format("%s must not be an integer (was %s)", args.argName(), args.arg());
       }
       String fmt = "%s must be an integer (was %s)";
-      return format(fmt, md.argName(), md.arg(), className(md.arg()));
+      return format(fmt, args.argName(), args.arg(), className(args.arg()));
     };
   }
 
   static Formatter msgEqualTo() {
-    return md -> {
-      if (md.negated()) {
-        return format("%s must not be equal to %s", md.argName(), toStr(md.object()));
+    return args -> {
+      if (args.negated()) {
+        return format("%s must not be equal to %s", args.argName(), toStr(args.object()));
       }
       String fmt = "%s must be equal to %s (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
+      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
     };
   }
 
   static Formatter msgEqualsIgnoreCase() {
-    return md -> {
-      if (md.negated()) {
+    return args -> {
+      if (args.negated()) {
         String fmt = "%s must not be equal ignoring case to any of %s (was %s)";
-        return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
+        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
       }
       String fmt = "%s must be equal ignoring case to any of %s (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
+      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
     };
   }
 
   static Formatter msgSameAs() {
-    return md -> {
-      if (md.negated()) {
+    return args -> {
+      if (args.negated()) {
         String fmt = "%s must not be %s";
-        String id0 = className(md.object()) + '@' + System.identityHashCode(md.object());
-        return format(fmt, md.argName(), id0);
+        String id0 = className(args.object()) + '@' + System.identityHashCode(args.object());
+        return format(fmt, args.argName(), id0);
       }
       String fmt = "%s must be %s (was %s)";
-      String id0 = className(md.object()) + '@' + System.identityHashCode(md.object());
-      String id1 = className(md.arg()) + '@' + System.identityHashCode(md.arg());
-      return format(fmt, md.argName(), id0, id1);
+      String id0 = className(args.object()) + '@' + System.identityHashCode(args.object());
+      String id1 = className(args.arg()) + '@' + System.identityHashCode(args.arg());
+      return format(fmt, args.argName(), id0, id1);
     };
   }
 
   static Formatter msgSizeEquals() {
-    return md -> {
-      if (md.negated()) {
+    return args -> {
+      if (args.negated()) {
         String fmt = "%s.size() must not be equal to %s";
-        return format(fmt, md.argName(), md.object());
+        return format(fmt, args.argName(), args.object());
       }
       String fmt = "%s.size() must be equal to %s (was %s)";
-      return format(fmt, md.argName(), md.object(), ((Collection) md.arg()).size());
+      return format(fmt, args.argName(), args.object(), ((Collection) args.arg()).size());
     };
   }
 
   static Formatter msgSizeGT() {
-    return md -> {
-      if (md.negated()) {
-        return msgSizeLTE().apply(md.flip());
+    return args -> {
+      if (args.negated()) {
+        return msgSizeLTE().apply(args.flip());
       }
       String fmt = "%s.size() must be > %s (was %s)";
-      return format(fmt, md.argName(), md.object(), ((Collection) md.arg()).size());
+      return format(fmt, args.argName(), args.object(), ((Collection) args.arg()).size());
     };
   }
 
   static Formatter msgSizeGTE() {
-    return md -> {
-      if (md.negated()) {
-        return msgSizeLT().apply(md.flip());
+    return args -> {
+      if (args.negated()) {
+        return msgSizeLT().apply(args.flip());
       }
       String fmt = "%s.size() must be >= %s (was %s)";
-      return format(fmt, md.argName(), md.object(), ((Collection) md.arg()).size());
+      return format(fmt, args.argName(), args.object(), ((Collection) args.arg()).size());
     };
   }
 
   static Formatter msgSizeLT() {
-    return md -> {
-      if (md.negated()) {
-        return msgSizeGTE().apply(md.flip());
+    return args -> {
+      if (args.negated()) {
+        return msgSizeGTE().apply(args.flip());
       }
       String fmt = "%s.size() must be < %s (was %s)";
-      return format(fmt, md.argName(), md.object(), ((Collection) md.arg()).size());
+      return format(fmt, args.argName(), args.object(), ((Collection) args.arg()).size());
     };
   }
 
   static Formatter msgSizeLTE() {
-    return md -> {
-      if (md.negated()) {
-        return msgSizeGT().apply(md.flip());
+    return args -> {
+      if (args.negated()) {
+        return msgSizeGT().apply(args.flip());
       }
       String fmt = "%s.size() must be <= %s (was %s)";
-      return format(fmt, md.argName(), md.object(), ((Collection) md.arg()).size());
+      return format(fmt, args.argName(), args.object(), ((Collection) args.arg()).size());
     };
   }
 
   static Formatter msgBetween() {
-    return md -> {
-      Pair pair = (Pair) md.object();
+    return args -> {
+      Pair pair = (Pair) args.object();
       String fmt;
-      if (md.negated()) {
+      if (args.negated()) {
         fmt = "%s must be < %s or >= %s (was %s)";
       } else {
         fmt = "%s must be >= %s and < %s (was %s)";
       }
-      return format(fmt, md.argName(), pair.one(), pair.two(), md.arg());
+      return format(fmt, args.argName(), pair.one(), pair.two(), args.arg());
     };
   }
 
   static Formatter msgInRangeClosed() {
-    return md -> {
-      Pair pair = (Pair) md.object();
+    return args -> {
+      Pair pair = (Pair) args.object();
       String fmt;
-      if (md.negated()) {
+      if (args.negated()) {
         fmt = "%s must be < %s or > %s (was %s)";
       } else {
         fmt = "%s must be >= %s and <= %s (was %s)";
       }
-      return format(fmt, md.argName(), pair.one(), pair.two(), md.arg());
+      return format(fmt, args.argName(), pair.one(), pair.two(), args.arg());
     };
   }
 
   static Formatter msgIndexOf() {
-    return md -> {
-      if (md.negated()) {
+    return args -> {
+      if (args.negated()) {
         String fmt = "%s must < 0 or >= %s (was %s)";
-        return format(fmt, md.argName(), md.object(), md.arg());
+        return format(fmt, args.argName(), args.object(), args.arg());
       }
       String fmt = "%s must be >= 0 and < %s (was %s)";
-      return format(fmt, md.argName(), md.object(), md.arg());
+      return format(fmt, args.argName(), args.object(), args.arg());
     };
   }
 
   static Formatter msgValidFromIndex() {
-    return md -> {
-      if (md.negated()) {
+    return args -> {
+      if (args.negated()) {
         String fmt = "%s must < 0 or > %s (was %s)";
-        return format(fmt, md.argName(), md.object(), md.arg());
+        return format(fmt, args.argName(), args.object(), args.arg());
       }
       String fmt = "%s must be >= 0 and <= %s (was %s)";
-      return format(fmt, md.argName(), md.object(), md.arg());
+      return format(fmt, args.argName(), args.object(), args.arg());
     };
   }
 
   static Formatter msgFile() {
-    return md -> {
-      File f = (File) md.arg();
-      if (md.negated()) {
-        return format("File already exists: %s", md.arg());
+    return args -> {
+      File f = (File) args.arg();
+      if (args.negated()) {
+        return format("File already exists: %s", args.arg());
       } else if (f.isDirectory()) {
         // File indeed exists, but is a directory
-        return format("%s must not be a directory (was %s)", md.argName(), f);
+        return format("%s must not be a directory (was %s)", args.argName(), f);
       }
       // File not present at all
-      return format("File not found: %s", md.arg());
+      return format("File not found: %s", args.arg());
     };
   }
 
   static Formatter msgDirectory() {
-    return md -> {
-      File f = (File) md.arg();
-      if (md.negated()) {
-        return format("Directory already exists: %s", md.arg());
+    return args -> {
+      File f = (File) args.arg();
+      if (args.negated()) {
+        return format("Directory already exists: %s", args.arg());
       } else if (f.isFile()) {
-        return format("%s must not be a file (was %s)", md.argName(), f);
+        return format("%s must not be a file (was %s)", args.argName(), f);
       }
-      return format("Directory not found: %s", md.arg());
+      return format("Directory not found: %s", args.arg());
     };
   }
 
   static Formatter msgOnFileSystem() {
-    return md -> {
-      File f = (File) md.arg();
-      if (md.negated()) {
+    return args -> {
+      File f = (File) args.arg();
+      if (args.negated()) {
         if (f.isDirectory()) {
           return format("Directory already exists: %s", f.getAbsolutePath());
         }
@@ -309,12 +309,12 @@ class Messages {
   }
 
   static Formatter msgReadable() {
-    return md -> {
-      File f = (File) md.arg();
+    return args -> {
+      File f = (File) args.arg();
       if (!f.exists()) {
         return format("No such file/directory: %s", f.getAbsolutePath());
       }
-      if (md.negated()) {
+      if (args.negated()) {
         if (f.isDirectory()) {
           return format("Directory must not be readable: %s", f.getAbsolutePath());
         }
@@ -328,12 +328,12 @@ class Messages {
   }
 
   static Formatter msgWritable() {
-    return md -> {
-      File f = (File) md.arg();
+    return args -> {
+      File f = (File) args.arg();
       if (!f.exists()) {
         return format("No such file/directory: %s", f.getAbsolutePath());
       }
-      if (md.negated()) {
+      if (args.negated()) {
         if (f.isDirectory()) {
           return format("Directory must not be writable: %s", f.getAbsolutePath());
         }
@@ -347,255 +347,255 @@ class Messages {
   }
 
   static Formatter msgEven() {
-    return md -> {
-      if (md.negated()) {
-        return msgOdd().apply(md.flip());
+    return args -> {
+      if (args.negated()) {
+        return msgOdd().apply(args.flip());
       }
-      return format("%s must be even (was %s)", md.argName(), md.arg());
+      return format("%s must be even (was %s)", args.argName(), args.arg());
     };
   }
 
   static Formatter msgOdd() {
-    return md -> {
-      if (md.negated()) {
-        return msgEven().apply(md.flip());
+    return args -> {
+      if (args.negated()) {
+        return msgEven().apply(args.flip());
       }
-      return format("%s must be odd (was %s)", md.argName(), md.arg());
+      return format("%s must be odd (was %s)", args.argName(), args.arg());
     };
   }
 
   static Formatter msgPositive() {
-    return md -> {
-      String not = md.negated() ? " not" : "";
-      return format("%s must%s be positive (was %s)", md.argName(), not, md.arg());
+    return args -> {
+      String not = args.negated() ? " not" : "";
+      return format("%s must%s be positive (was %s)", args.argName(), not, args.arg());
     };
   }
 
   static Formatter msgNegative() {
-    return md -> {
-      String not = md.negated() ? " not" : "";
-      return format("%s must%s be negative (was %s)", md.argName(), not, md.arg());
+    return args -> {
+      String not = args.negated() ? " not" : "";
+      return format("%s must%s be negative (was %s)", args.argName(), not, args.arg());
     };
   }
 
   static Formatter msgNullOr() {
-    return md -> {
-      if (md.negated()) {
+    return args -> {
+      if (args.negated()) {
         String fmt = "%s must not be null or %s (was %s)";
-        return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
+        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
       }
       String fmt = "%s must be null or %s (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
+      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
     };
   }
 
   static Formatter msgContaining() {
-    return md -> {
-      if (md.negated()) {
-        return format("%s must not contain %s", md.argName(), toStr(md.object()));
+    return args -> {
+      if (args.negated()) {
+        return format("%s must not contain %s", args.argName(), toStr(args.object()));
       }
       String fmt = "%s must contain %s";
-      return format(fmt, md.argName(), toStr(md.object()));
+      return format(fmt, args.argName(), toStr(args.object()));
     };
   }
 
   static Formatter msgIn() {
-    return md -> {
-      if (md.negated()) {
+    return args -> {
+      if (args.negated()) {
         String fmt = "%s must not be element of %s (was %s)";
-        return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
+        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
       }
       String fmt = "%s must be element of %s (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
+      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
     };
   }
 
   static Formatter msgSupersetOf() {
-    return md -> {
-      if (md.negated()) {
+    return args -> {
+      if (args.negated()) {
         String fmt = "%s must not be superset of %s (was %s)";
-        return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
+        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
       }
       String fmt = "%s must be superset of %s (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
+      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
     };
   }
 
   static Formatter msgSubsetOf() {
-    return md -> {
-      if (md.negated()) {
+    return args -> {
+      if (args.negated()) {
         String fmt = "%s must not be subset of %s (was %s)";
-        return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
+        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
       }
       String fmt = "%s must be subset of %s (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
+      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
     };
   }
 
   static Formatter msgContainingKey() {
-    return md -> {
-      if (md.negated()) {
-        return format("%s must not contain key %s", md.argName(), toStr(md.object()));
+    return args -> {
+      if (args.negated()) {
+        return format("%s must not contain key %s", args.argName(), toStr(args.object()));
       }
-      return format("%s must contain key %s", md.argName(), toStr(md.object()));
+      return format("%s must contain key %s", args.argName(), toStr(args.object()));
     };
   }
 
   static Formatter msgKeyIn() {
-    return md -> {
-      if (md.negated()) {
+    return args -> {
+      if (args.negated()) {
         String fmt = "%s must not be key in %s (parameter \"%s\")";
-        return format(fmt, toStr(md.arg()), toStr(md.object()), md.argName());
+        return format(fmt, toStr(args.arg()), toStr(args.object()), args.argName());
       }
       String fmt = "%s must be key in %s (parameter \"%s\")";
-      return format(fmt, toStr(md.arg()), toStr(md.object()), md.argName());
+      return format(fmt, toStr(args.arg()), toStr(args.object()), args.argName());
     };
   }
 
   static Formatter msgContainingValue() {
-    return md -> {
-      if (md.negated()) {
-        return format("%s must not contain value %s", md.argName(), toStr(md.object()));
+    return args -> {
+      if (args.negated()) {
+        return format("%s must not contain value %s", args.argName(), toStr(args.object()));
       }
-      return format("%s must contain value %s", md.argName(), toStr(md.object()));
+      return format("%s must contain value %s", args.argName(), toStr(args.object()));
     };
   }
 
   static Formatter msgValueIn() {
-    return md -> {
-      if (md.negated()) {
+    return args -> {
+      if (args.negated()) {
         String fmt = "%s must not be value in %s (was %s)";
-        return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
+        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
       }
       String fmt = "%s must be value in %s (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
+      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
     };
   }
 
   static Formatter msgZero() {
-    return md -> {
-      if (md.negated()) {
-        return format("%s must not be zero", md.argName());
+    return args -> {
+      if (args.negated()) {
+        return format("%s must not be zero", args.argName());
       }
       String fmt = "%s must be zero (was %s)";
-      return format(fmt, md.argName(), md.arg());
+      return format(fmt, args.argName(), args.arg());
     };
   }
 
   static Formatter msgEq() {
-    return md -> {
-      if (md.negated()) {
-        return msgNe().apply(md.flip());
+    return args -> {
+      if (args.negated()) {
+        return msgNe().apply(args.flip());
       }
       String fmt = "%s must be equal to %s (was %s)";
-      return format(fmt, md.argName(), md.object(), md.arg());
+      return format(fmt, args.argName(), args.object(), args.arg());
     };
   }
 
   static Formatter msgNe() {
-    return md -> {
-      if (md.negated()) {
-        return msgEq().apply(md.flip());
+    return args -> {
+      if (args.negated()) {
+        return msgEq().apply(args.flip());
       }
       String fmt = "%s must not be equal to %s";
-      return format(fmt, md.argName(), md.object());
+      return format(fmt, args.argName(), args.object());
     };
   }
 
   static Formatter msgGreaterThan() {
-    return md -> {
-      if (md.negated()) {
-        return msgAtMost().apply(md.flip());
+    return args -> {
+      if (args.negated()) {
+        return msgAtMost().apply(args.flip());
       }
       String fmt = "%s must be > %s (was %s)";
-      return format(fmt, md.argName(), md.object(), md.arg());
+      return format(fmt, args.argName(), args.object(), args.arg());
     };
   }
 
   static Formatter msgAtLeast() {
-    return md -> {
-      if (md.negated()) {
-        return msgLessThan().apply(md.flip());
+    return args -> {
+      if (args.negated()) {
+        return msgLessThan().apply(args.flip());
       }
       String fmt = "%s must be >= %s (was %s)";
-      return format(fmt, md.argName(), md.object(), md.arg());
+      return format(fmt, args.argName(), args.object(), args.arg());
     };
   }
 
   static Formatter msgLessThan() {
-    return md -> {
-      if (md.negated()) {
-        return msgAtLeast().apply(md.flip());
+    return args -> {
+      if (args.negated()) {
+        return msgAtLeast().apply(args.flip());
       }
       String fmt = "%s must be < %s (was %s)";
-      return format(fmt, md.argName(), md.object(), md.arg());
+      return format(fmt, args.argName(), args.object(), args.arg());
     };
   }
 
   static Formatter msgAtMost() {
-    return md -> {
-      if (md.negated()) {
-        return msgGreaterThan().apply(md.flip());
+    return args -> {
+      if (args.negated()) {
+        return msgGreaterThan().apply(args.flip());
       }
       String fmt = "%s must be <= %s (was %s)";
-      return format(fmt, md.argName(), md.object(), md.arg());
+      return format(fmt, args.argName(), args.object(), args.arg());
     };
   }
 
   static Formatter msgEndsWith() {
-    return md -> {
-      if (md.negated()) {
+    return args -> {
+      if (args.negated()) {
         String fmt = "%s must not end with \"%s\" (was %s)";
-        return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
+        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
       }
       String fmt = "%s must end with \"%s\" (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
+      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
     };
   }
 
   static Formatter msgHasSubstr() {
-    return md -> {
-      if (md.negated()) {
+    return args -> {
+      if (args.negated()) {
         String fmt = "%s must not contain \"%s\" (was %s)";
-        return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
+        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
       }
       String fmt = "%s must contain \"%s\" (was %s)";
-      return format(fmt, md.argName(), toStr(md.object()), toStr(md.arg()));
+      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
     };
   }
 
   static Formatter msgInstanceOf() {
-    return md -> {
-      if (md.negated()) {
+    return args -> {
+      if (args.negated()) {
         String fmt = "%s must not be instance of %s";
-        return format(fmt, md.argName(), className(md.object()));
+        return format(fmt, args.argName(), className(args.object()));
       }
       String fmt = "%s must be instance of %s (was %s)";
-      String cn0 = className(md.object());
-      String cn1 = className(md.arg());
-      return format(fmt, md.argName(), cn0, cn1, toStr(md.arg()));
+      String cn0 = className(args.object());
+      String cn1 = className(args.arg());
+      return format(fmt, args.argName(), cn0, cn1, toStr(args.arg()));
     };
   }
 
   static Formatter msgArray() {
-    return md -> {
-      if (md.negated()) {
+    return args -> {
+      if (args.negated()) {
         String fmt = "%s must not be an array (was %s)";
-        return format(fmt, md.argName(), className(md.arg()));
+        return format(fmt, args.argName(), className(args.arg()));
       }
       String fmt = "%s must be an array (was %s)";
-      return format(fmt, md.argName(), className(md.arg()));
+      return format(fmt, args.argName(), className(args.arg()));
     };
   }
 
   static Formatter msgMultipleOf() {
-    return md -> {
-      if (md.negated()) {
+    return args -> {
+      if (args.negated()) {
         String fmt = "%s must not be multiple of %s (was %s)";
-        return format(fmt, md.argName(), md.arg());
+        return format(fmt, args.argName(), args.arg());
       }
       String fmt = "%s must be multiple of %s (was %s)";
-      return format(fmt, md.argName(), md.arg());
+      return format(fmt, args.argName(), args.arg());
     };
   }
 
