@@ -5,8 +5,8 @@ import nl.naturalis.common.check.Check;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import static nl.naturalis.common.StringMethods.isEmpty;
-import static nl.naturalis.common.StringMethods.isNotEmpty;
+import static nl.naturalis.common.ObjectMethods.isEmpty;
+import static nl.naturalis.common.ObjectMethods.isNotEmpty;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
@@ -36,8 +36,9 @@ public class NumberMethods {
   }
 
   /**
-   * Returns whether the specified string represents a plain, non-negative integer, consisting of digits
-   * only, without plus or minus sign, without leading zeros, and fitting into a 32-bit integer.
+   * Returns whether the specified string represents a plain, non-negative integer, consisting of
+   * digits only, without plus or minus sign, without leading zeros, and fitting into a 32-bit
+   * integer.
    *
    * @param str The string
    * @return Whether the specified string is a valid, digit-only integer

@@ -1,6 +1,6 @@
 package nl.naturalis.common.path;
 
-import static nl.naturalis.common.StringMethods.isEmpty;
+import static nl.naturalis.common.ObjectMethods.isEmpty;
 import static nl.naturalis.common.path.PathWalkerException.arrayIndexExpected;
 import static nl.naturalis.common.path.PathWalkerException.arrayIndexOutOfBounds;
 import static nl.naturalis.common.path.PathWalkerException.emptySegment;
