@@ -1,13 +1,11 @@
 package nl.naturalis.common.check;
 
-import nl.naturalis.common.NumberMethods;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static nl.naturalis.common.ArrayMethods.isOneOf;
 import static nl.naturalis.common.check.InvalidCheckException.notApplicable;
 import static nl.naturalis.common.check.Messages.createMessage;
 
@@ -120,10 +118,12 @@ final class ObjectCheck<T, E extends Exception> extends Check<T, E> {
       throw excFactory.apply(msg);
     } else if (arg.getClass() == Integer.class) {
       return (Integer) arg;
-    } else if (arg.getClass() == Short.class) {
-      return (Short) arg;
+    } else if (arg.getClass().isEnum()) {
+      return ((Enum) arg).ordinal();
     } else if (arg.getClass() == Byte.class) {
       return (Byte) arg;
+    } else if (arg.getClass() == Short.class) {
+      return (Short) arg;
     }
     String msg = String.format(ERR_OBJECT_TO_INT, getArgName(arg), arg.getClass().getName());
     throw excFactory.apply(msg);

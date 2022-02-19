@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static nl.naturalis.common.CollectionMethods.*;
-import static nl.naturalis.common.check.CommonGetters.asString;
+import static nl.naturalis.common.check.CommonGetters.stringValue;
 import static org.junit.Assert.*;
 
 public class CollectionMethodsTest {
@@ -159,7 +159,7 @@ public class CollectionMethodsTest {
     s.add(1);
     s.add(2);
     s.add(3);
-    assertEquals("2|3", implode(s, asString(), "|", 1, 20));
+    assertEquals("2|3", implode(s, stringValue(), "|", 1, 20));
   }
 
   @Test
@@ -168,13 +168,13 @@ public class CollectionMethodsTest {
     s.add(1);
     s.add(2);
     s.add(3);
-    assertEquals("2|3", implode(s, asString(), "|", 1, -1));
+    assertEquals("2|3", implode(s, stringValue(), "|", 1, -1));
   }
 
   @Test
   public void implode09() {
     List<Integer> l = List.of(1, 2, 3);
-    assertEquals("2|3", implode(l, asString(), "|", 1, -1));
+    assertEquals("2|3", implode(l, stringValue(), "|", 1, -1));
   }
 
   @Test

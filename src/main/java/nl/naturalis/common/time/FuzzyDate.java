@@ -8,7 +8,7 @@ import java.util.OptionalInt;
 
 import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoField.*;
-import static nl.naturalis.common.ArrayMethods.isOneOf;
+import static nl.naturalis.common.ArrayMethods.isPresent;
 import static nl.naturalis.common.ObjectMethods.ifNotEmpty;
 
 /**
@@ -346,7 +346,7 @@ public final class FuzzyDate {
    *     FuzzyDate}
    */
   public TemporalAccessor bestMatch(ZoneOffset timeZone) {
-    if (isOneOf(
+    if (isPresent(
         ta.getClass(),
         OffsetDateTime.class,
         LocalDateTime.class,

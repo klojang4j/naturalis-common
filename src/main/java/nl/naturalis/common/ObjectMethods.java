@@ -600,7 +600,7 @@ public class ObjectMethods {
    */
   @SuppressWarnings("unchecked")
   public static <T> T nullIf(T arg0, T... values) {
-    return nullIf(arg0, inArray(), values);
+    return nullIf(arg0, elementOf(), values);
   }
 
   /**
@@ -619,7 +619,7 @@ public class ObjectMethods {
    */
   @SuppressWarnings("unchecked")
   public static <T> T nullUnless(T arg0, T... values) {
-    return (T) nullUnless(arg0, inArray().negate(), values);
+    return (T) nullUnless(arg0, elementOf().negate(), values);
   }
 
   /**

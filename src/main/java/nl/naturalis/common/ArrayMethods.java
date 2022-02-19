@@ -134,7 +134,19 @@ public final class ArrayMethods {
    * @param array The array to search
    * @return Whether the array contains the value
    */
-  public static boolean inIntArray(int value, int... array) {
+  public static boolean isElementOf(int value, int[] array) {
+    return indexOf(array, value) != -1;
+  }
+
+  /**
+   * Returns {@code true} if the specified array contains the specified value, {@code false}
+   * otherwise.
+   *
+   * @param value The value to search for
+   * @param array The array to search
+   * @return Whether the array contains the value
+   */
+  public static <T> boolean isElementOf(T value, T[] array) {
     return indexOf(array, value) != -1;
   }
 
@@ -147,7 +159,7 @@ public final class ArrayMethods {
    * @return Whether the array contains the value
    */
   @SafeVarargs
-  public static <T> boolean inArray(T value, T... array) {
+  public static <T> boolean isOneOf(T value, T... array) {
     return indexOf(array, value) != -1;
   }
 
@@ -160,7 +172,7 @@ public final class ArrayMethods {
    * @return Whether the array contains the specified reference
    */
   @SafeVarargs
-  public static <T> boolean isOneOf(T ref, T... array) {
+  public static <T> boolean isPresent(T ref, T... array) {
     return find(array, ref) != -1;
   }
 
@@ -533,24 +545,25 @@ public final class ArrayMethods {
   }
 
   /**
-   * Simply returns the specified array, but allows for leaner code.
-   *
-   * <blockquote>
-   *
-   * <pre>{@code
-   * String[] words0 = new String[] {"Hello", "world"};
-   * String[] words1 = pack("Hello", "world");
-   * }</pre>
-   *
-   * </blockquote>
+   * Simply returns the specified array, but allows for leaner code when statically imported.
    *
    * @param <T> The type of the objects to pack
-   * @param objs The objects to pack
-   * @return The packed objects
+   * @param objs The array
+   * @return The same array
    */
   @SafeVarargs
   public static <T> T[] pack(T... objs) {
     return objs;
+  }
+
+  /**
+   * Simply returns the specified array, but allows for leaner code when statically imported.
+   *
+   * @param ints The array
+   * @return The dame array
+   */
+  public static int[] packInts(int... ints) {
+    return ints;
   }
 
   /**
@@ -563,6 +576,9 @@ public final class ArrayMethods {
    */
   public static <T> T[] prefix(T[] array, T obj) {
     Check.notNull(array, "array");
+    if (array.length == 0) {
+      return pack(obj);
+    }
     T[] res = fromTemplate(array, array.length + 1);
     res[0] = obj;
     arraycopy(array, 0, res, 1, array.length);

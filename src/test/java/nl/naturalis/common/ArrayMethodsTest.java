@@ -3,7 +3,6 @@ package nl.naturalis.common;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.Objects;
 
 import static nl.naturalis.common.ArrayMethods.*;
 import static org.junit.Assert.*;
@@ -59,9 +58,9 @@ public class ArrayMethodsTest {
   @Test
   public void inArray01() {
     int[] array = {1, 2, 4, 8, 16};
-    assertTrue(inIntArray(1, array));
-    assertTrue(inIntArray(16, array));
-    assertFalse(inIntArray(23, array));
+    assertTrue(isElementOf(1, array));
+    assertTrue(isElementOf(16, array));
+    assertFalse(isElementOf(23, array));
   }
 
   @Test
@@ -112,18 +111,18 @@ public class ArrayMethodsTest {
 
   @Test
   public void inIntArray00() {
-    assertTrue(inIntArray(2, 0, 4, 6, 3, 2));
-    assertFalse(inIntArray(2, 0, 4, 6, 3, 9));
+    assertTrue(isElementOf(2, packInts(0, 4, 6, 3, 2)));
+    assertFalse(isElementOf(2, packInts(0, 4, 6, 3, 9)));
   }
 
   @Test
-  public void inArray00() {
-    assertTrue(inArray("a", null, "a", "b", "c", "d"));
-    assertTrue(inArray(null, null, "a", "b", "c", "d"));
-    assertTrue(inArray("c", null, "a", "b", "c", "d"));
-    assertTrue(inArray("", null, ""));
-    assertFalse(inArray("FOO", null, "a", "b", "c", "d"));
-    assertFalse(inArray("FOO"));
+  public void isOneOf00() {
+    assertTrue(isOneOf("a", null, "a", "b", "c", "d"));
+    assertTrue(isOneOf(null, null, "a", "b", "c", "d"));
+    assertTrue(isOneOf("c", null, "a", "b", "c", "d"));
+    assertTrue(isOneOf("", null, ""));
+    assertFalse(isOneOf("FOO", null, "a", "b", "c", "d"));
+    assertFalse(isOneOf("FOO"));
   }
 
   @Test

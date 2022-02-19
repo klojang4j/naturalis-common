@@ -3,10 +3,10 @@ package nl.naturalis.common;
 import nl.naturalis.common.check.Check;
 
 /**
- * A generic, immutable container of two objects of the same type.
+ * Generic, immutable container of two non-null values of the same type.
  *
  * @author Ayco Holleman
- * @param <T>
+ * @param <T> The type of the values
  */
 public record Pair<T>(T one, T two) {
 

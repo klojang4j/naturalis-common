@@ -148,10 +148,10 @@ class Messages {
   static Formatter msgEqualsIgnoreCase() {
     return args -> {
       if (args.negated()) {
-        String fmt = "%s must not be equal ignoring case to any of %s (was %s)";
+        String fmt = "%s must not be equal ignoring case to %s (was %s)";
         return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
       }
-      String fmt = "%s must be equal ignoring case to any of %s (was %s)";
+      String fmt = "%s must be equal ignoring case to %s (was %s)";
       return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
     };
   }
@@ -542,6 +542,17 @@ class Messages {
     };
   }
 
+  static Formatter msgStartsWith() {
+    return args -> {
+      if (args.negated()) {
+        String fmt = "%s must not start with \"%s\" (was %s)";
+        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+      }
+      String fmt = "%s must start with \"%s\" (was %s)";
+      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+    };
+  }
+
   static Formatter msgEndsWith() {
     return args -> {
       if (args.negated()) {
@@ -553,7 +564,7 @@ class Messages {
     };
   }
 
-  static Formatter msgHasSubstr() {
+  static Formatter msgContains() {
     return args -> {
       if (args.negated()) {
         String fmt = "%s must not contain \"%s\" (was %s)";

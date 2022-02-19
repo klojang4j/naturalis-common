@@ -67,12 +67,12 @@ public class CommonGetters {
    * @param <T> The type of the object on which to call {@code toString{}}.
    * @return A {@code Function} that returns the result of calling {@code toString()} on the object.
    */
-  public static <T> Function<T, String> asString() {
+  public static <T> Function<T, String> stringValue() {
     return Object::toString;
   }
 
   static {
-    tmp.put(asString(), "%s.toString()");
+    tmp.put(stringValue(), "%s.toString()");
   }
 
   /**

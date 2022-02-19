@@ -13,19 +13,39 @@ import static nl.naturalis.common.check.CommonChecks.instanceOf;
 import static nl.naturalis.common.check.CommonGetters.type;
 
 /**
- * A fixed-size, but mutable {@code List} implementation intended for situations where an array
- * temporarily needs to take on the guise of a {@code List}. This {@code List} implementation is
- * much like the one you get from {@link Arrays#asList(Object[]) Arrays.asList} in that it swallows
- * rather than copies the array you provide it with. However, it will also "spit out" the original
- * array rather than a copy of it (see {@link #uncloak()}). The {@code set} and {@code get} methods
+ * A fixed-size, mutable {@code List} implementation intended for situations where an array
+ * temporarily needs to take on the guise of a {@code List} before being processed as an array
+ * again. This {@code List} implementation is much like the one you get from {@link
+ * Arrays#asList(Object[]) Arrays.asList} in that it swallows rather than copies the array. However,
+ * it also <i>exposes</i> the original array through the {@link #uncloak()} method, thus saving you
+ * one array copy when continuing with the array again. The {@code set} and {@code get} methods
  * don't perform bounds-checking and all {@code add}-like methods throw an {@link
- * UnsupportedOperationException}. The {@code remove} methods, however, have been repurposed to
- * nullify list elements (thus exposing nullification as a simple {@code (Int)Consumer} function.
+ * UnsupportedOperationException}. The {@code remove} methods have been repurposed to nullify list
+ * elements, making them attractive candidates for a method references. This {@code List}
+ * implementation accepts and may return {@code null} values.
  *
  * @param <E> The type of the list elements
  * @author Ayco Holleman
  */
 public class ArrayCloakList<E> implements List<E>, RandomAccess {
+
+  /**
+   * Creates a new {@code ArrayCloakList} from the specified elements
+   *
+   * @param elementType The class of the elements
+   * @param elems The elements
+   * @return A new {@code ArrayCloakList} containing the specified elements
+   */
+  public static <F> ArrayCloakList<F> create(Class<F> elementType, F... elems) {
+    Check.notNull(elementType, "elementType");
+    Check.notNull(elems, "elems");
+    for (F f : elems) {
+      if (f != null) {
+        Check.that(f, "element").is(instanceOf(), elementType);
+      }
+    }
+    return new ArrayCloakList<>(elems);
+  }
 
   private final Class<E> elementType;
   private final E[] data;

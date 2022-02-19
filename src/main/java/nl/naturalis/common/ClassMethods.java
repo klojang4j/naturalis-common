@@ -80,7 +80,7 @@ public class ClassMethods {
 
   /**
    * Tests whether the first class extends or implements the second class. In case you keep
-   * forgetting what "assign from" even means. Equivalent to <code>
+   * forgetting what "assignable from" even means. Equivalent to <code>
    * superOrInterface.isAssignableFrom(classToTest)</code>.
    *
    * @param clazz The class to test

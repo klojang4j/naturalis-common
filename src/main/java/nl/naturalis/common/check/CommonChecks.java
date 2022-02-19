@@ -15,6 +15,7 @@ import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
+import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.Messages.*;
 
 /**
@@ -213,7 +214,7 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that a {@code String} argument is a valid integer. Equivalent to {@link
+   * Verifies that a {@code String} argument represents a valid integer. Equivalent to {@link
    * NumberMethods#isInteger(String) NumberMethods::isInteger}.
    *
    * @return A {@code Predicate}
@@ -225,6 +226,22 @@ public class CommonChecks {
   static {
     setMessagePattern(integer(), msgInteger());
     setName(integer(), "integer");
+  }
+
+  /**
+   * Verifies that the argument is an array or, if the argument is a {@code Class} object, that is
+   * an array type.
+   *
+   * @param <T> The type of the argument
+   * @return A {@code Predicate} implementing the test described above
+   */
+  public static <T> Predicate<T> array() {
+    return x -> x.getClass() == Class.class ? ((Class) x).isArray() : x.getClass().isArray();
+  }
+
+  static {
+    setMessagePattern(array(), msgArray());
+    setName(array(), "array");
   }
 
   /**
@@ -361,48 +378,42 @@ public class CommonChecks {
     setName(negative(), "negative");
   }
 
+  /**
+   * Verifies that the argument is 0 (zero).
+   *
+   * @return A {@code Predicate} implementing the test described above establishing that the
+   *     argument is equal to zero
+   */
+  public static IntPredicate zero() {
+    return x -> x == 0;
+  }
+
+  static {
+    setMessagePattern(eq(), msgZero());
+    setName(zero(), "zero");
+  }
+
   /* ++++++++++++++ Relation ++++++++++++++ */
 
   /**
-   * If the argument is a {@link Class} object, this method verifies that it is a subclass or
-   * implementation of the specified class; otherwise that the argument is an instance of it.
+   * Verifies that the argument is an instance of the specified class or, if the argument is itself
+   * a {@code Class} object, that it is a subclass or implementation of the specified class.
    *
    * @param <X> The type of the argument
-   * @return A {@code Relation}
+   * @return A {@code Relation} implementing the test described above
    */
   public static <X> Relation<X, Class<?>> instanceOf() {
-    return (x, y) -> {
-      if (x.getClass() == Class.class) {
-        return ClassMethods.isA((Class<?>) x, y);
-      }
-      return y.isInstance(x);
-    };
+    return (x, y) ->
+        x.getClass() == Class.class ? y.isAssignableFrom((Class<?>) x) : y.isInstance(x);
   }
 
   static {
     setMessagePattern(instanceOf(), msgInstanceOf());
     setName(instanceOf(), "instanceOf");
   }
-
   /**
-   * Ensures that the arguments is an array or, if the argument is a {@code Class} object, that is
-   * an array type.
-   *
-   * @param <T> The type of the argument
-   * @return A {@code Predicate} implementing the test described above
-   */
-  public static <T> Predicate<T> array() {
-    return x -> x.getClass() == Class.class ? ((Class) x).isArray() : x.getClass().isArray();
-  }
-
-  static {
-    setMessagePattern(array(), msgArray());
-    setName(array(), "array");
-  }
-
-  /**
-   * Verifies that a {@code Collection} contains a particular value. Equivalent to {@link
-   * Collection#contains(Object) Collection::contains}.
+   * Verifies that the specified {@code Collection} contains the specified value. Equivalent to
+   * {@link Collection#contains(Object) Collection::contains}.
    *
    * @param <E> The type of the elements in the {@code Collection}
    * @param <C> The type of the collection
@@ -418,7 +429,7 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies the presence of an element within a {@code Collection}.
+   * Verifies the specified argument is contained in the specified {@code Collection}.
    *
    * @param <E> The type of the argument
    * @param <C> The type of the {@code Collection}
@@ -434,8 +445,18 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that a {@code Collection} argument is a subset of another {@code Collection}.
-   * Equivalent to {@link Collection#containsAll(Collection) Collection::containsAll}.
+   * Verifies that the specified {@code Collection} argument is a superset of another {@code
+   * Collection}. Equivalent to {@link Collection#containsAll(Collection) Collection::containsAll}.
+   * Note that the collections <i>need not be</i> instances of the {@link Set} interface:
+   *
+   * <blockquote>
+   *
+   * <pre>{@code
+   * Check.that(Set.of(1, 2, 3).is(supersetOf(), List.of(1, 2)); // valid and true
+   * Check.that(List.of(1, 2).is(supersetOf(), Set.of(1, 2, 3)); // valid but false
+   * }</pre>
+   *
+   * </blockquote>
    *
    * @param <E> The type of the elements in the {@code Collection}
    * @param <C0> The type of the argument (the subject of the {@code Relation})
@@ -537,20 +558,20 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies the presence of an element within an array. Equivalent to {@link
-   * ArrayMethods#inArray(Object, Object...) ArrayMethods::inArray}.
+   * Verifies that the argument is an element of the specified array. Equivalent to {@link
+   * ArrayMethods#isElementOf(Object, Object[]) ArrayMethods::isElementOf}.
    *
    * @param <X> The type of the argument
    * @param <Y> The component type of the array
    * @return A {@code Relation}
    */
-  public static <Y, X extends Y> Relation<X, Y[]> inArray() {
-    return ArrayMethods::inArray;
+  public static <Y, X extends Y> Relation<X, Y[]> elementOf() {
+    return ArrayMethods::isElementOf;
   }
 
   static {
-    setMessagePattern(inArray(), msgIn()); // recycle message
-    setName(inArray(), "inArray");
+    setMessagePattern(elementOf(), msgIn()); // recycle message
+    setName(elementOf(), "elementOf");
   }
 
   /**
@@ -574,8 +595,8 @@ public class CommonChecks {
    *
    * @return A {@code Relation} implementing the test described above
    */
-  public static Relation<String, List<String>> equalsIgnoreCase() {
-    return (x, y) -> y.stream().anyMatch(s -> s.equalsIgnoreCase(x));
+  public static Relation<String, String> equalsIgnoreCase() {
+    return String::equalsIgnoreCase;
   }
 
   static {
@@ -696,6 +717,21 @@ public class CommonChecks {
    *
    * @return A {@code Relation}
    */
+  public static Relation<String, String> startsWith() {
+    return String::startsWith;
+  }
+
+  static {
+    setMessagePattern(startsWith(), msgStartsWith());
+    setName(startsWith(), "startsWith");
+  }
+
+  /**
+   * Verifies that the argument ends with a particular character sequence. Equivalent to {@link
+   * String#endsWith(String) String::endsWith}.
+   *
+   * @return A {@code Relation}
+   */
   public static Relation<String, String> endsWith() {
     return String::endsWith;
   }
@@ -711,123 +747,16 @@ public class CommonChecks {
    *
    * @return A {@code Relation}
    */
-  public static <T extends CharSequence> Relation<String, T> hasSubstr() {
+  public static <T extends CharSequence> Relation<String, T> contains() {
     return String::contains;
   }
 
   static {
-    setMessagePattern(hasSubstr(), msgHasSubstr());
-    setName(hasSubstr(), "hasSubstr");
+    setMessagePattern(contains(), msgContains());
+    setName(contains(), "contains");
   }
 
   /* ++++++++++++++ ObjIntRelation ++++++++++++++ */
-
-  /**
-   * Verifies that a {@code Collection} has a size equal to some integer value. Mainly meant to be
-   * called from the {@code has} methods of the {@code Check} class.
-   *
-   * @see CommonGetters#size()
-   * @see #eq()
-   * @param <E> The type of the elements of the collection
-   * @param <C> The type of the collection
-   * @return An {@code ObjIntRelation} that expresses the described test
-   */
-  public static <E, C extends Collection<? super E>> ObjIntRelation<C> sizeEquals() {
-    return (x, y) -> x.size() == y;
-  }
-
-  static {
-    setMessagePattern(sizeEquals(), msgSizeEquals());
-    setName(sizeEquals(), "sizeEquals");
-  }
-
-  /**
-   * Verifies that a {@code Collection} has a size greater than some integer value. Mainly meant to
-   * be called from the {@code has} methods of the {@code Check} class. In other words, when testing
-   * a {@code Collection}-type property of the argument rather than the argument itself. If the
-   * argument is itself a {@code Collection}, you can test this more concisely using {@code
-   * Check.that(myCollection).has(size(), gt(), 42)}.
-   *
-   * @see CommonGetters#size()
-   * @see #gt()
-   * @param <E> The type of the elements of the collection
-   * @param <C> The type of the collection
-   * @return An {@code ObjIntRelation} that expresses the described test
-   */
-  public static <E, C extends Collection<? super E>> ObjIntRelation<C> sizeGT() {
-    return (x, y) -> x.size() > y;
-  }
-
-  static {
-    setMessagePattern(sizeGT(), msgSizeGT());
-    setName(sizeGT(), "sizeGT");
-  }
-
-  /**
-   * Verifies that that {@code Collection} has a size equal to, or greater than some integer value.
-   * Mainly meant to be called from the {@code has} methods of the {@code Check} class. In other
-   * words, when testing a {@code Collection}-type property of the argument rather than the argument
-   * itself. If the argument is itself a {@code Collection}, you can test this more concisely using
-   * {@code Check.that(myCollection).has(size(), gte(), 42)}.
-   *
-   * @see CommonGetters#size()
-   * @see #gte()
-   * @param <E> The type of the elements of the collection
-   * @param <C> The type of the collection
-   * @return An {@code ObjIntRelation} that expresses the described test
-   */
-  public static <E, C extends Collection<? super E>> ObjIntRelation<C> sizeGTE() {
-    return (x, y) -> x.size() >= y;
-  }
-
-  static {
-    setMessagePattern(sizeGTE(), msgSizeGTE());
-    setName(sizeGTE(), "sizeGTE");
-  }
-
-  /**
-   * Verifies that that {@code Collection} has a size less than some integer value. Mainly meant to
-   * be called from the {@code has} methods of the {@code Check} class. In other words, when testing
-   * a {@code Collection}-type property of the argument rather than the argument itself. If the
-   * argument is itself a {@code Collection}, you can test this more concisely using {@code
-   * Check.that(myCollection).has(size(), lt(), 42)}.
-   *
-   * @see CommonGetters#size()
-   * @see #lt()
-   * @param <E> The type of the elements of the collection
-   * @param <C> The type of the collection
-   * @return An {@code ObjIntRelation} that expresses the described test
-   */
-  public static <E, C extends Collection<? super E>> ObjIntRelation<C> sizeLT() {
-    return (x, y) -> x.size() < y;
-  }
-
-  static {
-    setMessagePattern(sizeLT(), msgSizeLT());
-    setName(sizeLT(), "sizeLT");
-  }
-
-  /**
-   * Verifies that that {@code Collection} has a size less than, or equal to some integer value.
-   * Mainly meant to be called from the {@code has} methods of the {@code Check} class. In other
-   * words, when testing a {@code Collection}-type property of the argument rather than the argument
-   * itself. If the argument is itself a {@code Collection}, you can test this more concisely using
-   * {@code Check.that(myCollection).has(size(), eq(), 42)}.
-   *
-   * @see CommonGetters#size()
-   * @see #lte()
-   * @param <E> The type of the elements of the collection
-   * @param <C> The type of the collection
-   * @return An {@code ObjIntRelation} that expresses the described test
-   */
-  public static <E, C extends Collection<? super E>> ObjIntRelation<C> sizeLTE() {
-    return (x, y) -> x.size() <= y;
-  }
-
-  static {
-    setMessagePattern(sizeLTE(), msgSizeLTE());
-    setName(sizeLTE(), "sizeLTE");
-  }
 
   /* ++++++++++++++ IntObjRelation ++++++++++++++ */
 
@@ -876,7 +805,7 @@ public class CommonChecks {
         BigDecimal n = (BigDecimal) x;
         return n.compareTo((BigDecimal) y.one()) >= 0 && n.compareTo((BigDecimal) y.two()) < 0;
       }
-      return Check.fail("Ouch, a new type of number: %s", x.getClass());
+      return fail("Ouch, a new type of number: %s", x.getClass());
     };
   }
 
@@ -926,7 +855,7 @@ public class CommonChecks {
         BigDecimal n = (BigDecimal) x;
         return n.compareTo((BigDecimal) y.one()) >= 0 && n.compareTo((BigDecimal) y.two()) <= 0;
       }
-      return Check.fail("Ouch, a new type of number: %s", x.getClass());
+      return fail("Ouch, a new type of number: %s", x.getClass());
     };
   }
 
@@ -938,23 +867,21 @@ public class CommonChecks {
   /**
    * Verifies that the argument is greater than or equal to zero and less than the size of the
    * specified {@code List} or array. The object of the relationship is deliberately weakly typed to
-   * allow it to be either a {@code List} or an array. Specifying any other type of object will
-   * cause an {@link InvalidCheckException} to be thrown though.
+   * allow it to be either a {@code List} or an array. Specifying any other type of object will,
+   * however, cause an {@link InvalidCheckException} to be thrown though.
    *
    * @return An {@code IntObjRelation} expressing this requirement
    */
   @SuppressWarnings("rawtypes")
   public static <T> IntObjRelation<T> indexOf() {
-    return (x, y) -> {
-      if (x < 0) {
-        return false;
-      } else if (y instanceof List) {
-        return x < ((List) y).size();
-      } else if (y.getClass().isArray()) {
-        return x < Array.getLength(y);
-      }
-      throw new InvalidCheckException("Object of \"indexOf\" relation must be List or array");
-    };
+    return (x, y) ->
+        y instanceof List
+            ? x >= 0 && x < ((List) y).size()
+            : y.getClass().isArray()
+                ? x >= 0 && x < Array.getLength(y)
+                : fail(
+                    InvalidCheckException::new,
+                    "Object of \"indexOf\" relation must be List or array");
   }
 
   static {
@@ -992,23 +919,6 @@ public class CommonChecks {
   static {
     setMessagePattern(validToIndex(), msgValidFromIndex()); // recycle message
     setName(validToIndex(), "validToIndex");
-  }
-
-  /* ++++++++++++++ IntPredicate ++++++++++++++ */
-
-  /**
-   * Verifies that the argument is 0 (zero).
-   *
-   * @return A {@code Predicate} implementing the test described above establishing that the
-   *     argument is equal to zero
-   */
-  public static IntPredicate zero() {
-    return (x) -> x == 0;
-  }
-
-  static {
-    setMessagePattern(eq(), msgZero());
-    setName(zero(), "zero");
   }
 
   /* ++++++++++++++ IntRelation ++++++++++++++ */

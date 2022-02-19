@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static nl.naturalis.common.ArrayMethods.inArray;
+import static nl.naturalis.common.ArrayMethods.isOneOf;
 import static nl.naturalis.common.StringMethods.endsWith;
 import static nl.naturalis.common.check.CommonChecks.*;
 
@@ -147,7 +147,7 @@ public class SearchReplace {
               String dirname = dir.getFileName().toString();
               if (excludeHidden && dirname.startsWith(".")) {
                 return FileVisitResult.SKIP_SUBTREE;
-              } else if (excludeDirs != null && inArray(dirname, excludeDirs)) {
+              } else if (excludeDirs != null && isOneOf(dirname, excludeDirs)) {
                 return FileVisitResult.SKIP_SUBTREE;
               }
               return FileVisitResult.CONTINUE;
