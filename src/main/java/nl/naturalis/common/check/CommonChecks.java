@@ -9,6 +9,7 @@ import nl.naturalis.common.function.Relation;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
@@ -101,6 +102,7 @@ public class CommonChecks {
    *
    * <pre>{@code
    * Check.that(list.isEmpty()).is(yes());
+   * Check.that(list).has(List::isEmpty, yes());
    * }</pre>
    *
    * </blockquote>
@@ -355,8 +357,8 @@ public class CommonChecks {
    *
    * @return A {@code Predicate} implementing the test described above
    */
-  public static <T extends Number> Predicate<T> positive() {
-    return x -> x.doubleValue() > 0D;
+  public static IntPredicate positive() {
+    return x -> x > 0;
   }
 
   static {
@@ -369,8 +371,8 @@ public class CommonChecks {
    *
    * @return A {@code Predicate} implementing the test described above
    */
-  public static <T extends Number> Predicate<T> negative() {
-    return x -> x.doubleValue() < 0D;
+  public static IntPredicate negative() {
+    return x -> x < 0;
   }
 
   static {
@@ -411,6 +413,7 @@ public class CommonChecks {
     setMessagePattern(instanceOf(), msgInstanceOf());
     setName(instanceOf(), "instanceOf");
   }
+
   /**
    * Verifies that the specified {@code Collection} contains the specified value. Equivalent to
    * {@link Collection#contains(Object) Collection::contains}.
@@ -756,107 +759,89 @@ public class CommonChecks {
     setName(contains(), "contains");
   }
 
-  /* ++++++++++++++ ObjIntRelation ++++++++++++++ */
+  // Lookup for numberInRange()
+  private static final Map<Class, Relation<?, Pair<?>>> m0 =
+      Map.of(
+          Integer.class,
+          (x, y) -> (int) x >= (int) y.one() && (int) x < (int) y.two(),
+          Long.class,
+          (x, y) -> (long) x >= (long) y.one() && (long) x < (long) y.two(),
+          Double.class,
+          (x, y) -> (double) x >= (double) y.one() && (double) x < (double) y.two(),
+          Float.class,
+          (x, y) -> (float) x >= (float) y.one() && (float) x < (float) y.two(),
+          Byte.class,
+          (x, y) -> (byte) x >= (byte) y.one() && (byte) x < (byte) y.two(),
+          Short.class,
+          (x, y) -> (short) x >= (short) y.one() && (short) x < (short) y.two(),
+          BigInteger.class,
+          (x, y) -> {
+            BigInteger bi0 = (BigInteger) x;
+            BigInteger bi1 = (BigInteger) y.one();
+            BigInteger bi2 = (BigInteger) y.two();
+            return bi0.compareTo(bi1) >= 0 && bi0.compareTo(bi2) < 0;
+          },
+          BigDecimal.class,
+          (x, y) -> {
+            BigDecimal bd0 = (BigDecimal) x;
+            BigDecimal bd1 = (BigDecimal) y.one();
+            BigDecimal bd2 = (BigDecimal) y.two();
+            return bd0.compareTo(bd1) >= 0 && bd0.compareTo(bd2) < 0;
+          });
 
-  /* ++++++++++++++ IntObjRelation ++++++++++++++ */
+  // Lookup for numberInRangeClosed()
+  private static final Map<Class, Relation<?, Pair<?>>> m1 =
+      Map.of(
+          Integer.class,
+          (x, y) -> (int) x >= (int) y.one() && (int) x <= (int) y.two(),
+          Long.class,
+          (x, y) -> (long) x >= (long) y.one() && (long) x <= (long) y.two(),
+          Double.class,
+          (x, y) -> (double) x >= (double) y.one() && (double) x <= (double) y.two(),
+          Float.class,
+          (x, y) -> (float) x >= (float) y.one() && (float) x <= (float) y.two(),
+          Byte.class,
+          (x, y) -> (byte) x >= (byte) y.one() && (byte) x <= (byte) y.two(),
+          Short.class,
+          (x, y) -> (short) x >= (short) y.one() && (short) x <= (short) y.two(),
+          BigInteger.class,
+          (x, y) -> {
+            BigInteger bi0 = (BigInteger) x;
+            BigInteger bi1 = (BigInteger) y.one();
+            BigInteger bi2 = (BigInteger) y.two();
+            return bi0.compareTo(bi1) >= 0 && bi0.compareTo(bi2) <= 0;
+          },
+          BigDecimal.class,
+          (x, y) -> {
+            BigDecimal bd0 = (BigDecimal) x;
+            BigDecimal bd1 = (BigDecimal) y.one();
+            BigDecimal bd2 = (BigDecimal) y.two();
+            return bd0.compareTo(bd1) >= 0 && bd0.compareTo(bd2) <= 0;
+          });
 
   /**
-   * Verifies that a number lies between two other numbers, the first one included, the second one
-   * excluded. If the type of the numbers in the {@code Pair} is different from the type of the
-   * number to be tested, all numbers are first converted to double instances, unless one of the
-   * types is {@link BigDecimal}, in which case the comparison is scaled up to a {@code BigDecimal}
-   * comparison.
+   * Verifies that a number lies between two other numbers, the first one inclusive, the second one
+   * exclusive.
    *
    * @return A {@code Relation} that implements the test described above
    */
-  public static <T extends Number, U extends Number> Relation<T, Pair<U>> between() {
-    return (x, y) -> {
-      if (x.getClass() != y.one().getClass()) {
-        if (x.getClass() == BigDecimal.class || y.one().getClass() == BigDecimal.class) {
-          BigDecimal bd0 = NumberMethods.convert(x, BigDecimal.class);
-          BigDecimal bd1 = NumberMethods.convert(y.one(), BigDecimal.class);
-          BigDecimal bd2 = NumberMethods.convert(y.two(), BigDecimal.class);
-          return bd0.compareTo(bd1) >= 0 && bd0.compareTo(bd2) < 0;
-        }
-        double d0 = x.doubleValue();
-        double d1 = y.one().doubleValue();
-        double d2 = y.two().doubleValue();
-        return d0 >= d1 && d0 < d2;
-      }
-      if (x.getClass() == Integer.class) {
-        int n = (Integer) x;
-        return n >= (Integer) y.one() && n < (Integer) y.two();
-      } else if (x.getClass() == Double.class) {
-        double n = (Double) x;
-        return n >= (Double) y.one() && n < (Double) y.two();
-      } else if (x.getClass() == Long.class) {
-        long n = (Long) x;
-        return n >= (Long) y.one() && n < (Long) y.two();
-      } else if (x.getClass() == Byte.class) {
-        byte n = (Byte) x;
-        return n >= (Byte) y.one() && n < (Float) y.two();
-      } else if (x.getClass() == Float.class) {
-        float n = (Float) x;
-        return n >= (Float) y.one() && n < (Float) y.two();
-      } else if (x.getClass() == Short.class) {
-        short n = (Short) x;
-        return n >= (Short) y.one() && n < (Short) y.two();
-      } else if (x.getClass() == BigDecimal.class) {
-        BigDecimal n = (BigDecimal) x;
-        return n.compareTo((BigDecimal) y.one()) >= 0 && n.compareTo((BigDecimal) y.two()) < 0;
-      }
-      return fail("Ouch, a new type of number: %s", x.getClass());
-    };
+  public static <T extends Number, U extends Number> Relation<T, Pair<T>> inRangeFrom() {
+    return (x, y) -> ((Relation) m0.get(x.getClass())).exists(x, y);
   }
 
   static {
-    setMessagePattern(between(), msgBetween());
-    setName(between(), "between");
+    setMessagePattern(inRangeFrom(), msgInRangeFrom());
+    setName(inRangeFrom(), "inRangeFrom");
   }
 
   /**
-   * Verifies that a number lies between two other numbers, both included.
+   * Verifies that a number lies between two other numbers, the first one inclusive, the second one
+   * exclusive.
    *
    * @return A {@code Relation} that implements the test described above
    */
-  public static <T extends Number> Relation<T, Pair<T>> inRangeClosed() {
-    return (x, y) -> {
-      if (x.getClass() != y.one().getClass()) {
-        if (x.getClass() == BigDecimal.class || y.one().getClass() == BigDecimal.class) {
-          BigDecimal bd0 = NumberMethods.convert(x, BigDecimal.class);
-          BigDecimal bd1 = NumberMethods.convert(y.one(), BigDecimal.class);
-          BigDecimal bd2 = NumberMethods.convert(y.two(), BigDecimal.class);
-          return bd0.compareTo(bd1) >= 0 && bd0.compareTo(bd2) <= 0;
-        }
-        double d0 = x.doubleValue();
-        double d1 = y.one().doubleValue();
-        double d2 = y.two().doubleValue();
-        return d0 >= d1 && d0 <= d2;
-      }
-      if (x.getClass() == Integer.class) {
-        int n = (Integer) x;
-        return n >= (Integer) y.one() && n <= (Integer) y.two();
-      } else if (x.getClass() == Double.class) {
-        double n = (Double) x;
-        return n >= (Double) y.one() && n <= (Double) y.two();
-      } else if (x.getClass() == Long.class) {
-        long n = (Long) x;
-        return n >= (Long) y.one() && n <= (Long) y.two();
-      } else if (x.getClass() == Byte.class) {
-        byte n = (Byte) x;
-        return n >= (Byte) y.one() && n <= (Float) y.two();
-      } else if (x.getClass() == Float.class) {
-        float n = (Float) x;
-        return n >= (Float) y.one() && n <= (Float) y.two();
-      } else if (x.getClass() == Short.class) {
-        short n = (Short) x;
-        return n >= (Short) y.one() && n <= (Short) y.two();
-      } else if (x.getClass() == BigDecimal.class) {
-        BigDecimal n = (BigDecimal) x;
-        return n.compareTo((BigDecimal) y.one()) >= 0 && n.compareTo((BigDecimal) y.two()) <= 0;
-      }
-      return fail("Ouch, a new type of number: %s", x.getClass());
-    };
+  public static <T extends Number, U extends Number> Relation<T, Pair<T>> inRangeClosed() {
+    return (x, y) -> ((Relation) m1.get(x.getClass())).exists(x, y);
   }
 
   static {
@@ -864,24 +849,101 @@ public class CommonChecks {
     setName(inRangeClosed(), "inRangeClosed");
   }
 
+  /* ++++++++++++++ ObjIntRelation ++++++++++++++ */
+
+  public static <T extends CharSequence> ObjIntRelation<T> strlenEquals() {
+    return (x, y) -> x.length() == y;
+  }
+
+  static {
+    setMessagePattern(strlenEquals(), msgEq()); // Recycle message
+    setName(strlenEquals(), "strlenEq");
+  }
+
+  public static <T extends CharSequence> ObjIntRelation<T> strlenNotEquals() {
+    return (x, y) -> x.length() != y;
+  }
+
+  static {
+    setMessagePattern(strlenNotEquals(), msgNe()); // Recycle message
+    setName(strlenNotEquals(), "strlenNotEquals");
+  }
+
+  public static <T extends CharSequence> ObjIntRelation<T> strlenGreaterThan() {
+    return (x, y) -> x.length() > y;
+  }
+
+  static {
+    setMessagePattern(strlenGreaterThan(), msgGreaterThan()); // Recycle message
+    setName(strlenGreaterThan(), "strlenGreaterThan");
+  }
+
+  public static <T extends CharSequence> ObjIntRelation<T> strlenAtLeast() {
+    return (x, y) -> x.length() >= y;
+  }
+
+  static {
+    setMessagePattern(strlenAtLeast(), msgGreaterThan()); // Recycle message
+    setName(strlenAtLeast(), "strlenAtLeast");
+  }
+
+  public static <T extends CharSequence> ObjIntRelation<T> strlenLessThan() {
+    return (x, y) -> x.length() < y;
+  }
+
+  static {
+    setMessagePattern(strlenLessThan(), msgLessThan()); // Recycle message
+    setName(strlenLessThan(), "strlenLessThan");
+  }
+
+  public static <T extends CharSequence> ObjIntRelation<T> strlenAtMost() {
+    return (x, y) -> x.length() <= y;
+  }
+
+  static {
+    setMessagePattern(strlenAtMost(), msgAtMost()); // Recycle message
+    setName(strlenAtMost(), "strlenAtMost");
+  }
+
+  /* ++++++++++++++ IntObjRelation ++++++++++++++ */
+
   /**
-   * Verifies that the argument is greater than or equal to zero and less than the size of the
-   * specified {@code List} or array. The object of the relationship is deliberately weakly typed to
-   * allow it to be either a {@code List} or an array. Specifying any other type of object will,
-   * however, cause an {@link InvalidCheckException} to be thrown though.
+   * Verifies that the argument is greater than or equal to the first integer of the specified
+   * {@code IntPair}, and less than the second integer of the {@code IntPair}.
+   *
+   * @return An {@code IntObjRelation} that implements the test described above
+   */
+  public static IntObjRelation<Range> inRange() {
+    return (x, y) -> {
+      return ((Range.Reader) y).isInRange(x);
+    };
+  }
+
+  private static final String ERR_INDEX_OF =
+          "Object of indexOf(), fromIndexOf() and toIndexOf() must be a List, a String or an array";
+
+  /**
+   * Verifies that the argument can be used as index into the specified array, string or list,
+   * respectively. The object of the relationship is deliberately weakly typed to allow it to be
+   * either a {@code List} or an array. or a {@code String} Specifying any other type of object
+   * will, however, cause an {@link InvalidCheckException} to be thrown though.
    *
    * @return An {@code IntObjRelation} expressing this requirement
    */
   @SuppressWarnings("rawtypes")
   public static <T> IntObjRelation<T> indexOf() {
-    return (x, y) ->
-        y instanceof List
-            ? x >= 0 && x < ((List) y).size()
-            : y.getClass().isArray()
-                ? x >= 0 && x < Array.getLength(y)
-                : fail(
-                    InvalidCheckException::new,
-                    "Object of \"indexOf\" relation must be List or array");
+    return (x, y) -> {
+      if(y instanceof List l) {
+        return x >= 0 && x < l.size();
+      } else if(y instanceof String s) {
+        return x >= 0 && x < s.length();
+      } else if(y instanceof Object[] s) {
+        return x >= 0 && x < s.length;
+      } else if(y.getClass().isArray()) {
+        return x >= 0 && x < Array.getLength(y);
+      }
+      return fail(InvalidCheckException::new, ERR_INDEX_OF);
+    };
   }
 
   static {
@@ -890,35 +952,56 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is a valid "from" index for a {@code List} operation like {@link
-   * List#subList(int, int) List.sublist}. In the case the index may actually be one position past
-   * the end of the {@code List}.
+   * Verifies that the argument is a valid {@code from} index for operations like {@code List.subList}
+   * and {@code String.substring}. For this type of operations the {@code from} index may actually be one
+   * position past the end of the  {@code List}, {@code String}, etc.
    *
    * @return An {@code IntObjRelation}
    */
-  public static <E, L extends List<? super E>> IntObjRelation<L> validFromIndex() {
-    return (x, y) -> x >= 0 && x <= y.size();
+  public static <T> IntObjRelation<T> fromIndexOf() {
+    return (x, y) -> {
+      if(y instanceof List l) {
+        return x >= 0 && x <= l.size();
+      } else if(y instanceof String s) {
+        return x >= 0 && x <= s.length();
+      } else if(y instanceof Object[] s) {
+        return x >= 0 && x <= s.length;
+      } else if(y.getClass().isArray()) {
+        return x >= 0 && x <= Array.getLength(y);
+      }
+      return fail(InvalidCheckException::new, ERR_INDEX_OF);
+    };
   }
 
   static {
-    setMessagePattern(validFromIndex(), msgValidFromIndex());
-    setName(validFromIndex(), "msgValidFromIndex");
+    setMessagePattern(fromIndexOf(), msgFromIndexOf());
+    setName(fromIndexOf(), "fromIndexOf");
   }
 
   /**
-   * Verifies that the argument is a valid "to" index for a {@code List} operation like {@link
-   * List#subList(int, int) List.sublist}. This is, in fact, the same test as {@link
-   * #validFromIndex()}, but it codes more intuitively when testing "to" indices.
+   * Verifies that the argument is a valid {@code to} index for operations like {@code List.subList}
+   * and {@code String.substring}. For this type of operations the {@code to} index may actually be one
+   * position past the end of the  {@code List}, {@code String}, etc. This method really just returns
+   * {@link #fromIndexOf()}, but you might find it more intuitive to use when testing "to" indices.
    *
    * @return An {@code IntObjRelation}
    */
-  public static <E, L extends List<? super E>> IntObjRelation<L> validToIndex() {
-    return validFromIndex();
+  public static <T> IntObjRelation<T> toIndexOf() {
+    return fromIndexOf();
   }
 
   static {
-    setMessagePattern(validToIndex(), msgValidFromIndex()); // recycle message
-    setName(validToIndex(), "validToIndex");
+    setMessagePattern(toIndexOf(), msgFromIndexOf()); // recycle message
+    setName(toIndexOf(), "toIndexOf");
+  }
+
+  public static IntObjRelation<int[]> intElementOf() {
+    return ArrayMethods::isElementOf;
+  }
+
+  static {
+    setMessagePattern(intElementOf(), msgIn()); // recycle message
+    setName(intElementOf(), "intElementOf");
   }
 
   /* ++++++++++++++ IntRelation ++++++++++++++ */

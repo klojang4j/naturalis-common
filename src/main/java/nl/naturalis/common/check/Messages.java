@@ -1,6 +1,7 @@
 package nl.naturalis.common.check;
 
 import nl.naturalis.common.ArrayMethods;
+import nl.naturalis.common.IntPair;
 import nl.naturalis.common.Pair;
 import nl.naturalis.common.collection.TypeSet;
 
@@ -221,7 +222,44 @@ class Messages {
     };
   }
 
-  static Formatter msgBetween() {
+  static Formatter msgInRange() {
+    return args -> {
+      Range range = (Range) args.object();
+      Range.Reader reader = (Range.Reader) args.object();
+      IntPair bounds = reader.getBounds();
+      String fmt;
+      String op1;
+      String op2;
+      if (args.negated()) {
+        fmt = "%s must be %s %s or %s %s (was %s)";
+        if(range.getClass() == Range.From.class) {
+          op1 = "<";
+          op2 = ">=";
+        } else if(range.getClass() == Range.Closed.class) {
+          op1 = "<";
+          op2 = ">";
+        } else {
+          op1 = "<=";
+          op2 = ">=";
+        }
+      } else {
+        fmt = "%s must be %s %s and %s %s (was %s)";
+        if(range.getClass() == Range.From.class) {
+          op1 = ">=";
+          op2 = "<";
+        } else if(range.getClass() == Range.Closed.class) {
+          op1 = ">=";
+          op2 = "<=";
+        } else {
+          op1 = ">";
+          op2 = "<";
+        }
+      }
+      return format(fmt, args.argName(), op1, bounds.one(), op2, bounds.two(), args.arg());
+    };
+  }
+
+  static Formatter msgInRangeFrom() {
     return args -> {
       Pair pair = (Pair) args.object();
       String fmt;
@@ -258,7 +296,7 @@ class Messages {
     };
   }
 
-  static Formatter msgValidFromIndex() {
+  static Formatter msgFromIndexOf() {
     return args -> {
       if (args.negated()) {
         String fmt = "%s must < 0 or > %s (was %s)";

@@ -10,8 +10,10 @@ import java.util.function.Predicate;
 
 import static java.time.DayOfWeek.*;
 import static nl.naturalis.common.ArrayMethods.pack;
+import static nl.naturalis.common.ArrayMethods.packInts;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.*;
+import static nl.naturalis.common.check.Range.*;
 
 @SuppressWarnings({"rawtypes"})
 public class CheckTest {
@@ -211,6 +213,13 @@ public class CheckTest {
     Check.that(7).is(intObj((x, y) -> y.length() > x), "Foo");
   }
 
+  public void intObjRelation00() {
+    Check.that(7).is(intElementOf(), packInts(3, 5, 7, 9));
+    Check.that(7).isNot(inRange(), from(3, 7));
+    Check.that(7).is(inRange(), closed(7, 7));
+    Check.that(7).is(inRange(), inside(6, 8));
+  }
+
   @Test(expected = IllegalArgumentException.class)
   public void lambdaAsIntRelation() {
     Check.that(7).is(intInt((x, y) -> x > y), 9);
@@ -234,23 +243,53 @@ public class CheckTest {
   @Test
   public void hasPredicate00() {
     Check.that(List.of(1, 2, 3, 4)).has(l -> l.isEmpty(), no());
-    // Nonsensical, but just to test combi of gett method reference and lambda predicate
     Check.that(List.of(1, 2, 3, 4)).notHas(List::isEmpty, asObj(x -> false));
   }
 
   @Test
   public void hasIntPredicate00() {
-    Check.that(List.of(1, 2, 3, 4)).has(size(), eq(), 4);
-    Check.that(List.of(1, 2, 3, 4)).notHas(size(), lt(), 1);
-    // Check.that(SUNDAY).has(ordinal(), eq(), 7);
+    Check.that(List.of(1, 2, 3, 4)).has(size(), even());
+    Check.that(List.of(1, 2, 3, 4)).has(List::size, even());
+    // Check.that(List.of(1, 2, 3, 4)).has(List::size, x -> x % 2 == 0); Ambiguous method call
+    Check.that(List.of(1, 2, 3, 4)).has(List::size, asInt(x -> x % 2 == 0));
+    Check.that(List.of(1, 2, 3, 4)).has(size(), x -> x % 2 == 0);
+    Check.that(List.of(1, 2, 3, 4)).notHas(size(), odd());
+    Check.that(List.of()).has(size(), zero());
+    Check.that(List.of(1, 2, 3, 4)).notHas(size(), negative());
+    Check.that("FOO").has(strlen(), positive());
+    Check.that("").has(strlen(), zero());
   }
 
-  public void hasRelation() {
+  @Test
+  public void hasRelation00() {
     Check.that(List.of(1, 2, 3, 4)).has(l -> l.subList(1, 3), equalTo(), List.of(2, 3));
-    // Now, the compiler apparently has enough context to accept the plain lambda !!!
-    Check.that(List.of(1, 2, 3, 4)).has(l -> l.subList(1, 3), (x, y) -> x.equals(y), List.of(2, 3));
     Check.that(MONDAY).has(stringValue(), startsWith(), "MON");
     Check.that(MONDAY).has(stringValue(), (x, y) -> x.startsWith(y), "MON");
     Check.that("Foo").notHas(type(), equalTo(), int.class);
+    // TODO, Houston, we have a problem here
+    // Check.that(42).has(type(), equalTo(), int.class);
+  }
+
+  @Test
+  public void hasIntRelation00() {
+    Check.that(List.of(1, 2, 3, 4)).has(size(), eq(), 4);
+    Check.that(List.of(1, 2, 3, 4)).notHas(size(), lt(), 1);
+    Check.that(packInts(1, 2, 3, 4, 5)).has(length(), gt(), 3);
+    Check.that(-42).has(abs(), gt(), 40);
+    Check.that(SUNDAY).has(ordinal(), eq(), 6);
+  }
+
+  @Test
+  public void hasIntObjRelation00() {
+    Check.that(List.of(1, 2, 3, 4)).has(size(), intElementOf(), packInts(2, 4, 6));
+    Check.that(List.of(1, 2, 3, 4)).has(size(), inRange(), from(3, 10));
+  }
+
+  @Test
+  public void hasObjIntRelation00() {
+    Check.that("foo").has(s -> s.substring(1), strlenEquals(), 2);
+    Check.that("foo").has(s -> s + s, strlenNotEquals(), 3);
+    Check.that("foo").has(toUpperCase(), strlenGreaterThan(), 2);
+    Check.that("foo").has(toLowerCase(), strlenAtLeast(), 3);
   }
 }

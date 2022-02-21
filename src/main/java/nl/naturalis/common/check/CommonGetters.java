@@ -76,6 +76,32 @@ public class CommonGetters {
   }
 
   /**
+   * Returns the upper case version of the argument
+   *
+   * @return The upper case version of the argument
+   */
+  public static Function<String, String> toUpperCase() {
+    return String::toUpperCase;
+  }
+
+  static {
+    tmp.put(toUpperCase(), "%s.toUpperCase()");
+  }
+
+  /**
+   * Returns the lower case version of the argument
+   *
+   * @return The lower case version of the argument
+   */
+  public static Function<String, String> toLowerCase() {
+    return String::toLowerCase;
+  }
+
+  static {
+    tmp.put(toLowerCase(), "%s.toLowerCase()");
+  }
+
+  /**
    * A {@code Function} that returns the {@code Class} of an object. Equivalent to {@link
    * Object#getClass() Object::getClass}.
    *
