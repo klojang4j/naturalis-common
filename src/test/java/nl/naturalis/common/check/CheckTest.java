@@ -13,7 +13,6 @@ import static nl.naturalis.common.ArrayMethods.pack;
 import static nl.naturalis.common.ArrayMethods.packInts;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.*;
-import static nl.naturalis.common.check.Range.*;
 
 @SuppressWarnings({"rawtypes"})
 public class CheckTest {
@@ -216,9 +215,6 @@ public class CheckTest {
 
     public void intObjRelation00() {
         Check.that(7).is(intElementOf(), packInts(3, 5, 7, 9));
-        Check.that(7).isNot(inRange(), from(3, 7));
-        Check.that(7).is(inRange(), closed(7, 7));
-        Check.that(7).is(inRange(), inside(6, 8));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -283,7 +279,6 @@ public class CheckTest {
     @Test
     public void hasIntObjRelation00() {
         Check.that(List.of(1, 2, 3, 4)).has(size(), intElementOf(), packInts(2, 4, 6));
-        Check.that(List.of(1, 2, 3, 4)).has(size(), inRange(), from(3, 10));
     }
 
     @Test

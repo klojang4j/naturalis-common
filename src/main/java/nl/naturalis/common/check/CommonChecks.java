@@ -848,7 +848,7 @@ public class CommonChecks {
 
     static {
         setMessagePattern(strlenEquals(), msgEq()); // Recycle message
-        setName(strlenEquals(), "strlenEq");
+        setName(strlenEquals(), "strlenEquals");
     }
 
     public static <T extends CharSequence> ObjIntRelation<T> strlenNotEquals() {
@@ -897,16 +897,6 @@ public class CommonChecks {
     }
 
     /* ++++++++++++++ IntObjRelation ++++++++++++++ */
-
-    /**
-     * Verifies that the argument is greater than or equal to the first integer of the specified
-     * {@code IntPair}, and less than the second integer of the {@code IntPair}.
-     *
-     * @return An {@code IntObjRelation} that implements the test described above
-     */
-    public static IntObjRelation<Range> inRange() {
-        return (x, y) -> y.contains(x);
-    }
 
     private static final String ERR_INDEX_OF = "Object of indexOf(), fromIndexOf() and toIndexOf() must be a List, a String or an array";
 
@@ -984,6 +974,11 @@ public class CommonChecks {
         setName(toIndexOf(), "toIndexOf");
     }
 
+    /**
+     * Verifies that the argument is present in the specified array.
+     *
+     * @return
+     */
     public static IntObjRelation<int[]> intElementOf() {
         return ArrayMethods::isElementOf;
     }

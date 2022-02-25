@@ -3,6 +3,7 @@ package nl.naturalis.common.check;
 import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.Pair;
 import nl.naturalis.common.collection.TypeSet;
+import org.w3c.dom.ranges.Range;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -18,7 +19,6 @@ import static nl.naturalis.common.ClassMethods.simpleClassName;
 import static nl.naturalis.common.CollectionMethods.implode;
 import static nl.naturalis.common.StringMethods.ellipsis;
 import static nl.naturalis.common.check.CommonChecks.MESSAGE_PATTERNS;
-import static nl.naturalis.common.check.Range.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 class Messages {
@@ -224,36 +224,6 @@ class Messages {
             }
             String fmt = "%s.size() must be <= %s (was %s)";
             return format(fmt, args.argName(), args.object(), ((Collection) args.arg()).size());
-        };
-    }
-
-    static Formatter msgInRange() {
-        return args -> {
-            Range range = (Range) args.object();
-            Class<?> clazz = args.object().getClass();
-            Normalizer normalizer = (Normalizer) args.object();
-            String fmt;
-            String op1;
-            String op2;
-            if (args.negated()) {
-                fmt = "%s must be %s %s or %s %s (was %s)";
-                if (clazz == From.class) {
-                    op1 = "<";
-                    op2 = ">=";
-                } else if (clazz == Closed.class || clazz == Offset.class) {
-                    op1 = "<";
-                    op2 = ">";
-                } else { // Inside.class
-                    op1 = "<=";
-                    op2 = ">=";
-                }
-            } else {
-                fmt = "%s must be %s %s and %s %s (was %s)";
-            }
-            return format(fmt,
-                          args.argName(),
-                          range.getLowerBoundOperator(), range.getDeclaredLowerBound(),
-                          range.getUpperBoundOperator(), range.getDeclaredUpperBound(), args.arg());
         };
     }
 
@@ -507,7 +477,7 @@ class Messages {
             return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
         };
     }
-    
+
     static Formatter msgZero() {
         return args -> {
             if (args.negated()) {
