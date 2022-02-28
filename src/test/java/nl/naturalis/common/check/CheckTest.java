@@ -137,6 +137,11 @@ public class CheckTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
+    public void intPredicate02() {
+        Check.that(5).is(even());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
     public void relation00() {
         Check.that(Float.valueOf(7.5F)).is(greaterThan(), Short.valueOf((short) 16));
     }
@@ -172,8 +177,8 @@ public class CheckTest {
         Check.that(42).isNot(instanceOf(), String.class);
         Check.that(Set.of("1", "2", "3")).is(containing(), "2");
         Check.that(Set.of("1", "2", "3")).isNot(containing(), "4");
-        Check.that(2).is(in(), List.of(1, 2, 3));
-        Check.that(4).isNot(in(), List.of(1, 2, 3));
+        Check.that((Integer) 2).is(in(), List.of(1, 2, 3));
+        Check.that((Integer) 4).isNot(in(), List.of(1, 2, 3));
         Check.that(Set.of("1", "2", "3")).is(supersetOf(), List.of("1", "2"));
         Check.that(Set.of("1", "4", "5")).isNot(supersetOf(), List.of("1", "2"));
         Check.that(Set.of(MONDAY, TUESDAY, WEDNESDAY))
@@ -185,9 +190,9 @@ public class CheckTest {
         Check.that(map).isNot(containingKey(), 11);
         Check.that(map).is(containingValue(), 4);
         Check.that(map).isNot(containingValue(), 7);
-        Check.that(5).is(keyIn(), map);
-        Check.that(7).isNot(valueIn(), map);
-        Check.that(7).is(elementOf(), pack(1, 7, 10));
+        Check.that((Integer) 5).is(keyIn(), map);
+        Check.that((Integer) 7).isNot(valueIn(), map);
+        Check.that((Integer) 7).is(elementOf(), pack(1, 7, 10));
         Check.that("Hello").is(equalTo(), new String("Hello"));
         Check.that("Hello").isNot(sameAs(), new String("Hello"));
         Check.that("Hello").is(equalsIgnoreCase(), "HELLO");
@@ -195,8 +200,8 @@ public class CheckTest {
         Check.that(true).is(nullOr(), Boolean.TRUE);
         Check.that(7.23F).is(greaterThan(), (byte) 2);
         Check.that(7.230F).is(atMost(), 7.230F);
-        Check.that((short) 17).is(lessThan(), (byte) 31);
-        Check.that((short) 17).is(atLeast(), (byte) 17);
+        Check.that((Short) (short) 17).is(lessThan(), (byte) 31);
+        Check.that((Short) (short) 17).is(atLeast(), (byte) 17);
         Check.that("hello").isNot(startsWith(), "foo");
         Check.that("hello").is(endsWith(), "lo");
         Check.that("hello").is(contains(), "lo");
@@ -243,6 +248,11 @@ public class CheckTest {
         Check.that(List.of(1, 2, 3, 4)).notHas(List::isEmpty, asObj(x -> false));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void hasPredicate01() {
+        Check.that(List.of(1, 2, 3, 4)).has(l -> l.isEmpty(), yes());
+    }
+
     @Test
     public void hasIntPredicate00() {
         Check.that(List.of(1, 2, 3, 4)).has(size(), even());
@@ -257,6 +267,11 @@ public class CheckTest {
         Check.that("").has(strlen(), zero());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void hasIntPredicate01() {
+        Check.that(List.of(1, 2, 3, 4)).has(size(), odd());
+    }
+
     @Test
     public void hasRelation00() {
         Check.that(List.of(1, 2, 3, 4)).has(l -> l.subList(1, 3), equalTo(), List.of(2, 3));
@@ -265,6 +280,11 @@ public class CheckTest {
         Check.that("Foo").notHas(type(), equalTo(), int.class);
         // TODO, Houston, we have a problem here
         // Check.that(42).has(type(), equalTo(), int.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void hasRelation01() {
+        Check.that(MONDAY).has(stringValue(), startsWith(), "TUE");
     }
 
     @Test
@@ -276,9 +296,20 @@ public class CheckTest {
         Check.that(SUNDAY).has(ordinal(), eq(), 6);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void hasIntRelation01() {
+        Check.that(List.of(1, 2, 3, 4)).has(size(), eq(), 5);
+    }
+
     @Test
     public void hasIntObjRelation00() {
+        Check.that(pack("foo", "bar", "baz")).notHas(length(), intElementOf(), packInts(2, 4, 6));
         Check.that(List.of(1, 2, 3, 4)).has(size(), intElementOf(), packInts(2, 4, 6));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void hasIntObjRelation01() {
+        Check.that(List.of(1, 2, 3)).has(size(), intElementOf(), packInts(2, 4, 6));
     }
 
     @Test
@@ -287,5 +318,12 @@ public class CheckTest {
         Check.that("foo").has(s -> s + s, strlenNotEquals(), 3);
         Check.that("foo").has(toUpperCase(), strlenGreaterThan(), 2);
         Check.that("foo").has(toLowerCase(), strlenAtLeast(), 3);
+        Check.that("foo").notHas(toUpperCase(), strlenAtMost(), 2);
+        Check.that("foo").notHas(toUpperCase(), strlenLessThan(), 3);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void hasObjIntRelation01() {
+        Check.that("foo").has(s -> s.substring(1), strlenEquals(), 6);
     }
 }

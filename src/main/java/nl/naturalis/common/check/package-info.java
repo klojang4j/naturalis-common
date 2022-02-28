@@ -1,15 +1,11 @@
 /**
- *
- *
  * <h1>Precondition and Postcondition Verification</h1>
  *
  * <p>The classes in this package facilitate the validation of method arguments, variables, object
  * state (preconditions) and computational outcomes (postconditions). Validations happen through the
  * {@link nl.naturalis.common.check.Check} class - the central class of this package. Contrary to
- * Google Guava's <a
- * href="https://guava.dev/releases/21.0/api/docs/com/google/common/base/Preconditions.html}">Preconditions</a>
- * class and Apache's <a
- * href="https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html">Validate</a>
+ * Google Guava's <a href="https://guava.dev/releases/21.0/api/docs/com/google/common/base/Preconditions.html}">Preconditions</a>
+ * class and Apache's <a href="https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html">Validate</a>
  * class, the checks are carried out an <i>instance</i> of the {@code Check} class.
  *
  * <p>Here is an example of what argument validation looks like when using this package.
@@ -25,14 +21,14 @@
  * </blockquote>
  *
  * <h2>Performance</h2>
- *
+ * <p>
  * In spite of the checks being carried out an instance of the {@code Check} class,
  * microbenchmarking its performance using JMH yield practically - and often exactly - zero
  * difference with manually coded argument checks. Clearly, the compiler is quite capable of
  * compiling the whose {@code Check} instance away.
  *
  * <h2>Common checks</h2>
- *
+ * <p>
  * All checks come in two variants: one where you can provide a custom error message and one where
  * you can't. The latter is mainly meant to be used in combination with the {@link
  * nl.naturalis.common.check.CommonChecks} class. This class is a grab bag of common checks for
