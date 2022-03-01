@@ -29,12 +29,183 @@ public final class ObjectCheck<T, E extends Exception> {
         this.excFactory = excFactory;
     }
 
+    /**
+     * Verifies that the argument passes the test expressed through the specified {@code Predicate}.
+     * Although not strictly required, this method is meant to be used with a {@code Predicate} from
+     * the {@link CommonChecks} class so that an informative error message is generated if the
+     * argument fails the test.
+     *
+     * <p>When providing a lambda or method reference, you will have to make it clear to the
+     * compiler that it actually <i>is</i> a {@code Predicate}, because the compiler will not be
+     * able to distinguish it from an {@code IntPredicate}. It will complain about an <b>Ambiguous
+     * method call</b>. You can circumvent this in various ways:
+     *
+     * <ol>
+     *   <li>Specify the type of the lambda parameter (not an option when providing a method
+     *       reference)
+     *   <li>Use the {@link CommonChecks#asObj asObj} utility method from the {@code CommonChecks}
+     *       class
+     *   <li>Cast the lambda or method reference to {@code Predicate}
+     * </ol>
+     *
+     * <blockquote>
+     *
+     * <pre>{@code
+     * Check.that("abc").is(s -> myStringTest(s)); // WON'T COMPILE !
+     * Check.that("abc").is((String s) -> myStringTest(s)); // Will compile
+     * Check.that("abc").is(asObj(s -> myStringTest(s))); // Will compile
+     * Check.that("abc").is((Predicate<String>) s -> myStringTest(s)); // Verbose, but compiles
+     * }</pre>
+     *
+     * <p>Note that you will never have to do any of this when using the checks from the {@code
+     * CommonChecks} class.
+     *
+     * @param test A {@code Predicate} expressing the test
+     * @return This {@code Check} object
+     * @throws E If the test fails
+     */
+    public ObjectCheck<T, E> is(Predicate<T> test) throws E {
+        if (test.test(ok())) {
+            return this;
+        }
+        String msg = createMessage(test, false, getArgName(ok()), ok());
+        throw excFactory.apply(msg);
+    }
+
+
+    /**
+     * Verifies that the argument ducks the test expressed through the specified {@code Predicate}.
+     * Although not strictly required, this method is meant to be used with a {@code Predicate} from
+     * the {@link CommonChecks} class so that an informative error message is generated if the
+     * argument fails the test.
+     *
+     * @param test A {@code Predicate} expressing the test
+     * @return This {@code Check} object
+     * @throws E If the test fails
+     */
+    public ObjectCheck<T, E> isNot(Predicate<T> test) throws E {
+        if (!test.test(ok())) {
+            return this;
+        }
+        String msg = createMessage(test, true, getArgName(ok()), ok());
+        throw excFactory.apply(msg);
+    }
+
 
     public ObjectCheck<T, E> is(Predicate<T> test, String message, Object... msgArgs) throws E {
         if (test.test(arg)) {
             return this;
         }
         throw exception(test, message, msgArgs);
+    }
+
+
+    /**
+     * Verifies that the argument ducks the test expressed through the specified {@code Predicate}.
+     * Allows you to provide a custom error message.
+     *
+     * @param test    A {@code Predicate} expressing the test
+     * @param message The error message
+     * @param msgArgs The message arguments
+     * @return This {@code Check} object
+     * @throws E If the test fails
+     */
+    public ObjectCheck<T, E> isNot(Predicate<T> test, String message, Object... msgArgs) throws E {
+        return is(test.negate(), message, msgArgs);
+    }
+
+
+    /**
+     * Verifies that the argument passes the test expressed through the specified {@code
+     * IntPredicate}. Although not strictly required, this method is meant to be used with an {@code
+     * IntPredicate} from the {@link CommonChecks} class so that an informative error message is
+     * generated if the argument fails the test.
+     *
+     * <p>When providing a lambda or method reference, you will have to make it clear to the
+     * compiler that it actually <i>is</i> a {@code Predicate}, because the compiler will not be
+     * able to distinguish it from an {@code IntPredicate}. It will complain about an <b>Ambiguous
+     * method call</b>. You can circumvent this in three ways:
+     *
+     * <ol>
+     *   <li>Specify the type of the lambda parameter (not an option when providing a method
+     *       reference)
+     *   <li>Use the {@link CommonChecks#asInt(IntPredicate)} asInt} utility method from the {@code
+     *       CommonChecks} class
+     *   <li>Cast the lambda or method reference to an {@code IntPredicate}
+     * </ol>
+     *
+     * <blockquote>
+     *
+     * <pre>{@code
+     * Check.that(8).is(i -> i > 5); // WON'T COMPILE !
+     * Check.that(8).is((int i) -> i > 5); // Will compile
+     * Check.that(8).is(asInt(i -> i > 5)); // Will compile
+     * Check.that(8).is((IntPredicate) (i -> i > 5)); // Verbose, but compiles
+     * }</pre>
+     *
+     * <p>Note that you will never have to do any of this when using the checks from the {@code
+     * CommonChecks} class.
+     *
+     * @param test An {@code IntPredicate} expressing the test
+     * @return This {@code Check} object
+     * @throws E If the test fails
+     */
+    public ObjectCheck<T, E> is(IntPredicate test) throws E {
+        if (test.test(intValue())) {
+            return this;
+        }
+        String msg = createMessage(test, false, getArgName(intValue()), ok());
+        throw excFactory.apply(msg);
+    }
+
+
+    /**
+     * Verifies that the argument ducks the test expressed through the specified {@code Predicate}.
+     * Although not strictly required, this method is meant to be used with a {@code Predicate} from
+     * the {@link CommonChecks} class so that an informative error message is generated if the
+     * argument fails the test.
+     *
+     * @param test A {@code Predicate} expressing the test
+     * @return This {@code Check} object
+     * @throws E If the test fails
+     */
+    public ObjectCheck<T, E> isNot(IntPredicate test) throws E {
+        if (!test.test(intValue())) {
+            return this;
+        }
+        String msg = createMessage(test, true, argName, ok());
+        throw excFactory.apply(msg);
+    }
+
+    /**
+     * Verifies that the argument passes the test expressed through the specified {@code Predicate}.
+     * Allows you to provide a custom error message.
+     *
+     * @param test    An {@code IntPredicate} expressing the test
+     * @param message The error message
+     * @param msgArgs The message arguments
+     * @return This {@code Check} object
+     * @throws E If the test fails
+     */
+    public ObjectCheck<T, E> is(IntPredicate test, String message, Object... msgArgs) throws E {
+        if (test.test(intValue())) {
+            return this;
+        }
+        throw exception(test, message, msgArgs);
+    }
+
+    /**
+     * Verifies that the argument ducks the test expressed through the specified {@code Predicate}.
+     * Allows you to provide a custom error message.
+     *
+     * @param test    An {@code IntPredicate} expressing the test
+     * @param message The error message
+     * @param msgArgs The message arguments
+     * @return This {@code Check} object
+     * @throws E If the test fails
+     */
+    public ObjectCheck<T, E> isNot(IntPredicate test, String message, Object... msgArgs) throws E {
+        return is(test.negate(), message, msgArgs);
     }
 
 
@@ -110,203 +281,6 @@ public final class ObjectCheck<T, E extends Exception> {
             throw exception(test, object, message, msgArgs);
         }
         throw notApplicable(test, arg, getArgName(arg));
-    }
-
-
-    public T ok() {
-        return arg;
-    }
-
-
-    public int intValue() throws E {
-        if (arg == null) {
-            String msg = String.format(ERR_NULL_TO_INT, getArgName(arg));
-            throw excFactory.apply(msg);
-        } else if (arg.getClass() == Integer.class) {
-            return (Integer) arg;
-        } else if (arg.getClass().isEnum()) {
-            return ((Enum) arg).ordinal();
-        } else if (arg.getClass() == Byte.class) {
-            return (Byte) arg;
-        } else if (arg.getClass() == Short.class) {
-            return (Short) arg;
-        }
-        String msg = String.format(ERR_OBJECT_TO_INT, getArgName(arg), arg.getClass().getName());
-        throw excFactory.apply(msg);
-    }
-
-    @SuppressWarnings({"raw-types"})
-    private boolean applicable() {
-        Class c = arg.getClass();
-        return c == Integer.class || c == Short.class || c == Byte.class;
-    }
-
-
-    /**
-     * Verifies that the argument passes the test expressed through the specified {@code Predicate}.
-     * Although not strictly required, this method is meant to be used with a {@code Predicate} from
-     * the {@link CommonChecks} class so that an informative error message is generated if the
-     * argument fails the test.
-     *
-     * <p>When providing a lambda or method reference, you will have to make it clear to the
-     * compiler that it actually <i>is</i> a {@code Predicate}, because the compiler will not be
-     * able to distinguish it from an {@code IntPredicate}. It will complain about an <b>Ambiguous
-     * method call</b>. You can circumvent this in three ways:
-     *
-     * <ol>
-     *   <li>Specify the type of the lambda parameter (not an option when providing a method
-     *       reference)
-     *   <li>Use the {@link CommonChecks#asObj asObj} utility method from the {@code CommonChecks}
-     *       class
-     *   <li>Cast the lambda or method reference to an {@code IntPredicate}
-     * </ol>
-     *
-     * <blockquote>
-     *
-     * <pre>{@code
-     * Check.that("abc").is(s -> s.endsWith("xyz")); // WON'T COMPILE !
-     * Check.that("abc").is((String s) -> s.endsWith("xyz")); // Will compile
-     * Check.that("abc").is(asObj(s -> s.endsWith("xyz"))); // Will compile
-     * Check.that("abc").is((Predicate<String>) (s -> s.endsWith("xyz"))); // Verbose, but compiles
-     * }</pre>
-     *
-     * <p>Note that you will never have to do any of this when using the checks from the {@code
-     * CommonChecks} class.
-     *
-     * @param test A {@code Predicate} expressing the test
-     * @return This {@code Check} object
-     * @throws E If the test fails
-     */
-    public ObjectCheck<T, E> is(Predicate<T> test) throws E {
-        if (test.test(ok())) {
-            return this;
-        }
-        String msg = createMessage(test, false, getArgName(ok()), ok());
-        throw excFactory.apply(msg);
-    }
-
-    /**
-     * Verifies that the argument passes the test expressed through the specified {@code
-     * IntPredicate}. Although not strictly required, this method is meant to be used with an {@code
-     * IntPredicate} from the {@link CommonChecks} class so that an informative error message is
-     * generated if the argument fails the test.
-     *
-     * <p>When providing a lambda or method reference, you will have to make it clear to the
-     * compiler that it actually <i>is</i> a {@code Predicate}, because the compiler will not be
-     * able to distinguish it from an {@code IntPredicate}. It will complain about an <b>Ambiguous
-     * method call</b>. You can circumvent this in three ways:
-     *
-     * <ol>
-     *   <li>Specify the type of the lambda parameter (not an option when providing a method
-     *       reference)
-     *   <li>Use the {@link CommonChecks#asInt(IntPredicate)} asInt} utility method from the {@code
-     *       CommonChecks} class
-     *   <li>Cast the lambda or method reference to an {@code IntPredicate}
-     * </ol>
-     *
-     * <blockquote>
-     *
-     * <pre>{@code
-     * Check.that(8).is(i -> i > 5); // WON'T COMPILE !
-     * Check.that(8).is((int i) -> i > 5); // Will compile
-     * Check.that(8).is(asInt(i -> i > 5)); // Will compile
-     * Check.that(8).is((IntPredicate) (i -> i > 5)); // Verbose, but compiles
-     * }</pre>
-     *
-     * <p>Note that you will never have to do any of this when using the checks from the {@code
-     * CommonChecks} class.
-     *
-     * @param test An {@code IntPredicate} expressing the test
-     * @return This {@code Check} object
-     * @throws E If the test fails
-     */
-    public ObjectCheck<T, E> is(IntPredicate test) throws E {
-        if (test.test(intValue())) {
-            return this;
-        }
-        String msg = createMessage(test, false, getArgName(intValue()), ok());
-        throw excFactory.apply(msg);
-    }
-
-    /**
-     * Verifies that the argument ducks the test expressed through the specified {@code Predicate}.
-     * Although not strictly required, this method is meant to be used with a {@code Predicate} from
-     * the {@link CommonChecks} class so that an informative error message is generated if the
-     * argument fails the test.
-     *
-     * @param test A {@code Predicate} expressing the test
-     * @return This {@code Check} object
-     * @throws E If the test fails
-     */
-    public ObjectCheck<T, E> isNot(Predicate<T> test) throws E {
-        if (!test.test(ok())) {
-            return this;
-        }
-        String msg = createMessage(test, true, getArgName(ok()), ok());
-        throw excFactory.apply(msg);
-    }
-
-    /**
-     * Verifies that the argument ducks the test expressed through the specified {@code Predicate}.
-     * Although not strictly required, this method is meant to be used with a {@code Predicate} from
-     * the {@link CommonChecks} class so that an informative error message is generated if the
-     * argument fails the test.
-     *
-     * @param test A {@code Predicate} expressing the test
-     * @return This {@code Check} object
-     * @throws E If the test fails
-     */
-    public ObjectCheck<T, E> isNot(IntPredicate test) throws E {
-        if (!test.test(intValue())) {
-            return this;
-        }
-        String msg = createMessage(test, true, argName, ok());
-        throw excFactory.apply(msg);
-    }
-
-    /**
-     * Verifies that the argument passes the test expressed through the specified {@code Predicate}.
-     * Allows you to provide a custom error message.
-     *
-     * @param test    An {@code IntPredicate} expressing the test
-     * @param message The error message
-     * @param msgArgs The message arguments
-     * @return This {@code Check} object
-     * @throws E If the test fails
-     */
-    public ObjectCheck<T, E> is(IntPredicate test, String message, Object... msgArgs) throws E {
-        if (test.test(intValue())) {
-            return this;
-        }
-        throw exception(test, message, msgArgs);
-    }
-
-    /**
-     * Verifies that the argument ducks the test expressed through the specified {@code Predicate}.
-     * Allows you to provide a custom error message.
-     *
-     * @param test    A {@code Predicate} expressing the test
-     * @param message The error message
-     * @param msgArgs The message arguments
-     * @return This {@code Check} object
-     * @throws E If the test fails
-     */
-    public ObjectCheck<T, E> isNot(Predicate<T> test, String message, Object... msgArgs) throws E {
-        return is(test.negate(), message, msgArgs);
-    }
-
-    /**
-     * Verifies that the argument ducks the test expressed through the specified {@code Predicate}.
-     * Allows you to provide a custom error message.
-     *
-     * @param test    An {@code IntPredicate} expressing the test
-     * @param message The error message
-     * @param msgArgs The message arguments
-     * @return This {@code Check} object
-     * @throws E If the test fails
-     */
-    public ObjectCheck<T, E> isNot(IntPredicate test, String message, Object... msgArgs) throws E {
-        return is(test.negate(), message, msgArgs);
     }
 
     /**
@@ -1534,6 +1508,35 @@ public final class ObjectCheck<T, E extends Exception> {
         return has(property, test.negate(), object, message, msgArgs);
     }
 
+    public T ok() {
+        return arg;
+    }
+
+
+    public int intValue() throws E {
+        if (arg == null) {
+            String msg = String.format(ERR_NULL_TO_INT, getArgName(arg));
+            throw excFactory.apply(msg);
+        } else if (arg.getClass() == Integer.class) {
+            return (Integer) arg;
+        } else if (arg.getClass().isEnum()) {
+            return ((Enum) arg).ordinal();
+        } else if (arg.getClass() == Byte.class) {
+            return (Byte) arg;
+        } else if (arg.getClass() == Short.class) {
+            return (Short) arg;
+        }
+        String msg = String.format(ERR_OBJECT_TO_INT, getArgName(arg), arg.getClass().getName());
+        throw excFactory.apply(msg);
+    }
+
+    @SuppressWarnings({"raw-types"})
+    private boolean applicable() {
+        Class c = arg.getClass();
+        return c == Integer.class || c == Short.class || c == Byte.class;
+    }
+
+
     /**
      * Passes the argument to the specified {@code Function} and returns the value it computes. To
      * be used as the last call after a chain of checks. For example:
@@ -1563,16 +1566,6 @@ public final class ObjectCheck<T, E extends Exception> {
      */
     public <F extends Throwable> void then(ThrowingConsumer<T, F> consumer) throws F {
         consumer.accept(ok());
-    }
-
-    /**
-     * Passes the validated argument to the specified {@code Function} and returns the value
-     * computed by the {@code Function}. To be used as the last call after a chain of checks.
-     *
-     * @param transformer An {@code IntFunction} that transforms the argument into some other value
-     */
-    public <U> U intValue(IntFunction<U> transformer) throws E {
-        return transformer.apply(intValue());
     }
 
     E exception(Object test, String msg, Object[] msgArgs) {
