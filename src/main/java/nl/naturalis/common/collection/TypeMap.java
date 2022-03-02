@@ -53,7 +53,7 @@ public final class TypeMap<V> extends AbstractTypeMap<V> {
      * @return This {@code Builder} instance
      */
     public Builder<U> autoExpand(int expectedSize) {
-      this.expectedSize = Check.that(expectedSize).is(gt(), 1).intValue();
+      this.expectedSize = Check.that(expectedSize).is(gt(), 1).ok();
       return this;
     }
 

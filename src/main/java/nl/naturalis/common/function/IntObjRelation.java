@@ -2,7 +2,8 @@ package nl.naturalis.common.function;
 
 /**
  * Defines a relationship between an integer and an object. For example, if x equals 6, and y is an
- * {@code int} array containing 6, then the relation <i>X element-of Y</i> exists.
+ * {@code int} array containing 6, then the relation <b>X is-element-of Y</b> exists between x and
+ * y.
  *
  * @author Ayco Holleman
  * @param <T> The type of the object of the relation
@@ -31,7 +32,9 @@ public interface IntObjRelation<T> {
   /**
    * Returns whether the relationship between {@code subject} and {@code object} exists.
    *
-   * @return {@code true} if the relation exists, {@code false} otherwise.
+   * @param subject The value to test
+   * @param object The value to test it against
+   * @return {@code true} if the relation exists, {@code false} otherwise
    */
   boolean exists(int subject, T object);
 }

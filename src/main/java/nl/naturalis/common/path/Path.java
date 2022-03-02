@@ -138,7 +138,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    */
   public String segment(int index) {
     int i = index < 0 ? elems.length + index : index;
-    return Check.that(i).is(lt(), elems.length).intValue(x -> elems[x]);
+    return Check.that(i).is(lt(), elems.length).ok(x -> elems[x]);
   }
 
   /**

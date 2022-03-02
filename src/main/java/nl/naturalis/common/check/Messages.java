@@ -3,11 +3,9 @@ package nl.naturalis.common.check;
 import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.Pair;
 import nl.naturalis.common.collection.TypeSet;
-import org.w3c.dom.ranges.Range;
 
 import java.io.File;
 import java.lang.reflect.Array;
-import java.text.Normalizer;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;

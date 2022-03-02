@@ -2,8 +2,8 @@ package nl.naturalis.common.function;
 
 /**
  * Defines some kind of relationship between an object and an integer. For example, if x is a {@code
- * Collection} with 6 elements, and y equals 3, then the relation <i>X.size() &gt; Y</i> exists
- * between these two values.
+ * Collection} with 6 elements, and y equals 3, then the relation <b>X has-size-greater-than Y</b>
+ * exists between x and y.
  *
  * @author Ayco Holleman
  * @param <T> The type of the subject of the relation

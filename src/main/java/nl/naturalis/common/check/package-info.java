@@ -1,14 +1,14 @@
 /**
+ *
+ *
  * <h1>Precondition and Postcondition Verification</h1>
  *
  * <p>The classes in this package facilitate the validation of method arguments, variables, object
- * state (preconditions) and computational outcomes (postconditions). Validations happen through the
- * {@link nl.naturalis.common.check.Check} class - the central class of this package. Contrary to
- * Google Guava's <a href="https://guava.dev/releases/21.0/api/docs/com/google/common/base/Preconditions.html}">Preconditions</a>
- * class and Apache's <a href="https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html">Validate</a>
- * class, the checks are carried out an <i>instance</i> of the {@code Check} class.
- *
- * <p>Here is an example of what argument validation looks like when using this package.
+ * state (preconditions) and computational outcomes (postconditions). Contrary to Google Guava's <a
+ * href="https://guava.dev/releases/21.0/api/docs/com/google/common/base/Preconditions.html}">Preconditions</a>
+ * class and Apache's <a
+ * href="https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html">Validate</a>
+ * class, validation happens through instance methods. For example:
  *
  * <blockquote>
  *
@@ -21,16 +21,21 @@
  * </blockquote>
  *
  * <h2>Performance</h2>
- * <p>
- * In spite of the checks being carried out an instance of the {@code Check} class,
- * microbenchmarking its performance using JMH yield practically - and often exactly - zero
- * difference with manually coded argument checks. Clearly, the compiler is quite capable of
- * compiling the whose {@code Check} instance away.
+ *
+ * <p>In spite of the checks being carried out on an instance of {@link
+ * nl.naturalis.common.check.IntCheck IntCheck} or {@link nl.naturalis.common.check.ObjectCheck
+ * ObjectCheck} microbenchmarking their performance using JMH yield no difference with manually
+ * coded argument checks. Clearly, the compiler is quite capable of compiling the whose {@code
+ * Check} instance away. If the argument fails the test, the {@code check} becomes somewhat slower
+ * than a manually coded test because the construction of the exception, notably the error message,
+ * takes more time. However, you generally don't to recover from pre- and postcondition failures
+ * anyhow. They are end-of-story failures, if not for the application as a whoe, then at least for
+ * the rquest being serviced.
  *
  * <h2>Common checks</h2>
- * <p>
- * All checks come in two variants: one where you can provide a custom error message and one where
- * you can't. The latter is mainly meant to be used in combination with the {@link
+ *
+ * <p>All checks come in two variants: one where you can provide a custom error message and one
+ * where you can't. The latter is mainly meant to be used in combination with the {@link
  * nl.naturalis.common.check.CommonChecks} class. This class is a grab bag of common checks for
  * arguments. They are already associated with short, informative error messages, so you don't have
  * to invent them yourself.
@@ -56,7 +61,7 @@
  * <ol>
  *   <li>The name of the check that was executed. E.g. "gt" or "notNull". Within the message pattern
  *       this message argument can be referenced using a standard {@code printf} indexed message
- *       argument: <code>%1$s</code>. You can also use <code>${test}</code> to reference this
+ *       argument: <code>%1$s</code>. You can also use <code>${check}</code> to reference this
  *       message argument. This will get translated into <code>%1$s</code> before the message
  *       pattern is passed off to {@code String.format}.
  *   <li>The argument being validated. Within the message pattern this message argument can be
@@ -64,8 +69,9 @@
  *   <li>The simple class name of the argument, or {@code null} if the argument was {@code null}.
  *       Within the message pattern this message argument can be referenced as <code>
  *       ${type}</code> or <code>%3$s</code>.
- *   <li>The name of the argument. Within the message pattern this message argument can be
- *       referenced as <code>${name}</code> or <code>%4$s</code>.
+ *   <li>The name of the argument, or {@code null} if no argument name was provided. Within the
+ *       message pattern this message argument can be referenced as <code>${name}</code> or <code>
+ *       %4$s</code>.
  *   <li>The object of the relationship in case the check took the form of a {@link
  *       nl.naturalis.common.function.Relation}. For example, for the {@code gt} (greater-than)
  *       check that would be the number that the argument must surpass. Within the message pattern

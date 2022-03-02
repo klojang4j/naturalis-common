@@ -4,12 +4,12 @@ import java.util.regex.Pattern;
 
 class FormatNormalizer {
 
-  static final String REGEX = "\\$\\{(test|arg|type|name|obj|\\d+)}";
+  static final String REGEX = "\\$\\{(check|arg|type|name|obj|\\d+)}";
   static final Pattern PATTERN = Pattern.compile(REGEX);
 
   static String normalize(String fmt) {
     return PATTERN.matcher(fmt).replaceAll(r -> switch (r.group(1)) {
-      case "test" -> "%1\\$s";
+      case "check" -> "%1\\$s";
       case "arg" -> "%2\\$s";
       case "type" -> "%3\\$s";
       case "name" -> "%4\\$s";
