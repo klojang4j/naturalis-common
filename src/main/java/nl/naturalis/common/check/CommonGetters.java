@@ -63,10 +63,10 @@ public class CommonGetters {
    * <blockquote>
    *
    * <pre>{@code
-   * // Won't compile because IntCheck does not have an is(Relation, Object) method
+   * // WON'T COMPILE! IntCheck does not have an is(Relation, Object) method
    * Check.that(42).is(keyIn(), map);
    *
-   * // OK, but not very elegant
+   * // OK. ObjectCheck does have is(Relation, Object) method. But ugly.
    * Check.that((Integer) 42).is(keyIn(), map);
    *
    * Check.that(42).has(box(), keyIn(), map);
