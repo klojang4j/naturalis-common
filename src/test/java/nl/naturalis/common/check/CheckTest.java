@@ -238,7 +238,7 @@ public class CheckTest {
     Check.that(9).is(ne(), 11);
     Check.that(9).is(lt(), 11);
     Check.that(11).is(lte(), 11);
-    Check.that(Integer.valueOf(11)).is(lte(), 11);
+    // Check.that(Integer.valueOf(11)).is(lte(), 11);
   }
 
   @Test

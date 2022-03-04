@@ -11,8 +11,8 @@ import static nl.naturalis.common.check.CommonChecks.NAMES;
 import static nl.naturalis.common.check.Messages.createMessage;
 
 /**
- * Facilitates the validation of {@code int} value. See the {@link nl.naturalis.common.check package
- * description} for more details.
+ * Facilitates the validation of {@code int} values. See the {@link nl.naturalis.common.check
+ * package description} for more details.
  *
  * @param <E> The type of the exception throw if the argument turns out to be invalid
  */
