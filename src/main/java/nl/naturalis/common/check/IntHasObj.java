@@ -57,13 +57,13 @@ class IntHasObj<E extends Exception> {
     throw check.exc.apply(createMessage(test, true, fqn(name), value));
   }
 
-  <U> IntCheck<E> has(IntFunction<U> property, Predicate<U> test, String message, Object... msgArgs)
+  <U> IntCheck<E> has(IntFunction<U> property, Predicate<U> test, String message, Object[] msgArgs)
       throws E {
     U value = property.apply(check.arg);
     if (test.test(value)) {
       return check;
     }
-    throw check.exception(test, message, msgArgs);
+    throw check.createException(test, message, msgArgs);
   }
 
   <U, X extends Exception> IntCheck<E> has(
@@ -113,12 +113,12 @@ class IntHasObj<E extends Exception> {
   }
 
   <U, V> IntCheck<E> has(
-      IntFunction<U> property, Relation<U, V> test, V object, String message, Object... msgArgs)
+      IntFunction<U> property, Relation<U, V> test, V object, String message, Object[] msgArgs)
       throws E {
     if (test.exists(property.apply(check.arg), object)) {
       return check;
     }
-    throw check.exception(test, object, message, msgArgs);
+    throw check.createException(test, object, message, msgArgs);
   }
 
   <U, V, X extends Exception> IntCheck<E> has(

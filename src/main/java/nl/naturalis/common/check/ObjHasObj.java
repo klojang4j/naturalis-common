@@ -66,7 +66,7 @@ class ObjHasObj<T, E extends Exception> {
     if (test.test(property.apply(check.arg))) {
       return check;
     }
-    throw check.exception(test, message, msgArgs);
+    throw check.createException(test, message, msgArgs);
   }
 
   <U, X extends Exception> ObjectCheck<T, E> has(
@@ -126,7 +126,7 @@ class ObjHasObj<T, E extends Exception> {
     if (test.exists(value, object)) {
       return check;
     }
-    throw check.exception(test, object, message, msgArgs);
+    throw check.createException(test, object, message, msgArgs);
   }
 
   public <U> ObjectCheck<T, E> has(Function<T, U> property, ObjIntRelation<U> test, int object)
@@ -178,7 +178,7 @@ class ObjHasObj<T, E extends Exception> {
     if (test.exists(value, object)) {
       return check;
     }
-    throw check.exception(test, object, message, msgArgs);
+    throw check.createException(test, object, message, msgArgs);
   }
 
   private String fqn(String name) {

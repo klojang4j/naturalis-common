@@ -6,7 +6,6 @@ import java.util.function.*;
 import java.util.stream.IntStream;
 
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
-import static nl.naturalis.common.check.Check.DEF_ARG_NAME;
 import static nl.naturalis.common.check.CommonChecks.NAMES;
 import static nl.naturalis.common.check.Messages.createMessage;
 
@@ -117,7 +116,7 @@ public final class IntCheck<E extends Exception> {
     if (test.test(arg)) {
       return this;
     }
-    throw exception(test, message, msgArgs);
+    throw createException(test, message, msgArgs);
   }
 
   /**
@@ -482,7 +481,7 @@ public final class IntCheck<E extends Exception> {
    */
   public <U> IntCheck<E> notHas(
       IntFunction<U> property, Predicate<U> test, String message, Object... msgArgs) throws E {
-    return has(property, test.negate(), message, msgArgs);
+    return IntHasObj.get(this).has(property, test.negate(), message, msgArgs);
   }
 
   /**
@@ -516,7 +515,7 @@ public final class IntCheck<E extends Exception> {
    */
   public <U, X extends Exception> IntCheck<E> notHas(
       IntFunction<U> property, Predicate<U> test, Supplier<X> exception) throws X {
-    return has(property, test.negate(), exception);
+    return IntHasObj.get(this).has(property, test.negate(), exception);
   }
 
   /**
@@ -637,7 +636,7 @@ public final class IntCheck<E extends Exception> {
   public <U, V> IntCheck<E> notHas(
       IntFunction<U> property, Relation<U, V> test, V object, String message, Object... msgArgs)
       throws E {
-    return has(property, test.negate(), object, message, msgArgs);
+    return IntHasObj.get(this).has(property, test.negate(), object, message, msgArgs);
   }
 
   /**
@@ -675,7 +674,7 @@ public final class IntCheck<E extends Exception> {
    */
   public <U, V, X extends Exception> IntCheck<E> notHas(
       IntFunction<U> property, Relation<U, V> test, V object, Supplier<X> exception) throws X {
-    return has(property, test.negate(), object, exception);
+    return IntHasObj.get(this).has(property, test.negate(), object, exception);
   }
 
   /**
@@ -773,7 +772,7 @@ public final class IntCheck<E extends Exception> {
    */
   public IntCheck<E> notHas(
       IntUnaryOperator property, IntPredicate test, String message, Object... msgArgs) throws E {
-    return has(property, test.negate(), message, msgArgs);
+    return IntHasInt.get(this).has(property, test.negate(), message, msgArgs);
   }
 
   /**
@@ -805,7 +804,7 @@ public final class IntCheck<E extends Exception> {
    */
   public <X extends Exception> IntCheck<E> notHas(
       IntUnaryOperator property, IntPredicate test, Supplier<X> exception) throws X {
-    return has(property, test.negate(), exception);
+    return IntHasInt.get(this).has(property, test.negate(), exception);
   }
 
   /**
@@ -950,17 +949,17 @@ public final class IntCheck<E extends Exception> {
     return has(property, test.negate(), object, exception);
   }
 
-  E exception(Object test, String msg, Object[] msgArgs) {
-    return exception(test, null, msg, msgArgs);
+  E createException(Object test, String msg, Object[] msgArgs) {
+    return createException(test, null, msg, msgArgs);
   }
 
-  E exception(Object test, Object object, String msg, Object[] msgArgs) {
-    return exception(test, ok(), object, msg, msgArgs);
+  E createException(Object test, Object object, String msg, Object[] msgArgs) {
+    return createException(test, ok(), object, msg, msgArgs);
   }
 
-  E exception(Object test, Object subject, Object object, String pattern, Object[] msgArgs) {
+  E createException(Object test, Object subject, Object object, String pattern, Object[] msgArgs) {
     if (pattern == null) {
-      throw new InvalidCheckException("message must not be null");
+      throw new InvalidCheckException("message pattern must not be null");
     }
     if (msgArgs == null) {
       throw new InvalidCheckException("message arguments must not be null");
@@ -969,7 +968,7 @@ public final class IntCheck<E extends Exception> {
     Object[] all = new Object[msgArgs.length + 5];
     all[0] = NAMES.getOrDefault(test, test.getClass().getSimpleName());
     all[1] = Messages.toStr(subject);
-    all[2] = ifNotNull(subject, IntCheck::className);
+    all[2] = ifNotNull(subject, Messages::simpleClassName);
     all[3] = argName;
     all[4] = Messages.toStr(object);
     System.arraycopy(msgArgs, 0, all, 5, msgArgs.length);
@@ -978,21 +977,6 @@ public final class IntCheck<E extends Exception> {
 
   String getArgName(int arg) {
     return argName != null ? argName : int.class.getSimpleName();
-  }
-
-  private static String className(Object obj) {
-    Class<?> clazz = obj.getClass();
-    if (clazz.isArray()) {
-      Class<?> c = clazz.getComponentType();
-      int i = 0;
-      for (; c.isArray(); c = c.getComponentType()) {
-        ++i;
-      }
-      StringBuilder sb = new StringBuilder(c.getSimpleName());
-      IntStream.rangeClosed(0, i).forEach(x -> sb.append("[]"));
-      return sb.toString();
-    }
-    return clazz.getSimpleName();
   }
 
   /* Returns fully-qualified name of the property with the specified name */

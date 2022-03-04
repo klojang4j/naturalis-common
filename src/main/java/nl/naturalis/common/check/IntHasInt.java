@@ -58,13 +58,13 @@ final class IntHasInt<E extends Exception> {
     throw check.exc.apply(createMessage(test, true, fqn(name), value));
   }
 
-  IntCheck<E> has(IntUnaryOperator property, IntPredicate test, String message, Object... msgArgs)
+  IntCheck<E> has(IntUnaryOperator property, IntPredicate test, String message, Object[] msgArgs)
       throws E {
     int value = property.applyAsInt(check.arg);
     if (test.test(value)) {
       return check;
     }
-    throw check.exception(test, message, msgArgs);
+    throw check.createException(test, message, msgArgs);
   }
 
   <X extends Exception> IntCheck<E> has(
@@ -115,14 +115,14 @@ final class IntHasInt<E extends Exception> {
   }
 
   IntCheck<E> has(
-      IntUnaryOperator property, IntRelation test, int object, String message, Object... msgArgs)
+      IntUnaryOperator property, IntRelation test, int object, String message, Object[] msgArgs)
       throws E {
     int value = property.applyAsInt(check.arg);
     if (test.exists(value, object)) {
       return check;
     }
     String msg = String.format(message, msgArgs);
-    throw check.exception(test, message, msgArgs);
+    throw check.createException(test, message, msgArgs);
   }
 
   <X extends Exception> IntCheck<E> has(
