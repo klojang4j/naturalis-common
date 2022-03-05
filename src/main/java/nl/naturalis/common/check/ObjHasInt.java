@@ -130,6 +130,14 @@ class ObjHasInt<T, E extends Exception> {
     throw check.createException(test, object, message, msgArgs);
   }
 
+  <U, X extends Exception> ObjectCheck<T, E> has(
+      ToIntFunction<T> property, IntObjRelation<U> test, U object, Supplier<X> exception) throws X {
+    if (test.exists(property.applyAsInt(check.arg), object)) {
+      return check;
+    }
+    throw exception.get();
+  }
+
   public ObjectCheck<T, E> has(ToIntFunction<T> property, IntRelation test, int object) throws E {
     int value = property.applyAsInt(check.arg);
     if (test.exists(value, object)) {
@@ -179,6 +187,14 @@ class ObjHasInt<T, E extends Exception> {
       return check;
     }
     throw check.createException(test, object, message, msgArgs);
+  }
+
+  <X extends Exception> ObjectCheck<T, E> has(
+      ToIntFunction<T> property, IntRelation test, int object, Supplier<X> exception) throws X {
+    if (test.exists(property.applyAsInt(check.arg), object)) {
+      return check;
+    }
+    throw exception.get();
   }
 
   private String fqn(String name) {
