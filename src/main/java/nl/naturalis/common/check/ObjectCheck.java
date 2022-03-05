@@ -4,10 +4,9 @@ import nl.naturalis.common.function.*;
 
 import java.util.function.*;
 
-import static nl.naturalis.common.ObjectMethods.ifNotNull;
 import static nl.naturalis.common.check.Check.DEF_ARG_NAME;
 import static nl.naturalis.common.check.CommonChecks.NAMES;
-import static nl.naturalis.common.check.Messages.createMessage;
+import static nl.naturalis.common.check.Messages.*;
 
 public final class ObjectCheck<T, E extends Exception> {
 
@@ -75,8 +74,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (test.test(arg)) {
       return this;
     }
-    String msg = createMessage(test, false, getArgName(arg), arg);
-    throw exc.apply(msg);
+    throw exc.apply(getMessage(test, false, getArgName(arg), arg));
   }
 
   /**
@@ -92,8 +90,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (!test.test(arg)) {
       return this;
     }
-    String msg = createMessage(test, true, getArgName(arg), arg);
-    throw exc.apply(msg);
+    throw exc.apply(getMessage(test, true, getArgName(arg), arg));
   }
 
   /**
@@ -177,8 +174,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    String msg = createMessage(test, false, getArgName(arg), arg, object);
-    throw exc.apply(msg);
+    throw exc.apply(getMessage(test, false, getArgName(arg), arg, object));
   }
 
   /**
@@ -196,8 +192,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    String msg = createMessage(test, true, getArgName(arg), arg, object);
-    throw exc.apply(msg);
+    throw exc.apply(getMessage(test, true, getArgName(arg), arg, object));
   }
 
   /**
@@ -290,8 +285,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    String msg = createMessage(test, false, getArgName(arg), arg, object);
-    throw exc.apply(msg);
+    throw exc.apply(getMessage(test, false, getArgName(arg), arg, object));
   }
 
   /**
@@ -308,8 +302,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    String msg = createMessage(test, true, getArgName(arg), arg, object);
-    throw exc.apply(msg);
+    throw exc.apply(getMessage(test, true, getArgName(arg), arg, object));
   }
 
   /**
@@ -954,6 +947,25 @@ public final class ObjectCheck<T, E extends Exception> {
    * CommonGetters} class so that an informative error message is generated if the argument turns
    * out to be invalid.
    *
+   * <p>Note that this method is heavily overloaded. Therefore you need to pay attention when
+   * providing a lambda or method reference for <b>both</b> the {@code property} argument <b>and</b>
+   * the {@code test} argument. Plain lambdas or method references will cause the compiler to
+   * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
+   * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
+   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   *
+   * <ul>
+   *   <li>Specify the type of the lambda arguments (not applicable when providing a method
+   *       reference). So in stead of<br>
+   *       {@code (x,y) -> x.length() < y}<br>
+   *       write:<br>
+   *       {@code (String x, int y) -> x.length() < y}.
+   *   <li>Use one of the utility methods in the {@code CommonChecks} class dedicated to this issue
+   *       (e.g. {@link CommonChecks#objObj(Relation) objObj} or {@link
+   *       CommonChecks#toInt(ToIntFunction) toInt})
+   *   <li>Cast the lambda or method reference to the appropriate type
+   * </ul>
+   *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
    * @param object The value that the argument is tested against (called "the object" of a relation)
@@ -973,6 +985,25 @@ public final class ObjectCheck<T, E extends Exception> {
    * CommonGetters} class so that an informative error message is generated if the argument turns
    * out to be invalid.
    *
+   * <p>Note that this method is heavily overloaded. Therefore you need to pay attention when
+   * providing a lambda or method reference for <b>both</b> the {@code property} argument <b>and</b>
+   * the {@code test} argument. Plain lambdas or method references will cause the compiler to
+   * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
+   * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
+   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   *
+   * <ul>
+   *   <li>Specify the type of the lambda arguments (not applicable when providing a method
+   *       reference). So in stead of<br>
+   *       {@code (x,y) -> x.length() < y}<br>
+   *       write:<br>
+   *       {@code (String x, int y) -> x.length() < y}.
+   *   <li>Use one of the utility methods in the {@code CommonChecks} class dedicated to this issue
+   *       (e.g. {@link CommonChecks#objObj(Relation) objObj} or {@link
+   *       CommonChecks#toInt(ToIntFunction) toInt})
+   *   <li>Cast the lambda or method reference to the appropriate type
+   * </ul>
+   *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
    * @param object The value that the argument is tested against (called "the object" of a relation)
@@ -990,6 +1021,25 @@ public final class ObjectCheck<T, E extends Exception> {
    * specified test. While not strictly required, this method is meant to be used in combination
    * with a check from the {@link CommonChecks} class so that an informative error message is
    * generated if the argument turns out to be invalid.
+   *
+   * <p>Note that this method is heavily overloaded. Therefore you need to pay attention when
+   * providing a lambda or method reference for <b>both</b> the {@code property} argument <b>and</b>
+   * the {@code test} argument. Plain lambdas or method references will cause the compiler to
+   * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
+   * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
+   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   *
+   * <ul>
+   *   <li>Specify the type of the lambda arguments (not applicable when providing a method
+   *       reference). So in stead of<br>
+   *       {@code (x,y) -> x.length() < y}<br>
+   *       write:<br>
+   *       {@code (String x, int y) -> x.length() < y}.
+   *   <li>Use one of the utility methods in the {@code CommonChecks} class dedicated to this issue
+   *       (e.g. {@link CommonChecks#objObj(Relation) objObj} or {@link
+   *       CommonChecks#toInt(ToIntFunction) toInt})
+   *   <li>Cast the lambda or method reference to the appropriate type
+   * </ul>
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param name The name of the property being tested. In error messages the fully-qualified name
@@ -1011,6 +1061,25 @@ public final class ObjectCheck<T, E extends Exception> {
    * with a check from the {@link CommonChecks} class so that an informative error message is
    * generated if the argument turns out to be invalid.
    *
+   * <p>Note that this method is heavily overloaded. Therefore you need to pay attention when
+   * providing a lambda or method reference for <b>both</b> the {@code property} argument <b>and</b>
+   * the {@code test} argument. Plain lambdas or method references will cause the compiler to
+   * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
+   * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
+   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   *
+   * <ul>
+   *   <li>Specify the type of the lambda arguments (not applicable when providing a method
+   *       reference). So in stead of<br>
+   *       {@code (x,y) -> x.length() < y}<br>
+   *       write:<br>
+   *       {@code (String x, int y) -> x.length() < y}.
+   *   <li>Use one of the utility methods in the {@code CommonChecks} class dedicated to this issue
+   *       (e.g. {@link CommonChecks#objObj(Relation) objObj} or {@link
+   *       CommonChecks#toInt(ToIntFunction) toInt})
+   *   <li>Cast the lambda or method reference to the appropriate type
+   * </ul>
+   *
    * @param property A function that extracts the value to be tested from the argument
    * @param name The name of the property being tested. In error messages the fully-qualified name
    *     will be used and constructed using {@code argName + "." + name}.
@@ -1029,6 +1098,25 @@ public final class ObjectCheck<T, E extends Exception> {
    * Validates a property of the argument, retrieved through the specified function, using the
    * specified test. Allows you to provide a custom error message. See the {@link
    * nl.naturalis.common.check package description} for how to specify a custom error message.
+   *
+   * <p>Note that this method is heavily overloaded. Therefore you need to pay attention when
+   * providing a lambda or method reference for <b>both</b> the {@code property} argument <b>and</b>
+   * the {@code test} argument. Plain lambdas or method references will cause the compiler to
+   * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
+   * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
+   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   *
+   * <ul>
+   *   <li>Specify the type of the lambda arguments (not applicable when providing a method
+   *       reference). So in stead of<br>
+   *       {@code (x,y) -> x.length() < y}<br>
+   *       write:<br>
+   *       {@code (String x, int y) -> x.length() < y}.
+   *   <li>Use one of the utility methods in the {@code CommonChecks} class dedicated to this issue
+   *       (e.g. {@link CommonChecks#objObj(Relation) objObj} or {@link
+   *       CommonChecks#toInt(ToIntFunction) toInt})
+   *   <li>Cast the lambda or method reference to the appropriate type
+   * </ul>
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
@@ -1053,6 +1141,25 @@ public final class ObjectCheck<T, E extends Exception> {
    * Validates a property of the argument, retrieved through the specified function, using the
    * specified test. Allows you to provide a custom error message. See the {@link
    * nl.naturalis.common.check package description} for how to specify a custom error message.
+   *
+   * <p>Note that this method is heavily overloaded. Therefore you need to pay attention when
+   * providing a lambda or method reference for <b>both</b> the {@code property} argument <b>and</b>
+   * the {@code test} argument. Plain lambdas or method references will cause the compiler to
+   * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
+   * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
+   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   *
+   * <ul>
+   *   <li>Specify the type of the lambda arguments (not applicable when providing a method
+   *       reference). So in stead of<br>
+   *       {@code (x,y) -> x.length() < y}<br>
+   *       write:<br>
+   *       {@code (String x, int y) -> x.length() < y}.
+   *   <li>Use one of the utility methods in the {@code CommonChecks} class dedicated to this issue
+   *       (e.g. {@link CommonChecks#objObj(Relation) objObj} or {@link
+   *       CommonChecks#toInt(ToIntFunction) toInt})
+   *   <li>Cast the lambda or method reference to the appropriate type
+   * </ul>
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
@@ -1095,6 +1202,25 @@ public final class ObjectCheck<T, E extends Exception> {
    * Validates a property of the argument, retrieved through the specified function, using the
    * specified test. Allows you to throw a different type of exception for this particular test.
    *
+   * <p>Note that this method is heavily overloaded. Therefore you need to pay attention when
+   * providing a lambda or method reference for <b>both</b> the {@code property} argument <b>and</b>
+   * the {@code test} argument. Plain lambdas or method references will cause the compiler to
+   * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
+   * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
+   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   *
+   * <ul>
+   *   <li>Specify the type of the lambda arguments (not applicable when providing a method
+   *       reference). So in stead of<br>
+   *       {@code (x,y) -> x.length() < y}<br>
+   *       write:<br>
+   *       {@code (String x, int y) -> x.length() < y}.
+   *   <li>Use one of the utility methods in the {@code CommonChecks} class dedicated to this issue
+   *       (e.g. {@link CommonChecks#objObj(Relation) objObj} or {@link
+   *       CommonChecks#toInt(ToIntFunction) toInt})
+   *   <li>Cast the lambda or method reference to the appropriate type
+   * </ul>
+   *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
    * @param object The value that the argument is tested against (called "the object" of a relation)
@@ -1116,6 +1242,25 @@ public final class ObjectCheck<T, E extends Exception> {
    * CommonGetters} class so that an informative error message is generated if the argument turns
    * out to be invalid.
    *
+   * <p>Note that this method is heavily overloaded. Therefore you need to pay attention when
+   * providing a lambda or method reference for <b>both</b> the {@code property} argument <b>and</b>
+   * the {@code test} argument. Plain lambdas or method references will cause the compiler to
+   * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
+   * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
+   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   *
+   * <ul>
+   *   <li>Specify the type of the lambda arguments (not applicable when providing a method
+   *       reference). So in stead of<br>
+   *       {@code (x,y) -> x.length() < y}<br>
+   *       write:<br>
+   *       {@code (String x, int y) -> x.length() < y}.
+   *   <li>Use one of the utility methods in the {@code CommonChecks} class dedicated to this issue
+   *       (e.g. {@link CommonChecks#objObj(Relation) objObj} or {@link
+   *       CommonChecks#toInt(ToIntFunction) toInt})
+   *   <li>Cast the lambda or method reference to the appropriate type
+   * </ul>
+   *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
    * @param object The value that the argument is tested against (called "the object" of a relation)
@@ -1133,6 +1278,25 @@ public final class ObjectCheck<T, E extends Exception> {
    * CommonGetters} class so that an informative error message is generated if the argument turns
    * out to be invalid.
    *
+   * <p>Note that this method is heavily overloaded. Therefore you need to pay attention when
+   * providing a lambda or method reference for <b>both</b> the {@code property} argument <b>and</b>
+   * the {@code test} argument. Plain lambdas or method references will cause the compiler to
+   * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
+   * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
+   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   *
+   * <ul>
+   *   <li>Specify the type of the lambda arguments (not applicable when providing a method
+   *       reference). So in stead of<br>
+   *       {@code (x,y) -> x.length() < y}<br>
+   *       write:<br>
+   *       {@code (String x, int y) -> x.length() < y}.
+   *   <li>Use one of the utility methods in the {@code CommonChecks} class dedicated to this issue
+   *       (e.g. {@link CommonChecks#objObj(Relation) objObj} or {@link
+   *       CommonChecks#toInt(ToIntFunction) toInt})
+   *   <li>Cast the lambda or method reference to the appropriate type
+   * </ul>
+   *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
    * @param object The value that the argument is tested against (called "the object" of a relation)
@@ -1149,6 +1313,25 @@ public final class ObjectCheck<T, E extends Exception> {
    * specified test. While not strictly required, this method is meant to be used in combination
    * with a check from the {@link CommonChecks} class so that an informative error message is
    * generated if the argument turns out to be invalid.
+   *
+   * <p>Note that this method is heavily overloaded. Therefore you need to pay attention when
+   * providing a lambda or method reference for <b>both</b> the {@code property} argument <b>and</b>
+   * the {@code test} argument. Plain lambdas or method references will cause the compiler to
+   * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
+   * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
+   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   *
+   * <ul>
+   *   <li>Specify the type of the lambda arguments (not applicable when providing a method
+   *       reference). So in stead of<br>
+   *       {@code (x,y) -> x.length() < y}<br>
+   *       write:<br>
+   *       {@code (String x, int y) -> x.length() < y}.
+   *   <li>Use one of the utility methods in the {@code CommonChecks} class dedicated to this issue
+   *       (e.g. {@link CommonChecks#objObj(Relation) objObj} or {@link
+   *       CommonChecks#toInt(ToIntFunction) toInt})
+   *   <li>Cast the lambda or method reference to the appropriate type
+   * </ul>
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param name The name of the property being tested. In error messages the fully-qualified name
@@ -1169,6 +1352,25 @@ public final class ObjectCheck<T, E extends Exception> {
    * with a check from the {@link CommonChecks} class so that an informative error message is
    * generated if the argument turns out to be invalid.
    *
+   * <p>Note that this method is heavily overloaded. Therefore you need to pay attention when
+   * providing a lambda or method reference for <b>both</b> the {@code property} argument <b>and</b>
+   * the {@code test} argument. Plain lambdas or method references will cause the compiler to
+   * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
+   * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
+   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   *
+   * <ul>
+   *   <li>Specify the type of the lambda arguments (not applicable when providing a method
+   *       reference). So in stead of<br>
+   *       {@code (x,y) -> x.length() < y}<br>
+   *       write:<br>
+   *       {@code (String x, int y) -> x.length() < y}.
+   *   <li>Use one of the utility methods in the {@code CommonChecks} class dedicated to this issue
+   *       (e.g. {@link CommonChecks#objObj(Relation) objObj} or {@link
+   *       CommonChecks#toInt(ToIntFunction) toInt})
+   *   <li>Cast the lambda or method reference to the appropriate type
+   * </ul>
+   *
    * @param property A function that extracts the value to be tested from the argument
    * @param name The name of the property being tested. In error messages the fully-qualified name
    *     will be used and constructed using {@code argName + "." + name}.
@@ -1186,6 +1388,25 @@ public final class ObjectCheck<T, E extends Exception> {
    * Validates a property of the argument, retrieved through the specified function, using the
    * specified test. Allows you to provide a custom error message. See the {@link
    * nl.naturalis.common.check package description} for how to specify a custom error message.
+   *
+   * <p>Note that this method is heavily overloaded. Therefore you need to pay attention when
+   * providing a lambda or method reference for <b>both</b> the {@code property} argument <b>and</b>
+   * the {@code test} argument. Plain lambdas or method references will cause the compiler to
+   * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
+   * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
+   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   *
+   * <ul>
+   *   <li>Specify the type of the lambda arguments (not applicable when providing a method
+   *       reference). So in stead of<br>
+   *       {@code (x,y) -> x.length() < y}<br>
+   *       write:<br>
+   *       {@code (String x, int y) -> x.length() < y}.
+   *   <li>Use one of the utility methods in the {@code CommonChecks} class dedicated to this issue
+   *       (e.g. {@link CommonChecks#objObj(Relation) objObj} or {@link
+   *       CommonChecks#toInt(ToIntFunction) toInt})
+   *   <li>Cast the lambda or method reference to the appropriate type
+   * </ul>
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
@@ -1206,6 +1427,25 @@ public final class ObjectCheck<T, E extends Exception> {
    * specified test. Allows you to provide a custom error message. See the {@link
    * nl.naturalis.common.check package description} for how to specify a custom error message.
    *
+   * <p>Note that this method is heavily overloaded. Therefore you need to pay attention when
+   * providing a lambda or method reference for <b>both</b> the {@code property} argument <b>and</b>
+   * the {@code test} argument. Plain lambdas or method references will cause the compiler to
+   * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
+   * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
+   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   *
+   * <ul>
+   *   <li>Specify the type of the lambda arguments (not applicable when providing a method
+   *       reference). So in stead of<br>
+   *       {@code (x,y) -> x.length() < y}<br>
+   *       write:<br>
+   *       {@code (String x, int y) -> x.length() < y}.
+   *   <li>Use one of the utility methods in the {@code CommonChecks} class dedicated to this issue
+   *       (e.g. {@link CommonChecks#objObj(Relation) objObj} or {@link
+   *       CommonChecks#toInt(ToIntFunction) toInt})
+   *   <li>Cast the lambda or method reference to the appropriate type
+   * </ul>
+   *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
    * @param object The value that the argument is tested against (called "the object" of a relation)
@@ -1221,6 +1461,28 @@ public final class ObjectCheck<T, E extends Exception> {
   }
 
   /**
+   * Validates a property of the argument, retrieved through the specified function, using the
+   * specified test. Allows you to throw a different type of exception for this particular test.
+   *
+   * <p>Note that this method is heavily overloaded. Therefore you need to pay attention when
+   * providing a lambda or method reference for <b>both</b> the {@code property} argument <b>and</b>
+   * the {@code test} argument. Plain lambdas or method references will cause the compiler to
+   * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
+   * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
+   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   *
+   * <ul>
+   *   <li>Specify the type of the lambda arguments (not applicable when providing a method
+   *       reference). So in stead of<br>
+   *       {@code (x,y) -> x.length() < y}<br>
+   *       write:<br>
+   *       {@code (String x, int y) -> x.length() < y}.
+   *   <li>Use one of the utility methods in the {@code CommonChecks} class dedicated to this issue
+   *       (e.g. {@link CommonChecks#objObj(Relation) objObj} or {@link
+   *       CommonChecks#toInt(ToIntFunction) toInt})
+   *   <li>Cast the lambda or method reference to the appropriate type
+   * </ul>
+   *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
    * @param object The value that the argument is tested against (called "the object" of a relation)
@@ -1235,6 +1497,28 @@ public final class ObjectCheck<T, E extends Exception> {
   }
 
   /**
+   * Validates a property of the argument, retrieved through the specified function, using the
+   * specified test. Allows you to throw a different type of exception for this particular test.
+   *
+   * <p>Note that this method is heavily overloaded. Therefore you need to pay attention when
+   * providing a lambda or method reference for <b>both</b> the {@code property} argument <b>and</b>
+   * the {@code test} argument. Plain lambdas or method references will cause the compiler to
+   * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
+   * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
+   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   *
+   * <ul>
+   *   <li>Specify the type of the lambda arguments (not applicable when providing a method
+   *       reference). So in stead of<br>
+   *       {@code (x,y) -> x.length() < y}<br>
+   *       write:<br>
+   *       {@code (String x, int y) -> x.length() < y}.
+   *   <li>Use one of the utility methods in the {@code CommonChecks} class dedicated to this issue
+   *       (e.g. {@link CommonChecks#objObj(Relation) objObj} or {@link
+   *       CommonChecks#toInt(ToIntFunction) toInt})
+   *   <li>Cast the lambda or method reference to the appropriate type
+   * </ul>
+   *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
    * @param object The value that the argument is tested against (called "the object" of a relation)
@@ -1270,19 +1554,19 @@ public final class ObjectCheck<T, E extends Exception> {
     String fmt = FormatNormalizer.normalize(pattern);
     Object[] all = new Object[msgArgs.length + 5];
     all[0] = NAMES.getOrDefault(test, test.getClass().getSimpleName());
-    all[1] = Messages.toStr(subject);
-    all[2] = ifNotNull(subject, Messages::simpleClassName);
+    all[1] = toPrettyString(subject);
+    all[2] = subject == null ? null : simpleClassName(subject);
     all[3] = argName;
-    all[4] = Messages.toStr(object);
+    all[4] = toPrettyString(object);
     System.arraycopy(msgArgs, 0, all, 5, msgArgs.length);
     return exc.apply(String.format(fmt, all));
   }
 
-  String getArgName(Object arg) {
-    return argName != null ? argName : arg != null ? Messages.simpleClassName(arg) : DEF_ARG_NAME;
-  }
-
   String FQN(String propName) {
     return argName + "." + propName;
+  }
+
+  private String getArgName(Object arg) {
+    return argName != null ? argName : arg != null ? simpleClassName(arg) : DEF_ARG_NAME;
   }
 }

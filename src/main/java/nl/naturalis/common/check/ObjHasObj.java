@@ -8,10 +8,10 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static nl.naturalis.common.check.CommonGetters.formatProperty;
-import static nl.naturalis.common.check.Messages.createMessage;
+import static nl.naturalis.common.check.Messages.getMessage;
 
 /** Helper class for ObjectCheck. */
-class ObjHasObj<T, E extends Exception> {
+final class ObjHasObj<T, E extends Exception> {
 
   static <T0, E0 extends Exception> ObjHasObj<T0, E0> get(ObjectCheck<T0, E0> check) {
     return new ObjHasObj<>(check);
@@ -29,7 +29,7 @@ class ObjHasObj<T, E extends Exception> {
     if (test.test(val)) {
       return check;
     }
-    throw check.createException(createMessage(test, false, check.FQN(name), val));
+    throw check.createException(Messages.getMessage(test, false, check.FQN(name), val));
   }
 
   <P> ObjectCheck<T, E> notHas(Function<T, P> prop, String name, Predicate<P> test) throws E {
@@ -38,7 +38,7 @@ class ObjHasObj<T, E extends Exception> {
     if (!test.test(val)) {
       return check;
     }
-    throw check.createException(createMessage(test, true, check.FQN(name), val));
+    throw check.createException(Messages.getMessage(test, true, check.FQN(name), val));
   }
 
   <P> ObjectCheck<T, E> has(Function<T, P> prop, Predicate<P> test) throws E {
@@ -48,7 +48,7 @@ class ObjHasObj<T, E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, Function.class);
-    throw check.createException(createMessage(test, false, name, val));
+    throw check.createException(Messages.getMessage(test, false, name, val));
   }
 
   <P> ObjectCheck<T, E> notHas(Function<T, P> prop, Predicate<P> test) throws E {
@@ -58,7 +58,7 @@ class ObjHasObj<T, E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, Function.class);
-    throw check.createException(createMessage(test, true, name, val));
+    throw check.createException(Messages.getMessage(test, true, name, val));
   }
 
   <P> ObjectCheck<T, E> has(Function<T, P> prop, Predicate<P> test, String msg, Object[] msgArgs)
@@ -86,7 +86,7 @@ class ObjHasObj<T, E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, Function.class);
-    throw check.createException(createMessage(test, false, name, val, obj));
+    throw check.createException(getMessage(test, false, name, val, obj));
   }
 
   public <P, O> ObjectCheck<T, E> notHas(Function<T, P> prop, Relation<P, O> test, O obj) throws E {
@@ -96,7 +96,7 @@ class ObjHasObj<T, E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, Function.class);
-    throw check.createException(createMessage(test, true, name, val, obj));
+    throw check.createException(getMessage(test, true, name, val, obj));
   }
 
   <P, O> ObjectCheck<T, E> has(Function<T, P> prop, String name, Relation<P, O> test, O obj)
@@ -106,7 +106,7 @@ class ObjHasObj<T, E extends Exception> {
     if (test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(createMessage(test, false, check.FQN(name), val, obj));
+    throw check.createException(getMessage(test, false, check.FQN(name), val, obj));
   }
 
   <P, O> ObjectCheck<T, E> notHas(Function<T, P> prop, String name, Relation<P, O> test, O obj)
@@ -116,7 +116,7 @@ class ObjHasObj<T, E extends Exception> {
     if (!test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(createMessage(test, true, check.FQN(name), val, obj));
+    throw check.createException(getMessage(test, true, check.FQN(name), val, obj));
   }
 
   <P, O> ObjectCheck<T, E> has(
@@ -145,7 +145,7 @@ class ObjHasObj<T, E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, Function.class);
-    throw check.createException(createMessage(test, false, name, val, obj));
+    throw check.createException(getMessage(test, false, name, val, obj));
   }
 
   public <P> ObjectCheck<T, E> notHas(Function<T, P> prop, ObjIntRelation<P> test, int obj)
@@ -156,7 +156,7 @@ class ObjHasObj<T, E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, Function.class);
-    throw check.createException(createMessage(test, true, name, val, obj));
+    throw check.createException(getMessage(test, true, name, val, obj));
   }
 
   <P> ObjectCheck<T, E> has(Function<T, P> prop, String name, ObjIntRelation<P> test, int obj)
@@ -166,7 +166,7 @@ class ObjHasObj<T, E extends Exception> {
     if (test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(createMessage(test, false, check.FQN(name), val, obj));
+    throw check.createException(getMessage(test, false, check.FQN(name), val, obj));
   }
 
   <P> ObjectCheck<T, E> notHas(Function<T, P> prop, String name, ObjIntRelation<P> test, int obj)
@@ -176,7 +176,7 @@ class ObjHasObj<T, E extends Exception> {
     if (!test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(createMessage(test, true, check.FQN(name), val, obj));
+    throw check.createException(getMessage(test, true, check.FQN(name), val, obj));
   }
 
   <P> ObjectCheck<T, E> has(

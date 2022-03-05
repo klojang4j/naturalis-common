@@ -7,7 +7,7 @@ import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 
 import static nl.naturalis.common.check.CommonGetters.formatProperty;
-import static nl.naturalis.common.check.Messages.createMessage;
+import static nl.naturalis.common.check.Messages.getMessage;
 
 /** Helper class for IntCheck. */
 final class IntHasInt<E extends Exception> {
@@ -23,94 +23,105 @@ final class IntHasInt<E extends Exception> {
   }
 
   IntCheck<E> has(IntUnaryOperator prop, IntPredicate test) throws E {
-    int value = prop.applyAsInt(check.arg);
-    if (test.test(value)) {
+    IntCheck<E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (test.test(val)) {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntUnaryOperator.class);
-    throw check.exc.apply(createMessage(test, false, name, value));
+    throw check.createException(Messages.getMessage(test, false, name, val));
   }
 
   IntCheck<E> notHas(IntUnaryOperator prop, IntPredicate test) throws E {
-    int value = prop.applyAsInt(check.arg);
-    if (!test.test(value)) {
+    IntCheck<E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (!test.test(val)) {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntUnaryOperator.class);
-    throw check.exc.apply(createMessage(test, true, name, value));
+    throw check.createException(Messages.getMessage(test, true, name, val));
   }
 
   IntCheck<E> has(IntUnaryOperator prop, String name, IntPredicate test) throws E {
-    int value = prop.applyAsInt(check.arg);
-    if (test.test(value)) {
+    IntCheck<E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (test.test(val)) {
       return check;
     }
-    throw check.exc.apply(createMessage(test, false, FQN(name), value));
+    throw check.createException(Messages.getMessage(test, false, check.FQN(name), val));
   }
 
   IntCheck<E> notHas(IntUnaryOperator prop, String name, IntPredicate test) throws E {
-    int value = prop.applyAsInt(check.arg);
-    if (!test.test(value)) {
+    IntCheck<E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (!test.test(val)) {
       return check;
     }
-    throw check.exc.apply(createMessage(test, true, FQN(name), value));
+    throw check.createException(Messages.getMessage(test, true, check.FQN(name), val));
   }
 
   IntCheck<E> has(IntUnaryOperator prop, IntPredicate test, String message, Object[] msgArgs)
       throws E {
-    int value = prop.applyAsInt(check.arg);
-    if (test.test(value)) {
+    IntCheck<E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (test.test(val)) {
       return check;
     }
     throw check.createException(test, message, msgArgs);
   }
 
-  <X extends Exception> IntCheck<E> has(
-      IntUnaryOperator prop, IntPredicate test, Supplier<X> exception) throws X {
+  <X extends Exception> IntCheck<E> has(IntUnaryOperator prop, IntPredicate test, Supplier<X> exc)
+      throws X {
+    IntCheck<E> check = this.check;
     if (test.test(prop.applyAsInt(check.arg))) {
       return check;
     }
-    throw exception.get();
+    throw exc.get();
   }
 
   IntCheck<E> has(IntUnaryOperator prop, IntRelation test, int obj) throws E {
-    int value = prop.applyAsInt(check.arg);
-    if (test.exists(value, obj)) {
+    IntCheck<E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (test.exists(val, obj)) {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntUnaryOperator.class);
-    throw check.exc.apply(createMessage(test, false, name, value, obj));
+    throw check.createException(getMessage(test, false, name, val, obj));
   }
 
   IntCheck<E> notHas(IntUnaryOperator prop, IntRelation test, int obj) throws E {
-    int value = prop.applyAsInt(check.arg);
-    if (!test.exists(value, obj)) {
+    IntCheck<E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (!test.exists(val, obj)) {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntUnaryOperator.class);
-    throw check.exc.apply(createMessage(test, true, name, value, obj));
+    throw check.createException(getMessage(test, true, name, val, obj));
   }
 
   IntCheck<E> has(IntUnaryOperator prop, String name, IntRelation test, int obj) throws E {
-    int value = prop.applyAsInt(check.arg);
-    if (test.exists(value, obj)) {
+    IntCheck<E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (test.exists(val, obj)) {
       return check;
     }
-    throw check.exc.apply(createMessage(test, false, FQN(name), value, obj));
+    throw check.createException(getMessage(test, false, check.FQN(name), val, obj));
   }
 
   IntCheck<E> notHas(IntUnaryOperator prop, String name, IntRelation test, int obj) throws E {
-    int value = prop.applyAsInt(check.arg);
-    if (!test.exists(value, obj)) {
+    IntCheck<E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (!test.exists(val, obj)) {
       return check;
     }
-    throw check.exc.apply(createMessage(test, true, FQN(name), value, obj));
+    throw check.createException(getMessage(test, true, check.FQN(name), val, obj));
   }
 
   IntCheck<E> has(
       IntUnaryOperator prop, IntRelation test, int obj, String message, Object[] msgArgs) throws E {
-    int value = prop.applyAsInt(check.arg);
-    if (test.exists(value, obj)) {
+    IntCheck<E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (test.exists(val, obj)) {
       return check;
     }
     String msg = String.format(message, msgArgs);
@@ -118,11 +129,12 @@ final class IntHasInt<E extends Exception> {
   }
 
   <X extends Exception> IntCheck<E> has(
-      IntUnaryOperator prop, IntRelation test, int obj, Supplier<X> exception) throws X {
+      IntUnaryOperator prop, IntRelation test, int obj, Supplier<X> exc) throws X {
+    IntCheck<E> check = this.check;
     if (test.exists(prop.applyAsInt(check.arg), obj)) {
       return check;
     }
-    throw exception.get();
+    throw exc.get();
   }
 
   private String FQN(String name) {

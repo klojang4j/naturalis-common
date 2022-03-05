@@ -6,7 +6,7 @@ import java.util.function.*;
 
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
 import static nl.naturalis.common.check.CommonChecks.NAMES;
-import static nl.naturalis.common.check.Messages.createMessage;
+import static nl.naturalis.common.check.Messages.getMessage;
 
 /**
  * Facilitates the validation of {@code int} values. See the {@link nl.naturalis.common.check
@@ -18,7 +18,8 @@ public final class IntCheck<E extends Exception> {
 
   final int arg;
   final String argName;
-  final Function<String, E> exc;
+
+  private final Function<String, E> exc;
 
   IntCheck(int arg, String argName, Function<String, E> exc) {
     this.arg = arg;
@@ -79,8 +80,7 @@ public final class IntCheck<E extends Exception> {
     if (test.test(arg)) {
       return this;
     }
-    String msg = createMessage(test, false, getArgName(arg), ok());
-    throw exc.apply(msg);
+    throw exc.apply(getMessage(test, false, getArgName(), arg));
   }
 
   /**
@@ -96,8 +96,7 @@ public final class IntCheck<E extends Exception> {
     if (!test.test(arg)) {
       return this;
     }
-    String msg = createMessage(test, true, argName, ok());
-    throw exc.apply(msg);
+    throw exc.apply(getMessage(test, true, argName, arg));
   }
 
   /**
@@ -181,8 +180,7 @@ public final class IntCheck<E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    String msg = createMessage(test, false, getArgName(arg), arg, object);
-    throw exc.apply(msg);
+    throw exc.apply(getMessage(test, false, getArgName(), arg, object));
   }
 
   /**
@@ -199,8 +197,7 @@ public final class IntCheck<E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    String msg = createMessage(test, true, getArgName(arg), arg, object);
-    throw exc.apply(msg);
+    throw exc.apply(getMessage(test, true, getArgName(), arg, object));
   }
 
   /**
@@ -219,8 +216,7 @@ public final class IntCheck<E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    String msg = String.format(message, msgArgs);
-    throw exc.apply(msg);
+    throw createException(test, object, message, msgArgs);
   }
 
   /**
@@ -290,8 +286,7 @@ public final class IntCheck<E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    String msg = createMessage(test, false, getArgName(arg), arg, object);
-    throw exc.apply(msg);
+    throw exc.apply(getMessage(test, false, getArgName(), arg, object));
   }
 
   /**
@@ -308,8 +303,7 @@ public final class IntCheck<E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    String msg = createMessage(test, true, argName, getArgName(arg), object);
-    throw exc.apply(msg);
+    throw exc.apply(getMessage(test, true, argName, getArgName(), object));
   }
 
   /**
@@ -329,8 +323,7 @@ public final class IntCheck<E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    String msg = String.format(message, msgArgs);
-    throw exc.apply(msg);
+    throw createException(test, object, message, msgArgs);
   }
 
   /**
@@ -962,12 +955,16 @@ public final class IntCheck<E extends Exception> {
     return has(property, test.negate(), object, exception);
   }
 
+  E createException(String msg) {
+    return exc.apply(msg);
+  }
+
   E createException(Object test, String msg, Object[] msgArgs) {
     return createException(test, null, msg, msgArgs);
   }
 
   E createException(Object test, Object object, String msg, Object[] msgArgs) {
-    return createException(test, ok(), object, msg, msgArgs);
+    return createException(test, arg, object, msg, msgArgs);
   }
 
   E createException(Object test, Object subject, Object object, String pattern, Object[] msgArgs) {
@@ -980,20 +977,20 @@ public final class IntCheck<E extends Exception> {
     String fmt = FormatNormalizer.normalize(pattern);
     Object[] all = new Object[msgArgs.length + 5];
     all[0] = NAMES.getOrDefault(test, test.getClass().getSimpleName());
-    all[1] = Messages.toStr(subject);
+    all[1] = Messages.toPrettyString(subject);
     all[2] = ifNotNull(subject, Messages::simpleClassName);
     all[3] = argName;
-    all[4] = Messages.toStr(object);
+    all[4] = Messages.toPrettyString(object);
     System.arraycopy(msgArgs, 0, all, 5, msgArgs.length);
     return exc.apply(String.format(fmt, all));
   }
 
-  String getArgName(int arg) {
-    return argName != null ? argName : int.class.getSimpleName();
+  /* Returns fully-qualified name of the property with the specified name */
+  String FQN(String name) {
+    return argName + "." + name;
   }
 
-  /* Returns fully-qualified name of the property with the specified name */
-  private String fqn(String name) {
-    return argName + "." + name;
+  private String getArgName() {
+    return argName != null ? argName : int.class.getSimpleName();
   }
 }

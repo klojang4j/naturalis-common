@@ -11,9 +11,7 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.IntPredicate;
-import java.util.function.Predicate;
+import java.util.function.*;
 
 import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.Messages.*;
@@ -1127,11 +1125,12 @@ public class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code IntPredicate}. Use when passing a lambda or
-   * method reference to the {@code Check.is()} and {@code Check.isNot()} methods. Because these
-   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
-   * supposed to be a {@code Predicate} or {@code IntPredicate} (it will complain about an
-   * <b>Ambiguous method call</b>). This method clears that up for the compiler.
+   * (Not a check) Simply returns the specified {@code IntPredicate}. Use when the compiler starts
+   * complaining about an <b>Ambiguous method call</b>. Note that for the {@code has()} and {@code
+   * notHas()} methods you can either wrap the function extracting the property to be tested (the
+   * {@code property} argument) or the function that tests the value of the property (the {@code
+   * test} argument). You don't need to wrap both. Wrapping just one gives the compiler enough
+   * context to determine which of the overloaded method is called.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @return The same {@code IntPredicate}
@@ -1141,11 +1140,12 @@ public class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code Predicate}. Use when passing a lambda or
-   * method reference to the {@code Check.is()} and {@code Check.isNot()} methods. Because these
-   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
-   * supposed to be a {@code Predicate} or {@code IntPredicate} (it will complain about an
-   * <b>Ambiguous method call</b>). This method clears that up for the compiler.
+   * (Not a check) Simply returns the specified {@code ToIntFunction}. Use when the compiler starts
+   * complaining about an <b>Ambiguous method call</b>. Note that for the {@code has()} and {@code
+   * notHas()} methods you can either wrap the function extracting the property to be tested (the
+   * {@code property} argument) or the function that tests the value of the property (the {@code
+   * test} argument). You don't need to wrap both. Wrapping just one gives the compiler enough
+   * context to determine which of the overloaded method is called.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the object being tested
@@ -1156,11 +1156,12 @@ public class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code Relation}. Use when passing a lambda or
-   * method reference to the {@code Check.is()} and {@code Check.isNot()} methods. Because these
-   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
-   * supposed to be a {@code Relation} or one of its sister interfaces (it will complain about an
-   * <b>Ambiguous method call</b>). This method clears that up for the compiler.
+   * (Not a check) Simply returns the specified {@code ToIntFunction}. Use when the compiler starts
+   * complaining about an <b>Ambiguous method call</b>. Note that for the {@code has()} and {@code
+   * notHas()} methods you can either wrap the function extracting the property to be tested (the
+   * {@code property} argument) or the function that tests the value of the property (the {@code
+   * test} argument). You don't need to wrap both. Wrapping just one gives the compiler enough
+   * context to determine which of the overloaded method is called.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the subject of the {@code Relation}
@@ -1172,11 +1173,12 @@ public class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code ObjIntRelation}. Use when passing a lambda or
-   * method reference to the {@code Check.is()} and {@code Check.isNot()} methods. Because these
-   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
-   * supposed to be an {@code ObjIntRelation} or one of its sister interfaces (it will complain
-   * about an <b>Ambiguous method call</b>). This method clears that up for the compiler.
+   * (Not a check) Simply returns the specified {@code ToIntFunction}. Use when the compiler starts
+   * complaining about an <b>Ambiguous method call</b>. Note that for the {@code has()} and {@code
+   * notHas()} methods you can either wrap the function extracting the property to be tested (the
+   * {@code property} argument) or the function that tests the value of the property (the {@code
+   * test} argument). You don't need to wrap both. Wrapping just one gives the compiler enough
+   * context to determine which of the overloaded method is called.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the subject of the {@code Relation}
@@ -1212,6 +1214,38 @@ public class CommonChecks {
    * @return The same {@code IntRelation}
    */
   public static IntRelation intInt(IntRelation lambdaOrMethodReference) {
+    return lambdaOrMethodReference;
+  }
+
+  /**
+   * (Not a check) Simply returns the specified {@code ToIntFunction}. Use when the compiler starts
+   * complaining about an <b>Ambiguous method call</b>. Note that for the {@code has()} and {@code
+   * notHas()} methods you can either wrap the function extracting the property to be tested (the
+   * {@code property} argument) or the function that tests the value of the property (the {@code
+   * test} argument). You don't need to wrap both. Wrapping just one gives the compiler enough
+   * context to determine which of the overloaded method is called.
+   *
+   * @param lambdaOrMethodReference A lambda or method reference
+   * @param <T> The type of the lambda's return value
+   * @return The same {@code ToIntFunction}
+   */
+  public static <T> ToIntFunction<T> toInt(ToIntFunction<T> lambdaOrMethodReference) {
+    return lambdaOrMethodReference;
+  }
+
+  /**
+   * (Not a check) Simply returns the specified {@code ToIntFunction}. Use when the compiler starts
+   * complaining about an <b>Ambiguous method call</b>. Note that for the {@code has()} and {@code
+   * notHas()} methods you can either wrap the function extracting the property to be tested (the
+   * {@code property} argument) or the function that tests the value of the property (the {@code
+   * test} argument). You don't need to wrap both. Wrapping just one gives the compiler enough
+   * context to determine which of the overloaded method is called.
+   *
+   * @param lambdaOrMethodReference
+   * @param <T> The type of the lambda argument
+   * @return The same {@code IntFunction}
+   */
+  public static <T> IntFunction<T> toObj(IntFunction<T> lambdaOrMethodReference) {
     return lambdaOrMethodReference;
   }
 

@@ -28,12 +28,12 @@ class Messages {
    */
   private static final int MAX_ARG_WIDTH = 50;
 
-  static String createMessage(Object predicate, boolean negated, String argName, Object argValue) {
+  static String getMessage(Object predicate, boolean negated, String argName, Object argValue) {
     MsgArgs args = new MsgArgs(predicate, negated, argName, argValue);
     return message(args);
   }
 
-  static String createMessage(
+  static String getMessage(
       Object relation, boolean negated, String argName, Object argValue, Object object) {
     return message(new MsgArgs(relation, negated, argName, argValue, object));
   }
@@ -43,7 +43,7 @@ class Messages {
     if (formatter != null) {
       return formatter.apply(args);
     }
-    return String.format(ERR_INVALID_VALUE, args.argName(), toStr(args.arg()));
+    return String.format(ERR_INVALID_VALUE, args.argName(), toPrettyString(args.arg()));
   }
 
   static Formatter msgNull() {
@@ -51,7 +51,7 @@ class Messages {
       if (args.negated()) {
         return msgNotNull().apply(args.flip());
       }
-      return format("%s must be null (was %s)", args.argName(), toStr(args.arg()));
+      return format("%s must be null (was %s)", args.argName(), toPrettyString(args.arg()));
     };
   }
 
@@ -87,10 +87,11 @@ class Messages {
       if (args.negated()) { // Negation is total nonsense, but OK
         return format(
             "%s must be null or contain one or more null values (was %s)",
-            args.argName(), toStr(args.arg()));
+            args.argName(), toPrettyString(args.arg()));
       }
       return format(
-          "%s must not be null or contain null values (was %s)", args.argName(), toStr(args.arg()));
+          "%s must not be null or contain null values (was %s)",
+          args.argName(), toPrettyString(args.arg()));
     };
   }
 
@@ -98,29 +99,32 @@ class Messages {
     return args -> {
       if (args.negated()) { // idem
         String fmt = "%s must be empty or contain or one or more empty values (was %s)";
-        return format(fmt, args.argName(), toStr(args.arg()));
+        return format(fmt, args.argName(), toPrettyString(args.arg()));
       }
       return format(
           "%s must not be empty or contain empty values (was %s)",
-          args.typeAndName(), toStr(args.arg()));
+          args.typeAndName(), toPrettyString(args.arg()));
     };
   }
 
   static Formatter msgEmpty() {
     return args -> {
       if (args.negated()) {
-        return format("%s must not be null or empty (was %s)", args.argName(), toStr(args.arg()));
+        return format(
+            "%s must not be null or empty (was %s)", args.argName(), toPrettyString(args.arg()));
       }
-      return format("%s must be empty (was %s)", args.argName(), toStr(args.arg()));
+      return format("%s must be empty (was %s)", args.argName(), toPrettyString(args.arg()));
     };
   }
 
   static Formatter msgBlank() {
     return args -> {
       if (args.negated()) {
-        return format("%s must not be null or blank (was %s)", args.argName(), toStr(args.arg()));
+        return format(
+            "%s must not be null or blank (was %s)", args.argName(), toPrettyString(args.arg()));
       }
-      return format("%s must be null or blank (was %s)", args.argName(), toStr(args.arg()));
+      return format(
+          "%s must be null or blank (was %s)", args.argName(), toPrettyString(args.arg()));
     };
   }
 
@@ -137,10 +141,10 @@ class Messages {
   static Formatter msgEqualTo() {
     return args -> {
       if (args.negated()) {
-        return format("%s must not be equal to %s", args.argName(), toStr(args.object()));
+        return format("%s must not be equal to %s", args.argName(), toPrettyString(args.object()));
       }
       String fmt = "%s must be equal to %s (was %s)";
-      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+      return format(fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
     };
   }
 
@@ -148,10 +152,11 @@ class Messages {
     return args -> {
       if (args.negated()) {
         String fmt = "%s must not be equal ignoring case to %s (was %s)";
-        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+        return format(
+            fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
       }
       String fmt = "%s must be equal ignoring case to %s (was %s)";
-      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+      return format(fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
     };
   }
 
@@ -381,20 +386,21 @@ class Messages {
     return args -> {
       if (args.negated()) {
         String fmt = "%s must not be null or %s (was %s)";
-        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+        return format(
+            fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
       }
       String fmt = "%s must be null or %s (was %s)";
-      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+      return format(fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
     };
   }
 
   static Formatter msgContaining() {
     return args -> {
       if (args.negated()) {
-        return format("%s must not contain %s", args.argName(), toStr(args.object()));
+        return format("%s must not contain %s", args.argName(), toPrettyString(args.object()));
       }
       String fmt = "%s must contain %s";
-      return format(fmt, args.argName(), toStr(args.object()));
+      return format(fmt, args.argName(), toPrettyString(args.object()));
     };
   }
 
@@ -402,10 +408,11 @@ class Messages {
     return args -> {
       if (args.negated()) {
         String fmt = "%s must not be element of %s (was %s)";
-        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+        return format(
+            fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
       }
       String fmt = "%s must be element of %s (was %s)";
-      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+      return format(fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
     };
   }
 
@@ -413,10 +420,11 @@ class Messages {
     return args -> {
       if (args.negated()) {
         String fmt = "%s must not be superset of %s (was %s)";
-        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+        return format(
+            fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
       }
       String fmt = "%s must be superset of %s (was %s)";
-      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+      return format(fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
     };
   }
 
@@ -424,19 +432,20 @@ class Messages {
     return args -> {
       if (args.negated()) {
         String fmt = "%s must not be subset of %s (was %s)";
-        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+        return format(
+            fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
       }
       String fmt = "%s must be subset of %s (was %s)";
-      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+      return format(fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
     };
   }
 
   static Formatter msgContainingKey() {
     return args -> {
       if (args.negated()) {
-        return format("%s must not contain key %s", args.argName(), toStr(args.object()));
+        return format("%s must not contain key %s", args.argName(), toPrettyString(args.object()));
       }
-      return format("%s must contain key %s", args.argName(), toStr(args.object()));
+      return format("%s must contain key %s", args.argName(), toPrettyString(args.object()));
     };
   }
 
@@ -444,19 +453,21 @@ class Messages {
     return args -> {
       if (args.negated()) {
         String fmt = "%s must not be key in %s (parameter \"%s\")";
-        return format(fmt, toStr(args.arg()), toStr(args.object()), args.argName());
+        return format(
+            fmt, toPrettyString(args.arg()), toPrettyString(args.object()), args.argName());
       }
       String fmt = "%s must be key in %s (parameter \"%s\")";
-      return format(fmt, toStr(args.arg()), toStr(args.object()), args.argName());
+      return format(fmt, toPrettyString(args.arg()), toPrettyString(args.object()), args.argName());
     };
   }
 
   static Formatter msgContainingValue() {
     return args -> {
       if (args.negated()) {
-        return format("%s must not contain value %s", args.argName(), toStr(args.object()));
+        return format(
+            "%s must not contain value %s", args.argName(), toPrettyString(args.object()));
       }
-      return format("%s must contain value %s", args.argName(), toStr(args.object()));
+      return format("%s must contain value %s", args.argName(), toPrettyString(args.object()));
     };
   }
 
@@ -464,10 +475,11 @@ class Messages {
     return args -> {
       if (args.negated()) {
         String fmt = "%s must not be value in %s (was %s)";
-        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+        return format(
+            fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
       }
       String fmt = "%s must be value in %s (was %s)";
-      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+      return format(fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
     };
   }
 
@@ -545,10 +557,11 @@ class Messages {
     return args -> {
       if (args.negated()) {
         String fmt = "%s must not start with \"%s\" (was %s)";
-        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+        return format(
+            fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
       }
       String fmt = "%s must start with \"%s\" (was %s)";
-      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+      return format(fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
     };
   }
 
@@ -556,10 +569,11 @@ class Messages {
     return args -> {
       if (args.negated()) {
         String fmt = "%s must not end with \"%s\" (was %s)";
-        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+        return format(
+            fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
       }
       String fmt = "%s must end with \"%s\" (was %s)";
-      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+      return format(fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
     };
   }
 
@@ -567,10 +581,11 @@ class Messages {
     return args -> {
       if (args.negated()) {
         String fmt = "%s must not contain \"%s\" (was %s)";
-        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+        return format(
+            fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
       }
       String fmt = "%s must contain \"%s\" (was %s)";
-      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+      return format(fmt, args.argName(), toPrettyString(args.object()), toPrettyString(args.arg()));
     };
   }
 
@@ -583,7 +598,7 @@ class Messages {
       String fmt = "%s must be instance of %s (was %s)";
       String cn0 = className(args.object());
       String cn1 = className(args.arg());
-      return format(fmt, args.argName(), cn0, cn1, toStr(args.arg()));
+      return format(fmt, args.argName(), cn0, cn1, toPrettyString(args.arg()));
     };
   }
 
@@ -612,7 +627,7 @@ class Messages {
   private static final Set<Class<?>> DECENT_TO_STRING =
       TypeSet.of(Number.class, Boolean.class, Character.class, Enum.class);
 
-  static String toStr(Object val) {
+  static String toPrettyString(Object val) {
     if (val == null) {
       return "null";
     }
@@ -653,7 +668,7 @@ class Messages {
       return scn;
     }
     String sep = DEFAULT_IMPLODE_SEPARATOR;
-    String imploded = trim(implode(c, Messages::toStr, sep, 0, 10), c.size());
+    String imploded = trim(implode(c, Messages::toPrettyString, sep, 0, 10), c.size());
     return new StringBuilder(32)
         .append(scn)
         .append(" of [")
@@ -685,7 +700,8 @@ class Messages {
       return scn;
     }
     String sep = DEFAULT_IMPLODE_SEPARATOR;
-    String imploded = trim(ArrayMethods.implodeAny(array, Messages::toStr, sep, 0, 10), len);
+    String imploded =
+        trim(ArrayMethods.implodeAny(array, Messages::toPrettyString, sep, 0, 10), len);
     return new StringBuilder(32)
         .append(scn)
         .append(" of [")
@@ -701,7 +717,7 @@ class Messages {
   }
 
   private static String entryToString(Map.Entry entry) {
-    return toStr(entry.getKey()) + ": " + toStr(entry.getValue());
+    return toPrettyString(entry.getKey()) + ": " + toPrettyString(entry.getValue());
   }
 
   private static String trim(String imploded, int sz) {
