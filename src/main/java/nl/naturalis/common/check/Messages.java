@@ -486,9 +486,9 @@ class Messages {
   static Formatter msgZero() {
     return args -> {
       if (args.negated()) {
-        return format("%s must not be zero", args.argName());
+        return format("%s must not be 0", args.argName());
       }
-      String fmt = "%s must be zero (was %s)";
+      String fmt = "%s must be 0 (was %s)";
       return format(fmt, args.argName(), args.arg());
     };
   }
@@ -623,6 +623,8 @@ class Messages {
       return format(fmt, args.argName(), args.arg());
     };
   }
+
+  //////////////////////////////////////////////////////////////////////////
 
   private static final Set<Class<?>> DECENT_TO_STRING =
       TypeSet.of(Number.class, Boolean.class, Character.class, Enum.class);

@@ -95,53 +95,6 @@ public class CheckTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void intPredicate00() {
-    Check.that(3, "foo").is(even());
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void lambdaAsIntPredicate00() {
-    Check.that(3).is(asInt(i -> i != 3));
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void lambdaAsIntPredicate01() {
-    Check.that(3, "foo").is((IntPredicate) i -> i != 3);
-  }
-
-  private static boolean notEqualsThree(int i) {
-    return i != 3;
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void methodReferenceAsIntPredicate00() {
-    Check.that(3, "foo").is(asInt(CheckTest::notEqualsThree));
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void methodReferenceAsIntPredicate01() {
-    Check.that(3, "foo").is((IntPredicate) CheckTest::notEqualsThree);
-  }
-
-  @Test
-  public void intPredicate01() {
-    Check.that(4).is(even());
-    Check.that(4).isNot(odd());
-    Check.that(4).is(positive());
-    Check.that(0).isNot(positive());
-    Check.that(0).isNot(negative());
-    Check.that(-3).is(negative());
-    Check.that(-3).isNot(positive());
-    Check.that(0).is(zero());
-    Check.that(1).isNot(zero());
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void intPredicate02() {
-    Check.that(5).is(even());
-  }
-
-  @Test(expected = IllegalArgumentException.class)
   public void relation00() {
     Check.that(Float.valueOf(7.5F)).is(greaterThan(), Short.valueOf((short) 16));
   }

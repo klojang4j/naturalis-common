@@ -387,7 +387,7 @@ public class CommonChecks {
   }
 
   static {
-    setMessagePattern(eq(), msgZero());
+    setMessagePattern(zero(), msgZero());
     setName(zero(), "zero");
   }
 

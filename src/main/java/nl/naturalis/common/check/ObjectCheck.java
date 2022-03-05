@@ -952,7 +952,7 @@ public final class ObjectCheck<T, E extends Exception> {
    * the {@code test} argument. Plain lambdas or method references will cause the compiler to
    * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
    * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
-   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   * CommonChecks} class this won't happen.) There are various ways around this:
    *
    * <ul>
    *   <li>Specify the type of the lambda arguments (not applicable when providing a method
@@ -990,7 +990,7 @@ public final class ObjectCheck<T, E extends Exception> {
    * the {@code test} argument. Plain lambdas or method references will cause the compiler to
    * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
    * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
-   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   * CommonChecks} class this won't happen.) There are various ways around this:
    *
    * <ul>
    *   <li>Specify the type of the lambda arguments (not applicable when providing a method
@@ -1027,7 +1027,7 @@ public final class ObjectCheck<T, E extends Exception> {
    * the {@code test} argument. Plain lambdas or method references will cause the compiler to
    * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
    * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
-   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   * CommonChecks} class this won't happen.) There are various ways around this:
    *
    * <ul>
    *   <li>Specify the type of the lambda arguments (not applicable when providing a method
@@ -1066,7 +1066,7 @@ public final class ObjectCheck<T, E extends Exception> {
    * the {@code test} argument. Plain lambdas or method references will cause the compiler to
    * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
    * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
-   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   * CommonChecks} class this won't happen.) There are various ways around this:
    *
    * <ul>
    *   <li>Specify the type of the lambda arguments (not applicable when providing a method
@@ -1104,7 +1104,7 @@ public final class ObjectCheck<T, E extends Exception> {
    * the {@code test} argument. Plain lambdas or method references will cause the compiler to
    * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
    * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
-   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   * CommonChecks} class this won't happen.) There are various ways around this:
    *
    * <ul>
    *   <li>Specify the type of the lambda arguments (not applicable when providing a method
@@ -1147,7 +1147,7 @@ public final class ObjectCheck<T, E extends Exception> {
    * the {@code test} argument. Plain lambdas or method references will cause the compiler to
    * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
    * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
-   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   * CommonChecks} class this won't happen.) There are various ways around this:
    *
    * <ul>
    *   <li>Specify the type of the lambda arguments (not applicable when providing a method
@@ -1207,7 +1207,7 @@ public final class ObjectCheck<T, E extends Exception> {
    * the {@code test} argument. Plain lambdas or method references will cause the compiler to
    * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
    * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
-   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   * CommonChecks} class this won't happen.) There are various ways around this:
    *
    * <ul>
    *   <li>Specify the type of the lambda arguments (not applicable when providing a method
@@ -1247,7 +1247,7 @@ public final class ObjectCheck<T, E extends Exception> {
    * the {@code test} argument. Plain lambdas or method references will cause the compiler to
    * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
    * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
-   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   * CommonChecks} class this won't happen.) There are various ways around this:
    *
    * <ul>
    *   <li>Specify the type of the lambda arguments (not applicable when providing a method
@@ -1283,7 +1283,7 @@ public final class ObjectCheck<T, E extends Exception> {
    * the {@code test} argument. Plain lambdas or method references will cause the compiler to
    * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
    * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
-   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   * CommonChecks} class this won't happen.) There are various ways around this:
    *
    * <ul>
    *   <li>Specify the type of the lambda arguments (not applicable when providing a method
@@ -1319,7 +1319,7 @@ public final class ObjectCheck<T, E extends Exception> {
    * the {@code test} argument. Plain lambdas or method references will cause the compiler to
    * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
    * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
-   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   * CommonChecks} class this won't happen.) There are various ways around this:
    *
    * <ul>
    *   <li>Specify the type of the lambda arguments (not applicable when providing a method
@@ -1357,7 +1357,7 @@ public final class ObjectCheck<T, E extends Exception> {
    * the {@code test} argument. Plain lambdas or method references will cause the compiler to
    * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
    * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
-   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   * CommonChecks} class this won't happen.) There are various ways around this:
    *
    * <ul>
    *   <li>Specify the type of the lambda arguments (not applicable when providing a method
@@ -1394,7 +1394,7 @@ public final class ObjectCheck<T, E extends Exception> {
    * the {@code test} argument. Plain lambdas or method references will cause the compiler to
    * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
    * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
-   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   * CommonChecks} class this won't happen.) There are various ways around this:
    *
    * <ul>
    *   <li>Specify the type of the lambda arguments (not applicable when providing a method
@@ -1432,7 +1432,7 @@ public final class ObjectCheck<T, E extends Exception> {
    * the {@code test} argument. Plain lambdas or method references will cause the compiler to
    * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
    * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
-   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   * CommonChecks} class this won't happen.) There are various ways around this:
    *
    * <ul>
    *   <li>Specify the type of the lambda arguments (not applicable when providing a method
@@ -1469,7 +1469,7 @@ public final class ObjectCheck<T, E extends Exception> {
    * the {@code test} argument. Plain lambdas or method references will cause the compiler to
    * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
    * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
-   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   * CommonChecks} class this won't happen.) There are various ways around this:
    *
    * <ul>
    *   <li>Specify the type of the lambda arguments (not applicable when providing a method
@@ -1505,7 +1505,7 @@ public final class ObjectCheck<T, E extends Exception> {
    * the {@code test} argument. Plain lambdas or method references will cause the compiler to
    * complain about an <b>Ambiguous method call</b>. (If the {@code property} argument is a getter
    * from the {@code CommonGetters} class or the {@code test} argument is a check from the {@code
-   * CommonChecks} class this won't happen.) There are various ways to circumvent this:
+   * CommonChecks} class this won't happen.) There are various ways around this:
    *
    * <ul>
    *   <li>Specify the type of the lambda arguments (not applicable when providing a method
