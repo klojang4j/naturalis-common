@@ -173,27 +173,6 @@ public class CheckTest {
     Check.that(7).is(intElementOf(), packInts(3, 5, 7, 9));
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void lambdaAsIntRelation() {
-    Check.that(7).is(intInt((x, y) -> x > y), 9);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void intRelation00() {
-    Check.that(7).is(gt(), 9);
-  }
-
-  @Test
-  public void intRelation01() {
-    Check.that(9).is(gt(), 7);
-    Check.that(9).is(gte(), 9);
-    Check.that(9).is(eq(), 9);
-    Check.that(9).is(ne(), 11);
-    Check.that(9).is(lt(), 11);
-    Check.that(11).is(lte(), 11);
-    // Check.that(Integer.valueOf(11)).is(lte(), 11);
-  }
-
   @Test
   public void hasPredicate00() {
     Check.that(List.of(1, 2, 3, 4)).has(l -> l.isEmpty(), no());
