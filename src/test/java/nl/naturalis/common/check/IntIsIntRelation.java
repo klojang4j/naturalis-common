@@ -22,6 +22,8 @@ public class IntIsIntRelation {
     Check.that(9).is(ne(), 11);
     Check.that(9).is(lt(), 11);
     Check.that(11).is(lte(), 11);
+    Check.that(15).is(multipleOf(), 5);
+    Check.that(16).isNot(multipleOf(), 5);
   }
 
   @Test
@@ -82,6 +84,26 @@ public class IntIsIntRelation {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("foo must not be equal to 7", e.getMessage());
+    }
+  }
+
+  @Test
+  public void intRelation07() {
+    try {
+      Check.that(7, "foo").is(multipleOf(), 3);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("foo must be multiple of 3 (was 7)", e.getMessage());
+    }
+  }
+
+  @Test
+  public void intRelation08() {
+    try {
+      Check.that(21, "foo").isNot(multipleOf(), 3);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("foo must not be multiple of 3 (was 21)", e.getMessage());
     }
   }
 }

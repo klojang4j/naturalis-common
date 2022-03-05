@@ -617,10 +617,10 @@ class Messages {
     return args -> {
       if (args.negated()) {
         String fmt = "%s must not be multiple of %s (was %s)";
-        return format(fmt, args.argName(), args.arg());
+        return format(fmt, args.argName(), args.object(), args.arg());
       }
       String fmt = "%s must be multiple of %s (was %s)";
-      return format(fmt, args.argName(), args.arg());
+      return format(fmt, args.argName(), args.object(), args.arg());
     };
   }
 
