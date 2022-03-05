@@ -27,6 +27,11 @@ public final class ObjectCheck<T, E extends Exception> {
     this.exc = exc;
   }
 
+  /**
+   * @param test The test
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public ObjectCheck<T, E> is(Predicate<T> test) throws E {
     if (test.test(arg)) {
       return this;
@@ -35,6 +40,11 @@ public final class ObjectCheck<T, E extends Exception> {
     throw exc.apply(msg);
   }
 
+  /**
+   * @param test The test
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public ObjectCheck<T, E> isNot(Predicate<T> test) throws E {
     if (!test.test(arg)) {
       return this;
@@ -43,6 +53,13 @@ public final class ObjectCheck<T, E extends Exception> {
     throw exc.apply(msg);
   }
 
+  /**
+   * @param test The test
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public ObjectCheck<T, E> is(Predicate<T> test, String message, Object... msgArgs) throws E {
     if (test.test(arg)) {
       return this;
@@ -50,10 +67,24 @@ public final class ObjectCheck<T, E extends Exception> {
     throw createException(test, message, msgArgs);
   }
 
+  /**
+   * @param test The test
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public ObjectCheck<T, E> isNot(Predicate<T> test, String message, Object... msgArgs) throws E {
     return is(test.negate(), message, msgArgs);
   }
 
+  /**
+   * @param test The test
+   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param <X> The type of the exception thrown if the argument is invalid
+   * @return This instance
+   * @throws X If the argument is invalid
+   */
   public <X extends Exception> ObjectCheck<T, E> is(Predicate<T> test, Supplier<X> exception)
       throws X {
     if (test.test(arg)) {
@@ -62,11 +93,25 @@ public final class ObjectCheck<T, E extends Exception> {
     throw exception.get();
   }
 
+  /**
+   * @param test The test
+   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param <X> The type of the exception thrown if the argument is invalid
+   * @return This instance
+   * @throws X If the argument is invalid
+   */
   public <X extends Exception> ObjectCheck<T, E> isNot(Predicate<T> test, Supplier<X> exception)
       throws X {
     return is(test.negate(), exception);
   }
 
+  /**
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> is(Relation<T, U> test, U object) throws E {
     if (test.exists(arg, object)) {
       return this;
@@ -75,6 +120,13 @@ public final class ObjectCheck<T, E extends Exception> {
     throw exc.apply(msg);
   }
 
+  /**
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> isNot(Relation<T, U> test, U object) throws E {
     if (!test.exists(arg, object)) {
       return this;
@@ -83,6 +135,15 @@ public final class ObjectCheck<T, E extends Exception> {
     throw exc.apply(msg);
   }
 
+  /**
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> is(Relation<T, U> test, U object, String message, Object... msgArgs)
       throws E {
     if (test.exists(arg, object)) {
@@ -91,11 +152,29 @@ public final class ObjectCheck<T, E extends Exception> {
     throw createException(test, object, message, msgArgs);
   }
 
+  /**
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> isNot(
       Relation<T, U> test, U object, String message, Object... msgArgs) throws E {
     return is(test.negate(), object, message, msgArgs);
   }
 
+  /**
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param <U> The type of the value being tested against
+   * @param <X> The type of the exception thrown if the argument is invalid
+   * @return This instance
+   * @throws X If the argument is invalid
+   */
   public <U, X extends Exception> ObjectCheck<T, E> is(
       Relation<T, U> test, U object, Supplier<X> exception) throws X {
     if (test.exists(arg, object)) {
@@ -104,11 +183,26 @@ public final class ObjectCheck<T, E extends Exception> {
     throw exception.get();
   }
 
+  /**
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param <U> The type of the value being tested against
+   * @param <X> The type of the exception thrown if the argument is invalid
+   * @return This instance
+   * @throws X If the argument is invalid
+   */
   public <U, X extends Exception> ObjectCheck<T, E> isNot(
       Relation<T, U> test, U object, Supplier<X> exception) throws X {
     return is(test.negate(), object, exception);
   }
 
+  /**
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public ObjectCheck<T, E> is(ObjIntRelation<T> test, int object) throws E {
     if (test.exists(arg, object)) {
       return this;
@@ -117,6 +211,12 @@ public final class ObjectCheck<T, E extends Exception> {
     throw exc.apply(msg);
   }
 
+  /**
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public ObjectCheck<T, E> isNot(ObjIntRelation<T> test, int object) throws E {
     if (!test.exists(arg, object)) {
       return this;
@@ -125,6 +225,14 @@ public final class ObjectCheck<T, E extends Exception> {
     throw exc.apply(msg);
   }
 
+  /**
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public ObjectCheck<T, E> is(ObjIntRelation<T> test, int object, String message, Object... msgArgs)
       throws E {
     if (test.exists(arg, object)) {
@@ -133,11 +241,27 @@ public final class ObjectCheck<T, E extends Exception> {
     throw createException(test, object, message, msgArgs);
   }
 
+  /**
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public ObjectCheck<T, E> isNot(
       ObjIntRelation<T> test, int object, String message, Object... msgArgs) throws E {
     return is(test.negate(), object, message, msgArgs);
   }
 
+  /**
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param <X> The type of the exception thrown if the argument is invalid
+   * @return This instance
+   * @throws X If the argument is invalid
+   */
   public <X extends Exception> ObjectCheck<T, E> is(
       ObjIntRelation<T> test, int object, Supplier<X> exception) throws X {
     if (test.exists(arg, object)) {
@@ -146,101 +270,285 @@ public final class ObjectCheck<T, E extends Exception> {
     throw exception.get();
   }
 
+  /**
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param <X> The type of the exception thrown if the argument is invalid
+   * @return This instance
+   * @throws X If the argument is invalid
+   */
   public <X extends Exception> ObjectCheck<T, E> isNot(
       ObjIntRelation<T> test, int object, Supplier<X> exception) throws X {
     return is(test.negate(), object, exception);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> has(Function<T, U> property, Predicate<U> test) throws E {
     return ObjHasObj.get(this).has(property, test);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> notHas(Function<T, U> property, Predicate<U> test) throws E {
     return ObjHasObj.get(this).notHas(property, test);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param name The name of the property being tested. In error messages the fully-qualified name
+   *     will be used and constructed using {@code argName + "." + name}.
+   * @param test The test
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> has(Function<T, U> property, String name, Predicate<U> test)
       throws E {
     return ObjHasObj.get(this).has(property, name, test);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param name The name of the property being tested. In error messages the fully-qualified name
+   *     will be used and constructed using {@code argName + "." + name}.
+   * @param test The test
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> notHas(Function<T, U> property, String name, Predicate<U> test)
       throws E {
     return ObjHasObj.get(this).notHas(property, name, test);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> has(
       Function<T, U> property, Predicate<U> test, String message, Object... msgArgs) throws E {
     return ObjHasObj.get(this).has(property, test, message, msgArgs);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> notHas(
       Function<T, U> property, Predicate<U> test, String message, Object... msgArgs) throws E {
     return ObjHasObj.get(this).has(property, test.negate(), message, msgArgs);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param <U> The type of the value being tested against
+   * @param <X> The type of the exception thrown if the argument is invalid
+   * @return This instance
+   * @throws X If the argument is invalid
+   */
   public <U, X extends Exception> ObjectCheck<T, E> has(
       Function<T, U> property, Predicate<U> test, Supplier<X> exception) throws X {
     return ObjHasObj.get(this).has(property, test, exception);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param <U> The type of the value being tested against
+   * @param <X> The type of the exception thrown if the argument is invalid
+   * @return This instance
+   * @throws X If the argument is invalid
+   */
   public <U, X extends Exception> ObjectCheck<T, E> notHas(
       Function<T, U> property, Predicate<U> test, Supplier<X> exception) throws X {
     return ObjHasObj.get(this).has(property, test.negate(), exception);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param <U> The type of the value being tested against
+   * @param <V>
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U, V> ObjectCheck<T, E> has(Function<T, U> property, Relation<U, V> test, V object)
       throws E {
     return ObjHasObj.get(this).has(property, test, object);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param <U> The type of the value being tested against
+   * @param <V>
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U, V> ObjectCheck<T, E> notHas(Function<T, U> property, Relation<U, V> test, V object)
       throws E {
     return ObjHasObj.get(this).notHas(property, test, object);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param name The name of the property being tested. In error messages the fully-qualified name
+   *     will be used and constructed using {@code argName + "." + name}.
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param <U> The type of the value being tested against
+   * @param <V>
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U, V> ObjectCheck<T, E> has(
       Function<T, U> property, String name, Relation<U, V> test, V object) throws E {
     return ObjHasObj.get(this).has(property, name, test, object);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param name The name of the property being tested. In error messages the fully-qualified name
+   *     will be used and constructed using {@code argName + "." + name}.
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param <U> The type of the value being tested against
+   * @param <V>
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U, V> ObjectCheck<T, E> notHas(
       Function<T, U> property, String name, Relation<U, V> test, V object) throws E {
     return ObjHasObj.get(this).notHas(property, name, test, object);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @param <U> The type of the value being tested against
+   * @param <V>
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U, V> ObjectCheck<T, E> has(
       Function<T, U> property, Relation<U, V> test, V object, String message, Object... msgArgs)
       throws E {
     return ObjHasObj.get(this).has(property, test, object, message, msgArgs);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @param <U> The type of the value being tested against
+   * @param <V>
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U, V> ObjectCheck<T, E> notHas(
       Function<T, U> property, Relation<U, V> test, V object, String message, Object... msgArgs)
       throws E {
     return ObjHasObj.get(this).has(property, test.negate(), object, message, msgArgs);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> has(Function<T, U> property, ObjIntRelation<U> test, int object)
       throws E {
     return ObjHasObj.get(this).has(property, test, object);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> notHas(Function<T, U> property, ObjIntRelation<U> test, int object)
       throws E {
     return ObjHasObj.get(this).notHas(property, test, object);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param name The name of the property being tested. In error messages the fully-qualified name
+   *     will be used and constructed using {@code argName + "." + name}.
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> has(
       Function<T, U> property, String name, ObjIntRelation<U> test, int object) throws E {
     return ObjHasObj.get(this).has(property, name, test, object);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param name The name of the property being tested. In error messages the fully-qualified name
+   *     will be used and constructed using {@code argName + "." + name}.
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> notHas(
       Function<T, U> property, String name, ObjIntRelation<U> test, int object) throws E {
     return ObjHasObj.get(this).notHas(property, name, test, object);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> has(
       Function<T, U> property,
       ObjIntRelation<U> test,
@@ -251,6 +559,16 @@ public final class ObjectCheck<T, E extends Exception> {
     return ObjHasObj.get(this).has(property, test, object, message, msgArgs);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> notHas(
       Function<T, U> property,
       ObjIntRelation<U> test,
@@ -261,79 +579,141 @@ public final class ObjectCheck<T, E extends Exception> {
     return ObjHasObj.get(this).has(property, test.negate(), object, message, msgArgs);
   }
 
-  public ObjectCheck<T, E> has(ToIntFunction<T> property, String name, IntPredicate test) throws E {
-    int value = property.applyAsInt(arg);
-    if (test.test(value)) {
-      return this;
-    }
-    String msg = createMessage(test, false, fqn(name), value);
-    throw exc.apply(msg);
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
+  public ObjectCheck<T, E> has(ToIntFunction<T> property, IntPredicate test) throws E {
+    return ObjHasInt.get(this).has(property, test);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
+  public ObjectCheck<T, E> notHas(ToIntFunction<T> property, IntPredicate test) throws E {
+    return ObjHasInt.get(this).notHas(property, test);
+  }
+
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param name The name of the property being tested. In error messages the fully-qualified name
+   *     will be used and constructed using {@code argName + "." + name}.
+   * @param test The test
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
+  public ObjectCheck<T, E> has(ToIntFunction<T> property, String name, IntPredicate test) throws E {
+    return ObjHasInt.get(this).has(property, name, test);
+  }
+
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param name The name of the property being tested. In error messages the fully-qualified name
+   *     will be used and constructed using {@code argName + "." + name}.
+   * @param test The test
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public ObjectCheck<T, E> notHas(ToIntFunction<T> property, String name, IntPredicate test)
       throws E {
-    int value = property.applyAsInt(arg);
-    if (!test.test(value)) {
-      return this;
-    }
-    String msg = createMessage(test, true, fqn(name), value);
-    throw exc.apply(msg);
+    return ObjHasInt.get(this).notHas(property, name, test);
   }
 
-  public ObjectCheck<T, E> has(ToIntFunction<T> property, IntPredicate test) throws E {
-    int value = property.applyAsInt(arg);
-    if (test.test(value)) {
-      return this;
-    }
-    String name = formatProperty(arg, argName, property, ToIntFunction.class);
-    String msg = createMessage(test, false, name, value);
-    throw exc.apply(msg);
-  }
-
-  public ObjectCheck<T, E> notHas(ToIntFunction<T> property, IntPredicate test) throws E {
-    int value = property.applyAsInt(arg);
-    if (!test.test(value)) {
-      return this;
-    }
-    String name = formatProperty(arg, argName, property, ToIntFunction.class);
-    String msg = createMessage(test, true, name, value);
-    throw exc.apply(msg);
-  }
-
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public ObjectCheck<T, E> has(
       ToIntFunction<T> property, IntPredicate test, String message, Object... msgArgs) throws E {
-    int value = property.applyAsInt(arg);
-    if (test.test(value)) {
-      return this;
-    }
-    throw createException(test, message, msgArgs);
+    return ObjHasInt.get(this).has(property, test, message, msgArgs);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public ObjectCheck<T, E> notHas(
       ToIntFunction<T> property, IntPredicate test, String message, Object... msgArgs) throws E {
-    return has(property, test.negate(), message, msgArgs);
+    return ObjHasInt.get(this).has(property, test.negate(), message, msgArgs);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param <X> The type of the exception thrown if the argument is invalid
+   * @return This instance
+   * @throws X If the argument is invalid
+   */
+  public <X extends Exception> ObjectCheck<T, E> has(
+      ToIntFunction<T> property, IntPredicate test, Supplier<X> exception) throws X {
+    return ObjHasInt.get(this).has(property, test, exception);
+  }
+
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param <X> The type of the exception thrown if the argument is invalid
+   * @return This instance
+   * @throws X If the argument is invalid
+   */
+  public <X extends Exception> ObjectCheck<T, E> notHas(
+      ToIntFunction<T> property, IntPredicate test, Supplier<X> exception) throws X {
+    return ObjHasInt.get(this).has(property, test.negate(), exception);
+  }
+
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param name The name of the property being tested. In error messages the fully-qualified name
+   *     will be used and constructed using {@code argName + "." + name}.
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> has(
       ToIntFunction<T> property, String name, IntObjRelation<U> test, U object) throws E {
-    int value = property.applyAsInt(arg);
-    if (test.exists(value, object)) {
-      return this;
-    }
-    String msg = createMessage(test, false, fqn(name), value, object);
-    throw exc.apply(msg);
+    return ObjHasInt.get(this).has(property, name, test, object);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param name The name of the property being tested. In error messages the fully-qualified name
+   *     will be used and constructed using {@code argName + "." + name}.
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> notHas(
       ToIntFunction<T> property, String name, IntObjRelation<U> test, U object) throws E {
-    int value = property.applyAsInt(arg);
-    if (!test.exists(value, object)) {
-      return this;
-    }
-    String msg = createMessage(test, true, fqn(name), value, object);
-    throw exc.apply(msg);
+    return ObjHasInt.get(this).notHas(property, name, test, object);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> has(ToIntFunction<T> property, IntObjRelation<U> test, U object)
       throws E {
     int value = property.applyAsInt(arg);
@@ -345,6 +725,14 @@ public final class ObjectCheck<T, E extends Exception> {
     throw exc.apply(msg);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> notHas(ToIntFunction<T> property, IntObjRelation<U> test, U object)
       throws E {
     int value = property.applyAsInt(arg);
@@ -356,6 +744,16 @@ public final class ObjectCheck<T, E extends Exception> {
     throw exc.apply(msg);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> has(
       ToIntFunction<T> property,
       IntObjRelation<U> test,
@@ -370,6 +768,16 @@ public final class ObjectCheck<T, E extends Exception> {
     throw createException(test, object, message, msgArgs);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @param <U> The type of the value being tested against
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public <U> ObjectCheck<T, E> notHas(
       ToIntFunction<T> property,
       IntObjRelation<U> test,
@@ -380,6 +788,15 @@ public final class ObjectCheck<T, E extends Exception> {
     return has(property, test, object, message, msgArgs);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param name The name of the property being tested. In error messages the fully-qualified name
+   *     will be used and constructed using {@code argName + "." + name}.
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public ObjectCheck<T, E> has(ToIntFunction<T> property, String name, IntRelation test, int object)
       throws E {
     int value = property.applyAsInt(arg);
@@ -390,6 +807,15 @@ public final class ObjectCheck<T, E extends Exception> {
     throw exc.apply(msg);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param name The name of the property being tested. In error messages the fully-qualified name
+   *     will be used and constructed using {@code argName + "." + name}.
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public ObjectCheck<T, E> notHas(
       ToIntFunction<T> property, String name, IntRelation test, int object) throws E {
     int value = property.applyAsInt(arg);
@@ -400,6 +826,13 @@ public final class ObjectCheck<T, E extends Exception> {
     throw exc.apply(msg);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public ObjectCheck<T, E> has(ToIntFunction<T> property, IntRelation test, int object) throws E {
     int value = property.applyAsInt(arg);
     if (test.exists(value, object)) {
@@ -410,6 +843,13 @@ public final class ObjectCheck<T, E extends Exception> {
     throw exc.apply(msg);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public ObjectCheck<T, E> notHas(ToIntFunction<T> property, IntRelation test, int object)
       throws E {
     int value = property.applyAsInt(arg);
@@ -421,6 +861,15 @@ public final class ObjectCheck<T, E extends Exception> {
     throw exc.apply(msg);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public ObjectCheck<T, E> has(
       ToIntFunction<T> property, IntRelation test, int object, String message, Object... msgArgs)
       throws E {
@@ -432,6 +881,15 @@ public final class ObjectCheck<T, E extends Exception> {
     throw exc.apply(msg);
   }
 
+  /**
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param message The message pattern
+   * @param msgArgs The message arguments
+   * @return This instance
+   * @throws E If the argument is invalid
+   */
   public ObjectCheck<T, E> notHas(
       ToIntFunction<T> property, IntRelation test, int object, String message, Object... msgArgs)
       throws E {
@@ -440,23 +898,6 @@ public final class ObjectCheck<T, E extends Exception> {
 
   public T ok() {
     return arg;
-  }
-
-  public int intValue() throws E {
-    if (arg == null) {
-      String msg = String.format(ERR_NULL_TO_INT, getArgName(arg));
-      throw exc.apply(msg);
-    } else if (arg.getClass() == Integer.class) {
-      return (Integer) arg;
-    } else if (arg.getClass().isEnum()) {
-      return ((Enum) arg).ordinal();
-    } else if (arg.getClass() == Byte.class) {
-      return (Byte) arg;
-    } else if (arg.getClass() == Short.class) {
-      return (Short) arg;
-    }
-    String msg = String.format(ERR_OBJECT_TO_INT, getArgName(arg), arg.getClass().getName());
-    throw exc.apply(msg);
   }
 
   @SuppressWarnings({"raw-types"})
@@ -477,9 +918,9 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * </blockquote>
    *
-   * @param <U> The type of the returned value
+   * @param <U> The type of the value being tested against The type of the returned value
    * @param transformer A {@code Function} that transforms the argument into some other value
-   * @return The value computed by the {@code Function}
+   * @return This instance The value computed by the {@code Function}
    * @throws F The exception potentially thrown by the {@code Function}
    */
   public <U, F extends Throwable> U ok(ThrowingFunction<T, U, F> transformer) throws F {
