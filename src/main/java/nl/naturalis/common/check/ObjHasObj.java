@@ -13,7 +13,7 @@ import static nl.naturalis.common.check.Messages.createMessage;
 /** Helper class for ObjectCheck. */
 class ObjHasObj<T, E extends Exception> {
 
-  static <U, EXC extends Exception> ObjHasObj<U, EXC> get(ObjectCheck<U, EXC> check) {
+  static <T0, E0 extends Exception> ObjHasObj<T0, E0> get(ObjectCheck<T0, E0> check) {
     return new ObjHasObj<>(check);
   }
 
@@ -23,181 +23,178 @@ class ObjHasObj<T, E extends Exception> {
     this.check = check;
   }
 
-  <U> ObjectCheck<T, E> has(Function<T, U> property, String name, Predicate<U> test) throws E {
-    U value = property.apply(check.arg);
-    if (test.test(value)) {
+  <P> ObjectCheck<T, E> has(Function<T, P> prop, String name, Predicate<P> test) throws E {
+    ObjectCheck<T, E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (test.test(val)) {
       return check;
     }
-    String msg = createMessage(test, false, FQN(name), value);
-    throw check.exc.apply(msg);
+    throw check.createException(createMessage(test, false, check.FQN(name), val));
   }
 
-  <U> ObjectCheck<T, E> notHas(Function<T, U> property, String name, Predicate<U> test) throws E {
-    U value = property.apply(check.arg);
-    if (!test.test(value)) {
+  <P> ObjectCheck<T, E> notHas(Function<T, P> prop, String name, Predicate<P> test) throws E {
+    ObjectCheck<T, E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (!test.test(val)) {
       return check;
     }
-    String msg = createMessage(test, true, FQN(name), value);
-    throw check.exc.apply(msg);
+    throw check.createException(createMessage(test, true, check.FQN(name), val));
   }
 
-  <U> ObjectCheck<T, E> has(Function<T, U> property, Predicate<U> test) throws E {
-    U value = property.apply(check.arg);
-    if (test.test(value)) {
+  <P> ObjectCheck<T, E> has(Function<T, P> prop, Predicate<P> test) throws E {
+    ObjectCheck<T, E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (test.test(val)) {
       return check;
     }
-    String name = formatProperty(check.arg, check.argName, property, Function.class);
-    String msg = createMessage(test, false, name, value);
-    throw check.exc.apply(msg);
+    String name = formatProperty(check.arg, check.argName, prop, Function.class);
+    throw check.createException(createMessage(test, false, name, val));
   }
 
-  <U> ObjectCheck<T, E> notHas(Function<T, U> property, Predicate<U> test) throws E {
-    U value = property.apply(check.arg);
-    if (!test.test(value)) {
+  <P> ObjectCheck<T, E> notHas(Function<T, P> prop, Predicate<P> test) throws E {
+    ObjectCheck<T, E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (!test.test(val)) {
       return check;
     }
-    String name = formatProperty(check.arg, check.argName, property, Function.class);
-    String msg = createMessage(test, true, name, value);
-    throw check.exc.apply(msg);
+    String name = formatProperty(check.arg, check.argName, prop, Function.class);
+    throw check.createException(createMessage(test, true, name, val));
   }
 
-  <U> ObjectCheck<T, E> has(
-      Function<T, U> property, Predicate<U> test, String message, Object[] msgArgs) throws E {
-    if (test.test(property.apply(check.arg))) {
-      return check;
-    }
-    throw check.createException(test, message, msgArgs);
-  }
-
-  <U, X extends Exception> ObjectCheck<T, E> has(
-      Function<T, U> property, Predicate<U> test, Supplier<X> exception) throws X {
-    if (test.test(property.apply(check.arg))) {
-      return check;
-    }
-    throw exception.get();
-  }
-
-  public <U, V> ObjectCheck<T, E> has(Function<T, U> property, Relation<U, V> test, V object)
+  <P> ObjectCheck<T, E> has(Function<T, P> prop, Predicate<P> test, String msg, Object[] msgArgs)
       throws E {
-    U value = property.apply(check.arg);
-    if (test.exists(value, object)) {
+    ObjectCheck<T, E> check = this.check;
+    if (test.test(prop.apply(check.arg))) {
       return check;
     }
-    String name = formatProperty(check.arg, check.argName, property, Function.class);
-    String msg = createMessage(test, false, name, value, object);
-    throw check.exc.apply(msg);
+    throw check.createException(test, msg, msgArgs);
   }
 
-  public <U, V> ObjectCheck<T, E> notHas(Function<T, U> property, Relation<U, V> test, V object)
+  <P, X extends Exception> ObjectCheck<T, E> has(
+      Function<T, P> prop, Predicate<P> test, Supplier<X> exc) throws X {
+    ObjectCheck<T, E> check = this.check;
+    if (test.test(prop.apply(check.arg))) {
+      return check;
+    }
+    throw exc.get();
+  }
+
+  public <P, O> ObjectCheck<T, E> has(Function<T, P> prop, Relation<P, O> test, O obj) throws E {
+    ObjectCheck<T, E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (test.exists(val, obj)) {
+      return check;
+    }
+    String name = formatProperty(check.arg, check.argName, prop, Function.class);
+    throw check.createException(createMessage(test, false, name, val, obj));
+  }
+
+  public <P, O> ObjectCheck<T, E> notHas(Function<T, P> prop, Relation<P, O> test, O obj) throws E {
+    ObjectCheck<T, E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (!test.exists(val, obj)) {
+      return check;
+    }
+    String name = formatProperty(check.arg, check.argName, prop, Function.class);
+    throw check.createException(createMessage(test, true, name, val, obj));
+  }
+
+  <P, O> ObjectCheck<T, E> has(Function<T, P> prop, String name, Relation<P, O> test, O obj)
       throws E {
-    U value = property.apply(check.arg);
-    if (!test.exists(value, object)) {
+    ObjectCheck<T, E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (test.exists(val, obj)) {
       return check;
     }
-    String name = formatProperty(check.arg, check.argName, property, Function.class);
-    String msg = createMessage(test, true, name, value, object);
-    throw check.exc.apply(msg);
+    throw check.createException(createMessage(test, false, check.FQN(name), val, obj));
   }
 
-  <U, V> ObjectCheck<T, E> has(Function<T, U> property, String name, Relation<U, V> test, V object)
+  <P, O> ObjectCheck<T, E> notHas(Function<T, P> prop, String name, Relation<P, O> test, O obj)
       throws E {
-    U value = property.apply(check.arg);
-    if (test.exists(value, object)) {
+    ObjectCheck<T, E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (!test.exists(val, obj)) {
       return check;
     }
-    String msg = createMessage(test, false, FQN(name), value, object);
-    throw check.exc.apply(msg);
+    throw check.createException(createMessage(test, true, check.FQN(name), val, obj));
   }
 
-  <U, V> ObjectCheck<T, E> notHas(
-      Function<T, U> property, String name, Relation<U, V> test, V object) throws E {
-    U value = property.apply(check.arg);
-    if (!test.exists(value, object)) {
+  <P, O> ObjectCheck<T, E> has(
+      Function<T, P> prop, Relation<P, O> test, O obj, String msg, Object[] msgArgs) throws E {
+    ObjectCheck<T, E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (test.exists(val, obj)) {
       return check;
     }
-    String msg = createMessage(test, true, FQN(name), value, object);
-    throw check.exc.apply(msg);
+    throw check.createException(test, obj, msg, msgArgs);
   }
 
-  <U, V> ObjectCheck<T, E> has(
-      Function<T, U> property, Relation<U, V> test, V object, String message, Object[] msgArgs)
+  <P, O, X extends Exception> ObjectCheck<T, E> has(
+      Function<T, P> prop, Relation<P, O> test, O obj, Supplier<X> exc) throws X {
+    ObjectCheck<T, E> check = this.check;
+    if (test.exists(prop.apply(check.arg), obj)) {
+      return check;
+    }
+    throw exc.get();
+  }
+
+  public <P> ObjectCheck<T, E> has(Function<T, P> prop, ObjIntRelation<P> test, int obj) throws E {
+    ObjectCheck<T, E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (test.exists(val, obj)) {
+      return check;
+    }
+    String name = formatProperty(check.arg, check.argName, prop, Function.class);
+    throw check.createException(createMessage(test, false, name, val, obj));
+  }
+
+  public <P> ObjectCheck<T, E> notHas(Function<T, P> prop, ObjIntRelation<P> test, int obj)
       throws E {
-    U value = property.apply(check.arg);
-    if (test.exists(value, object)) {
+    ObjectCheck<T, E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (!test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(test, object, message, msgArgs);
+    String name = formatProperty(check.arg, check.argName, prop, Function.class);
+    throw check.createException(createMessage(test, true, name, val, obj));
   }
 
-  <U, V, X extends Exception> ObjectCheck<T, E> has(
-      Function<T, U> property, Relation<U, V> test, V object, Supplier<X> exception) throws X {
-    if (test.exists(property.apply(check.arg), object)) {
-      return check;
-    }
-    throw exception.get();
-  }
-
-  public <U> ObjectCheck<T, E> has(Function<T, U> property, ObjIntRelation<U> test, int object)
+  <P> ObjectCheck<T, E> has(Function<T, P> prop, String name, ObjIntRelation<P> test, int obj)
       throws E {
-    U value = property.apply(check.arg);
-    if (test.exists(value, object)) {
+    ObjectCheck<T, E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (test.exists(val, obj)) {
       return check;
     }
-    String name = formatProperty(check.arg, check.argName, property, Function.class);
-    String msg = createMessage(test, false, name, value, object);
-    throw check.exc.apply(msg);
+    throw check.createException(createMessage(test, false, check.FQN(name), val, obj));
   }
 
-  public <U> ObjectCheck<T, E> notHas(Function<T, U> property, ObjIntRelation<U> test, int object)
+  <P> ObjectCheck<T, E> notHas(Function<T, P> prop, String name, ObjIntRelation<P> test, int obj)
       throws E {
-    U value = property.apply(check.arg);
-    if (!test.exists(value, object)) {
+    ObjectCheck<T, E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (!test.exists(val, obj)) {
       return check;
     }
-    String name = formatProperty(check.arg, check.argName, property, Function.class);
-    String msg = createMessage(test, true, name, value, object);
-    throw check.exc.apply(msg);
+    throw check.createException(createMessage(test, true, check.FQN(name), val, obj));
   }
 
-  <U> ObjectCheck<T, E> has(
-      Function<T, U> property, String name, ObjIntRelation<U> test, int object) throws E {
-    U value = property.apply(check.arg);
-    if (test.exists(value, object)) {
+  <P> ObjectCheck<T, E> has(
+      Function<T, P> prop, ObjIntRelation<P> test, int obj, String msg, Object[] msgArgs) throws E {
+    ObjectCheck<T, E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (test.exists(val, obj)) {
       return check;
     }
-    String msg = createMessage(test, false, FQN(name), value, object);
-    throw check.exc.apply(msg);
+    throw check.createException(test, obj, msg, msgArgs);
   }
 
-  <U> ObjectCheck<T, E> notHas(
-      Function<T, U> property, String name, ObjIntRelation<U> test, int object) throws E {
-    U value = property.apply(check.arg);
-    if (!test.exists(value, object)) {
+  <P, X extends Exception> ObjectCheck<T, E> has(
+      Function<T, P> prop, ObjIntRelation<P> test, int obj, Supplier<X> exc) throws X {
+    ObjectCheck<T, E> check = this.check;
+    if (test.exists(prop.apply(check.arg), obj)) {
       return check;
     }
-    String msg = createMessage(test, true, FQN(name), value, object);
-    throw check.exc.apply(msg);
-  }
-
-  <U> ObjectCheck<T, E> has(
-      Function<T, U> property, ObjIntRelation<U> test, int object, String message, Object[] msgArgs)
-      throws E {
-    U value = property.apply(check.arg);
-    if (test.exists(value, object)) {
-      return check;
-    }
-    throw check.createException(test, object, message, msgArgs);
-  }
-
-  <U, X extends Exception> ObjectCheck<T, E> has(
-      Function<T, U> property, ObjIntRelation<U> test, int object, Supplier<X> exception) throws X {
-    if (test.exists(property.apply(check.arg), object)) {
-      return check;
-    }
-    throw exception.get();
-  }
-
-  private String FQN(String name) {
-    return check.argName + "." + name;
+    throw exc.get();
   }
 }

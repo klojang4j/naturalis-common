@@ -11,7 +11,7 @@ import static nl.naturalis.common.check.Messages.createMessage;
 
 class IntHasObj<E extends Exception> {
 
-  static <EXC extends Exception> IntHasObj<EXC> get(IntCheck<EXC> check) {
+  static <E0 extends Exception> IntHasObj<E0> get(IntCheck<E0> check) {
     return new IntHasObj<>(check);
   }
 
@@ -21,8 +21,8 @@ class IntHasObj<E extends Exception> {
     this.check = check;
   }
 
-  <U> IntCheck<E> has(IntFunction<U> property, Predicate<U> test) throws E {
-    U value = property.apply(check.arg);
+  <P> IntCheck<E> has(IntFunction<P> property, Predicate<P> test) throws E {
+    P value = property.apply(check.arg);
     if (test.test(value)) {
       return check;
     }
@@ -31,8 +31,8 @@ class IntHasObj<E extends Exception> {
     throw check.exc.apply(msg);
   }
 
-  <U> IntCheck<E> notHas(IntFunction<U> property, Predicate<U> test) throws E {
-    U value = property.apply(check.arg);
+  <P> IntCheck<E> notHas(IntFunction<P> property, Predicate<P> test) throws E {
+    P value = property.apply(check.arg);
     if (!test.test(value)) {
       return check;
     }
@@ -41,59 +41,59 @@ class IntHasObj<E extends Exception> {
     throw check.exc.apply(msg);
   }
 
-  <U> IntCheck<E> has(IntFunction<U> property, String name, Predicate<U> test) throws E {
-    U value = property.apply(check.arg);
+  <P> IntCheck<E> has(IntFunction<P> property, String name, Predicate<P> test) throws E {
+    P value = property.apply(check.arg);
     if (test.test(value)) {
       return check;
     }
-    throw check.exc.apply(createMessage(test, false, fqn(name), value));
+    throw check.exc.apply(createMessage(test, false, FQN(name), value));
   }
 
-  <U> IntCheck<E> notHas(IntFunction<U> property, String name, Predicate<U> test) throws E {
-    U value = property.apply(check.arg);
+  <P> IntCheck<E> notHas(IntFunction<P> property, String name, Predicate<P> test) throws E {
+    P value = property.apply(check.arg);
     if (!test.test(value)) {
       return check;
     }
-    throw check.exc.apply(createMessage(test, true, fqn(name), value));
+    throw check.exc.apply(createMessage(test, true, FQN(name), value));
   }
 
-  <U> IntCheck<E> has(IntFunction<U> property, Predicate<U> test, String message, Object[] msgArgs)
+  <P> IntCheck<E> has(IntFunction<P> property, Predicate<P> test, String message, Object[] msgArgs)
       throws E {
-    U value = property.apply(check.arg);
+    P value = property.apply(check.arg);
     if (test.test(value)) {
       return check;
     }
     throw check.createException(test, message, msgArgs);
   }
 
-  <U, X extends Exception> IntCheck<E> has(
-      IntFunction<U> property, Predicate<U> test, Supplier<X> exception) throws X {
+  <P, X extends Exception> IntCheck<E> has(
+      IntFunction<P> property, Predicate<P> test, Supplier<X> exception) throws X {
     if (test.test(property.apply(check.arg))) {
       return check;
     }
     throw exception.get();
   }
 
-  <U, V> IntCheck<E> has(IntFunction<U> property, String name, Relation<U, V> test, V object)
+  <P, O> IntCheck<E> has(IntFunction<P> property, String name, Relation<P, O> test, O object)
       throws E {
-    U value = property.apply(check.arg);
+    P value = property.apply(check.arg);
     if (test.exists(value, object)) {
       return check;
     }
-    throw check.exc.apply(createMessage(test, false, fqn(name), value, object));
+    throw check.exc.apply(createMessage(test, false, FQN(name), value, object));
   }
 
-  <U, V> IntCheck<E> notHas(IntFunction<U> property, String name, Relation<U, V> test, V object)
+  <P, O> IntCheck<E> notHas(IntFunction<P> property, String name, Relation<P, O> test, O object)
       throws E {
-    U value = property.apply(check.arg);
+    P value = property.apply(check.arg);
     if (!test.exists(value, object)) {
       return check;
     }
-    throw check.exc.apply(createMessage(test, true, fqn(name), value, object));
+    throw check.exc.apply(createMessage(test, true, FQN(name), value, object));
   }
 
-  <U, V> IntCheck<E> has(IntFunction<U> property, Relation<U, V> test, V object) throws E {
-    U value = property.apply(check.arg);
+  <P, O> IntCheck<E> has(IntFunction<P> property, Relation<P, O> test, O object) throws E {
+    P value = property.apply(check.arg);
     if (test.exists(value, object)) {
       return check;
     }
@@ -102,8 +102,8 @@ class IntHasObj<E extends Exception> {
     throw check.exc.apply(msg);
   }
 
-  <U, V> IntCheck<E> notHas(IntFunction<U> property, Relation<U, V> test, V object) throws E {
-    U value = property.apply(check.arg);
+  <P, O> IntCheck<E> notHas(IntFunction<P> property, Relation<P, O> test, O object) throws E {
+    P value = property.apply(check.arg);
     if (!test.exists(value, object)) {
       return check;
     }
@@ -112,8 +112,8 @@ class IntHasObj<E extends Exception> {
     throw check.exc.apply(msg);
   }
 
-  <U, V> IntCheck<E> has(
-      IntFunction<U> property, Relation<U, V> test, V object, String message, Object[] msgArgs)
+  <P, O> IntCheck<E> has(
+      IntFunction<P> property, Relation<P, O> test, O object, String message, Object[] msgArgs)
       throws E {
     if (test.exists(property.apply(check.arg), object)) {
       return check;
@@ -121,15 +121,15 @@ class IntHasObj<E extends Exception> {
     throw check.createException(test, object, message, msgArgs);
   }
 
-  <U, V, X extends Exception> IntCheck<E> has(
-      IntFunction<U> property, Relation<U, V> test, V object, Supplier<X> exception) throws X {
+  <P, O, X extends Exception> IntCheck<E> has(
+      IntFunction<P> property, Relation<P, O> test, O object, Supplier<X> exception) throws X {
     if (test.exists(property.apply(check.arg), object)) {
       return check;
     }
     throw exception.get();
   }
 
-  private String fqn(String name) {
+  private String FQN(String name) {
     return check.argName + "." + name;
   }
 }

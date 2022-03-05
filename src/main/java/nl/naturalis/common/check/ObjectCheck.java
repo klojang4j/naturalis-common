@@ -11,14 +11,10 @@ import static nl.naturalis.common.check.Messages.createMessage;
 
 public final class ObjectCheck<T, E extends Exception> {
 
-  private static final String ERR_INT_VALUE = "Cannot return int value for %s";
-  private static final String ERR_NULL_TO_INT = ERR_INT_VALUE + " (was null)";
-  private static final String ERR_NUMBER_TO_INT = ERR_INT_VALUE + " (was %s)";
-  private static final String ERR_OBJECT_TO_INT = ERR_INT_VALUE + " (%s)";
-
   final T arg;
   final String argName;
-  final Function<String, E> exc;
+
+  private final Function<String, E> exc;
 
   ObjectCheck(T arg, String argName, Function<String, E> exc) {
     this.arg = arg;
@@ -1228,7 +1224,7 @@ public final class ObjectCheck<T, E extends Exception> {
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
    * @param object The value that the argument is tested against (called "the object" of a relation)
-   * @param exception
+   * @param exception The supplier of the exception to be thrown if the argument is invalid
    * @param <X> The type of the exception thrown if the argument is invalid
    * @return This instance
    * @throws X If the argument is invalid
@@ -1242,7 +1238,7 @@ public final class ObjectCheck<T, E extends Exception> {
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
    * @param object The value that the argument is tested against (called "the object" of a relation)
-   * @param exception
+   * @param exception The supplier of the exception to be thrown if the argument is invalid
    * @param <X> The type of the exception thrown if the argument is invalid
    * @return This instance
    * @throws X If the argument is invalid
@@ -1250,6 +1246,10 @@ public final class ObjectCheck<T, E extends Exception> {
   public <X extends Exception> ObjectCheck<T, E> notHas(
       ToIntFunction<T> property, IntRelation test, int object, Supplier<X> exception) throws X {
     return ObjHasInt.get(this).has(property, test.negate(), object, exception);
+  }
+
+  E createException(String msg) {
+    return exc.apply(msg);
   }
 
   E createException(Object test, String msg, Object[] msgArgs) {
@@ -1262,7 +1262,7 @@ public final class ObjectCheck<T, E extends Exception> {
 
   E createException(Object test, Object subject, Object object, String pattern, Object[] msgArgs) {
     if (pattern == null) {
-      throw new InvalidCheckException("message must not be null");
+      throw new InvalidCheckException("message pattern must not be null");
     }
     if (msgArgs == null) {
       throw new InvalidCheckException("message arguments must not be null");
@@ -1280,5 +1280,9 @@ public final class ObjectCheck<T, E extends Exception> {
 
   String getArgName(Object arg) {
     return argName != null ? argName : arg != null ? Messages.simpleClassName(arg) : DEF_ARG_NAME;
+  }
+
+  String FQN(String propName) {
+    return argName + "." + propName;
   }
 }

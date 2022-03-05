@@ -14,7 +14,7 @@ import static nl.naturalis.common.check.Messages.createMessage;
 /** Helper class for ObjectCheck. */
 class ObjHasInt<T, E extends Exception> {
 
-  static <U, EXC extends Exception> ObjHasInt<U, EXC> get(ObjectCheck<U, EXC> check) {
+  static <T0, E0 extends Exception> ObjHasInt<T0, E0> get(ObjectCheck<T0, E0> check) {
     return new ObjHasInt<>(check);
   }
 
@@ -24,180 +24,175 @@ class ObjHasInt<T, E extends Exception> {
     this.check = check;
   }
 
-  <U> ObjectCheck<T, E> has(ToIntFunction<T> property, String name, IntPredicate test) throws E {
-    int value = property.applyAsInt(check.arg);
-    if (test.test(value)) {
+  <O> ObjectCheck<T, E> has(ToIntFunction<T> prop, String name, IntPredicate test) throws E {
+    ObjectCheck<T, E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (test.test(val)) {
       return check;
     }
-    String msg = createMessage(test, false, fqn(name), value);
-    throw check.exc.apply(msg);
+    throw check.createException(createMessage(test, false, check.FQN(name), val));
   }
 
-  <U> ObjectCheck<T, E> notHas(ToIntFunction<T> property, String name, IntPredicate test) throws E {
-    int value = property.applyAsInt(check.arg);
-    if (!test.test(value)) {
+  <O> ObjectCheck<T, E> notHas(ToIntFunction<T> prop, String name, IntPredicate test) throws E {
+    ObjectCheck<T, E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (!test.test(val)) {
       return check;
     }
-    String msg = createMessage(test, true, fqn(name), value);
-    throw check.exc.apply(msg);
+    throw check.createException(createMessage(test, true, check.FQN(name), val));
   }
 
-  <U> ObjectCheck<T, E> has(ToIntFunction<T> property, IntPredicate test) throws E {
-    int value = property.applyAsInt(check.arg);
-    if (test.test(value)) {
+  <O> ObjectCheck<T, E> has(ToIntFunction<T> prop, IntPredicate test) throws E {
+    ObjectCheck<T, E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (test.test(val)) {
       return check;
     }
-    String name = formatProperty(check.arg, check.argName, property, Function.class);
-    String msg = createMessage(test, false, name, value);
-    throw check.exc.apply(msg);
+    String name = formatProperty(check.arg, check.argName, prop, Function.class);
+    throw check.createException(createMessage(test, false, name, val));
   }
 
-  <U> ObjectCheck<T, E> notHas(ToIntFunction<T> property, IntPredicate test) throws E {
-    int value = property.applyAsInt(check.arg);
-    if (!test.test(value)) {
+  <O> ObjectCheck<T, E> notHas(ToIntFunction<T> prop, IntPredicate test) throws E {
+    ObjectCheck<T, E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (!test.test(val)) {
       return check;
     }
-    String name = formatProperty(check.arg, check.argName, property, Function.class);
-    String msg = createMessage(test, true, name, value);
-    throw check.exc.apply(msg);
+    String name = formatProperty(check.arg, check.argName, prop, Function.class);
+    throw check.createException(createMessage(test, true, name, val));
   }
 
-  <U> ObjectCheck<T, E> has(
-      ToIntFunction<T> property, IntPredicate test, String message, Object[] msgArgs) throws E {
-    if (test.test(property.applyAsInt(check.arg))) {
+  <O> ObjectCheck<T, E> has(ToIntFunction<T> prop, IntPredicate test, String msg, Object[] msgArgs)
+      throws E {
+    ObjectCheck<T, E> check = this.check;
+    if (test.test(prop.applyAsInt(check.arg))) {
       return check;
     }
-    throw check.createException(test, message, msgArgs);
+    throw check.createException(test, msg, msgArgs);
   }
 
-  <U, X extends Exception> ObjectCheck<T, E> has(
-      ToIntFunction<T> property, IntPredicate test, Supplier<X> exception) throws X {
-    if (test.test(property.applyAsInt(check.arg))) {
+  <O, X extends Exception> ObjectCheck<T, E> has(
+      ToIntFunction<T> prop, IntPredicate test, Supplier<X> exception) throws X {
+    ObjectCheck<T, E> check = this.check;
+    if (test.test(prop.applyAsInt(check.arg))) {
       return check;
     }
     throw exception.get();
   }
 
-  public <U> ObjectCheck<T, E> has(ToIntFunction<T> property, IntObjRelation<U> test, U object)
+  public <O> ObjectCheck<T, E> has(ToIntFunction<T> prop, IntObjRelation<O> test, O obj) throws E {
+    ObjectCheck<T, E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (test.exists(val, obj)) {
+      return check;
+    }
+    String name = formatProperty(check.arg, check.argName, prop, Function.class);
+    throw check.createException(createMessage(test, false, name, val, obj));
+  }
+
+  public <O> ObjectCheck<T, E> notHas(ToIntFunction<T> prop, IntObjRelation<O> test, O obj)
       throws E {
-    int value = property.applyAsInt(check.arg);
-    if (test.exists(value, object)) {
+    ObjectCheck<T, E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (!test.exists(val, obj)) {
       return check;
     }
-    String name = formatProperty(check.arg, check.argName, property, Function.class);
-    String msg = createMessage(test, false, name, value, object);
-    throw check.exc.apply(msg);
+    String name = formatProperty(check.arg, check.argName, prop, Function.class);
+    throw check.createException(createMessage(test, true, name, val, obj));
   }
 
-  public <U> ObjectCheck<T, E> notHas(ToIntFunction<T> property, IntObjRelation<U> test, U object)
+  <O> ObjectCheck<T, E> has(ToIntFunction<T> prop, String name, IntObjRelation<O> test, O obj)
       throws E {
-    int value = property.applyAsInt(check.arg);
-    if (!test.exists(value, object)) {
+    ObjectCheck<T, E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (test.exists(val, obj)) {
       return check;
     }
-    String name = formatProperty(check.arg, check.argName, property, Function.class);
-    String msg = createMessage(test, true, name, value, object);
-    throw check.exc.apply(msg);
+    throw check.createException(createMessage(test, false, check.FQN(name), val, obj));
   }
 
-  <U> ObjectCheck<T, E> has(
-      ToIntFunction<T> property, String name, IntObjRelation<U> test, U object) throws E {
-    int value = property.applyAsInt(check.arg);
-    if (test.exists(value, object)) {
-      return check;
-    }
-    String msg = createMessage(test, false, fqn(name), value, object);
-    throw check.exc.apply(msg);
-  }
-
-  <U> ObjectCheck<T, E> notHas(
-      ToIntFunction<T> property, String name, IntObjRelation<U> test, U object) throws E {
-    int value = property.applyAsInt(check.arg);
-    if (!test.exists(value, object)) {
-      return check;
-    }
-    String msg = createMessage(test, true, fqn(name), value, object);
-    throw check.exc.apply(msg);
-  }
-
-  <U> ObjectCheck<T, E> has(
-      ToIntFunction<T> property, IntObjRelation<U> test, U object, String message, Object[] msgArgs)
+  <O> ObjectCheck<T, E> notHas(ToIntFunction<T> prop, String name, IntObjRelation<O> test, O obj)
       throws E {
-    int value = property.applyAsInt(check.arg);
-    if (test.exists(value, object)) {
+    ObjectCheck<T, E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (!test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(test, object, message, msgArgs);
+    throw check.createException(createMessage(test, true, check.FQN(name), val, obj));
   }
 
-  <U, X extends Exception> ObjectCheck<T, E> has(
-      ToIntFunction<T> property, IntObjRelation<U> test, U object, Supplier<X> exception) throws X {
-    if (test.exists(property.applyAsInt(check.arg), object)) {
+  <O> ObjectCheck<T, E> has(
+      ToIntFunction<T> prop, IntObjRelation<O> test, O obj, String msg, Object[] msgArgs) throws E {
+    ObjectCheck<T, E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (test.exists(val, obj)) {
+      return check;
+    }
+    throw check.createException(test, obj, msg, msgArgs);
+  }
+
+  <O, X extends Exception> ObjectCheck<T, E> has(
+      ToIntFunction<T> prop, IntObjRelation<O> test, O obj, Supplier<X> exception) throws X {
+    if (test.exists(prop.applyAsInt(check.arg), obj)) {
       return check;
     }
     throw exception.get();
   }
 
-  public ObjectCheck<T, E> has(ToIntFunction<T> property, IntRelation test, int object) throws E {
-    int value = property.applyAsInt(check.arg);
-    if (test.exists(value, object)) {
+  public ObjectCheck<T, E> has(ToIntFunction<T> prop, IntRelation test, int obj) throws E {
+    ObjectCheck<T, E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (test.exists(val, obj)) {
       return check;
     }
-    String name = formatProperty(check.arg, check.argName, property, Function.class);
-    String msg = createMessage(test, false, name, value, object);
-    throw check.exc.apply(msg);
+    String name = formatProperty(check.arg, check.argName, prop, Function.class);
+    throw check.createException(createMessage(test, false, name, val, obj));
   }
 
-  public ObjectCheck<T, E> notHas(ToIntFunction<T> property, IntRelation test, int object)
-      throws E {
-    int value = property.applyAsInt(check.arg);
-    if (!test.exists(value, object)) {
+  public ObjectCheck<T, E> notHas(ToIntFunction<T> prop, IntRelation test, int obj) throws E {
+    ObjectCheck<T, E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (!test.exists(val, obj)) {
       return check;
     }
-    String name = formatProperty(check.arg, check.argName, property, Function.class);
-    String msg = createMessage(test, true, name, value, object);
-    throw check.exc.apply(msg);
+    String name = formatProperty(check.arg, check.argName, prop, Function.class);
+    throw check.createException(createMessage(test, true, name, val, obj));
   }
 
-  ObjectCheck<T, E> has(ToIntFunction<T> property, String name, IntRelation test, int object)
-      throws E {
-    int value = property.applyAsInt(check.arg);
-    if (test.exists(value, object)) {
+  ObjectCheck<T, E> has(ToIntFunction<T> prop, String name, IntRelation test, int obj) throws E {
+    ObjectCheck<T, E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (test.exists(val, obj)) {
       return check;
     }
-    String msg = createMessage(test, false, fqn(name), value, object);
-    throw check.exc.apply(msg);
+    throw check.createException(createMessage(test, false, check.FQN(name), val, obj));
   }
 
-  ObjectCheck<T, E> notHas(ToIntFunction<T> property, String name, IntRelation test, int object)
-      throws E {
-    int value = property.applyAsInt(check.arg);
-    if (!test.exists(value, object)) {
+  ObjectCheck<T, E> notHas(ToIntFunction<T> prop, String name, IntRelation test, int obj) throws E {
+    ObjectCheck<T, E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (!test.exists(val, obj)) {
       return check;
     }
-    String msg = createMessage(test, true, fqn(name), value, object);
-    throw check.exc.apply(msg);
+    throw check.createException(createMessage(test, true, check.FQN(name), val, obj));
   }
 
   ObjectCheck<T, E> has(
-      ToIntFunction<T> property, IntRelation test, int object, String message, Object[] msgArgs)
-      throws E {
-    int value = property.applyAsInt(check.arg);
-    if (test.exists(value, object)) {
+      ToIntFunction<T> prop, IntRelation test, int obj, String msg, Object[] msgArgs) throws E {
+    ObjectCheck<T, E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(test, object, message, msgArgs);
+    throw check.createException(test, obj, msg, msgArgs);
   }
 
   <X extends Exception> ObjectCheck<T, E> has(
-      ToIntFunction<T> property, IntRelation test, int object, Supplier<X> exception) throws X {
-    if (test.exists(property.applyAsInt(check.arg), object)) {
+      ToIntFunction<T> prop, IntRelation test, int obj, Supplier<X> exception) throws X {
+    ObjectCheck<T, E> check = this.check;
+    if (test.exists(prop.applyAsInt(check.arg), obj)) {
       return check;
     }
     throw exception.get();
-  }
-
-  private String fqn(String name) {
-    return check.argName + "." + name;
   }
 }

@@ -282,11 +282,11 @@ public final class IntCheck<E extends Exception> {
    *
    * @param test The test
    * @param object The object of the {@code IntObjRelation}
-   * @param <P> The type of the object of the {@code IntObjRelation}
+   * @param <O> The type of the object of the {@code IntObjRelation}
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <P> IntCheck<E> is(IntObjRelation<P> test, P object) throws E {
+  public <O> IntCheck<E> is(IntObjRelation<O> test, O object) throws E {
     if (test.exists(arg, object)) {
       return this;
     }
