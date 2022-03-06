@@ -118,7 +118,7 @@ class ConfigReader {
     String dateTimeClass = dateTimeElem.getTagName();
     checkThat(dateTimeClass).is(keyIn(), supported, ERR_NOT_SUPPORTED);
     for (Element tryElem : xmlGetChildElements(dateTimeElem)) {
-      checkThat(tryElem.getTagName()).is(equalTo(), "try", ERR_UNEXPECTED_ELEM, dateTimeClass);
+      checkThat(tryElem.getTagName()).is(EQ(), "try", ERR_UNEXPECTED_ELEM, dateTimeClass);
       processTryElement(attempts, tryElem);
     }
   }

@@ -2,7 +2,7 @@ package nl.naturalis.common.check;
 
 import static java.lang.String.format;
 
-class MsgIntPredicate {
+final class MsgIntPredicate {
 
   private MsgIntPredicate() {}
 

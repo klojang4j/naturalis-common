@@ -2,7 +2,7 @@ package nl.naturalis.common.check;
 
 import static java.lang.String.format;
 
-class MsgIntRelation {
+final class MsgIntRelation {
 
   private MsgIntRelation() {}
 
@@ -11,7 +11,7 @@ class MsgIntRelation {
       if (args.negated()) {
         return msgNe().apply(args.flip());
       }
-      String fmt = "%s must be equal to %s (was %s)";
+      String fmt = "%s must equal %s (was %s)";
       return format(fmt, args.argName(), args.object(), args.arg());
     };
   }
@@ -21,7 +21,7 @@ class MsgIntRelation {
       if (args.negated()) {
         return msgEq().apply(args.flip());
       }
-      String fmt = "%s must not be equal to %s";
+      String fmt = "%s must not equal %s";
       return format(fmt, args.argName(), args.object());
     };
   }
@@ -62,6 +62,17 @@ class MsgIntRelation {
         return msgGt().apply(args.flip());
       }
       String fmt = "%s must be <= %s (was %s)";
+      return format(fmt, args.argName(), args.object(), args.arg());
+    };
+  }
+
+  static Formatter msgMultipleOf() {
+    return args -> {
+      if (args.negated()) {
+        String fmt = "%s must not be multiple of %s (was %s)";
+        return format(fmt, args.argName(), args.object(), args.arg());
+      }
+      String fmt = "%s must be multiple of %s (was %s)";
       return format(fmt, args.argName(), args.object(), args.arg());
     };
   }

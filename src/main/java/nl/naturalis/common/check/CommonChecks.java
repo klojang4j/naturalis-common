@@ -1,6 +1,9 @@
 package nl.naturalis.common.check;
 
-import nl.naturalis.common.*;
+import nl.naturalis.common.ArrayMethods;
+import nl.naturalis.common.NumberMethods;
+import nl.naturalis.common.ObjectMethods;
+import nl.naturalis.common.StringMethods;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
@@ -8,8 +11,6 @@ import nl.naturalis.common.function.Relation;
 
 import java.io.File;
 import java.lang.reflect.Array;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
@@ -17,9 +18,9 @@ import java.util.function.Predicate;
 
 import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.Messages.*;
-import static nl.naturalis.common.check.MsgPredicate.*;
 import static nl.naturalis.common.check.MsgIntPredicate.*;
 import static nl.naturalis.common.check.MsgIntRelation.*;
+import static nl.naturalis.common.check.MsgPredicate.*;
 import static nl.naturalis.common.check.MsgRelation.*;
 
 /**
@@ -64,7 +65,9 @@ public class CommonChecks {
 
   private CommonChecks() {}
 
-  /* ++++++++++++++ Predicate ++++++++++++++ */
+  //////////////////////////////////////////////////////////////////////////////////
+  // Predicate
+  //////////////////////////////////////////////////////////////////////////////////
 
   /**
    * Verifies that the argument is null. Equivalent to {@link Objects#isNull(Object)
@@ -323,7 +326,9 @@ public class CommonChecks {
     setName(writable(), "writable");
   }
 
-  /* ++++++++++++++ IntPredicate ++++++++++++++ */
+  //////////////////////////////////////////////////////////////////////////////////
+  // IntPredicate
+  //////////////////////////////////////////////////////////////////////////////////
 
   /**
    * Verifies that the argument is an even number.
@@ -397,7 +402,128 @@ public class CommonChecks {
     setName(zero(), "zero");
   }
 
-  /* ++++++++++++++ Relation ++++++++++++++ */
+  //////////////////////////////////////////////////////////////////////////////////
+  // Relation
+  //////////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Verifies that the argument equals the specified value. Equivalent to {@link
+   * Objects#equals(Object) Objects::equals}.
+   *
+   * @param <X> The type of the argument
+   * @return A {@code Relation}
+   */
+  public static <X> Relation<X, X> EQ() {
+    return Objects::equals;
+  }
+
+  static {
+    setMessagePattern(EQ(), msgEq()); // Recycle message
+    setName(EQ(), "EQ");
+  }
+
+  /**
+   * Verifies that the argument is greater than the specified value. Especially useful for checking
+   * values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double}, but can be
+   * used to check any value that is an instance of {@link Comparable}.
+   *
+   * @param <X> The type of the values being compared
+   * @return A {@code Relation}
+   * @see #gt()
+   */
+  public static <X extends Comparable<X>> Relation<X, X> GT() {
+    return (x, y) -> x.compareTo(y) > 0;
+  }
+
+  static {
+    setMessagePattern(GT(), msgGt()); // Recycle message
+    setName(GT(), "GT");
+  }
+
+  /**
+   * Verifies that the argument is less than the specified value. Especially useful for checking
+   * values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double}, but can be
+   * used to check any value that is an instance of {@link Comparable}.
+   *
+   * @param <X> The type of the values being compared
+   * @return A {@code Relation}
+   * @see #lt()
+   */
+  public static <X extends Comparable<X>> Relation<X, X> LT() {
+    return (x, y) -> x.compareTo(y) < 0;
+  }
+
+  static {
+    setMessagePattern(LT(), msgLt()); // Recycle message
+    setName(LT(), "LT");
+  }
+
+  /**
+   * Verifies that the argument is greater than or equal to the specified value. Especially useful
+   * for checking values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double},
+   * but can be used to check any value that is an instance of {@link Comparable}.
+   *
+   * @param <X> The type of the values being compared
+   * @return A {@code Relation}
+   * @see #gte()
+   */
+  public static <X extends Comparable<X>> Relation<X, X> GTE() {
+    return (x, y) -> x.compareTo(y) >= 0;
+  }
+
+  static {
+    setMessagePattern(GTE(), msgGte()); // Recycle message
+    setName(GTE(), "GTE");
+  }
+
+  /**
+   * Verifies that the argument is less than or equal to the specified value. Especially useful for
+   * checking values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double}, but
+   * can be used to check any value that is an instance of {@link Comparable}.
+   *
+   * @param <X> The type of the values being compared
+   * @return A {@code Relation}
+   * @see #lte()
+   */
+  public static <X extends Comparable<X>> Relation<X, X> LTE() {
+    return (x, y) -> x.compareTo(y) <= 0;
+  }
+
+  static {
+    setMessagePattern(LTE(), msgLte()); // Recycle message
+    setName(LTE(), "LTE");
+  }
+
+  /**
+   * Verifies that the argument references the same object as the specified value
+   *
+   * @param <X> The type of the argument (the subject of the {@code Relation})
+   * @param <Y> The type of the value to compare it with (the object of the {@code Relation})
+   * @return A {@code Relation}
+   */
+  public static <X, Y> Relation<X, Y> sameAs() {
+    return (x, y) -> x == y;
+  }
+
+  static {
+    setMessagePattern(sameAs(), msgSameAs());
+    setName(sameAs(), "sameAs");
+  }
+
+  /**
+   * Verifies that the argument is either null or equals the specified value.
+   *
+   * @param <X> The type of the argument
+   * @return A {@code Relation}
+   */
+  public static <X> Relation<X, X> nullOr() {
+    return (x, y) -> x == null || x.equals(y);
+  }
+
+  static {
+    setMessagePattern(nullOr(), msgNullOr());
+    setName(nullOr(), "nullOr");
+  }
 
   /**
    * Verifies that the argument is an instance of the specified class or, if the argument is itself
@@ -417,8 +543,8 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the specified {@code Collection} contains the specified value. Equivalent to
-   * {@link Collection#contains(Object) Collection::contains}.
+   * Verifies that a {@code Collection} argument contains the specified value. Equivalent to {@link
+   * Collection#contains(Object) Collection::contains}.
    *
    * @param <E> The type of the elements in the {@code Collection}
    * @param <C> The type of the collection
@@ -434,7 +560,7 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies the specified argument is contained in the specified {@code Collection}.
+   * Verifies that the argument is an element of the specified {@code Collection}.
    *
    * @param <E> The type of the argument
    * @param <C> The type of the {@code Collection}
@@ -450,9 +576,26 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the specified {@code Collection} argument is a superset of another {@code
-   * Collection}. Equivalent to {@link Collection#containsAll(Collection) Collection::containsAll}.
-   * Note that the collections <i>need not be</i> instances of the {@link Set} interface:
+   * Verifies that the argument is an element of the specified array. Equivalent to {@link
+   * ArrayMethods#isElementOf(Object, Object[]) ArrayMethods::isElementOf}.
+   *
+   * @param <X> The type of the argument
+   * @param <Y> The component type of the array
+   * @return A {@code Relation}
+   */
+  public static <Y, X extends Y> Relation<X, Y[]> elementOf() {
+    return ArrayMethods::isElementOf;
+  }
+
+  static {
+    setMessagePattern(elementOf(), msgIn()); // Recycle message
+    setName(elementOf(), "elementOf");
+  }
+
+  /**
+   * Verifies that a {@code Collection} argument is a superset of the specified {@code Collection}.
+   * Equivalent to {@link Collection#containsAll(Collection) Collection::containsAll}. Note that the
+   * collections <i>need not be</i> instances of the {@link Set} interface:
    *
    * <blockquote>
    *
@@ -563,39 +706,6 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is an element of the specified array. Equivalent to {@link
-   * ArrayMethods#isElementOf(Object, Object[]) ArrayMethods::isElementOf}.
-   *
-   * @param <X> The type of the argument
-   * @param <Y> The component type of the array
-   * @return A {@code Relation}
-   */
-  public static <Y, X extends Y> Relation<X, Y[]> elementOf() {
-    return ArrayMethods::isElementOf;
-  }
-
-  static {
-    setMessagePattern(elementOf(), msgIn()); // recycle message
-    setName(elementOf(), "elementOf");
-  }
-
-  /**
-   * Verifies that the argument is equal to a particular value. Equivalent to {@link
-   * Objects#equals(Object) Objects::equals}.
-   *
-   * @param <X> The type of the argument
-   * @return A {@code Relation}
-   */
-  public static <X> Relation<X, X> equalTo() {
-    return Objects::equals;
-  }
-
-  static {
-    setMessagePattern(equalTo(), msgEqualTo());
-    setName(equalTo(), "equalTo");
-  }
-
-  /**
    * Verifies that a {@code String} is present, ignoring case, in a {@code List} of strings.
    *
    * @return A {@code Relation} implementing the test described above
@@ -607,109 +717,6 @@ public class CommonChecks {
   static {
     setMessagePattern(equalsIgnoreCase(), msgEqualsIgnoreCase());
     setName(equalsIgnoreCase(), "equalsIgnoreCase");
-  }
-
-  /**
-   * Verifies that the argument references the same object as some other reference.
-   *
-   * @param <X> The type of the argument (the subject of the {@code Relation})
-   * @param <Y> The type of object of the {@code Relation}
-   * @return A {@code Relation}
-   */
-  public static <X, Y> Relation<X, Y> sameAs() {
-    return (x, y) -> x == y;
-  }
-
-  static {
-    setMessagePattern(sameAs(), msgSameAs());
-    setName(sameAs(), "sameAs");
-  }
-
-  /**
-   * Verifies that the argument is either null or has a particular value.
-   *
-   * @param <X> The type of the argument
-   * @return A {@code Relation}
-   */
-  public static <X> Relation<X, X> nullOr() {
-    return (x, y) -> x == null || x.equals(y);
-  }
-
-  static {
-    setMessagePattern(nullOr(), msgNullOr());
-    setName(nullOr(), "nullOr");
-  }
-
-  /**
-   * Verifies that the argument is greater than the specified value. Especially useful for checking
-   * values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double}, but can be
-   * used to check any value that is an instance of {@link Comparable}.
-   *
-   * @param <X> The type of the values being compared
-   * @return A {@code Relation}
-   * @see #gt()
-   */
-  public static <X extends Comparable<X>> Relation<X, X> GT() {
-    return (x, y) -> x.compareTo(y) > 0;
-  }
-
-  static {
-    setMessagePattern(GT(), msgGt()); // recycle message
-    setName(GT(), "GT");
-  }
-
-  /**
-   * Verifies that the argument is less than the specified value. Especially useful for checking
-   * values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double}, but can be
-   * used to check any value that is an instance of {@link Comparable}.
-   *
-   * @param <X> The type of the values being compared
-   * @return A {@code Relation}
-   * @see #lt()
-   */
-  public static <X extends Comparable<X>> Relation<X, X> LT() {
-    return (x, y) -> x.compareTo(y) < 0;
-  }
-
-  static {
-    setMessagePattern(LT(), msgLt()); // recycle message
-    setName(LT(), "LT");
-  }
-
-  /**
-   * Verifies that the argument is greater than or equal to the specified value. Especially useful
-   * for checking values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double},
-   * but can be used to check any value that is an instance of {@link Comparable}.
-   *
-   * @param <X> The type of the values being compared
-   * @return A {@code Relation}
-   * @see #gte()
-   */
-  public static <X extends Comparable<X>> Relation<X, X> GTE() {
-    return (x, y) -> x.compareTo(y) >= 0;
-  }
-
-  static {
-    setMessagePattern(GTE(), msgGte()); // recycle message
-    setName(GTE(), "GTE");
-  }
-
-  /**
-   * Verifies that the argument is less than or equal to the specified value. Especially useful for
-   * checking values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double}, but
-   * can be used to check any value that is an instance of {@link Comparable}.
-   *
-   * @param <X> The type of the values being compared
-   * @return A {@code Relation}
-   * @see #lte()
-   */
-  public static <X extends Comparable<X>> Relation<X, X> LTE() {
-    return (x, y) -> x.compareTo(y) <= 0;
-  }
-
-  static {
-    setMessagePattern(LTE(), msgLte()); // recycle message
-    setName(LTE(), "LTE");
   }
 
   /**
@@ -757,152 +764,261 @@ public class CommonChecks {
     setName(contains(), "contains");
   }
 
-  // Lookup for nRangeFrom()
-  private static final Map<Class, Relation<?, Pair<?>>> m0 =
-      Map.of(
-          Integer.class,
-          (x, y) -> (int) x >= (int) y.one() && (int) x < (int) y.two(),
-          Long.class,
-          (x, y) -> (long) x >= (long) y.one() && (long) x < (long) y.two(),
-          Double.class,
-          (x, y) -> (double) x >= (double) y.one() && (double) x < (double) y.two(),
-          Float.class,
-          (x, y) -> (float) x >= (float) y.one() && (float) x < (float) y.two(),
-          Byte.class,
-          (x, y) -> (byte) x >= (byte) y.one() && (byte) x < (byte) y.two(),
-          Short.class,
-          (x, y) -> (short) x >= (short) y.one() && (short) x < (short) y.two(),
-          BigInteger.class,
-          (x, y) -> {
-            BigInteger bi0 = (BigInteger) x;
-            BigInteger bi1 = (BigInteger) y.one();
-            BigInteger bi2 = (BigInteger) y.two();
-            return bi0.compareTo(bi1) >= 0 && bi0.compareTo(bi2) < 0;
-          },
-          BigDecimal.class,
-          (x, y) -> {
-            BigDecimal bd0 = (BigDecimal) x;
-            BigDecimal bd1 = (BigDecimal) y.one();
-            BigDecimal bd2 = (BigDecimal) y.two();
-            return bd0.compareTo(bd1) >= 0 && bd0.compareTo(bd2) < 0;
-          });
-
-  // Lookup for inRangeClosed()
-  private static final Map<Class, Relation<?, Pair<?>>> m1 =
-      Map.of(
-          Integer.class,
-          (x, y) -> (int) x >= (int) y.one() && (int) x <= (int) y.two(),
-          Long.class,
-          (x, y) -> (long) x >= (long) y.one() && (long) x <= (long) y.two(),
-          Double.class,
-          (x, y) -> (double) x >= (double) y.one() && (double) x <= (double) y.two(),
-          Float.class,
-          (x, y) -> (float) x >= (float) y.one() && (float) x <= (float) y.two(),
-          Byte.class,
-          (x, y) -> (byte) x >= (byte) y.one() && (byte) x <= (byte) y.two(),
-          Short.class,
-          (x, y) -> (short) x >= (short) y.one() && (short) x <= (short) y.two(),
-          BigInteger.class,
-          (x, y) -> {
-            BigInteger bi0 = (BigInteger) x;
-            BigInteger bi1 = (BigInteger) y.one();
-            BigInteger bi2 = (BigInteger) y.two();
-            return bi0.compareTo(bi1) >= 0 && bi0.compareTo(bi2) <= 0;
-          },
-          BigDecimal.class,
-          (x, y) -> {
-            BigDecimal bd0 = (BigDecimal) x;
-            BigDecimal bd1 = (BigDecimal) y.one();
-            BigDecimal bd2 = (BigDecimal) y.two();
-            return bd0.compareTo(bd1) >= 0 && bd0.compareTo(bd2) <= 0;
-          });
+  //////////////////////////////////////////////////////////////////////////////////
+  // ObjIntRelation
+  //////////////////////////////////////////////////////////////////////////////////
 
   /**
-   * Verifies that a number lies between two other numbers, the first one inclusive, the second one
-   * exclusive.
+   * Verifies that the length of a {@code String} argument has the specified value. Although you can
+   * use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
+   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used with
+   * the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
+   * validate properties of properties:
    *
-   * @return A {@code Relation} that implements the test described above
-   */
-  public static <T extends Number, U extends Number> Relation<T, Pair<T>> inRangeFrom() {
-    return (x, y) -> ((Relation) m0.get(x.getClass())).exists(x, y);
-  }
-
-  static {
-    setMessagePattern(inRangeFrom(), msgInRangeFrom());
-    setName(inRangeFrom(), "inRangeFrom");
-  }
-
-  /**
-   * Verifies that a number lies between two other numbers, both inclusive.
+   * <blockquote>
    *
-   * @return A {@code Relation} that implements the test described above
+   * <pre>{@code
+   * // Validate the length of a string argument (not preferred):
+   * Check.that("FOO").is(strlenEQ(), 3);
+   * // Validate the length of a string argument (preferred):
+   * Check.that("FOO").has(strlen(), eq(), 3);
+   * // Validate the length of a string property of the argument:
+   * Check.that(employee).has(Employee::getLastName, strlenEQ(), 3);
+   * }</pre>
+   *
+   * </blockquote>
+   *
+   * @return
    */
-  public static <T extends Number, U extends Number> Relation<T, Pair<T>> inRangeClosed() {
-    return (x, y) -> ((Relation) m1.get(x.getClass())).exists(x, y);
-  }
-
-  static {
-    setMessagePattern(inRangeClosed(), msgInRangeClosed());
-    setName(inRangeClosed(), "inRangeClosed");
-  }
-
-  /* ++++++++++++++ ObjIntRelation ++++++++++++++ */
-
-  public static <T extends CharSequence> ObjIntRelation<T> strlenEquals() {
+  public static ObjIntRelation<String> strlenEQ() {
     return (x, y) -> x.length() == y;
   }
 
   static {
-    setMessagePattern(strlenEquals(), msgEq()); // Recycle message
-    setName(strlenEquals(), "strlenEquals");
+    setMessagePattern(strlenEQ(), msgEq()); // Recycle message
+    setName(strlenEQ(), "strlenEQ");
   }
 
-  public static <T extends CharSequence> ObjIntRelation<T> strlenNotEquals() {
-    return (x, y) -> x.length() != y;
-  }
-
-  static {
-    setMessagePattern(strlenNotEquals(), msgNe()); // Recycle message
-    setName(strlenNotEquals(), "strlenNotEquals");
-  }
-
-  public static <T extends CharSequence> ObjIntRelation<T> strlenGreaterThan() {
+  /**
+   * Verifies that the length of a {@code String} argument is greater than the specified value.
+   * Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
+   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used
+   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
+   * validate properties of properties:
+   *
+   * <blockquote>
+   *
+   * <pre>{@code
+   * // Validate the length of a string argument (not preferred):
+   * Check.that("FOO").is(strlenGT(), 2);
+   * // Validate the length of a string argument (preferred):
+   * Check.that("FOO").has(strlen(), gt(), 2);
+   * // Validate the length of a string property of the argument:
+   * Check.that(employee).has(Employee::getLastName, strlenGT(), 2);
+   * }</pre>
+   *
+   * </blockquote>
+   *
+   * @return
+   */
+  public static ObjIntRelation<String> strlenGT() {
     return (x, y) -> x.length() > y;
   }
 
   static {
-    setMessagePattern(strlenGreaterThan(), msgGt()); // Recycle message
-    setName(strlenGreaterThan(), "strlenGreaterThan");
+    setMessagePattern(strlenGT(), msgGt()); // Recycle message
+    setName(strlenGT(), "strlenGT");
   }
 
-  public static <T extends CharSequence> ObjIntRelation<T> strlenAtLeast() {
+  /**
+   * Verifies that the length of a {@code String} argument is greater than or equal to the specified
+   * value. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int)
+   * is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant
+   * to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
+   * validate properties of properties:
+   *
+   * @see #strlenGT()
+   * @return
+   */
+  public static ObjIntRelation<String> strlenGTE() {
     return (x, y) -> x.length() >= y;
   }
 
   static {
-    setMessagePattern(strlenAtLeast(), msgGte()); // Recycle message
-    setName(strlenAtLeast(), "strlenAtLeast");
+    setMessagePattern(strlenGTE(), msgGte()); // Recycle message
+    setName(strlenGTE(), "strlenGTE");
   }
 
-  public static <T extends CharSequence> ObjIntRelation<T> strlenLessThan() {
+  /**
+   * Verifies that the length of a {@code String} argument is less than the specified value.
+   * Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
+   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used
+   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
+   * validate properties of properties:
+   *
+   * @see #strlenGT()
+   * @return
+   */
+  public static ObjIntRelation<String> strlenLT() {
     return (x, y) -> x.length() < y;
   }
 
   static {
-    setMessagePattern(strlenLessThan(), msgLt()); // Recycle message
-    setName(strlenLessThan(), "strlenLessThan");
+    setMessagePattern(strlenLT(), msgLt()); // Recycle message
+    setName(strlenLT(), "strlenLT");
   }
 
-  public static <T extends CharSequence> ObjIntRelation<T> strlenAtMost() {
+  /**
+   * Verifies that the length of a {@code String} argument is less than or equal to the specified
+   * value. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int)
+   * is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant
+   * to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
+   * validate properties of properties:
+   *
+   * @see #strlenGT()
+   * @return
+   */
+  public static ObjIntRelation<String> strlenLTE() {
     return (x, y) -> x.length() <= y;
   }
 
   static {
-    setMessagePattern(strlenAtMost(), msgLte()); // Recycle message
-    setName(strlenAtMost(), "strlenAtMost");
+    setMessagePattern(strlenLTE(), msgLte()); // Recycle message
+    setName(strlenLTE(), "strlenLTE");
   }
 
-  /* ++++++++++++++ IntObjRelation ++++++++++++++ */
+  /**
+   * Verifies that the size of a {@code Collection} argument has the specified value. Although you
+   * can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
+   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used with
+   * the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
+   * validate properties of properties:
+   *
+   * <blockquote>
+   *
+   * <pre>{@code
+   * // Validate the size of a collection argument (not preferred):
+   * Check.that(List.of("A", "B", "C")).is(sizeEQ(), 3);
+   * // Validate the size of a collection argument (preferred):
+   * Check.that(List.of("A", "B", "C")).has(size(), eq(), 3);
+   * // Validate the size of a collection property of the argument:
+   * Check.that(company).has(Company::getEmployees, sizeEQ(), 3);
+   * }</pre>
+   *
+   * </blockquote>
+   *
+   * @return
+   */
+  public static <E, C extends Collection<E>> ObjIntRelation<C> sizeEQ() {
+    return (x, y) -> x.size() == y;
+  }
+
+  static {
+    setMessagePattern(sizeEQ(), msgEq()); // Recycle message
+    setName(sizeEQ(), "sizeEQ");
+  }
+
+  /**
+   * Verifies that the size of a {@code Collection} argument is greater than the specified value.
+   * Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
+   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used
+   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
+   * validate properties of properties:
+   *
+   * <blockquote>
+   *
+   * <pre>{@code
+   * // Validate the size of a collection argument (not preferred):
+   * Check.that(List.of("A", "B", "C")).is(sizeGT(), 2);
+   * // Validate the size of a collection argument (preferred):
+   * Check.that(List.of("A", "B", "C")).has(size(), gt(), 2);
+   * // Validate the size of a collection property of the argument:
+   * Check.that(company).has(Company::getEmployees, sizeGT(), 2);
+   * }</pre>
+   *
+   * </blockquote>
+   *
+   * @return
+   */
+  public static <E, C extends Collection<E>> ObjIntRelation<C> sizeGT() {
+    return (x, y) -> x.size() > y;
+  }
+
+  static {
+    setMessagePattern(sizeGT(), msgGt()); // Recycle message
+    setName(sizeGT(), "sizeGT");
+  }
+
+  /**
+   * Verifies that the size of a {@code Collection} argument is greater than or equal to the
+   * specified value. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation,
+   * int) is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really
+   * meant to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and
+   * {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way
+   * to validate properties of properties:
+   *
+   * @see #sizeGT()
+   * @return
+   */
+  public static <E, C extends Collection<E>> ObjIntRelation<C> sizeGTE() {
+    return (x, y) -> x.size() >= y;
+  }
+
+  static {
+    setMessagePattern(sizeGTE(), msgGte()); // Recycle message
+    setName(sizeGTE(), "sizeGTE");
+  }
+
+  /**
+   * Verifies that the size of a {@code Collection} argument is less than the specified value.
+   * Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
+   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used
+   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
+   * validate properties of properties:
+   *
+   * @see #sizeGT()
+   * @return
+   */
+  public static <E, C extends Collection<E>> ObjIntRelation<C> sizeLT() {
+    return (x, y) -> x.size() < y;
+  }
+
+  static {
+    setMessagePattern(sizeLT(), msgLt()); // Recycle message
+    setName(sizeLT(), "sizeLT");
+  }
+
+  /**
+   * Verifies that the size of a {@code Collection} argument is less than or equal to the specified
+   * value. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int)
+   * is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant
+   * to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
+   * validate properties of properties:
+   *
+   * @see #sizeGT()
+   * @return
+   */
+  public static <E, C extends Collection<E>> ObjIntRelation<C> sizeLTE() {
+    return (x, y) -> x.size() <= y;
+  }
+
+  static {
+    setMessagePattern(sizeLTE(), msgLte()); // Recycle message
+    setName(sizeLTE(), "sizeLTE");
+  }
+
+  //////////////////////////////////////////////////////////////////////////////////
+  // IntObjRelation
+  //////////////////////////////////////////////////////////////////////////////////
 
   private static final String ERR_INDEX_OF =
       "Object of indexOf(), fromIndexOf() and toIndexOf() must be a List, a String or an array";
@@ -973,7 +1089,7 @@ public class CommonChecks {
   }
 
   static {
-    setMessagePattern(toIndexOf(), msgFromIndexOf()); // recycle message
+    setMessagePattern(toIndexOf(), msgFromIndexOf()); // Recycle message
     setName(toIndexOf(), "toIndexOf");
   }
 
@@ -987,7 +1103,7 @@ public class CommonChecks {
   }
 
   static {
-    setMessagePattern(intElementOf(), msgIn()); // recycle message
+    setMessagePattern(intElementOf(), msgIn()); // Recycle message
     setName(intElementOf(), "intElementOf");
   }
 

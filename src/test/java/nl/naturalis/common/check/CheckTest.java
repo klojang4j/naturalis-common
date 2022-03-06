@@ -144,7 +144,7 @@ public class CheckTest {
     Check.that((Integer) 5).is(keyIn(), map);
     Check.that((Integer) 7).isNot(valueIn(), map);
     Check.that((Integer) 7).is(elementOf(), pack(1, 7, 10));
-    Check.that("Hello").is(equalTo(), new String("Hello"));
+    Check.that("Hello").is(EQ(), new String("Hello"));
     Check.that("Hello").isNot(sameAs(), new String("Hello"));
     Check.that("Hello").is(equalsIgnoreCase(), "HELLO");
     Check.that(null).is(nullOr(), Boolean.TRUE);
@@ -205,10 +205,10 @@ public class CheckTest {
 
   @Test
   public void hasRelation00() {
-    Check.that(List.of(1, 2, 3, 4)).has(l -> l.subList(1, 3), equalTo(), List.of(2, 3));
+    Check.that(List.of(1, 2, 3, 4)).has(l -> l.subList(1, 3), EQ(), List.of(2, 3));
     Check.that(MONDAY).has(strval(), startsWith(), "MON");
     Check.that(MONDAY).has(strval(), (x, y) -> x.startsWith(y), "MON");
-    Check.that("Foo").notHas(type(), equalTo(), int.class);
+    Check.that("Foo").notHas(type(), EQ(), int.class);
     // TODO, Houston, we have a problem here
     // Check.that(42).has(type(), equalTo(), int.class);
   }
@@ -245,16 +245,15 @@ public class CheckTest {
 
   @Test
   public void hasObjIntRelation00() {
-    Check.that("foo").has(s -> s.substring(1), strlenEquals(), 2);
-    Check.that("foo").has(s -> s + s, strlenNotEquals(), 3);
-    Check.that("foo").has(toUpperCase(), strlenGreaterThan(), 2);
-    Check.that("foo").has(toLowerCase(), strlenAtLeast(), 3);
-    Check.that("foo").notHas(toUpperCase(), strlenAtMost(), 2);
-    Check.that("foo").notHas(toUpperCase(), strlenLessThan(), 3);
+    Check.that("foo").has(s -> s.substring(1), strlenEQ(), 2);
+    Check.that("foo").has(toUpperCase(), strlenGT(), 2);
+    Check.that("foo").has(toLowerCase(), strlenGTE(), 3);
+    Check.that("foo").notHas(toUpperCase(), strlenLTE(), 2);
+    Check.that("foo").notHas(toUpperCase(), strlenLT(), 3);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void hasObjIntRelation01() {
-    Check.that("foo").has(s -> s.substring(1), strlenEquals(), 6);
+    Check.that("foo").has(s -> s.substring(1), strlenEQ(), 6);
   }
 }

@@ -4,9 +4,11 @@ import java.io.File;
 
 import static java.lang.String.format;
 import static nl.naturalis.common.ClassMethods.className;
-import static nl.naturalis.common.check.Messages.*;
+import static nl.naturalis.common.check.Messages.toStr;
 
-class MsgPredicate {
+final class MsgPredicate {
+
+  private MsgPredicate() {}
 
   static Formatter msgNull() {
     return args -> {
