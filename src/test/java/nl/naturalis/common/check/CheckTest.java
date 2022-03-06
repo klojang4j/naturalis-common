@@ -5,7 +5,6 @@ import nl.naturalis.common.function.Relation;
 import org.junit.Test;
 
 import java.util.*;
-import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 import static java.time.DayOfWeek.*;
@@ -96,7 +95,7 @@ public class CheckTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void relation00() {
-    Check.that(Float.valueOf(7.5F)).is(greaterThan(), Short.valueOf((short) 16));
+    Check.that(Float.valueOf(7.5F)).is(GT(), 16F);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -150,10 +149,11 @@ public class CheckTest {
     Check.that("Hello").is(equalsIgnoreCase(), "HELLO");
     Check.that(null).is(nullOr(), Boolean.TRUE);
     Check.that(true).is(nullOr(), Boolean.TRUE);
-    Check.that(7.23F).is(greaterThan(), (byte) 2);
-    Check.that(7.230F).is(atMost(), 7.230F);
-    Check.that((Short) (short) 17).is(lessThan(), (byte) 31);
-    Check.that((Short) (short) 17).is(atLeast(), (byte) 17);
+    Check.that(7.23F).is(GT(), 2F);
+    Check.that(7.230F).is(LTE(), 7.230F);
+    Check.that((Short) (short) 17).is(LT(), (short) 31);
+    Check.that((Short) (short) 17).is(GTE(), (short) 17);
+    Check.that("ZZZ").is(GT(), "AAA");
     Check.that("hello").isNot(startsWith(), "foo");
     Check.that("hello").is(endsWith(), "lo");
     Check.that("hello").is(contains(), "lo");

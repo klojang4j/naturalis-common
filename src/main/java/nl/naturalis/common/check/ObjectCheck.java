@@ -1554,10 +1554,10 @@ public final class ObjectCheck<T, E extends Exception> {
     String fmt = FormatNormalizer.normalize(pattern);
     Object[] all = new Object[msgArgs.length + 5];
     all[0] = NAMES.getOrDefault(test, test.getClass().getSimpleName());
-    all[1] = toPrettyString(subject);
+    all[1] = toStr(subject);
     all[2] = subject == null ? null : simpleClassName(subject);
     all[3] = argName;
-    all[4] = toPrettyString(object);
+    all[4] = toStr(object);
     System.arraycopy(msgArgs, 0, all, 5, msgArgs.length);
     return exc.apply(String.format(fmt, all));
   }

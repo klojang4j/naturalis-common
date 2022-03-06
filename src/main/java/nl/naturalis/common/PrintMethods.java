@@ -100,7 +100,7 @@ public class PrintMethods {
    * @return A human-friendly representation of the duration of the specified time interval
    */
   public static String interval(long start, long end) {
-    Check.that(end).is(atLeast(), start, "Negative time interval");
+    Check.that(end).is(GTE(), start, "Negative time interval");
     return duration(end - start);
   }
 

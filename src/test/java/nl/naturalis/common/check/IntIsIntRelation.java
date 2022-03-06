@@ -11,7 +11,7 @@ public class IntIsIntRelation {
 
   @Test(expected = IllegalArgumentException.class)
   public void lambdaAsIntRelation() {
-    Check.that(7).is(intInt((x, y) -> x > y), 9);
+    Check.that(7).is((x, y) -> x > y, 9);
   }
 
   @Test

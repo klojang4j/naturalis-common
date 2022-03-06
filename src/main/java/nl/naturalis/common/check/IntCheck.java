@@ -977,10 +977,10 @@ public final class IntCheck<E extends Exception> {
     String fmt = FormatNormalizer.normalize(pattern);
     Object[] all = new Object[msgArgs.length + 5];
     all[0] = NAMES.getOrDefault(test, test.getClass().getSimpleName());
-    all[1] = Messages.toPrettyString(subject);
+    all[1] = Messages.toStr(subject);
     all[2] = ifNotNull(subject, Messages::simpleClassName);
     all[3] = argName;
-    all[4] = Messages.toPrettyString(object);
+    all[4] = Messages.toStr(object);
     System.arraycopy(msgArgs, 0, all, 5, msgArgs.length);
     return exc.apply(String.format(fmt, all));
   }

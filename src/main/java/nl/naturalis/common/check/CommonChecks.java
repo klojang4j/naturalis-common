@@ -11,10 +11,16 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Function;
+import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 
 import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.Messages.*;
+import static nl.naturalis.common.check.MsgPredicate.*;
+import static nl.naturalis.common.check.MsgIntPredicate.*;
+import static nl.naturalis.common.check.MsgIntRelation.*;
+import static nl.naturalis.common.check.MsgRelation.*;
 
 /**
  * Defines various common tests for arguments. The tests have short, informative error messages
@@ -635,79 +641,75 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that a {@code Number} is greater than another {@code Number}, widening both to {@code
-   * Double} before comparing them. Use when testing any type of numbers besides {@code int} or
-   * {@code Integer}.
+   * Verifies that the argument is greater than the specified value. Especially useful for checking
+   * values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double}, but can be
+   * used to check any value that is an instance of {@link Comparable}.
    *
-   * @param <X> The type of the argument
-   * @param <Y> The type of the value to compare the argument to
+   * @param <X> The type of the values being compared
    * @return A {@code Relation}
    * @see #gt()
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> greaterThan() {
-    return (x, y) -> x.doubleValue() > y.doubleValue();
+  public static <X extends Comparable<X>> Relation<X, X> GT() {
+    return (x, y) -> x.compareTo(y) > 0;
   }
 
   static {
-    setMessagePattern(greaterThan(), msgGreaterThan()); // recycle message
-    setName(greaterThan(), "greaterThan");
+    setMessagePattern(GT(), msgGt()); // recycle message
+    setName(GT(), "GT");
   }
 
   /**
-   * Verifies that a {@code Number} is greater than or equal to another {@code Number}, widening
-   * both to {@code Double} before comparing them. Use when testing any type of numbers besides
-   * {@code int} or {@code Integer}.
+   * Verifies that the argument is less than the specified value. Especially useful for checking
+   * values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double}, but can be
+   * used to check any value that is an instance of {@link Comparable}.
    *
-   * @param <X> The type of the argument
-   * @param <Y> The type of the value to compare the argument to
-   * @return A {@code Relation}
-   * @see #gte()
-   */
-  public static <X extends Number, Y extends Number> Relation<X, Y> atLeast() {
-    return (x, y) -> x.doubleValue() >= y.doubleValue();
-  }
-
-  static {
-    setMessagePattern(atLeast(), msgAtLeast()); // recycle message
-    setName(atLeast(), "atLeast");
-  }
-
-  /**
-   * Verifies that a {@code Number} is less than another {@code Number}, widening both to {@code
-   * Double} before comparing them. Use when testing any type of numbers besides {@code int} or
-   * {@code Integer}.
-   *
-   * @param <X> The type of the argument
-   * @param <Y> The type of the value to compare the argument to
+   * @param <X> The type of the values being compared
    * @return A {@code Relation}
    * @see #lt()
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> lessThan() {
-    return (x, y) -> x.doubleValue() < y.doubleValue();
+  public static <X extends Comparable<X>> Relation<X, X> LT() {
+    return (x, y) -> x.compareTo(y) < 0;
   }
 
   static {
-    setMessagePattern(lessThan(), msgLessThan()); // recycle message
-    setName(lessThan(), "lessThan");
+    setMessagePattern(LT(), msgLt()); // recycle message
+    setName(LT(), "LT");
   }
 
   /**
-   * Verifies that a {@code Number} is less than or equal to another {@code Number}, widening both
-   * to {@code Double} before comparing them. Use when testing any type of numbers besides {@code
-   * int} or {@code Integer}.
+   * Verifies that the argument is greater than or equal to the specified value. Especially useful
+   * for checking values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double},
+   * but can be used to check any value that is an instance of {@link Comparable}.
    *
-   * @param <X> The type of the argument
-   * @param <Y> The type of the value to compare the argument to
+   * @param <X> The type of the values being compared
    * @return A {@code Relation}
-   * @see #lte()
+   * @see #gte()
    */
-  public static <X extends Number, Y extends Number> Relation<X, Y> atMost() {
-    return (x, y) -> x.doubleValue() <= y.doubleValue();
+  public static <X extends Comparable<X>> Relation<X, X> GTE() {
+    return (x, y) -> x.compareTo(y) >= 0;
   }
 
   static {
-    setMessagePattern(atMost(), msgAtMost()); // recycle message
-    setName(atMost(), "atMost");
+    setMessagePattern(GTE(), msgGte()); // recycle message
+    setName(GTE(), "GTE");
+  }
+
+  /**
+   * Verifies that the argument is less than or equal to the specified value. Especially useful for
+   * checking values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double}, but
+   * can be used to check any value that is an instance of {@link Comparable}.
+   *
+   * @param <X> The type of the values being compared
+   * @return A {@code Relation}
+   * @see #lte()
+   */
+  public static <X extends Comparable<X>> Relation<X, X> LTE() {
+    return (x, y) -> x.compareTo(y) <= 0;
+  }
+
+  static {
+    setMessagePattern(LTE(), msgLte()); // recycle message
+    setName(LTE(), "LTE");
   }
 
   /**
@@ -869,7 +871,7 @@ public class CommonChecks {
   }
 
   static {
-    setMessagePattern(strlenGreaterThan(), msgGreaterThan()); // Recycle message
+    setMessagePattern(strlenGreaterThan(), msgGt()); // Recycle message
     setName(strlenGreaterThan(), "strlenGreaterThan");
   }
 
@@ -878,7 +880,7 @@ public class CommonChecks {
   }
 
   static {
-    setMessagePattern(strlenAtLeast(), msgGreaterThan()); // Recycle message
+    setMessagePattern(strlenAtLeast(), msgGte()); // Recycle message
     setName(strlenAtLeast(), "strlenAtLeast");
   }
 
@@ -887,7 +889,7 @@ public class CommonChecks {
   }
 
   static {
-    setMessagePattern(strlenLessThan(), msgLessThan()); // Recycle message
+    setMessagePattern(strlenLessThan(), msgLt()); // Recycle message
     setName(strlenLessThan(), "strlenLessThan");
   }
 
@@ -896,7 +898,7 @@ public class CommonChecks {
   }
 
   static {
-    setMessagePattern(strlenAtMost(), msgAtMost()); // Recycle message
+    setMessagePattern(strlenAtMost(), msgLte()); // Recycle message
     setName(strlenAtMost(), "strlenAtMost");
   }
 
@@ -1029,7 +1031,7 @@ public class CommonChecks {
   }
 
   static {
-    setMessagePattern(gt(), msgGreaterThan());
+    setMessagePattern(gt(), msgGt());
     setName(gt(), "gt");
   }
 
@@ -1043,7 +1045,7 @@ public class CommonChecks {
   }
 
   static {
-    setMessagePattern(gte(), msgAtLeast());
+    setMessagePattern(gte(), msgGte());
     setName(gte(), "gte");
   }
 
@@ -1057,7 +1059,7 @@ public class CommonChecks {
   }
 
   static {
-    setMessagePattern(lt(), msgLessThan());
+    setMessagePattern(lt(), msgLt());
     setName(lt(), "lt");
   }
 
@@ -1071,7 +1073,7 @@ public class CommonChecks {
   }
 
   static {
-    setMessagePattern(lte(), msgAtMost());
+    setMessagePattern(lte(), msgLte());
     setName(lte(), "lte");
   }
 
@@ -1125,12 +1127,11 @@ public class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code IntPredicate}. Use when the compiler starts
-   * complaining about an <b>Ambiguous method call</b>. Note that for the {@code has()} and {@code
-   * notHas()} methods you can either wrap the function extracting the property to be tested (the
-   * {@code property} argument) or the function that tests the value of the property (the {@code
-   * test} argument). You don't need to wrap both. Wrapping just one gives the compiler enough
-   * context to determine which of the overloaded method is called.
+   * (Not a check) Simply returns the specified {@code IntPredicate}. Use when passing a lambda or
+   * method reference to the {@code Check.is()} and {@code Check.isNot()} methods. Because these
+   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
+   * supposed to be a {@code Predicate} or {@code IntPredicate} (it will complain about an
+   * <b>Ambiguous method call</b>). This method clears that up for the compiler.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @return The same {@code IntPredicate}
@@ -1140,12 +1141,11 @@ public class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code ToIntFunction}. Use when the compiler starts
-   * complaining about an <b>Ambiguous method call</b>. Note that for the {@code has()} and {@code
-   * notHas()} methods you can either wrap the function extracting the property to be tested (the
-   * {@code property} argument) or the function that tests the value of the property (the {@code
-   * test} argument). You don't need to wrap both. Wrapping just one gives the compiler enough
-   * context to determine which of the overloaded method is called.
+   * (Not a check) Simply returns the specified {@code Predicate}. Use when passing a lambda or
+   * method reference to the {@code Check.is()} and {@code Check.isNot()} methods. Because these
+   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
+   * supposed to be a {@code Predicate} or {@code IntPredicate} (it will complain about an
+   * <b>Ambiguous method call</b>). This method clears that up for the compiler.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the object being tested
@@ -1156,12 +1156,11 @@ public class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code ToIntFunction}. Use when the compiler starts
-   * complaining about an <b>Ambiguous method call</b>. Note that for the {@code has()} and {@code
-   * notHas()} methods you can either wrap the function extracting the property to be tested (the
-   * {@code property} argument) or the function that tests the value of the property (the {@code
-   * test} argument). You don't need to wrap both. Wrapping just one gives the compiler enough
-   * context to determine which of the overloaded method is called.
+   * (Not a check) Simply returns the specified {@code Relation}. Use when passing a lambda or
+   * method reference to the {@code Check.is()} and {@code Check.isNot()} methods. Because these
+   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
+   * supposed to be a {@code Relation} or one of its sister interfaces (it will complain about an
+   * <b>Ambiguous method call</b>). This method clears that up for the compiler.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the subject of the {@code Relation}
@@ -1173,12 +1172,11 @@ public class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code ToIntFunction}. Use when the compiler starts
-   * complaining about an <b>Ambiguous method call</b>. Note that for the {@code has()} and {@code
-   * notHas()} methods you can either wrap the function extracting the property to be tested (the
-   * {@code property} argument) or the function that tests the value of the property (the {@code
-   * test} argument). You don't need to wrap both. Wrapping just one gives the compiler enough
-   * context to determine which of the overloaded method is called.
+   * (Not a check) Simply returns the specified {@code ObjIntRelation}. Use when passing a lambda or
+   * method reference to the {@code Check.is()} and {@code Check.isNot()} methods. Because these
+   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
+   * supposed to be an {@code ObjIntRelation} or one of its sister interfaces (it will complain
+   * about an <b>Ambiguous method call</b>). This method clears that up for the compiler.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the subject of the {@code Relation}
@@ -1214,38 +1212,6 @@ public class CommonChecks {
    * @return The same {@code IntRelation}
    */
   public static IntRelation intInt(IntRelation lambdaOrMethodReference) {
-    return lambdaOrMethodReference;
-  }
-
-  /**
-   * (Not a check) Simply returns the specified {@code ToIntFunction}. Use when the compiler starts
-   * complaining about an <b>Ambiguous method call</b>. Note that for the {@code has()} and {@code
-   * notHas()} methods you can either wrap the function extracting the property to be tested (the
-   * {@code property} argument) or the function that tests the value of the property (the {@code
-   * test} argument). You don't need to wrap both. Wrapping just one gives the compiler enough
-   * context to determine which of the overloaded method is called.
-   *
-   * @param lambdaOrMethodReference A lambda or method reference
-   * @param <T> The type of the lambda's return value
-   * @return The same {@code ToIntFunction}
-   */
-  public static <T> ToIntFunction<T> toInt(ToIntFunction<T> lambdaOrMethodReference) {
-    return lambdaOrMethodReference;
-  }
-
-  /**
-   * (Not a check) Simply returns the specified {@code ToIntFunction}. Use when the compiler starts
-   * complaining about an <b>Ambiguous method call</b>. Note that for the {@code has()} and {@code
-   * notHas()} methods you can either wrap the function extracting the property to be tested (the
-   * {@code property} argument) or the function that tests the value of the property (the {@code
-   * test} argument). You don't need to wrap both. Wrapping just one gives the compiler enough
-   * context to determine which of the overloaded method is called.
-   *
-   * @param lambdaOrMethodReference
-   * @param <T> The type of the lambda argument
-   * @return The same {@code IntFunction}
-   */
-  public static <T> IntFunction<T> toObj(IntFunction<T> lambdaOrMethodReference) {
     return lambdaOrMethodReference;
   }
 

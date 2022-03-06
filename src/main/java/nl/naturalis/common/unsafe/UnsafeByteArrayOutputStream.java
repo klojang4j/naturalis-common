@@ -1,15 +1,14 @@
 package nl.naturalis.common.unsafe;
 
+import nl.naturalis.common.check.Check;
+import nl.naturalis.common.util.ExpansionType;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
-import nl.naturalis.common.check.Check;
-import nl.naturalis.common.util.ExpansionType;
-import static nl.naturalis.common.check.CommonChecks.atMost;
-import static nl.naturalis.common.check.CommonChecks.greaterThan;
-import static nl.naturalis.common.check.CommonChecks.gt;
-import static nl.naturalis.common.check.CommonChecks.lte;
+
+import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.length;
 import static nl.naturalis.common.util.ExpansionType.MULTIPLY;
 
@@ -99,7 +98,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
       byte[] buf, int offset, float expandBy, ExpansionType expansionType) {
     this.buf = Check.notNull(buf, "buf").has(length(), gt(), 0).ok();
     this.cnt = Check.that(offset, "offset").is(lte(), buf.length).ok();
-    this.expandBy = Check.that(expandBy, "expandBy").is(greaterThan(), 0).ok();
+    this.expandBy = Check.that(expandBy, "expandBy").is(GT(), 0F).ok();
     this.expansionType = Check.notNull(expansionType, "expansionType").ok();
   }
 
@@ -214,7 +213,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
         newSize = Math.max(buf.length + minIncrease, buf.length * ((100 + (int) expandBy) / 100));
         break;
     }
-    Check.on(s -> new BufferOverflowException(), newSize).is(atMost(), Integer.MAX_VALUE);
+    Check.that(newSize).is(LTE(), (long) Integer.MAX_VALUE, () -> new BufferOverflowException());
     byte[] newBuf = new byte[(int) newSize];
     System.arraycopy(buf, 0, newBuf, 0, cnt);
     buf = newBuf;

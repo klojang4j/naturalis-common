@@ -16,23 +16,13 @@ public class IntIsIntPredicateTest {
     Check.that(3).is(asInt(i -> i != 3));
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void lambdaAsIntPredicate01() { // Using cast
-    Check.that(3, "foo").is((IntPredicate) i -> i != 3);
-  }
-
   private static boolean notEqualsThree(int i) {
     return i != 3;
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void methodReferenceAsIntPredicate00() { // Using asInt utility method
-    Check.that(3, "foo").is(asInt(IntIsIntPredicateTest::notEqualsThree));
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void methodReferenceAsIntPredicate01() { // Using cast
-    Check.that(3, "foo").is((IntPredicate) IntIsIntPredicateTest::notEqualsThree);
+  public void methodReferenceAsIntPredicate00() {
+    Check.that(3, "foo").is(IntIsIntPredicateTest::notEqualsThree);
   }
 
   @Test

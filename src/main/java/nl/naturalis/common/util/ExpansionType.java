@@ -1,7 +1,7 @@
 package nl.naturalis.common.util;
 
-import static nl.naturalis.common.check.CommonChecks.atLeast;
-import static nl.naturalis.common.check.CommonChecks.atMost;
+import static nl.naturalis.common.check.CommonChecks.GTE;
+import static nl.naturalis.common.check.CommonChecks.LTE;
 
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.unsafe.UnsafeByteArrayOutputStream;
@@ -47,11 +47,11 @@ public enum ExpansionType {
    * @return The value to used for the new capacity
    */
   public int increaseCapacity(int curCapacity, double amount, int minAmount) {
-    return Check.that(
-            increaseCapacity((double) curCapacity, amount, (double) minAmount), "New capacity")
-        .is(atMost(), Integer.MAX_VALUE)
-        .is(atLeast(), Integer.MIN_VALUE)
-        .ok(Double::intValue);
+    double newCapacity = increaseCapacity((double) curCapacity, amount, (double) minAmount);
+    if (newCapacity < curCapacity + 1 || newCapacity > Integer.MAX_VALUE) {
+      throw new IllegalArgumentException("Invalid value for new capacity: " + newCapacity);
+    }
+    return (int) newCapacity;
   }
 
   /**

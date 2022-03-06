@@ -38,6 +38,8 @@ public final class ArrayMethods {
   static final String START_INDEX = "Start index";
   static final String END_INDEX = "End index";
 
+  private static Long MAX_ARR_LEN = (long) Integer.MAX_VALUE;
+
   /**
    * Appends the specified object to the specified array.
    *
@@ -106,7 +108,7 @@ public final class ArrayMethods {
     Check.notNull(moreArrays, "moreArrays");
     long x = Arrays.stream(moreArrays).flatMap(Arrays::stream).count();
     long y = arr0.length + arr1.length + arr2.length + x;
-    Check.that(y).is(atMost(), Integer.MAX_VALUE, "Concatenated array too large");
+    Check.that(y).is(LTE(), MAX_ARR_LEN, "Concatenated array too large");
     int i = (int) y;
     T[] all = fromTemplate(arr0, i);
     i = 0;

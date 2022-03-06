@@ -50,7 +50,7 @@ public class IntArrayList implements IntList {
 
   public IntArrayList(int capacity, float enlargeBy, ExpansionType expansionType) {
     this.buf = Check.that(capacity, "capacity").is(gt(), 0).ok(int[]::new);
-    this.eb = Check.that(enlargeBy, "incrementBy").is(greaterThan(), 0).ok();
+    this.eb = Check.that(enlargeBy, "incrementBy").is(GT(), 0F).ok();
     this.et = Check.notNull(expansionType, "expansionType").ok();
   }
 
