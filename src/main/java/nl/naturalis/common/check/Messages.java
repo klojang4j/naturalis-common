@@ -67,17 +67,6 @@ class Messages {
     };
   }
 
-  static Formatter msgContains() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must not contain \"%s\" (was %s)";
-        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
-      }
-      String fmt = "%s must contain \"%s\" (was %s)";
-      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
-    };
-  }
-
   static Formatter msgInstanceOf() {
     return args -> {
       if (args.negated()) {
@@ -209,10 +198,10 @@ class Messages {
     return imploded;
   }
 
-  private static String classNameAbbrev(Class type) {
-    String[] pkgs = type.getPackageName().split("\\.");
+  static String classNameAbbrev(Object obj) {
+    String[] pkgs = obj.getClass().getPackageName().split("\\.");
     String pkg = ArrayMethods.implode(pkgs, s -> s.substring(0, 1), ".", 0, -1);
-    return pkg + '.' + simpleClassName(type);
+    return pkg + '.' + simpleClassName(obj);
   }
 
   static String simpleClassName(Object obj) {

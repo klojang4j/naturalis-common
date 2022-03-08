@@ -111,8 +111,8 @@ public class ArrayMethodsTest {
 
   @Test
   public void inIntArray00() {
-    assertTrue(isElementOf(2, packInts(0, 4, 6, 3, 2)));
-    assertFalse(isElementOf(2, packInts(0, 4, 6, 3, 9)));
+    assertTrue(isElementOf(2, ArrayMethods.pack(0, 4, 6, 3, 2)));
+    assertFalse(isElementOf(2, ArrayMethods.pack(0, 4, 6, 3, 9)));
   }
 
   @Test
@@ -255,8 +255,13 @@ public class ArrayMethodsTest {
   }
 
   @Test
-  public void pack00() {
+  public void packAndFriends00() {
     assertArrayEquals(new String[] {"a", "b", "c"}, pack("a", "b", "c"));
+    assertArrayEquals(new char[] {'a', 'b', 'c'}, chars('a', 'b', 'c'));
+    assertArrayEquals(new int[] {1, 2, 3}, ints(1, 2, 3));
+    assertArrayEquals(new long[] {1, 2, 3}, longs(1, 2, 3));
+    assertArrayEquals(new double[] {6D, 3.2, 8.0}, doubles(6D, 3.2, 8.0), .000001);
+    assertArrayEquals(new float[] {6F, 3.2F, 8.0F}, floats(6F, 3.2F, 8.0F), .000001F);
     assertArrayEquals(new String[0], pack());
     assertArrayEquals(new Integer[0], pack());
     assertNull(pack(null)); // Hm, do we like this?

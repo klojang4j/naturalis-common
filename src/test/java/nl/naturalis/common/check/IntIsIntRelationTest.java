@@ -7,7 +7,7 @@ import java.io.IOException;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static org.junit.Assert.assertEquals;
 
-public class IntIsIntRelation {
+public class IntIsIntRelationTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void lambdaAsIntRelation() {
@@ -73,7 +73,7 @@ public class IntIsIntRelation {
       Check.that(7, "foo").is(ne(), 7);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("foo must not be equal to 7", e.getMessage());
+      assertEquals("foo must not equal 7", e.getMessage());
     }
   }
 
@@ -83,7 +83,7 @@ public class IntIsIntRelation {
       Check.that(7, "foo").isNot(eq(), 7);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("foo must not be equal to 7", e.getMessage());
+      assertEquals("foo must not equal 7", e.getMessage());
     }
   }
 

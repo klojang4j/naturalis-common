@@ -16,7 +16,6 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
-import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.Messages.*;
 import static nl.naturalis.common.check.MsgIntPredicate.*;
 import static nl.naturalis.common.check.MsgIntRelation.*;
@@ -413,7 +412,7 @@ public class CommonChecks {
    * @param <X> The type of the argument
    * @return A {@code Relation}
    */
-  public static <X> Relation<X, X> EQ() {
+  public static <X, Y> Relation<X, Y> EQ() {
     return Objects::equals;
   }
 
@@ -526,20 +525,27 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is an instance of the specified class or, if the argument is itself
-   * a {@code Class} object, that it is a subclass or implementation of the specified class.
+   * Verifies that the argument is an instance of the specified class.
    *
    * @param <X> The type of the argument
    * @return A {@code Relation} implementing the test described above
    */
   public static <X> Relation<X, Class<?>> instanceOf() {
-    return (x, y) ->
-        x.getClass() == Class.class ? y.isAssignableFrom((Class<?>) x) : y.isInstance(x);
+    return (x, y) -> y.isInstance(x);
   }
 
   static {
     setMessagePattern(instanceOf(), msgInstanceOf());
     setName(instanceOf(), "instanceOf");
+  }
+
+  /**
+   * Verifies that the argument extends or implements the specified class / interface.
+   *
+   * @return
+   */
+  public static <T, U> Relation<Class<T>, Class<U>> assignableTo() {
+    return (x, y) -> y.isAssignableFrom(x);
   }
 
   /**
@@ -550,13 +556,62 @@ public class CommonChecks {
    * @param <C> The type of the collection
    * @return A {@code Relation} implementing the test described above
    */
-  public static <E, C extends Collection<? super E>> Relation<C, E> containing() {
+  public static <E, C extends Collection<? super E>> Relation<C, E> contains() {
     return Collection::contains;
   }
 
   static {
-    setMessagePattern(containing(), msgContaining());
-    setName(containing(), "containing");
+    setMessagePattern(contains(), msgContains());
+    setName(contains(), "contains");
+  }
+
+  /**
+   * Verifies that a {@code Map} argument contains the specified key. Equivalent to {@link
+   * Map#containsKey(Object) Map::containsKey}.
+   *
+   * @param <K> The type of the keys within the map
+   * @param <M> The Type of the {@code Map}
+   * @return A {@code Relation}
+   */
+  public static <K, M extends Map<? super K, ?>> Relation<M, K> hasKey() {
+    return Map::containsKey;
+  }
+
+  static {
+    setMessagePattern(hasKey(), msgHasKey());
+    setName(hasKey(), "hasKey");
+  }
+
+  /**
+   * Verifies that a {@code Map} argument contains the specified value. Equivalent to {@link
+   * Map#containsValue(Object) Map::containsValue}.
+   *
+   * @param <V> The type of the values within the map
+   * @param <M> The Type of the {@code Map}
+   * @return A {@code Relation}
+   */
+  public static <V, M extends Map<?, ? super V>> Relation<M, V> hasValue() {
+    return Map::containsValue;
+  }
+
+  static {
+    setMessagePattern(hasValue(), msgHasValue());
+    setName(hasValue(), "msgHasValue");
+  }
+
+  /**
+   * Verifies that a {@code String} argument contains the specified substring. Equivalent to {@link
+   * String#contains(CharSequence) String::contains}.
+   *
+   * @return
+   */
+  public static Relation<String, CharSequence> hasSubstr() {
+    return String::contains;
+  }
+
+  static {
+    setMessagePattern(hasSubstr(), msgContains()); // Recycle message
+    setName(hasSubstr(), "hasSubstr");
   }
 
   /**
@@ -573,6 +628,38 @@ public class CommonChecks {
   static {
     setMessagePattern(in(), msgIn());
     setName(in(), "in");
+  }
+
+  /**
+   * Verifies that the argument is a key in the specified {@code Map}.
+   *
+   * @param <K> The type of the keys within the map
+   * @param <M> The Type of the {@code Map}
+   * @return A {@code Relation}
+   */
+  public static <K, M extends Map<? super K, ?>> Relation<K, M> keyIn() {
+    return (x, y) -> y.containsKey(x);
+  }
+
+  static {
+    setMessagePattern(keyIn(), msgKeyIn());
+    setName(keyIn(), "keyIn");
+  }
+
+  /**
+   * Verifies the presence of a value within a {@code Map}.
+   *
+   * @param <K> The type of the keys within the map
+   * @param <M> The Type of the {@code Map}
+   * @return A {@code Relation}
+   */
+  public static <K, M extends Map<? super K, ?>> Relation<K, M> valueIn() {
+    return (x, y) -> y.containsValue(x);
+  }
+
+  static {
+    setMessagePattern(valueIn(), msgValueIn());
+    setName(valueIn(), "valueIn");
   }
 
   /**
@@ -593,116 +680,55 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that a {@code Collection} argument is a superset of the specified {@code Collection}.
-   * Equivalent to {@link Collection#containsAll(Collection) Collection::containsAll}. Note that the
-   * collections <i>need not be</i> instances of the {@link Set} interface:
+   * Verifies that the argument is a substring of the specified string.
    *
-   * <blockquote>
-   *
-   * <pre>{@code
-   * Check.that(Set.of(1, 2, 3).is(supersetOf(), List.of(1, 2)); // valid and true
-   * Check.that(List.of(1, 2).is(supersetOf(), Set.of(1, 2, 3)); // valid but false
-   * }</pre>
-   *
-   * </blockquote>
+   * @return
+   */
+  public static Relation<String, String> substringOf() {
+    return (x, y) -> y.contains(x);
+  }
+
+  static {
+    setMessagePattern(substringOf(), msgSubstringOf());
+    setName(substringOf(), "substringOf");
+  }
+
+  /**
+   * Verifies that a {@code Collection} argument contains all of the elements of the specified
+   * collection. Equivalent to {@link Collection#containsAll(Collection) Collection::containsAll}.
    *
    * @param <E> The type of the elements in the {@code Collection}
    * @param <C0> The type of the argument (the subject of the {@code Relation})
    * @param <C1> The type of the object of the {@code Relation}
    * @return A {@code Relation}
    */
-  public static <E, C0 extends Collection<? super E>, C1 extends Collection<? super E>>
-      Relation<C0, C1> supersetOf() {
+  public static <E, C0 extends Collection<? super E>, C1 extends Collection<E>>
+      Relation<C0, C1> containsAll() {
     return Collection::containsAll;
   }
 
   static {
-    setMessagePattern(supersetOf(), msgSupersetOf());
-    setName(supersetOf(), "supersetOf");
+    setMessagePattern(containsAll(), msgContainsAll());
+    setName(containsAll(), "containsAll");
   }
 
   /**
-   * Verifies that a {@code Collection} argument is a subset of another {@code Collection}.
+   * Verifies that a {@code Collection} argument is a subset or sublist of another {@code
+   * Collection}.
    *
    * @param <E> The type of the elements in the {@code Collection}
    * @param <C0> The type of the argument (the subject of the {@code Relation})
    * @param <C1> The type of the object of the {@code Relation}
    * @return A {@code Relation}
    */
-  public static <E, C0 extends Collection<? super E>, C1 extends Collection<? super E>>
-      Relation<C0, C1> subsetOf() {
+  public static <E, C0 extends Collection<E>, C1 extends Collection<? super E>>
+      Relation<C0, C1> allIn() {
     return (x, y) -> y.containsAll(x);
   }
 
   static {
-    setMessagePattern(subsetOf(), msgSubsetOf());
-    setName(subsetOf(), "subsetOf");
-  }
-
-  /**
-   * Verifies that a {@code Map} contains a key. Equivalent to {@link Map#containsKey(Object)
-   * Map::containsKey}.
-   *
-   * @param <K> The type of the keys within the map
-   * @param <M> The Type of the {@code Map}
-   * @return A {@code Relation}
-   */
-  public static <K, M extends Map<? super K, ?>> Relation<M, K> containingKey() {
-    return Map::containsKey;
-  }
-
-  static {
-    setMessagePattern(containingKey(), msgContainingKey());
-    setName(containingKey(), "containingKey");
-  }
-
-  /**
-   * Verifies the presence of a key within a {@code Map}.
-   *
-   * @param <K> The type of the keys within the map
-   * @param <M> The Type of the {@code Map}
-   * @return A {@code Relation}
-   */
-  public static <K, M extends Map<? super K, ?>> Relation<K, M> keyIn() {
-    return (x, y) -> y.containsKey(x);
-  }
-
-  static {
-    setMessagePattern(keyIn(), msgKeyIn());
-    setName(keyIn(), "keyIn");
-  }
-
-  /**
-   * Verifies that a {@code Map} contains a value. Equivalent to {@link Map#containsValue(Object)
-   * Map::containsValue}.
-   *
-   * @param <V> The type of the values within the map
-   * @param <M> The Type of the {@code Map}
-   * @return A {@code Relation}
-   */
-  public static <V, M extends Map<?, ? super V>> Relation<M, V> containingValue() {
-    return Map::containsValue;
-  }
-
-  static {
-    setMessagePattern(containingValue(), msgContainingValue());
-    setName(containingValue(), "containingValue");
-  }
-
-  /**
-   * Verifies the presence of a value within a {@code Map}.
-   *
-   * @param <K> The type of the keys within the map
-   * @param <M> The Type of the {@code Map}
-   * @return A {@code Relation}
-   */
-  public static <K, M extends Map<? super K, ?>> Relation<K, M> valueIn() {
-    return (x, y) -> y.containsValue(x);
-  }
-
-  static {
-    setMessagePattern(valueIn(), msgValueIn());
-    setName(valueIn(), "valueIn");
+    setMessagePattern(allIn(), msgAllIn());
+    setName(allIn(), "allIn");
   }
 
   /**
@@ -720,8 +746,8 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument ends with a particular character sequence. Equivalent to {@link
-   * String#endsWith(String) String::endsWith}.
+   * Verifies that a {@code String} argument starts with the specified substring. Equivalent to
+   * {@link String#startsWith(String) String::startsWith}.
    *
    * @return A {@code Relation}
    */
@@ -735,7 +761,7 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument ends with a particular character sequence. Equivalent to {@link
+   * Verifies that a {@code String} argument ends with the specified substring. Equivalent to {@link
    * String#endsWith(String) String::endsWith}.
    *
    * @return A {@code Relation}
@@ -749,21 +775,6 @@ public class CommonChecks {
     setName(endsWith(), "endsWith");
   }
 
-  /**
-   * Verifies that a {@code String} contains a {@code CharSequence}. Equivalent to {@link
-   * String#contains(CharSequence) String::contains}.
-   *
-   * @return A {@code Relation}
-   */
-  public static <T extends CharSequence> Relation<String, T> contains() {
-    return String::contains;
-  }
-
-  static {
-    setMessagePattern(contains(), msgContains());
-    setName(contains(), "contains");
-  }
-
   //////////////////////////////////////////////////////////////////////////////////
   // ObjIntRelation
   //////////////////////////////////////////////////////////////////////////////////
@@ -773,17 +784,19 @@ public class CommonChecks {
    * use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
    * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used with
    * the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
-   * validate properties of properties:
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * validating properties of properties:
    *
    * <blockquote>
    *
    * <pre>{@code
    * // Validate the length of a string argument (not preferred):
    * Check.that("FOO").is(strlenEQ(), 3);
+   *
    * // Validate the length of a string argument (preferred):
    * Check.that("FOO").has(strlen(), eq(), 3);
-   * // Validate the length of a string property of the argument:
+   *
+   * // Validate the length property of the lastName property of the employee argument:
    * Check.that(employee).has(Employee::getLastName, strlenEQ(), 3);
    * }</pre>
    *
@@ -805,17 +818,19 @@ public class CommonChecks {
    * Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
    * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used
    * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
-   * validate properties of properties:
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * validating properties of properties:
    *
    * <blockquote>
    *
    * <pre>{@code
-   * // Validate the length of a string argument (not preferred):
+   * // Validate the length property of a string argument (not preferred):
    * Check.that("FOO").is(strlenGT(), 2);
-   * // Validate the length of a string argument (preferred):
+   *
+   * // Validate the length property of a string argument (preferred):
    * Check.that("FOO").has(strlen(), gt(), 2);
-   * // Validate the length of a string property of the argument:
+   *
+   * // Validate the length property of the lastName property of the employee argument:
    * Check.that(employee).has(Employee::getLastName, strlenGT(), 2);
    * }</pre>
    *
@@ -837,8 +852,8 @@ public class CommonChecks {
    * value. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int)
    * is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant
    * to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
-   * validate properties of properties:
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * validating properties of properties:
    *
    * @see #strlenGT()
    * @return
@@ -857,8 +872,8 @@ public class CommonChecks {
    * Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
    * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used
    * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
-   * validate properties of properties:
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * validating properties of properties:
    *
    * @see #strlenGT()
    * @return
@@ -877,8 +892,8 @@ public class CommonChecks {
    * value. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int)
    * is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant
    * to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
-   * validate properties of properties:
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * validating properties of properties:
    *
    * @see #strlenGT()
    * @return
@@ -897,17 +912,19 @@ public class CommonChecks {
    * can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
    * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used with
    * the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
-   * validate properties of properties:
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * validating properties of properties:
    *
    * <blockquote>
    *
    * <pre>{@code
-   * // Validate the size of a collection argument (not preferred):
+   * // Validate the size property of a collection argument (not preferred):
    * Check.that(List.of("A", "B", "C")).is(sizeEQ(), 3);
-   * // Validate the size of a collection argument (preferred):
+   *
+   * // Validate the size property of a collection argument (preferred):
    * Check.that(List.of("A", "B", "C")).has(size(), eq(), 3);
-   * // Validate the size of a collection property of the argument:
+   *
+   * // Validate the size property of the employees property of the company argument:
    * Check.that(company).has(Company::getEmployees, sizeEQ(), 3);
    * }</pre>
    *
@@ -929,17 +946,19 @@ public class CommonChecks {
    * Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
    * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used
    * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
-   * validate properties of properties:
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * validating properties of properties:
    *
    * <blockquote>
    *
    * <pre>{@code
-   * // Validate the size of a collection argument (not preferred):
+   * // Validate the size property of a collection argument (not preferred):
    * Check.that(List.of("A", "B", "C")).is(sizeGT(), 2);
-   * // Validate the size of a collection argument (preferred):
+   *
+   * // Validate the size property of a collection argument (preferred):
    * Check.that(List.of("A", "B", "C")).has(size(), gt(), 2);
-   * // Validate the size of a collection property of the argument:
+   *
+   * // Validate the size property of the employees property of the company argument:
    * Check.that(company).has(Company::getEmployees, sizeGT(), 2);
    * }</pre>
    *
@@ -961,8 +980,8 @@ public class CommonChecks {
    * specified value. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation,
    * int) is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really
    * meant to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and
-   * {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way
-   * to validate properties of properties:
+   * {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API
+   * for validating properties of properties:
    *
    * @see #sizeGT()
    * @return
@@ -981,8 +1000,8 @@ public class CommonChecks {
    * Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
    * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used
    * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
-   * validate properties of properties:
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * validating properties of properties:
    *
    * @see #sizeGT()
    * @return
@@ -1001,8 +1020,8 @@ public class CommonChecks {
    * value. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int)
    * is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant
    * to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no way to
-   * validate properties of properties:
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * validating properties of properties:
    *
    * @see #sizeGT()
    * @return
@@ -1020,29 +1039,13 @@ public class CommonChecks {
   // IntObjRelation
   //////////////////////////////////////////////////////////////////////////////////
 
-  private static final String ERR_INDEX_OF =
-      "Object of indexOf(), fromIndexOf() and toIndexOf() must be a List, a String or an array";
-
   /**
-   * Verifies that the argument can be used as index into the specified array, string or list,
-   * respectively. The object of the relationship is deliberately weakly typed to allow it to be
-   * either a {@code List}, an array or a {@code String}. However, specifying any other type of
-   * object will cause an {@link InvalidCheckException} to be thrown though.
+   * Verifies that the argument can be used as index into the specified list.
    *
    * @return An {@code IntObjRelation} expressing this requirement
    */
-  @SuppressWarnings("rawtypes")
-  public static <T> IntObjRelation<T> indexOf() {
-    return (x, y) -> {
-      if (y instanceof List) {
-        return x >= 0 && x < ((List) y).size();
-      } else if (y instanceof String) {
-        return x >= 0 && x < ((String) y).length();
-      } else if (y.getClass().isArray()) {
-        return x >= 0 && x < Array.getLength(y);
-      }
-      return fail(InvalidCheckException::new, ERR_INDEX_OF);
-    };
+  public static <E, L extends List<E>> IntObjRelation<L> indexOf() {
+    return (x, y) -> x >= 0 && x < y.size();
   }
 
   static {
@@ -1051,46 +1054,44 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is a valid {@code from} index for operations like {@code
-   * List.subList} and {@code String.substring}. For this type of operations the {@code from} index
-   * may actually be one position past the end of the {@code List}, {@code String}, etc.
+   * Verifies that the argument can be used as index into the specified array. No preliminary check
+   * is done to ascertain that the provided object actually is an array. Execute the {@link
+   * #array()} check first if there is any doubt about this.
    *
-   * @return An {@code IntObjRelation}
+   * @param <T> The type of the array
+   * @return
    */
-  public static <T> IntObjRelation<T> fromIndexOf() {
-    return (x, y) -> {
-      if (y instanceof List) {
-        return x >= 0 && x <= ((List) y).size();
-      } else if (y instanceof String) {
-        return x >= 0 && x <= ((String) y).length();
-      } else if (y.getClass().isArray()) {
-        return x >= 0 && x <= Array.getLength(y);
-      }
-      return fail(InvalidCheckException::new, ERR_INDEX_OF);
-    };
+  public static <T> IntObjRelation<T> arrayIndexOf() {
+    return (x, y) -> x >= 0 && x < Array.getLength(y);
   }
 
   static {
-    setMessagePattern(fromIndexOf(), msgFromIndexOf());
-    setName(fromIndexOf(), "fromIndexOf");
+    setMessagePattern(arrayIndexOf(), msgIndexOf()); // Recycle message
+    setName(arrayIndexOf(), "arrayIndexOf");
   }
 
   /**
-   * Verifies that the argument is a valid {@code to} index for operations like {@code List.subList}
-   * and {@code String.substring}. For this type of operations the {@code to} index may actually be
-   * one position past the end of the {@code List}, {@code String}, etc. This method really just
-   * returns {@link #fromIndexOf()}, but you might find it more intuitive to use when testing "to"
-   * indices.
+   * Verifies that the argument can be used as index into the specified array. No preliminary check
+   * is done to ascertain that the provided object actually is an array. Execute the {@link
+   * #array()} check first if there is any doubt about this.
    *
-   * @return An {@code IntObjRelation}
+   * <blockquote>
+   *
+   * <pre>{@code
+   * char c = Check.that(2).is(strIndexOf(), lastName).intValue(lastName::charAt);
+   * }</pre>
+   *
+   * </blockquote>
+   *
+   * @return
    */
-  public static <T> IntObjRelation<T> toIndexOf() {
-    return fromIndexOf();
+  public static <T> IntObjRelation<T> strIndexOf() {
+    return (x, y) -> x >= 0 && x < Array.getLength(y);
   }
 
   static {
-    setMessagePattern(toIndexOf(), msgFromIndexOf()); // Recycle message
-    setName(toIndexOf(), "toIndexOf");
+    setMessagePattern(arrayIndexOf(), msgIndexOf()); // Recycle message
+    setName(arrayIndexOf(), "arrayIndexOf");
   }
 
   /**
@@ -1107,7 +1108,9 @@ public class CommonChecks {
     setName(intElementOf(), "intElementOf");
   }
 
-  /* ++++++++++++++ IntRelation ++++++++++++++ */
+  //////////////////////////////////////////////////////////////////////////////////
+  // IntRelation
+  //////////////////////////////////////////////////////////////////////////////////
 
   /**
    * Verifies that the argument is equal to a particular value.

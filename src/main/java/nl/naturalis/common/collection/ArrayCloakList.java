@@ -8,8 +8,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
-import static nl.naturalis.common.check.CommonChecks.gte;
-import static nl.naturalis.common.check.CommonChecks.instanceOf;
+import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.type;
 
 /**
@@ -94,7 +93,7 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   @Override
   public E set(int index, E element) {
     if (element != null) {
-      Check.that(element, "element").has(type(), instanceOf(), elementType);
+      Check.that(element, "element").is(instanceOf(), elementType);
     }
     E e = data[index];
     data[index] = element;

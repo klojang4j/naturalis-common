@@ -1,15 +1,14 @@
 package nl.naturalis.common.check;
 
+import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.collection.ArrayCloakList;
-import nl.naturalis.common.function.Relation;
 import org.junit.Test;
 
 import java.util.*;
 import java.util.function.Predicate;
 
 import static java.time.DayOfWeek.*;
-import static nl.naturalis.common.ArrayMethods.pack;
-import static nl.naturalis.common.ArrayMethods.packInts;
+import static nl.naturalis.common.ArrayMethods.*;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.*;
 
@@ -108,57 +107,6 @@ public class CheckTest {
     Check.that("Foo").is(objObj(String::contains), "Bar");
   }
 
-  @Test
-  public void relation01() {
-    Map<String, Object> map = new HashMap<>();
-    map.put("Greeting", "HelloWorld");
-    // Check.that(map).is((x, y) -> x.containsKey(y), "Hello World"); // WON'T COMPILE !
-    // Check.that(map).is(Map::containsKey, "Greeting"); // WON'T COMPILE !
-    Check.that(map).is(containingKey(), "Greeting");
-    Check.that(map).is((Map<String, Object> x, String y) -> x.containsKey(y), "Greeting");
-    Check.that(map).is(objObj((x, y) -> x.containsKey(y)), "Greeting");
-    Check.that(map).is(objObj(Map::containsKey), "Greeting");
-    Check.that(map).is((Relation<Map<String, Object>, String>) Map::containsKey, "Greeting");
-  }
-
-  @Test
-  public void relation02() {
-    Check.that(String.class).is(instanceOf(), CharSequence.class);
-    Check.that(String.class).is(instanceOf(), CharSequence.class);
-    Check.that(CharSequence.class).isNot(instanceOf(), String.class);
-    Check.that(Set.of("1", "2", "3")).is(containing(), "2");
-    Check.that(Set.of("1", "2", "3")).isNot(containing(), "4");
-    Check.that((Integer) 2).is(in(), List.of(1, 2, 3));
-    Check.that((Integer) 4).isNot(in(), List.of(1, 2, 3));
-    Check.that(Set.of("1", "2", "3")).is(supersetOf(), List.of("1", "2"));
-    Check.that(Set.of("1", "4", "5")).isNot(supersetOf(), List.of("1", "2"));
-    Check.that(Set.of(MONDAY, TUESDAY, WEDNESDAY))
-        .is(subsetOf(), List.of(MONDAY, TUESDAY, WEDNESDAY, THURSDAY));
-    Check.that(Set.of(MONDAY, TUESDAY, SATURDAY))
-        .isNot(subsetOf(), List.of(MONDAY, TUESDAY, WEDNESDAY, THURSDAY));
-    Map<Integer, Integer> map = Map.of(1, 1, 2, 4, 3, 6, 4, 8, 5, 10);
-    Check.that(map).is(containingKey(), 1);
-    Check.that(map).isNot(containingKey(), 11);
-    Check.that(map).is(containingValue(), 4);
-    Check.that(map).isNot(containingValue(), 7);
-    Check.that((Integer) 5).is(keyIn(), map);
-    Check.that((Integer) 7).isNot(valueIn(), map);
-    Check.that((Integer) 7).is(elementOf(), pack(1, 7, 10));
-    Check.that("Hello").is(EQ(), new String("Hello"));
-    Check.that("Hello").isNot(sameAs(), new String("Hello"));
-    Check.that("Hello").is(equalsIgnoreCase(), "HELLO");
-    Check.that(null).is(nullOr(), Boolean.TRUE);
-    Check.that(true).is(nullOr(), Boolean.TRUE);
-    Check.that(7.23F).is(GT(), 2F);
-    Check.that(7.230F).is(LTE(), 7.230F);
-    Check.that((Short) (short) 17).is(LT(), (short) 31);
-    Check.that((Short) (short) 17).is(GTE(), (short) 17);
-    Check.that("ZZZ").is(GT(), "AAA");
-    Check.that("hello").isNot(startsWith(), "foo");
-    Check.that("hello").is(endsWith(), "lo");
-    Check.that("hello").is(contains(), "lo");
-  }
-
   @Test(expected = IllegalArgumentException.class)
   public void lambdaAsObjIntRelation00() {
     Check.that("Foo").is(objInt((x, y) -> x.length() > y), 7);
@@ -170,7 +118,7 @@ public class CheckTest {
   }
 
   public void intObjRelation00() {
-    Check.that(7).is(intElementOf(), packInts(3, 5, 7, 9));
+    Check.that(7).is(intElementOf(), ints(3, 5, 7, 9));
   }
 
   @Test
@@ -222,7 +170,7 @@ public class CheckTest {
   public void hasIntRelation00() {
     Check.that(List.of(1, 2, 3, 4)).has(size(), eq(), 4);
     Check.that(List.of(1, 2, 3, 4)).notHas(size(), lt(), 1);
-    Check.that(packInts(1, 2, 3, 4, 5)).has(length(), gt(), 3);
+    Check.that(ArrayMethods.pack(1, 2, 3, 4, 5)).has(length(), gt(), 3);
     Check.that(-42).has(abs(), gt(), 40);
     Check.that(SUNDAY).has(ordinal(), eq(), 6);
   }
@@ -234,13 +182,13 @@ public class CheckTest {
 
   @Test
   public void hasIntObjRelation00() {
-    Check.that(pack("foo", "bar", "baz")).notHas(length(), intElementOf(), packInts(2, 4, 6));
-    Check.that(List.of(1, 2, 3, 4)).has(size(), intElementOf(), packInts(2, 4, 6));
+    Check.that(pack("foo", "bar", "baz")).notHas(length(), intElementOf(), ints(2, 4, 6));
+    Check.that(List.of(1, 2, 3, 4)).has(size(), intElementOf(), ints(2, 4, 6));
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void hasIntObjRelation01() {
-    Check.that(List.of(1, 2, 3)).has(size(), intElementOf(), packInts(2, 4, 6));
+    Check.that(List.of(1, 2, 3)).has(size(), intElementOf(), ints(2, 4, 6));
   }
 
   @Test

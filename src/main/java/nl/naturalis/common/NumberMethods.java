@@ -4,6 +4,8 @@ import nl.naturalis.common.check.Check;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Map;
+import java.util.function.UnaryOperator;
 
 import static nl.naturalis.common.ObjectMethods.isEmpty;
 import static nl.naturalis.common.ObjectMethods.isNotEmpty;
@@ -14,6 +16,7 @@ import static nl.naturalis.common.check.CommonChecks.*;
  *
  * @author Ayco Holleman
  */
+@SuppressWarnings("rawtypes")
 public class NumberMethods {
 
   /**
@@ -24,12 +27,13 @@ public class NumberMethods {
    * @param str The string
    * @return Whether the specified string represents a valid integer
    */
+  @SuppressWarnings({"ResultOfMethodCallIgnored"})
   public static boolean isInteger(String str) {
     if (isNotEmpty(str)) {
       try {
         new BigInteger(str).intValueExact();
         return true;
-      } catch (NumberFormatException | ArithmeticException e) {
+      } catch (NumberFormatException | ArithmeticException ignored) {
       }
     }
     return false;
@@ -43,6 +47,7 @@ public class NumberMethods {
    * @param str The string
    * @return Whether the specified string is a valid, digit-only integer
    */
+  @SuppressWarnings("ResultOfMethodCallIgnored")
   public static boolean isPlainInt(String str) {
     if (isEmpty(str)) {
       return false;
@@ -52,7 +57,7 @@ public class NumberMethods {
       try {
         new BigInteger(str).intValueExact();
         return true;
-      } catch (ArithmeticException e) {
+      } catch (ArithmeticException ignored) {
       }
     }
     return false;
@@ -64,12 +69,13 @@ public class NumberMethods {
    * @param str The string
    * @return Whether the specified string represents a valid {@code short}.
    */
+  @SuppressWarnings("ResultOfMethodCallIgnored")
   public static boolean isShort(String str) {
     if (!isEmpty(str) && str.codePoints().allMatch(Character::isDigit)) {
       try {
         new BigInteger(str).shortValueExact();
         return true;
-      } catch (NumberFormatException | ArithmeticException e) {
+      } catch (NumberFormatException | ArithmeticException ignored) {
       }
     }
     return false;
@@ -82,6 +88,7 @@ public class NumberMethods {
    * @param str The string
    * @return Whether the specified string is a valid, digit-only integer
    */
+  @SuppressWarnings("ResultOfMethodCallIgnored")
   public static boolean isPlainShort(String str) {
     if (isEmpty(str)) {
       return false;
@@ -93,7 +100,7 @@ public class NumberMethods {
       try {
         new BigInteger(str).shortValueExact();
         return true;
-      } catch (ArithmeticException e) {
+      } catch (ArithmeticException ignored) {
       }
     }
     return false;
@@ -112,10 +119,12 @@ public class NumberMethods {
         : t == BigInteger.class
             ? new BigDecimal((BigInteger) n)
             : t == Double.class
-                ? new BigDecimal((Double) n)
+                ? BigDecimal.valueOf((Double) n)
                 : t == Long.class
                     ? new BigDecimal((Long) n)
-                    : t == Float.class ? new BigDecimal((Float) n) : new BigDecimal(n.intValue());
+                    : t == Float.class
+                        ? BigDecimal.valueOf((Float) n)
+                        : new BigDecimal(n.intValue());
   }
 
   /**
@@ -222,8 +231,19 @@ public class NumberMethods {
     }
   }
 
+  private static final Map<Class, UnaryOperator<? extends Number>> absFunctions =
+      Map.of(
+          Integer.class, n -> n.intValue() >= 0 ? n : Integer.valueOf(-n.intValue()),
+          Double.class, n -> n.doubleValue() >= 0 ? n : Double.valueOf(-n.doubleValue()),
+          Long.class, n -> n.longValue() >= 0 ? n : Long.valueOf(-n.longValue()),
+          Float.class, n -> n.floatValue() >= 0 ? n : Float.valueOf(-n.floatValue()),
+          Short.class, n -> n.shortValue() >= 0 ? n : Short.valueOf((short) -n.shortValue()),
+          Byte.class, n -> n.byteValue() >= 0 ? n : Byte.valueOf((byte) -n.byteValue()),
+          BigInteger.class, n -> ((BigInteger) n).abs(),
+          BigDecimal.class, n -> ((BigDecimal) n).abs());
+
   /**
-   * Returns the absolute value of the specified number.
+   * Returns the absolute value of an arbitrary type of number.
    *
    * @param <T> The type of the number
    * @param number The number
@@ -231,19 +251,8 @@ public class NumberMethods {
    */
   @SuppressWarnings("unchecked")
   public static <T extends Number> T abs(T number) {
-    Check.notNull(number);
-    if (number.getClass() == Integer.class) {
-      return number.intValue() >= 0 ? number : (T) Integer.valueOf(-number.intValue());
-    } else if (number.getClass() == Long.class) {
-      return number.longValue() >= 0 ? number : (T) Long.valueOf(-number.longValue());
-    } else if (number.getClass() == Double.class) {
-      return number.doubleValue() >= 0 ? number : (T) Double.valueOf(-number.doubleValue());
-    } else if (number.getClass() == Float.class) {
-      return number.floatValue() >= 0 ? number : (T) Float.valueOf(-number.floatValue());
-    } else if (number.getClass() == Short.class) {
-      return number.shortValue() >= 0 ? number : (T) Short.valueOf((short) -number.shortValue());
-    }
-    return number.byteValue() >= 0 ? number : (T) Byte.valueOf((byte) -number.byteValue());
+    UnaryOperator op = Check.notNull(number).ok(n -> absFunctions.get(n.getClass()));
+    return (T) op.apply(number);
   }
 
   /**

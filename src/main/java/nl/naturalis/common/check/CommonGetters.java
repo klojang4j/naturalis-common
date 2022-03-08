@@ -47,6 +47,7 @@ import static nl.naturalis.common.ObjectMethods.ifNull;
  *
  * @author Ayco Holleman
  */
+@SuppressWarnings("rawtypes")
 public class CommonGetters {
 
   private CommonGetters() {}
@@ -56,29 +57,48 @@ public class CommonGetters {
   private static Map<Object, BiFunction<Object, String, String>> tmp = new HashMap<>();
 
   /**
-   * Returns the boxed version of an {@code int} argument. Equivalent to {@link Integer#valueOf(int)
+   * Returns the boxed version of the argument. Equivalent to {@link Integer#valueOf(int)
    * Integer::valueOf}. This "getter" is especially useful to get access to the many {@link
    * Relation} checks in the {@link CommonChecks} class when validating an {@code int} argument:
    *
    * <blockquote>
    *
    * <pre>{@code
-   * // WON'T COMPILE! IntCheck does not have an is(Relation, Object) method
+   * // WON'T COMPILE! IntCheck does not have method is(Relation, Object)
    * Check.that(42).is(keyIn(), map);
    *
-   * // OK. ObjectCheck does have is(Relation, Object) method. But ugly.
+   * // OK. ObjectCheck does have method is(Relation, Object)
    * Check.that((Integer) 42).is(keyIn(), map);
    *
+   * // More idiomatic:
    * Check.that(42).has(box(), keyIn(), map);
    *
    * }</pre>
    *
    * </blockquote>
    *
-   * @return The boxed version of an {@code int} argument
+   * @return The boxed version of the argument
    */
   public static IntFunction<Integer> box() {
     return Integer::valueOf;
+  }
+
+  static {
+    tmp.put(box(), (arg, argName) -> ifNull(argName, int.class.getSimpleName()));
+  }
+
+  /**
+   * Returns the unboxed version of the argument. Equivalent to {@link Integer#intValue()
+   * Integer::intValue}.
+   *
+   * @return The unboxed version of the argument
+   */
+  public static ToIntFunction<Integer> unbox() {
+    return Integer::intValue;
+  }
+
+  static {
+    tmp.put(unbox(), (arg, argName) -> base(argName, arg));
   }
 
   /**
@@ -93,7 +113,7 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(strval(), (arg, argName) -> ifNull(argName, simpleClassName(arg)) + ".toString()");
+    tmp.put(strval(), (arg, argName) -> base(argName, arg) + ".toString()");
   }
 
   /**
@@ -106,11 +126,12 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(strlen(), (arg, argName) -> ifNull(argName, simpleClassName(arg)) + ".length()");
+    tmp.put(strlen(), (arg, argName) -> base(argName, arg) + ".length()");
   }
 
   /**
-   * Returns the upper case version of the argument
+   * Returns the upper case version of the argument. Equivalent to {@link String#toUpperCase()
+   * String::toUpperCase}.
    *
    * @return The upper case version of the argument
    */
@@ -119,12 +140,12 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(
-        toUpperCase(), (arg, argName) -> ifNull(argName, simpleClassName(arg)) + ".toUpperCase()");
+    tmp.put(toUpperCase(), (arg, argName) -> base(argName, arg) + ".toUpperCase()");
   }
 
   /**
-   * Returns the lower case version of the argument
+   * Returns the lower case version of the argument. Equivalent to {@link String#toLowerCase()
+   * String::toLowerCase}.
    *
    * @return The lower case version of the argument
    */
@@ -133,75 +154,70 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(
-        toLowerCase(), (arg, argName) -> ifNull(argName, simpleClassName(arg)) + ".toLowerCase()");
+    tmp.put(toLowerCase(), (arg, argName) -> base(argName, arg) + ".toLowerCase()");
   }
 
   /**
-   * A {@code Function} that returns the {@code Class} of an object. Equivalent to {@link
-   * Object#getClass() Object::getClass}.
+   * Returns the {@code Class} of the argument. Equivalent to {@link Object#getClass()
+   * Object::getClass}.
    *
    * @param <T> The type of the object
-   * @return A {@code Function} that returns the {@code Class} of an object
+   * @return The {@code Class} of the argument
    */
-  public static <T> Function<T, Class<? extends Object>> type() {
+  public static <T> Function<T, Class<?>> type() {
     return Object::getClass;
   }
 
   static {
-    tmp.put(type(), (arg, argName) -> ifNull(argName, simpleClassName(arg)) + ".getClass()");
+    tmp.put(type(), (arg, argName) -> base(argName, arg) + ".getClass()");
   }
 
   /**
-   * A {@code Function} that returns the constants of an {@code Enum} class. Equivalent to {@link
-   * Class#getEnumConstants() Class::getEnumConstants}.
+   * Returns the constants of an enum class. Equivalent to {@link Class#getEnumConstants()
+   * Class::getEnumConstants}.
    *
    * @param <T> The enum class
-   * @return A {@code Function} that returns all enum constants of an {@code Enum} class
+   * @return The constants of an enum class
    */
   public static <T extends Enum<T>> Function<Class<T>, T[]> constants() {
-    return Class::getEnumConstants;
+    return x -> (T[]) x.getEnumConstants();
   }
 
   static {
-    tmp.put(
-        constants(),
-        (arg, argName) -> ifNull(argName, simpleClassName(arg)) + ".getEnumConstants()");
+    tmp.put(constants(), (arg, argName) -> base(argName, arg) + ".getEnumConstants()");
   }
 
   /**
-   * A function that returns the name of an enum constant. Equivalent to {@link Enum#name()
-   * Enum::name}.
+   * Returns the name of an enum constant. Equivalent to {@link Enum#name() Enum::name}.
    *
    * @param <T> The type of the enum class
-   * @return A {@code Function} that returns the name of the enum constant
+   * @return The name of the enum constant
    */
-  public static <T extends Enum<T>> Function<T, String> enumName() {
+  public static <T extends Enum<?>> Function<T, String> name() {
     return Enum::name;
   }
 
   static {
-    tmp.put(enumName(), (arg, argName) -> ifNull(argName, ((Enum) arg).name()) + ".name()");
+    tmp.put(name(), (arg, argName) -> base(argName, arg) + ".name()");
   }
 
   /**
-   * A function that returns the ordinal of an enum constant. Equivalent to {@link Enum#ordinal()
-   * Enum::ordinal}.
+   * Returns the ordinal of an enum constant. Equivalent to {@link Enum#ordinal() Enum::ordinal}.
    *
    * @param <T> The type of the enum class
-   * @return A {@code Function} that returns the ordinal of the enum constant
+   * @return The ordinal of the enum constant
    */
-  public static <T extends Enum<T>> ToIntFunction<T> ordinal() {
+  public static <T extends Enum<?>> ToIntFunction<T> ordinal() {
     return Enum::ordinal;
   }
 
   static {
-    tmp.put(ordinal(), (arg, argName) -> ifNull(argName, ((Enum) arg).name()) + ".ordinal()");
+    tmp.put(ordinal(), (arg, argName) -> base(argName, arg) + ".ordinal()");
   }
 
   /**
-   * Returns the length of an array argument. Equivalent to {@link Array#getLength(Object)
-   * Array::getLength}.
+   * A function that returns the length of an array argument. Equivalent to {@link
+   * Array#getLength(Object) Array::getLength}.
    *
    * @param <T> The type of the array.
    * @return A {@code Function} that returns the length of an array
@@ -211,7 +227,7 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(length(), (arg, argName) -> ifNull(argName, simpleClassName(arg)) + ".length");
+    tmp.put(length(), (arg, argName) -> base(argName, arg) + ".length");
   }
 
   /**
@@ -225,109 +241,83 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(size(), (arg, argName) -> ifNull(argName, simpleClassName(arg)) + ".size()");
+    tmp.put(size(), (arg, argName) -> base(argName, arg) + ".size()");
   }
 
   /**
-   * A {@code Function} that returns the size of a {@code Map}. Equivalent to {@code Map::size}.
-   *
-   * @param <M> The type of the {@code Map}
-   * @return A {@code Function} that returns the size of a {@code Map}
-   */
-  public static <M extends Map<?, ?>> ToIntFunction<M> mapSize() {
-    return Map::size;
-  }
-
-  static {
-    tmp.put(mapSize(), tmp.get(size())); // recycle
-  }
-
-  /**
-   * A {@code Function} that returns the keys of a {@code Map}. Equivalent to {@code Map::keySet}.
-   *
-   * @param <K> The type of the keys in the map
-   * @param <V> The type of the values in the map
-   * @return A {@code Function} that returns the keys of a {@code Map}
-   */
-  public static <K, V> Function<Map<K, V>, Set<? extends K>> keySet() {
-    return Map::keySet;
-  }
-
-  static {
-    tmp.put(keySet(), (arg, argName) -> ifNull(argName, simpleClassName(arg)) + ".keySet()");
-  }
-
-  public static <K, V> Function<Map<K, V>, Collection<? extends V>> values() {
-    return Map::values;
-  }
-
-  static {
-    tmp.put(values(), (arg, argName) -> ifNull(argName, simpleClassName(arg)) + ".values()");
-  }
-
-  /**
-   * A {@code Function} that returns the size of a {@code List}. Equivalent to {@code List::size}.
-   * Can be used if there already is a {@code size()} method in the class in which to execute a size
-   * check.
+   * Returns the size of a {@code List} argument. Equivalent to {@code List::size}. Can be used if
+   * there already is a {@code size()} method in the class in which to execute a size check.
    *
    * @param <L> The type of the {@code List}
-   * @return A {@code Function} that returns the size of a {@code List}
+   * @return Returns the size of a {@code List} argument
    */
   public static <L extends List<?>> ToIntFunction<L> listSize() {
     return List::size;
   }
 
   static {
-    tmp.put(listSize(), tmp.get(size())); // recycle
+    tmp.put(listSize(), tmp.get(size())); // Recycle
   }
 
   /**
-   * A {@code Function} that returns the size of a {@code Set}. Equivalent to {@code Set::size}. Can
-   * be used if there already is a {@code size()} method in the class in which to execute a size
-   * check.
+   * Returns the size of a {@code Set} argument. Equivalent to {@code Set::size}. Can be used if
+   * there already is a {@code size()} method in the class in which to execute a size check.
    *
    * @param <S> The type of the {@code Set}.
-   * @return A {@code Function} that returns the size of a {@code Set}
+   * @return The size of a {@code Set} argument
    */
   public static <S extends Set<?>> ToIntFunction<S> setSize() {
     return Set::size;
   }
 
   static {
-    tmp.put(setSize(), tmp.get(size())); // recycle
+    tmp.put(setSize(), tmp.get(size())); // Recycle
   }
 
   /**
-   * Returns the absolute value of an {@code int} argument. Equivalent to {@link Math#abs(int)
-   * Math::abs}.
+   * Returns the size of a {@code Map} argument. Equivalent to {@code Map::size}.
    *
-   * @return A {@code Function} that returns the absolute value of an integer
+   * @param <M> The type of the {@code Map}
+   * @return The size of a {@code Map} argument
    */
-  public static IntUnaryOperator abs() {
-    return Math::abs;
+  public static <M extends Map<?, ?>> ToIntFunction<M> mapSize() {
+    return Map::size;
   }
 
   static {
-    tmp.put(
-        abs(), (arg, argName) -> argName == null ? "absolute value" : "Math.abs(" + argName + ")");
+    tmp.put(mapSize(), tmp.get(size())); // Recycle
   }
 
   /**
-   * Returns the absolute value of a {@code Number}. Equivalent to {@link NumberMethods#abs(Number)
-   * NumberMethods::abs}.
+   * Returns the keys of a {@code Map} argument. Equivalent to {@link Map#keySet() Map::keySet}.
    *
-   * @param <T> The type of the {@code Number}
-   * @return The absolute value of a {@code Number}
+   * @param <K> The type of the keys in the map
+   * @param <V> The type of the values in the map
+   * @param <M> The type of the map
+   * @return The keys of a {@code Map} argument
    */
-  public static <T extends Number> Function<T, T> ABS() {
-    return NumberMethods::abs;
+  public static <K, V, M extends Map<K, V>> Function<M, Set<K>> keySet() {
+    return Map::keySet;
   }
 
   static {
-    tmp.put(
-        abs(),
-        (arg, argName) ->
-            String.format("absolute value of %s", ifNull(argName, simpleClassName(arg))));
+    tmp.put(keySet(), (arg, argName) -> argName == null ? "map keys" : argName + ".keySet()");
+  }
+
+  /**
+   * Returns the keys of a {@code Map} argument. Equivalent to {@link Map#values() Map::values}.
+   *
+   * @param <K> The type of the keys in the map
+   * @param <V> The type of the values in the map
+   * @param <M> The type of the map
+   * @return The values of a {@code Map} argument
+   */
+  public static <K, V, M extends Map<K, V>> Function<M, Collection<V>> values() {
+    return Map::values;
+  }
+
+  static {
+    tmp.put(values(), (arg, argName) -> argName == null ? "map values" : argName + ".values()");
   }
 
   /**
@@ -360,6 +350,35 @@ public class CommonGetters {
     tmp.put(value(), (arg, argName) -> ifNull(argName, "entry") + ".getValue()");
   }
 
+  /**
+   * Returns the absolute value of an {@code int} argument. Equivalent to {@link Math#abs(int)
+   * Math::abs}.
+   *
+   * @return A {@code Function} that returns the absolute value of an integer
+   */
+  public static IntUnaryOperator abs() {
+    return Math::abs;
+  }
+
+  static {
+    tmp.put(abs(), (arg, argName) -> "abs(" + ifNull(argName, "int") + ")");
+  }
+
+  /**
+   * Returns the absolute value of a {@code Number}. Equivalent to {@link NumberMethods#abs(Number)
+   * NumberMethods::abs}.
+   *
+   * @param <T> The type of the {@code Number}
+   * @return The absolute value of a {@code Number}
+   */
+  public static <T extends Number> Function<T, T> ABS() {
+    return NumberMethods::abs;
+  }
+
+  static {
+    tmp.put(ABS(), (arg, argName) -> "abs(" + base(argName, arg) + ")");
+  }
+
   /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
   /*            End of getter definitions                    */
   /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
@@ -368,7 +387,7 @@ public class CommonGetters {
     BiFunction<Object, String, String> fmt = NAMES.get(getter);
     if (fmt == null) {
       String s0 = getterClass == ToIntFunction.class ? "applyAsInt" : "apply";
-      String s1 = ifNull(argName, simpleClassName(arg));
+      String s1 = base(argName, arg);
       return simpleClassName(getterClass) + "." + s0 + "(" + s1 + ")";
     }
     return fmt.apply(arg, argName);
@@ -387,5 +406,9 @@ public class CommonGetters {
   static {
     NAMES = Map.copyOf(tmp);
     tmp = null;
+  }
+
+  private static String base(String argName, Object arg) {
+    return ifNull(argName, simpleClassName(arg));
   }
 }

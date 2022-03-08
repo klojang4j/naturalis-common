@@ -42,7 +42,7 @@ public class EnumParser<T extends Enum<T>> {
 
   /**
    * The default normalization function. Removes spaces, hyphens and underscores and returns an
-   * all-lowercase string. The default normalizer does not allow {@code null} as input string.
+   * all-lowercase string.
    */
   public static final UnaryOperator<String> DEFAULT_NORMALIZER =
       s -> Check.notNull(s).ok().replaceAll("[-_ ]", "").toLowerCase();
@@ -103,12 +103,10 @@ public class EnumParser<T extends Enum<T>> {
    *     the enum's constants.
    */
   public T parse(Object value) throws TypeConversionException {
-    Check.on(badValue(value), value).is(notNull());
+    Check.that(value).is(notNull(), () -> new TypeConversionException(value, enumClass));
     String key = normalizer.apply(value.toString());
-    return Check.on(badValue(value), lookups.get(key)).is(notNull()).ok();
-  }
-
-  private Function<String, TypeConversionException> badValue(Object value) {
-    return s -> new TypeConversionException(value, enumClass);
+    return Check.that(lookups.get(key))
+        .is(notNull(), () -> new TypeConversionException(value, enumClass))
+        .ok();
   }
 }

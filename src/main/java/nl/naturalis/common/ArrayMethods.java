@@ -562,10 +562,50 @@ public final class ArrayMethods {
    * Simply returns the specified array, but allows for leaner code when statically imported.
    *
    * @param ints The array
-   * @return The dame array
+   * @return The same array
    */
-  public static int[] packInts(int... ints) {
+  public static int[] ints(int... ints) {
     return ints;
+  }
+
+  /**
+   * Simply returns the specified array, but allows for leaner code when statically imported.
+   *
+   * @param chars The array
+   * @return The same array
+   */
+  public static char[] chars(char... chars) {
+    return chars;
+  }
+
+  /**
+   * Simply returns the specified array, but allows for leaner code when statically imported.
+   *
+   * @param doubles The array
+   * @return The same array
+   */
+  public static double[] doubles(double... doubles) {
+    return doubles;
+  }
+
+  /**
+   * Simply returns the specified array, but allows for leaner code when statically imported.
+   *
+   * @param longs The array
+   * @return The same array
+   */
+  public static long[] longs(long... longs) {
+    return longs;
+  }
+
+  /**
+   * Simply returns the specified array, but allows for leaner code when statically imported.
+   *
+   * @param floats The array
+   * @return The same array
+   */
+  public static float[] floats(float... floats) {
+    return floats;
   }
 
   /**

@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 
 class FormatNormalizer {
 
-  static final String REGEX = "\\$\\{(check|arg|type|name|obj|\\d+)}";
+  static final String REGEX = "\\$\\{(check|arg|type|name|obj|\\d{1,2})}";
   static final Pattern PATTERN = Pattern.compile(REGEX);
 
   static String normalize(String fmt) {

@@ -2,7 +2,7 @@ package nl.naturalis.common.collection;
 
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
-import static nl.naturalis.common.check.CommonChecks.containingValue;
+import static nl.naturalis.common.check.CommonChecks.hasValue;
 import static nl.naturalis.common.check.CommonChecks.empty;
 import static nl.naturalis.common.check.CommonChecks.ne;
 import static nl.naturalis.common.check.CommonGetters.constants;
@@ -217,7 +217,7 @@ public final class EnumToIntMap<K extends Enum<K>> {
    */
   public void putAll(Map<K, Integer> other) {
     Check.notNull(other, "other")
-        .isNot(containingValue(), kav)
+        .isNot(hasValue(), kav)
         .then(m -> m.entrySet().forEach(e -> assign(e.getKey(), e.getValue())));
   }
 

@@ -6,20 +6,11 @@ import java.util.Collection;
 
 import static java.lang.String.format;
 import static nl.naturalis.common.ClassMethods.className;
+import static java.lang.System.*;
 import static nl.naturalis.common.check.Messages.*;
 
 class MsgRelation {
 
-  //  static Formatter msgEqualTo() {
-  //    return args -> {
-  //      if (args.negated()) {
-  //        return format("%s must not be equal to %s", args.argName(), toStr(args.object()));
-  //      }
-  //      String fmt = "%s must be equal to %s (was %s)";
-  //      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
-  //    };
-  //  }
-  //
   static Formatter msgEqualsIgnoreCase() {
     return args -> {
       if (args.negated()) {
@@ -35,12 +26,21 @@ class MsgRelation {
     return args -> {
       if (args.negated()) {
         String fmt = "%s must not be %s";
-        String id0 = className(args.object()) + '@' + System.identityHashCode(args.object());
+        String id0 =
+            args.object() == null
+                ? "null"
+                : simpleClassName(args.object()) + '@' + identityHashCode(args.object());
         return format(fmt, args.argName(), id0);
       }
       String fmt = "%s must be %s (was %s)";
-      String id0 = className(args.object()) + '@' + System.identityHashCode(args.object());
-      String id1 = className(args.arg()) + '@' + System.identityHashCode(args.arg());
+      String id0 =
+          args.object() == null
+              ? "null"
+              : simpleClassName(args.object()) + '@' + identityHashCode(args.object());
+      String id1 =
+          args.arg() == null
+              ? "null"
+              : simpleClassName(args.arg()) + '@' + identityHashCode(args.arg());
       return format(fmt, args.argName(), id0, id1);
     };
   }
@@ -133,7 +133,7 @@ class MsgRelation {
     };
   }
 
-  static Formatter msgContaining() {
+  static Formatter msgContains() {
     return args -> {
       if (args.negated()) {
         return format("%s must not contain %s", args.argName(), toStr(args.object()));
@@ -154,7 +154,7 @@ class MsgRelation {
     };
   }
 
-  static Formatter msgSupersetOf() {
+  static Formatter msgContainsAll() {
     return args -> {
       if (args.negated()) {
         String fmt = "%s must not be superset of %s (was %s)";
@@ -165,7 +165,7 @@ class MsgRelation {
     };
   }
 
-  static Formatter msgSubsetOf() {
+  static Formatter msgAllIn() {
     return args -> {
       if (args.negated()) {
         String fmt = "%s must not be subset of %s (was %s)";
@@ -176,7 +176,7 @@ class MsgRelation {
     };
   }
 
-  static Formatter msgContainingKey() {
+  static Formatter msgHasKey() {
     return args -> {
       if (args.negated()) {
         return format("%s must not contain key %s", args.argName(), toStr(args.object()));
@@ -196,7 +196,7 @@ class MsgRelation {
     };
   }
 
-  static Formatter msgContainingValue() {
+  static Formatter msgHasValue() {
     return args -> {
       if (args.negated()) {
         return format("%s must not contain value %s", args.argName(), toStr(args.object()));
@@ -216,13 +216,24 @@ class MsgRelation {
     };
   }
 
+  static Formatter msgSubstringOf() {
+    return args -> {
+      if (args.negated()) {
+        String fmt = "%s must not be substring of \"%s\" (was \"%s\")";
+        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+      }
+      String fmt = "%s must be substring of \"%s\" (was \"%s\")";
+      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+    };
+  }
+
   static Formatter msgStartsWith() {
     return args -> {
       if (args.negated()) {
-        String fmt = "%s must not start with \"%s\" (was %s)";
+        String fmt = "%s must not start with \"%s\" (was \"%s\")";
         return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
       }
-      String fmt = "%s must start with \"%s\" (was %s)";
+      String fmt = "%s must start with \"%s\" (was \"%s\")";
       return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
     };
   }
