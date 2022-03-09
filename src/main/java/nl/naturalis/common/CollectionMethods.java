@@ -81,23 +81,49 @@ public class CollectionMethods {
   }
 
   /**
-   * Returns a modifiable {@link Map} initialized with the specified key-value pairs.
+   * Returns a new {@link ArrayList} initialized with the specified values. The values are allowed
+   * to be {@code null}. The initial capacity will always be at least the length of the {@code
+   * initVals} array, whatever the value of the {@code capacity} argument.
+   *
+   * @param capacity The initial capacity of the list
+   * @param initVals The values to add to the list
+   * @param <E> The type of the list elements
+   * @return A new {@link ArrayList} initialized with the specified values.
+   */
+  public static <E> List<E> newArrayList(int capacity, E... initVals) {
+    Check.that(capacity, "capacity").is(gte(), 0);
+    Check.notNull(initVals, "initVals");
+    if (initVals.length == 0) {
+      return new ArrayList<>(Math.max(1, capacity));
+    }
+    List<E> l = new ArrayList<>(Math.max(capacity, initVals.length));
+    Arrays.stream(initVals).forEach(l::add);
+    return l;
+  }
+
+  /**
+   * Returns a {@link HashMap} initialized with the specified key-value pairs.
    *
    * @param <K> The type of the keys
    * @param <V> The type of the values
-   * @param capacity The initial capacity of the map. If you specify a number less than the number
-   *     of key-value pairs (half the length of the varargs array), it will be taken as a
-   *     multiplier. For example, 2 would mean that you expect the map to grow to about twice its
-   *     initial size.
+   * @param size The expected number of map entries. If you specify a number less than the number of
+   *     key-value pairs (half the length of the varargs array), it will be taken as a multiplier.
+   *     For example, 2 would mean that you expect the map to grow to about twice its original size.
+   *     The minimum initial capacity will in any case be at least 4.
    * @param kvPairs An array alternating between keys and values
    * @return A {@code HashMap} initialized with the specified key-value pairs
    */
   @SuppressWarnings("unchecked")
-  public static <K, V> Map<K, V> initializeMap(int capacity, Object... kvPairs) {
-    Check.that(capacity, "capacity").is(gt(), 0);
+  public static <K, V> Map<K, V> newHashMap(int size, Object... kvPairs) {
+    Check.that(size, "capacity").is(gte(), 0);
     Check.notNull(kvPairs, "kvPairs").has(length(), even());
-    int sz = capacity < kvPairs.length / 2 ? capacity * kvPairs.length : capacity;
-    HashMap<K, V> map = new HashMap<>(1 + sz * 4 / 3);
+    if (kvPairs.length == 0) {
+      return new HashMap<>(Math.max(4, size));
+    }
+    int cap = size < kvPairs.length / 2 ? size * kvPairs.length : size;
+    cap = Math.max(4, cap);
+    cap = 1 + cap * 4 / 3;
+    HashMap<K, V> map = new HashMap<>(1 + cap * 4 / 3);
     for (int i = 0; i < kvPairs.length - 1; i += 2) {
       map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
     }

@@ -201,7 +201,7 @@ public class CollectionMethodsTest {
 
   @Test
   public void initializeMap00() {
-    Map<String, Integer> m = initializeMap(10, "a", 1, "b", 2, "c", null);
+    Map<String, Integer> m = newHashMap(10, "a", 1, "b", 2, "c", null);
     assertEquals(3, m.size());
     assertEquals(Integer.valueOf(1), m.get("a"));
     assertEquals(Integer.valueOf(2), m.get("b"));
@@ -211,7 +211,7 @@ public class CollectionMethodsTest {
 
   @Test
   public void initializeMap01() {
-    Map<String, Integer> m = initializeMap(1, "a", 1, "b", 2, "c", null);
+    Map<String, Integer> m = newHashMap(1, "a", 1, "b", 2, "c", null);
     assertEquals(3, m.size());
     assertEquals(Integer.valueOf(1), m.get("a"));
     assertEquals(Integer.valueOf(2), m.get("b"));
@@ -221,12 +221,13 @@ public class CollectionMethodsTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void initializeMap02() {
-    initializeMap(0, "a", new File("/"), "b", 2, "c", null);
+    int badSize = -3;
+    newHashMap(badSize, "a", new File("/"), "b", 2, "c", null);
   }
 
   @Test
   public void freeze00() {
-    Map<String, Integer> src = initializeMap(10, "foo", 1, "bar", 2, "baz", 3);
+    Map<String, Integer> src = newHashMap(10, "foo", 1, "bar", 2, "baz", 3);
     Map<String, String> map0 = freeze(src, String::valueOf);
     Map<String, String> expected0 = Map.of("foo", "1", "bar", "2", "baz", "3");
     Map<String, Short> map1 = freeze(src, i -> (short) (i * 3));
@@ -236,7 +237,7 @@ public class CollectionMethodsTest {
 
   @Test
   public void freeze01() {
-    Map<Integer, Integer> src = initializeMap(10, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6);
+    Map<Integer, Integer> src = newHashMap(10, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6);
     Map<Integer, Integer> out =
         freeze(
             src,
@@ -246,7 +247,7 @@ public class CollectionMethodsTest {
               }
               return v * 2;
             });
-    Map<Integer, Integer> expected = initializeMap(10, 1, 2, 2, 4, 3, 3, 4, 8, 5, 10, 6, 6);
+    Map<Integer, Integer> expected = newHashMap(10, 1, 2, 2, 4, 3, 3, 4, 8, 5, 10, 6, 6);
     assertEquals(expected, out);
   }
 
@@ -276,7 +277,7 @@ public class CollectionMethodsTest {
 
   @Test
   public void deepFreeze00() {
-    Map<Integer, String> src = initializeMap(10, 1, "foo", 2, "bar", 3, "baz");
+    Map<Integer, String> src = newHashMap(10, 1, "foo", 2, "bar", 3, "baz");
     Map<Integer, Integer> out = deepFreeze(src, e -> Map.entry(e.getValue().length(), e.getKey()));
     assertEquals(1, out.size());
     assertTrue(out.containsKey(3));

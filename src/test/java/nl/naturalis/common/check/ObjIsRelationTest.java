@@ -4,13 +4,13 @@ import nl.naturalis.common.function.Relation;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.OutputStream;
+import java.util.*;
 
 import static java.time.DayOfWeek.*;
 import static nl.naturalis.common.ArrayMethods.pack;
+import static nl.naturalis.common.CollectionMethods.newHashMap;
+import static nl.naturalis.common.CollectionMethods.newArrayList;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static org.junit.Assert.*;
 
@@ -36,7 +36,7 @@ public class ObjIsRelationTest {
 
   @Test
   public void relation02() {
-    Check.that(String.class).is(assignableTo(), CharSequence.class);
+    Check.that(String.class).is(extending(), CharSequence.class);
     Check.that("foo").is(instanceOf(), CharSequence.class);
     Check.that(CharSequence.class).isNot(instanceOf(), String.class);
     Check.that(Set.of("1", "2", "3")).is(contains(), "2");
@@ -236,10 +236,168 @@ public class ObjIsRelationTest {
   @Test
   public void nullOr01() {
     try {
-      Check.that(null, "mordor").isNot(nullOr(), FRIDAY);
+      Check.that(null, "xavier").isNot(nullOr(), SUNDAY);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      // assertEquals("zorro must be > FRIDAY (was WEDNESDAY)", e.getMessage());
+      assertEquals("xavier must not be null or SUNDAY (was null)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void instanceOf00() {
+    try {
+      Check.that(9.7F, "pipe").is(instanceOf(), String.class);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "pipe must be instance of java.lang.String (was java.lang.Float)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void instanceOf01() {
+    try {
+      Check.on(illegalState(), 9.7F, "pipe").isNot(instanceOf(), Float.class);
+    } catch (IllegalStateException e) {
+      System.out.println(e.getMessage());
+      assertEquals("pipe must not be instance of java.lang.Float (was 9.7)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void extending00() {
+    try {
+      Check.that(OutputStream.class, "babbage").is(extending(), OutputStream[].class);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "babbage must extend java.io.OutputStream[] (was java.io.OutputStream)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void extending01() {
+    try {
+      Check.that(OutputStream.class, "babbage").is(extending(), Comparable.class);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "babbage must implement java.lang.Comparable (was java.io.OutputStream)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void extending02() {
+    try {
+      Check.that(String.class, "babbage").isNot(extending(), CharSequence.class);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "babbage must not implement java.lang.CharSequence (was java.lang.String)",
+          e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void extending03() {
+    try {
+      Check.that(Float.class, "babbage").isNot(extending(), Comparable.class);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "babbage must not implement java.lang.Comparable (was java.lang.Float)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void extending04() {
+    try {
+      Check.that(Comparable.class, "babbage").isNot(extending(), Comparable.class);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("babbage must not extend java.lang.Comparable", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void extending05() {
+    try {
+      Check.that(Float.class, "babbage").isNot(extending(), Float.class);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("babbage must not extend java.lang.Float", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void contains00() {
+    try {
+      List<String> names = newArrayList(0, "john", "paul", "george", "guess who");
+      Check.on(io(), names, "poseidon").is(contains(), "ringo");
+    } catch (IOException e) {
+      System.out.println(e.getMessage());
+      assertEquals("poseidon must contain ringo", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void contains01() {
+    try {
+      List<String> names = newArrayList(0, "john", "paul", "george", "guess who");
+      Check.on(io(), names, "poseidon").isNot(contains(), "paul");
+    } catch (IOException e) {
+      System.out.println(e.getMessage());
+      assertEquals("poseidon must not contain paul", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void hasKey00() {
+    try {
+      Map<String, String> map =
+          newHashMap(
+              0, "john", "lennon", "paul", "mccartney", "george", "harrison", "guess who", "huh?");
+      Check.on(unsupportedOperation(), map, "thor").is(hasKey(), "ringo");
+    } catch (UnsupportedOperationException e) {
+      System.out.println(e.getMessage());
+      assertEquals("thor must contain key ringo", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void hasKey01() {
+    try {
+      Map<String, String> map =
+          newHashMap(
+              0, "john", "lennon", "paul", "mccartney", "george", "harrison", "guess who", "huh?");
+      Check.on(unsupportedOperation(), map, "thor").isNot(hasKey(), "john");
+    } catch (UnsupportedOperationException e) {
+      System.out.println(e.getMessage());
+      assertEquals("thor must not contain key john", e.getMessage());
       return;
     }
     fail();

@@ -67,30 +67,6 @@ class Messages {
     };
   }
 
-  static Formatter msgInstanceOf() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must not be instance of %s";
-        return format(fmt, args.argName(), className(args.object()));
-      }
-      String fmt = "%s must be instance of %s (was %s)";
-      String cn0 = className(args.object());
-      String cn1 = className(args.arg());
-      return format(fmt, args.argName(), cn0, cn1, toStr(args.arg()));
-    };
-  }
-
-  static Formatter msgArray() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must not be an array (was %s)";
-        return format(fmt, args.argName(), className(args.arg()));
-      }
-      String fmt = "%s must be an array (was %s)";
-      return format(fmt, args.argName(), className(args.arg()));
-    };
-  }
-
   //////////////////////////////////////////////////////////////////////////
 
   static String toStr(Object val) {
@@ -204,8 +180,33 @@ class Messages {
     return pkg + '.' + simpleClassName(obj);
   }
 
+  static String className(Object obj) {
+    return obj.getClass() == Class.class ? className((Class) obj) : className(obj.getClass());
+  }
+
+  static String className(Class c) {
+    if (c.isArray()) {
+      c = c.getComponentType();
+      StringBuilder sb = new StringBuilder(6);
+      do {
+        sb.append("[]");
+        if (!c.isArray()) {
+          break;
+        }
+        c = c.getComponentType();
+      } while (true);
+      return c.getName() + sb;
+    }
+    return c.getName();
+  }
+
   static String simpleClassName(Object obj) {
-    Class<?> c = obj.getClass();
+    return obj.getClass() == Class.class
+        ? simpleClassName((Class) obj)
+        : simpleClassName(obj.getClass());
+  }
+
+  static String simpleClassName(Class c) {
     if (c.isArray()) {
       c = c.getComponentType();
       StringBuilder sb = new StringBuilder(6);

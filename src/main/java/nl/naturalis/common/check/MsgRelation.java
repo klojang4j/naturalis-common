@@ -24,24 +24,18 @@ class MsgRelation {
 
   static Formatter msgSameAs() {
     return args -> {
+      String scnObj = simpleClassName(args.object());
+      int hcObj = identityHashCode(args.object());
+      String idObj = args.object() == null ? "null" : scnObj + '@' + hcObj;
       if (args.negated()) {
         String fmt = "%s must not be %s";
-        String id0 =
-            args.object() == null
-                ? "null"
-                : simpleClassName(args.object()) + '@' + identityHashCode(args.object());
-        return format(fmt, args.argName(), id0);
+        return format(fmt, args.argName(), idObj);
       }
+      String scnArg = simpleClassName(args.arg());
+      int hcArg = identityHashCode(args.arg());
+      String idArg = args.arg() == null ? "null" : scnArg + '@' + hcArg;
       String fmt = "%s must be %s (was %s)";
-      String id0 =
-          args.object() == null
-              ? "null"
-              : simpleClassName(args.object()) + '@' + identityHashCode(args.object());
-      String id1 =
-          args.arg() == null
-              ? "null"
-              : simpleClassName(args.arg()) + '@' + identityHashCode(args.arg());
-      return format(fmt, args.argName(), id0, id1);
+      return format(fmt, args.argName(), idObj, idArg);
     };
   }
 
@@ -130,6 +124,40 @@ class MsgRelation {
       }
       String fmt = "%s must be null or %s (was %s)";
       return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+    };
+  }
+
+  static Formatter msgInstanceOf() {
+    return args -> {
+      String cnObj = className(args.object());
+      if (args.negated()) {
+        String fmt = "%s must not be instance of %s (was %s)";
+        String arg = toStr(args.arg());
+        return format(fmt, args.argName(), cnObj, arg);
+      }
+      String fmt = "%s must be instance of %s (was %s)";
+      String cnArg = className(args.arg());
+      return format(fmt, args.argName(), cnObj, cnArg);
+    };
+  }
+
+  static Formatter msgExtending() {
+    return args -> {
+      Class cArg = (Class) args.arg();
+      Class cObj = (Class) args.object();
+      String verb = cArg.isInterface() || !cObj.isInterface() ? "extend" : "implement";
+      String cnObj = className(cObj);
+      String cnArg = className(cArg);
+      if (args.negated()) {
+        if (cArg == cObj) {
+          String fmt = "%s must not %s %s";
+          return format(fmt, args.argName(), verb, cnObj);
+        }
+        String fmt = "%s must not %s %s (was %s)";
+        return format(fmt, args.argName(), verb, cnObj, cnArg);
+      }
+      String fmt = "%s must %s %s (was %s)";
+      return format(fmt, args.argName(), verb, cnObj, cnArg);
     };
   }
 

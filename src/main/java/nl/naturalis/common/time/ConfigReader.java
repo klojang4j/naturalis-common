@@ -264,7 +264,7 @@ class ConfigReader {
     } catch (ClassNotFoundException e) {
       return Check.fail(FuzzyDateException::new, "Class not found: \"${0}\"", className);
     }
-    checkThat(clazz, "filter").is(assignableTo(), DateStringFilter.class);
+    checkThat(clazz, "filter").is(extending(), DateStringFilter.class);
     try {
       return (DateStringFilter) clazz.getDeclaredConstructor().newInstance();
     } catch (Exception e) {

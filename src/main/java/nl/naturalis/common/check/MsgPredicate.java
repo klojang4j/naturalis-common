@@ -112,6 +112,17 @@ final class MsgPredicate {
     };
   }
 
+  static Formatter msgArray() {
+    return args -> {
+      if (args.negated()) {
+        String fmt = "%s must not be an array (was %s)";
+        return format(fmt, args.argName(), className(args.arg()));
+      }
+      String fmt = "%s must be an array (was %s)";
+      return format(fmt, args.argName(), className(args.arg()));
+    };
+  }
+
   static Formatter msgDirectory() {
     return args -> {
       File f = (File) args.arg();

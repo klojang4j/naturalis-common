@@ -10,6 +10,7 @@ import nl.naturalis.common.function.ObjIntRelation;
 import nl.naturalis.common.function.Relation;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
@@ -402,6 +403,108 @@ public class CommonChecks {
   }
 
   //////////////////////////////////////////////////////////////////////////////////
+  // IntRelation
+  //////////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Verifies that the argument is equal to a particular value.
+   *
+   * @return An {@code IntRelation}
+   */
+  public static IntRelation eq() {
+    return (x, y) -> x == y;
+  }
+
+  static {
+    setMessagePattern(eq(), msgEq());
+    setName(eq(), "eq");
+  }
+
+  /**
+   * Verifies that the argument is not equal to a particular value.
+   *
+   * @return An {@code IntRelation}
+   */
+  public static IntRelation ne() {
+    return (x, y) -> x != y;
+  }
+
+  static {
+    setMessagePattern(ne(), msgNe());
+    setName(ne(), "ne");
+  }
+
+  /**
+   * Verifies that the argument is greater than a particular value.
+   *
+   * @return An {@code IntRelation}
+   */
+  public static IntRelation gt() {
+    return (x, y) -> x > y;
+  }
+
+  static {
+    setMessagePattern(gt(), msgGt());
+    setName(gt(), "gt");
+  }
+
+  /**
+   * Verifies that the argument is greater than or equal to a particular value.
+   *
+   * @return An {@code IntRelation}
+   */
+  public static IntRelation gte() {
+    return (x, y) -> x >= y;
+  }
+
+  static {
+    setMessagePattern(gte(), msgGte());
+    setName(gte(), "gte");
+  }
+
+  /**
+   * Verifies that the argument is less than a particular value.
+   *
+   * @return An {@code IntRelation}
+   */
+  public static IntRelation lt() {
+    return (x, y) -> x < y;
+  }
+
+  static {
+    setMessagePattern(lt(), msgLt());
+    setName(lt(), "lt");
+  }
+
+  /**
+   * Verifies that the argument is less than or equal to a particular value.
+   *
+   * @return An {@code IntRelation}
+   */
+  public static IntRelation lte() {
+    return (x, y) -> x <= y;
+  }
+
+  static {
+    setMessagePattern(lte(), msgLte());
+    setName(lte(), "lte");
+  }
+
+  /**
+   * Verifies that the argument is a whole multiple of a particular integer.
+   *
+   * @return An {@code IntRelation}
+   */
+  public static IntRelation multipleOf() {
+    return (x, y) -> x % y == 0;
+  }
+
+  static {
+    setMessagePattern(multipleOf(), msgMultipleOf());
+    setName(multipleOf(), "multipleOf");
+  }
+
+  //////////////////////////////////////////////////////////////////////////////////
   // Relation
   //////////////////////////////////////////////////////////////////////////////////
 
@@ -544,8 +647,13 @@ public class CommonChecks {
    *
    * @return
    */
-  public static <T, U> Relation<Class<T>, Class<U>> assignableTo() {
+  public static <T, U> Relation<Class<T>, Class<U>> extending() {
     return (x, y) -> y.isAssignableFrom(x);
+  }
+
+  static {
+    setMessagePattern(extending(), msgExtending());
+    setName(extending(), "extending");
   }
 
   /**
@@ -1108,108 +1216,6 @@ public class CommonChecks {
     setName(intElementOf(), "intElementOf");
   }
 
-  //////////////////////////////////////////////////////////////////////////////////
-  // IntRelation
-  //////////////////////////////////////////////////////////////////////////////////
-
-  /**
-   * Verifies that the argument is equal to a particular value.
-   *
-   * @return An {@code IntRelation}
-   */
-  public static IntRelation eq() {
-    return (x, y) -> x == y;
-  }
-
-  static {
-    setMessagePattern(eq(), msgEq());
-    setName(eq(), "eq");
-  }
-
-  /**
-   * Verifies that the argument is not equal to a particular value.
-   *
-   * @return An {@code IntRelation}
-   */
-  public static IntRelation ne() {
-    return (x, y) -> x != y;
-  }
-
-  static {
-    setMessagePattern(ne(), msgNe());
-    setName(ne(), "ne");
-  }
-
-  /**
-   * Verifies that the argument is greater than a particular value.
-   *
-   * @return An {@code IntRelation}
-   */
-  public static IntRelation gt() {
-    return (x, y) -> x > y;
-  }
-
-  static {
-    setMessagePattern(gt(), msgGt());
-    setName(gt(), "gt");
-  }
-
-  /**
-   * Verifies that the argument is greater than or equal to a particular value.
-   *
-   * @return An {@code IntRelation}
-   */
-  public static IntRelation gte() {
-    return (x, y) -> x >= y;
-  }
-
-  static {
-    setMessagePattern(gte(), msgGte());
-    setName(gte(), "gte");
-  }
-
-  /**
-   * Verifies that the argument is less than a particular value.
-   *
-   * @return An {@code IntRelation}
-   */
-  public static IntRelation lt() {
-    return (x, y) -> x < y;
-  }
-
-  static {
-    setMessagePattern(lt(), msgLt());
-    setName(lt(), "lt");
-  }
-
-  /**
-   * Verifies that the argument is less than or equal to a particular value.
-   *
-   * @return An {@code IntRelation}
-   */
-  public static IntRelation lte() {
-    return (x, y) -> x <= y;
-  }
-
-  static {
-    setMessagePattern(lte(), msgLte());
-    setName(lte(), "lte");
-  }
-
-  /**
-   * Verifies that the argument is a whole multiple of a particular integer.
-   *
-   * @return An {@code IntRelation}
-   */
-  public static IntRelation multipleOf() {
-    return (x, y) -> x % y == 0;
-  }
-
-  static {
-    setMessagePattern(multipleOf(), msgMultipleOf());
-    setName(multipleOf(), "multipleOf");
-  }
-
   /* ++++++++++++++ Miscellaneous ++++++++++++++ */
 
   /**
@@ -1243,6 +1249,15 @@ public class CommonChecks {
    */
   public static Function<String, UnsupportedOperationException> unsupportedOperation() {
     return UnsupportedOperationException::new;
+  }
+
+  /**
+   * (Not a check) Shortcut for {@link IOException#IOException(String) IOException::new}.
+   *
+   * @return A {@code Function} that produces an {@code UnsupportedOperationException}
+   */
+  public static Function<String, IOException> io() {
+    return IOException::new;
   }
 
   /**

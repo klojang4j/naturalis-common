@@ -1,6 +1,6 @@
 package nl.naturalis.common.path;
 
-import static nl.naturalis.common.CollectionMethods.initializeMap;
+import static nl.naturalis.common.CollectionMethods.newHashMap;
 import static nl.naturalis.common.path.PathWalker.DeadEndAction.RETURN_DEAD_END;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -245,7 +245,7 @@ public class PathWalkerTest {
     piet.setTwitter(null);
     piet.setBirthDate(new int[] {1972, 1, 1});
     piet.setExtraInfo(
-        initializeMap(
+        newHashMap(
             10,
             "hobbies",
             "paardrijden",
@@ -254,7 +254,7 @@ public class PathWalkerTest {
             new URL("https://nos.nl"),
             "OkiDoki",
             "deep stuff",
-            initializeMap(10, "e=mc2", "Einstein", "cogito", "Descartes"),
+            newHashMap(10, "e=mc2", "Einstein", "cogito", "Descartes"),
             "numberOfPets",
             2));
     hr.getEmployees().add(piet);
@@ -266,7 +266,7 @@ public class PathWalkerTest {
     jan.setTwitter(new URL("https://twitter.com/@jan"));
     jan.setBirthDate(new int[] {1972, 2, 2});
     jan.setExtraInfo(
-        initializeMap(
+        newHashMap(
             10,
             "hobbies",
             "null",
