@@ -8,17 +8,19 @@ class MsgRelation {
 
   static Formatter msgSameAs() {
     return args -> {
-      String scnObj = simpleClassName(args.object());
-      int hcObj = identityHashCode(args.object());
-      String idObj = args.object() == null ? "null" : scnObj + '@' + hcObj;
+      String idObj =
+          args.object() == null
+              ? "null"
+              : simpleClassName(args.object()) + '@' + identityHashCode(args.object());
       if (args.negated()) {
-        String fmt = "%s must not be %s";
+        String fmt = "%s must not be reference to %s";
         return format(fmt, args.argName(), idObj);
       }
-      String scnArg = simpleClassName(args.arg());
-      int hcArg = identityHashCode(args.arg());
-      String idArg = args.arg() == null ? "null" : scnArg + '@' + hcArg;
-      String fmt = "%s must be %s (was %s)";
+      String idArg =
+          args.arg() == null
+              ? "null"
+              : simpleClassName(args.arg()) + '@' + identityHashCode(args.arg());
+      String fmt = "%s must be reference to %s (was %s)";
       return format(fmt, args.argName(), idObj, idArg);
     };
   }

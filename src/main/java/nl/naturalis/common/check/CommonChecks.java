@@ -846,7 +846,7 @@ public class CommonChecks {
   }
 
   static {
-    setMessagePattern(hasSubstring(), msgContains()); // Recycle message
+    setMessagePattern(hasSubstring(), msgHasSubstring()); // Recycle message
     setName(hasSubstring(), "hasSubstring");
   }
 

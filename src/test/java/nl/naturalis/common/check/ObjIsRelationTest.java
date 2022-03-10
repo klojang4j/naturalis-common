@@ -216,7 +216,7 @@ public class ObjIsRelationTest {
       Check.that(9.7F, "siphon").is(sameAs(), 9.7D);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertTrue(e.getMessage().startsWith("siphon must be Double@"));
+      assertTrue(e.getMessage().startsWith("siphon must be reference to Double@"));
       assertTrue(e.getMessage().contains(" (was Float@"));
       assertTrue(e.getMessage().endsWith(")"));
       return;
@@ -230,7 +230,31 @@ public class ObjIsRelationTest {
       Check.that(WEDNESDAY, "siphon").isNot(sameAs(), WEDNESDAY);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertTrue(e.getMessage().startsWith("siphon must not be DayOfWeek@"));
+      assertTrue(e.getMessage().startsWith("siphon must not be reference to DayOfWeek@"));
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void sameAs02() {
+    try {
+      Check.that(null, "siphon").is(sameAs(), WEDNESDAY);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertTrue(e.getMessage().startsWith("siphon must be reference to DayOfWeek@"));
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void sameAs03() {
+    try {
+      Check.that(WEDNESDAY, "siphon").is(sameAs(), null);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertTrue(e.getMessage().startsWith("siphon must be reference to null (was DayOfWeek@"));
       return;
     }
     fail();
@@ -676,7 +700,7 @@ public class ObjIsRelationTest {
       Check.that("abcd", "BMW").is(hasSubstring(), "qwe");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("BMW must contain qwe", e.getMessage());
+      assertEquals("BMW must contain qwe (was abcd)", e.getMessage());
       return;
     }
     fail();
@@ -688,7 +712,7 @@ public class ObjIsRelationTest {
       Check.that("abcd", "BMW").isNot(hasSubstring(), "abc");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("BMW must not contain abc", e.getMessage());
+      assertEquals("BMW must not contain abc (was abcd)", e.getMessage());
       return;
     }
     fail();
