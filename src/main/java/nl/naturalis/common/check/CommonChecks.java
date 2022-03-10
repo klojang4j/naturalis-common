@@ -22,6 +22,7 @@ import static nl.naturalis.common.check.MsgIntPredicate.*;
 import static nl.naturalis.common.check.MsgIntRelation.*;
 import static nl.naturalis.common.check.MsgPredicate.*;
 import static nl.naturalis.common.check.MsgRelation.*;
+import static nl.naturalis.common.check.MsgIntObjRelation.*;
 
 /**
  * Defines various common tests for arguments. The tests have short, informative error messages
@@ -1173,37 +1174,6 @@ public class CommonChecks {
   //////////////////////////////////////////////////////////////////////////////////
 
   /**
-   * Verifies that the argument can be used as index into the specified list.
-   *
-   * @return An {@code IntObjRelation} expressing this requirement
-   */
-  public static <E, L extends List<E>> IntObjRelation<L> indexOf() {
-    return (x, y) -> x >= 0 && x < y.size();
-  }
-
-  static {
-    setMessagePattern(indexOf(), msgIndexOf());
-    setName(indexOf(), "indexOf");
-  }
-
-  /**
-   * Verifies that the argument can be used as index into the specified array. No preliminary check
-   * is done to ascertain that the provided object actually is an array. Execute the {@link
-   * #array()} check first if there is any doubt about this.
-   *
-   * @param <T> The type of the array
-   * @return
-   */
-  public static <T> IntObjRelation<T> arrayIndexOf() {
-    return (x, y) -> x >= 0 && x < Array.getLength(y);
-  }
-
-  static {
-    setMessagePattern(arrayIndexOf(), msgIndexOf()); // Recycle message
-    setName(arrayIndexOf(), "arrayIndexOf");
-  }
-
-  /**
    * Verifies that the argument can be used as index into the specified array. No preliminary check
    * is done to ascertain that the provided object actually is an array. Execute the {@link
    * #array()} check first if there is any doubt about this.
@@ -1211,20 +1181,50 @@ public class CommonChecks {
    * <blockquote>
    *
    * <pre>{@code
-   * char c = Check.that(2).is(strIndexOf(), lastName).intValue(lastName::charAt);
+   * Check.that(4).is(indexOf, new String[5]); // true
+   * Check.that(5).is(indexOf, new String[5]); // false
+   * Check.that(-1).is(indexOf, new String[5]); // false
    * }</pre>
    *
    * </blockquote>
    *
+   * @param <T> The type of the array
    * @return
    */
-  public static <T> IntObjRelation<T> strIndexOf() {
+  public static <T> IntObjRelation<T> indexOf() {
     return (x, y) -> x >= 0 && x < Array.getLength(y);
   }
 
   static {
-    setMessagePattern(arrayIndexOf(), msgIndexOf()); // Recycle message
-    setName(arrayIndexOf(), "arrayIndexOf");
+    setMessagePattern(indexOf(), msgIndexOf()); // Recycle message
+    setName(indexOf(), "indexOf");
+  }
+
+  /**
+   * Verifies that the argument can be used as index into the specified list.
+   *
+   * @return An {@code IntObjRelation} expressing this requirement
+   */
+  public static <E, L extends List<E>> IntObjRelation<L> listIndexOf() {
+    return (x, y) -> x >= 0 && x < y.size();
+  }
+
+  static {
+    setMessagePattern(listIndexOf(), msgIndexOf());
+    setName(listIndexOf(), "listIndexOf");
+  }
+  /**
+   * Verifies that the argument can be safely passed to {@link String#charAt(int) String.charAt}.
+   *
+   * @return
+   */
+  public static IntObjRelation<String> strIndexOf() {
+    return (x, y) -> x >= 0 && x < y.length();
+  }
+
+  static {
+    setMessagePattern(strIndexOf(), msgIndexOf()); // Recycle message
+    setName(strIndexOf(), "strIndexOf");
   }
 
   /**

@@ -5,6 +5,7 @@ import nl.naturalis.common.collection.TypeSet;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,13 +18,13 @@ import static nl.naturalis.common.check.CommonChecks.MESSAGE_PATTERNS;
 @SuppressWarnings({"rawtypes", "unchecked"})
 class Messages {
 
+  // Fall-back error message
   static final String ERR_INVALID_VALUE = "Invalid value for %s: %s";
 
-  /*
-   * Max. display width (characters) for stringified values.
-   */
+  // Max display width (characters) for stringified values.
   private static final int MAX_DISPLAY_WIDTH = 55;
 
+  // Classes that stringify nicely out of the box
   private static final Set<Class<?>> DECENT_TO_STRING =
       TypeSet.of(Number.class, Boolean.class, Character.class, Enum.class);
 
@@ -43,28 +44,6 @@ class Messages {
       return formatter.apply(args);
     }
     return String.format(ERR_INVALID_VALUE, args.argName(), toStr(args.arg()));
-  }
-
-  static Formatter msgIndexOf() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must < 0 or >= %s (was %s)";
-        return format(fmt, args.argName(), args.object(), args.arg());
-      }
-      String fmt = "%s must be >= 0 and < %s (was %s)";
-      return format(fmt, args.argName(), args.object(), args.arg());
-    };
-  }
-
-  static Formatter msgFromIndexOf() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must < 0 or > %s (was %s)";
-        return format(fmt, args.argName(), args.object(), args.arg());
-      }
-      String fmt = "%s must be >= 0 and <= %s (was %s)";
-      return format(fmt, args.argName(), args.object(), args.arg());
-    };
   }
 
   //////////////////////////////////////////////////////////////////////////

@@ -303,7 +303,7 @@ public final class IntCheck<E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    throw exc.apply(getMessage(test, true, argName, getArgName(), object));
+    throw exc.apply(getMessage(test, true, getArgName(), arg, object));
   }
 
   /**

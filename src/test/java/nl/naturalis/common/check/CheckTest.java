@@ -112,15 +112,6 @@ public class CheckTest {
     Check.that("Foo").is(objInt((x, y) -> x.length() > y), 7);
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void lambdaAsIntObjRelation00() {
-    Check.that(7).is(intObj((x, y) -> y.length() > x), "Foo");
-  }
-
-  public void intObjRelation00() {
-    Check.that(7).is(intElementOf(), ints(3, 5, 7, 9));
-  }
-
   @Test
   public void hasPredicate00() {
     Check.that(List.of(1, 2, 3, 4)).has(l -> l.isEmpty(), no());
