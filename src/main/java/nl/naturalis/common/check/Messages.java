@@ -77,11 +77,9 @@ class Messages {
     if (DECENT_TO_STRING.contains(type)) {
       return val.toString();
     } else if (val instanceof CharSequence) {
-      CharSequence cs = (CharSequence) val;
-      if (cs.toString().isEmpty()) {
-        return "<EMPTY_STRING>";
-      } else if (cs.toString().isBlank()) {
-        return "<BLANK_STRING[" + cs.length() + "]>";
+      String cs = ((CharSequence) val).toString();
+      if (cs.toString().isBlank()) {
+        return '"' + cs + '"';
       }
       return ellipsis(val.toString());
     } else if (type == Class.class) {

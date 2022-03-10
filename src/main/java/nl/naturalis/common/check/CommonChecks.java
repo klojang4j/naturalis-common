@@ -643,17 +643,32 @@ public class CommonChecks {
   }
 
   /**
+   * Verifies that the argument is a supertype of the specified class. Equivalent to {@link
+   * Class#isAssignableFrom(Class) Class::isAssignableFrom}.
+   *
+   * @return
+   */
+  public static <T, U> Relation<Class<T>, Class<U>> supertypeOf() {
+    return Class::isAssignableFrom;
+  }
+
+  static {
+    setMessagePattern(supertypeOf(), msgSupertypeOf());
+    setName(supertypeOf(), "supertypeOf");
+  }
+
+  /**
    * Verifies that the argument extends or implements the specified class / interface.
    *
    * @return
    */
-  public static <T, U> Relation<Class<T>, Class<U>> extending() {
+  public static <T, U> Relation<Class<T>, Class<U>> subtypeOf() {
     return (x, y) -> y.isAssignableFrom(x);
   }
 
   static {
-    setMessagePattern(extending(), msgExtending());
-    setName(extending(), "extending");
+    setMessagePattern(subtypeOf(), msgSubtypeOf());
+    setName(subtypeOf(), "subtypeOf");
   }
 
   /**
@@ -850,7 +865,7 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that a {@code String} is present, ignoring case, in a {@code List} of strings.
+   * Verifies that the argument equals ignoring case the specified string.
    *
    * @return A {@code Relation} implementing the test described above
    */

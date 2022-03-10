@@ -3,6 +3,7 @@ package nl.naturalis.common.check;
 import nl.naturalis.common.function.Relation;
 import org.junit.Test;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
@@ -31,7 +32,7 @@ public class ObjIsRelationTest {
           "huh?");
 
   @Test(expected = IllegalArgumentException.class)
-  public void relation00() {
+  public void relation00() { // Just to cover check without parameter name
     Check.that(Float.valueOf(7.5F)).is(GT(), 16F);
   }
 
@@ -50,7 +51,7 @@ public class ObjIsRelationTest {
 
   @Test
   public void relation02() {
-    Check.that(String.class).is(extending(), CharSequence.class);
+    Check.that(String.class).is(subtypeOf(), CharSequence.class);
     Check.that("foo").is(instanceOf(), CharSequence.class);
     Check.that(CharSequence.class).isNot(instanceOf(), String.class);
     Check.that(Set.of("1", "2", "3")).is(contains(), "2");
@@ -238,10 +239,10 @@ public class ObjIsRelationTest {
   @Test
   public void nullOr00() {
     try {
-      Check.that(9.7F, "mordor").is(nullOr(), 9.5F);
+      Check.that(9.7F, "xavier").is(nullOr(), 9.5F);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("mordor must be null or 9.5 (was 9.7)", e.getMessage());
+      assertEquals("xavier must be null or 9.5 (was 9.7)", e.getMessage());
       return;
     }
     fail();
@@ -285,9 +286,37 @@ public class ObjIsRelationTest {
   }
 
   @Test
-  public void extending00() {
+  public void supertype00() {
     try {
-      Check.that(OutputStream.class, "babbage").is(extending(), OutputStream[].class);
+      Check.that(OutputStream.class, "trevor").is(supertypeOf(), OutputStream[].class);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "trevor must be supertype of java.io.OutputStream[] (was java.io.OutputStream)",
+          e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void supertype01() {
+    try {
+      Check.that(OutputStream.class, "trevor").isNot(supertypeOf(), FileOutputStream.class);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "trevor must not be supertype of java.io.FileOutputStream (was java.io.OutputStream)",
+          e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void subtypeOf00() {
+    try {
+      Check.that(OutputStream.class, "babbage").is(subtypeOf(), OutputStream[].class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
@@ -298,9 +327,9 @@ public class ObjIsRelationTest {
   }
 
   @Test
-  public void extending01() {
+  public void subtypeOf01() {
     try {
-      Check.that(OutputStream.class, "babbage").is(extending(), Comparable.class);
+      Check.that(OutputStream.class, "babbage").is(subtypeOf(), Comparable.class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
@@ -311,9 +340,9 @@ public class ObjIsRelationTest {
   }
 
   @Test
-  public void extending02() {
+  public void subtypeOf02() {
     try {
-      Check.that(String.class, "babbage").isNot(extending(), CharSequence.class);
+      Check.that(String.class, "babbage").isNot(subtypeOf(), CharSequence.class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
@@ -325,37 +354,13 @@ public class ObjIsRelationTest {
   }
 
   @Test
-  public void extending03() {
+  public void subtypeOf03() {
     try {
-      Check.that(Float.class, "babbage").isNot(extending(), Comparable.class);
+      Check.that(Float.class, "babbage").isNot(subtypeOf(), Comparable.class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
           "babbage must not implement java.lang.Comparable (was java.lang.Float)", e.getMessage());
-      return;
-    }
-    fail();
-  }
-
-  @Test
-  public void extending04() {
-    try {
-      Check.that(Comparable.class, "babbage").isNot(extending(), Comparable.class);
-    } catch (IllegalArgumentException e) {
-      System.out.println(e.getMessage());
-      assertEquals("babbage must not extend java.lang.Comparable", e.getMessage());
-      return;
-    }
-    fail();
-  }
-
-  @Test
-  public void extending05() {
-    try {
-      Check.that(Float.class, "babbage").isNot(extending(), Float.class);
-    } catch (IllegalArgumentException e) {
-      System.out.println(e.getMessage());
-      assertEquals("babbage must not extend java.lang.Float", e.getMessage());
       return;
     }
     fail();
@@ -666,12 +671,36 @@ public class ObjIsRelationTest {
   }
 
   @Test
-  public void substringOf01() {
+  public void hasSubstring00() {
     try {
-      Check.that("xyz", "foo").is(substringOf(), "abcde");
+      Check.that("abcd", "BMW").is(hasSubstring(), "qwe");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("foo must be substring of \"abcde\" (was \"xyz\")", e.getMessage());
+      assertEquals("BMW must contain qwe", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void hasSubstring01() {
+    try {
+      Check.that("abcd", "BMW").isNot(hasSubstring(), "abc");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("BMW must not contain abc", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void substringOf01() {
+    try {
+      Check.that("xyz", "bandung").is(substringOf(), "abcde");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("bandung must be substring of abcde (was xyz)", e.getMessage());
       return;
     }
     fail();
@@ -685,11 +714,106 @@ public class ObjIsRelationTest {
   @Test
   public void substringOf03() {
     try {
-      Check.on(IOException::new, "xyz")
-          .is(substringOf(), "abcde", "${arg} is not substring of ${obj}");
+      Check.on(io(), "xyz").isNot(substringOf(), "xyz");
     } catch (IOException e) {
       System.out.println(e.getMessage());
-      assertEquals("xyz is not substring of abcde", e.getMessage());
+      assertEquals("String must not be substring of xyz (was xyz)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void substringOf04() {
+    try {
+      Check.that("xyz", "bandung").is(substringOf(), "");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("bandung must be substring of \"\" (was xyz)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void substringOf05() {
+    try {
+      Check.that("     ", "bandung").is(substringOf(), "abcd");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("bandung must be substring of abcd (was \"     \")", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void equalsIgnoreCase00() {
+    try {
+      Check.that("abc", "mordor").is(equalsIgnoreCase(), "XYZ");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("mordor must be equal ignoring case to XYZ (was abc)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void equalsIgnoreCase01() {
+    try {
+      Check.that("123", "mordor").isNot(equalsIgnoreCase(), "123");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("mordor must not be equal ignoring case to 123", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void startsWith00() {
+    try {
+      Check.that("abc", "coco").is(startsWith(), "XYZ");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("coco must start with XYZ (was abc)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void startsWith01() {
+    try {
+      Check.that("abc", "coco").isNot(startsWith(), "a");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("coco must not start with a (was abc)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void endsWith00() {
+    try {
+      Check.that("Thus spoke Zarathustra", "pathos").is(endsWith(), "STRA");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("pathos must end with STRA (was Thus spoke Zarathustra)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void endsWit01() {
+    try {
+      Check.that("Thus spoke Zarathustra", "pathos").isNot(endsWith(), "stra");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("pathos must not end with stra (was Thus spoke Zarathustra)", e.getMessage());
       return;
     }
     fail();

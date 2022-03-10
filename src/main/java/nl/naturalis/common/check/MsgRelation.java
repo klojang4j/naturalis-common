@@ -1,25 +1,10 @@
 package nl.naturalis.common.check;
 
-import nl.naturalis.common.Pair;
-
-import java.util.Collection;
-
 import static java.lang.String.format;
 import static java.lang.System.identityHashCode;
 import static nl.naturalis.common.check.Messages.*;
 
 class MsgRelation {
-
-  static Formatter msgEqualsIgnoreCase() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must not be equal ignoring case to %s (was %s)";
-        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
-      }
-      String fmt = "%s must be equal ignoring case to %s (was %s)";
-      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
-    };
-  }
 
   static Formatter msgSameAs() {
     return args -> {
@@ -35,83 +20,6 @@ class MsgRelation {
       String idArg = args.arg() == null ? "null" : scnArg + '@' + hcArg;
       String fmt = "%s must be %s (was %s)";
       return format(fmt, args.argName(), idObj, idArg);
-    };
-  }
-
-  static Formatter msgSizeEquals() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s.size() must not be equal to %s";
-        return format(fmt, args.argName(), args.object());
-      }
-      String fmt = "%s.size() must be equal to %s (was %s)";
-      return format(fmt, args.argName(), args.object(), ((Collection) args.arg()).size());
-    };
-  }
-
-  static Formatter msgSizeGT() {
-    return args -> {
-      if (args.negated()) {
-        return msgSizeLTE().apply(args.flip());
-      }
-      String fmt = "%s.size() must be > %s (was %s)";
-      return format(fmt, args.argName(), args.object(), ((Collection) args.arg()).size());
-    };
-  }
-
-  static Formatter msgSizeGTE() {
-    return args -> {
-      if (args.negated()) {
-        return msgSizeLT().apply(args.flip());
-      }
-      String fmt = "%s.size() must be >= %s (was %s)";
-      return format(fmt, args.argName(), args.object(), ((Collection) args.arg()).size());
-    };
-  }
-
-  static Formatter msgSizeLT() {
-    return args -> {
-      if (args.negated()) {
-        return msgSizeGTE().apply(args.flip());
-      }
-      String fmt = "%s.size() must be < %s (was %s)";
-      return format(fmt, args.argName(), args.object(), ((Collection) args.arg()).size());
-    };
-  }
-
-  static Formatter msgSizeLTE() {
-    return args -> {
-      if (args.negated()) {
-        return msgSizeGT().apply(args.flip());
-      }
-      String fmt = "%s.size() must be <= %s (was %s)";
-      return format(fmt, args.argName(), args.object(), ((Collection) args.arg()).size());
-    };
-  }
-
-  static Formatter msgInRangeFrom() {
-    return args -> {
-      Pair pair = (Pair) args.object();
-      String fmt;
-      if (args.negated()) {
-        fmt = "%s must be < %s or >= %s (was %s)";
-      } else {
-        fmt = "%s must be >= %s and < %s (was %s)";
-      }
-      return format(fmt, args.argName(), pair.one(), pair.two(), args.arg());
-    };
-  }
-
-  static Formatter msgInRangeClosed() {
-    return args -> {
-      Pair pair = (Pair) args.object();
-      String fmt;
-      if (args.negated()) {
-        fmt = "%s must be < %s or > %s (was %s)";
-      } else {
-        fmt = "%s must be >= %s and <= %s (was %s)";
-      }
-      return format(fmt, args.argName(), pair.one(), pair.two(), args.arg());
     };
   }
 
@@ -140,7 +48,7 @@ class MsgRelation {
     };
   }
 
-  static Formatter msgExtending() {
+  static Formatter msgSubtypeOf() {
     return args -> {
       Class cArg = (Class) args.arg();
       Class cObj = (Class) args.object();
@@ -148,15 +56,26 @@ class MsgRelation {
       String cnObj = className(cObj);
       String cnArg = className(cArg);
       if (args.negated()) {
-        if (cArg == cObj) {
-          String fmt = "%s must not %s %s";
-          return format(fmt, args.argName(), verb, cnObj);
-        }
         String fmt = "%s must not %s %s (was %s)";
         return format(fmt, args.argName(), verb, cnObj, cnArg);
       }
       String fmt = "%s must %s %s (was %s)";
       return format(fmt, args.argName(), verb, cnObj, cnArg);
+    };
+  }
+
+  static Formatter msgSupertypeOf() {
+    return args -> {
+      Class cArg = (Class) args.arg();
+      Class cObj = (Class) args.object();
+      String cnObj = className(cObj);
+      String cnArg = className(cArg);
+      if (args.negated()) {
+        String fmt = "%s must not be supertype of %s (was %s)";
+        return format(fmt, args.argName(), cnObj, cnArg);
+      }
+      String fmt = "%s must be supertype of %s (was %s)";
+      return format(fmt, args.argName(), cnObj, cnArg);
     };
   }
 
@@ -243,13 +162,36 @@ class MsgRelation {
     };
   }
 
+  static Formatter msgHasSubstring() {
+    return args -> {
+      if (args.negated()) {
+        return format(
+            "%s must not contain %s (was %s)",
+            args.argName(), toStr(args.object()), toStr(args.arg()));
+      }
+      String fmt = "%s must contain %s (was %s)";
+      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+    };
+  }
+
   static Formatter msgSubstringOf() {
     return args -> {
       if (args.negated()) {
-        String fmt = "%s must not be substring of \"%s\" (was \"%s\")";
+        String fmt = "%s must not be substring of %s (was %s)";
         return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
       }
-      String fmt = "%s must be substring of \"%s\" (was \"%s\")";
+      String fmt = "%s must be substring of %s (was %s)";
+      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+    };
+  }
+
+  static Formatter msgEqualsIgnoreCase() {
+    return args -> {
+      if (args.negated()) {
+        String fmt = "%s must not be equal ignoring case to %s";
+        return format(fmt, args.argName(), toStr(args.object()));
+      }
+      String fmt = "%s must be equal ignoring case to %s (was %s)";
       return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
     };
   }
@@ -257,10 +199,10 @@ class MsgRelation {
   static Formatter msgStartsWith() {
     return args -> {
       if (args.negated()) {
-        String fmt = "%s must not start with \"%s\" (was \"%s\")";
+        String fmt = "%s must not start with %s (was %s)";
         return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
       }
-      String fmt = "%s must start with \"%s\" (was \"%s\")";
+      String fmt = "%s must start with %s (was %s)";
       return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
     };
   }
@@ -268,10 +210,10 @@ class MsgRelation {
   static Formatter msgEndsWith() {
     return args -> {
       if (args.negated()) {
-        String fmt = "%s must not end with \"%s\" (was %s)";
+        String fmt = "%s must not end with %s (was %s)";
         return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
       }
-      String fmt = "%s must end with \"%s\" (was %s)";
+      String fmt = "%s must end with %s (was %s)";
       return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
     };
   }
