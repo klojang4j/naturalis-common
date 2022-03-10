@@ -1,11 +1,7 @@
 package nl.naturalis.common.path;
 
-import static nl.naturalis.common.CollectionMethods.newHashMap;
-import static nl.naturalis.common.path.PathWalker.DeadEndAction.RETURN_DEAD_END;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import nl.naturalis.common.ExceptionMethods;
+import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
@@ -14,8 +10,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import nl.naturalis.common.ExceptionMethods;
-import org.junit.Test;
+
+import static nl.naturalis.common.CollectionMethods.newHashMap;
+import static nl.naturalis.common.path.PathWalker.DeadEndAction.RETURN_DEAD_END;
+import static org.junit.Assert.*;
 
 public class PathWalkerTest {
 
@@ -247,6 +245,8 @@ public class PathWalkerTest {
     piet.setExtraInfo(
         newHashMap(
             10,
+            Object.class,
+            Object.class,
             "hobbies",
             "paardrijden",
             null,
@@ -254,7 +254,7 @@ public class PathWalkerTest {
             new URL("https://nos.nl"),
             "OkiDoki",
             "deep stuff",
-            newHashMap(10, "e=mc2", "Einstein", "cogito", "Descartes"),
+            newHashMap(10, String.class, String.class, "e=mc2", "Einstein", "cogito", "Descartes"),
             "numberOfPets",
             2));
     hr.getEmployees().add(piet);
@@ -268,6 +268,8 @@ public class PathWalkerTest {
     jan.setExtraInfo(
         newHashMap(
             10,
+            Object.class,
+            Object.class,
             "hobbies",
             "null",
             "allergies",

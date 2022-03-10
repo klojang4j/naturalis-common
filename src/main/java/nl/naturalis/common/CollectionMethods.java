@@ -97,35 +97,51 @@ public class CollectionMethods {
       return new ArrayList<>(Math.max(1, capacity));
     }
     List<E> l = new ArrayList<>(Math.max(capacity, initVals.length));
-    Arrays.stream(initVals).forEach(l::add);
+    l.addAll(Arrays.asList(initVals));
     return l;
   }
 
   /**
-   * Returns a {@link HashMap} initialized with the specified key-value pairs.
+   * Returns a {@link HashMap} initialized with the specified key-value pairs. Both keys and values
+   * are allowed to be {@code null}. Keys will be checked for uniqueness.
    *
    * @param <K> The type of the keys
    * @param <V> The type of the values
-   * @param size The expected number of map entries. If you specify a number less than the number of
-   *     key-value pairs (half the length of the varargs array), it will be taken as a multiplier.
-   *     For example, 2 would mean that you expect the map to grow to about twice its original size.
-   *     The minimum initial capacity will in any case be at least 4.
+   * @param size The expected number of map entries. No rehashing will take place until that number
+   *     is reached. If you specify a number less than the number of key-value pairs (half the
+   *     length of the varargs array), it will be taken as a multiplier. For example, 2 would mean
+   *     that you expect the map to grow to about twice its original size.
+   * @param keyClass The class of the keys.
+   * @param valueClass The class of the values
    * @param kvPairs An array alternating between keys and values
    * @return A {@code HashMap} initialized with the specified key-value pairs
    */
   @SuppressWarnings("unchecked")
-  public static <K, V> Map<K, V> newHashMap(int size, Object... kvPairs) {
-    Check.that(size, "capacity").is(gte(), 0);
+  public static <K, V> Map<K, V> newHashMap(
+      int size, Class<K> keyClass, Class<V> valueClass, Object... kvPairs) {
+    Check.that(size, "capacity").isNot(negative());
     Check.notNull(kvPairs, "kvPairs").has(length(), even());
     if (kvPairs.length == 0) {
-      return new HashMap<>(Math.max(4, size));
+      return new HashMap<>(Math.max(1, size));
     }
-    int cap = size < kvPairs.length / 2 ? size * kvPairs.length : size;
-    cap = Math.max(4, cap);
-    cap = 1 + cap * 4 / 3;
+    int cap;
+    if (size < kvPairs.length / 2) {
+      cap = Math.max(1, size) * kvPairs.length;
+    } else {
+      cap = size;
+    }
     HashMap<K, V> map = new HashMap<>(1 + cap * 4 / 3);
     for (int i = 0; i < kvPairs.length - 1; i += 2) {
-      map.put((K) kvPairs[i], (V) kvPairs[i + 1]);
+      K key = (K) kvPairs[i];
+      V val = (V) kvPairs[i + 1];
+      Check.that(key).isNot(keyIn(), map, "duplicate key at position ${0}: ${arg}", i);
+      if (key != null) {
+        Check.that(key, "kvPairs[" + i + "]").is(instanceOf(), keyClass);
+      }
+      if (val != null) {
+        Check.that(val, "kvPairs[" + (i + 1) + "]").is(instanceOf(), valueClass);
+      }
+      map.put(key, val);
     }
     return map;
   }

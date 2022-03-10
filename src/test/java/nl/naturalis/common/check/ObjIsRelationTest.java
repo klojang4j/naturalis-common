@@ -16,6 +16,20 @@ import static org.junit.Assert.*;
 
 public class ObjIsRelationTest {
 
+  private static final Map<String, String> beatles =
+      newHashMap(
+          0,
+          String.class,
+          String.class,
+          "john",
+          "lennon",
+          "paul",
+          "mccartney",
+          "george",
+          "harrison",
+          "guess who",
+          "huh?");
+
   @Test(expected = IllegalArgumentException.class)
   public void relation00() {
     Check.that(Float.valueOf(7.5F)).is(GT(), 16F);
@@ -43,12 +57,12 @@ public class ObjIsRelationTest {
     Check.that(Set.of("1", "2", "3")).isNot(contains(), "4");
     Check.that((Integer) 2).is(in(), List.of(1, 2, 3));
     Check.that((Integer) 4).isNot(in(), List.of(1, 2, 3));
-    Check.that(Set.of("1", "2", "3")).is(containsAll(), List.of("1", "2"));
-    Check.that(Set.of("1", "4", "5")).isNot(containsAll(), List.of("1", "2"));
+    Check.that(Set.of("1", "2", "3")).is(supersetOf(), List.of("1", "2"));
+    Check.that(Set.of("1", "4", "5")).isNot(supersetOf(), List.of("1", "2"));
     Check.that(Set.of(MONDAY, TUESDAY, WEDNESDAY))
-        .is(allIn(), List.of(MONDAY, TUESDAY, WEDNESDAY, THURSDAY));
+        .is(subsetOf(), List.of(MONDAY, TUESDAY, WEDNESDAY, THURSDAY));
     Check.that(Set.of(MONDAY, TUESDAY, SATURDAY))
-        .isNot(allIn(), List.of(MONDAY, TUESDAY, WEDNESDAY, THURSDAY));
+        .isNot(subsetOf(), List.of(MONDAY, TUESDAY, WEDNESDAY, THURSDAY));
     Map<Integer, Integer> map = Map.of(1, 1, 2, 4, 3, 6, 4, 8, 5, 10);
     Check.that(map).is(hasKey(), 1);
     Check.that(map).isNot(hasKey(), 11);
@@ -69,7 +83,7 @@ public class ObjIsRelationTest {
     Check.that("ZZZ").is(GT(), "AAA");
     Check.that("hello").isNot(startsWith(), "foo");
     Check.that("hello").is(endsWith(), "lo");
-    Check.that("hello").is(hasSubstr(), "lo");
+    Check.that("hello").is(hasSubstring(), "lo");
     Check.that("abc").is(substringOf(), "abcde");
     Check.that("abc").is(substringOf(), "abc");
     Check.that("abc").isNot(substringOf(), "ab");
@@ -378,7 +392,17 @@ public class ObjIsRelationTest {
     try {
       Map<String, String> map =
           newHashMap(
-              0, "john", "lennon", "paul", "mccartney", "george", "harrison", "guess who", "huh?");
+              0,
+              String.class,
+              String.class,
+              "john",
+              "lennon",
+              "paul",
+              "mccartney",
+              "george",
+              "harrison",
+              "guess who",
+              "huh?");
       Check.on(unsupportedOperation(), map, "thor").is(hasKey(), "ringo");
     } catch (UnsupportedOperationException e) {
       System.out.println(e.getMessage());
@@ -393,11 +417,249 @@ public class ObjIsRelationTest {
     try {
       Map<String, String> map =
           newHashMap(
-              0, "john", "lennon", "paul", "mccartney", "george", "harrison", "guess who", "huh?");
+              0,
+              String.class,
+              String.class,
+              "john",
+              "lennon",
+              "paul",
+              "mccartney",
+              "george",
+              "harrison",
+              "guess who",
+              "huh?");
       Check.on(unsupportedOperation(), map, "thor").isNot(hasKey(), "john");
     } catch (UnsupportedOperationException e) {
       System.out.println(e.getMessage());
       assertEquals("thor must not contain key john", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void hasValue00() {
+    try {
+      Map<String, String> map =
+          newHashMap(
+              0,
+              String.class,
+              String.class,
+              "john",
+              "lennon",
+              "paul",
+              "mccartney",
+              "george",
+              "harrison",
+              "guess who",
+              "huh?");
+      Check.that(map, "morpheus").is(hasValue(), "star");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("morpheus must contain value star", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void hasValue01() {
+    try {
+      Map<String, String> map =
+          newHashMap(
+              0,
+              String.class,
+              String.class,
+              "john",
+              "lennon",
+              "paul",
+              "mccartney",
+              "george",
+              "harrison",
+              "guess who",
+              "huh?");
+      Check.that(map, "morpheus").isNot(hasValue(), "huh?");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("morpheus must not contain value huh?", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void in00() {
+    try {
+      List<String> names = newArrayList(0, "john", "paul", "george", "guess who");
+      Check.that("ringo", "tetrapod").is(in(), names);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "tetrapod must be element of ArrayList[4] of [john, paul, george, guess who] (was ringo)",
+          e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void in01() {
+    try {
+      List<String> names = newArrayList(0, "john", "paul", "george", "guess who");
+      Check.that("paul", "tetrapod").isNot(in(), names);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "tetrapod must not be element of ArrayList[4] of [john, paul, george, guess who] (was paul)",
+          e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void keyIn00() {
+    try {
+      Check.that("ringo", "flavius").is(keyIn(), beatles);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "flavius must be key in HashMap[4] of {george: harrison, john: lennon, paul: mccartney, gue...} (was ringo)",
+          e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void keyIn01() {
+    try {
+      Check.that("john", "flavius").isNot(keyIn(), beatles);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "flavius must not be key in HashMap[4] of {george: harrison, john: lennon, paul: mccartney, gue...} (was john)",
+          e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void valueIn00() {
+    try {
+      Check.that("star", "werner").is(valueIn(), beatles);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "werner must be value in HashMap[4] of {george: harrison, john: lennon, paul: mccartney, gue...} (was star)",
+          e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void valueIn01() {
+    try {
+      Check.that("lennon", "werner").isNot(valueIn(), beatles);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "werner must not be value in HashMap[4] of {george: harrison, john: lennon, paul: mccartney, gue...} (was lennon)",
+          e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void elementOf00() {
+    try {
+      Check.that("lennon", "tolstoy").is(elementOf(), pack("mccartney", "harrisson", "star"));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "tolstoy must be element of String[3] of [mccartney, harrisson, star] (was lennon)",
+          e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void elementOf01() {
+    try {
+      Check.that("star", "tolstoy").isNot(elementOf(), pack("mccartney", "harrisson", "star"));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "tolstoy must not be element of String[3] of [mccartney, harrisson, star] (was star)",
+          e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void supersetOf00() {
+    try {
+      Check.that(List.of("mccartney", "harrisson", "lennon"), "frodo")
+          .is(supersetOf(), List.of("mccartney", "harrisson", "star"));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "frodo must be superset ListN[3] of [mccartney, harrisson, star] "
+              + "(was ListN[3] of [mccartney, harrisson, lennon])",
+          e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void superset01() {
+    try {
+      Check.that(List.of("lennon", "mccartney", "harrisson", "star"), "frodo")
+          .isNot(supersetOf(), List.of("mccartney", "harrisson", "star"));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "frodo must not be superset ListN[3] of [mccartney, harrisson, star] "
+              + "(was ListN[4] of [lennon, mccartney, harrisson, star])",
+          e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void subsetOf00() {
+    try {
+      Check.that(List.of("mccartney", "harrisson", "lennon"), "kremlin")
+          .is(subsetOf(), List.of("mccartney", "harrisson", "star"));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "kremlin must be subset of ListN[3] of [mccartney, harrisson, star] "
+              + "(was ListN[3] of [mccartney, harrisson, lennon])",
+          e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void subsetOf01() {
+    try {
+      Check.that(List.of("lennon", "mccartney", "harrisson", "star"), "kremlin")
+          .isNot(subsetOf(), List.of("lennon", "mccartney", "harrisson", "star"));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals(
+          "kremlin must not be subset of ListN[4] of [lennon, mccartney, harrisson, star] "
+              + "(was ListN[4] of [lennon, mccartney, harrisson, star])",
+          e.getMessage());
       return;
     }
     fail();

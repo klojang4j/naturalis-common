@@ -5,8 +5,7 @@ import nl.naturalis.common.Pair;
 import java.util.Collection;
 
 import static java.lang.String.format;
-import static nl.naturalis.common.ClassMethods.className;
-import static java.lang.System.*;
+import static java.lang.System.identityHashCode;
 import static nl.naturalis.common.check.Messages.*;
 
 class MsgRelation {
@@ -171,56 +170,12 @@ class MsgRelation {
     };
   }
 
-  static Formatter msgIn() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must not be element of %s (was %s)";
-        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
-      }
-      String fmt = "%s must be element of %s (was %s)";
-      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
-    };
-  }
-
-  static Formatter msgContainsAll() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must not be superset of %s (was %s)";
-        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
-      }
-      String fmt = "%s must be superset of %s (was %s)";
-      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
-    };
-  }
-
-  static Formatter msgAllIn() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must not be subset of %s (was %s)";
-        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
-      }
-      String fmt = "%s must be subset of %s (was %s)";
-      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
-    };
-  }
-
   static Formatter msgHasKey() {
     return args -> {
       if (args.negated()) {
         return format("%s must not contain key %s", args.argName(), toStr(args.object()));
       }
       return format("%s must contain key %s", args.argName(), toStr(args.object()));
-    };
-  }
-
-  static Formatter msgKeyIn() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must not be key in %s (parameter \"%s\")";
-        return format(fmt, toStr(args.arg()), toStr(args.object()), args.argName());
-      }
-      String fmt = "%s must be key in %s (parameter \"%s\")";
-      return format(fmt, toStr(args.arg()), toStr(args.object()), args.argName());
     };
   }
 
@@ -233,6 +188,28 @@ class MsgRelation {
     };
   }
 
+  static Formatter msgIn() {
+    return args -> {
+      if (args.negated()) {
+        String fmt = "%s must not be element of %s (was %s)";
+        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+      }
+      String fmt = "%s must be element of %s (was %s)";
+      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+    };
+  }
+
+  static Formatter msgKeyIn() {
+    return args -> {
+      if (args.negated()) {
+        String fmt = "%s must not be key in %s (was %s)";
+        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+      }
+      String fmt = "%s must be key in %s (was %s)";
+      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+    };
+  }
+
   static Formatter msgValueIn() {
     return args -> {
       if (args.negated()) {
@@ -240,6 +217,28 @@ class MsgRelation {
         return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
       }
       String fmt = "%s must be value in %s (was %s)";
+      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+    };
+  }
+
+  static Formatter msgSupersetOf() {
+    return args -> {
+      if (args.negated()) {
+        String fmt = "%s must not be superset %s (was %s)";
+        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+      }
+      String fmt = "%s must be superset %s (was %s)";
+      return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+    };
+  }
+
+  static Formatter msgSubsetOf() {
+    return args -> {
+      if (args.negated()) {
+        String fmt = "%s must not be subset of %s (was %s)";
+        return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
+      }
+      String fmt = "%s must be subset of %s (was %s)";
       return format(fmt, args.argName(), toStr(args.object()), toStr(args.arg()));
     };
   }

@@ -22,7 +22,7 @@ class Messages {
   /*
    * Max. display width (characters) for stringified values.
    */
-  private static final int MAX_DISPLAY_WIDTH = 50;
+  private static final int MAX_DISPLAY_WIDTH = 55;
 
   private static final Set<Class<?>> DECENT_TO_STRING =
       TypeSet.of(Number.class, Boolean.class, Character.class, Enum.class);

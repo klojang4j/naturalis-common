@@ -14,7 +14,7 @@ class FormatNormalizer {
       case "type" -> "%3\\$s";
       case "name" -> "%4\\$s";
       case "obj" -> "%5\\$s";
-      default -> "%" + (Integer.valueOf(r.group(1)) + 6) + "\\$s";
+      default -> "%" + (Integer.parseInt(r.group(1)) + 6) + "\\$s";
     });
   }
 }

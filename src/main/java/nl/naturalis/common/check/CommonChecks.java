@@ -708,21 +708,6 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that a {@code String} argument contains the specified substring. Equivalent to {@link
-   * String#contains(CharSequence) String::contains}.
-   *
-   * @return
-   */
-  public static Relation<String, CharSequence> hasSubstr() {
-    return String::contains;
-  }
-
-  static {
-    setMessagePattern(hasSubstr(), msgContains()); // Recycle message
-    setName(hasSubstr(), "hasSubstr");
-  }
-
-  /**
    * Verifies that the argument is an element of the specified {@code Collection}.
    *
    * @param <E> The type of the argument
@@ -788,22 +773,18 @@ public class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is a substring of the specified string.
-   *
-   * @return
-   */
-  public static Relation<String, String> substringOf() {
-    return (x, y) -> y.contains(x);
-  }
-
-  static {
-    setMessagePattern(substringOf(), msgSubstringOf());
-    setName(substringOf(), "substringOf");
-  }
-
-  /**
-   * Verifies that a {@code Collection} argument contains all of the elements of the specified
+   * Verifies that a {@code Collection} argument contains all the elements of the specified
    * collection. Equivalent to {@link Collection#containsAll(Collection) Collection::containsAll}.
+   * Note that neither collection needs to be a {@link Set}:
+   *
+   * <blockquote>
+   *
+   * <pre>{@code
+   * Check.that(List.of(1,2,3)).is(supersetOf(), Set.of(1,2); // valid and true
+   * Check.that(List.of(1,2)).is(supersetOf(), Set.of(1,2,3); // valid but false
+   * }</pre>
+   *
+   * </blockquote>
    *
    * @param <E> The type of the elements in the {@code Collection}
    * @param <C0> The type of the argument (the subject of the {@code Relation})
@@ -811,13 +792,13 @@ public class CommonChecks {
    * @return A {@code Relation}
    */
   public static <E, C0 extends Collection<? super E>, C1 extends Collection<E>>
-      Relation<C0, C1> containsAll() {
+      Relation<C0, C1> supersetOf() {
     return Collection::containsAll;
   }
 
   static {
-    setMessagePattern(containsAll(), msgContainsAll());
-    setName(containsAll(), "containsAll");
+    setMessagePattern(supersetOf(), msgSupersetOf());
+    setName(supersetOf(), "supersetOf");
   }
 
   /**
@@ -830,13 +811,42 @@ public class CommonChecks {
    * @return A {@code Relation}
    */
   public static <E, C0 extends Collection<E>, C1 extends Collection<? super E>>
-      Relation<C0, C1> allIn() {
+      Relation<C0, C1> subsetOf() {
     return (x, y) -> y.containsAll(x);
   }
 
   static {
-    setMessagePattern(allIn(), msgAllIn());
-    setName(allIn(), "allIn");
+    setMessagePattern(subsetOf(), msgSubsetOf());
+    setName(subsetOf(), "subsetOf");
+  }
+
+  /**
+   * Verifies that a {@code String} argument contains the specified substring. Equivalent to {@link
+   * String#contains(CharSequence) String::contains}.
+   *
+   * @return
+   */
+  public static Relation<String, CharSequence> hasSubstring() {
+    return String::contains;
+  }
+
+  static {
+    setMessagePattern(hasSubstring(), msgContains()); // Recycle message
+    setName(hasSubstring(), "hasSubstring");
+  }
+
+  /**
+   * Verifies that the argument is a substring of the specified string.
+   *
+   * @return
+   */
+  public static Relation<String, String> substringOf() {
+    return (x, y) -> y.contains(x);
+  }
+
+  static {
+    setMessagePattern(substringOf(), msgSubstringOf());
+    setName(substringOf(), "substringOf");
   }
 
   /**
