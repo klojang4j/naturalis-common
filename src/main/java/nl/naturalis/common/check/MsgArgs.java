@@ -20,16 +20,8 @@ import static nl.naturalis.common.check.Messages.simpleClassName;
  */
 record MsgArgs(Object test, boolean negated, String name, Object arg, Class<?> type, Object obj) {
 
-  MsgArgs(Object test, boolean negated, String name, Object arg, Object obj) {
-    this(test, negated, name, arg, null, obj);
-  }
-
-  MsgArgs(Object check, boolean negated, String name, Object argument) {
-    this(check, negated, name, argument, null);
-  }
-
   MsgArgs flip() {
-    return new MsgArgs(test, !negated, name, arg, obj);
+    return new MsgArgs(test, !negated, name, arg, type, obj);
   }
 
   public Class<?> type() {
