@@ -158,7 +158,7 @@ public class ObjIsPredicateTest {
       Check.that(List.of(1F), "iron").is(empty());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("iron must be empty (was List12[1] of [1.0])", e.getMessage());
+      assertEquals("iron must be null or empty (was List12[1] of [1.0])", e.getMessage());
       return;
     }
     fail();
@@ -197,8 +197,7 @@ public class ObjIsPredicateTest {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
-          "gold must be null or contain one or more null values (was String[2] of [foo, bar])",
-          e.getMessage());
+          "gold must be null or contain null values (was String[2] of [foo, bar])", e.getMessage());
       return;
     }
     fail();
@@ -342,6 +341,51 @@ public class ObjIsPredicateTest {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("File lithium must not exist (was " + f + ")", e.getMessage());
+      return;
+    } finally {
+      f.delete();
+    }
+    fail();
+  }
+
+  @Test
+  public void directory00() throws IOException {
+    File f = IOMethods.createTempFile();
+    try {
+      Check.that(f, "thorium").is(directory());
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("thorium must not be a directory (was " + f + ")", e.getMessage());
+      return;
+    } finally {
+      f.delete();
+    }
+    fail();
+  }
+
+  @Test
+  public void directory01() throws IOException {
+    File f = new File("/bla/bla/bar.foo");
+    try {
+      Check.that(f, "thorium").is(directory());
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Directory thorium must exist (was /bla/bla/bar.foo)", e.getMessage());
+      return;
+    } finally {
+      f.delete();
+    }
+    fail();
+  }
+
+  @Test
+  public void directory02() throws IOException {
+    File f = IOMethods.createTempDir();
+    try {
+      Check.that(f, "thorium").isNot(directory());
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Directory thorium must not exist (was " + f + ")", e.getMessage());
       return;
     } finally {
       f.delete();

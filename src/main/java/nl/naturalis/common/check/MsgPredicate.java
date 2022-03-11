@@ -1,5 +1,7 @@
 package nl.naturalis.common.check;
 
+import nl.naturalis.common.StringMethods;
+
 import java.io.File;
 
 import static java.lang.String.format;
@@ -8,77 +10,67 @@ import static nl.naturalis.common.check.Messages.toStr;
 
 final class MsgPredicate {
 
+  private static final String DISCARD = StringMethods.EMPTY;
+  private static final String MSG_PLAIN = "%s must%s be %s";
+  private static final String MSG_STD = "%s must%s be %s (was %s)";
+
+  private static final String MSG_NULL = "%s must be null (was %s)";
+  private static final String MSG_NOT_NULL = "%s must not be null";
+  private static final String MSG_TRUE = "%s must be true (was false)";
+  private static final String MSG_FALSE = "%s must be false (was true)";
+
   private MsgPredicate() {}
 
   static Formatter msgNull() {
-    return args -> {
-      if (args.negated()) {
-        return msgNotNull().apply(args.flip());
-      }
-      return format("%s must be null (was %s)", args.argName(), toStr(args.arg()));
-    };
+    return args ->
+        args.negated()
+            ? format(MSG_NOT_NULL, args.argName())
+            : format(MSG_NULL, args.argName(), toStr(args.arg()));
   }
 
   static Formatter msgNotNull() {
-    return args -> {
-      if (args.negated()) {
-        return msgNull().apply(args.flip());
-      }
-      return format("%s must not be null", args.argName());
-    };
+    return args ->
+        args.negated()
+            ? format(MSG_NULL, args.argName(), toStr(args.arg()))
+            : format(MSG_NOT_NULL, args.argName());
   }
 
   static Formatter msgYes() {
-    return args -> {
-      if (args.negated()) {
-        return msgNo().apply(args.flip());
-      }
-      return format("%s must be true (was false)", args.argName());
-    };
+    return args ->
+        args.negated() ? format(MSG_FALSE, args.argName()) : format(MSG_TRUE, args.argName());
   }
 
   static Formatter msgNo() {
-    return args -> {
-      if (args.negated()) {
-        return msgYes().apply(args.flip());
-      }
-      return format("%s must be false (was true)", args.argName());
-    };
+    return args ->
+        args.negated() ? format(MSG_TRUE, args.argName()) : format(MSG_FALSE, args.argName());
   }
 
   static Formatter msgEmpty() {
-    return args -> {
-      if (args.negated()) {
-        return format("%s must not be null or empty (was %s)", args.argName(), toStr(args.arg()));
-      }
-      return format("%s must be empty (was %s)", args.argName(), toStr(args.arg()));
-    };
+    return args -> format(MSG_STD, args.argName(), args.not(), "null or empty", toStr(args.arg()));
   }
 
   static Formatter msgDeepNotNull() {
-    return args -> {
-      if (args.negated()) { // Negation is total nonsense, but OK
-        return format(
-            "%s must be null or contain one or more null values (was %s)",
-            args.argName(), toStr(args.arg()));
-      }
-      return format(
-          "%s must not be null or contain null values (was %s)", args.argName(), toStr(args.arg()));
-    };
+    return args ->
+        format(
+            MSG_STD,
+            args.argName(),
+            args.notNot(),
+            "null or contain null values",
+            toStr(args.arg()));
   }
 
   static Formatter msgDeepNotEmpty() {
-    return args -> {
-      var fmt = "%s must%s be empty or contain empty values (was %s)";
-      return format(fmt, args.argName(), args.notNot(), toStr(args.arg()));
-    };
+    return args ->
+        format(
+            MSG_STD,
+            args.argName(),
+            args.notNot(),
+            "empty or contain empty values",
+            toStr(args.arg()));
   }
 
   static Formatter msgBlank() {
-    return args -> {
-      var fmt = "%s must%s be null or blank (was %s)";
-      return format(fmt, args.argName(), args.not(), toStr(args.arg()));
-    };
+    return args -> format(MSG_STD, args.argName(), args.not(), "null or blank", toStr(args.arg()));
   }
 
   static Formatter msgInteger() {
@@ -110,7 +102,7 @@ final class MsgPredicate {
     return args -> {
       File f = (File) args.arg();
       if (f.isFile()) {
-        return format("%s must not be a file (was %s)", args.argName(), f);
+        return format("%s must not be a directory (was %s)", args.argName(), f);
       }
       var fmt = "Directory %s must%s exist (was %s)";
       return format(fmt, args.argName(), args.not(), args.arg());
