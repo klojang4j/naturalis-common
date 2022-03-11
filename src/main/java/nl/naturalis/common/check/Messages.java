@@ -38,11 +38,11 @@ class Messages {
   }
 
   private static String message(MsgArgs args) {
-    Formatter formatter = MESSAGE_PATTERNS.get(args.check());
+    Formatter formatter = MESSAGE_PATTERNS.get(args.test());
     if (formatter != null) {
       return formatter.apply(args);
     }
-    return String.format(ERR_INVALID_VALUE, args.argName(), toStr(args.arg()));
+    return String.format(ERR_INVALID_VALUE, args.name(), toStr(args.arg()));
   }
 
   //////////////////////////////////////////////////////////////////////////

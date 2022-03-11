@@ -12,19 +12,19 @@ final class MsgIntObjRelation {
   static Formatter msgIndexOf() {
     return args -> {
       int max;
-      if (args.object().getClass().isArray()) {
-        max = Array.getLength(args.object());
-      } else if (args.object() instanceof List) {
-        max = ((List) args.object()).size();
+      if (args.obj().getClass().isArray()) {
+        max = Array.getLength(args.obj());
+      } else if (args.obj() instanceof List) {
+        max = ((List) args.obj()).size();
       } else { // String
-        max = ((String) args.object()).length();
+        max = ((String) args.obj()).length();
       }
       if (args.negated()) {
         String fmt = "%s must be < 0 or >= %s (was %s)";
-        return format(fmt, args.argName(), max, args.arg());
+        return format(fmt, args.name(), max, args.arg());
       }
       String fmt = "%s must be >= 0 and < %s (was %s)";
-      return format(fmt, args.argName(), max, args.arg());
+      return format(fmt, args.name(), max, args.arg());
     };
   }
 }

@@ -12,7 +12,7 @@ final class MsgIntRelation {
         return msgNe().apply(args.flip());
       }
       String fmt = "%s must equal %s (was %s)";
-      return format(fmt, args.argName(), args.object(), args.arg());
+      return format(fmt, args.name(), args.obj(), args.arg());
     };
   }
 
@@ -22,7 +22,7 @@ final class MsgIntRelation {
         return msgEq().apply(args.flip());
       }
       String fmt = "%s must not equal %s";
-      return format(fmt, args.argName(), args.object());
+      return format(fmt, args.name(), args.obj());
     };
   }
 
@@ -32,7 +32,7 @@ final class MsgIntRelation {
         return msgLte().apply(args.flip());
       }
       String fmt = "%s must be > %s (was %s)";
-      return format(fmt, args.argName(), args.object(), args.arg());
+      return format(fmt, args.name(), args.obj(), args.arg());
     };
   }
 
@@ -42,7 +42,7 @@ final class MsgIntRelation {
         return msgLt().apply(args.flip());
       }
       String fmt = "%s must be >= %s (was %s)";
-      return format(fmt, args.argName(), args.object(), args.arg());
+      return format(fmt, args.name(), args.obj(), args.arg());
     };
   }
 
@@ -52,7 +52,7 @@ final class MsgIntRelation {
         return msgGte().apply(args.flip());
       }
       String fmt = "%s must be < %s (was %s)";
-      return format(fmt, args.argName(), args.object(), args.arg());
+      return format(fmt, args.name(), args.obj(), args.arg());
     };
   }
 
@@ -62,7 +62,7 @@ final class MsgIntRelation {
         return msgGt().apply(args.flip());
       }
       String fmt = "%s must be <= %s (was %s)";
-      return format(fmt, args.argName(), args.object(), args.arg());
+      return format(fmt, args.name(), args.obj(), args.arg());
     };
   }
 
@@ -70,10 +70,10 @@ final class MsgIntRelation {
     return args -> {
       if (args.negated()) {
         String fmt = "%s must not be multiple of %s (was %s)";
-        return format(fmt, args.argName(), args.object(), args.arg());
+        return format(fmt, args.name(), args.obj(), args.arg());
       }
       String fmt = "%s must be multiple of %s (was %s)";
-      return format(fmt, args.argName(), args.object(), args.arg());
+      return format(fmt, args.name(), args.obj(), args.arg());
     };
   }
 }

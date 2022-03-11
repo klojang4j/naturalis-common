@@ -2,25 +2,42 @@ package nl.naturalis.common.check;
 
 import static nl.naturalis.common.check.Messages.simpleClassName;
 
-/*
- * check .....: the check that was executed (e.g. notNull(), gte() or Objects::nonNull or a lambda)
- * negated ...: whether the check was executed in the isNot(..) or notHas(...) methods
- * argName ...: the argument name
- * arg .... ..: the argument and, if the check was implemented as a Relation, the subject of the relationship
- * object ....: the object of the relationship, or null if the check was implemented as a Predicate
+/**
+ * Standard message argument for prefab messages:
+ * <ol>
+ *     <li><b>test</b> The check that was executed, e.g. notNull(), gte() or Objects::nonNull or a
+ *        lambda
+ *     <li><b>negated</b> Whether the check was executed in the isNot(..) or notHas(...)
+ *        methods
+ *     <li><b>name</b> The argument name
+ *     <li><b>arg</b> The argument
+ *     <li><b>type</b> The class of the argument. Will only be set by IntCheck, so in practice
+ *        will always be either null or int.class. We need to be able to distinguish between
+ *        int and Integer.
+ *     <li><b>obj</b> The value of the object of a Relation, or null of the check was implemented
+ *        as a Predicate or IntPredicate
+ * </ol>
  */
-record MsgArgs(Object check, boolean negated, String argName, Object arg, Object object) {
+record MsgArgs(Object test, boolean negated, String name, Object arg, Class<?> type, Object obj) {
 
-  MsgArgs(Object check, boolean negated, String argName, Object argument) {
-    this(check, negated, argName, argument, null);
+  MsgArgs(Object test, boolean negated, String name, Object arg, Object obj) {
+    this(test, negated, name, arg, null, obj);
+  }
+
+  MsgArgs(Object check, boolean negated, String name, Object argument) {
+    this(check, negated, name, argument, null);
   }
 
   MsgArgs flip() {
-    return new MsgArgs(check, !negated, argName, arg, object);
+    return new MsgArgs(test, !negated, name, arg, obj);
+  }
+
+  public Class<?> type() {
+    return type != null? type:arg == null? null : arg.getClass();
   }
 
   String typeAndName() {
-    return arg == null? argName: simpleClassName(arg) +  ' ' + argName;
+    return arg == null? name : simpleClassName(type()) +  ' ' + name;
   }
 
   String not() {
