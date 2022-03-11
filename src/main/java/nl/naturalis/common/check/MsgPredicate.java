@@ -69,73 +69,55 @@ final class MsgPredicate {
 
   static Formatter msgDeepNotEmpty() {
     return args -> {
-      if (args.negated()) { // idem
-        String fmt = "%s must be empty or contain or one or more empty values (was %s)";
-        return format(fmt, args.argName(), toStr(args.arg()));
-      }
-      return format(
-          "%s must not be empty or contain empty values (was %s)",
-          args.typeAndName(), toStr(args.arg()));
+      var fmt = "%s must%s be empty or contain empty values (was %s)";
+      return format(fmt, args.argName(), args.notNot(), toStr(args.arg()));
     };
   }
 
   static Formatter msgBlank() {
     return args -> {
-      if (args.negated()) {
-        return format("%s must not be null or blank (was %s)", args.argName(), toStr(args.arg()));
-      }
-      return format("%s must be null or blank (was %s)", args.argName(), toStr(args.arg()));
+      var fmt = "%s must%s be null or blank (was %s)";
+      return format(fmt, args.argName(), args.not(), toStr(args.arg()));
     };
   }
 
   static Formatter msgInteger() {
     return args -> {
-      if (args.negated()) {
-        return format("%s must not be an integer (was %s)", args.argName(), args.arg());
-      }
-      String fmt = "%s must be an integer (was %s)";
-      return format(fmt, args.argName(), args.arg(), className(args.arg()));
+      var fmt = "%s must%s be parsable as integer (was %s)";
+      return format(fmt, args.argName(), args.not(), args.arg());
+    };
+  }
+
+  static Formatter msgArray() {
+    return args -> {
+      String fmt = "%s must%s be an array (was %s)";
+      return format(fmt, args.argName(), args.not(), className(args.arg()));
     };
   }
 
   static Formatter msgFile() {
     return args -> {
       File f = (File) args.arg();
-      if (args.negated()) {
-        return format("File %s already exists", args.arg());
-      } else if (f.isDirectory()) {
-        // File exists, but is a directory
+      if (f.isDirectory()) {
         return format("%s must not be a directory (was %s)", args.argName(), f);
       }
-      // File not present at all
-      return format("No such file: %s", args.arg());
-    };
-  }
-
-  static Formatter msgArray() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must not be an array (was %s)";
-        return format(fmt, args.argName(), className(args.arg()));
-      }
-      String fmt = "%s must be an array (was %s)";
-      return format(fmt, args.argName(), className(args.arg()));
+      var fmt = "%s must%s exist (was %s)";
+      return format(fmt, args.typeAndName(), args.not(), args.arg());
     };
   }
 
   static Formatter msgDirectory() {
     return args -> {
       File f = (File) args.arg();
-      if (args.negated()) {
-        return format("Directory %s already exists", args.arg());
-      } else if (f.isFile()) {
+      if (f.isFile()) {
         return format("%s must not be a file (was %s)", args.argName(), f);
       }
-      return format("No such directory: %s", args.arg());
+      var fmt = "Directory %s must%s exist (was %s)";
+      return format(fmt, args.argName(), args.not(), args.arg());
     };
   }
 
-  static Formatter msgOnFileSystem() {
+  static Formatter msgFileExists() {
     return args -> {
       File f = (File) args.arg();
       if (args.negated()) {

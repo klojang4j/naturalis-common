@@ -163,7 +163,7 @@ public class IOMethods {
     String path = getPath(requester, extension);
     File f = new File(path);
     if (touch) {
-      Check.on(IOException::new, f).isNot(onFileSystem(), "File exists already: ${arg}");
+      Check.on(IOException::new, f).isNot(fileExists(), "File exists already: ${arg}");
       f.createNewFile();
     }
     return f;
@@ -224,7 +224,7 @@ public class IOMethods {
     String path = getPath(requester, extension);
     File f = new File(path);
     if (touch) {
-      Check.on(IOException::new, f).isNot(onFileSystem(), "File exists already: ${arg}");
+      Check.on(IOException::new, f).isNot(fileExists(), "File exists already: ${arg}");
       f.mkdir();
     }
     return f;

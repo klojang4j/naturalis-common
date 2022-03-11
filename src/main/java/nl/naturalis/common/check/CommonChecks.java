@@ -17,7 +17,6 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
-import static nl.naturalis.common.check.Messages.*;
 import static nl.naturalis.common.check.MsgIntPredicate.*;
 import static nl.naturalis.common.check.MsgIntRelation.*;
 import static nl.naturalis.common.check.MsgPredicate.*;
@@ -288,13 +287,13 @@ public class CommonChecks {
    *
    * @return A {@code Predicate}
    */
-  public static Predicate<File> onFileSystem() {
+  public static Predicate<File> fileExists() {
     return File::exists;
   }
 
   static {
-    setMessagePattern(onFileSystem(), msgOnFileSystem());
-    setName(onFileSystem(), "onFileSystem");
+    setMessagePattern(fileExists(), msgFileExists());
+    setName(fileExists(), "fileExists");
   }
 
   /**

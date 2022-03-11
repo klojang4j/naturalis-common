@@ -1,6 +1,6 @@
 package nl.naturalis.common.check;
 
-import static nl.naturalis.common.ClassMethods.simpleClassName;
+import static nl.naturalis.common.check.Messages.simpleClassName;
 
 /*
  * check .....: the check that was executed (e.g. notNull(), gte() or Objects::nonNull or a lambda)
@@ -25,6 +25,11 @@ record MsgArgs(Object check, boolean negated, String argName, Object arg, Object
 
   String not() {
     return negated? " not" : "";
+  }
+
+  // For negatively formulated checks like notNull() or deepNotEmpty()
+  String notNot() {
+    return negated? "" : " not";
   }
 
 }

@@ -5,7 +5,6 @@ import nl.naturalis.common.collection.TypeSet;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,27 +55,19 @@ class Messages {
     if (DECENT_TO_STRING.contains(type)) {
       return val.toString();
     } else if (val instanceof CharSequence) {
-      String cs = ((CharSequence) val).toString();
-      if (cs.toString().isBlank()) {
-        return '"' + cs + '"';
+      String s = ((CharSequence) val).toString();
+      if (s.isBlank()) {
+        return '"' + s + '"';
       }
       return ellipsis(val.toString());
-    } else if (type == Class.class) {
-      return type.getSimpleName();
     } else if (val instanceof Collection) {
       return collectionToString((Collection) val);
     } else if (val instanceof Map) {
       return mapToString((Map) val);
     } else if (type.isArray()) {
       return arrayToString(val);
-    } else if (type != Object.class) {
-      try {
-        // If the class has its own toString() method, it's probably interesting
-        type.getDeclaredMethod("toString");
-        return ellipsis(val.toString());
-      } catch (NoSuchMethodException e) {
-        // ...
-      }
+    } else if (type == Class.class) {
+      return type.getSimpleName();
     }
     return classNameAbbrev(type) + '@' + System.identityHashCode(val);
   }
