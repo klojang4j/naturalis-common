@@ -80,7 +80,7 @@ public final class IntCheck<E extends Exception> {
     if (test.test(arg)) {
       return this;
     }
-    throw exc.apply(getMessage(test, false, getArgName(), arg));
+    throw exc.apply(getMessage(test, false, getArgName(), arg, int.class));
   }
 
   /**
@@ -96,7 +96,7 @@ public final class IntCheck<E extends Exception> {
     if (!test.test(arg)) {
       return this;
     }
-    throw exc.apply(getMessage(test, true, argName, arg));
+    throw exc.apply(getMessage(test, true, argName, arg, int.class));
   }
 
   /**
@@ -180,7 +180,7 @@ public final class IntCheck<E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    throw exc.apply(getMessage(test, false, getArgName(), arg, object));
+    throw exc.apply(getMessage(test, false, getArgName(), arg, int.class, object));
   }
 
   /**
@@ -197,7 +197,7 @@ public final class IntCheck<E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    throw exc.apply(getMessage(test, true, getArgName(), arg, object));
+    throw exc.apply(getMessage(test, true, getArgName(), arg, int.class, object));
   }
 
   /**
@@ -286,7 +286,7 @@ public final class IntCheck<E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    throw exc.apply(getMessage(test, false, getArgName(), arg, object));
+    throw exc.apply(getMessage(test, false, getArgName(), arg, int.class, object));
   }
 
   /**
@@ -303,7 +303,7 @@ public final class IntCheck<E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    throw exc.apply(getMessage(test, true, getArgName(), arg, object));
+    throw exc.apply(getMessage(test, true, getArgName(), arg, int.class, object));
   }
 
   /**

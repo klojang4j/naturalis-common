@@ -1,6 +1,5 @@
 package nl.naturalis.common.check;
 
-import nl.naturalis.common.CollectionMethods;
 import org.junit.Test;
 
 import static nl.naturalis.common.ArrayMethods.ints;
@@ -9,7 +8,7 @@ import static nl.naturalis.common.check.CommonChecks.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class InitIsIntObjRelationTest {
+public class CheckIntObjRelationTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void lambdaAsIntObjRelation00() {

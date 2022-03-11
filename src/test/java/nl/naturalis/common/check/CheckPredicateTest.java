@@ -14,7 +14,7 @@ import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.ArrayMethods.pack;
 import static org.junit.Assert.*;
 
-public class ObjIsPredicateTest {
+public class CheckPredicateTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void lambdaAsPredicate00() {
@@ -389,6 +389,110 @@ public class ObjIsPredicateTest {
       return;
     } finally {
       f.delete();
+    }
+    fail();
+  }
+
+  @Test
+  public void fileExists00() throws IOException {
+    File f = new File("/bla/foo/bla/bar");
+    try {
+      Check.that(f, "xenon").is(fileExists());
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("File xenon must exist (was " + f + ")", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void fileExists01() throws IOException {
+    File f = IOMethods.createTempFile();
+    try {
+      Check.that(f, "xenon").isNot(fileExists());
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("File xenon must not exist (was " + f + ")", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void readable00() throws IOException {
+    File f = new File("/bla/foo/bla/bar");
+    try {
+      Check.that(f, "krypton").is(readable());
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("No such file/directory: " + f, e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void readable01() throws IOException {
+    File f = IOMethods.createTempFile();
+    try {
+      Check.that(f, "krypton").isNot(readable());
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("File krypton must not be readable (was " + f + ")", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void readable02() throws IOException {
+    File f = IOMethods.createTempDir();
+    try {
+      Check.that(f, "krypton").isNot(readable());
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Directory krypton must not be readable (was " + f + ")", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void writable00() throws IOException {
+    File f = new File("/bla/foo/bla/bar");
+    try {
+      Check.that(f, "argon").is(writable());
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("No such file/directory: " + f, e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void writable01() throws IOException {
+    File f = IOMethods.createTempFile();
+    try {
+      Check.that(f, "argon").isNot(writable());
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("File argon must not be writable (was " + f + ")", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void writable02() throws IOException {
+    File f = IOMethods.createTempDir();
+    try {
+      Check.that(f, "argon").isNot(writable());
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Directory argon must not be writable (was " + f + ")", e.getMessage());
+      return;
     }
     fail();
   }

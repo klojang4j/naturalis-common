@@ -15,7 +15,7 @@ import static nl.naturalis.common.CollectionMethods.newArrayList;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static org.junit.Assert.*;
 
-public class ObjIsRelationTest {
+public class CheckRelationTest {
 
   private static final Map<String, String> beatles =
       newHashMap(

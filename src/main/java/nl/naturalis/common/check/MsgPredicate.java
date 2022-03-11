@@ -1,7 +1,5 @@
 package nl.naturalis.common.check;
 
-import nl.naturalis.common.StringMethods;
-
 import java.io.File;
 
 import static java.lang.String.format;
@@ -10,9 +8,8 @@ import static nl.naturalis.common.check.Messages.toStr;
 
 final class MsgPredicate {
 
-  private static final String DISCARD = StringMethods.EMPTY;
-  private static final String MSG_PLAIN = "%s must%s be %s";
-  private static final String MSG_STD = "%s must%s be %s (was %s)";
+  private static final String MSG_MUST = "%s must%s %s (was %s)";
+  private static final String MSG_MUST_BE = "%s must%s be %s (was %s)";
 
   private static final String MSG_NULL = "%s must be null (was %s)";
   private static final String MSG_NOT_NULL = "%s must not be null";
@@ -44,19 +41,23 @@ final class MsgPredicate {
   }
 
   static Formatter msgEmpty() {
-    return args -> format(MSG_STD, args.name(), args.not(), "null or empty", toStr(args.arg()));
+    return args -> format(MSG_MUST_BE, args.name(), args.not(), "null or empty", toStr(args.arg()));
   }
 
   static Formatter msgDeepNotNull() {
     return args ->
         format(
-            MSG_STD, args.name(), args.notNot(), "null or contain null values", toStr(args.arg()));
+            MSG_MUST_BE,
+            args.name(),
+            args.notNot(),
+            "null or contain null values",
+            toStr(args.arg()));
   }
 
   static Formatter msgDeepNotEmpty() {
     return args ->
         format(
-            MSG_STD,
+            MSG_MUST_BE,
             args.name(),
             args.notNot(),
             "empty or contain empty values",
@@ -64,21 +65,16 @@ final class MsgPredicate {
   }
 
   static Formatter msgBlank() {
-    return args -> format(MSG_STD, args.name(), args.not(), "null or blank", toStr(args.arg()));
+    return args -> format(MSG_MUST_BE, args.name(), args.not(), "null or blank", toStr(args.arg()));
   }
 
   static Formatter msgInteger() {
-    return args -> {
-      var fmt = "%s must%s be parsable as integer (was %s)";
-      return format(fmt, args.name(), args.not(), args.arg());
-    };
+    return args ->
+        format(MSG_MUST_BE, args.name(), args.not(), "parsable as integer", toStr(args.arg()));
   }
 
   static Formatter msgArray() {
-    return args -> {
-      String fmt = "%s must%s be an array (was %s)";
-      return format(fmt, args.name(), args.not(), className(args.arg()));
-    };
+    return args -> format(MSG_MUST_BE, args.name(), args.not(), "an array", className(args.type()));
   }
 
   static Formatter msgFile() {
@@ -87,8 +83,7 @@ final class MsgPredicate {
       if (f.isDirectory()) {
         return format("%s must not be a directory (was %s)", args.name(), f);
       }
-      var fmt = "%s must%s exist (was %s)";
-      return format(fmt, args.typeAndName(), args.not(), args.arg());
+      return format(MSG_MUST, args.typeAndName(), args.not(), "exist", args.arg());
     };
   }
 
@@ -104,34 +99,17 @@ final class MsgPredicate {
   }
 
   static Formatter msgFileExists() {
-    return args -> {
-      File f = (File) args.arg();
-      if (args.negated()) {
-        if (f.isDirectory()) {
-          return format("Directory already exists: %s", f.getAbsolutePath());
-        }
-        return format("File already exists: %s", f.getAbsolutePath());
-      }
-      return format("Missing file/directory: %s", f.getAbsolutePath());
-    };
+    return args -> format(MSG_MUST, args.typeAndName(), args.not(), "exist", args.arg());
   }
 
   static Formatter msgReadable() {
     return args -> {
       File f = (File) args.arg();
       if (!f.exists()) {
-        return format("No such file/directory: %s", f.getAbsolutePath());
+        return format("No such file/directory: %s", f);
       }
-      if (args.negated()) {
-        if (f.isDirectory()) {
-          return format("Directory must not be readable: %s", f.getAbsolutePath());
-        }
-        return format("File must not be readable: %s", f.getAbsolutePath());
-      }
-      if (f.isDirectory()) {
-        return format("Directory must be readable: %s", f.getAbsolutePath());
-      }
-      return format("File must be readable: %s", f.getAbsolutePath());
+      String s = f.isDirectory() ? "Directory" : File.class.getSimpleName();
+      return format("%s %s must%s be readable (was %s)", s, args.name(), args.not(), f);
     };
   }
 
@@ -139,18 +117,10 @@ final class MsgPredicate {
     return args -> {
       File f = (File) args.arg();
       if (!f.exists()) {
-        return format("No such file/directory: %s", f.getAbsolutePath());
+        return format("No such file/directory: %s", f);
       }
-      if (args.negated()) {
-        if (f.isDirectory()) {
-          return format("Directory must not be writable: %s", f.getAbsolutePath());
-        }
-        return format("File must not be writable: %s", f.getAbsolutePath());
-      }
-      if (f.isDirectory()) {
-        return format("Directory must be writable: %s", f.getAbsolutePath());
-      }
-      return format("File must be writable: %s", f.getAbsolutePath());
+      String s = f.isDirectory() ? "Directory" : File.class.getSimpleName();
+      return format("%s %s must%s be writable (was %s)", s, args.name(), args.not(), f);
     };
   }
 }

@@ -29,7 +29,7 @@ final class IntHasInt<E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntUnaryOperator.class);
-    throw check.createException(Messages.getMessage(test, false, name, val));
+    throw check.createException(getMessage(test, false, name, val, int.class));
   }
 
   IntCheck<E> notHas(IntUnaryOperator prop, IntPredicate test) throws E {
@@ -39,7 +39,7 @@ final class IntHasInt<E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntUnaryOperator.class);
-    throw check.createException(Messages.getMessage(test, true, name, val));
+    throw check.createException(getMessage(test, true, name, val, int.class));
   }
 
   IntCheck<E> has(IntUnaryOperator prop, String name, IntPredicate test) throws E {
@@ -48,7 +48,7 @@ final class IntHasInt<E extends Exception> {
     if (test.test(val)) {
       return check;
     }
-    throw check.createException(Messages.getMessage(test, false, check.FQN(name), val));
+    throw check.createException(getMessage(test, false, check.FQN(name), val));
   }
 
   IntCheck<E> notHas(IntUnaryOperator prop, String name, IntPredicate test) throws E {
@@ -57,7 +57,7 @@ final class IntHasInt<E extends Exception> {
     if (!test.test(val)) {
       return check;
     }
-    throw check.createException(Messages.getMessage(test, true, check.FQN(name), val));
+    throw check.createException(getMessage(test, true, check.FQN(name), val));
   }
 
   IntCheck<E> has(IntUnaryOperator prop, IntPredicate test, String message, Object[] msgArgs)
@@ -86,7 +86,7 @@ final class IntHasInt<E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntUnaryOperator.class);
-    throw check.createException(getMessage(test, false, name, val, obj));
+    throw check.createException(getMessage(test, false, name, val, int.class, obj));
   }
 
   IntCheck<E> notHas(IntUnaryOperator prop, IntRelation test, int obj) throws E {
@@ -105,7 +105,7 @@ final class IntHasInt<E extends Exception> {
     if (test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(getMessage(test, false, check.FQN(name), val, obj));
+    throw check.createException(getMessage(test, false, check.FQN(name), val, int.class, obj));
   }
 
   IntCheck<E> notHas(IntUnaryOperator prop, String name, IntRelation test, int obj) throws E {
@@ -114,7 +114,7 @@ final class IntHasInt<E extends Exception> {
     if (!test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(getMessage(test, true, check.FQN(name), val, obj));
+    throw check.createException(getMessage(test, true, check.FQN(name), val, int.class, obj));
   }
 
   IntCheck<E> has(

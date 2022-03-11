@@ -3,13 +3,12 @@ package nl.naturalis.common.check;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.function.IntPredicate;
 
 import static nl.naturalis.common.check.CommonChecks.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class IntIsIntPredicateTest {
+public class CheckIntPredicateTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void lambdaAsIntPredicate00() { // Using asInt utility method
@@ -22,7 +21,7 @@ public class IntIsIntPredicateTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void methodReferenceAsIntPredicate00() {
-    Check.that(3, "foo").is(IntIsIntPredicateTest::notEqualsThree);
+    Check.that(3, "foo").is(CheckIntPredicateTest::notEqualsThree);
   }
 
   @Test

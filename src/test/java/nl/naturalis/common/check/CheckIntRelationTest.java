@@ -7,7 +7,7 @@ import java.io.IOException;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static org.junit.Assert.assertEquals;
 
-public class IntIsIntRelationTest {
+public class CheckIntRelationTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void lambdaAsIntRelation() {
