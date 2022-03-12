@@ -7,7 +7,7 @@ import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 
 import static nl.naturalis.common.check.CommonGetters.formatProperty;
-import static nl.naturalis.common.check.Messages.getMessage;
+import static nl.naturalis.common.check.MsgUtil.getMessage;
 
 /** Helper class for IntCheck. */
 final class IntHasInt<E extends Exception> {

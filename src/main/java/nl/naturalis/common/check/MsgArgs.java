@@ -1,6 +1,6 @@
 package nl.naturalis.common.check;
 
-import static nl.naturalis.common.check.Messages.simpleClassName;
+import static nl.naturalis.common.check.MsgUtil.simpleClassName;
 
 /*
  * Message arguments for prefab messages:

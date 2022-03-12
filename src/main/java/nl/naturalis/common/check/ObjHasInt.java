@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 
 import static nl.naturalis.common.check.CommonGetters.formatProperty;
-import static nl.naturalis.common.check.Messages.getMessage;
+import static nl.naturalis.common.check.MsgUtil.getMessage;
 
 /** Helper class for ObjectCheck. */
 class ObjHasInt<T, E extends Exception> {

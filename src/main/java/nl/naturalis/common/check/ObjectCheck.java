@@ -6,7 +6,7 @@ import java.util.function.*;
 
 import static nl.naturalis.common.check.Check.DEF_ARG_NAME;
 import static nl.naturalis.common.check.CommonChecks.NAMES;
-import static nl.naturalis.common.check.Messages.*;
+import static nl.naturalis.common.check.MsgUtil.*;
 
 public final class ObjectCheck<T, E extends Exception> {
 

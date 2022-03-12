@@ -2,7 +2,7 @@ package nl.naturalis.common.check;
 
 import static java.lang.String.format;
 import static java.lang.System.identityHashCode;
-import static nl.naturalis.common.check.Messages.*;
+import static nl.naturalis.common.check.MsgUtil.*;
 
 final class MsgRelation {
 

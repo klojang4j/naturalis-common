@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static nl.naturalis.common.check.CommonGetters.formatProperty;
-import static nl.naturalis.common.check.Messages.getMessage;
+import static nl.naturalis.common.check.MsgUtil.getMessage;
 
 /** Helper class for ObjectCheck. */
 final class ObjHasObj<T, E extends Exception> {
@@ -29,7 +29,7 @@ final class ObjHasObj<T, E extends Exception> {
     if (test.test(val)) {
       return check;
     }
-    throw check.createException(Messages.getMessage(test, false, check.FQN(name), val));
+    throw check.createException(MsgUtil.getMessage(test, false, check.FQN(name), val));
   }
 
   <P> ObjectCheck<T, E> notHas(Function<T, P> prop, String name, Predicate<P> test) throws E {
@@ -38,7 +38,7 @@ final class ObjHasObj<T, E extends Exception> {
     if (!test.test(val)) {
       return check;
     }
-    throw check.createException(Messages.getMessage(test, true, check.FQN(name), val));
+    throw check.createException(MsgUtil.getMessage(test, true, check.FQN(name), val));
   }
 
   <P> ObjectCheck<T, E> has(Function<T, P> prop, Predicate<P> test) throws E {
@@ -48,7 +48,7 @@ final class ObjHasObj<T, E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, Function.class);
-    throw check.createException(Messages.getMessage(test, false, name, val));
+    throw check.createException(MsgUtil.getMessage(test, false, name, val));
   }
 
   <P> ObjectCheck<T, E> notHas(Function<T, P> prop, Predicate<P> test) throws E {
@@ -58,7 +58,7 @@ final class ObjHasObj<T, E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, Function.class);
-    throw check.createException(Messages.getMessage(test, true, name, val));
+    throw check.createException(MsgUtil.getMessage(test, true, name, val));
   }
 
   <P> ObjectCheck<T, E> has(Function<T, P> prop, Predicate<P> test, String msg, Object[] msgArgs)

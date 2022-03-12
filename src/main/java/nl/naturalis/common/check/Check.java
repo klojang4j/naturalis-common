@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.function.Function;
 
 import static nl.naturalis.common.check.CommonChecks.eq;
-import static nl.naturalis.common.check.Messages.getMessage;
+import static nl.naturalis.common.check.MsgUtil.getMessage;
 
 /**
  * Facilitates precondition and postcondition checking. See {@linkplain nl.naturalis.common.check
@@ -79,7 +79,7 @@ public abstract class Check {
   public static <U> ObjectCheck<U, IllegalArgumentException> notNull(U arg)
       throws IllegalArgumentException {
     if (arg == null) {
-      String msg = Messages.getMessage(CommonChecks.notNull(), false, DEF_ARG_NAME, null);
+      String msg = MsgUtil.getMessage(CommonChecks.notNull(), false, DEF_ARG_NAME, null);
       throw DEF_EXC_FACTORY.apply(msg);
     }
     return new ObjectCheck<>(arg, null, DEF_EXC_FACTORY);
@@ -98,7 +98,7 @@ public abstract class Check {
   public static <U> ObjectCheck<U, IllegalArgumentException> notNull(U arg, String argName)
       throws IllegalArgumentException {
     if (arg == null) {
-      String msg = Messages.getMessage(CommonChecks.notNull(), false, argName, null);
+      String msg = MsgUtil.getMessage(CommonChecks.notNull(), false, argName, null);
       throw DEF_EXC_FACTORY.apply(msg);
     }
     return new ObjectCheck<>(arg, argName, DEF_EXC_FACTORY);
@@ -121,7 +121,7 @@ public abstract class Check {
   public static <U, X extends Exception> ObjectCheck<U, X> notNull(
       Function<String, X> excFactory, U arg) throws X {
     if (arg == null) {
-      String msg = Messages.getMessage(CommonChecks.notNull(), false, DEF_ARG_NAME, null);
+      String msg = MsgUtil.getMessage(CommonChecks.notNull(), false, DEF_ARG_NAME, null);
       throw excFactory.apply(msg);
     }
     return new ObjectCheck<>(arg, null, excFactory);
@@ -146,7 +146,7 @@ public abstract class Check {
   public static <U, X extends Exception> ObjectCheck<U, X> notNull(
       Function<String, X> excFactory, U arg, String argName) throws X {
     if (arg == null) {
-      String msg = Messages.getMessage(CommonChecks.notNull(), false, argName, null);
+      String msg = MsgUtil.getMessage(CommonChecks.notNull(), false, argName, null);
       throw excFactory.apply(msg);
     }
     return new ObjectCheck<>(arg, argName, excFactory);

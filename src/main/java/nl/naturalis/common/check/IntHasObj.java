@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static nl.naturalis.common.check.CommonGetters.formatProperty;
-import static nl.naturalis.common.check.Messages.getMessage;
+import static nl.naturalis.common.check.MsgUtil.getMessage;
 
 final class IntHasObj<E extends Exception> {
 
@@ -28,7 +28,7 @@ final class IntHasObj<E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntFunction.class);
-    throw check.createException(Messages.getMessage(test, false, name, val));
+    throw check.createException(MsgUtil.getMessage(test, false, name, val));
   }
 
   <P> IntCheck<E> notHas(IntFunction<P> prop, Predicate<P> test) throws E {
@@ -38,7 +38,7 @@ final class IntHasObj<E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntFunction.class);
-    throw check.createException(Messages.getMessage(test, true, name, val));
+    throw check.createException(MsgUtil.getMessage(test, true, name, val));
   }
 
   <P> IntCheck<E> has(IntFunction<P> prop, String name, Predicate<P> test) throws E {
@@ -47,7 +47,7 @@ final class IntHasObj<E extends Exception> {
     if (test.test(val)) {
       return check;
     }
-    throw check.createException(Messages.getMessage(test, false, check.FQN(name), val));
+    throw check.createException(MsgUtil.getMessage(test, false, check.FQN(name), val));
   }
 
   <P> IntCheck<E> notHas(IntFunction<P> prop, String name, Predicate<P> test) throws E {
@@ -56,7 +56,7 @@ final class IntHasObj<E extends Exception> {
     if (!test.test(val)) {
       return check;
     }
-    throw check.createException(Messages.getMessage(test, true, check.FQN(name), val));
+    throw check.createException(MsgUtil.getMessage(test, true, check.FQN(name), val));
   }
 
   <P> IntCheck<E> has(IntFunction<P> prop, Predicate<P> test, String msg, Object[] msgArgs)

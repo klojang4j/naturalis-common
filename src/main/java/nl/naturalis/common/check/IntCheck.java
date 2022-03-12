@@ -6,7 +6,7 @@ import java.util.function.*;
 
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
 import static nl.naturalis.common.check.CommonChecks.NAMES;
-import static nl.naturalis.common.check.Messages.getMessage;
+import static nl.naturalis.common.check.MsgUtil.getMessage;
 
 /**
  * Facilitates the validation of {@code int} values. See the {@link nl.naturalis.common.check
@@ -977,10 +977,10 @@ public final class IntCheck<E extends Exception> {
     String fmt = FormatNormalizer.normalize(pattern);
     Object[] all = new Object[msgArgs.length + 5];
     all[0] = NAMES.getOrDefault(test, test.getClass().getSimpleName());
-    all[1] = Messages.toStr(arg);
-    all[2] = ifNotNull(arg, Messages::simpleClassName);
+    all[1] = MsgUtil.toStr(arg);
+    all[2] = ifNotNull(arg, MsgUtil::simpleClassName);
     all[3] = argName;
-    all[4] = Messages.toStr(obj);
+    all[4] = MsgUtil.toStr(obj);
     System.arraycopy(msgArgs, 0, all, 5, msgArgs.length);
     return exc.apply(String.format(fmt, all));
   }

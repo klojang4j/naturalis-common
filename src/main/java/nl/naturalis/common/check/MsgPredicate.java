@@ -4,7 +4,7 @@ import java.io.File;
 
 import static java.lang.String.format;
 import static nl.naturalis.common.ClassMethods.className;
-import static nl.naturalis.common.check.Messages.toStr;
+import static nl.naturalis.common.check.MsgUtil.toStr;
 
 final class MsgPredicate {
 

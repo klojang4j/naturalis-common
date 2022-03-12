@@ -10,10 +10,10 @@ import static nl.naturalis.common.CollectionMethods.implode;
 import static nl.naturalis.common.check.CommonChecks.MESSAGE_PATTERNS;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-class Messages {
+class MsgUtil {
 
   // Fall-back error message
-  static final String ERR_INVALID_VALUE = "Invalid value for %s: %s";
+  private static final String ERR_INVALID_VALUE = "Invalid value for %s: %s";
 
   // Max display width (characters) for stringified values.
   private static final int MAX_DISPLAY_WIDTH = 55;
@@ -98,7 +98,7 @@ class Messages {
     if (c.size() == 0) {
       return scn;
     }
-    String s = implode(c, Messages::toStr, DEFAULT_IMPLODE_SEPARATOR, 0, 10);
+    String s = implode(c, MsgUtil::toStr, DEFAULT_IMPLODE_SEPARATOR, 0, 10);
     return scn + " of [" + trim(s, c.size()) + ']';
   }
 
@@ -107,7 +107,7 @@ class Messages {
     if (m.size() == 0) {
       return scn;
     }
-    String s = implode(m.entrySet(), Messages::entryToString, DEFAULT_IMPLODE_SEPARATOR, 0, 10);
+    String s = implode(m.entrySet(), MsgUtil::entryToString, DEFAULT_IMPLODE_SEPARATOR, 0, 10);
     return scn + " of {" + trim(s, m.size()) + '}';
   }
 
@@ -130,7 +130,7 @@ class Messages {
     if (len == 0) {
       return scn;
     }
-    String s = implodeAny(array, Messages::toStr, DEFAULT_IMPLODE_SEPARATOR, 0, 10);
+    String s = implodeAny(array, MsgUtil::toStr, DEFAULT_IMPLODE_SEPARATOR, 0, 10);
     return scn + " of [" + trim(s, len) + ']';
   }
 
