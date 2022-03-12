@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static nl.naturalis.common.ArrayMethods.DEFAULT_IMPLODE_SEPARATOR;
+import static nl.naturalis.common.ArrayMethods.implodeAny;
 import static nl.naturalis.common.CollectionMethods.implode;
 import static nl.naturalis.common.check.CommonChecks.MESSAGE_PATTERNS;
 
@@ -84,14 +85,31 @@ class Messages {
     return classNameAbbrev(type) + '@' + System.identityHashCode(val);
   }
 
+  static String className(Object obj) {
+    return obj.getClass() == Class.class ? className((Class) obj) : className(obj.getClass());
+  }
+
+  static String simpleClassName(Object obj) {
+    return obj.getClass() == Class.class
+        ? simpleClassName((Class) obj)
+        : simpleClassName(obj.getClass());
+  }
+
+  static String className(Class c) {
+    return c.isArray() ? arrayClassName(c) : c.getName();
+  }
+
+  static String simpleClassName(Class c) {
+    return c.isArray() ? simpleArrayClassName(c) : c.getSimpleName();
+  }
+
   private static String collectionToString(Collection c) {
     String scn = c.getClass().getSimpleName() + "[" + c.size() + "]";
     if (c.size() == 0) {
       return scn;
     }
-    String sep = DEFAULT_IMPLODE_SEPARATOR;
-    String imploded = trim(implode(c, Messages::toStr, sep, 0, 10), c.size());
-    return scn + " of [" + imploded + ']';
+    String s = implode(c, Messages::toStr, DEFAULT_IMPLODE_SEPARATOR, 0, 10);
+    return scn + " of [" + trim(s, c.size()) + ']';
   }
 
   private static String mapToString(Map m) {
@@ -99,30 +117,67 @@ class Messages {
     if (m.size() == 0) {
       return scn;
     }
-    String sep = DEFAULT_IMPLODE_SEPARATOR;
-    String imploded = trim(implode(m.entrySet(), Messages::entryToString, sep, 0, 10), m.size());
-    return scn + " of {" + imploded + '}';
+    String s = implode(m.entrySet(), Messages::entryToString, DEFAULT_IMPLODE_SEPARATOR, 0, 10);
+    return scn + " of {" + trim(s, m.size()) + '}';
   }
 
   private static String arrayToString(Object array) {
-    String scn = arrayTypeToString(array);
     int len = Array.getLength(array);
+    Class c = array.getClass().getComponentType();
+    StringBuilder sb = new StringBuilder(6);
+    for (int i = 0; ; ++i) {
+      sb.append('[');
+      if (i == 0) {
+        sb.append(len);
+      }
+      sb.append(']');
+      if (!c.isArray()) {
+        break;
+      }
+      c = c.getComponentType();
+    }
+    String scn = c.getSimpleName() + sb;
     if (len == 0) {
       return scn;
     }
-    String sep = DEFAULT_IMPLODE_SEPARATOR;
-    String imploded = trim(ArrayMethods.implodeAny(array, Messages::toStr, sep, 0, 10), len);
-    return scn + " of [" + imploded + ']';
-  }
-
-  private static String arrayTypeToString(Object array) {
-    int len = Array.getLength(array);
-    String scn = simpleClassName(array);
-    return scn.replaceFirst("\\[]", "[" + len + "]");
+    String s = implodeAny(array, Messages::toStr, DEFAULT_IMPLODE_SEPARATOR, 0, 10);
+    return scn + " of [" + trim(s, len) + ']';
   }
 
   private static String entryToString(Map.Entry entry) {
     return toStr(entry.getKey()) + ": " + toStr(entry.getValue());
+  }
+
+  private static String classNameAbbrev(Object obj) {
+    String[] pkgs = obj.getClass().getPackageName().split("\\.");
+    String pkg = ArrayMethods.implode(pkgs, s -> s.substring(0, 1), ".", 0, -1);
+    return pkg + '.' + simpleClassName(obj);
+  }
+
+  private static String arrayClassName(Class c) {
+    c = c.getComponentType();
+    StringBuilder sb = new StringBuilder(6);
+    do {
+      sb.append("[]");
+      if (!c.isArray()) {
+        break;
+      }
+      c = c.getComponentType();
+    } while (true);
+    return c.getName() + sb;
+  }
+
+  private static String simpleArrayClassName(Class c) {
+    c = c.getComponentType();
+    StringBuilder sb = new StringBuilder(6);
+    do {
+      sb.append("[]");
+      if (!c.isArray()) {
+        break;
+      }
+      c = c.getComponentType();
+    } while (true);
+    return c.getSimpleName() + sb;
   }
 
   private static String trim(String imploded, int sz) {
@@ -136,54 +191,6 @@ class Messages {
       imploded = ellipsis(imploded);
     }
     return imploded;
-  }
-
-  static String classNameAbbrev(Object obj) {
-    String[] pkgs = obj.getClass().getPackageName().split("\\.");
-    String pkg = ArrayMethods.implode(pkgs, s -> s.substring(0, 1), ".", 0, -1);
-    return pkg + '.' + simpleClassName(obj);
-  }
-
-  static String className(Object obj) {
-    return obj.getClass() == Class.class ? className((Class) obj) : className(obj.getClass());
-  }
-
-  static String className(Class c) {
-    if (c.isArray()) {
-      c = c.getComponentType();
-      StringBuilder sb = new StringBuilder(6);
-      do {
-        sb.append("[]");
-        if (!c.isArray()) {
-          break;
-        }
-        c = c.getComponentType();
-      } while (true);
-      return c.getName() + sb;
-    }
-    return c.getName();
-  }
-
-  static String simpleClassName(Object obj) {
-    return obj.getClass() == Class.class
-        ? simpleClassName((Class) obj)
-        : simpleClassName(obj.getClass());
-  }
-
-  static String simpleClassName(Class c) {
-    if (c.isArray()) {
-      c = c.getComponentType();
-      StringBuilder sb = new StringBuilder(6);
-      do {
-        sb.append("[]");
-        if (!c.isArray()) {
-          break;
-        }
-        c = c.getComponentType();
-      } while (true);
-      return c.getSimpleName() + sb;
-    }
-    return c.getSimpleName();
   }
 
   private static String ellipsis(String str) {
