@@ -17,11 +17,11 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
+import static nl.naturalis.common.check.MsgIntObjRelation.msgIndexOf;
 import static nl.naturalis.common.check.MsgIntPredicate.*;
 import static nl.naturalis.common.check.MsgIntRelation.*;
 import static nl.naturalis.common.check.MsgPredicate.*;
 import static nl.naturalis.common.check.MsgRelation.*;
-import static nl.naturalis.common.check.MsgIntObjRelation.*;
 
 /**
  * Defines various common tests for arguments. The tests have short, informative error messages
@@ -915,8 +915,8 @@ public class CommonChecks {
   /**
    * Verifies that the length of a {@code String} argument has the specified value. Although you can
    * use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
-   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used with
-   * the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used
+   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
    * validating properties of properties:
    *
@@ -949,10 +949,10 @@ public class CommonChecks {
   /**
    * Verifies that the length of a {@code String} argument is greater than the specified value.
    * Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used
-   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be
+   * used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
-   * validating properties of properties:
+   * validating properties of properties.
    *
    * <blockquote>
    *
@@ -983,10 +983,10 @@ public class CommonChecks {
   /**
    * Verifies that the length of a {@code String} argument is greater than or equal to the specified
    * value. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int)
-   * is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant
-   * to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
-   * validating properties of properties:
+   * is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically
+   * meant to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and
+   * {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API
+   * for validating properties of properties.
    *
    * @see #strlenGT()
    * @return
@@ -1003,10 +1003,10 @@ public class CommonChecks {
   /**
    * Verifies that the length of a {@code String} argument is less than the specified value.
    * Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used
-   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be
+   * used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
-   * validating properties of properties:
+   * validating properties of properties.
    *
    * @see #strlenGT()
    * @return
@@ -1023,10 +1023,10 @@ public class CommonChecks {
   /**
    * Verifies that the length of a {@code String} argument is less than or equal to the specified
    * value. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int)
-   * is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant
-   * to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
-   * validating properties of properties:
+   * is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically
+   * meant to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and
+   * {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API
+   * for validating properties of properties.
    *
    * @see #strlenGT()
    * @return
@@ -1043,8 +1043,8 @@ public class CommonChecks {
   /**
    * Verifies that the size of a {@code Collection} argument has the specified value. Although you
    * can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
-   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used with
-   * the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used
+   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
    * validating properties of properties:
    *
@@ -1057,7 +1057,7 @@ public class CommonChecks {
    * // Validate the size property of a collection argument (preferred):
    * Check.that(List.of("A", "B", "C")).has(size(), eq(), 3);
    *
-   * // Validate the size property of the employees property of the company argument:
+   * // Validate the size property of the employees list of the company argument:
    * Check.that(company).has(Company::getEmployees, sizeEQ(), 3);
    * }</pre>
    *
@@ -1077,8 +1077,8 @@ public class CommonChecks {
   /**
    * Verifies that the size of a {@code Collection} argument is greater than the specified value.
    * Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used
-   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be
+   * used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
    * validating properties of properties:
    *
@@ -1091,7 +1091,7 @@ public class CommonChecks {
    * // Validate the size property of a collection argument (preferred):
    * Check.that(List.of("A", "B", "C")).has(size(), gt(), 2);
    *
-   * // Validate the size property of the employees property of the company argument:
+   * // Validate the size property of the employees list of the company argument:
    * Check.that(company).has(Company::getEmployees, sizeGT(), 2);
    * }</pre>
    *
@@ -1111,10 +1111,10 @@ public class CommonChecks {
   /**
    * Verifies that the size of a {@code Collection} argument is greater than or equal to the
    * specified value. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation,
-   * int) is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really
-   * meant to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and
-   * {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API
-   * for validating properties of properties:
+   * int) is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is
+   * specifically meant to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int)
+   * has()} and {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there
+   * is no API for validating properties of properties.
    *
    * @see #sizeGT()
    * @return
@@ -1131,10 +1131,10 @@ public class CommonChecks {
   /**
    * Verifies that the size of a {@code Collection} argument is less than the specified value.
    * Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant to be used
-   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be
+   * used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
-   * validating properties of properties:
+   * validating properties of properties.
    *
    * @see #sizeGT()
    * @return
@@ -1151,10 +1151,10 @@ public class CommonChecks {
   /**
    * Verifies that the size of a {@code Collection} argument is less than or equal to the specified
    * value. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int)
-   * is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, they are really meant
-   * to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
-   * validating properties of properties:
+   * is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically
+   * meant to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and
+   * {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API
+   * for validating properties of properties.
    *
    * @see #sizeGT()
    * @return
@@ -1166,6 +1166,127 @@ public class CommonChecks {
   static {
     setMessagePattern(sizeLTE(), msgLte()); // Recycle message
     setName(sizeLTE(), "sizeLTE");
+  }
+
+  /**
+   * Verifies that the size of an array argument is equal to the specified value. No preliminary
+   * check is done to determine if the argument actually <i>is</i> an array. Execute the {@link
+   * #array()} check first if there is any doubt about this. Although you can use this check with
+   * the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
+   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used
+   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * validating properties of properties:
+   *
+   * <blockquote>
+   *
+   * <pre>{@code
+   * // Validate the length of an array argument (not preferred):
+   * Check.that(new int[10]).is(lenEQ(), 10);
+   *
+   * // Validate the length of an array argument (preferred):
+   * Check.that(new int[10]).has(length(), eq(), 10);
+   *
+   *
+   * // Validate the length property of the employees array of the company argument:
+   * Check.that(company).has(Company::getEmployees, lenEQ(), 25);
+   * }</pre>
+   *
+   * </blockquote>
+   *
+   * @return
+   */
+  public static <T> ObjIntRelation<T> lenEQ() {
+    return (x, y) -> Array.getLength(x) == y;
+  }
+
+  static {
+    setMessagePattern(lenEQ(), msgEq()); // Recycle message
+    setName(lenEQ(), "lenEQ");
+  }
+
+  /**
+   * Verifies that the size of an array argument is greater than the specified value. No preliminary
+   * check is done to determine if the argument actually <i>is</i> an array. Execute the {@link
+   * #array()} check first if there is any doubt about this. Although you can use this check with
+   * the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
+   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used
+   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * validating properties of properties.
+   *
+   * @return
+   */
+  public static <T> ObjIntRelation<T> lenGT() {
+    return (x, y) -> Array.getLength(x) > y;
+  }
+
+  static {
+    setMessagePattern(lenGT(), msgGt()); // Recycle message
+    setName(lenGT(), "lenGT");
+  }
+
+  /**
+   * Verifies that the size of an array argument is greater than or equal to the specified value. No
+   * preliminary check is done to determine if the argument actually <i>is</i> an array. Execute the
+   * {@link #array()} check first if there is any doubt about this. Although you can use this check
+   * with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
+   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used
+   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * validating properties of properties.
+   *
+   * @return
+   */
+  public static <T> ObjIntRelation<T> lenGTE() {
+    return (x, y) -> Array.getLength(x) >= y;
+  }
+
+  static {
+    setMessagePattern(lenGTE(), msgGte()); // Recycle message
+    setName(lenGTE(), "lenGTE");
+  }
+
+  /**
+   * Verifies that the size of an array argument is less than the specified value. No preliminary
+   * check is done to determine if the argument actually <i>is</i> an array. Execute the {@link
+   * #array()} check first if there is any doubt about this. Although you can use this check with
+   * the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
+   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used
+   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * validating properties of properties.
+   *
+   * @return
+   */
+  public static <T> ObjIntRelation<T> lenLT() {
+    return (x, y) -> Array.getLength(x) < y;
+  }
+
+  static {
+    setMessagePattern(lenLT(), msgLt()); // Recycle message
+    setName(lenLT(), "lenLT");
+  }
+
+  /**
+   * Verifies that the size of an array argument is less than or equal to the specified value. No
+   * preliminary check is done to determine if the argument actually <i>is</i> an array. Execute the
+   * {@link #array()} check first if there is any doubt about this. Although you can use this check
+   * with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
+   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used
+   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
+   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * validating properties of properties.
+   *
+   * @return
+   */
+  public static <T> ObjIntRelation<T> lenLTE() {
+    return (x, y) -> Array.getLength(x) <= y;
+  }
+
+  static {
+    setMessagePattern(lenLTE(), msgLte()); // Recycle message
+    setName(lenLTE(), "lenLTE");
   }
 
   //////////////////////////////////////////////////////////////////////////////////
