@@ -1,12 +1,8 @@
 package nl.naturalis.common.check;
 
-import nl.naturalis.common.ArrayMethods;
-import nl.naturalis.common.collection.TypeSet;
-
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 import static nl.naturalis.common.ArrayMethods.DEFAULT_IMPLODE_SEPARATOR;
 import static nl.naturalis.common.ArrayMethods.implodeAny;
@@ -21,10 +17,6 @@ class Messages {
 
   // Max display width (characters) for stringified values.
   private static final int MAX_DISPLAY_WIDTH = 55;
-
-  // Classes that stringify nicely out of the box
-  private static final Set<Class<?>> DECENT_TO_STRING =
-      TypeSet.of(Number.class, Boolean.class, Character.class, Enum.class);
 
   static String getMessage(Object predicate, boolean negated, String argName, Object argValue) {
     return getMessage(predicate, negated, argName, argValue, null, null);
@@ -65,9 +57,7 @@ class Messages {
       return "null";
     }
     Class type = val.getClass();
-    if (DECENT_TO_STRING.contains(type)) {
-      return val.toString();
-    } else if (val instanceof CharSequence) {
+    if (val instanceof CharSequence) {
       String s = ((CharSequence) val).toString();
       if (s.isBlank()) {
         return '"' + s + '"';
@@ -80,9 +70,9 @@ class Messages {
     } else if (type.isArray()) {
       return arrayToString(val);
     } else if (type == Class.class) {
-      return type.getSimpleName();
+      return simpleClassName(type);
     }
-    return classNameAbbrev(type) + '@' + System.identityHashCode(val);
+    return ellipsis(val.toString());
   }
 
   static String className(Object obj) {
@@ -146,12 +136,6 @@ class Messages {
 
   private static String entryToString(Map.Entry entry) {
     return toStr(entry.getKey()) + ": " + toStr(entry.getValue());
-  }
-
-  private static String classNameAbbrev(Object obj) {
-    String[] pkgs = obj.getClass().getPackageName().split("\\.");
-    String pkg = ArrayMethods.implode(pkgs, s -> s.substring(0, 1), ".", 0, -1);
-    return pkg + '.' + simpleClassName(obj);
   }
 
   private static String arrayClassName(Class c) {
