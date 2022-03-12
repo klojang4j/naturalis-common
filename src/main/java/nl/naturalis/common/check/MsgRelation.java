@@ -4,7 +4,9 @@ import static java.lang.String.format;
 import static java.lang.System.identityHashCode;
 import static nl.naturalis.common.check.Messages.*;
 
-class MsgRelation {
+final class MsgRelation {
+
+  private MsgRelation() {}
 
   static Formatter msgSameAs() {
     return args -> {

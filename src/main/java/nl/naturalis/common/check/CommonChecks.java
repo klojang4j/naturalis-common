@@ -55,7 +55,7 @@ import static nl.naturalis.common.check.MsgRelation.*;
  * @author Ayco Holleman
  */
 @SuppressWarnings("rawtypes")
-public class CommonChecks {
+public final class CommonChecks {
 
   static final Map<Object, Formatter> MESSAGE_PATTERNS;
   static final Map<Object, String> NAMES;
@@ -74,7 +74,7 @@ public class CommonChecks {
    * Objects::isNull}.
    *
    * @param <T> The type of the argument
-   * @return A {@code Predicate}
+   * @return A function implementing the test described above
    */
   public static <T> Predicate<T> NULL() {
     return Objects::isNull;
@@ -90,7 +90,7 @@ public class CommonChecks {
    * Objects::nonNull}.
    *
    * @param <T> The type of the argument
-   * @return A {@code Predicate}
+   * @return A function implementing the test described above
    */
   public static <T> Predicate<T> notNull() {
     return Objects::nonNull;
@@ -114,7 +114,7 @@ public class CommonChecks {
    *
    * </blockquote>
    *
-   * @return A {@code Predicate}
+   * @return A function implementing the test described above
    */
   public static Predicate<Boolean> yes() {
     return x -> x;
@@ -129,7 +129,7 @@ public class CommonChecks {
    * Verifies that the argument is {@code false}. If the argument is a {@code Boolean} rather than a
    * {@code boolean} and the argument might be null, use {@link #nullOr() nullOr()}.
    *
-   * @return A {@code Predicate}
+   * @return A function implementing the test described above
    */
   public static Predicate<Boolean> no() {
     return x -> !x;
@@ -148,7 +148,7 @@ public class CommonChecks {
    * of) executing the {@link #notNull()} check first.
    *
    * @param <T> The type of the argument
-   * @return A {@code Predicate}
+   * @return A function implementing the test described above
    */
   public static <T> Predicate<T> empty() {
     return ObjectMethods::isEmpty;
@@ -169,7 +169,7 @@ public class CommonChecks {
    * of) executing the {@link #notNull()} check first.
    *
    * @param <T> The type of the argument
-   * @return A {@code Predicate} implementing the check described above
+   * @return A function implementing the test described above
    * @see ObjectMethods#isDeepNotNull(Object)
    */
   public static <T> Predicate<T> deepNotNull() {
@@ -190,7 +190,7 @@ public class CommonChecks {
    * of) executing the {@link #notNull()} check first.
    *
    * @param <T> The type of the argument
-   * @return A {@code Predicate}
+   * @return A function implementing the test described above
    * @see ObjectMethods#isDeepNotEmpty(Object)
    */
   public static <T> Predicate<T> deepNotEmpty() {
@@ -209,7 +209,7 @@ public class CommonChecks {
    * <p>This check performs an implicit null check, so can be safely executed without (or instead
    * of) executing the {@link #notNull()} check first.
    *
-   * @return A {@code Predicate}
+   * @return A function implementing the test described above
    */
   public static Predicate<String> blank() {
     return StringMethods::isBlank;
@@ -224,7 +224,7 @@ public class CommonChecks {
    * Verifies that a {@code String} argument represents a valid integer. Equivalent to {@link
    * NumberMethods#isInteger(String) NumberMethods::isInteger}.
    *
-   * @return A {@code Predicate}
+   * @return A function implementing the test described above
    */
   public static Predicate<String> integer() {
     return NumberMethods::isInteger;
@@ -240,7 +240,7 @@ public class CommonChecks {
    * an array type.
    *
    * @param <T> The type of the argument
-   * @return A {@code Predicate} implementing the test described above
+   * @return A function implementing the test described above
    */
   public static <T> Predicate<T> array() {
     return x -> x.getClass() == Class.class ? ((Class) x).isArray() : x.getClass().isArray();
@@ -255,7 +255,7 @@ public class CommonChecks {
    * Verifies that the argument is an existing, regular file. Equivalent to {@link File#isFile()
    * File::isFile}.
    *
-   * @return A {@code Predicate} implementing the test described above
+   * @return A function implementing the test described above
    */
   public static Predicate<File> file() {
     return File::isFile;
@@ -270,7 +270,7 @@ public class CommonChecks {
    * Verifies that the argument is an existing directory. Equivalent to {@link File#isDirectory()
    * File::isDirectory}.
    *
-   * @return A {@code Predicate} implementing the test described above
+   * @return A function implementing the test described above
    */
   public static Predicate<File> directory() {
     return File::isDirectory;
@@ -285,7 +285,7 @@ public class CommonChecks {
    * Verifies that the argument is an existing file of any type.Equivalent to {@link File#exists()
    * File::exists}.
    *
-   * @return A {@code Predicate}
+   * @return A function implementing the test described above
    */
   public static Predicate<File> fileExists() {
     return File::exists;
@@ -300,7 +300,7 @@ public class CommonChecks {
    * Verifies that the argument is a readable file (implies that the file exists). Equivalent to
    * {@link File#canRead() File::canRead}.
    *
-   * @return A {@code Predicate}
+   * @return A function implementing the test described above
    */
   public static Predicate<File> readable() {
     return File::canRead;
@@ -315,7 +315,7 @@ public class CommonChecks {
    * Verifies that the argument is a writable file (implies that the file exists). Equivalent to
    * {@link File#canWrite() File::canWrite}.
    *
-   * @return A {@code Predicate} implementing the test described above
+   * @return A function implementing the test described above
    */
   public static Predicate<File> writable() {
     return File::canWrite;
@@ -333,7 +333,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is an even number.
    *
-   * @return A {@code Predicate} implementing the test described above
+   * @return A function implementing the test described above
    */
   public static IntPredicate even() {
     return x -> x % 2 == 0;
@@ -347,7 +347,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is an odd number.
    *
-   * @return A {@code Predicate} implementing the test described above
+   * @return A function implementing the test described above
    */
   public static IntPredicate odd() {
     return x -> x % 2 == 1;
@@ -362,7 +362,7 @@ public class CommonChecks {
    * Verifies that the argument is greater than zero. If the argument is an {@code int}, you are
    * better off using the {@link #gt()} check, performancewise.
    *
-   * @return A {@code Predicate} implementing the test described above
+   * @return A function implementing the test described above
    */
   public static IntPredicate positive() {
     return x -> x > 0;
@@ -376,7 +376,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is greater than zero.
    *
-   * @return A {@code Predicate} implementing the test described above
+   * @return A function implementing the test described above
    */
   public static IntPredicate negative() {
     return x -> x < 0;
@@ -390,8 +390,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is 0 (zero).
    *
-   * @return A {@code Predicate} implementing the test described above establishing that the
-   *     argument is equal to zero
+   * @return A function implementing the test described above
    */
   public static IntPredicate zero() {
     return x -> x == 0;
@@ -409,7 +408,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is equal to a particular value.
    *
-   * @return An {@code IntRelation}
+   * @return A function implementing the test described above
    */
   public static IntRelation eq() {
     return (x, y) -> x == y;
@@ -423,7 +422,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is not equal to a particular value.
    *
-   * @return An {@code IntRelation}
+   * @return A function implementing the test described above
    */
   public static IntRelation ne() {
     return (x, y) -> x != y;
@@ -437,7 +436,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is greater than a particular value.
    *
-   * @return An {@code IntRelation}
+   * @return A function implementing the test described above
    */
   public static IntRelation gt() {
     return (x, y) -> x > y;
@@ -451,7 +450,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is greater than or equal to a particular value.
    *
-   * @return An {@code IntRelation}
+   * @return A function implementing the test described above
    */
   public static IntRelation gte() {
     return (x, y) -> x >= y;
@@ -465,7 +464,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is less than a particular value.
    *
-   * @return An {@code IntRelation}
+   * @return A function implementing the test described above
    */
   public static IntRelation lt() {
     return (x, y) -> x < y;
@@ -479,7 +478,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is less than or equal to a particular value.
    *
-   * @return An {@code IntRelation}
+   * @return A function implementing the test described above
    */
   public static IntRelation lte() {
     return (x, y) -> x <= y;
@@ -493,7 +492,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is a whole multiple of a particular integer.
    *
-   * @return An {@code IntRelation}
+   * @return A function implementing the test described above
    */
   public static IntRelation multipleOf() {
     return (x, y) -> x % y == 0;
@@ -513,7 +512,7 @@ public class CommonChecks {
    * Objects#equals(Object) Objects::equals}.
    *
    * @param <X> The type of the argument
-   * @return A {@code Relation}
+   * @return A function implementing the test described above
    */
   public static <X, Y> Relation<X, Y> EQ() {
     return Objects::equals;
@@ -529,9 +528,9 @@ public class CommonChecks {
    * values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double}, but can be
    * used to check any value that is an instance of {@link Comparable}.
    *
-   * @param <X> The type of the values being compared
-   * @return A {@code Relation}
    * @see #gt()
+   * @param <X> The type of the values being compared
+   * @return A function implementing the test described above
    */
   public static <X extends Comparable<X>> Relation<X, X> GT() {
     return (x, y) -> x.compareTo(y) > 0;
@@ -547,9 +546,9 @@ public class CommonChecks {
    * values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double}, but can be
    * used to check any value that is an instance of {@link Comparable}.
    *
-   * @param <X> The type of the values being compared
-   * @return A {@code Relation}
    * @see #lt()
+   * @param <X> The type of the values being compared
+   * @return A function implementing the test described above
    */
   public static <X extends Comparable<X>> Relation<X, X> LT() {
     return (x, y) -> x.compareTo(y) < 0;
@@ -565,9 +564,9 @@ public class CommonChecks {
    * for checking values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double},
    * but can be used to check any value that is an instance of {@link Comparable}.
    *
-   * @param <X> The type of the values being compared
-   * @return A {@code Relation}
    * @see #gte()
+   * @param <X> The type of the values being compared
+   * @return A function implementing the test described above
    */
   public static <X extends Comparable<X>> Relation<X, X> GTE() {
     return (x, y) -> x.compareTo(y) >= 0;
@@ -583,9 +582,9 @@ public class CommonChecks {
    * checking values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double}, but
    * can be used to check any value that is an instance of {@link Comparable}.
    *
-   * @param <X> The type of the values being compared
-   * @return A {@code Relation}
    * @see #lte()
+   * @param <X> The type of the values being compared
+   * @return A function implementing the test described above
    */
   public static <X extends Comparable<X>> Relation<X, X> LTE() {
     return (x, y) -> x.compareTo(y) <= 0;
@@ -601,7 +600,7 @@ public class CommonChecks {
    *
    * @param <X> The type of the argument (the subject of the {@code Relation})
    * @param <Y> The type of the value to compare it with (the object of the {@code Relation})
-   * @return A {@code Relation}
+   * @return A function implementing the test described above
    */
   public static <X, Y> Relation<X, Y> sameAs() {
     return (x, y) -> x == y;
@@ -616,7 +615,7 @@ public class CommonChecks {
    * Verifies that the argument is either null or equals the specified value.
    *
    * @param <X> The type of the argument
-   * @return A {@code Relation}
+   * @return A function implementing the test described above
    */
   public static <X> Relation<X, X> nullOr() {
     return (x, y) -> x == null || x.equals(y);
@@ -631,7 +630,7 @@ public class CommonChecks {
    * Verifies that the argument is an instance of the specified class.
    *
    * @param <X> The type of the argument
-   * @return A {@code Relation} implementing the test described above
+   * @return A function implementing the test described above
    */
   public static <X> Relation<X, Class<?>> instanceOf() {
     return (x, y) -> y.isInstance(x);
@@ -646,7 +645,7 @@ public class CommonChecks {
    * Verifies that the argument is a supertype of the specified class. Equivalent to {@link
    * Class#isAssignableFrom(Class) Class::isAssignableFrom}.
    *
-   * @return
+   * @return A function implementing the test described above
    */
   public static <T, U> Relation<Class<T>, Class<U>> supertypeOf() {
     return Class::isAssignableFrom;
@@ -660,7 +659,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument extends or implements the specified class / interface.
    *
-   * @return
+   * @return A function implementing the test described above
    */
   public static <T, U> Relation<Class<T>, Class<U>> subtypeOf() {
     return (x, y) -> y.isAssignableFrom(x);
@@ -677,7 +676,7 @@ public class CommonChecks {
    *
    * @param <E> The type of the elements in the {@code Collection}
    * @param <C> The type of the collection
-   * @return A {@code Relation} implementing the test described above
+   * @return A function implementing the test described above
    */
   public static <E, C extends Collection<? super E>> Relation<C, E> contains() {
     return Collection::contains;
@@ -694,7 +693,7 @@ public class CommonChecks {
    *
    * @param <K> The type of the keys within the map
    * @param <M> The Type of the {@code Map}
-   * @return A {@code Relation}
+   * @return A function implementing the test described above
    */
   public static <K, M extends Map<? super K, ?>> Relation<M, K> hasKey() {
     return Map::containsKey;
@@ -711,7 +710,7 @@ public class CommonChecks {
    *
    * @param <V> The type of the values within the map
    * @param <M> The Type of the {@code Map}
-   * @return A {@code Relation}
+   * @return A function implementing the test described above
    */
   public static <V, M extends Map<?, ? super V>> Relation<M, V> hasValue() {
     return Map::containsValue;
@@ -727,7 +726,7 @@ public class CommonChecks {
    *
    * @param <E> The type of the argument
    * @param <C> The type of the {@code Collection}
-   * @return A {@code Relation}
+   * @return A function implementing the test described above
    */
   public static <E, C extends Collection<? super E>> Relation<E, C> in() {
     return (x, y) -> y.contains(x);
@@ -743,7 +742,7 @@ public class CommonChecks {
    *
    * @param <K> The type of the keys within the map
    * @param <M> The Type of the {@code Map}
-   * @return A {@code Relation}
+   * @return A function implementing the test described above
    */
   public static <K, M extends Map<? super K, ?>> Relation<K, M> keyIn() {
     return (x, y) -> y.containsKey(x);
@@ -759,7 +758,7 @@ public class CommonChecks {
    *
    * @param <K> The type of the keys within the map
    * @param <M> The Type of the {@code Map}
-   * @return A {@code Relation}
+   * @return A function implementing the test described above
    */
   public static <K, M extends Map<? super K, ?>> Relation<K, M> valueIn() {
     return (x, y) -> y.containsValue(x);
@@ -776,7 +775,7 @@ public class CommonChecks {
    *
    * @param <X> The type of the argument
    * @param <Y> The component type of the array
-   * @return A {@code Relation}
+   * @return A function implementing the test described above
    */
   public static <Y, X extends Y> Relation<X, Y[]> elementOf() {
     return ArrayMethods::isElementOf;
@@ -804,7 +803,7 @@ public class CommonChecks {
    * @param <E> The type of the elements in the {@code Collection}
    * @param <C0> The type of the argument (the subject of the {@code Relation})
    * @param <C1> The type of the object of the {@code Relation}
-   * @return A {@code Relation}
+   * @return A function implementing the test described above
    */
   public static <E, C0 extends Collection<? super E>, C1 extends Collection<E>>
       Relation<C0, C1> supersetOf() {
@@ -823,7 +822,7 @@ public class CommonChecks {
    * @param <E> The type of the elements in the {@code Collection}
    * @param <C0> The type of the argument (the subject of the {@code Relation})
    * @param <C1> The type of the object of the {@code Relation}
-   * @return A {@code Relation}
+   * @return A function implementing the test described above
    */
   public static <E, C0 extends Collection<E>, C1 extends Collection<? super E>>
       Relation<C0, C1> subsetOf() {
@@ -839,7 +838,7 @@ public class CommonChecks {
    * Verifies that a {@code String} argument contains the specified substring. Equivalent to {@link
    * String#contains(CharSequence) String::contains}.
    *
-   * @return
+   * @return A function implementing the test described above
    */
   public static Relation<String, CharSequence> hasSubstring() {
     return String::contains;
@@ -853,7 +852,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is a substring of the specified string.
    *
-   * @return
+   * @return A function implementing the test described above
    */
   public static Relation<String, String> substringOf() {
     return (x, y) -> y.contains(x);
@@ -867,7 +866,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument equals ignoring case the specified string.
    *
-   * @return A {@code Relation} implementing the test described above
+   * @return A function implementing the test described above
    */
   public static Relation<String, String> equalsIgnoreCase() {
     return String::equalsIgnoreCase;
@@ -882,7 +881,7 @@ public class CommonChecks {
    * Verifies that a {@code String} argument starts with the specified substring. Equivalent to
    * {@link String#startsWith(String) String::startsWith}.
    *
-   * @return A {@code Relation}
+   * @return A function implementing the test described above
    */
   public static Relation<String, String> startsWith() {
     return String::startsWith;
@@ -897,7 +896,7 @@ public class CommonChecks {
    * Verifies that a {@code String} argument ends with the specified substring. Equivalent to {@link
    * String#endsWith(String) String::endsWith}.
    *
-   * @return A {@code Relation}
+   * @return A function implementing the test described above
    */
   public static Relation<String, String> endsWith() {
     return String::endsWith;
@@ -935,7 +934,7 @@ public class CommonChecks {
    *
    * </blockquote>
    *
-   * @return
+   * @return A function implementing the test described above
    */
   public static ObjIntRelation<String> strlenEQ() {
     return (x, y) -> x.length() == y;
@@ -969,7 +968,7 @@ public class CommonChecks {
    *
    * </blockquote>
    *
-   * @return
+   * @return A function implementing the test described above
    */
   public static ObjIntRelation<String> strlenGT() {
     return (x, y) -> x.length() > y;
@@ -989,7 +988,7 @@ public class CommonChecks {
    * for validating properties of properties.
    *
    * @see #strlenGT()
-   * @return
+   * @return A function implementing the test described above
    */
   public static ObjIntRelation<String> strlenGTE() {
     return (x, y) -> x.length() >= y;
@@ -1009,7 +1008,7 @@ public class CommonChecks {
    * validating properties of properties.
    *
    * @see #strlenGT()
-   * @return
+   * @return A function implementing the test described above
    */
   public static ObjIntRelation<String> strlenLT() {
     return (x, y) -> x.length() < y;
@@ -1029,7 +1028,7 @@ public class CommonChecks {
    * for validating properties of properties.
    *
    * @see #strlenGT()
-   * @return
+   * @return A function implementing the test described above
    */
   public static ObjIntRelation<String> strlenLTE() {
     return (x, y) -> x.length() <= y;
@@ -1063,7 +1062,7 @@ public class CommonChecks {
    *
    * </blockquote>
    *
-   * @return
+   * @return A function implementing the test described above
    */
   public static <E, C extends Collection<E>> ObjIntRelation<C> sizeEQ() {
     return (x, y) -> x.size() == y;
@@ -1097,7 +1096,7 @@ public class CommonChecks {
    *
    * </blockquote>
    *
-   * @return
+   * @return A function implementing the test described above
    */
   public static <E, C extends Collection<E>> ObjIntRelation<C> sizeGT() {
     return (x, y) -> x.size() > y;
@@ -1117,7 +1116,7 @@ public class CommonChecks {
    * is no API for validating properties of properties.
    *
    * @see #sizeGT()
-   * @return
+   * @return A function implementing the test described above
    */
   public static <E, C extends Collection<E>> ObjIntRelation<C> sizeGTE() {
     return (x, y) -> x.size() >= y;
@@ -1137,7 +1136,7 @@ public class CommonChecks {
    * validating properties of properties.
    *
    * @see #sizeGT()
-   * @return
+   * @return A function implementing the test described above
    */
   public static <E, C extends Collection<E>> ObjIntRelation<C> sizeLT() {
     return (x, y) -> x.size() < y;
@@ -1157,7 +1156,7 @@ public class CommonChecks {
    * for validating properties of properties.
    *
    * @see #sizeGT()
-   * @return
+   * @return A function implementing the test described above
    */
   public static <E, C extends Collection<E>> ObjIntRelation<C> sizeLTE() {
     return (x, y) -> x.size() <= y;
@@ -1194,7 +1193,7 @@ public class CommonChecks {
    *
    * </blockquote>
    *
-   * @return
+   * @return A function implementing the test described above
    */
   public static <T> ObjIntRelation<T> lenEQ() {
     return (x, y) -> Array.getLength(x) == y;
@@ -1215,7 +1214,7 @@ public class CommonChecks {
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
    * validating properties of properties.
    *
-   * @return
+   * @return A function implementing the test described above
    */
   public static <T> ObjIntRelation<T> lenGT() {
     return (x, y) -> Array.getLength(x) > y;
@@ -1236,7 +1235,7 @@ public class CommonChecks {
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
    * validating properties of properties.
    *
-   * @return
+   * @return A function implementing the test described above
    */
   public static <T> ObjIntRelation<T> lenGTE() {
     return (x, y) -> Array.getLength(x) >= y;
@@ -1257,7 +1256,7 @@ public class CommonChecks {
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
    * validating properties of properties.
    *
-   * @return
+   * @return A function implementing the test described above
    */
   public static <T> ObjIntRelation<T> lenLT() {
     return (x, y) -> Array.getLength(x) < y;
@@ -1278,7 +1277,7 @@ public class CommonChecks {
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
    * validating properties of properties.
    *
-   * @return
+   * @return A function implementing the test described above
    */
   public static <T> ObjIntRelation<T> lenLTE() {
     return (x, y) -> Array.getLength(x) <= y;
@@ -1309,7 +1308,7 @@ public class CommonChecks {
    * </blockquote>
    *
    * @param <T> The type of the array
-   * @return
+   * @return A function implementing the test described above
    */
   public static <T> IntObjRelation<T> indexOf() {
     return (x, y) -> x >= 0 && x < Array.getLength(y);
@@ -1323,7 +1322,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument can be used as index into the specified list.
    *
-   * @return An {@code IntObjRelation} expressing this requirement
+   * @return A function implementing the test described above
    */
   public static <E, L extends List<E>> IntObjRelation<L> listIndexOf() {
     return (x, y) -> x >= 0 && x < y.size();
@@ -1336,7 +1335,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument can be safely passed to {@link String#charAt(int) String.charAt}.
    *
-   * @return
+   * @return A function implementing the test described above
    */
   public static IntObjRelation<String> strIndexOf() {
     return (x, y) -> x >= 0 && x < y.length();
@@ -1350,7 +1349,7 @@ public class CommonChecks {
   /**
    * Verifies that the argument is present in the specified array.
    *
-   * @return
+   * @return A function implementing the test described above
    */
   public static IntObjRelation<int[]> intElementOf() {
     return ArrayMethods::isElementOf;
@@ -1501,32 +1500,6 @@ public class CommonChecks {
     NAMES = Map.copyOf(tmp1);
     tmp0 = null;
     tmp1 = null;
-  }
-
-  private static final String suffix = "()";
-
-  static String nameOf(Predicate test) {
-    return NAMES.getOrDefault(test, Predicate.class.getSimpleName());
-  }
-
-  static String nameOf(IntPredicate test) {
-    return NAMES.getOrDefault(test, IntPredicate.class.getSimpleName());
-  }
-
-  static String nameOf(Relation test) {
-    return NAMES.getOrDefault(test, Relation.class.getSimpleName());
-  }
-
-  static String nameOf(IntRelation test) {
-    return NAMES.getOrDefault(test, IntRelation.class.getSimpleName());
-  }
-
-  static String nameOf(ObjIntRelation test) {
-    return NAMES.getOrDefault(test, ObjIntRelation.class.getSimpleName());
-  }
-
-  static String nameOf(IntObjRelation test) {
-    return NAMES.getOrDefault(test, IntObjRelation.class.getSimpleName());
   }
 
   private static void setMessagePattern(Object test, Formatter message) {
