@@ -8,16 +8,23 @@ import static nl.naturalis.common.ArrayMethods.DEFAULT_IMPLODE_SEPARATOR;
 import static nl.naturalis.common.ArrayMethods.implodeAny;
 import static nl.naturalis.common.CollectionMethods.implode;
 import static nl.naturalis.common.check.CommonChecks.MESSAGE_PATTERNS;
-import static java.lang.String.format;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 class MsgUtil {
 
   // Common message patterns:
+
   static final String PLAIN_MUST = "%s must%s %s";
   static final String PLAIN_MUST_BE = "%s must%s be %s";
-  static final String MUST = PLAIN_MUST + " (was %s)";
-  static final String MUST_BE = PLAIN_MUST_BE + " (was %s)";
+
+  static final String MUST_BUT_WAS = PLAIN_MUST + " (was %s)";
+  static final String MUST_BE_BUT_WAS = PLAIN_MUST_BE + " (was %s)";
+
+  static final String MUST_OBJ = "%s must%s %s %s";
+  static final String MUST_BE_OBJ = "%s must%s be %s %s";
+
+  static final String MUST_OBJ_BUT_WAS = MUST_OBJ + " (was %s)";
+  static final String MUST_BE_OBJ_BUT_WAS = MUST_BE_OBJ + " (was %s)";
 
   // Fall-back error message
   private static final String MSG_INVALID_VALUE = "Invalid value for %s: %s";

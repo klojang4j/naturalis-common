@@ -344,7 +344,8 @@ public class CheckRelationTest {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
-          "babbage must extend java.io.OutputStream[] (was java.io.OutputStream)", e.getMessage());
+          "babbage must extend/implement java.io.OutputStream[] (was java.io.OutputStream)",
+          e.getMessage());
       return;
     }
     fail();
@@ -357,7 +358,8 @@ public class CheckRelationTest {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
-          "babbage must implement java.lang.Comparable (was java.io.OutputStream)", e.getMessage());
+          "babbage must extend/implement java.lang.Comparable (was java.io.OutputStream)",
+          e.getMessage());
       return;
     }
     fail();
@@ -370,7 +372,7 @@ public class CheckRelationTest {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
-          "babbage must not implement java.lang.CharSequence (was java.lang.String)",
+          "babbage must not extend/implement java.lang.CharSequence (was java.lang.String)",
           e.getMessage());
       return;
     }
@@ -384,7 +386,8 @@ public class CheckRelationTest {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
-          "babbage must not implement java.lang.Comparable (was java.lang.Float)", e.getMessage());
+          "babbage must not extend/implement java.lang.Comparable (was java.lang.Float)",
+          e.getMessage());
       return;
     }
     fail();
