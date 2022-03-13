@@ -32,7 +32,7 @@ final class MsgRelation {
   static Formatter msgNullOr() {
     return args ->
         format(
-            MUST_OBJ_BUT_WAS,
+            MSG_RELATION_WAS,
             args.name(),
             args.not(),
             "be null or",
@@ -57,7 +57,7 @@ final class MsgRelation {
   static Formatter msgSubtypeOf() {
     return args ->
         format(
-            MUST_OBJ_BUT_WAS,
+            MSG_RELATION_WAS,
             args.name(),
             args.not(),
             "extend/implement",
@@ -68,7 +68,7 @@ final class MsgRelation {
   static Formatter msgSupertypeOf() {
     return args ->
         format(
-            MUST_OBJ_BUT_WAS,
+            MSG_RELATION_WAS,
             args.name(),
             args.not(),
             "be supertype of",
@@ -77,23 +77,22 @@ final class MsgRelation {
   }
 
   static Formatter msgContains() {
-    return args -> format(PLAIN_MUST_OBJ, args.name(), args.not(), "contain", toStr(args.obj()));
+    return args -> format(MSG_RELATION, args.name(), args.not(), "contain", toStr(args.obj()));
   }
 
   static Formatter msgHasKey() {
-    return args ->
-        format(PLAIN_MUST_OBJ, args.name(), args.not(), "contain key", toStr(args.obj()));
+    return args -> format(MSG_RELATION, args.name(), args.not(), "contain key", toStr(args.obj()));
   }
 
   static Formatter msgHasValue() {
     return args ->
-        format(PLAIN_MUST_OBJ, args.name(), args.not(), "contain value", toStr(args.obj()));
+        format(MSG_RELATION, args.name(), args.not(), "contain value", toStr(args.obj()));
   }
 
   static Formatter msgIn() {
     return args ->
         format(
-            MUST_OBJ_BUT_WAS,
+            MSG_RELATION_WAS,
             args.name(),
             args.not(),
             "be element of",
@@ -104,7 +103,7 @@ final class MsgRelation {
   static Formatter msgKeyIn() {
     return args ->
         format(
-            MUST_OBJ_BUT_WAS,
+            MSG_RELATION_WAS,
             args.name(),
             args.not(),
             "be key in",
@@ -115,7 +114,7 @@ final class MsgRelation {
   static Formatter msgValueIn() {
     return args ->
         format(
-            MUST_OBJ_BUT_WAS,
+            MSG_RELATION_WAS,
             args.name(),
             args.not(),
             "be value in",
@@ -126,7 +125,7 @@ final class MsgRelation {
   static Formatter msgSupersetOf() {
     return args ->
         format(
-            MUST_OBJ_BUT_WAS,
+            MSG_RELATION_WAS,
             args.name(),
             args.not(),
             "be superset of",
@@ -137,7 +136,7 @@ final class MsgRelation {
   static Formatter msgSubsetOf() {
     return args ->
         format(
-            MUST_OBJ_BUT_WAS,
+            MSG_RELATION_WAS,
             args.name(),
             args.not(),
             "be subset of",
@@ -148,7 +147,7 @@ final class MsgRelation {
   static Formatter msgHasSubstring() {
     return args ->
         format(
-            MUST_OBJ_BUT_WAS,
+            MSG_RELATION_WAS,
             args.name(),
             args.not(),
             "contain",
@@ -159,7 +158,7 @@ final class MsgRelation {
   static Formatter msgSubstringOf() {
     return args ->
         format(
-            MUST_OBJ_BUT_WAS,
+            MSG_RELATION_WAS,
             args.name(),
             args.not(),
             "be substring of",
@@ -170,7 +169,7 @@ final class MsgRelation {
   static Formatter msgEqualsIgnoreCase() {
     return args ->
         format(
-            MUST_OBJ_BUT_WAS,
+            MSG_RELATION_WAS,
             args.name(),
             args.not(),
             "be equal ignoring case to",
@@ -181,7 +180,7 @@ final class MsgRelation {
   static Formatter msgStartsWith() {
     return args ->
         format(
-            MUST_OBJ_BUT_WAS,
+            MSG_RELATION_WAS,
             args.name(),
             args.not(),
             "start with",
@@ -192,7 +191,7 @@ final class MsgRelation {
   static Formatter msgEndsWith() {
     return args ->
         format(
-            MUST_OBJ_BUT_WAS,
+            MSG_RELATION_WAS,
             args.name(),
             args.not(),
             "end with",

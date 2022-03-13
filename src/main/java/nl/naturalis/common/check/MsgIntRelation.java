@@ -8,79 +8,30 @@ final class MsgIntRelation {
   private MsgIntRelation() {}
 
   static Formatter msgEq() {
-    return args ->
-        args.negated()
-            ? format(PLAIN_MUST_OBJ, args.name(), args.not(), "equal", toStr(args.obj()))
-            : format(
-                MUST_OBJ_BUT_WAS,
-                args.name(),
-                args.not(),
-                "equal",
-                toStr(args.obj()),
-                toStr(args.arg()));
+    return formatRelation("equal", true, false);
   }
 
   static Formatter msgNe() {
-    return args ->
-        args.negated()
-            ? format(MUST_OBJ_BUT_WAS, args.name(), args.notNot(), "equal", toStr(args.obj()))
-            : format(
-                PLAIN_MUST_OBJ,
-                args.name(),
-                args.notNot(),
-                "equal",
-                toStr(args.obj()),
-                toStr(args.arg()));
+    return formatDeniedRelation("equal", true, false);
   }
 
   static Formatter msgGt() {
-    return args -> {
-      if (args.negated()) {
-        return msgLte().apply(args.flip());
-      }
-      String fmt = "%s must be > %s (was %s)";
-      return format(fmt, args.name(), args.obj(), args.arg());
-    };
+    return formatRelation("be >", true);
   }
 
   static Formatter msgGte() {
-    return args -> {
-      if (args.negated()) {
-        return msgLt().apply(args.flip());
-      }
-      String fmt = "%s must be >= %s (was %s)";
-      return format(fmt, args.name(), args.obj(), args.arg());
-    };
+    return formatRelation("be >=", true);
   }
 
   static Formatter msgLt() {
-    return args -> {
-      if (args.negated()) {
-        return msgGte().apply(args.flip());
-      }
-      String fmt = "%s must be < %s (was %s)";
-      return format(fmt, args.name(), args.obj(), args.arg());
-    };
+    return formatRelation("be <", true);
   }
 
   static Formatter msgLte() {
-    return args -> {
-      if (args.negated()) {
-        return msgGt().apply(args.flip());
-      }
-      String fmt = "%s must be <= %s (was %s)";
-      return format(fmt, args.name(), args.obj(), args.arg());
-    };
+    return formatRelation("be <=", true);
   }
 
   static Formatter msgMultipleOf() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must not be multiple of %s (was %s)";
-        return format(fmt, args.name(), args.obj(), args.arg());
-      }
-      String fmt = "%s must be multiple of %s (was %s)";
-      return format(fmt, args.name(), args.obj(), args.arg());
-    };
+    return formatRelation("be multiple of", true);
   }
 }

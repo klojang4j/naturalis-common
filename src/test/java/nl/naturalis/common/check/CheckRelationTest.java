@@ -168,7 +168,7 @@ public class CheckRelationTest {
       Check.that("aaa", "zappa").isNot(LT(), "bbb");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("zappa must be >= bbb (was aaa)", e.getMessage());
+      assertEquals("zappa must not be < bbb (was aaa)", e.getMessage());
       return;
     }
     fail();
@@ -204,7 +204,7 @@ public class CheckRelationTest {
       Check.that(WEDNESDAY, "zorro").isNot(LTE(), FRIDAY);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("zorro must be > FRIDAY (was WEDNESDAY)", e.getMessage());
+      assertEquals("zorro must not be <= FRIDAY (was WEDNESDAY)", e.getMessage());
       return;
     }
     fail();

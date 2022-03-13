@@ -28,22 +28,22 @@ final class MsgPredicate {
   }
 
   static Formatter msgYes() {
-    return args -> format(PLAIN_MUST, args.name(), args.not(), "be true");
+    return args -> format(MSG_PREDICATE, args.name(), args.not(), "be true");
   }
 
   static Formatter msgNo() {
-    return args -> format(PLAIN_MUST, args.name(), args.not(), "be false");
+    return args -> format(MSG_PREDICATE, args.name(), args.not(), "be false");
   }
 
   static Formatter msgEmpty() {
     return args ->
-        format(MUST_BUT_WAS, args.name(), args.not(), "be null or empty", toStr(args.arg()));
+        format(MSG_PREDICATE_WAS, args.name(), args.not(), "be null or empty", toStr(args.arg()));
   }
 
   static Formatter msgDeepNotNull() {
     return args ->
         format(
-            MUST_BUT_WAS,
+            MSG_PREDICATE_WAS,
             args.name(),
             args.notNot(),
             "be null or contain null values",
@@ -53,7 +53,7 @@ final class MsgPredicate {
   static Formatter msgDeepNotEmpty() {
     return args ->
         format(
-            MUST_BUT_WAS,
+            MSG_PREDICATE_WAS,
             args.name(),
             args.notNot(),
             "be empty or contain empty values",
@@ -62,17 +62,22 @@ final class MsgPredicate {
 
   static Formatter msgBlank() {
     return args ->
-        format(MUST_BUT_WAS, args.name(), args.not(), "be null or blank", toStr(args.arg()));
+        format(MSG_PREDICATE_WAS, args.name(), args.not(), "be null or blank", toStr(args.arg()));
   }
 
   static Formatter msgInteger() {
     return args ->
-        format(MUST_BUT_WAS, args.name(), args.not(), "be parsable as integer", toStr(args.arg()));
+        format(
+            MSG_PREDICATE_WAS,
+            args.name(),
+            args.not(),
+            "be parsable as integer",
+            toStr(args.arg()));
   }
 
   static Formatter msgArray() {
     return args ->
-        format(MUST_BUT_WAS, args.name(), args.not(), "be an array", className(args.type()));
+        format(MSG_PREDICATE_WAS, args.name(), args.not(), "be an array", className(args.type()));
   }
 
   static Formatter msgFile() {
@@ -81,7 +86,7 @@ final class MsgPredicate {
       if (f.isDirectory()) {
         return format("%s must not be a directory (was %s)", args.name(), f);
       }
-      return format(MUST_BUT_WAS, args.typeAndName(), args.not(), "exist", args.arg());
+      return format(MSG_PREDICATE_WAS, args.typeAndName(), args.not(), "exist", args.arg());
     };
   }
 
@@ -97,7 +102,7 @@ final class MsgPredicate {
   }
 
   static Formatter msgFileExists() {
-    return args -> format(MUST_BUT_WAS, args.typeAndName(), args.not(), "exist", args.arg());
+    return args -> format(MSG_PREDICATE_WAS, args.typeAndName(), args.not(), "exist", args.arg());
   }
 
   static Formatter msgReadable() {
