@@ -151,18 +151,6 @@ public class CheckRelationTest {
   }
 
   @Test
-  public void GTE01() {
-    try {
-      Check.that(9.0).is(GTE(), 9.5, "${arg} is not ${check} ${obj} (${0})", "sorry");
-    } catch (IllegalArgumentException e) {
-      System.out.println(e.getMessage());
-      assertEquals("9.0 is not GTE 9.5 (sorry)", e.getMessage());
-      return;
-    }
-    fail();
-  }
-
-  @Test
   public void LT00() {
     try {
       Check.that("aaa", "zappa").isNot(LT(), "bbb");
@@ -841,6 +829,22 @@ public class CheckRelationTest {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("pathos must not end with stra (was Thus spoke Zarathustra)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+  // TESTS WITH CUSTOM MESSAGE
+  //////////////////////////////////////////////////////////////////////////
+
+  @Test
+  public void GTE01() {
+    try {
+      Check.that(9.0).is(GTE(), 9.5, "${arg} is not ${test} ${obj} (${0})", "sorry");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("9.0 is not GTE 9.5 (sorry)", e.getMessage());
       return;
     }
     fail();

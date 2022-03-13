@@ -133,25 +133,33 @@ public class CheckIntPredicateTest {
     assertEquals(97, check.ok());
   }
 
-  @Test(expected = IOException.class)
-  public void intPredicate10() throws IOException {
-    Check.on(IOException::new, -2, "foo").is(odd());
-  }
-
-  @Test(expected = IOException.class)
-  public void intPredicate11() throws IOException {
-    Check.that(-2, "foo").is(odd(), () -> new IOException());
-  }
+  //////////////////////////////////////////////////////////////////////////
+  // TESTS WITH CUSTOM MESSAGE
+  //////////////////////////////////////////////////////////////////////////
 
   @Test
-  public void intPredicate12() {
+  public void intPredicateCustomMsg00() {
     try {
-      Check.that(1, "foo").is(negative(), "${name} failed ${check}() test. It was ${arg}");
+      Check.that(1, "foo").is(negative(), "${name} failed ${test}() test. It was ${arg}");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("foo failed negative() test. It was 1", e.getMessage());
       return;
     }
     fail();
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+  // TESTS WITH CUSTOM EXCEPTION
+  //////////////////////////////////////////////////////////////////////////
+
+  @Test(expected = IOException.class)
+  public void intPredicateCustomExc00() throws IOException {
+    Check.on(IOException::new, -2, "foo").is(odd());
+  }
+
+  @Test(expected = IOException.class)
+  public void intPredicateCustomExc01() throws IOException {
+    Check.that(-2, "foo").is(odd(), () -> new IOException());
   }
 }

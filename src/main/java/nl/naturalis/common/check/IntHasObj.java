@@ -28,7 +28,7 @@ final class IntHasObj<E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntFunction.class);
-    throw check.createException(MsgUtil.getMessage(test, false, name, val));
+    throw check.createException(getMessage(test, false, name, val));
   }
 
   <P> IntCheck<E> notHas(IntFunction<P> prop, Predicate<P> test) throws E {
@@ -38,7 +38,7 @@ final class IntHasObj<E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntFunction.class);
-    throw check.createException(MsgUtil.getMessage(test, true, name, val));
+    throw check.createException(getMessage(test, true, name, val));
   }
 
   <P> IntCheck<E> has(IntFunction<P> prop, String name, Predicate<P> test) throws E {
@@ -47,7 +47,7 @@ final class IntHasObj<E extends Exception> {
     if (test.test(val)) {
       return check;
     }
-    throw check.createException(MsgUtil.getMessage(test, false, check.FQN(name), val));
+    throw check.createException(getMessage(test, false, check.FQN(name), val));
   }
 
   <P> IntCheck<E> notHas(IntFunction<P> prop, String name, Predicate<P> test) throws E {
@@ -56,7 +56,7 @@ final class IntHasObj<E extends Exception> {
     if (!test.test(val)) {
       return check;
     }
-    throw check.createException(MsgUtil.getMessage(test, true, check.FQN(name), val));
+    throw check.createException(getMessage(test, true, check.FQN(name), val));
   }
 
   <P> IntCheck<E> has(IntFunction<P> prop, Predicate<P> test, String msg, Object[] msgArgs)
@@ -64,6 +64,16 @@ final class IntHasObj<E extends Exception> {
     IntCheck<E> check = this.check;
     P val = prop.apply(check.arg);
     if (test.test(val)) {
+      return check;
+    }
+    throw check.createException(test, msg, msgArgs);
+  }
+
+  <P> IntCheck<E> notHas(IntFunction<P> prop, Predicate<P> test, String msg, Object[] msgArgs)
+      throws E {
+    IntCheck<E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (!test.test(val)) {
       return check;
     }
     throw check.createException(test, msg, msgArgs);
@@ -120,6 +130,15 @@ final class IntHasObj<E extends Exception> {
       IntFunction<P> prop, Relation<P, O> test, O obj, String msg, Object[] msgArgs) throws E {
     IntCheck<E> check = this.check;
     if (test.exists(prop.apply(check.arg), obj)) {
+      return check;
+    }
+    throw check.createException(test, obj, msg, msgArgs);
+  }
+
+  <P, O> IntCheck<E> notHas(
+      IntFunction<P> prop, Relation<P, O> test, O obj, String msg, Object[] msgArgs) throws E {
+    IntCheck<E> check = this.check;
+    if (!test.exists(prop.apply(check.arg), obj)) {
       return check;
     }
     throw check.createException(test, obj, msg, msgArgs);

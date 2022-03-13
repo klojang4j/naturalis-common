@@ -129,7 +129,13 @@ public final class IntCheck<E extends Exception> {
    * @throws E If the argument is invalid
    */
   public IntCheck<E> isNot(IntPredicate test, String message, Object... msgArgs) throws E {
-    return is(test.negate(), message, msgArgs);
+    // WATCH OUT. Don't call: is(test.negate(), message, msgArgs)
+    // If the test came from the CommonChecks class it must preserve its identity
+    // in order to be looked up in the CommonChecks.NAMES map
+    if (!test.test(arg)) {
+      return this;
+    }
+    throw createException(test, message, msgArgs);
   }
 
   /**
@@ -233,7 +239,10 @@ public final class IntCheck<E extends Exception> {
    */
   public IntCheck<E> isNot(IntRelation test, int object, String message, Object... msgArgs)
       throws E {
-    return is(test.negate(), object, message, msgArgs);
+    if (!test.exists(arg, object)) {
+      return this;
+    }
+    throw createException(test, object, message, msgArgs);
   }
 
   /**
@@ -340,7 +349,10 @@ public final class IntCheck<E extends Exception> {
    */
   public <O> IntCheck<E> isNot(IntObjRelation<O> test, O object, String message, Object... msgArgs)
       throws E {
-    return is(test.negate(), object, message, msgArgs);
+    if (!test.exists(arg, object)) {
+      return this;
+    }
+    throw createException(test, object, message, msgArgs);
   }
 
   /**
@@ -481,7 +493,7 @@ public final class IntCheck<E extends Exception> {
    */
   public <P> IntCheck<E> notHas(
       IntFunction<P> property, Predicate<P> test, String message, Object... msgArgs) throws E {
-    return IntHasObj.get(this).has(property, test.negate(), message, msgArgs);
+    return IntHasObj.get(this).notHas(property, test, message, msgArgs);
   }
 
   /**
@@ -638,7 +650,7 @@ public final class IntCheck<E extends Exception> {
   public <P, O> IntCheck<E> notHas(
       IntFunction<P> property, Relation<P, O> test, O object, String message, Object... msgArgs)
       throws E {
-    return IntHasObj.get(this).has(property, test.negate(), object, message, msgArgs);
+    return IntHasObj.get(this).notHas(property, test, object, message, msgArgs);
   }
 
   /**
@@ -776,7 +788,7 @@ public final class IntCheck<E extends Exception> {
    */
   public IntCheck<E> notHas(
       IntUnaryOperator property, IntPredicate test, String message, Object... msgArgs) throws E {
-    return IntHasInt.get(this).has(property, test.negate(), message, msgArgs);
+    return IntHasInt.get(this).notHas(property, test, message, msgArgs);
   }
 
   /**
@@ -918,7 +930,7 @@ public final class IntCheck<E extends Exception> {
   public IntCheck<E> notHas(
       IntUnaryOperator property, IntRelation test, int object, String message, Object... msgArgs)
       throws E {
-    return has(property, test.negate(), object, message, msgArgs);
+    return IntHasInt.get(this).notHas(property, test, object, message, msgArgs);
   }
 
   /**

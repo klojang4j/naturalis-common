@@ -123,7 +123,13 @@ public final class ObjectCheck<T, E extends Exception> {
    * @throws E If the argument is invalid
    */
   public ObjectCheck<T, E> isNot(Predicate<T> test, String message, Object... msgArgs) throws E {
-    return is(test.negate(), message, msgArgs);
+    // WATCH OUT. Don't call: is(test.negate(), message, msgArgs)
+    // If the test came from the CommonChecks class it must preserve its identity
+    // in order to be looked up in the CommonChecks.NAMES map
+    if (!test.test(arg)) {
+      return this;
+    }
+    throw createException(test, message, msgArgs);
   }
 
   /**
@@ -231,7 +237,10 @@ public final class ObjectCheck<T, E extends Exception> {
    */
   public <O> ObjectCheck<T, E> isNot(
       Relation<T, O> test, O object, String message, Object... msgArgs) throws E {
-    return is(test.negate(), object, message, msgArgs);
+    if (!test.exists(arg, object)) {
+      return this;
+    }
+    throw createException(test, object, message, msgArgs);
   }
 
   /**
@@ -339,7 +348,10 @@ public final class ObjectCheck<T, E extends Exception> {
    */
   public ObjectCheck<T, E> isNot(
       ObjIntRelation<T> test, int object, String message, Object... msgArgs) throws E {
-    return is(test.negate(), object, message, msgArgs);
+    if (!test.exists(arg, object)) {
+      return this;
+    }
+    throw createException(test, object, message, msgArgs);
   }
 
   /**
@@ -482,7 +494,7 @@ public final class ObjectCheck<T, E extends Exception> {
    */
   public <P> ObjectCheck<T, E> notHas(
       Function<T, P> property, Predicate<P> test, String message, Object... msgArgs) throws E {
-    return ObjHasObj.get(this).has(property, test.negate(), message, msgArgs);
+    return ObjHasObj.get(this).notHas(property, test, message, msgArgs);
   }
 
   /**
@@ -640,7 +652,7 @@ public final class ObjectCheck<T, E extends Exception> {
   public <P, O> ObjectCheck<T, E> notHas(
       Function<T, P> property, Relation<P, O> test, O object, String message, Object... msgArgs)
       throws E {
-    return ObjHasObj.get(this).has(property, test.negate(), object, message, msgArgs);
+    return ObjHasObj.get(this).notHas(property, test, object, message, msgArgs);
   }
 
   /**
@@ -804,7 +816,7 @@ public final class ObjectCheck<T, E extends Exception> {
       String message,
       Object... msgArgs)
       throws E {
-    return ObjHasObj.get(this).has(property, test.negate(), object, message, msgArgs);
+    return ObjHasObj.get(this).notHas(property, test, object, message, msgArgs);
   }
 
   /**
@@ -905,7 +917,7 @@ public final class ObjectCheck<T, E extends Exception> {
    */
   public ObjectCheck<T, E> notHas(
       ToIntFunction<T> property, IntPredicate test, String message, Object... msgArgs) throws E {
-    return ObjHasInt.get(this).has(property, test.negate(), message, msgArgs);
+    return ObjHasInt.get(this).notHas(property, test, message, msgArgs);
   }
 
   /**
@@ -1177,7 +1189,7 @@ public final class ObjectCheck<T, E extends Exception> {
       String message,
       Object... msgArgs)
       throws E {
-    return ObjHasInt.get(this).has(property, test.negate(), object, message, msgArgs);
+    return ObjHasInt.get(this).notHas(property, test, object, message, msgArgs);
   }
 
   /**
@@ -1457,7 +1469,7 @@ public final class ObjectCheck<T, E extends Exception> {
   public ObjectCheck<T, E> notHas(
       ToIntFunction<T> property, IntRelation test, int object, String message, Object... msgArgs)
       throws E {
-    return ObjHasInt.get(this).has(property, test.negate(), object, message, msgArgs);
+    return ObjHasInt.get(this).notHas(property, test, object, message, msgArgs);
   }
 
   /**

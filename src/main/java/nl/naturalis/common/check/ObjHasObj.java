@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static nl.naturalis.common.check.CommonChecks.notNull;
 import static nl.naturalis.common.check.CommonGetters.formatProperty;
 import static nl.naturalis.common.check.MsgUtil.getMessage;
 
@@ -65,6 +66,15 @@ final class ObjHasObj<T, E extends Exception> {
       throws E {
     ObjectCheck<T, E> check = this.check;
     if (test.test(prop.apply(check.arg))) {
+      return check;
+    }
+    throw check.createException(test, msg, msgArgs);
+  }
+
+  <P> ObjectCheck<T, E> notHas(Function<T, P> prop, Predicate<P> test, String msg, Object[] msgArgs)
+      throws E {
+    ObjectCheck<T, E> check = this.check;
+    if (!test.test(prop.apply(check.arg))) {
       return check;
     }
     throw check.createException(test, msg, msgArgs);
@@ -129,6 +139,16 @@ final class ObjHasObj<T, E extends Exception> {
     throw check.createException(test, obj, msg, msgArgs);
   }
 
+  <P, O> ObjectCheck<T, E> notHas(
+      Function<T, P> prop, Relation<P, O> test, O obj, String msg, Object[] msgArgs) throws E {
+    ObjectCheck<T, E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (!test.exists(val, obj)) {
+      return check;
+    }
+    throw check.createException(test, obj, msg, msgArgs);
+  }
+
   <P, O, X extends Exception> ObjectCheck<T, E> has(
       Function<T, P> prop, Relation<P, O> test, O obj, Supplier<X> exc) throws X {
     ObjectCheck<T, E> check = this.check;
@@ -184,6 +204,16 @@ final class ObjHasObj<T, E extends Exception> {
     ObjectCheck<T, E> check = this.check;
     P val = prop.apply(check.arg);
     if (test.exists(val, obj)) {
+      return check;
+    }
+    throw check.createException(test, obj, msg, msgArgs);
+  }
+
+  <P> ObjectCheck<T, E> notHas(
+      Function<T, P> prop, ObjIntRelation<P> test, int obj, String msg, Object[] msgArgs) throws E {
+    ObjectCheck<T, E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (!test.exists(val, obj)) {
       return check;
     }
     throw check.createException(test, obj, msg, msgArgs);

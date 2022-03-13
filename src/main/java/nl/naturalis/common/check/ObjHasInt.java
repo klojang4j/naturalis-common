@@ -71,6 +71,15 @@ class ObjHasInt<T, E extends Exception> {
     throw check.createException(test, msg, msgArgs);
   }
 
+  <O> ObjectCheck<T, E> notHas(
+      ToIntFunction<T> prop, IntPredicate test, String msg, Object[] msgArgs) throws E {
+    ObjectCheck<T, E> check = this.check;
+    if (!test.test(prop.applyAsInt(check.arg))) {
+      return check;
+    }
+    throw check.createException(test, msg, msgArgs);
+  }
+
   <O, X extends Exception> ObjectCheck<T, E> has(
       ToIntFunction<T> prop, IntPredicate test, Supplier<X> exception) throws X {
     ObjectCheck<T, E> check = this.check;
@@ -131,6 +140,16 @@ class ObjHasInt<T, E extends Exception> {
     throw check.createException(test, obj, msg, msgArgs);
   }
 
+  <O> ObjectCheck<T, E> notHas(
+      ToIntFunction<T> prop, IntObjRelation<O> test, O obj, String msg, Object[] msgArgs) throws E {
+    ObjectCheck<T, E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (!test.exists(val, obj)) {
+      return check;
+    }
+    throw check.createException(test, obj, msg, msgArgs);
+  }
+
   <O, X extends Exception> ObjectCheck<T, E> has(
       ToIntFunction<T> prop, IntObjRelation<O> test, O obj, Supplier<X> exception) throws X {
     ObjectCheck<T, E> check = this.check;
@@ -183,6 +202,16 @@ class ObjHasInt<T, E extends Exception> {
     ObjectCheck<T, E> check = this.check;
     int val = prop.applyAsInt(check.arg);
     if (test.exists(val, obj)) {
+      return check;
+    }
+    throw check.createException(test, obj, msg, msgArgs);
+  }
+
+  ObjectCheck<T, E> notHas(
+      ToIntFunction<T> prop, IntRelation test, int obj, String msg, Object[] msgArgs) throws E {
+    ObjectCheck<T, E> check = this.check;
+    int val = prop.applyAsInt(check.arg);
+    if (!test.exists(val, obj)) {
       return check;
     }
     throw check.createException(test, obj, msg, msgArgs);

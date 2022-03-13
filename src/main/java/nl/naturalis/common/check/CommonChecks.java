@@ -16,6 +16,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 
 import static nl.naturalis.common.check.MsgIntObjRelation.msgIndexOf;
 import static nl.naturalis.common.check.MsgIntPredicate.*;
@@ -1415,7 +1416,7 @@ public final class CommonChecks {
 
   /**
    * (Not a check) Simply returns the specified {@code IntPredicate}. Use when passing a lambda or
-   * method reference to the {@code Check.is()} and {@code Check.isNot()} methods. Because these
+   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
    * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
    * supposed to be a {@code Predicate} or {@code IntPredicate} (it will complain about an
    * <b>Ambiguous method call</b>). This method clears that up for the compiler.
@@ -1429,7 +1430,7 @@ public final class CommonChecks {
 
   /**
    * (Not a check) Simply returns the specified {@code Predicate}. Use when passing a lambda or
-   * method reference to the {@code Check.is()} and {@code Check.isNot()} methods. Because these
+   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
    * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
    * supposed to be a {@code Predicate} or {@code IntPredicate} (it will complain about an
    * <b>Ambiguous method call</b>). This method clears that up for the compiler.
@@ -1444,7 +1445,7 @@ public final class CommonChecks {
 
   /**
    * (Not a check) Simply returns the specified {@code Relation}. Use when passing a lambda or
-   * method reference to the {@code Check.is()} and {@code Check.isNot()} methods. Because these
+   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
    * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
    * supposed to be a {@code Relation} or one of its sister interfaces (it will complain about an
    * <b>Ambiguous method call</b>). This method clears that up for the compiler.
@@ -1460,7 +1461,7 @@ public final class CommonChecks {
 
   /**
    * (Not a check) Simply returns the specified {@code ObjIntRelation}. Use when passing a lambda or
-   * method reference to the {@code Check.is()} and {@code Check.isNot()} methods. Because these
+   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
    * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
    * supposed to be an {@code ObjIntRelation} or one of its sister interfaces (it will complain
    * about an <b>Ambiguous method call</b>). This method clears that up for the compiler.
@@ -1472,10 +1473,9 @@ public final class CommonChecks {
   public static <T> ObjIntRelation<T> objInt(ObjIntRelation<T> lambdaOrMethodReference) {
     return lambdaOrMethodReference;
   }
-
   /**
    * (Not a check) Simply returns the specified {@code IntObjRelation}. Use when passing a lambda or
-   * method reference to the {@code Check.is()} and {@code Check.isNot()} methods. Because these
+   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
    * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
    * supposed to be an {@code IntObjRelation} or one of its sister interfaces (it will complain
    * about an <b>Ambiguous method call</b>). This method clears that up for the compiler.
@@ -1490,7 +1490,7 @@ public final class CommonChecks {
 
   /**
    * (Not a check) Simply returns the specified {@code IntRelation}. Use when passing a lambda or
-   * method reference to the {@code Check.is()} and {@code Check.isNot()} methods. Because these
+   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
    * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
    * supposed to be an {@code IntRelation} or one of its sister interfaces (it will complain about
    * an <b>Ambiguous method call</b>). This method clears that up for the compiler.
@@ -1499,6 +1499,21 @@ public final class CommonChecks {
    * @return The same {@code IntRelation}
    */
   public static IntRelation intInt(IntRelation lambdaOrMethodReference) {
+    return lambdaOrMethodReference;
+  }
+
+  /**
+   * (Not a check) Simply returns the specified {@code ToIntFunction}. Use when passing a lambda or
+   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
+   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
+   * supposed to be an {@code ToIntFunction} or some other kind of function (it will complain about
+   * an <b>Ambiguous method call</b>). This method clears that up for the compiler.
+   *
+   * @param lambdaOrMethodReference A lambda or method reference
+   * @param <T> The type of the subject of the {@code Relation}
+   * @return The same {@code ObjIntRelation}
+   */
+  public static <T> ToIntFunction<T> toInt(ToIntFunction<T> lambdaOrMethodReference) {
     return lambdaOrMethodReference;
   }
 

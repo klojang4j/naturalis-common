@@ -9,7 +9,7 @@ public class FormatNormalizerTest {
 
   @Test
   public void test00() {
-    String in = "Check \"${check}\" did not go wel for argument ${name}";
+    String in = "Check \"${test}\" did not go wel for argument ${name}";
     String out = normalize(in);
     assertEquals("Check \"%1$s\" did not go wel for argument %4$s", out);
   }
