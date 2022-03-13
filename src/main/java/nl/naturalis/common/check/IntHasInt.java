@@ -67,7 +67,7 @@ final class IntHasInt<E extends Exception> {
     if (test.test(val)) {
       return check;
     }
-    throw check.createException(test, message, msgArgs);
+    throw check.createException(test, check.arg, null, message, msgArgs);
   }
 
   IntCheck<E> notHas(IntUnaryOperator prop, IntPredicate test, String message, Object[] msgArgs)
@@ -77,7 +77,7 @@ final class IntHasInt<E extends Exception> {
     if (!test.test(val)) {
       return check;
     }
-    throw check.createException(test, message, msgArgs);
+    throw check.createException(test, check.arg, null, message, msgArgs);
   }
 
   <X extends Exception> IntCheck<E> has(IntUnaryOperator prop, IntPredicate test, Supplier<X> exc)
@@ -134,8 +134,7 @@ final class IntHasInt<E extends Exception> {
     if (test.exists(val, obj)) {
       return check;
     }
-    String msg = String.format(message, msgArgs);
-    throw check.createException(test, message, msgArgs);
+    throw check.createException(test, check.arg, obj, message, msgArgs);
   }
 
   IntCheck<E> notHas(
@@ -145,8 +144,7 @@ final class IntHasInt<E extends Exception> {
     if (!test.exists(val, obj)) {
       return check;
     }
-    String msg = String.format(message, msgArgs);
-    throw check.createException(test, message, msgArgs);
+    throw check.createException(test, check.arg, obj, message, msgArgs);
   }
 
   <X extends Exception> IntCheck<E> has(

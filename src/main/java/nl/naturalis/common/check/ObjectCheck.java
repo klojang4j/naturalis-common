@@ -108,7 +108,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (test.test(arg)) {
       return this;
     }
-    throw createException(test, message, msgArgs);
+    throw createException(test, arg, null, message, msgArgs);
   }
 
   /**
@@ -129,7 +129,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (!test.test(arg)) {
       return this;
     }
-    throw createException(test, message, msgArgs);
+    throw createException(test, arg, null, message, msgArgs);
   }
 
   /**
@@ -219,7 +219,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    throw createException(test, object, message, msgArgs);
+    throw createException(test, arg, object, message, msgArgs);
   }
 
   /**
@@ -240,7 +240,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    throw createException(test, object, message, msgArgs);
+    throw createException(test, arg, object, message, msgArgs);
   }
 
   /**
@@ -331,7 +331,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    throw createException(test, object, message, msgArgs);
+    throw createException(test, arg, object, message, msgArgs);
   }
 
   /**
@@ -351,7 +351,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    throw createException(test, object, message, msgArgs);
+    throw createException(test, arg, object, message, msgArgs);
   }
 
   /**
@@ -1546,14 +1546,6 @@ public final class ObjectCheck<T, E extends Exception> {
 
   E createException(String msg) {
     return exc.apply(msg);
-  }
-
-  E createException(Object test, String msg, Object[] msgArgs) {
-    return createException(test, null, msg, msgArgs);
-  }
-
-  E createException(Object test, Object object, String msg, Object[] msgArgs) {
-    return createException(test, arg, object, msg, msgArgs);
   }
 
   E createException(Object test, Object subject, Object object, String pattern, Object[] msgArgs) {

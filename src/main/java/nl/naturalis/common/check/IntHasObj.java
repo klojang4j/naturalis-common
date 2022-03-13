@@ -66,7 +66,7 @@ final class IntHasObj<E extends Exception> {
     if (test.test(val)) {
       return check;
     }
-    throw check.createException(test, msg, msgArgs);
+    throw check.createException(test, check.arg, null, msg, msgArgs);
   }
 
   <P> IntCheck<E> notHas(IntFunction<P> prop, Predicate<P> test, String msg, Object[] msgArgs)
@@ -76,7 +76,7 @@ final class IntHasObj<E extends Exception> {
     if (!test.test(val)) {
       return check;
     }
-    throw check.createException(test, msg, msgArgs);
+    throw check.createException(test, check.arg, null, msg, msgArgs);
   }
 
   <P, X extends Exception> IntCheck<E> has(
@@ -132,7 +132,7 @@ final class IntHasObj<E extends Exception> {
     if (test.exists(prop.apply(check.arg), obj)) {
       return check;
     }
-    throw check.createException(test, obj, msg, msgArgs);
+    throw check.createException(test, check.arg, obj, msg, msgArgs);
   }
 
   <P, O> IntCheck<E> notHas(
@@ -141,7 +141,7 @@ final class IntHasObj<E extends Exception> {
     if (!test.exists(prop.apply(check.arg), obj)) {
       return check;
     }
-    throw check.createException(test, obj, msg, msgArgs);
+    throw check.createException(test, check.arg, obj, msg, msgArgs);
   }
 
   <P, O, X extends Exception> IntCheck<E> has(

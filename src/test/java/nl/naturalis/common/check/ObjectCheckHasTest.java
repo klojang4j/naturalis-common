@@ -9,7 +9,7 @@ import static nl.naturalis.common.check.CommonChecks.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class ObjHasObjTest {
+public class ObjectCheckHasTest {
 
   private record Person(String firstName, LocalDate birtDate) {}
 

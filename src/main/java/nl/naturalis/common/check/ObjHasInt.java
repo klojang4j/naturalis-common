@@ -68,7 +68,7 @@ class ObjHasInt<T, E extends Exception> {
     if (test.test(prop.applyAsInt(check.arg))) {
       return check;
     }
-    throw check.createException(test, msg, msgArgs);
+    throw check.createException(test, check.arg, null, msg, msgArgs);
   }
 
   <O> ObjectCheck<T, E> notHas(
@@ -77,7 +77,7 @@ class ObjHasInt<T, E extends Exception> {
     if (!test.test(prop.applyAsInt(check.arg))) {
       return check;
     }
-    throw check.createException(test, msg, msgArgs);
+    throw check.createException(test, check.arg, null, msg, msgArgs);
   }
 
   <O, X extends Exception> ObjectCheck<T, E> has(
@@ -137,7 +137,7 @@ class ObjHasInt<T, E extends Exception> {
     if (test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(test, obj, msg, msgArgs);
+    throw check.createException(test, check.arg, obj, msg, msgArgs);
   }
 
   <O> ObjectCheck<T, E> notHas(
@@ -147,7 +147,7 @@ class ObjHasInt<T, E extends Exception> {
     if (!test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(test, obj, msg, msgArgs);
+    throw check.createException(test, check.arg, obj, msg, msgArgs);
   }
 
   <O, X extends Exception> ObjectCheck<T, E> has(
@@ -204,7 +204,7 @@ class ObjHasInt<T, E extends Exception> {
     if (test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(test, obj, msg, msgArgs);
+    throw check.createException(test, check.arg, obj, msg, msgArgs);
   }
 
   ObjectCheck<T, E> notHas(
@@ -214,7 +214,7 @@ class ObjHasInt<T, E extends Exception> {
     if (!test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(test, obj, msg, msgArgs);
+    throw check.createException(test, check.arg, obj, msg, msgArgs);
   }
 
   <X extends Exception> ObjectCheck<T, E> has(
