@@ -9,16 +9,30 @@ import static nl.naturalis.common.check.CommonGetters.abs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class IntCheckHasTest {
+public class IntHasIntTest {
 
   @Test
-  public void hasPredicate00() {
+  public void vanilla00() throws IOException {
     Check.that(-7, "foo").has(abs(), odd());
+    Check.that(-7, "foo").has(abs(), "bar", odd());
+    Check.that(-7, "foo").has(abs(), odd(), "A custom message");
+    Check.that(-7, "foo").has(abs(), odd(), () -> new IOException());
+    Check.that(-7, "foo").has(abs(), lt(), 10);
+    Check.that(-7, "foo").has(abs(), "foo", lt(), 10);
+    Check.that(-7, "foo").has(abs(), lt(), 10, "A custom message");
+    Check.that(-7, "foo").has(abs(), lt(), 10, () -> new IOException());
   }
 
   @Test
-  public void notHasPredicate00() {
-    Check.that(-7).notHas(abs(), even());
+  public void vanilla01() throws IOException {
+    Check.that(-7, "foo").notHas(abs(), even());
+    Check.that(-7, "foo").notHas(abs(), "bar", even());
+    Check.that(-7, "foo").notHas(abs(), even(), "A custom message");
+    Check.that(-7, "foo").notHas(abs(), even(), () -> new IOException());
+    Check.that(-7, "foo").notHas(abs(), lt(), 5);
+    Check.that(-7, "foo").notHas(abs(), "foo", lt(), 5);
+    Check.that(-7, "foo").notHas(abs(), lt(), 5, "A custom message");
+    Check.that(-7, "foo").notHas(abs(), lt(), 5, () -> new IOException());
   }
 
   @Test

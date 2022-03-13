@@ -8,21 +8,40 @@ import java.time.LocalDate;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static nl.naturalis.common.check.CommonGetters.*;
 
-public class ObjectCheckHasTest {
+public class ObjHasObjTest {
 
   private record Person(String firstName, LocalDate birtDate) {}
 
   @Test
-  public void hasPredicate00() {
+  public void vanilla00() throws IOException {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     Check.that(p, "person").has(Person::firstName, notNull());
+    Check.that(p, "person").has(Person::firstName, "firstName", notNull());
+    Check.that(p, "person").has(Person::firstName, notNull(), "Any message you like bro");
+    Check.that(p, "person").has(Person::firstName, notNull(), () -> new IOException());
+    Check.that(p, "person").has(type(), EQ(), Person.class);
+    Check.that(p, "person").has(type(), "class", EQ(), Person.class);
+    Check.that(p, "person").has(type(), EQ(), Person.class, "Any message you like bro");
+    Check.that(p, "person").has(type(), EQ(), Person.class, () -> new IOException());
+    Check.that(p, "person").has(Person::firstName, EQ(), "john");
+    Check.that(p, "person").has(Person::birtDate, LT(), LocalDate.of(2000, 1, 1));
   }
 
   @Test
-  public void notHasPredicate00() {
+  public void vanilla01() throws IOException {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     Check.that(p, "person").notHas(Person::firstName, blank());
+    Check.that(p, "person").notHas(Person::firstName, "class", blank());
+    Check.that(p, "person").notHas(Person::firstName, blank(), "Any message you like ${0}", "bro");
+    Check.that(p, "person").notHas(Person::firstName, blank(), () -> new IOException());
+    Check.that(p, "person").notHas(type(), EQ(), String.class);
+    Check.that(p, "person").notHas(type(), "class", EQ(), String.class);
+    Check.that(p, "person").notHas(type(), EQ(), String.class, "Any message you like ${0}", "bro");
+    Check.that(p, "person").notHas(type(), EQ(), String.class, () -> new IOException());
+    Check.that(p, "person").notHas(Person::firstName, EQ(), "jim");
+    Check.that(p, "person").notHas(Person::birtDate, LT(), LocalDate.of(1900, 1, 1));
   }
 
   @Test
@@ -52,18 +71,6 @@ public class ObjectCheckHasTest {
   }
 
   @Test
-  public void hasNamePredicate00() {
-    Person p = new Person("john", LocalDate.of(1966, 04, 22));
-    Check.that(p, "person").has(Person::firstName, "firstName", notNull());
-  }
-
-  @Test
-  public void notHasNamePredicate00() {
-    Person p = new Person("john", LocalDate.of(1966, 04, 22));
-    Check.that(p, "person").notHas(Person::firstName, "firstName", blank());
-  }
-
-  @Test
   public void hasNamePredicate01() {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     try {
@@ -90,10 +97,10 @@ public class ObjectCheckHasTest {
   }
 
   @Test
-  public void hasNamePredicateCustomMsg00() {
+  public void hasPredicateCustomMsg00() {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     try {
-      Check.that(p, "person").has(Person::firstName, NULL(), "Bad stuff");
+      Check.that(p).has(Person::firstName, NULL(), "Bad stuff");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("Bad stuff", e.getMessage());
@@ -102,8 +109,20 @@ public class ObjectCheckHasTest {
     fail();
   }
 
+  @Test(expected = IOException.class)
+  public void notHasPredicateCustomMsg00() throws IOException {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    Check.that(p).notHas(Person::firstName, notNull(), () -> new IOException());
+  }
+
+  @Test(expected = IOException.class)
+  public void hasPredicateCustomExc00() throws IOException {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    Check.that(p, "person").has(Person::firstName, NULL(), () -> new IOException());
+  }
+
   @Test
-  public void notHasNamePredicateCustomMsg00() {
+  public void notHasPredicateCustomExc00() {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     try {
       Check.that(p, "person").notHas(Person::firstName, notNull(), "Failed test ${test}");
@@ -113,20 +132,6 @@ public class ObjectCheckHasTest {
       return;
     }
     fail();
-  }
-
-  @Test
-  public void hasRelation00() {
-    Person p = new Person("john", LocalDate.of(1966, 04, 22));
-    Check.that(p, "person").has(Person::firstName, EQ(), "john");
-    Check.that(p, "person").has(Person::birtDate, LT(), LocalDate.of(2000, 1, 1));
-  }
-
-  @Test
-  public void notHasRelation00() {
-    Person p = new Person("john", LocalDate.of(1966, 04, 22));
-    Check.that(p, "person").notHas(Person::firstName, EQ(), "jim");
-    Check.that(p, "person").notHas(Person::birtDate, LT(), LocalDate.of(1900, 1, 1));
   }
 
   @Test
@@ -153,20 +158,6 @@ public class ObjectCheckHasTest {
       return;
     }
     fail();
-  }
-
-  @Test
-  public void hasNameRelation00() {
-    Person p = new Person("john", LocalDate.of(1966, 04, 22));
-    Check.that(p, "person").has(Person::firstName, "firstName", EQ(), "john");
-    Check.that(p, "person").has(Person::birtDate, "birtDate", LT(), LocalDate.of(2000, 1, 1));
-  }
-
-  @Test
-  public void notHasNameRelation00() {
-    Person p = new Person("john", LocalDate.of(1966, 04, 22));
-    Check.that(p, "person").notHas(Person::firstName, "firstName", EQ(), "jim");
-    Check.that(p, "person").notHas(Person::birtDate, "birtDate", LT(), LocalDate.of(1900, 1, 1));
   }
 
   @Test
