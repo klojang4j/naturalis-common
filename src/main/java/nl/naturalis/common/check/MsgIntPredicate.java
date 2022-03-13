@@ -1,8 +1,6 @@
 package nl.naturalis.common.check;
 
-import static java.lang.String.format;
-import static nl.naturalis.common.check.MsgUtil.MSG_PREDICATE;
-import static nl.naturalis.common.check.MsgUtil.*;
+import static nl.naturalis.common.check.MsgUtil.formatPredicate;
 
 final class MsgIntPredicate {
 

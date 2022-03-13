@@ -1,7 +1,7 @@
 package nl.naturalis.common.check;
 
-import static java.lang.String.format;
-import static nl.naturalis.common.check.MsgUtil.*;
+import static nl.naturalis.common.check.MsgUtil.formatDeniedRelation;
+import static nl.naturalis.common.check.MsgUtil.formatRelation;
 
 final class MsgIntRelation {
 

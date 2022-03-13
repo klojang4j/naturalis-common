@@ -8,9 +8,6 @@ import static nl.naturalis.common.check.MsgUtil.*;
 
 final class MsgPredicate {
 
-  private static final String MSG_NULL = "%s must be null (was %s)";
-  private static final String MSG_NOT_NULL = " must not be null";
-
   private MsgPredicate() {}
 
   static Formatter msgNull() {

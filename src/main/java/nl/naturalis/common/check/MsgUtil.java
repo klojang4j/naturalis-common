@@ -11,7 +11,7 @@ import static nl.naturalis.common.CollectionMethods.implode;
 import static nl.naturalis.common.check.CommonChecks.MESSAGE_PATTERNS;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-class MsgUtil {
+final class MsgUtil {
 
   // Common message patterns:
   static final String MSG_PREDICATE = "%s must%s %s";
@@ -52,14 +52,14 @@ class MsgUtil {
 
   //////////////////////////////////////////////////////////////////////////
 
-  // Default message for predicate-style checks
+  // Default message for predicates
   static Formatter formatPredicate(String predicate, boolean showArgument) {
     return showArgument
         ? args -> format(MSG_PREDICATE_WAS, args.name(), args.not(), predicate, toStr(args.arg()))
         : args -> format(MSG_PREDICATE, args.name(), args.not(), predicate);
   }
 
-  // Default message for predicate-style checks
+  // Default message for negatively formulated predicates like notNull()
   static Formatter formatDeniedPredicate(String predicate, boolean showArgument) {
     return showArgument
         ? args ->
@@ -95,27 +95,23 @@ class MsgUtil {
       String predicate, boolean showArgIfAffirmative, boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
       if (showArgIfNegated) {
-        // Always show argument
         return args ->
             format(MSG_PREDICATE_WAS, args.name(), args.notNot(), predicate, toStr(args.arg()));
       }
-      // Only show argument if not negated
       return args ->
           args.negated()
               ? format(MSG_PREDICATE, args.name(), args.notNot(), predicate)
               : format(MSG_PREDICATE_WAS, args.name(), args.notNot(), predicate, toStr(args.arg()));
     } else if (showArgIfNegated) {
-      // Only show argument if negated
       return args ->
           args.negated()
               ? format(MSG_PREDICATE_WAS, args.name(), args.notNot(), predicate, toStr(args.arg()))
               : format(MSG_PREDICATE, args.name(), args.notNot(), predicate);
     }
-    // Never show argument
     return args -> format(MSG_PREDICATE, args.name(), args.notNot(), predicate);
   }
 
-  // Default message for predicate-style checks
+  // Default message for relations
   static Formatter formatRelation(String relation, boolean showArgument) {
     return showArgument
         ? args ->
@@ -129,15 +125,12 @@ class MsgUtil {
         : args -> format(MSG_RELATION, args.name(), args.not(), relation, toStr(args.obj()));
   }
 
-  // Default message for relation-style checks
   static Formatter formatRelation(
       String relation, boolean showArgIfAffirmative, boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
       if (showArgIfNegated) {
-        // Always show argument
         return formatRelation(relation, true);
       }
-      // Only show argument if not negated
       return args ->
           args.negated()
               ? format(MSG_RELATION, args.name(), args.not(), relation, toStr(args.obj()))
@@ -149,7 +142,6 @@ class MsgUtil {
                   toStr(args.obj()),
                   toStr(args.arg()));
     } else if (showArgIfNegated) {
-      // Only show argument if negated
       return args ->
           args.negated()
               ? format(
@@ -161,7 +153,6 @@ class MsgUtil {
                   toStr(args.arg()))
               : format(MSG_RELATION, args.name(), args.not(), relation, toStr(args.obj()));
     }
-    // Never show argument
     return formatRelation(relation, false);
   }
 
@@ -170,7 +161,6 @@ class MsgUtil {
       String relation, boolean showArgIfAffirmative, boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
       if (showArgIfNegated) {
-        // Always show argument
         return args ->
             format(
                 MSG_RELATION_WAS,
@@ -180,7 +170,6 @@ class MsgUtil {
                 toStr(args.obj()),
                 toStr(args.arg()));
       }
-      // Only show argument if not negated
       return args ->
           args.negated()
               ? format(MSG_RELATION, args.name(), args.notNot(), relation, toStr(args.obj()))
@@ -192,7 +181,6 @@ class MsgUtil {
                   toStr(args.obj()),
                   toStr(args.arg()));
     } else if (showArgIfNegated) {
-      // Only show argument if negated
       return args ->
           args.negated()
               ? format(
@@ -204,7 +192,6 @@ class MsgUtil {
                   toStr(args.arg()))
               : format(MSG_RELATION, args.name(), args.notNot(), relation, toStr(args.obj()));
     }
-    // Never show argument
     return args -> format(MSG_RELATION, args.name(), args.notNot(), relation, toStr(args.obj()));
   }
 
