@@ -817,7 +817,16 @@ public final class CommonChecks {
 
   /**
    * Verifies that a {@code Collection} argument is a subset or sublist of another {@code
-   * Collection}.
+   * Collection}. Note that neither collection needs to be a {@link Set}:
+   *
+   * <blockquote>
+   *
+   * <pre>{@code
+   * Check.that(List.of(1,2,3)).is(subsetOf(), Set.of(1,2); // valid but false
+   * Check.that(List.of(1,2)).is(subsetOf(), Set.of(1,2,3); // valid and true
+   * }</pre>
+   *
+   * </blockquote>
    *
    * @param <E> The type of the elements in the {@code Collection}
    * @param <C0> The type of the argument (the subject of the {@code Relation})

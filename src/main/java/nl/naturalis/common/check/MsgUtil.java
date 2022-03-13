@@ -19,9 +19,6 @@ class MsgUtil {
   static final String MSG_RELATION = "%s must%s %s %s";
   static final String MSG_RELATION_WAS = MSG_RELATION + " (was %s)";
 
-  // Fall-back error message
-  private static final String MSG_INVALID_VALUE = "Invalid value for %s: %s";
-
   // Max display width (characters) for stringified values.
   private static final int MAX_DISPLAY_WIDTH = 55;
 
@@ -40,21 +37,17 @@ class MsgUtil {
   }
 
   static String getMessage(
-      Object relation,
+      Object test,
       boolean negated,
       String argName,
       Object argValue,
       Class<?> argType,
       Object object) {
-    return message(new MsgArgs(relation, negated, argName, argValue, argType, object));
-  }
-
-  private static String message(MsgArgs args) {
-    Formatter formatter = MESSAGE_PATTERNS.get(args.test());
-    if (formatter != null) {
-      return formatter.apply(args);
+    Formatter formatter = MESSAGE_PATTERNS.get(test);
+    if (formatter == null) {
+      return format("Invalid value for %s: %s", argName, toStr(argValue));
     }
-    return format(MSG_INVALID_VALUE, args.name(), toStr(args.arg()));
+    return formatter.apply(new MsgArgs(test, negated, argName, argValue, argType, object));
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -64,6 +57,14 @@ class MsgUtil {
     return showArgument
         ? args -> format(MSG_PREDICATE_WAS, args.name(), args.not(), predicate, toStr(args.arg()))
         : args -> format(MSG_PREDICATE, args.name(), args.not(), predicate);
+  }
+
+  // Default message for predicate-style checks
+  static Formatter formatDeniedPredicate(String predicate, boolean showArgument) {
+    return showArgument
+        ? args ->
+            format(MSG_PREDICATE_WAS, args.name(), args.notNot(), predicate, toStr(args.arg()))
+        : args -> format(MSG_PREDICATE, args.name(), args.notNot(), predicate);
   }
 
   static Formatter formatPredicate(
@@ -89,6 +90,31 @@ class MsgUtil {
     return formatPredicate(predicate, false);
   }
 
+  // Default message for negatively formulated predicates like notNull()
+  static Formatter formatDeniedPredicate(
+      String predicate, boolean showArgIfAffirmative, boolean showArgIfNegated) {
+    if (showArgIfAffirmative) {
+      if (showArgIfNegated) {
+        // Always show argument
+        return args ->
+            format(MSG_PREDICATE_WAS, args.name(), args.notNot(), predicate, toStr(args.arg()));
+      }
+      // Only show argument if not negated
+      return args ->
+          args.negated()
+              ? format(MSG_PREDICATE, args.name(), args.notNot(), predicate)
+              : format(MSG_PREDICATE_WAS, args.name(), args.notNot(), predicate, toStr(args.arg()));
+    } else if (showArgIfNegated) {
+      // Only show argument if negated
+      return args ->
+          args.negated()
+              ? format(MSG_PREDICATE_WAS, args.name(), args.notNot(), predicate, toStr(args.arg()))
+              : format(MSG_PREDICATE, args.name(), args.notNot(), predicate);
+    }
+    // Never show argument
+    return args -> format(MSG_PREDICATE, args.name(), args.notNot(), predicate);
+  }
+
   // Default message for predicate-style checks
   static Formatter formatRelation(String relation, boolean showArgument) {
     return showArgument
@@ -103,6 +129,7 @@ class MsgUtil {
         : args -> format(MSG_RELATION, args.name(), args.not(), relation, toStr(args.obj()));
   }
 
+  // Default message for relation-style checks
   static Formatter formatRelation(
       String relation, boolean showArgIfAffirmative, boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
@@ -138,7 +165,7 @@ class MsgUtil {
     return formatRelation(relation, false);
   }
 
-  // Formats messages for negatively formulated relations like ne() (not equals)
+  // Default message for negatively formulated relations like ne() (not equals)
   static Formatter formatDeniedRelation(
       String relation, boolean showArgIfAffirmative, boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
@@ -153,18 +180,6 @@ class MsgUtil {
                 toStr(args.obj()),
                 toStr(args.arg()));
       }
-      // Only show argument if negated
-      return args ->
-          args.negated()
-              ? format(
-                  MSG_RELATION_WAS,
-                  args.name(),
-                  args.notNot(),
-                  relation,
-                  toStr(args.obj()),
-                  toStr(args.arg()))
-              : format(MSG_RELATION, args.name(), args.notNot(), relation, toStr(args.obj()));
-    } else if (showArgIfNegated) {
       // Only show argument if not negated
       return args ->
           args.negated()
@@ -176,6 +191,18 @@ class MsgUtil {
                   relation,
                   toStr(args.obj()),
                   toStr(args.arg()));
+    } else if (showArgIfNegated) {
+      // Only show argument if negated
+      return args ->
+          args.negated()
+              ? format(
+                  MSG_RELATION_WAS,
+                  args.name(),
+                  args.notNot(),
+                  relation,
+                  toStr(args.obj()),
+                  toStr(args.arg()))
+              : format(MSG_RELATION, args.name(), args.notNot(), relation, toStr(args.obj()));
     }
     // Never show argument
     return args -> format(MSG_RELATION, args.name(), args.notNot(), relation, toStr(args.obj()));
@@ -201,7 +228,7 @@ class MsgUtil {
     } else if (type.isArray()) {
       return arrayToString(val);
     } else if (type == Class.class) {
-      return simpleClassName(type);
+      return className(val);
     }
     return ellipsis(val.toString());
   }

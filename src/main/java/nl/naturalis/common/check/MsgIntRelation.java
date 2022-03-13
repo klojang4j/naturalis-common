@@ -12,7 +12,7 @@ final class MsgIntRelation {
   }
 
   static Formatter msgNe() {
-    return formatDeniedRelation("equal", true, false);
+    return formatDeniedRelation("equal", false, true);
   }
 
   static Formatter msgGt() {

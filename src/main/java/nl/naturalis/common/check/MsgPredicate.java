@@ -14,65 +14,39 @@ final class MsgPredicate {
   private MsgPredicate() {}
 
   static Formatter msgNull() {
-    return args ->
-        args.negated()
-            ? args.name() + MSG_NOT_NULL
-            : format(MSG_NULL, args.name(), toStr(args.arg()));
+    return formatPredicate("be null", true, false);
   }
 
   static Formatter msgNotNull() {
-    return args ->
-        args.negated()
-            ? format(MSG_NULL, args.name(), toStr(args.arg()))
-            : args.name() + MSG_NOT_NULL;
+    return formatDeniedPredicate("be null", false, true);
   }
 
   static Formatter msgYes() {
-    return args -> format(MSG_PREDICATE, args.name(), args.not(), "be true");
+    return formatPredicate("be true", false);
   }
 
   static Formatter msgNo() {
-    return args -> format(MSG_PREDICATE, args.name(), args.not(), "be false");
+    return formatPredicate("be false", false);
   }
 
   static Formatter msgEmpty() {
-    return args ->
-        format(MSG_PREDICATE_WAS, args.name(), args.not(), "be null or empty", toStr(args.arg()));
+    return formatPredicate("be null or empty", true);
   }
 
   static Formatter msgDeepNotNull() {
-    return args ->
-        format(
-            MSG_PREDICATE_WAS,
-            args.name(),
-            args.notNot(),
-            "be null or contain null values",
-            toStr(args.arg()));
+    return formatDeniedPredicate("be null or contain null values", true);
   }
 
   static Formatter msgDeepNotEmpty() {
-    return args ->
-        format(
-            MSG_PREDICATE_WAS,
-            args.name(),
-            args.notNot(),
-            "be empty or contain empty values",
-            toStr(args.arg()));
+    return formatDeniedPredicate("be empty or contain empty values", true);
   }
 
   static Formatter msgBlank() {
-    return args ->
-        format(MSG_PREDICATE_WAS, args.name(), args.not(), "be null or blank", toStr(args.arg()));
+    return formatPredicate("be null or blank", true);
   }
 
   static Formatter msgInteger() {
-    return args ->
-        format(
-            MSG_PREDICATE_WAS,
-            args.name(),
-            args.not(),
-            "be parsable as integer",
-            toStr(args.arg()));
+    return formatPredicate("be parsable as integer", true);
   }
 
   static Formatter msgArray() {

@@ -30,14 +30,7 @@ final class MsgRelation {
   }
 
   static Formatter msgNullOr() {
-    return args ->
-        format(
-            MSG_RELATION_WAS,
-            args.name(),
-            args.not(),
-            "be null or",
-            toStr(args.obj()),
-            toStr(args.arg()));
+    return formatRelation("be null or", true);
   }
 
   static Formatter msgInstanceOf() {
@@ -55,147 +48,62 @@ final class MsgRelation {
   }
 
   static Formatter msgSubtypeOf() {
-    return args ->
-        format(
-            MSG_RELATION_WAS,
-            args.name(),
-            args.not(),
-            "extend/implement",
-            className(args.obj()),
-            className(args.arg()));
+    return formatRelation("extend/implement", true);
   }
 
   static Formatter msgSupertypeOf() {
-    return args ->
-        format(
-            MSG_RELATION_WAS,
-            args.name(),
-            args.not(),
-            "be supertype of",
-            className(args.obj()),
-            className(args.arg()));
+    return formatRelation("be supertype of", true);
   }
 
   static Formatter msgContains() {
-    return args -> format(MSG_RELATION, args.name(), args.not(), "contain", toStr(args.obj()));
+    return formatRelation("contain", false);
   }
 
   static Formatter msgHasKey() {
-    return args -> format(MSG_RELATION, args.name(), args.not(), "contain key", toStr(args.obj()));
+    return formatRelation("contain key", false);
   }
 
   static Formatter msgHasValue() {
-    return args ->
-        format(MSG_RELATION, args.name(), args.not(), "contain value", toStr(args.obj()));
+    return formatRelation("contain value", false);
   }
 
   static Formatter msgIn() {
-    return args ->
-        format(
-            MSG_RELATION_WAS,
-            args.name(),
-            args.not(),
-            "be element of",
-            toStr(args.obj()),
-            toStr(args.arg()));
+    return formatRelation("be element of", true);
   }
 
   static Formatter msgKeyIn() {
-    return args ->
-        format(
-            MSG_RELATION_WAS,
-            args.name(),
-            args.not(),
-            "be key in",
-            toStr(args.obj()),
-            toStr(args.arg()));
+    return formatRelation("be key in", true);
   }
 
   static Formatter msgValueIn() {
-    return args ->
-        format(
-            MSG_RELATION_WAS,
-            args.name(),
-            args.not(),
-            "be value in",
-            toStr(args.obj()),
-            toStr(args.arg()));
+    return formatRelation("be value in", true);
   }
 
   static Formatter msgSupersetOf() {
-    return args ->
-        format(
-            MSG_RELATION_WAS,
-            args.name(),
-            args.not(),
-            "be superset of",
-            toStr(args.obj()),
-            toStr(args.arg()));
+    return formatRelation("be superset of", true);
   }
 
   static Formatter msgSubsetOf() {
-    return args ->
-        format(
-            MSG_RELATION_WAS,
-            args.name(),
-            args.not(),
-            "be subset of",
-            toStr(args.obj()),
-            toStr(args.arg()));
+    return formatRelation("be subset of", true);
   }
 
   static Formatter msgHasSubstring() {
-    return args ->
-        format(
-            MSG_RELATION_WAS,
-            args.name(),
-            args.not(),
-            "contain",
-            toStr(args.obj()),
-            toStr(args.arg()));
+    return formatRelation("contain", true);
   }
 
   static Formatter msgSubstringOf() {
-    return args ->
-        format(
-            MSG_RELATION_WAS,
-            args.name(),
-            args.not(),
-            "be substring of",
-            toStr(args.obj()),
-            toStr(args.arg()));
+    return formatRelation("be substring of", true);
   }
 
   static Formatter msgEqualsIgnoreCase() {
-    return args ->
-        format(
-            MSG_RELATION_WAS,
-            args.name(),
-            args.not(),
-            "be equal ignoring case to",
-            toStr(args.obj()),
-            toStr(args.arg()));
+    return formatRelation("be equal ignoring case to", true);
   }
 
   static Formatter msgStartsWith() {
-    return args ->
-        format(
-            MSG_RELATION_WAS,
-            args.name(),
-            args.not(),
-            "start with",
-            toStr(args.obj()),
-            toStr(args.arg()));
+    return formatRelation("start with", true);
   }
 
   static Formatter msgEndsWith() {
-    return args ->
-        format(
-            MSG_RELATION_WAS,
-            args.name(),
-            args.not(),
-            "end with",
-            toStr(args.obj()),
-            toStr(args.arg()));
+    return formatRelation("end with", true);
   }
 }
