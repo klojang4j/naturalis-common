@@ -20,10 +20,10 @@ class MsgUtil {
   static final String MUST_BUT_WAS = PLAIN_MUST + " (was %s)";
   static final String MUST_BE_BUT_WAS = PLAIN_MUST_BE + " (was %s)";
 
-  static final String MUST_OBJ = "%s must%s %s %s";
+  static final String PLAIN_MUST_OBJ = "%s must%s %s %s";
   static final String MUST_BE_OBJ = "%s must%s be %s %s";
 
-  static final String MUST_OBJ_BUT_WAS = MUST_OBJ + " (was %s)";
+  static final String MUST_OBJ_BUT_WAS = PLAIN_MUST_OBJ + " (was %s)";
   static final String MUST_BE_OBJ_BUT_WAS = MUST_BE_OBJ + " (was %s)";
 
   // Fall-back error message

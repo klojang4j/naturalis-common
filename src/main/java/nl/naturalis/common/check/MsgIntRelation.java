@@ -1,29 +1,36 @@
 package nl.naturalis.common.check;
 
 import static java.lang.String.format;
+import static nl.naturalis.common.check.MsgUtil.*;
 
 final class MsgIntRelation {
 
   private MsgIntRelation() {}
 
   static Formatter msgEq() {
-    return args -> {
-      if (args.negated()) {
-        return msgNe().apply(args.flip());
-      }
-      String fmt = "%s must equal %s (was %s)";
-      return format(fmt, args.name(), args.obj(), args.arg());
-    };
+    return args ->
+        args.negated()
+            ? format(PLAIN_MUST_OBJ, args.name(), args.not(), "equal", toStr(args.obj()))
+            : format(
+                MUST_OBJ_BUT_WAS,
+                args.name(),
+                args.not(),
+                "equal",
+                toStr(args.obj()),
+                toStr(args.arg()));
   }
 
   static Formatter msgNe() {
-    return args -> {
-      if (args.negated()) {
-        return msgEq().apply(args.flip());
-      }
-      String fmt = "%s must not equal %s";
-      return format(fmt, args.name(), args.obj());
-    };
+    return args ->
+        args.negated()
+            ? format(MUST_OBJ_BUT_WAS, args.name(), args.notNot(), "equal", toStr(args.obj()))
+            : format(
+                PLAIN_MUST_OBJ,
+                args.name(),
+                args.notNot(),
+                "equal",
+                toStr(args.obj()),
+                toStr(args.arg()));
   }
 
   static Formatter msgGt() {

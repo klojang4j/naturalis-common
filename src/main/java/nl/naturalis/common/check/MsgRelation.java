@@ -77,15 +77,17 @@ final class MsgRelation {
   }
 
   static Formatter msgContains() {
-    return args -> format(MUST_OBJ, args.name(), args.not(), "contain", toStr(args.obj()));
+    return args -> format(PLAIN_MUST_OBJ, args.name(), args.not(), "contain", toStr(args.obj()));
   }
 
   static Formatter msgHasKey() {
-    return args -> format(MUST_OBJ, args.name(), args.not(), "contain key", toStr(args.obj()));
+    return args ->
+        format(PLAIN_MUST_OBJ, args.name(), args.not(), "contain key", toStr(args.obj()));
   }
 
   static Formatter msgHasValue() {
-    return args -> format(MUST_OBJ, args.name(), args.not(), "contain value", toStr(args.obj()));
+    return args ->
+        format(PLAIN_MUST_OBJ, args.name(), args.not(), "contain value", toStr(args.obj()));
   }
 
   static Formatter msgIn() {
