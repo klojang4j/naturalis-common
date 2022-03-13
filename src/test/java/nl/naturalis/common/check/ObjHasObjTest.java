@@ -14,6 +14,44 @@ public class ObjHasObjTest {
   private record Person(String firstName, LocalDate birtDate) {}
 
   @Test
+  public void hasPredicate00() {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    Check.that(p, "person").has(Person::firstName, notNull());
+  }
+
+  @Test
+  public void notHasPredicate00() {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    Check.that(p, "person").notHas(Person::firstName, blank());
+  }
+
+  @Test
+  public void hasPredicate01() {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    try {
+      Check.that(p, "person").has(Person::firstName, NULL());
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Function.apply(person) must be null (was john)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void notHasPredicate01() {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    try {
+      Check.that(p, "person").notHas(Person::firstName, notNull());
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Function.apply(person) must be null (was john)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
   public void hasNamePredicate00() {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     Check.that(p, "person").has(Person::firstName, "firstName", notNull());
@@ -72,6 +110,46 @@ public class ObjHasObjTest {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("Failed test notNull", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void hasRelation00() {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    Check.that(p, "person").has(Person::firstName, EQ(), "john");
+    Check.that(p, "person").has(Person::birtDate, LT(), LocalDate.of(2000, 1, 1));
+  }
+
+  @Test
+  public void notHasRelation00() {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    Check.that(p, "person").notHas(Person::firstName, EQ(), "jim");
+    Check.that(p, "person").notHas(Person::birtDate, LT(), LocalDate.of(1900, 1, 1));
+  }
+
+  @Test
+  public void hasRelation01() {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    try {
+      Check.that(p, "person").has(Person::birtDate, GT(), LocalDate.of(2000, 1, 1));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Function.apply(person) must be > 2000-01-01 (was 1966-04-22)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void notHasRelation01() {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    try {
+      Check.that(p, "person").notHas(Person::firstName, EQ(), "john");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Function.apply(person) must not equal john", e.getMessage());
       return;
     }
     fail();
