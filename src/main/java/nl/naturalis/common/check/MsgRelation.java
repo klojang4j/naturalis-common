@@ -111,90 +111,90 @@ final class MsgRelation {
   }
 
   static Formatter msgValueIn() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must not be value in %s (was %s)";
-        return format(fmt, args.name(), toStr(args.obj()), toStr(args.arg()));
-      }
-      String fmt = "%s must be value in %s (was %s)";
-      return format(fmt, args.name(), toStr(args.obj()), toStr(args.arg()));
-    };
+    return args ->
+        format(
+            MUST_OBJ_BUT_WAS,
+            args.name(),
+            args.not(),
+            "be value in",
+            toStr(args.obj()),
+            toStr(args.arg()));
   }
 
   static Formatter msgSupersetOf() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must not be superset %s (was %s)";
-        return format(fmt, args.name(), toStr(args.obj()), toStr(args.arg()));
-      }
-      String fmt = "%s must be superset %s (was %s)";
-      return format(fmt, args.name(), toStr(args.obj()), toStr(args.arg()));
-    };
+    return args ->
+        format(
+            MUST_OBJ_BUT_WAS,
+            args.name(),
+            args.not(),
+            "be superset of",
+            toStr(args.obj()),
+            toStr(args.arg()));
   }
 
   static Formatter msgSubsetOf() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must not be subset of %s (was %s)";
-        return format(fmt, args.name(), toStr(args.obj()), toStr(args.arg()));
-      }
-      String fmt = "%s must be subset of %s (was %s)";
-      return format(fmt, args.name(), toStr(args.obj()), toStr(args.arg()));
-    };
+    return args ->
+        format(
+            MUST_OBJ_BUT_WAS,
+            args.name(),
+            args.not(),
+            "be subset of",
+            toStr(args.obj()),
+            toStr(args.arg()));
   }
 
   static Formatter msgHasSubstring() {
-    return args -> {
-      if (args.negated()) {
-        return format(
-            "%s must not contain %s (was %s)", args.name(), toStr(args.obj()), toStr(args.arg()));
-      }
-      String fmt = "%s must contain %s (was %s)";
-      return format(fmt, args.name(), toStr(args.obj()), toStr(args.arg()));
-    };
+    return args ->
+        format(
+            MUST_OBJ_BUT_WAS,
+            args.name(),
+            args.not(),
+            "contain",
+            toStr(args.obj()),
+            toStr(args.arg()));
   }
 
   static Formatter msgSubstringOf() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must not be substring of %s (was %s)";
-        return format(fmt, args.name(), toStr(args.obj()), toStr(args.arg()));
-      }
-      String fmt = "%s must be substring of %s (was %s)";
-      return format(fmt, args.name(), toStr(args.obj()), toStr(args.arg()));
-    };
+    return args ->
+        format(
+            MUST_OBJ_BUT_WAS,
+            args.name(),
+            args.not(),
+            "be substring of",
+            toStr(args.obj()),
+            toStr(args.arg()));
   }
 
   static Formatter msgEqualsIgnoreCase() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must not be equal ignoring case to %s";
-        return format(fmt, args.name(), toStr(args.obj()));
-      }
-      String fmt = "%s must be equal ignoring case to %s (was %s)";
-      return format(fmt, args.name(), toStr(args.obj()), toStr(args.arg()));
-    };
+    return args ->
+        format(
+            MUST_OBJ_BUT_WAS,
+            args.name(),
+            args.not(),
+            "be equal ignoring case to",
+            toStr(args.obj()),
+            toStr(args.arg()));
   }
 
   static Formatter msgStartsWith() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must not start with %s (was %s)";
-        return format(fmt, args.name(), toStr(args.obj()), toStr(args.arg()));
-      }
-      String fmt = "%s must start with %s (was %s)";
-      return format(fmt, args.name(), toStr(args.obj()), toStr(args.arg()));
-    };
+    return args ->
+        format(
+            MUST_OBJ_BUT_WAS,
+            args.name(),
+            args.not(),
+            "start with",
+            toStr(args.obj()),
+            toStr(args.arg()));
   }
 
   static Formatter msgEndsWith() {
-    return args -> {
-      if (args.negated()) {
-        String fmt = "%s must not end with %s (was %s)";
-        return format(fmt, args.name(), toStr(args.obj()), toStr(args.arg()));
-      }
-      String fmt = "%s must end with %s (was %s)";
-      return format(fmt, args.name(), toStr(args.obj()), toStr(args.arg()));
-    };
+    return args ->
+        format(
+            MUST_OBJ_BUT_WAS,
+            args.name(),
+            args.not(),
+            "end with",
+            toStr(args.obj()),
+            toStr(args.arg()));
   }
 }

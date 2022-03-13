@@ -641,7 +641,7 @@ public class CheckRelationTest {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
-          "frodo must be superset ListN[3] of [mccartney, harrisson, star] "
+          "frodo must be superset of ListN[3] of [mccartney, harrisson, star] "
               + "(was ListN[3] of [mccartney, harrisson, lennon])",
           e.getMessage());
       return;
@@ -657,7 +657,7 @@ public class CheckRelationTest {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
-          "frodo must not be superset ListN[3] of [mccartney, harrisson, star] "
+          "frodo must not be superset of ListN[3] of [mccartney, harrisson, star] "
               + "(was ListN[4] of [lennon, mccartney, harrisson, star])",
           e.getMessage());
       return;
@@ -792,7 +792,7 @@ public class CheckRelationTest {
       Check.that("123", "mordor").isNot(equalsIgnoreCase(), "123");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("mordor must not be equal ignoring case to 123", e.getMessage());
+      assertEquals("mordor must not be equal ignoring case to 123 (was 123)", e.getMessage());
       return;
     }
     fail();
