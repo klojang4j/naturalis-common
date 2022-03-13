@@ -4,21 +4,19 @@ import java.io.File;
 
 import static java.lang.String.format;
 import static nl.naturalis.common.ClassMethods.className;
-import static nl.naturalis.common.check.MsgUtil.toStr;
+import static nl.naturalis.common.check.MsgUtil.*;
 
 final class MsgPredicate {
 
   private static final String MSG_NULL = "%s must be null (was %s)";
-  private static final String MSG_NOT_NULL = "%s must not be null";
-  private static final String MSG_TRUE = "%s must be true (was false)";
-  private static final String MSG_FALSE = "%s must be false (was true)";
+  private static final String MSG_NOT_NULL = " must not be null";
 
   private MsgPredicate() {}
 
   static Formatter msgNull() {
     return args ->
         args.negated()
-            ? format(MSG_NOT_NULL, args.name())
+            ? args.name() + MSG_NOT_NULL
             : format(MSG_NULL, args.name(), toStr(args.arg()));
   }
 
@@ -26,36 +24,31 @@ final class MsgPredicate {
     return args ->
         args.negated()
             ? format(MSG_NULL, args.name(), toStr(args.arg()))
-            : format(MSG_NOT_NULL, args.name());
+            : args.name() + MSG_NOT_NULL;
   }
 
   static Formatter msgYes() {
-    return args -> args.negated() ? format(MSG_FALSE, args.name()) : format(MSG_TRUE, args.name());
+    return args -> format(PLAIN_MUST_BE, args.name(), args.not(), "true");
   }
 
   static Formatter msgNo() {
-    return args -> args.negated() ? format(MSG_TRUE, args.name()) : format(MSG_FALSE, args.name());
+    return args -> format(PLAIN_MUST_BE, args.name(), args.not(), "false");
   }
 
   static Formatter msgEmpty() {
-    return args ->
-        format(MsgUtil.MUST_BE, args.name(), args.not(), "null or empty", toStr(args.arg()));
+    return args -> format(MUST_BE, args.name(), args.not(), "null or empty", toStr(args.arg()));
   }
 
   static Formatter msgDeepNotNull() {
     return args ->
         format(
-            MsgUtil.MUST_BE,
-            args.name(),
-            args.notNot(),
-            "null or contain null values",
-            toStr(args.arg()));
+            MUST_BE, args.name(), args.notNot(), "null or contain null values", toStr(args.arg()));
   }
 
   static Formatter msgDeepNotEmpty() {
     return args ->
         format(
-            MsgUtil.MUST_BE,
+            MUST_BE,
             args.name(),
             args.notNot(),
             "empty or contain empty values",
@@ -63,18 +56,16 @@ final class MsgPredicate {
   }
 
   static Formatter msgBlank() {
-    return args ->
-        format(MsgUtil.MUST_BE, args.name(), args.not(), "null or blank", toStr(args.arg()));
+    return args -> format(MUST_BE, args.name(), args.not(), "null or blank", toStr(args.arg()));
   }
 
   static Formatter msgInteger() {
     return args ->
-        format(MsgUtil.MUST_BE, args.name(), args.not(), "parsable as integer", toStr(args.arg()));
+        format(MUST_BE, args.name(), args.not(), "parsable as integer", toStr(args.arg()));
   }
 
   static Formatter msgArray() {
-    return args ->
-        format(MsgUtil.MUST_BE, args.name(), args.not(), "an array", className(args.type()));
+    return args -> format(MUST_BE, args.name(), args.not(), "an array", className(args.type()));
   }
 
   static Formatter msgFile() {
@@ -83,7 +74,7 @@ final class MsgPredicate {
       if (f.isDirectory()) {
         return format("%s must not be a directory (was %s)", args.name(), f);
       }
-      return format(MsgUtil.MUST, args.typeAndName(), args.not(), "exist", args.arg());
+      return format(MUST, args.typeAndName(), args.not(), "exist", args.arg());
     };
   }
 
@@ -99,7 +90,7 @@ final class MsgPredicate {
   }
 
   static Formatter msgFileExists() {
-    return args -> format(MsgUtil.MUST, args.typeAndName(), args.not(), "exist", args.arg());
+    return args -> format(MUST, args.typeAndName(), args.not(), "exist", args.arg());
   }
 
   static Formatter msgReadable() {

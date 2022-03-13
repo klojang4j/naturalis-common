@@ -110,7 +110,7 @@ public class CheckPredicateTest {
       Check.that(false, "oxygen").is(yes());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("oxygen must be true (was false)", e.getMessage());
+      assertEquals("oxygen must be true", e.getMessage());
       return;
     }
     fail();
@@ -122,7 +122,7 @@ public class CheckPredicateTest {
       Check.that(true, "oxygen").isNot(yes());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("oxygen must be false (was true)", e.getMessage());
+      assertEquals("oxygen must not be true", e.getMessage());
       return;
     }
     fail();
@@ -134,7 +134,7 @@ public class CheckPredicateTest {
       Check.that(true, "carbon").is(no());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("carbon must be false (was true)", e.getMessage());
+      assertEquals("carbon must be false", e.getMessage());
       return;
     }
     fail();
@@ -146,7 +146,7 @@ public class CheckPredicateTest {
       Check.that(false, "carbon").isNot(no());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("carbon must be true (was false)", e.getMessage());
+      assertEquals("carbon must not be false", e.getMessage());
       return;
     }
     fail();
