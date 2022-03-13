@@ -13,10 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.IntPredicate;
-import java.util.function.Predicate;
-import java.util.function.ToIntFunction;
+import java.util.function.*;
 
 import static nl.naturalis.common.check.MsgIntObjRelation.msgIndexOf;
 import static nl.naturalis.common.check.MsgIntPredicate.*;
@@ -1421,6 +1418,10 @@ public final class CommonChecks {
    * supposed to be a {@code Predicate} or {@code IntPredicate} (it will complain about an
    * <b>Ambiguous method call</b>). This method clears that up for the compiler.
    *
+   * <p>NB this method is meant to wrap the {@code test} argument of a {@code Check.has()} or {@code
+   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the
+   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
+   *
    * @param lambdaOrMethodReference A lambda or method reference
    * @return The same {@code IntPredicate}
    */
@@ -1434,6 +1435,10 @@ public final class CommonChecks {
    * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
    * supposed to be a {@code Predicate} or {@code IntPredicate} (it will complain about an
    * <b>Ambiguous method call</b>). This method clears that up for the compiler.
+   *
+   * <p>NB this method is meant to wrap the {@code test} argument of a {@code Check.has()} or {@code
+   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the
+   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the object being tested
@@ -1449,6 +1454,10 @@ public final class CommonChecks {
    * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
    * supposed to be a {@code Relation} or one of its sister interfaces (it will complain about an
    * <b>Ambiguous method call</b>). This method clears that up for the compiler.
+   *
+   * <p>NB this method is meant to wrap the {@code test} argument of a {@code Check.has()} or {@code
+   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the
+   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the subject of the {@code Relation}
@@ -1466,6 +1475,10 @@ public final class CommonChecks {
    * supposed to be an {@code ObjIntRelation} or one of its sister interfaces (it will complain
    * about an <b>Ambiguous method call</b>). This method clears that up for the compiler.
    *
+   * <p>NB this method is meant to wrap the {@code test} argument of a {@code Check.has()} or {@code
+   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the
+   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
+   *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the subject of the {@code Relation}
    * @return The same {@code ObjIntRelation}
@@ -1479,6 +1492,10 @@ public final class CommonChecks {
    * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
    * supposed to be an {@code IntObjRelation} or one of its sister interfaces (it will complain
    * about an <b>Ambiguous method call</b>). This method clears that up for the compiler.
+   *
+   * <p>NB this method is meant to wrap the {@code test} argument of a {@code Check.has()} or {@code
+   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the
+   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the object of the {@code Relation}
@@ -1495,6 +1512,10 @@ public final class CommonChecks {
    * supposed to be an {@code IntRelation} or one of its sister interfaces (it will complain about
    * an <b>Ambiguous method call</b>). This method clears that up for the compiler.
    *
+   * <p>NB this method is meant to wrap the {@code test} argument of a {@code Check.has()} or {@code
+   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the
+   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
+   *
    * @param lambdaOrMethodReference A lambda or method reference
    * @return The same {@code IntRelation}
    */
@@ -1509,11 +1530,71 @@ public final class CommonChecks {
    * supposed to be an {@code ToIntFunction} or some other kind of function (it will complain about
    * an <b>Ambiguous method call</b>). This method clears that up for the compiler.
    *
+   * <p>NB this method is meant to wrap the {@code property} argument of a {@code Check.has()} or
+   * {@code Check.notHas()} method, not the {@code test} argument. You only need to wrap one of the
+   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
+   *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the subject of the {@code Relation}
    * @return The same {@code ObjIntRelation}
    */
   public static <T> ToIntFunction<T> toInt(ToIntFunction<T> lambdaOrMethodReference) {
+    return lambdaOrMethodReference;
+  }
+
+  /**
+   * (Not a check) Simply returns the specified {@code IntFunction}. Use when passing a lambda or
+   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
+   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
+   * supposed to be an {@code IntFunction} or some other kind of function (it will complain about an
+   * <b>Ambiguous method call</b>). This method clears that up for the compiler.
+   *
+   * <p>NB this method is meant to wrap the {@code property} argument of a {@code Check.has()} or
+   * {@code Check.notHas()} method, not the {@code test} argument. You only need to wrap one of the
+   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
+   *
+   * @param lambdaOrMethodReference A lambda or method reference
+   * @param <T> The type of the subject of the {@code Relation}
+   * @return The same {@code ObjIntRelation}
+   */
+  public static <T> IntFunction<T> toObj(IntFunction<T> lambdaOrMethodReference) {
+    return lambdaOrMethodReference;
+  }
+
+  /**
+   * (Not a check) Simply returns the specified {@code Function}. Use when passing a lambda or
+   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
+   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
+   * supposed to be an {@code Function} or, for example, an {@code IntFunction} (it will complain
+   * about an <b>Ambiguous method call</b>). This method clears that up for the compiler.
+   *
+   * <p>NB this method is meant to wrap the {@code property} argument of a {@code Check.has()} or
+   * {@code Check.notHas()} method, not the {@code test} argument. You only need to wrap one of the
+   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
+   *
+   * @param lambdaOrMethodReference A lambda or method reference
+   * @param <T> The type of the subject of the {@code Relation}
+   * @return The same {@code ObjIntRelation}
+   */
+  public static <T, R> Function<T, R> objToObj(Function<T, R> lambdaOrMethodReference) {
+    return lambdaOrMethodReference;
+  }
+
+  /**
+   * (Not a check) Simply returns the specified {@code IntUnaryOperator}. Use when passing a lambda
+   * or method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because
+   * these methods are heavily overloaded, the compiler may not be able to establish whether the
+   * lambda is supposed to be an {@code IntUnaryOperator} or some other kind of function (it will
+   * complain about an <b>Ambiguous method call</b>). This method clears that up for the compiler.
+   *
+   * <p>NB this method is meant to wrap the {@code property} argument of a {@code Check.has()} or
+   * {@code Check.notHas()} method, not the {@code test} argument. You only need to wrap one of the
+   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
+   *
+   * @param lambdaOrMethodReference A lambda or method reference
+   * @return The same {@code ObjIntRelation}
+   */
+  public static IntUnaryOperator intToInt(IntUnaryOperator lambdaOrMethodReference) {
     return lambdaOrMethodReference;
   }
 

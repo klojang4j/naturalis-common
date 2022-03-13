@@ -234,4 +234,16 @@ public class ObjHasObjTest {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     Check.that(p, "person").notHas(Person::firstName, EQ(), "john", () -> new IOException());
   }
+
+  @Test
+  public void testLambdas() {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    Check.that(p).has(x -> x.firstName(), objObj((x, y) -> x.equals(y)), "john");
+    Check.that(p).has(x -> x.firstName().length(), intInt((x, y) -> x == y), 4);
+    Check.that(p).has(toInt(x -> x.firstName().length()), intInt((x, y) -> x == y), 4);
+    Check.that(p).has(toInt(x -> x.firstName().length()), (x, y) -> x == y, 4);
+    Check.that(p).has(objToObj(x -> x.firstName()), objObj((x, y) -> x.equals(y)), "john");
+    Check.that(p).has(objToObj(x -> x.firstName()), (x, y) -> x.equals(y), "john");
+    Check.that(p).has(Person::firstName, (x, y) -> x.equals(y), "john");
+  }
 }
