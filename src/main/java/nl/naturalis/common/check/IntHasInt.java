@@ -155,8 +155,4 @@ final class IntHasInt<E extends Exception> {
     }
     throw exc.get();
   }
-
-  private String FQN(String name) {
-    return check.argName + "." + name;
-  }
 }

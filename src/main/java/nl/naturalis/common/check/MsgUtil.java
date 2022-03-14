@@ -114,46 +114,27 @@ final class MsgUtil {
   // Default message for relations
   static Formatter formatRelation(String relation, boolean showArgument) {
     return showArgument
-        ? args ->
-            format(
-                MSG_RELATION_WAS,
-                args.name(),
-                args.not(),
-                relation,
-                toStr(args.obj()),
-                toStr(args.arg()))
-        : args -> format(MSG_RELATION, args.name(), args.not(), relation, toStr(args.obj()));
+        ? args -> formatRelationShowArg(args, relation, false)
+        : args -> formatRelation(args, relation, false);
   }
 
   static Formatter formatRelation(
       String relation, boolean showArgIfAffirmative, boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
       if (showArgIfNegated) {
-        return formatRelation(relation, true);
+        return args -> formatRelationShowArg(args, relation, false);
       }
       return args ->
           args.negated()
-              ? format(MSG_RELATION, args.name(), args.not(), relation, toStr(args.obj()))
-              : format(
-                  MSG_RELATION_WAS,
-                  args.name(),
-                  args.not(),
-                  relation,
-                  toStr(args.obj()),
-                  toStr(args.arg()));
+              ? formatRelation(args, relation, false)
+              : formatRelationShowArg(args, relation, false);
     } else if (showArgIfNegated) {
       return args ->
           args.negated()
-              ? format(
-                  MSG_RELATION_WAS,
-                  args.name(),
-                  args.not(),
-                  relation,
-                  toStr(args.obj()),
-                  toStr(args.arg()))
-              : format(MSG_RELATION, args.name(), args.not(), relation, toStr(args.obj()));
+              ? formatRelationShowArg(args, relation, false)
+              : formatRelation(args, relation, false);
     }
-    return formatRelation(relation, false);
+    return args -> formatRelation(args, relation, false);
   }
 
   // Default message for negatively formulated relations like ne() (not equals)
@@ -161,38 +142,38 @@ final class MsgUtil {
       String relation, boolean showArgIfAffirmative, boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
       if (showArgIfNegated) {
-        return args ->
-            format(
-                MSG_RELATION_WAS,
-                args.name(),
-                args.notNot(),
-                relation,
-                toStr(args.obj()),
-                toStr(args.arg()));
+        return args -> formatRelationShowArg(args, relation, true);
       }
       return args ->
           args.negated()
-              ? format(MSG_RELATION, args.name(), args.notNot(), relation, toStr(args.obj()))
-              : format(
-                  MSG_RELATION_WAS,
-                  args.name(),
-                  args.notNot(),
-                  relation,
-                  toStr(args.obj()),
-                  toStr(args.arg()));
+              ? formatRelation(args, relation, true)
+              : formatRelationShowArg(args, relation, true);
     } else if (showArgIfNegated) {
       return args ->
           args.negated()
-              ? format(
-                  MSG_RELATION_WAS,
-                  args.name(),
-                  args.notNot(),
-                  relation,
-                  toStr(args.obj()),
-                  toStr(args.arg()))
-              : format(MSG_RELATION, args.name(), args.notNot(), relation, toStr(args.obj()));
+              ? formatRelationShowArg(args, relation, true)
+              : formatRelation(args, relation, true);
     }
-    return args -> format(MSG_RELATION, args.name(), args.notNot(), relation, toStr(args.obj()));
+    return args -> formatRelation(args, relation, true);
+  }
+
+  private static String formatRelation(MsgArgs args, String relation, boolean negative) {
+    return format(
+        MSG_RELATION,
+        args.name(),
+        negative ? args.notNot() : args.not(),
+        relation,
+        toStr(args.obj()));
+  }
+
+  private static String formatRelationShowArg(MsgArgs args, String relation, boolean negative) {
+    return format(
+        MSG_RELATION_WAS,
+        args.name(),
+        negative ? args.notNot() : args.not(),
+        relation,
+        toStr(args.obj()),
+        toStr(args.arg()));
   }
 
   //////////////////////////////////////////////////////////////////////////
