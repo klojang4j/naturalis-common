@@ -3,6 +3,7 @@ package nl.naturalis.common.check;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 
 import static nl.naturalis.common.check.CommonChecks.*;
@@ -27,6 +28,7 @@ public class ObjHasObjTest {
     Check.that(p, "person").has(type(), EQ(), Person.class, () -> new IOException());
     Check.that(p, "person").has(Person::firstName, EQ(), "john");
     Check.that(p, "person").has(Person::birtDate, LT(), LocalDate.of(2000, 1, 1));
+    Check.that(DayOfWeek.class).has(constants(), lenEQ(), 7);
   }
 
   @Test
@@ -207,7 +209,7 @@ public class ObjHasObjTest {
       Check.that(p, "person").notHas(Person::firstName, EQ(), "john", "Bad person: ${arg}");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("Bad person: Person[firstName=john, birtDate=1966-04-22]", e.getMessage());
+      assertEquals("Bad person: john", e.getMessage());
       return;
     }
     fail();
@@ -224,6 +226,19 @@ public class ObjHasObjTest {
   public void hasRelationCustomExc01() throws IOException {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     Check.that(p, "person").notHas(Person::firstName, EQ(), "john", () -> new IOException());
+  }
+
+  @Test
+  public void hasObjIntRelation00() {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    try {
+      Check.that(p, "person").has(Person::firstName, strlenGT(), 100);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      // assertEquals("Bad person: Person[firstName=john, birtDate=1966-04-22]", e.getMessage());
+      return;
+    }
+    fail();
   }
 
   @Test

@@ -136,7 +136,7 @@ final class ObjHasObj<T, E extends Exception> {
     if (test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(test, check.arg, obj, msg, msgArgs);
+    throw check.createException(test, val, obj, msg, msgArgs);
   }
 
   <P, O> ObjectCheck<T, E> notHas(
@@ -146,7 +146,7 @@ final class ObjHasObj<T, E extends Exception> {
     if (!test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(test, check.arg, obj, msg, msgArgs);
+    throw check.createException(test, val, obj, msg, msgArgs);
   }
 
   <P, O, X extends Exception> ObjectCheck<T, E> has(
@@ -206,7 +206,7 @@ final class ObjHasObj<T, E extends Exception> {
     if (test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(test, check.arg, obj, msg, msgArgs);
+    throw check.createException(test, val, obj, msg, msgArgs);
   }
 
   <P> ObjectCheck<T, E> notHas(
@@ -216,7 +216,7 @@ final class ObjHasObj<T, E extends Exception> {
     if (!test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(test, check.arg, obj, msg, msgArgs);
+    throw check.createException(test, val, obj, msg, msgArgs);
   }
 
   <P, X extends Exception> ObjectCheck<T, E> has(

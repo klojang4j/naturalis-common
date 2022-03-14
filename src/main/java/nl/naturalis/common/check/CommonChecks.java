@@ -1,9 +1,6 @@
 package nl.naturalis.common.check;
 
-import nl.naturalis.common.ArrayMethods;
-import nl.naturalis.common.NumberMethods;
-import nl.naturalis.common.ObjectMethods;
-import nl.naturalis.common.StringMethods;
+import nl.naturalis.common.*;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
@@ -15,6 +12,7 @@ import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.*;
 
+import static nl.naturalis.common.check.MsgIntObjRelation.msgBetween;
 import static nl.naturalis.common.check.MsgIntObjRelation.msgIndexOf;
 import static nl.naturalis.common.check.MsgIntPredicate.*;
 import static nl.naturalis.common.check.MsgIntRelation.*;
@@ -1354,7 +1352,7 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is present in the specified array.
+   * Verifies that the argument is present in the specified integer array.
    *
    * @return A function implementing the test described above
    */
@@ -1365,6 +1363,20 @@ public final class CommonChecks {
   static {
     setMessagePattern(intElementOf(), msgIn()); // Recycle message
     setName(intElementOf(), "intElementOf");
+  }
+
+  /**
+   * Verifies that the argument is present in the specified integer array.
+   *
+   * @return A function implementing the test described above
+   */
+  public static IntObjRelation<IntPair> between() {
+    return (x, y) -> x >= y.one() && x < y.two();
+  }
+
+  static {
+    setMessagePattern(between(), msgBetween());
+    setName(between(), "between");
   }
 
   /* ++++++++++++++ Miscellaneous ++++++++++++++ */
