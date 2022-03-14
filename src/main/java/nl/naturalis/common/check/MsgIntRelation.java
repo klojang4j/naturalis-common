@@ -1,6 +1,6 @@
 package nl.naturalis.common.check;
 
-import static nl.naturalis.common.check.MsgUtil.formatDeniedRelation;
+import static nl.naturalis.common.check.MsgUtil.formatNegativeRelation;
 import static nl.naturalis.common.check.MsgUtil.formatRelation;
 
 final class MsgIntRelation {
@@ -12,7 +12,7 @@ final class MsgIntRelation {
   }
 
   static Formatter msgNe() {
-    return formatDeniedRelation("equal", false, true);
+    return formatNegativeRelation("equal", false, true);
   }
 
   static Formatter msgGt() {

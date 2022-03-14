@@ -15,7 +15,7 @@ final class MsgPredicate {
   }
 
   static Formatter msgNotNull() {
-    return formatDeniedPredicate("be null", false, true);
+    return formatNegativePredicate("be null", false, true);
   }
 
   static Formatter msgYes() {
@@ -31,11 +31,11 @@ final class MsgPredicate {
   }
 
   static Formatter msgDeepNotNull() {
-    return formatDeniedPredicate("be null or contain null values", true);
+    return formatNegativePredicate("be null or contain null values", true);
   }
 
   static Formatter msgDeepNotEmpty() {
-    return formatDeniedPredicate("be empty or contain empty values", true);
+    return formatNegativePredicate("be empty or contain empty values", true);
   }
 
   static Formatter msgBlank() {

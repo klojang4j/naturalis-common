@@ -55,63 +55,57 @@ final class MsgUtil {
   // Default message for predicates
   static Formatter formatPredicate(String predicate, boolean showArgument) {
     return showArgument
-        ? args -> format(MSG_PREDICATE_WAS, args.name(), args.not(), predicate, toStr(args.arg()))
-        : args -> format(MSG_PREDICATE, args.name(), args.not(), predicate);
+        ? args -> formatPredicateShowArg(args, predicate, false)
+        : args -> formatPredicate(args, predicate, false);
   }
 
   // Default message for negatively formulated predicates like notNull()
-  static Formatter formatDeniedPredicate(String predicate, boolean showArgument) {
+  static Formatter formatNegativePredicate(String predicate, boolean showArgument) {
     return showArgument
-        ? args ->
-            format(MSG_PREDICATE_WAS, args.name(), args.notNot(), predicate, toStr(args.arg()))
-        : args -> format(MSG_PREDICATE, args.name(), args.notNot(), predicate);
+        ? args -> formatPredicateShowArg(args, predicate, true)
+        : args -> formatPredicate(args, predicate, true);
   }
 
+  // showArgIfAffirmative: show argument when executed in is() or has() method
+  // showArgIfNegated: show argument when executed in isNot() or notHas() method
   static Formatter formatPredicate(
       String predicate, boolean showArgIfAffirmative, boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
       if (showArgIfNegated) {
-        // Always show argument
-        return formatPredicate(predicate, true);
+        return args -> formatPredicateShowArg(args, predicate, false);
       }
-      // Only show argument if not negated
       return args ->
           args.negated()
-              ? format(MSG_PREDICATE, args.name(), args.not(), predicate)
-              : format(MSG_PREDICATE_WAS, args.name(), args.not(), predicate, toStr(args.arg()));
+              ? formatPredicate(args, predicate, false)
+              : formatPredicateShowArg(args, predicate, false);
     } else if (showArgIfNegated) {
-      // Only show argument if negated
       return args ->
           args.negated()
-              ? format(MSG_PREDICATE_WAS, args.name(), args.not(), predicate, toStr(args.arg()))
-              : format(MSG_PREDICATE, args.name(), args.not(), predicate);
+              ? formatPredicateShowArg(args, predicate, false)
+              : formatPredicate(args, predicate, false);
     }
-    // Never show argument
-    return formatPredicate(predicate, false);
+    return args -> formatPredicate(args, predicate, false);
   }
 
-  // Default message for negatively formulated predicates like notNull()
-  static Formatter formatDeniedPredicate(
+  static Formatter formatNegativePredicate(
       String predicate, boolean showArgIfAffirmative, boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
       if (showArgIfNegated) {
-        return args ->
-            format(MSG_PREDICATE_WAS, args.name(), args.notNot(), predicate, toStr(args.arg()));
+        return args -> formatPredicateShowArg(args, predicate, true);
       }
       return args ->
           args.negated()
-              ? format(MSG_PREDICATE, args.name(), args.notNot(), predicate)
-              : format(MSG_PREDICATE_WAS, args.name(), args.notNot(), predicate, toStr(args.arg()));
+              ? formatPredicate(args, predicate, true)
+              : formatPredicateShowArg(args, predicate, true);
     } else if (showArgIfNegated) {
       return args ->
           args.negated()
-              ? format(MSG_PREDICATE_WAS, args.name(), args.notNot(), predicate, toStr(args.arg()))
-              : format(MSG_PREDICATE, args.name(), args.notNot(), predicate);
+              ? formatPredicateShowArg(args, predicate, true)
+              : formatPredicate(args, predicate, true);
     }
-    return args -> format(MSG_PREDICATE, args.name(), args.notNot(), predicate);
+    return args -> formatPredicate(args, predicate, true);
   }
 
-  // Default message for relations
   static Formatter formatRelation(String relation, boolean showArgument) {
     return showArgument
         ? args -> formatRelationShowArg(args, relation, false)
@@ -137,8 +131,7 @@ final class MsgUtil {
     return args -> formatRelation(args, relation, false);
   }
 
-  // Default message for negatively formulated relations like ne() (not equals)
-  static Formatter formatDeniedRelation(
+  static Formatter formatNegativeRelation(
       String relation, boolean showArgIfAffirmative, boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
       if (showArgIfNegated) {
@@ -157,23 +150,40 @@ final class MsgUtil {
     return args -> formatRelation(args, relation, true);
   }
 
+  private static String formatPredicate(MsgArgs args, String predicate, boolean negative) {
+    return negative
+        ? format(MSG_PREDICATE, args.name(), args.notNot(), predicate)
+        : format(MSG_PREDICATE, args.name(), args.not(), predicate);
+  }
+
+  private static String formatPredicateShowArg(MsgArgs args, String predicate, boolean negative) {
+    return negative
+        ? format(MSG_PREDICATE_WAS, args.name(), args.notNot(), predicate, toStr(args.arg()))
+        : format(MSG_PREDICATE_WAS, args.name(), args.not(), predicate, toStr(args.arg()));
+  }
+
   private static String formatRelation(MsgArgs args, String relation, boolean negative) {
-    return format(
-        MSG_RELATION,
-        args.name(),
-        negative ? args.notNot() : args.not(),
-        relation,
-        toStr(args.obj()));
+    return negative
+        ? format(MSG_RELATION, args.name(), args.notNot(), relation, toStr(args.obj()))
+        : format(MSG_RELATION, args.name(), args.not(), relation, toStr(args.obj()));
   }
 
   private static String formatRelationShowArg(MsgArgs args, String relation, boolean negative) {
-    return format(
-        MSG_RELATION_WAS,
-        args.name(),
-        negative ? args.notNot() : args.not(),
-        relation,
-        toStr(args.obj()),
-        toStr(args.arg()));
+    return negative
+        ? format(
+            MSG_RELATION_WAS,
+            args.name(),
+            args.notNot(),
+            relation,
+            toStr(args.obj()),
+            toStr(args.arg()))
+        : format(
+            MSG_RELATION_WAS,
+            args.name(),
+            args.not(),
+            relation,
+            toStr(args.obj()),
+            toStr(args.arg()));
   }
 
   //////////////////////////////////////////////////////////////////////////
