@@ -4,16 +4,14 @@ import nl.naturalis.common.function.*;
 
 import java.util.function.*;
 
-import static nl.naturalis.common.check.Check.DEF_ARG_NAME;
-import static nl.naturalis.common.check.CommonChecks.NAMES;
-import static nl.naturalis.common.check.MsgUtil.*;
+import static nl.naturalis.common.check.MsgUtil.getCustomMessage;
+import static nl.naturalis.common.check.MsgUtil.getPrefabMessage;
 
 public final class ObjectCheck<T, E extends Exception> {
 
   final T arg;
   final String argName;
-
-  private final Function<String, E> exc;
+  final Function<String, E> exc;
 
   ObjectCheck(T arg, String argName, Function<String, E> exc) {
     this.arg = arg;
@@ -74,7 +72,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (test.test(arg)) {
       return this;
     }
-    throw exc.apply(getMessage(test, false, getArgName(arg), arg));
+    throw exc.apply(getPrefabMessage(test, false, argName, arg, null, null));
   }
 
   /**
@@ -90,7 +88,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (!test.test(arg)) {
       return this;
     }
-    throw exc.apply(getMessage(test, true, getArgName(arg), arg));
+    throw exc.apply(getPrefabMessage(test, true, argName, arg, null, null));
   }
 
   /**
@@ -108,7 +106,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (test.test(arg)) {
       return this;
     }
-    throw createException(test, arg, null, message, msgArgs);
+    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, null, null));
   }
 
   /**
@@ -129,7 +127,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (!test.test(arg)) {
       return this;
     }
-    throw createException(test, arg, null, message, msgArgs);
+    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, null, null));
   }
 
   /**
@@ -180,7 +178,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    throw exc.apply(getMessage(test, false, getArgName(arg), arg, object));
+    throw exc.apply(getPrefabMessage(test, false, argName, arg, null, object));
   }
 
   /**
@@ -198,7 +196,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    throw exc.apply(getMessage(test, true, getArgName(arg), arg, object));
+    throw exc.apply(getPrefabMessage(test, true, argName, arg, null, object));
   }
 
   /**
@@ -219,7 +217,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    throw createException(test, arg, object, message, msgArgs);
+    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, null, object));
   }
 
   /**
@@ -240,7 +238,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    throw createException(test, arg, object, message, msgArgs);
+    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, null, object));
   }
 
   /**
@@ -294,7 +292,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    throw exc.apply(getMessage(test, false, getArgName(arg), arg, object));
+    throw exc.apply(getPrefabMessage(test, false, argName, arg, null, object));
   }
 
   /**
@@ -311,7 +309,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    throw exc.apply(getMessage(test, true, getArgName(arg), arg, object));
+    throw exc.apply(getPrefabMessage(test, true, argName, arg, null, object));
   }
 
   /**
@@ -331,7 +329,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    throw createException(test, arg, object, message, msgArgs);
+    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, null, object));
   }
 
   /**
@@ -351,7 +349,7 @@ public final class ObjectCheck<T, E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    throw createException(test, arg, object, message, msgArgs);
+    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, null, object));
   }
 
   /**
@@ -1544,33 +1542,7 @@ public final class ObjectCheck<T, E extends Exception> {
     return ObjHasInt.get(this).has(property, test.negate(), object, exception);
   }
 
-  E createException(String msg) {
-    return exc.apply(msg);
-  }
-
-  E createException(Object test, Object subject, Object object, String pattern, Object[] msgArgs) {
-    if (pattern == null) {
-      throw new InvalidCheckException("message pattern must not be null");
-    }
-    if (msgArgs == null) {
-      throw new InvalidCheckException("message arguments must not be null");
-    }
-    String fmt = FormatNormalizer.normalize(pattern);
-    Object[] all = new Object[msgArgs.length + 5];
-    all[0] = NAMES.getOrDefault(test, test.getClass().getSimpleName());
-    all[1] = toStr(subject);
-    all[2] = subject == null ? null : simpleClassName(subject);
-    all[3] = argName;
-    all[4] = toStr(object);
-    System.arraycopy(msgArgs, 0, all, 5, msgArgs.length);
-    return exc.apply(String.format(fmt, all));
-  }
-
   String FQN(String propName) {
     return argName + "." + propName;
-  }
-
-  private String getArgName(Object arg) {
-    return argName != null ? argName : arg != null ? simpleClassName(arg) : DEF_ARG_NAME;
   }
 }

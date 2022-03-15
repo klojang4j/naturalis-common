@@ -40,7 +40,7 @@ public class ObjHashIntTest {
     Check.that(c, "collection").notHas(size(), gt(), 10, () -> new IOException());
     Check.that(c, "collection").notHas(size(), zero());
     Check.that(c, "collection").notHas(size(), "size", zero());
-    Check.that(c, "collection").notHas(size(), zero(), "Size must be ${test}");
+    Check.that(c, "collection").notHas(size(), zero(), "size must be ${test}");
     Check.that(c, "collection").notHas(size(), zero(), () -> new IOException());
   }
 
@@ -188,7 +188,7 @@ public class ObjHashIntTest {
       Check.that("1234567").has(strlen(), ne(), 7, "Count to 10: ${arg}${0}", 8910);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("Count to 10: 12345678910", e.getMessage());
+      assertEquals("Count to 10: 78910", e.getMessage());
       return;
     }
     fail();

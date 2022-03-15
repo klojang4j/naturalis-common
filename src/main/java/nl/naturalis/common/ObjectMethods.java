@@ -9,6 +9,7 @@ import nl.naturalis.common.function.ThrowingSupplier;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import static java.util.stream.Collectors.toSet;
@@ -842,6 +843,22 @@ public class ObjectMethods {
    */
   public static Boolean n2e(Boolean arg) {
     return ifNull(arg, Boolean.FALSE);
+  }
+
+  /**
+   * Throws the exception supplied by the specified {@code Supplier} if the specified condition
+   * evaluates to {@code true}.
+   *
+   * @param condition The condition
+   * @param exception The supplier of the exception
+   * @param <E> The type of the exception thrown
+   * @throws E If the condition evaluates to {@code true}
+   */
+  public static <E extends Exception> void throwIf(boolean condition, Supplier<E> exception)
+      throws E {
+    if (condition) {
+      throw exception.get();
+    }
   }
 
   private static boolean eq(Object arg0, Object arg1) {

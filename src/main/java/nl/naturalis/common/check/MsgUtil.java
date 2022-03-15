@@ -8,7 +8,9 @@ import static java.lang.String.format;
 import static nl.naturalis.common.ArrayMethods.DEFAULT_IMPLODE_SEPARATOR;
 import static nl.naturalis.common.ArrayMethods.implodeAny;
 import static nl.naturalis.common.CollectionMethods.implode;
+import static nl.naturalis.common.ObjectMethods.throwIf;
 import static nl.naturalis.common.check.CommonChecks.MESSAGE_PATTERNS;
+import static nl.naturalis.common.check.CommonChecks.NAMES;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 final class MsgUtil {
@@ -22,32 +24,49 @@ final class MsgUtil {
   // Max display width (characters) for stringified values.
   private static final int MAX_DISPLAY_WIDTH = 55;
 
-  static String getMessage(Object predicate, boolean negated, String argName, Object argValue) {
-    return getMessage(predicate, negated, argName, argValue, null, null);
-  }
-
-  static String getMessage(
-      Object predicate, boolean negated, String argName, Object argValue, Class<?> argType) {
-    return getMessage(predicate, negated, argName, argValue, argType, null);
-  }
-
-  static String getMessage(
-      Object relation, boolean negated, String argName, Object argValue, Object object) {
-    return getMessage(relation, negated, argName, argValue, null, object);
-  }
-
-  static String getMessage(
-      Object test,
-      boolean negated,
-      String argName,
-      Object argValue,
-      Class<?> argType,
-      Object object) {
+  static String getPrefabMessage(
+      Object test, boolean negated, String argName, Object argVal, Class<?> argType, Object obj) {
     Formatter formatter = MESSAGE_PATTERNS.get(test);
     if (formatter == null) {
-      return format("Invalid value for %s: %s", argName, toStr(argValue));
+      if (obj == null) {
+        return "Invalid value for " + argName + ": " + toStr(argVal);
+      }
+      return "Invalid value for "
+          + argName
+          + ": "
+          + toStr(argVal)
+          + " and "
+          + toStr(obj)
+          + " must "
+          + (negated ? "not " : "")
+          + "have the specified relationship";
     }
-    return formatter.apply(new MsgArgs(test, negated, argName, argValue, argType, object));
+    Class<?> type = argType != null ? argType : argVal != null ? argVal.getClass() : null;
+    return formatter.apply(new MsgArgs(test, negated, argName, argVal, type, obj));
+  }
+
+  static String getCustomMessage(
+      String pattern,
+      Object[] msgArgs,
+      Object test,
+      String argName,
+      Object argVal,
+      Class<?> argType,
+      Object obj) {
+    throwIf(pattern == null, () -> new InvalidCheckException("message pattern must not be null"));
+    throwIf(msgArgs == null, () -> new InvalidCheckException("message arguments must not be null"));
+    String fmt = FormatNormalizer.normalize(pattern);
+    Object[] all = new Object[msgArgs.length + 5];
+    all[0] = NAMES.getOrDefault(test, test.getClass().getSimpleName());
+    all[1] = toStr(argVal);
+    all[2] =
+        argType != null
+            ? simpleClassName(argType)
+            : argVal != null ? simpleClassName(argVal.getClass()) : null;
+    all[3] = argName;
+    all[4] = toStr(obj);
+    System.arraycopy(msgArgs, 0, all, 5, msgArgs.length);
+    return format(fmt, all);
   }
 
   //////////////////////////////////////////////////////////////////////////

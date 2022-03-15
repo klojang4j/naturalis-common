@@ -7,7 +7,8 @@ import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 
 import static nl.naturalis.common.check.CommonGetters.formatProperty;
-import static nl.naturalis.common.check.MsgUtil.getMessage;
+import static nl.naturalis.common.check.MsgUtil.getCustomMessage;
+import static nl.naturalis.common.check.MsgUtil.getPrefabMessage;
 
 /** Helper class for IntCheck. */
 final class IntHasInt<E extends Exception> {
@@ -29,7 +30,7 @@ final class IntHasInt<E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntUnaryOperator.class);
-    throw check.createException(getMessage(test, false, name, val, int.class));
+    throw check.exc.apply(getPrefabMessage(test, false, name, val, int.class, null));
   }
 
   IntCheck<E> notHas(IntUnaryOperator prop, IntPredicate test) throws E {
@@ -39,7 +40,7 @@ final class IntHasInt<E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntUnaryOperator.class);
-    throw check.createException(getMessage(test, true, name, val, int.class));
+    throw check.exc.apply(getPrefabMessage(test, true, name, val, int.class, null));
   }
 
   IntCheck<E> has(IntUnaryOperator prop, String name, IntPredicate test) throws E {
@@ -48,7 +49,7 @@ final class IntHasInt<E extends Exception> {
     if (test.test(val)) {
       return check;
     }
-    throw check.createException(getMessage(test, false, check.FQN(name), val));
+    throw check.exc.apply(getPrefabMessage(test, false, check.FQN(name), val, int.class, null));
   }
 
   IntCheck<E> notHas(IntUnaryOperator prop, String name, IntPredicate test) throws E {
@@ -57,27 +58,28 @@ final class IntHasInt<E extends Exception> {
     if (!test.test(val)) {
       return check;
     }
-    throw check.createException(getMessage(test, true, check.FQN(name), val));
+    throw check.exc.apply(getPrefabMessage(test, true, check.FQN(name), val, int.class, null));
   }
 
-  IntCheck<E> has(IntUnaryOperator prop, IntPredicate test, String message, Object[] msgArgs)
-      throws E {
+  IntCheck<E> has(IntUnaryOperator prop, IntPredicate test, String msg, Object[] msgArgs) throws E {
     IntCheck<E> check = this.check;
     int val = prop.applyAsInt(check.arg);
     if (test.test(val)) {
       return check;
     }
-    throw check.createException(test, check.arg, null, message, msgArgs);
+    throw check.exc.apply(
+        getCustomMessage(msg, msgArgs, test, check.argName, val, int.class, null));
   }
 
-  IntCheck<E> notHas(IntUnaryOperator prop, IntPredicate test, String message, Object[] msgArgs)
+  IntCheck<E> notHas(IntUnaryOperator prop, IntPredicate test, String msg, Object[] msgArgs)
       throws E {
     IntCheck<E> check = this.check;
     int val = prop.applyAsInt(check.arg);
     if (!test.test(val)) {
       return check;
     }
-    throw check.createException(test, check.arg, null, message, msgArgs);
+    throw check.exc.apply(
+        getCustomMessage(msg, msgArgs, test, check.argName, val, int.class, null));
   }
 
   <X extends Exception> IntCheck<E> has(IntUnaryOperator prop, IntPredicate test, Supplier<X> exc)
@@ -96,7 +98,7 @@ final class IntHasInt<E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntUnaryOperator.class);
-    throw check.createException(getMessage(test, false, name, val, int.class, obj));
+    throw check.exc.apply(getPrefabMessage(test, false, name, val, int.class, obj));
   }
 
   IntCheck<E> notHas(IntUnaryOperator prop, IntRelation test, int obj) throws E {
@@ -106,7 +108,7 @@ final class IntHasInt<E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntUnaryOperator.class);
-    throw check.createException(getMessage(test, true, name, val, obj));
+    throw check.exc.apply(getPrefabMessage(test, true, name, val, int.class, obj));
   }
 
   IntCheck<E> has(IntUnaryOperator prop, String name, IntRelation test, int obj) throws E {
@@ -115,7 +117,7 @@ final class IntHasInt<E extends Exception> {
     if (test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(getMessage(test, false, check.FQN(name), val, int.class, obj));
+    throw check.exc.apply(getPrefabMessage(test, false, check.FQN(name), val, int.class, obj));
   }
 
   IntCheck<E> notHas(IntUnaryOperator prop, String name, IntRelation test, int obj) throws E {
@@ -124,27 +126,27 @@ final class IntHasInt<E extends Exception> {
     if (!test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(getMessage(test, true, check.FQN(name), val, int.class, obj));
+    throw check.exc.apply(getPrefabMessage(test, true, check.FQN(name), val, int.class, obj));
   }
 
-  IntCheck<E> has(
-      IntUnaryOperator prop, IntRelation test, int obj, String message, Object[] msgArgs) throws E {
+  IntCheck<E> has(IntUnaryOperator prop, IntRelation test, int obj, String msg, Object[] msgArgs)
+      throws E {
     IntCheck<E> check = this.check;
     int val = prop.applyAsInt(check.arg);
     if (test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(test, check.arg, obj, message, msgArgs);
+    throw check.exc.apply(getCustomMessage(msg, msgArgs, test, check.argName, val, int.class, obj));
   }
 
-  IntCheck<E> notHas(
-      IntUnaryOperator prop, IntRelation test, int obj, String message, Object[] msgArgs) throws E {
+  IntCheck<E> notHas(IntUnaryOperator prop, IntRelation test, int obj, String msg, Object[] msgArgs)
+      throws E {
     IntCheck<E> check = this.check;
     int val = prop.applyAsInt(check.arg);
     if (!test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(test, check.arg, obj, message, msgArgs);
+    throw check.exc.apply(getCustomMessage(msg, msgArgs, test, check.argName, val, int.class, obj));
   }
 
   <X extends Exception> IntCheck<E> has(

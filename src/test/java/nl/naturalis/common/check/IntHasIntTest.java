@@ -77,7 +77,7 @@ public class IntHasIntTest {
       Check.that(-7).notHas(abs(), odd(), "Test ${test} did not go as planned for ${arg}");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("Test odd did not go as planned for -7", e.getMessage());
+      assertEquals("Test odd did not go as planned for 7", e.getMessage());
       return;
     }
     fail();
@@ -167,7 +167,7 @@ public class IntHasIntTest {
       Check.that(7).has(i -> i + 3, gt(), 100, "Oops: ${type} ${arg} was invalid");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("Oops: int 7 was invalid", e.getMessage());
+      assertEquals("Oops: int 10 was invalid", e.getMessage());
       return;
     }
     fail();
@@ -179,7 +179,7 @@ public class IntHasIntTest {
       Check.that(7).notHas(i -> i + 3, gt(), 5, "This number is fun: ${arg}${arg}${arg}${obj}");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("This number is fun: 7775", e.getMessage());
+      assertEquals("This number is fun: 1010105", e.getMessage());
       return;
     }
     fail();

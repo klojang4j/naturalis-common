@@ -4,9 +4,8 @@ import nl.naturalis.common.function.*;
 
 import java.util.function.*;
 
-import static nl.naturalis.common.check.CommonChecks.NAMES;
-import static nl.naturalis.common.check.MsgUtil.getMessage;
-import static nl.naturalis.common.check.MsgUtil.toStr;
+import static nl.naturalis.common.check.MsgUtil.getCustomMessage;
+import static nl.naturalis.common.check.MsgUtil.getPrefabMessage;
 
 /**
  * Facilitates the validation of {@code int} values. See the {@link nl.naturalis.common.check
@@ -18,8 +17,7 @@ public final class IntCheck<E extends Exception> {
 
   final int arg;
   final String argName;
-
-  private final Function<String, E> exc;
+  final Function<String, E> exc;
 
   IntCheck(int arg, String argName, Function<String, E> exc) {
     this.arg = arg;
@@ -80,7 +78,7 @@ public final class IntCheck<E extends Exception> {
     if (test.test(arg)) {
       return this;
     }
-    throw exc.apply(getMessage(test, false, getArgName(), arg, int.class));
+    throw exc.apply(getPrefabMessage(test, false, argName, arg, int.class, null));
   }
 
   /**
@@ -96,7 +94,7 @@ public final class IntCheck<E extends Exception> {
     if (!test.test(arg)) {
       return this;
     }
-    throw exc.apply(getMessage(test, true, argName, arg, int.class));
+    throw exc.apply(getPrefabMessage(test, true, argName, arg, int.class, null));
   }
 
   /**
@@ -114,7 +112,7 @@ public final class IntCheck<E extends Exception> {
     if (test.test(arg)) {
       return this;
     }
-    throw createException(test, arg, null, message, msgArgs);
+    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, int.class, null));
   }
 
   /**
@@ -135,7 +133,7 @@ public final class IntCheck<E extends Exception> {
     if (!test.test(arg)) {
       return this;
     }
-    throw createException(test, arg, null, message, msgArgs);
+    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, int.class, null));
   }
 
   /**
@@ -186,7 +184,7 @@ public final class IntCheck<E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    throw exc.apply(getMessage(test, false, getArgName(), arg, int.class, object));
+    throw exc.apply(getPrefabMessage(test, false, argName, arg, int.class, object));
   }
 
   /**
@@ -203,7 +201,7 @@ public final class IntCheck<E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    throw exc.apply(getMessage(test, true, getArgName(), arg, int.class, object));
+    throw exc.apply(getPrefabMessage(test, true, argName, arg, int.class, object));
   }
 
   /**
@@ -222,7 +220,7 @@ public final class IntCheck<E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    throw createException(test, arg, object, message, msgArgs);
+    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, int.class, object));
   }
 
   /**
@@ -242,7 +240,7 @@ public final class IntCheck<E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    throw createException(test, arg, object, message, msgArgs);
+    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, int.class, object));
   }
 
   /**
@@ -295,7 +293,7 @@ public final class IntCheck<E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    throw exc.apply(getMessage(test, false, getArgName(), arg, int.class, object));
+    throw exc.apply(getPrefabMessage(test, false, argName, arg, int.class, object));
   }
 
   /**
@@ -312,7 +310,7 @@ public final class IntCheck<E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    throw exc.apply(getMessage(test, true, getArgName(), arg, int.class, object));
+    throw exc.apply(getPrefabMessage(test, true, argName, arg, int.class, object));
   }
 
   /**
@@ -332,7 +330,7 @@ public final class IntCheck<E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    throw createException(test, arg, object, message, msgArgs);
+    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, int.class, object));
   }
 
   /**
@@ -352,7 +350,7 @@ public final class IntCheck<E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    throw createException(test, arg, object, message, msgArgs);
+    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, int.class, object));
   }
 
   /**
@@ -967,34 +965,11 @@ public final class IntCheck<E extends Exception> {
     return has(property, test.negate(), object, exception);
   }
 
-  E createException(String msg) {
-    return exc.apply(msg);
-  }
-
-  E createException(Object test, Object arg, Object obj, String pattern, Object[] msgArgs) {
-    if (pattern == null) {
-      throw new InvalidCheckException("message pattern must not be null");
-    }
-    if (msgArgs == null) {
-      throw new InvalidCheckException("message arguments must not be null");
-    }
-    String fmt = FormatNormalizer.normalize(pattern);
-    Object[] all = new Object[msgArgs.length + 5];
-    all[0] = NAMES.getOrDefault(test, test.getClass().getSimpleName());
-    all[1] = toStr(arg);
-    all[2] = int.class;
-    all[3] = argName;
-    all[4] = toStr(obj);
-    System.arraycopy(msgArgs, 0, all, 5, msgArgs.length);
-    return exc.apply(String.format(fmt, all));
-  }
-
   /* Returns fully-qualified name of the property with the specified name */
   String FQN(String name) {
+    if (argName == null) {
+      return int.class.getSimpleName() + "." + name;
+    }
     return argName + "." + name;
-  }
-
-  private String getArgName() {
-    return argName != null ? argName : int.class.getSimpleName();
   }
 }

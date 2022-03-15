@@ -7,7 +7,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static nl.naturalis.common.check.CommonGetters.formatProperty;
-import static nl.naturalis.common.check.MsgUtil.getMessage;
+import static nl.naturalis.common.check.MsgUtil.getCustomMessage;
+import static nl.naturalis.common.check.MsgUtil.getPrefabMessage;
 
 final class IntHasObj<E extends Exception> {
 
@@ -28,7 +29,7 @@ final class IntHasObj<E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntFunction.class);
-    throw check.createException(getMessage(test, false, name, val));
+    throw check.exc.apply(getPrefabMessage(test, false, name, val, null, null));
   }
 
   <P> IntCheck<E> notHas(IntFunction<P> prop, Predicate<P> test) throws E {
@@ -38,7 +39,7 @@ final class IntHasObj<E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntFunction.class);
-    throw check.createException(getMessage(test, true, name, val));
+    throw check.exc.apply(getPrefabMessage(test, true, name, val, null, null));
   }
 
   <P> IntCheck<E> has(IntFunction<P> prop, String name, Predicate<P> test) throws E {
@@ -47,7 +48,7 @@ final class IntHasObj<E extends Exception> {
     if (test.test(val)) {
       return check;
     }
-    throw check.createException(getMessage(test, false, check.FQN(name), val));
+    throw check.exc.apply(getPrefabMessage(test, false, check.FQN(name), val, null, null));
   }
 
   <P> IntCheck<E> notHas(IntFunction<P> prop, String name, Predicate<P> test) throws E {
@@ -56,7 +57,7 @@ final class IntHasObj<E extends Exception> {
     if (!test.test(val)) {
       return check;
     }
-    throw check.createException(getMessage(test, true, check.FQN(name), val));
+    throw check.exc.apply(getPrefabMessage(test, true, check.FQN(name), val, null, null));
   }
 
   <P> IntCheck<E> has(IntFunction<P> prop, Predicate<P> test, String msg, Object[] msgArgs)
@@ -66,7 +67,7 @@ final class IntHasObj<E extends Exception> {
     if (test.test(val)) {
       return check;
     }
-    throw check.createException(test, check.arg, null, msg, msgArgs);
+    throw check.exc.apply(getCustomMessage(msg, msgArgs, test, check.argName, val, null, null));
   }
 
   <P> IntCheck<E> notHas(IntFunction<P> prop, Predicate<P> test, String msg, Object[] msgArgs)
@@ -76,34 +77,17 @@ final class IntHasObj<E extends Exception> {
     if (!test.test(val)) {
       return check;
     }
-    throw check.createException(test, check.arg, null, msg, msgArgs);
+    throw check.exc.apply(getCustomMessage(msg, msgArgs, test, check.argName, val, null, null));
   }
 
   <P, X extends Exception> IntCheck<E> has(
       IntFunction<P> prop, Predicate<P> test, Supplier<X> exception) throws X {
     IntCheck<E> check = this.check;
-    if (test.test(prop.apply(check.arg))) {
+    P val = prop.apply(check.arg);
+    if (test.test(val)) {
       return check;
     }
     throw exception.get();
-  }
-
-  <P, O> IntCheck<E> has(IntFunction<P> prop, String name, Relation<P, O> test, O obj) throws E {
-    IntCheck<E> check = this.check;
-    P val = prop.apply(check.arg);
-    if (test.exists(val, obj)) {
-      return check;
-    }
-    throw check.createException(getMessage(test, false, check.FQN(name), val, obj));
-  }
-
-  <P, O> IntCheck<E> notHas(IntFunction<P> prop, String name, Relation<P, O> test, O obj) throws E {
-    IntCheck<E> check = this.check;
-    P val = prop.apply(check.arg);
-    if (!test.exists(val, obj)) {
-      return check;
-    }
-    throw check.createException(getMessage(test, true, check.FQN(name), val, obj));
   }
 
   <P, O> IntCheck<E> has(IntFunction<P> prop, Relation<P, O> test, O obj) throws E {
@@ -113,7 +97,7 @@ final class IntHasObj<E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntFunction.class);
-    throw check.createException(getMessage(test, false, name, val, obj));
+    throw check.exc.apply(getPrefabMessage(test, false, name, val, null, obj));
   }
 
   <P, O> IntCheck<E> notHas(IntFunction<P> prop, Relation<P, O> test, O obj) throws E {
@@ -123,25 +107,45 @@ final class IntHasObj<E extends Exception> {
       return check;
     }
     String name = formatProperty(check.arg, check.argName, prop, IntFunction.class);
-    throw check.createException(getMessage(test, true, name, val, obj));
+    throw check.exc.apply(getPrefabMessage(test, true, name, val, null, obj));
+  }
+
+  <P, O> IntCheck<E> has(IntFunction<P> prop, String name, Relation<P, O> test, O obj) throws E {
+    IntCheck<E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (test.exists(val, obj)) {
+      return check;
+    }
+    throw check.exc.apply(getPrefabMessage(test, false, check.FQN(name), val, null, obj));
+  }
+
+  <P, O> IntCheck<E> notHas(IntFunction<P> prop, String name, Relation<P, O> test, O obj) throws E {
+    IntCheck<E> check = this.check;
+    P val = prop.apply(check.arg);
+    if (!test.exists(val, obj)) {
+      return check;
+    }
+    throw check.exc.apply(getPrefabMessage(test, true, check.FQN(name), val, null, obj));
   }
 
   <P, O> IntCheck<E> has(
       IntFunction<P> prop, Relation<P, O> test, O obj, String msg, Object[] msgArgs) throws E {
     IntCheck<E> check = this.check;
-    if (test.exists(prop.apply(check.arg), obj)) {
+    P val = prop.apply(check.arg);
+    if (test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(test, check.arg, obj, msg, msgArgs);
+    throw check.exc.apply(getCustomMessage(msg, msgArgs, test, check.argName, val, null, obj));
   }
 
   <P, O> IntCheck<E> notHas(
       IntFunction<P> prop, Relation<P, O> test, O obj, String msg, Object[] msgArgs) throws E {
     IntCheck<E> check = this.check;
-    if (!test.exists(prop.apply(check.arg), obj)) {
+    P val = prop.apply(check.arg);
+    if (!test.exists(val, obj)) {
       return check;
     }
-    throw check.createException(test, check.arg, obj, msg, msgArgs);
+    throw check.exc.apply(getCustomMessage(msg, msgArgs, test, check.argName, val, null, obj));
   }
 
   <P, O, X extends Exception> IntCheck<E> has(
