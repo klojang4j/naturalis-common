@@ -17,19 +17,43 @@ public class IntCheckTest {
   @Test
   public void vanilla00() {
     Check.that(42).is(even());
+    Check.that(42).is(even(), "custom message");
+    Check.that(42).is(even(), () -> new UnsupportedOperationException());
     Check.that(42).is(lt(), 43);
+    Check.that(42).is(lt(), 43, "custom message");
+    Check.that(42).is(lt(), 43, () -> new UnsupportedOperationException());
     Check.that(42).is(intElementOf(), ints(40, 42, 44));
-    Check.that(42).has(box(), i -> i instanceof Integer);
+    Check.that(42).is(intElementOf(), ints(40, 42, 44), "custom message");
+    Check.that(42).is(intElementOf(), ints(40, 42, 44), () -> new UnsupportedOperationException());
+    Check.that(42).has(box(), deepNotEmpty());
+    Check.that(42).has(box(), "box", deepNotEmpty());
+    Check.that(42).has(box(), deepNotEmpty(), "custom message");
+    Check.that(42).has(box(), deepNotEmpty(), () -> new UnsupportedOperationException());
     Check.that(42).has(i -> i / 7, eq(), 6);
+    Check.that(42).has(i -> i / 7, eq(), 6, "myprop");
+    Check.that(42).has(i -> i / 7, eq(), 6, "custom message");
+    Check.that(42).has(i -> i / 7, eq(), 6, () -> new UnsupportedOperationException());
   }
 
   @Test
   public void vanilla01() {
     Check.that(42).isNot(odd());
+    Check.that(42).isNot(odd(), "custom message");
+    Check.that(42).isNot(odd(), () -> new UnsupportedOperationException());
     Check.that(42).isNot(gt(), 43);
+    Check.that(42).isNot(gt(), 43, "custom message");
+    Check.that(42).isNot(gt(), 43, () -> new UnsupportedOperationException());
     Check.that(42).isNot(strIndexOf(), "42");
-    Check.that(42).notHas(box(), i -> i.getClass() == int.class);
+    Check.that(42).isNot(strIndexOf(), "42", "custom message");
+    Check.that(42).isNot(strIndexOf(), "42", () -> new UnsupportedOperationException());
+    Check.that(42).notHas(box(), NULL());
+    Check.that(42).notHas(box(), NULL(), "custom message");
+    Check.that(42).notHas(box(), NULL(), () -> new UnsupportedOperationException());
+    Check.that(42).notHas(box(), "box", NULL());
     Check.that(42).notHas(i -> i / 7, eq(), 9);
+    Check.that(42).notHas(i -> i / 7, eq(), 9, "custom message");
+    Check.that(42).notHas(i -> i / 7, eq(), 9, () -> new UnsupportedOperationException());
+    Check.that(42).notHas(i -> i / 7, eq(), 9, "my prop");
   }
 
   @Test
@@ -204,5 +228,90 @@ public class IntCheckTest {
   @Test(expected = IndexOutOfBoundsException.class)
   public void isNot_IntObjRelation_CustomExc00() {
     Check.that(2).isNot(strIndexOf(), "1234567", () -> new IndexOutOfBoundsException());
+  }
+
+  @Test
+  public void has_Predicate00() {
+    try {
+      Check.that(100).has(box(), x -> x.getClass().equals(String.class));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Invalid value for int: 100", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void notHas_Predicate00() {
+    try {
+      Check.that(100).notHas(box(), x -> x.getClass().equals(Integer.class));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Invalid value for int: 100", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void has_Name_Predicate00() {
+    try {
+      Check.that(100, "my").has(box(), "box", x -> x.getClass().equals(String.class));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Invalid value for my.box: 100", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void notHas_Name_Predicate00() {
+    try {
+      Check.that(100, "my").notHas(box(), "box", x -> x.getClass().equals(Integer.class));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Invalid value for my.box: 100", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void has_Predicate_CustomMsg00() {
+    try {
+      Check.that(100).has(box(), x -> x.getClass().equals(String.class), "BIM");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("BIM", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void notHas_Predicate_CustomMsg00() {
+    try {
+      Check.that(100).notHas(box(), x -> x.getClass().equals(Integer.class), "BAM");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("BAM", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test(expected = IndexOutOfBoundsException.class)
+  public void has_Predicate_CustomExc00() {
+    Check.that(100)
+        .has(box(), x -> x.getClass().equals(String.class), () -> new IndexOutOfBoundsException());
+  }
+
+  @Test(expected = IndexOutOfBoundsException.class)
+  public void notHas_Predicate_CustomExc00() {
+    Check.that(100)
+        .notHas(
+            box(), x -> x.getClass().equals(Integer.class), () -> new IndexOutOfBoundsException());
   }
 }
