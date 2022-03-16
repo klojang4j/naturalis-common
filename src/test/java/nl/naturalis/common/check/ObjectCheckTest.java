@@ -8,8 +8,7 @@ import java.time.DayOfWeek;
 import java.util.Collection;
 import java.util.List;
 
-import static nl.naturalis.common.ArrayMethods.doubles;
-import static nl.naturalis.common.ArrayMethods.floats;
+import static nl.naturalis.common.ArrayMethods.*;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.*;
 import static org.junit.Assert.assertEquals;
@@ -17,6 +16,40 @@ import static org.junit.Assert.fail;
 import static java.time.DayOfWeek.*;
 
 public class ObjectCheckTest {
+
+  @Test
+  public void vanilla00() throws Exception {
+    Check.that(new int[2][2]).is(notNull());
+    Check.that(new int[2][2]).is(notNull(), "custom message");
+    Check.that(new int[2][2]).is(notNull(), () -> new Exception());
+    Check.that("abc").has(strlen(), lt(), 10);
+    Check.that("abc").has(strlen(), lt(), 10, "custom message");
+    Check.that("abc").has(strlen(), lt(), 10, () -> new Exception());
+    Check.that("abc").has(s -> s.substring(1), EQ(), "bc");
+    Check.that("abc").has(s -> s.substring(1), "myprop", EQ(), "bc");
+    Check.that("abc").has(s -> s.substring(1), EQ(), "bc", "custom message");
+    Check.that("abc").has(s -> s.substring(1), EQ(), "bc", () -> new Exception());
+    Check.that((Integer) 2).has(unbox(), intElementOf(), ints(2, 4, 6));
+    Check.that((Integer) 2).has(unbox(), intElementOf(), ints(2, 4, 6), "custom message");
+    Check.that((Integer) 2).has(unbox(), intElementOf(), ints(2, 4, 6), () -> new Exception());
+  }
+
+  @Test
+  public void vanilla01() throws Exception {
+    Check.that("abc").isNot(empty());
+    Check.that("abc").isNot(empty(), "custom message");
+    Check.that("abc").isNot(empty(), () -> new Exception());
+    Check.that("abc").notHas(strlen(), gt(), 10);
+    Check.that("abc").notHas(strlen(), gt(), 10, "custom message");
+    Check.that("abc").notHas(strlen(), gt(), 10, () -> new Exception());
+    Check.that("abc").notHas(s -> s.substring(1), EQ(), "ab");
+    Check.that("abc").notHas(s -> s.substring(1), "myprop", EQ(), "ab");
+    Check.that("abc").notHas(s -> s.substring(1), EQ(), "ab", "custom message");
+    Check.that("abc").notHas(s -> s.substring(1), EQ(), "ab", () -> new Exception());
+    Check.that((Integer) 2).notHas(unbox(), intElementOf(), ints(1, 3, 5));
+    Check.that((Integer) 2).notHas(unbox(), intElementOf(), ints(1, 3, 5), "custom message");
+    Check.that((Integer) 2).notHas(unbox(), intElementOf(), ints(1, 3, 5), () -> new Exception());
+  }
 
   @Test
   public void is_Predicate00() {

@@ -3,9 +3,48 @@ package nl.naturalis.common.check;
 import org.junit.Test;
 
 import java.util.List;
+import static org.junit.Assert.*;
 
 @SuppressWarnings({"rawtypes"})
 public class CheckTest {
+
+  @Test(expected = IllegalArgumentException.class)
+  public void notNull00() {
+    Check.notNull(null);
+  }
+
+  @Test
+  public void notNull01() {
+    Object obj = Check.notNull(new Object());
+    assertTrue(obj instanceof ObjectCheck);
+  }
+
+  @Test
+  public void fail00() {
+    try {
+      Check.fail(IndexOutOfBoundsException::new, "Got that wrong ${0}", "bro");
+    } catch (IndexOutOfBoundsException e) {
+      assertEquals("Got that wrong bro", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void fail01() {
+    try {
+      Check.fail("Got that wrong ${0}", "bro");
+    } catch (IllegalArgumentException e) {
+      assertEquals("Got that wrong bro", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test(expected = IndexOutOfBoundsException.class)
+  public void fail02() {
+    Check.fail(IndexOutOfBoundsException::new);
+  }
 
   @Test
   public void offsetLength00() {

@@ -105,54 +105,6 @@ public abstract class Check {
   }
 
   /**
-   * Static factory method. Returns a new {@code Check} instance suitable for testing the provided
-   * argument. The argument will have already passed the {@link CommonChecks#notNull() notNull}
-   * test.
-   *
-   * @param excFactory A {@code Function} that takes a {@code String} (the error message) and
-   *     returns an {@code Exception}
-   * @param arg The argument
-   * @param <U> The type of the argument
-   * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test
-   * @return A new {@code Check} object
-   * @throws X If the argument fails to pass the {@code notNull} test or any subsequent tests called
-   *     on the returned {@code Check} object
-   */
-  public static <U, X extends Exception> ObjectCheck<U, X> notNull(
-      Function<String, X> excFactory, U arg) throws X {
-    if (arg == null) {
-      String msg = getPrefabMessage(CommonChecks.notNull(), false, null, null, null, null);
-      throw excFactory.apply(msg);
-    }
-    return new ObjectCheck<>(arg, null, excFactory);
-  }
-
-  /**
-   * Static factory method. Returns a new {@code Check} instance suitable for testing the provided
-   * argument. The argument will have already passed the {@link CommonChecks#notNull() notNull}
-   * test.
-   *
-   * @param excFactory A {@code Function} that will produce the exception if a test fails. The
-   *     {@code Function} takes a {@code String} (the error message) and returns the {@code
-   *     Exception}
-   * @param arg The argument
-   * @param argName The name of the argument
-   * @param <U> The type of the argument
-   * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test
-   * @return A new {@code Check} object
-   * @throws X If the argument fails to pass the {@code notNull} test or any subsequent tests called
-   *     on the returned {@code Check} object
-   */
-  public static <U, X extends Exception> ObjectCheck<U, X> notNull(
-      Function<String, X> excFactory, U arg, String argName) throws X {
-    if (arg == null) {
-      String msg = getPrefabMessage(CommonChecks.notNull(), false, argName, null, null, null);
-      throw excFactory.apply(msg);
-    }
-    return new ObjectCheck<>(arg, argName, excFactory);
-  }
-
-  /**
    * Static factory method. Returns a new {@code Check} instance suitable for testing integers.
    *
    * @param excFactory A {@code Function} that will produce the exception if a test fails. The
