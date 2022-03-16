@@ -71,7 +71,7 @@ public class ObjHashIntTest {
   }
 
   @Test
-  public void has_Name_Predicate00() {
+  public void has_Name_IntPredicate00() {
     float[] floats = floats(0F, 1F, 2F, 3F, 4F);
     try {
       Check.that(floats, "jimmie").has(length(), "bimmie", negative());
@@ -84,7 +84,7 @@ public class ObjHashIntTest {
   }
 
   @Test
-  public void notHas_Name_Predicate00() {
+  public void notHas_Name_IntPredicate00() {
     float[] floats = floats(0F, 1F, 2F, 3F, 4F);
     try {
       Check.that(floats, "jimmie").notHas(length(), "bimmie", positive());

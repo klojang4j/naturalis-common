@@ -21,6 +21,7 @@ public class IntHasIntTest {
     Check.that(-7, "foo").has(abs(), "foo", lt(), 10);
     Check.that(-7, "foo").has(abs(), lt(), 10, "A custom message");
     Check.that(-7, "foo").has(abs(), lt(), 10, () -> new IOException());
+    Check.that(7).has(i -> i + 3, lt(), 11);
   }
 
   @Test
@@ -36,7 +37,7 @@ public class IntHasIntTest {
   }
 
   @Test
-  public void hasPredicate01() {
+  public void has_IntPredicate00() {
     try {
       Check.that(-7, "foo").has(abs(), even());
     } catch (IllegalArgumentException e) {
@@ -48,7 +49,7 @@ public class IntHasIntTest {
   }
 
   @Test
-  public void notHasPredicate01() {
+  public void notHas_IntPredicate00() {
     try {
       Check.that(-7).notHas(abs(), odd());
     } catch (IllegalArgumentException e) {
@@ -60,7 +61,7 @@ public class IntHasIntTest {
   }
 
   @Test
-  public void hasPredicateCustomMsg00() {
+  public void has_IntPredicate_CustomMsg00() {
     try {
       Check.that(-7).has(abs(), even(), "Test ${test} did not go as planned for ${type}");
     } catch (IllegalArgumentException e) {
@@ -72,7 +73,7 @@ public class IntHasIntTest {
   }
 
   @Test
-  public void hasPredicateCustomMsg01() {
+  public void notHas_IntPredicate_CustomMsg00() {
     try {
       Check.that(-7).notHas(abs(), odd(), "Test ${test} did not go as planned for ${arg}");
     } catch (IllegalArgumentException e) {
@@ -84,17 +85,7 @@ public class IntHasIntTest {
   }
 
   @Test
-  public void hasNamePredicate00() {
-    Check.that(-7, "foo").has(abs(), "bar", odd());
-  }
-
-  @Test
-  public void notHasNamePredicate00() {
-    Check.that(-7, "foo").notHas(abs(), "bar", even());
-  }
-
-  @Test
-  public void hasNamePredicate01() {
+  public void has_Name_IntPredicate00() {
     try {
       Check.that(7, "foo").has(i -> i + 3, "bar", negative());
     } catch (IllegalArgumentException e) {
@@ -106,7 +97,7 @@ public class IntHasIntTest {
   }
 
   @Test
-  public void notHasNamePredicate01() {
+  public void notHas_Name_IntPredicate00() {
     try {
       Check.that(7, "foo").notHas(i -> i + 3, "bar", positive());
     } catch (IllegalArgumentException e) {
@@ -117,28 +108,18 @@ public class IntHasIntTest {
     fail();
   }
 
-  @Test(expected = IOException.class)
-  public void hasPredicateCustomExc00() throws IOException {
-    Check.that(-7).has(abs(), i -> i > 10, () -> new IOException());
-  }
-
-  @Test(expected = IOException.class)
-  public void hasPredicateCustomExc01() throws IOException {
-    Check.that(-7, "foo").notHas(abs(), i -> i == 7, () -> new IOException());
-  }
-
   @Test
-  public void hasIntRelation00() {
+  public void has_IntRelation00() {
     Check.that(7).has(i -> i + 3, lt(), 100);
   }
 
   @Test
-  public void hasIntRelation01() {
+  public void notHas_IntRelation00() {
     Check.that(7).notHas(i -> i + 3, lt(), 5);
   }
 
   @Test
-  public void hasNameIntRelation00() {
+  public void has_Name_IntRelation00() {
     try {
       Check.that(7, "foo").has(i -> i + 3, "bar", gt(), 100);
     } catch (IllegalArgumentException e) {
@@ -150,7 +131,7 @@ public class IntHasIntTest {
   }
 
   @Test
-  public void hasNameIntRelation01() {
+  public void notHas_Name_IntRelation01() {
     try {
       Check.that(7, "foo").notHas(i -> i + 3, "bar", gt(), 5);
     } catch (IllegalArgumentException e) {
@@ -162,7 +143,7 @@ public class IntHasIntTest {
   }
 
   @Test
-  public void hasIntRelationCustomMsg00() {
+  public void has_IntRelation_CustomMsg00() {
     try {
       Check.that(7).has(i -> i + 3, gt(), 100, "Oops: ${type} ${arg} was invalid");
     } catch (IllegalArgumentException e) {
@@ -174,7 +155,7 @@ public class IntHasIntTest {
   }
 
   @Test
-  public void hasIntRelationCustomMsg01() {
+  public void notHas_IntRelation_CustomMsg01() {
     try {
       Check.that(7).notHas(i -> i + 3, gt(), 5, "This number is fun: ${arg}${arg}${arg}${obj}");
     } catch (IllegalArgumentException e) {
@@ -186,12 +167,12 @@ public class IntHasIntTest {
   }
 
   @Test(expected = IOException.class)
-  public void hasIntRelationCustomExc00() throws IOException {
+  public void has_IntRelation_CustomExc00() throws IOException {
     Check.that(7).has(i -> i + 3, gt(), 100, () -> new IOException());
   }
 
   @Test(expected = IOException.class)
-  public void hasIntRelationCustomExc01() throws IOException {
+  public void notHas_IntRelation_CustomExc01() throws IOException {
     Check.that(7).notHas(i -> i + 3, gt(), 5, () -> new IOException());
   }
 
