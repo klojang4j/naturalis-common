@@ -218,12 +218,12 @@ public abstract class Check {
   }
 
   /**
-   * Verifies that that specified offset and length can be used for the specified byte array. This
-   * is a special-purpose check that stands somewhat apart from the rest of the check framework. It
-   * is specifically meant for read/write calls against (extensions of) {@code java.io} and {@code
-   * java.nio} classes. It can, however, also used for any method that uses the <i>offset &amp;
-   * length</i> paradigm to extract a segment from an array-like object (rather than the <i>from
-   * &amp; to</i> paradigm). This method performs a null-check on the {@code array} argument.
+   * Verifies that that specified offset and length can be used to extract a segment of the
+   * specified byte array. This method is specifically meant for read/write calls against
+   * (extensions of) {@code java.io} and {@code java.nio} classes. It can, however, be used for any
+   * method that uses the <i>offset &amp; length</i> paradigm to extract segments from arrays or
+   * array-like objects (rather than the <i>from &amp; to</i> paradigm). This method already
+   * performs a null-check on the {@code array} argument, so there is no need to do that first.
    *
    * @see #offsetLength(int, int, int)
    * @param array The byte array
@@ -236,27 +236,27 @@ public abstract class Check {
   }
 
   /**
-   * Verifies that specified offset and length can be used for an array with the specified length.
-   * The array would typically be a {@code byte} or {@code char} array. This is a special-purpose
-   * check that stands somewhat apart from the rest of the check framework. It is specifically meant
-   * for read/write calls against (extensions of) {@code java.io} and {@code java.nio} classes. It
-   * can, however, also used for any method that uses the <i>offset &amp; length</i> paradigm to
-   * extract a segment from an array-like object (rather than the <i>from &amp; to</i> paradigm).
+   * Verifies that specified offset and length can be used to extract a segment from an array with
+   * the specified length. The array would typically be a {@code byte} array. It is specifically
+   * meant for read/write calls against (extensions of) {@code java.io} and {@code java.nio}
+   * classes. It can, however, be used for any method that uses the <i>offset &amp; length</i>
+   * paradigm to extract a segments from arrays or array-like objects (rather than the <i>from &amp;
+   * to</i> paradigm).
    *
-   * @param bufLen The length of the array from to extract a segment
+   * @param srcLen The length of the array or array-like object from which to extract the segment
    * @param off The offset of the segment
    * @param len The length of the segment
    */
-  public static void offsetLength(int bufLen, int off, int len) {
-    Check.on(indexOutOfBounds(), off, "offset").isNot(negative());
-    Check.on(indexOutOfBounds(), len, "length").isNot(negative());
-    Check.on(indexOutOfBounds(), off + len, "offset + length").is(lte(), bufLen);
+  public static void offsetLength(int srcLen, int off, int len) {
+    Check.on(indexOutOfBounds(), srcLen | off | len, "length/offset").isNot(negative());
+    Check.on(indexOutOfBounds(), off + len, "offset + length").is(lte(), srcLen);
   }
 
   /**
    * Verifies that the specified {@code from} and {@code to} indices can be used to extract a
-   * substring from the specified {@code String}. This method performs a null-check on the {@code
-   * src} argument.
+   * substring from the specified {@code String}. This method already performs a null-check on the
+   * {@code src} argument, so there is no need to do that first, so there is no need to do that
+   * first.
    *
    * @see #fromTo(int, int, int)
    * @see String#substring(int, int)
@@ -271,8 +271,8 @@ public abstract class Check {
 
   /**
    * Verifies that the specified {@code from} and {@code to} indices can be used to extract a
-   * sublist from the specified {@code List}. This method performs a null-check on the {@code src}
-   * argument.
+   * sublist from the specified {@code List}. This method already performs a null-check on the
+   * {@code src} argument, so there is no need to do that first.
    *
    * @see #fromTo(int, int, int)
    * @see List#subList(int, int)
@@ -292,14 +292,14 @@ public abstract class Check {
    * may be one position past the end of the {@code String}, {@code List}, etc. In other words, they
    * may both be equal to {@code len}.
    *
-   * @param len The length of the {@code String}, {@code List}, array (etc.) from which to extract
-   *     the segment
+   * @param len The length of the {@code String}, {@code List}, (etc.) from which to extract the
+   *     segment
    * @param from The start index of the segment
    * @param to The end index of the segment
    */
   public static void fromTo(int len, int from, int to) {
-    Check.that(from, "from").isNot(negative()).isNot(gt(), to);
-    Check.that(to, "to").isNot(gt(), len);
+    Check.on(indexOutOfBounds(), from, "from").isNot(negative()).isNot(gt(), to);
+    Check.on(indexOutOfBounds(), to, "to").isNot(gt(), len);
   }
 
   /**
