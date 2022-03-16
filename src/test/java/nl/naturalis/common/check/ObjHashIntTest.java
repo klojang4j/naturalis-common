@@ -233,6 +233,74 @@ public class ObjHashIntTest {
   }
 
   @Test
+  public void has_Name_IntObjRelation00() {
+    List<String> c = List.of("a", "b", "c", "d", "e", "f");
+    try {
+      Check.that(c, "buffy").has(listSize(), "stuffy", inRange(), IntPair.of(100, 200));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("buffy.stuffy must be >= 100 and < 200 (was 6)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void notHas_Name_IntObjRelation00() {
+    List<String> c = List.of("a", "b", "c", "d", "e", "f");
+    try {
+      Check.that(c, "buffy").notHas(listSize(), "stuffy", inRange(), IntPair.of(0, 10));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("buffy.stuffy must be < 0 or >= 10 (was 6)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void has_IntObjRelation_CustomMsg00() {
+    List<String> c = List.of("a", "b", "c", "d", "e", "f");
+    try {
+      Check.that(c).has(listSize(), inRange(), IntPair.of(100, 200), "Not in range ${obj}");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Not in range IntPair[one=100, two=200]", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void notHas_IntObjRelation_CustomMsg00() {
+    List<String> c = List.of("a", "b", "c", "d", "e", "f");
+    try {
+      Check.that(c).notHas(listSize(), inRange(), IntPair.of(0, 10), "Bad argument: ${arg}");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Bad argument: 6", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test(expected = UnsupportedOperationException.class)
+  public void has_IntObjRelation_CustomExc00() {
+    List<String> c = List.of("a", "b", "c", "d", "e", "f");
+    Check.that(c)
+        .has(
+            listSize(), inRange(), IntPair.of(100, 200), () -> new UnsupportedOperationException());
+  }
+
+  @Test(expected = UnsupportedOperationException.class)
+  public void notHas_IntObjRelation_CustomExc00() {
+    List<String> c = List.of("a", "b", "c", "d", "e", "f");
+    Check.that(c)
+        .notHas(
+            listSize(), inRange(), IntPair.of(0, 10), () -> new UnsupportedOperationException());
+  }
+
+  @Test
   public void lambdasTest() {
     Collection<String> c = List.of("a", "b", "c", "d", "e", "f");
     Check.that(c).has(toInt(Collection::size), (x, y) -> x < y, 10);

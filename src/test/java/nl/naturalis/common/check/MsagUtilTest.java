@@ -217,18 +217,18 @@ public class MsagUtilTest {
 
   @Test
   public void formatRelation_simple_02() {
-    MsgArgs args = new MsgArgs("gt", false, "joseph3", 2, int.class, 7);
+    MsgArgs args = new MsgArgs("gt", true, "joseph3", 2, int.class, 7);
     Formatter formatter = formatRelation("be >", true);
     System.out.println(formatter.apply(args));
-    assertEquals("joseph3 must be > 7 (was 2)", formatter.apply(args));
+    assertEquals("joseph3 must not be > 7 (was 2)", formatter.apply(args));
   }
 
   @Test
   public void formatRelation_simple_03() {
-    MsgArgs args = new MsgArgs("gt", false, "joseph4", 2, int.class, 7);
+    MsgArgs args = new MsgArgs("gt", true, "joseph4", 2, int.class, 7);
     Formatter formatter = formatRelation("be >", false);
     System.out.println(formatter.apply(args));
-    assertEquals("joseph4 must be > 7", formatter.apply(args));
+    assertEquals("joseph4 must not be > 7", formatter.apply(args));
   }
 
   @Test
