@@ -819,6 +819,42 @@ public final class ObjectCheck<T, E extends Exception> {
 
   /**
    * Validates a property of the argument, retrieved through the specified function, using the
+   * specified test. Allows you to throw a different type of exception for this particular test.
+   *
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param <P> The type of the extracted value
+   * @param <X> The type of the exception thrown if the argument is invalid
+   * @return This instance
+   * @throws X If the argument is invalid
+   */
+  public <P, X extends Exception> ObjectCheck<T, E> has(
+      Function<T, P> property, ObjIntRelation<P> test, int object, Supplier<X> exception) throws X {
+    return ObjHasObj.get(this).has(property, test, object, exception);
+  }
+
+  /**
+   * Validates a property of the argument, retrieved through the specified function, using the
+   * specified test. Allows you to throw a different type of exception for this particular test.
+   *
+   * @param property A function that extracts the value to be tested from the argument
+   * @param test The test
+   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param <P> The type of the extracted value
+   * @param <X> The type of the exception thrown if the argument is invalid
+   * @return This instance
+   * @throws X If the argument is invalid
+   */
+  public <P, X extends Exception> ObjectCheck<T, E> notHas(
+      Function<T, P> property, ObjIntRelation<P> test, int object, Supplier<X> exception) throws X {
+    return ObjHasObj.get(this).has(property, test.negate(), object, exception);
+  }
+
+  /**
+   * Validates a property of the argument, retrieved through the specified function, using the
    * specified test. While not strictly required, this method is meant to be used in combination
    * with a check from the {@link CommonChecks} class <i>and</i> a "getter" from the {@link
    * CommonGetters} class so that an informative error message is generated if the argument turns

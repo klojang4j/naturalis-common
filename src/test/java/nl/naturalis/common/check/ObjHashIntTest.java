@@ -58,7 +58,7 @@ public class ObjHashIntTest {
   }
 
   @Test
-  public void hasPredicate01() {
+  public void notHasPredicate00() {
     String s = "0123456789";
     try {
       Check.that(s, "foo").notHas(strlen(), positive());
@@ -71,7 +71,7 @@ public class ObjHashIntTest {
   }
 
   @Test
-  public void hasNamePredicate00() {
+  public void has_Name_Predicate00() {
     float[] floats = floats(0F, 1F, 2F, 3F, 4F);
     try {
       Check.that(floats, "jimmie").has(length(), "bimmie", negative());
@@ -84,7 +84,7 @@ public class ObjHashIntTest {
   }
 
   @Test
-  public void hasNamePredicate01() {
+  public void notHas_Name_Predicate00() {
     float[] floats = floats(0F, 1F, 2F, 3F, 4F);
     try {
       Check.that(floats, "jimmie").notHas(length(), "bimmie", positive());
@@ -97,7 +97,7 @@ public class ObjHashIntTest {
   }
 
   @Test
-  public void hasPredicateCustomMsg00() {
+  public void has_IntPredicate_CustomMsg00() {
     String s = "0123456789";
     try {
       Check.that(s, "foo").has(strlen(), zero(), "My name is ${name}");
@@ -110,7 +110,7 @@ public class ObjHashIntTest {
   }
 
   @Test
-  public void hasPredicateCustomMsg01() {
+  public void notHas_IntPredicate_CustomMsg00() {
     String s = "0123456789";
     try {
       Check.that(s, "foo").notHas(strlen(), positive(), "Not in ${test} mood today");
@@ -123,19 +123,19 @@ public class ObjHashIntTest {
   }
 
   @Test(expected = IOException.class)
-  public void hasPredicateCustomExc00() throws IOException {
+  public void has_IntPredicate_CustomExc00() throws IOException {
     Collection<String> c = List.of("a", "b", "c", "d", "e", "f");
     Check.that(c, "collection").has(size(), zero(), () -> new IOException());
   }
 
   @Test(expected = IOException.class)
-  public void hasPredicateCustomExc01() throws IOException {
+  public void notHas_IntPredicate_CustomExc00() throws IOException {
     Collection<String> c = List.of("a", "b", "c", "d", "e", "f");
     Check.that(c, "collection").notHas(size(), x -> x > 2, () -> new IOException());
   }
 
   @Test
-  public void hasIntRelation00() {
+  public void has_IntRelation00() {
     try {
       Check.that(DayOfWeek.class.getEnumConstants(), "days").has(length(), ne(), 7);
     } catch (IllegalArgumentException e) {
@@ -147,7 +147,7 @@ public class ObjHashIntTest {
   }
 
   @Test
-  public void hasIntRelation01() {
+  public void notHas_IntRelation00() {
     try {
       Check.that(DayOfWeek.class.getEnumConstants(), "days").notHas(length(), lte(), 10);
     } catch (IllegalArgumentException e) {
@@ -159,7 +159,7 @@ public class ObjHashIntTest {
   }
 
   @Test
-  public void hasNameIntRelation00() {
+  public void has_Name_IntRelation00() {
     try {
       Check.that("1234567", "henkie").has(strlen(), "penkie", ne(), 7);
     } catch (IllegalArgumentException e) {
@@ -171,7 +171,7 @@ public class ObjHashIntTest {
   }
 
   @Test
-  public void hasNameIntRelation01() {
+  public void notHas_Name_IntRelation00() {
     try {
       Check.that("1234567", "henkie").notHas(strlen(), "penkie", lte(), 10);
     } catch (IllegalArgumentException e) {
@@ -183,7 +183,7 @@ public class ObjHashIntTest {
   }
 
   @Test
-  public void hasIntRelationCustomMsg00() {
+  public void has_IntRelation_CustomMsg00() {
     try {
       Check.that("1234567").has(strlen(), ne(), 7, "Count to 10: ${arg}${0}", 8910);
     } catch (IllegalArgumentException e) {
@@ -195,25 +195,38 @@ public class ObjHashIntTest {
   }
 
   @Test(expected = IOException.class)
-  public void hasIntRelationCustomExc00() throws IOException {
+  public void has_IntRelation_CustomExc00() throws IOException {
     Collection<String> c = List.of("a", "b", "c", "d", "e", "f");
     Check.that(c, "collection").has(size(), multipleOf(), 5, () -> new IOException());
   }
 
   @Test(expected = IOException.class)
-  public void hasIntRelationCustomExc01() throws IOException {
+  public void motHas_IntRelation_CustomExc00() throws IOException {
     Collection<String> c = List.of("a", "b", "c", "d", "e", "f");
     Check.that(c, "collection").notHas(size(), multipleOf(), 3, () -> new IOException());
   }
 
   @Test
-  public void hasIntObjRelation00() {
+  public void has_IntObjRelation00() {
     List<String> c = List.of("a", "b", "c", "d", "e", "f");
     try {
       Check.that(c, "buffy").has(listSize(), between(), IntPair.of(100, 200));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("buffy.size() must be >= 100 and < 200 (was 6)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void notHas_IntObjRelation00() {
+    List<String> c = List.of("a", "b", "c", "d", "e", "f");
+    try {
+      Check.that(c, "buffy").notHas(listSize(), between(), IntPair.of(0, 10));
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("buffy.size() must be < 0 or >= 10 (was 6)", e.getMessage());
       return;
     }
     fail();

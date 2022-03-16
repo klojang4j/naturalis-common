@@ -47,7 +47,7 @@ public class ObjHasObjTest {
   }
 
   @Test
-  public void hasPredicate01() {
+  public void hasPredicate00() {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     try {
       Check.that(p, "person").has(Person::firstName, NULL());
@@ -60,7 +60,7 @@ public class ObjHasObjTest {
   }
 
   @Test
-  public void notHasPredicate01() {
+  public void notHasPredicate00() {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     try {
       Check.that(p, "person").notHas(Person::firstName, notNull());
@@ -73,7 +73,7 @@ public class ObjHasObjTest {
   }
 
   @Test
-  public void hasNamePredicate01() {
+  public void has_Name_Predicate00() {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     try {
       Check.that(p, "person").has(Person::firstName, "firstName", NULL());
@@ -86,7 +86,7 @@ public class ObjHasObjTest {
   }
 
   @Test
-  public void notHasNamePredicate01() {
+  public void notHas_Name_Predicate00() {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     try {
       Check.that(p, "person").notHas(Person::firstName, "firstName", notNull());
@@ -99,7 +99,7 @@ public class ObjHasObjTest {
   }
 
   @Test
-  public void hasPredicateCustomMsg00() {
+  public void has_Predicate_CustomMsg00() {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     try {
       Check.that(p).has(Person::firstName, NULL(), "Bad stuff");
@@ -112,19 +112,19 @@ public class ObjHasObjTest {
   }
 
   @Test(expected = IOException.class)
-  public void notHasPredicateCustomMsg00() throws IOException {
+  public void notHas_Predicate_CustomMsg00() throws IOException {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     Check.that(p).notHas(Person::firstName, notNull(), () -> new IOException());
   }
 
   @Test(expected = IOException.class)
-  public void hasPredicateCustomExc00() throws IOException {
+  public void has_Predicate_CustomExc00() throws IOException {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     Check.that(p, "person").has(Person::firstName, NULL(), () -> new IOException());
   }
 
   @Test
-  public void notHasPredicateCustomExc00() {
+  public void notHas_Predicate_CustomExc00() {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     try {
       Check.that(p, "person").notHas(Person::firstName, notNull(), "Failed test ${test}");
@@ -137,7 +137,7 @@ public class ObjHasObjTest {
   }
 
   @Test
-  public void hasRelation01() {
+  public void has_Relation00() {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     try {
       Check.that(p, "person").has(Person::birtDate, GT(), LocalDate.of(2000, 1, 1));
@@ -150,7 +150,7 @@ public class ObjHasObjTest {
   }
 
   @Test
-  public void notHasRelation01() {
+  public void notHas_Relation00() {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     try {
       Check.that(p, "person").notHas(Person::firstName, EQ(), "john");
@@ -163,7 +163,7 @@ public class ObjHasObjTest {
   }
 
   @Test
-  public void hasNameRelation01() {
+  public void has_Name_Relation00() {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     try {
       Check.that(p, "person").has(Person::birtDate, "birtDate", GT(), LocalDate.of(2000, 1, 1));
@@ -176,7 +176,7 @@ public class ObjHasObjTest {
   }
 
   @Test
-  public void notHasNameRelation01() {
+  public void notHas_Name_Relation00() {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     try {
       Check.that(p, "person").notHas(Person::firstName, "firstName", EQ(), "john");
@@ -189,7 +189,7 @@ public class ObjHasObjTest {
   }
 
   @Test
-  public void hasRelationCustomMsg00() {
+  public void has_Relation_CustomMsg00() {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     try {
       Check.that(p, "person")
@@ -203,7 +203,7 @@ public class ObjHasObjTest {
   }
 
   @Test
-  public void hasRelationCustomMsg01() {
+  public void notHas_Relation_CustomMsg00() {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     try {
       Check.that(p, "person").notHas(Person::firstName, EQ(), "john", "Bad person: ${arg}");
@@ -216,29 +216,106 @@ public class ObjHasObjTest {
   }
 
   @Test(expected = IOException.class)
-  public void hasRelationCustomExc00() throws IOException {
+  public void has_Relation_CustomExc00() throws IOException {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     Check.that(p, "person")
         .has(Person::birtDate, GT(), LocalDate.of(2000, 1, 1), () -> new IOException());
   }
 
   @Test(expected = IOException.class)
-  public void hasRelationCustomExc01() throws IOException {
+  public void notHas_Relation_CustomExc01() throws IOException {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     Check.that(p, "person").notHas(Person::firstName, EQ(), "john", () -> new IOException());
   }
 
   @Test
-  public void hasObjIntRelation00() {
+  public void has_ObjIntRelation00() {
     Person p = new Person("john", LocalDate.of(1966, 04, 22));
     try {
       Check.that(p, "person").has(Person::firstName, strlenGT(), 100);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      // assertEquals("Bad person: Person[firstName=john, birtDate=1966-04-22]", e.getMessage());
+      assertEquals("Function.apply(person) must be > 100 (was john)", e.getMessage());
       return;
     }
     fail();
+  }
+
+  @Test
+  public void notHas_ObjIntRelation00() {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    try {
+      Check.that("1234567890", "person").notHas(s -> s.substring(2), strlenGT(), 3);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Function.apply(person) must not be > 3 (was 34567890)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void has_Name_ObjIntRelation00() {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    try {
+      Check.that(p, "person").has(Person::firstName, "firstName", strlenGT(), 100);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("person.firstName must be > 100 (was john)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void notHas_Name_ObjIntRelation00() {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    try {
+      Check.that("1234567890", "person").notHas(s -> s.substring(2), "substring2", strlenGT(), 3);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("person.substring2 must not be > 3 (was 34567890)", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void has_ObjIntRelation_CustomMsg00() {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    try {
+      Check.that(p).has(Person::firstName, strlenGT(), 100, "First name = ${arg}");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("First name = john", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test
+  public void notHas_ObjIntRelation_CustomMsg00() {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    try {
+      Check.that(p).notHas(Person::firstName, strlenLT(), 100, "Min length = ${obj}");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      assertEquals("Min length = 100", e.getMessage());
+      return;
+    }
+    fail();
+  }
+
+  @Test(expected = IndexOutOfBoundsException.class)
+  public void has_ObjIntRelation_CustomExc00() {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    Check.that(p).has(Person::firstName, strlenGT(), 100, () -> new IndexOutOfBoundsException());
+  }
+
+  @Test(expected = IndexOutOfBoundsException.class)
+  public void notHas_ObjIntRelation_CustomExc00() {
+    Person p = new Person("john", LocalDate.of(1966, 04, 22));
+    Check.that(p).notHas(Person::firstName, strlenLT(), 100, () -> new IndexOutOfBoundsException());
   }
 
   @Test
