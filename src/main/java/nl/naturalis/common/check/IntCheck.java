@@ -455,7 +455,7 @@ public final class IntCheck<E extends Exception> {
    * @throws E If the argument is invalid
    */
   public <P> IntCheck<E> notHas(IntFunction<P> property, String name, Predicate<P> test) throws E {
-    return IntHasObj.get(this).has(property, name, test);
+    return IntHasObj.get(this).notHas(property, name, test);
   }
 
   /**
@@ -807,7 +807,7 @@ public final class IntCheck<E extends Exception> {
   /* Returns fully-qualified name of the property with the specified name */
   String FQN(String name) {
     if (argName == null) {
-      return int.class.getSimpleName() + "." + name;
+      return name;
     }
     return argName + "." + name;
   }
