@@ -6,7 +6,6 @@ import java.lang.reflect.Array;
 import java.util.List;
 
 import static java.lang.String.format;
-import static nl.naturalis.common.check.MsgUtil.formatRelation;
 
 final class MsgIntObjRelation {
 
@@ -31,7 +30,7 @@ final class MsgIntObjRelation {
     };
   }
 
-  static Formatter msgBetween() {
+  static Formatter msgInRange() {
     return args ->
         args.negated()
             ? format(
@@ -39,6 +38,20 @@ final class MsgIntObjRelation {
                 args.name(), ((IntPair) args.obj()).one(), ((IntPair) args.obj()).two(), args.arg())
             : format(
                 "%s must be >= %s and < %s (was %s)",
+                args.name(),
+                ((IntPair) args.obj()).one(),
+                ((IntPair) args.obj()).two(),
+                args.arg());
+  }
+
+  static Formatter msgInRangeClosed() {
+    return args ->
+        args.negated()
+            ? format(
+                "%s must be < %s or > %s (was %s)",
+                args.name(), ((IntPair) args.obj()).one(), ((IntPair) args.obj()).two(), args.arg())
+            : format(
+                "%s must be >= %s and <= %s (was %s)",
                 args.name(),
                 ((IntPair) args.obj()).one(),
                 ((IntPair) args.obj()).two(),

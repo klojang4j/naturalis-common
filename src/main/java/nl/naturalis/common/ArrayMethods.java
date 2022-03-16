@@ -38,7 +38,7 @@ public final class ArrayMethods {
   static final String START_INDEX = "Start index";
   static final String END_INDEX = "End index";
 
-  private static Long MAX_ARR_LEN = (long) Integer.MAX_VALUE;
+  private static final Long MAX_ARR_LEN = (long) Integer.MAX_VALUE;
 
   /**
    * Appends the specified object to the specified array.

@@ -22,8 +22,8 @@ public class CheckIntObjRelationTest {
     Check.that(7).is(listIndexOf(), initializeList("foo", 10));
     Check.that(7).is(strIndexOf(), "Hello, Sam");
     Check.that(7).is(intElementOf(), ints(3, 5, 7, 9));
-    Check.that(7).is(between(), IntPair.of(7, 8));
-    Check.that(7).isNot(between(), IntPair.of(6, 7));
+    Check.that(7).is(inRange(), IntPair.of(7, 8));
+    Check.that(7).isNot(inRange(), IntPair.of(6, 7));
   }
 
   @Test
@@ -125,7 +125,7 @@ public class CheckIntObjRelationTest {
   @Test
   public void between00() {
     try {
-      Check.that(7, "tapestry").is(between(), IntPair.of(100, 200));
+      Check.that(7, "tapestry").is(inRange(), IntPair.of(100, 200));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("tapestry must be >= 100 and < 200 (was 7)", e.getMessage());
@@ -137,7 +137,7 @@ public class CheckIntObjRelationTest {
   @Test
   public void between01() {
     try {
-      Check.that(7, "tapestry").isNot(between(), IntPair.of(6, 8));
+      Check.that(7, "tapestry").isNot(inRange(), IntPair.of(6, 8));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("tapestry must be < 6 or >= 8 (was 7)", e.getMessage());

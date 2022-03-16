@@ -210,7 +210,7 @@ public class ObjHashIntTest {
   public void has_IntObjRelation00() {
     List<String> c = List.of("a", "b", "c", "d", "e", "f");
     try {
-      Check.that(c, "buffy").has(listSize(), between(), IntPair.of(100, 200));
+      Check.that(c, "buffy").has(listSize(), inRange(), IntPair.of(100, 200));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("buffy.size() must be >= 100 and < 200 (was 6)", e.getMessage());
@@ -223,7 +223,7 @@ public class ObjHashIntTest {
   public void notHas_IntObjRelation00() {
     List<String> c = List.of("a", "b", "c", "d", "e", "f");
     try {
-      Check.that(c, "buffy").notHas(listSize(), between(), IntPair.of(0, 10));
+      Check.that(c, "buffy").notHas(listSize(), inRange(), IntPair.of(0, 10));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("buffy.size() must be < 0 or >= 10 (was 6)", e.getMessage());

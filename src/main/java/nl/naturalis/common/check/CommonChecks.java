@@ -12,8 +12,7 @@ import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.*;
 
-import static nl.naturalis.common.check.MsgIntObjRelation.msgBetween;
-import static nl.naturalis.common.check.MsgIntObjRelation.msgIndexOf;
+import static nl.naturalis.common.check.MsgIntObjRelation.*;
 import static nl.naturalis.common.check.MsgIntPredicate.*;
 import static nl.naturalis.common.check.MsgIntRelation.*;
 import static nl.naturalis.common.check.MsgPredicate.*;
@@ -1352,7 +1351,8 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is present in the specified integer array.
+   * Verifies that the argument is present in the specified integer array. Equivalent to {@link
+   * ArrayMethods#isElementOf(int, int[]) ArrayMethods::isElementOf}.
    *
    * @return A function implementing the test described above
    */
@@ -1366,17 +1366,33 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is present in the specified integer array.
+   * Verifies that the argument is greater than or equal to the first integer of the specified
+   * {@link IntPair} and less than the second.
    *
    * @return A function implementing the test described above
    */
-  public static IntObjRelation<IntPair> between() {
+  public static IntObjRelation<IntPair> inRange() {
     return (x, y) -> x >= y.one() && x < y.two();
   }
 
   static {
-    setMessagePattern(between(), msgBetween());
-    setName(between(), "between");
+    setMessagePattern(inRange(), msgInRange());
+    setName(inRange(), "inRange");
+  }
+
+  /**
+   * Verifies that the argument is greater than or equal to the first integer of the specified
+   * {@link IntPair} and less than or equal to the second.
+   *
+   * @return A function implementing the test described above
+   */
+  public static IntObjRelation<IntPair> inRangeClosed() {
+    return (x, y) -> x >= y.one() && x <= y.two();
+  }
+
+  static {
+    setMessagePattern(inRangeClosed(), msgInRangeClosed());
+    setName(inRangeClosed(), "inRangeClosed");
   }
 
   /* ++++++++++++++ Miscellaneous ++++++++++++++ */

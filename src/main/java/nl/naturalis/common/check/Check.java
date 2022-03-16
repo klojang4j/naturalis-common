@@ -2,10 +2,10 @@ package nl.naturalis.common.check;
 
 import nl.naturalis.common.StringMethods;
 
-import java.io.IOException;
+import java.util.List;
 import java.util.function.Function;
 
-import static nl.naturalis.common.check.CommonChecks.eq;
+import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.MsgUtil.getPrefabMessage;
 
 /**
@@ -217,16 +217,89 @@ public abstract class Check {
     return new ObjectCheck<>(arg, argName, excFactory);
   }
 
-  public static void offsetAndLength(byte[] array, int off, int len) throws IOException {
-    if (array == null) {
-      throw new IOException("byte array must not be null");
-    } else if (off < 0) {
-      throw new IndexOutOfBoundsException("offset must not be negative");
-    } else if (len < 0) {
-      throw new IndexOutOfBoundsException("length must not be negative");
-    } else if (off + len > array.length) {
-      throw new IndexOutOfBoundsException("offset + length must be <= " + array.length);
-    }
+  /**
+   * Verifies that that specified offset and length can be used for the specified byte array. This
+   * is a special-purpose check that stands somewhat apart from the rest of the check framework. It
+   * is specifically meant for read/write calls against (extensions of) {@code java.io} and {@code
+   * java.nio} classes. It can, however, also used for any method that uses the <i>offset &amp;
+   * length</i> paradigm to extract a segment from an array-like object (rather than the <i>from
+   * &amp; to</i> paradigm). This method performs a null-check on the {@code array} argument.
+   *
+   * @see #offsetLength(int, int, int)
+   * @param array The byte array
+   * @param off The offset within byte array
+   * @param len The length of the segment within the byte array
+   */
+  public static void offsetLength(byte[] array, int off, int len) {
+    Check.notNull(array, "array");
+    Check.offsetLength(array.length, off, len);
+  }
+
+  /**
+   * Verifies that specified offset and length can be used for an array with the specified length.
+   * The array would typically be a {@code byte} or {@code char} array. This is a special-purpose
+   * check that stands somewhat apart from the rest of the check framework. It is specifically meant
+   * for read/write calls against (extensions of) {@code java.io} and {@code java.nio} classes. It
+   * can, however, also used for any method that uses the <i>offset &amp; length</i> paradigm to
+   * extract a segment from an array-like object (rather than the <i>from &amp; to</i> paradigm).
+   *
+   * @param bufLen The length of the array from to extract a segment
+   * @param off The offset of the segment
+   * @param len The length of the segment
+   */
+  public static void offsetLength(int bufLen, int off, int len) {
+    Check.on(indexOutOfBounds(), off, "offset").isNot(negative());
+    Check.on(indexOutOfBounds(), len, "length").isNot(negative());
+    Check.on(indexOutOfBounds(), off + len, "offset + length").is(lte(), bufLen);
+  }
+
+  /**
+   * Verifies that the specified {@code from} and {@code to} indices can be used to extract a
+   * substring from the specified {@code String}. This method performs a null-check on the {@code
+   * src} argument.
+   *
+   * @see #fromTo(int, int, int)
+   * @see String#substring(int, int)
+   * @param src The string to extract the substring from
+   * @param from The start index
+   * @param to The end index
+   */
+  public static void fromTo(String src, int from, int to) {
+    Check.notNull(src, "src");
+    Check.fromTo(src.length(), from, to);
+  }
+
+  /**
+   * Verifies that the specified {@code from} and {@code to} indices can be used to extract a
+   * sublist from the specified {@code List}. This method performs a null-check on the {@code src}
+   * argument.
+   *
+   * @see #fromTo(int, int, int)
+   * @see List#subList(int, int)
+   * @param src The string to extract the substring from
+   * @param from The start index
+   * @param to The end index
+   */
+  public static <E> void fromTo(List<E> src, int from, int to) {
+    Check.notNull(src, "src");
+    Check.fromTo(src.size(), from, to);
+  }
+
+  /**
+   * Verifies that the specified {@code from} and {@code to} indices can be used for typical segment
+   * extraction methods like {@link String#substring(int, int) String.substring} and {@link
+   * java.util.List#subList(int, int) List.subList}. Note that both {@code from} and to {@code to}
+   * may be one position past the end of the {@code String}, {@code List}, etc. In other words, they
+   * may both be equal to {@code len}.
+   *
+   * @param len The length of the {@code String}, {@code List}, array (etc.) from which to extract
+   *     the segment
+   * @param from The start index of the segment
+   * @param to The end index of the segment
+   */
+  public static void fromTo(int len, int from, int to) {
+    Check.that(from, "from").isNot(negative()).isNot(gt(), to);
+    Check.that(to, "to").isNot(gt(), len);
   }
 
   /**
