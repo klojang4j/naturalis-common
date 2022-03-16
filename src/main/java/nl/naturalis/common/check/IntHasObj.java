@@ -90,70 +90,73 @@ final class IntHasObj<E extends Exception> {
     throw exception.get();
   }
 
-  <P, O> IntCheck<E> has(IntFunction<P> prop, Relation<P, O> test, O obj) throws E {
-    IntCheck<E> check = this.check;
-    P val = prop.apply(check.arg);
-    if (test.exists(val, obj)) {
-      return check;
-    }
-    String name = formatProperty(check.arg, check.argName, prop, IntFunction.class);
-    throw check.exc.apply(getPrefabMessage(test, false, name, val, null, obj));
-  }
+  /* Not currently exposed via API, but let's keep them around:
 
-  <P, O> IntCheck<E> notHas(IntFunction<P> prop, Relation<P, O> test, O obj) throws E {
-    IntCheck<E> check = this.check;
-    P val = prop.apply(check.arg);
-    if (!test.exists(val, obj)) {
-      return check;
+    <P, O> IntCheck<E> has(IntFunction<P> prop, Relation<P, O> test, O obj) throws E {
+      IntCheck<E> check = this.check;
+      P val = prop.apply(check.arg);
+      if (test.exists(val, obj)) {
+        return check;
+      }
+      String name = formatProperty(check.arg, check.argName, prop, IntFunction.class);
+      throw check.exc.apply(getPrefabMessage(test, false, name, val, null, obj));
     }
-    String name = formatProperty(check.arg, check.argName, prop, IntFunction.class);
-    throw check.exc.apply(getPrefabMessage(test, true, name, val, null, obj));
-  }
 
-  <P, O> IntCheck<E> has(IntFunction<P> prop, String name, Relation<P, O> test, O obj) throws E {
-    IntCheck<E> check = this.check;
-    P val = prop.apply(check.arg);
-    if (test.exists(val, obj)) {
-      return check;
+    <P, O> IntCheck<E> notHas(IntFunction<P> prop, Relation<P, O> test, O obj) throws E {
+      IntCheck<E> check = this.check;
+      P val = prop.apply(check.arg);
+      if (!test.exists(val, obj)) {
+        return check;
+      }
+      String name = formatProperty(check.arg, check.argName, prop, IntFunction.class);
+      throw check.exc.apply(getPrefabMessage(test, true, name, val, null, obj));
     }
-    throw check.exc.apply(getPrefabMessage(test, false, check.FQN(name), val, null, obj));
-  }
 
-  <P, O> IntCheck<E> notHas(IntFunction<P> prop, String name, Relation<P, O> test, O obj) throws E {
-    IntCheck<E> check = this.check;
-    P val = prop.apply(check.arg);
-    if (!test.exists(val, obj)) {
-      return check;
+    <P, O> IntCheck<E> has(IntFunction<P> prop, String name, Relation<P, O> test, O obj) throws E {
+      IntCheck<E> check = this.check;
+      P val = prop.apply(check.arg);
+      if (test.exists(val, obj)) {
+        return check;
+      }
+      throw check.exc.apply(getPrefabMessage(test, false, check.FQN(name), val, null, obj));
     }
-    throw check.exc.apply(getPrefabMessage(test, true, check.FQN(name), val, null, obj));
-  }
 
-  <P, O> IntCheck<E> has(
-      IntFunction<P> prop, Relation<P, O> test, O obj, String msg, Object[] msgArgs) throws E {
-    IntCheck<E> check = this.check;
-    P val = prop.apply(check.arg);
-    if (test.exists(val, obj)) {
-      return check;
+    <P, O> IntCheck<E> notHas(IntFunction<P> prop, String name, Relation<P, O> test, O obj) throws E {
+      IntCheck<E> check = this.check;
+      P val = prop.apply(check.arg);
+      if (!test.exists(val, obj)) {
+        return check;
+      }
+      throw check.exc.apply(getPrefabMessage(test, true, check.FQN(name), val, null, obj));
     }
-    throw check.exc.apply(getCustomMessage(msg, msgArgs, test, check.argName, val, null, obj));
-  }
 
-  <P, O> IntCheck<E> notHas(
-      IntFunction<P> prop, Relation<P, O> test, O obj, String msg, Object[] msgArgs) throws E {
-    IntCheck<E> check = this.check;
-    P val = prop.apply(check.arg);
-    if (!test.exists(val, obj)) {
-      return check;
+    <P, O> IntCheck<E> has(
+        IntFunction<P> prop, Relation<P, O> test, O obj, String msg, Object[] msgArgs) throws E {
+      IntCheck<E> check = this.check;
+      P val = prop.apply(check.arg);
+      if (test.exists(val, obj)) {
+        return check;
+      }
+      throw check.exc.apply(getCustomMessage(msg, msgArgs, test, check.argName, val, null, obj));
     }
-    throw check.exc.apply(getCustomMessage(msg, msgArgs, test, check.argName, val, null, obj));
-  }
 
-  <P, O, X extends Exception> IntCheck<E> has(
-      IntFunction<P> prop, Relation<P, O> test, O obj, Supplier<X> exception) throws X {
-    IntCheck<E> check = this.check;
-    if (test.exists(prop.apply(check.arg), obj)) {
-      return check;
+    <P, O> IntCheck<E> notHas(
+        IntFunction<P> prop, Relation<P, O> test, O obj, String msg, Object[] msgArgs) throws E {
+      IntCheck<E> check = this.check;
+      P val = prop.apply(check.arg);
+      if (!test.exists(val, obj)) {
+        return check;
+      }
+      throw check.exc.apply(getCustomMessage(msg, msgArgs, test, check.argName, val, null, obj));
     }
-    throw exception.get();
-  }
+
+    <P, O, X extends Exception> IntCheck<E> has(
+        IntFunction<P> prop, Relation<P, O> test, O obj, Supplier<X> exception) throws X {
+      IntCheck<E> check = this.check;
+      if (test.exists(prop.apply(check.arg), obj)) {
+        return check;
+      }
+      throw exception.get();
+    }
+  */
 }
