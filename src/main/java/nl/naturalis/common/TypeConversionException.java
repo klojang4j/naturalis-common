@@ -11,33 +11,34 @@ import static nl.naturalis.common.ClassMethods.className;
  */
 public class TypeConversionException extends RuntimeException {
 
-  private final Object objectToConvert;
+  private final Object inputValue;
   private final Class<?> targetType;
 
-  public TypeConversionException(Object obj, Class<?> targetType) {
-    super(defaultMessage(obj, targetType));
-    this.objectToConvert = obj;
+  public TypeConversionException(Object inputValue, Class<?> targetType) {
+    super(defaultMessage(inputValue, targetType));
+    this.inputValue = inputValue;
     this.targetType = targetType;
   }
 
-  public TypeConversionException(Object obj, Class<?> targetType, String msg, Object... msgArgs) {
-    super(defaultMessage(obj, targetType) + ". " + format(msg, msgArgs));
-    this.objectToConvert = obj;
+  public TypeConversionException(Object inputValue, Class<?> targetType, String msg, Object... msgArgs) {
+    super(defaultMessage(inputValue, targetType) + ". " + format(msg, msgArgs));
+    this.inputValue = inputValue;
     this.targetType = targetType;
   }
 
-  static String defaultMessage(Object obj, Class<?> type) {
+  public Object getInputValue() {
+    return inputValue;
+  }
+
+  public Class<?> getTargetType() {
+    return targetType;
+  }
+
+  private static String defaultMessage(Object obj, Class<?> type) {
     if (obj == null) {
       return format("Cannot convert null to %s", className(type));
     }
     return format("Cannot convert %s to %s", className(obj), className(type));
   }
 
-  public Object getObjectToConvert() {
-    return objectToConvert;
-  }
-
-  public Class<?> getTargetType() {
-    return targetType;
-  }
 }

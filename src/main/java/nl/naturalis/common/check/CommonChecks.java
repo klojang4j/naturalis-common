@@ -12,6 +12,7 @@ import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.*;
 
+import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.check.MsgIntObjRelation.*;
 import static nl.naturalis.common.check.MsgIntPredicate.*;
 import static nl.naturalis.common.check.MsgIntRelation.*;
@@ -19,11 +20,11 @@ import static nl.naturalis.common.check.MsgPredicate.*;
 import static nl.naturalis.common.check.MsgRelation.*;
 
 /**
- * Defines various common tests for arguments. The tests have short, informative error messages
- * associated with them so you don't have to invent them yourself. Unless specified otherwise, they
+ * Defines various common tests for arguments. The tests have short, informative error messages associated with them so
+ * you don't have to invent them yourself. Unless specified otherwise, they
  * <i>only</i> test what they advertise to be testing. They <b>will not</b> do a preliminary null
- * check! If the argument might be {@code null}, always precede them with the {@link #notNull()}
- * check. Otherwise, a raw, unprocessed {@link NullPointerException} will be thrown from the test
+ * check! If the argument might be {@code null}, always precede them with the {@link #notNull()} check. Otherwise, a
+ * raw, unprocessed {@link NullPointerException} will be thrown from the test
  * <i>itself</i>, rather than the application code.
  *
  * <blockquote>
@@ -58,15 +59,15 @@ public final class CommonChecks {
   private static Map<Object, Formatter> tmp0 = new HashMap<>(64);
   private static Map<Object, String> tmp1 = new HashMap<>(64);
 
-  private CommonChecks() {}
+  private CommonChecks() {
+  }
 
   //////////////////////////////////////////////////////////////////////////////////
   // Predicate
   //////////////////////////////////////////////////////////////////////////////////
 
   /**
-   * Verifies that the argument is null. Equivalent to {@link Objects#isNull(Object)
-   * Objects::isNull}.
+   * Verifies that the argument is null. Equivalent to {@link Objects#isNull(Object) Objects::isNull}.
    *
    * @param <T> The type of the argument
    * @return A function implementing the test described above
@@ -81,8 +82,7 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is not null. Equivalent to {@link Objects#nonNull(Object)
-   * Objects::nonNull}.
+   * Verifies that the argument is not null. Equivalent to {@link Objects#nonNull(Object) Objects::nonNull}.
    *
    * @param <T> The type of the argument
    * @return A function implementing the test described above
@@ -97,8 +97,8 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is {@code true}. If the argument is a {@code Boolean} rather than a
-   * {@code boolean} and the argument might be null, use {@link #nullOr() nullOr()}.
+   * Verifies that the argument is {@code true}. If the argument is a {@code Boolean} rather than a {@code boolean} and
+   * the argument might be null, use {@link #nullOr() nullOr()}.
    *
    * <blockquote>
    *
@@ -121,8 +121,8 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is {@code false}. If the argument is a {@code Boolean} rather than a
-   * {@code boolean} and the argument might be null, use {@link #nullOr() nullOr()}.
+   * Verifies that the argument is {@code false}. If the argument is a {@code Boolean} rather than a {@code boolean} and
+   * the argument might be null, use {@link #nullOr() nullOr()}.
    *
    * @return A function implementing the test described above
    */
@@ -136,8 +136,8 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is empty. See {@link ObjectMethods#isEmpty(Object)
-   * ObjectMethods::isEmpty} for what counts as an empty object.
+   * Verifies that the argument is empty. See {@link ObjectMethods#isEmpty(Object) ObjectMethods::isEmpty} for what
+   * counts as an empty object.
    *
    * <p>This check performs an implicit null check, so can be safely executed without (or instead
    * of) executing the {@link #notNull()} check first.
@@ -155,10 +155,9 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is not null and, if it is an array, {@link Map} or {@link
-   * Collection}, that it does not contain any null values. This check still allows the array, map
-   * or collection to be empty (zero-sized). Use {@link #deepNotEmpty()} if you want to disallow
-   * this, too.
+   * Verifies that the argument is not null and, if it is an array, {@link Map} or {@link Collection}, that it does not
+   * contain any null values. This check still allows the array, map or collection to be empty (zero-sized). Use {@link
+   * #deepNotEmpty()} if you want to disallow this, too.
    *
    * <p>This check performs an implicit null check, so can be safely executed without (or instead
    * of) executing the {@link #notNull()} check first.
@@ -177,9 +176,9 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is not null, not empty, and, if it is an array, {@link Map} or
-   * {@link Collection}, that it does not contain any null or empty values. Equivalent to {@link
-   * ObjectMethods#isDeepNotEmpty(Object) ObjectMethods::isDeepNotEmpty}.
+   * Verifies that the argument is not null, not empty, and, if it is an array, {@link Map} or {@link Collection}, that
+   * it does not contain any null or empty values. Equivalent to {@link ObjectMethods#isDeepNotEmpty(Object)
+   * ObjectMethods::isDeepNotEmpty}.
    *
    * <p>This check performs an implicit null check, so can be safely executed without (or instead
    * of) executing the {@link #notNull()} check first.
@@ -198,8 +197,8 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that a {@code String} argument is null or contains whitespace only. Probably more
-   * useful when called from an {@code isNot} method.
+   * Verifies that a {@code String} argument is null or contains whitespace only. Probably more useful when called from
+   * an {@code isNot} method.
    *
    * <p>This check performs an implicit null check, so can be safely executed without (or instead
    * of) executing the {@link #notNull()} check first.
@@ -231,8 +230,7 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is an array or, if the argument is a {@code Class} object, that is
-   * an array type.
+   * Verifies that the argument is an array or, if the argument is a {@code Class} object, that is an array type.
    *
    * @param <T> The type of the argument
    * @return A function implementing the test described above
@@ -247,8 +245,7 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is an existing, regular file. Equivalent to {@link File#isFile()
-   * File::isFile}.
+   * Verifies that the argument is an existing, regular file. Equivalent to {@link File#isFile() File::isFile}.
    *
    * @return A function implementing the test described above
    */
@@ -262,8 +259,7 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is an existing directory. Equivalent to {@link File#isDirectory()
-   * File::isDirectory}.
+   * Verifies that the argument is an existing directory. Equivalent to {@link File#isDirectory() File::isDirectory}.
    *
    * @return A function implementing the test described above
    */
@@ -277,8 +273,7 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is an existing file of any type.Equivalent to {@link File#exists()
-   * File::exists}.
+   * Verifies that the argument is an existing file of any type.Equivalent to {@link File#exists() File::exists}.
    *
    * @return A function implementing the test described above
    */
@@ -292,8 +287,8 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is a readable file (implies that the file exists). Equivalent to
-   * {@link File#canRead() File::canRead}.
+   * Verifies that the argument is a readable file (implies that the file exists). Equivalent to {@link File#canRead()
+   * File::canRead}.
    *
    * @return A function implementing the test described above
    */
@@ -307,8 +302,8 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is a writable file (implies that the file exists). Equivalent to
-   * {@link File#canWrite() File::canWrite}.
+   * Verifies that the argument is a writable file (implies that the file exists). Equivalent to {@link File#canWrite()
+   * File::canWrite}.
    *
    * @return A function implementing the test described above
    */
@@ -354,8 +349,8 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is greater than zero. If the argument is an {@code int}, you are
-   * better off using the {@link #gt()} check, performancewise.
+   * Verifies that the argument is greater than zero. If the argument is an {@code int}, you are better off using the
+   * {@link #gt()} check, performancewise.
    *
    * @return A function implementing the test described above
    */
@@ -503,8 +498,8 @@ public final class CommonChecks {
   //////////////////////////////////////////////////////////////////////////////////
 
   /**
-   * Verifies that the argument equals the specified value. Equivalent to {@link
-   * Objects#equals(Object) Objects::equals}.
+   * Verifies that the argument equals the specified value. Equivalent to {@link Objects#equals(Object)
+   * Objects::equals}.
    *
    * @param <X> The type of the argument
    * @return A function implementing the test described above
@@ -519,13 +514,13 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is greater than the specified value. Especially useful for checking
-   * values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double}, but can be
-   * used to check any value that is an instance of {@link Comparable}.
+   * Verifies that the argument is greater than the specified value. Especially useful for checking values of primitive
+   * wrappers like {@code Byte}, {@code Integer} or {@code Double}, but can be used to check any value that is an
+   * instance of {@link Comparable}.
    *
-   * @see #gt()
    * @param <X> The type of the values being compared
    * @return A function implementing the test described above
+   * @see #gt()
    */
   public static <X extends Comparable<X>> Relation<X, X> GT() {
     return (x, y) -> x.compareTo(y) > 0;
@@ -537,13 +532,13 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is less than the specified value. Especially useful for checking
-   * values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double}, but can be
-   * used to check any value that is an instance of {@link Comparable}.
+   * Verifies that the argument is less than the specified value. Especially useful for checking values of primitive
+   * wrappers like {@code Byte}, {@code Integer} or {@code Double}, but can be used to check any value that is an
+   * instance of {@link Comparable}.
    *
-   * @see #lt()
    * @param <X> The type of the values being compared
    * @return A function implementing the test described above
+   * @see #lt()
    */
   public static <X extends Comparable<X>> Relation<X, X> LT() {
     return (x, y) -> x.compareTo(y) < 0;
@@ -555,13 +550,13 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is greater than or equal to the specified value. Especially useful
-   * for checking values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double},
-   * but can be used to check any value that is an instance of {@link Comparable}.
+   * Verifies that the argument is greater than or equal to the specified value. Especially useful for checking values
+   * of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double}, but can be used to check any value that
+   * is an instance of {@link Comparable}.
    *
-   * @see #gte()
    * @param <X> The type of the values being compared
    * @return A function implementing the test described above
+   * @see #gte()
    */
   public static <X extends Comparable<X>> Relation<X, X> GTE() {
     return (x, y) -> x.compareTo(y) >= 0;
@@ -573,13 +568,13 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is less than or equal to the specified value. Especially useful for
-   * checking values of primitive wrappers like {@code Byte}, {@code Integer} or {@code Double}, but
-   * can be used to check any value that is an instance of {@link Comparable}.
+   * Verifies that the argument is less than or equal to the specified value. Especially useful for checking values of
+   * primitive wrappers like {@code Byte}, {@code Integer} or {@code Double}, but can be used to check any value that is
+   * an instance of {@link Comparable}.
    *
-   * @see #lte()
    * @param <X> The type of the values being compared
    * @return A function implementing the test described above
+   * @see #lte()
    */
   public static <X extends Comparable<X>> Relation<X, X> LTE() {
     return (x, y) -> x.compareTo(y) <= 0;
@@ -628,7 +623,7 @@ public final class CommonChecks {
    * @return A function implementing the test described above
    */
   public static <X> Relation<X, Class<?>> instanceOf() {
-    return (x, y) -> y.isInstance(x);
+    return (x, y) -> (x == null && !y.isPrimitive()) || isA(x.getClass(), y);
   }
 
   static {
@@ -683,8 +678,8 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that a {@code Map} argument contains the specified key. Equivalent to {@link
-   * Map#containsKey(Object) Map::containsKey}.
+   * Verifies that a {@code Map} argument contains the specified key. Equivalent to {@link Map#containsKey(Object)
+   * Map::containsKey}.
    *
    * @param <K> The type of the keys within the map
    * @param <M> The Type of the {@code Map}
@@ -700,8 +695,8 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that a {@code Map} argument contains the specified value. Equivalent to {@link
-   * Map#containsValue(Object) Map::containsValue}.
+   * Verifies that a {@code Map} argument contains the specified value. Equivalent to {@link Map#containsValue(Object)
+   * Map::containsValue}.
    *
    * @param <V> The type of the values within the map
    * @param <M> The Type of the {@code Map}
@@ -782,9 +777,9 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that a {@code Collection} argument contains all the elements of the specified
-   * collection. Equivalent to {@link Collection#containsAll(Collection) Collection::containsAll}.
-   * Note that neither collection needs to be a {@link Set}:
+   * Verifies that a {@code Collection} argument contains all the elements of the specified collection. Equivalent to
+   * {@link Collection#containsAll(Collection) Collection::containsAll}. Note that neither collection needs to be a
+   * {@link Set}:
    *
    * <blockquote>
    *
@@ -801,7 +796,7 @@ public final class CommonChecks {
    * @return A function implementing the test described above
    */
   public static <E, C0 extends Collection<? super E>, C1 extends Collection<E>>
-      Relation<C0, C1> supersetOf() {
+  Relation<C0, C1> supersetOf() {
     return Collection::containsAll;
   }
 
@@ -811,8 +806,8 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that a {@code Collection} argument is a subset or sublist of another {@code
-   * Collection}. Note that neither collection needs to be a {@link Set}:
+   * Verifies that a {@code Collection} argument is a subset or sublist of another {@code Collection}. Note that neither
+   * collection needs to be a {@link Set}:
    *
    * <blockquote>
    *
@@ -829,7 +824,7 @@ public final class CommonChecks {
    * @return A function implementing the test described above
    */
   public static <E, C0 extends Collection<E>, C1 extends Collection<? super E>>
-      Relation<C0, C1> subsetOf() {
+  Relation<C0, C1> subsetOf() {
     return (x, y) -> y.containsAll(x);
   }
 
@@ -882,8 +877,8 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that a {@code String} argument starts with the specified substring. Equivalent to
-   * {@link String#startsWith(String) String::startsWith}.
+   * Verifies that a {@code String} argument starts with the specified substring. Equivalent to {@link
+   * String#startsWith(String) String::startsWith}.
    *
    * @return A function implementing the test described above
    */
@@ -916,12 +911,11 @@ public final class CommonChecks {
   //////////////////////////////////////////////////////////////////////////////////
 
   /**
-   * Verifies that the length of a {@code String} argument has the specified value. Although you can
-   * use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
-   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used
-   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
-   * validating properties of properties:
+   * Verifies that the length of a {@code String} argument has the specified value. Although you can use this check with
+   * the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()}
+   * method, it is specifically meant to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()}
+   * and {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for validating
+   * properties of properties:
    *
    * <blockquote>
    *
@@ -950,11 +944,10 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the length of a {@code String} argument is greater than the specified value.
-   * Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be
-   * used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * Verifies that the length of a {@code String} argument is greater than the specified value. Although you can use
+   * this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link ObjectCheck#isNot(ObjIntRelation,
+   * int) isNot()} method, it is specifically meant to be used with the {@link ObjectCheck#has(Function, ObjIntRelation,
+   * int) has()} and {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
    * validating properties of properties.
    *
    * <blockquote>
@@ -984,15 +977,14 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the length of a {@code String} argument is greater than or equal to the specified
-   * value. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int)
-   * is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically
-   * meant to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and
-   * {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API
-   * for validating properties of properties.
+   * Verifies that the length of a {@code String} argument is greater than or equal to the specified value. Although you
+   * can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
+   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used with the {@link
+   * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link ObjectCheck#notHas(Function, ObjIntRelation, int)
+   * notHas()} methods as there is no API for validating properties of properties.
    *
-   * @see #strlenGT()
    * @return A function implementing the test described above
+   * @see #strlenGT()
    */
   public static ObjIntRelation<String> strlenGTE() {
     return (x, y) -> x.length() >= y;
@@ -1004,15 +996,14 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the length of a {@code String} argument is less than the specified value.
-   * Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be
-   * used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * Verifies that the length of a {@code String} argument is less than the specified value. Although you can use this
+   * check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link ObjectCheck#isNot(ObjIntRelation, int)
+   * isNot()} method, it is specifically meant to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int)
+   * has()} and {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
    * validating properties of properties.
    *
-   * @see #strlenGT()
    * @return A function implementing the test described above
+   * @see #strlenGT()
    */
   public static ObjIntRelation<String> strlenLT() {
     return (x, y) -> x.length() < y;
@@ -1024,15 +1015,14 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the length of a {@code String} argument is less than or equal to the specified
-   * value. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int)
-   * is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically
-   * meant to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and
-   * {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API
-   * for validating properties of properties.
+   * Verifies that the length of a {@code String} argument is less than or equal to the specified value. Although you
+   * can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
+   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used with the {@link
+   * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link ObjectCheck#notHas(Function, ObjIntRelation, int)
+   * notHas()} methods as there is no API for validating properties of properties.
    *
-   * @see #strlenGT()
    * @return A function implementing the test described above
+   * @see #strlenGT()
    */
   public static ObjIntRelation<String> strlenLTE() {
     return (x, y) -> x.length() <= y;
@@ -1044,11 +1034,10 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the size of a {@code Collection} argument has the specified value. Although you
-   * can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
-   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used
-   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * Verifies that the size of a {@code Collection} argument has the specified value. Although you can use this check
+   * with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link ObjectCheck#isNot(ObjIntRelation, int)
+   * isNot()} method, it is specifically meant to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int)
+   * has()} and {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
    * validating properties of properties:
    *
    * <blockquote>
@@ -1078,11 +1067,10 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the size of a {@code Collection} argument is greater than the specified value.
-   * Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be
-   * used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * Verifies that the size of a {@code Collection} argument is greater than the specified value. Although you can use
+   * this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link ObjectCheck#isNot(ObjIntRelation,
+   * int) isNot()} method, it is specifically meant to be used with the {@link ObjectCheck#has(Function, ObjIntRelation,
+   * int) has()} and {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
    * validating properties of properties:
    *
    * <blockquote>
@@ -1112,15 +1100,14 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the size of a {@code Collection} argument is greater than or equal to the
-   * specified value. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation,
-   * int) is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is
-   * specifically meant to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int)
-   * has()} and {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there
-   * is no API for validating properties of properties.
+   * Verifies that the size of a {@code Collection} argument is greater than or equal to the specified value. Although
+   * you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
+   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used with the {@link
+   * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link ObjectCheck#notHas(Function, ObjIntRelation, int)
+   * notHas()} methods as there is no API for validating properties of properties.
    *
-   * @see #sizeGT()
    * @return A function implementing the test described above
+   * @see #sizeGT()
    */
   public static <E, C extends Collection<E>> ObjIntRelation<C> sizeGTE() {
     return (x, y) -> x.size() >= y;
@@ -1132,15 +1119,14 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the size of a {@code Collection} argument is less than the specified value.
-   * Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be
-   * used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
+   * Verifies that the size of a {@code Collection} argument is less than the specified value. Although you can use this
+   * check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link ObjectCheck#isNot(ObjIntRelation, int)
+   * isNot()} method, it is specifically meant to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int)
+   * has()} and {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
    * validating properties of properties.
    *
-   * @see #sizeGT()
    * @return A function implementing the test described above
+   * @see #sizeGT()
    */
   public static <E, C extends Collection<E>> ObjIntRelation<C> sizeLT() {
     return (x, y) -> x.size() < y;
@@ -1152,15 +1138,14 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the size of a {@code Collection} argument is less than or equal to the specified
-   * value. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int)
-   * is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically
-   * meant to be used with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and
-   * {@link ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API
-   * for validating properties of properties.
+   * Verifies that the size of a {@code Collection} argument is less than or equal to the specified value. Although you
+   * can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
+   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used with the {@link
+   * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link ObjectCheck#notHas(Function, ObjIntRelation, int)
+   * notHas()} methods as there is no API for validating properties of properties.
    *
-   * @see #sizeGT()
    * @return A function implementing the test described above
+   * @see #sizeGT()
    */
   public static <E, C extends Collection<E>> ObjIntRelation<C> sizeLTE() {
     return (x, y) -> x.size() <= y;
@@ -1172,14 +1157,12 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the size of an array argument is equal to the specified value. No preliminary
-   * check is done to determine if the argument actually <i>is</i> an array. Execute the {@link
-   * #array()} check first if there is any doubt about this. Although you can use this check with
-   * the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
-   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used
-   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
-   * validating properties of properties:
+   * Verifies that the size of an array argument is equal to the specified value. No preliminary check is done to
+   * determine if the argument actually <i>is</i> an array. Execute the {@link #array()} check first if there is any
+   * doubt about this. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
+   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used with the {@link
+   * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link ObjectCheck#notHas(Function, ObjIntRelation, int)
+   * notHas()} methods as there is no API for validating properties of properties:
    *
    * <blockquote>
    *
@@ -1209,14 +1192,12 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the size of an array argument is greater than the specified value. No preliminary
-   * check is done to determine if the argument actually <i>is</i> an array. Execute the {@link
-   * #array()} check first if there is any doubt about this. Although you can use this check with
-   * the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
-   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used
-   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
-   * validating properties of properties.
+   * Verifies that the size of an array argument is greater than the specified value. No preliminary check is done to
+   * determine if the argument actually <i>is</i> an array. Execute the {@link #array()} check first if there is any
+   * doubt about this. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
+   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used with the {@link
+   * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link ObjectCheck#notHas(Function, ObjIntRelation, int)
+   * notHas()} methods as there is no API for validating properties of properties.
    *
    * @return A function implementing the test described above
    */
@@ -1230,14 +1211,12 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the size of an array argument is greater than or equal to the specified value. No
-   * preliminary check is done to determine if the argument actually <i>is</i> an array. Execute the
-   * {@link #array()} check first if there is any doubt about this. Although you can use this check
-   * with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
-   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used
-   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
-   * validating properties of properties.
+   * Verifies that the size of an array argument is greater than or equal to the specified value. No preliminary check
+   * is done to determine if the argument actually <i>is</i> an array. Execute the {@link #array()} check first if there
+   * is any doubt about this. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()}
+   * and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used with the
+   * {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link ObjectCheck#notHas(Function,
+   * ObjIntRelation, int) notHas()} methods as there is no API for validating properties of properties.
    *
    * @return A function implementing the test described above
    */
@@ -1251,14 +1230,12 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the size of an array argument is less than the specified value. No preliminary
-   * check is done to determine if the argument actually <i>is</i> an array. Execute the {@link
-   * #array()} check first if there is any doubt about this. Although you can use this check with
-   * the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
-   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used
-   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
-   * validating properties of properties.
+   * Verifies that the size of an array argument is less than the specified value. No preliminary check is done to
+   * determine if the argument actually <i>is</i> an array. Execute the {@link #array()} check first if there is any
+   * doubt about this. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
+   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used with the {@link
+   * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link ObjectCheck#notHas(Function, ObjIntRelation, int)
+   * notHas()} methods as there is no API for validating properties of properties.
    *
    * @return A function implementing the test described above
    */
@@ -1272,14 +1249,12 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the size of an array argument is less than or equal to the specified value. No
-   * preliminary check is done to determine if the argument actually <i>is</i> an array. Execute the
-   * {@link #array()} check first if there is any doubt about this. Although you can use this check
-   * with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and {@link
-   * ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used
-   * with the {@link ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
-   * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is no API for
-   * validating properties of properties.
+   * Verifies that the size of an array argument is less than or equal to the specified value. No preliminary check is
+   * done to determine if the argument actually <i>is</i> an array. Execute the {@link #array()} check first if there is
+   * any doubt about this. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation, int) is()} and
+   * {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it is specifically meant to be used with the {@link
+   * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link ObjectCheck#notHas(Function, ObjIntRelation, int)
+   * notHas()} methods as there is no API for validating properties of properties.
    *
    * @return A function implementing the test described above
    */
@@ -1297,9 +1272,9 @@ public final class CommonChecks {
   //////////////////////////////////////////////////////////////////////////////////
 
   /**
-   * Verifies that the argument can be used as index into the specified array. No preliminary check
-   * is done to ascertain that the provided object actually is an array. Execute the {@link
-   * #array()} check first if there is any doubt about this.
+   * Verifies that the argument can be used as index into the specified array. No preliminary check is done to ascertain
+   * that the provided object actually is an array. Execute the {@link #array()} check first if there is any doubt about
+   * this.
    *
    * <blockquote>
    *
@@ -1336,6 +1311,7 @@ public final class CommonChecks {
     setMessagePattern(listIndexOf(), msgIndexOf());
     setName(listIndexOf(), "listIndexOf");
   }
+
   /**
    * Verifies that the argument can be safely passed to {@link String#charAt(int) String.charAt}.
    *
@@ -1366,8 +1342,8 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is greater than or equal to the first integer of the specified
-   * {@link IntPair} and less than the second.
+   * Verifies that the argument is greater than or equal to the first integer of the specified {@link IntPair} and less
+   * than the second.
    *
    * @return A function implementing the test described above
    */
@@ -1381,8 +1357,8 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is greater than or equal to the first integer of the specified
-   * {@link IntPair} and less than or equal to the second.
+   * Verifies that the argument is greater than or equal to the first integer of the specified {@link IntPair} and less
+   * than or equal to the second.
    *
    * @return A function implementing the test described above
    */
@@ -1398,10 +1374,9 @@ public final class CommonChecks {
   /* ++++++++++++++ Miscellaneous ++++++++++++++ */
 
   /**
-   * (Not a check) Shortcut for {@link IllegalStateException#IllegalStateException(String)
-   * IllegalStateException::new}. Can be used in combination with {@link Check#on(Function, Object)
-   * Check.on(...)}. For example: <code>Check.on(illegalState(),
-   * out.isClosed()).is(no())</code>.
+   * (Not a check) Shortcut for {@link IllegalStateException#IllegalStateException(String) IllegalStateException::new}.
+   * Can be used in combination with {@link Check#on(Function, Object) Check.on(...)}. For example:
+   * <code>Check.on(illegalState(), out.isClosed()).is(no())</code>.
    *
    * @return A {@code Function} that produces an {@code IllegalStateException}
    */
@@ -1420,8 +1395,7 @@ public final class CommonChecks {
   }
 
   /**
-   * (Not a check) Shortcut for {@link
-   * UnsupportedOperationException#UnsupportedOperationException(String)
+   * (Not a check) Shortcut for {@link UnsupportedOperationException#UnsupportedOperationException(String)
    * UnsupportedOperationException::new}.
    *
    * @return A {@code Function} that produces an {@code UnsupportedOperationException}
@@ -1440,15 +1414,15 @@ public final class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code IntPredicate}. Use when passing a lambda or
-   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
-   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
-   * supposed to be a {@code Predicate} or {@code IntPredicate} (it will complain about an
+   * (Not a check) Simply returns the specified {@code IntPredicate}. Use when passing a lambda or method reference to
+   * the {@code Check.has()} and {@code Check.notHas()} methods. Because these methods are heavily overloaded, the
+   * compiler may not be able to establish whether the lambda is supposed to be a {@code Predicate} or {@code
+   * IntPredicate} (it will complain about an
    * <b>Ambiguous method call</b>). This method clears that up for the compiler.
    *
    * <p>NB this method is meant to wrap the {@code test} argument of a {@code Check.has()} or {@code
-   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the
-   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
+   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the arguments to
+   * disambiguate the call. It is a matter of taste which one you prefer.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @return The same {@code IntPredicate}
@@ -1458,15 +1432,15 @@ public final class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code Predicate}. Use when passing a lambda or
-   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
-   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
-   * supposed to be a {@code Predicate} or {@code IntPredicate} (it will complain about an
+   * (Not a check) Simply returns the specified {@code Predicate}. Use when passing a lambda or method reference to the
+   * {@code Check.has()} and {@code Check.notHas()} methods. Because these methods are heavily overloaded, the compiler
+   * may not be able to establish whether the lambda is supposed to be a {@code Predicate} or {@code IntPredicate} (it
+   * will complain about an
    * <b>Ambiguous method call</b>). This method clears that up for the compiler.
    *
    * <p>NB this method is meant to wrap the {@code test} argument of a {@code Check.has()} or {@code
-   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the
-   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
+   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the arguments to
+   * disambiguate the call. It is a matter of taste which one you prefer.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the object being tested
@@ -1477,15 +1451,15 @@ public final class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code Relation}. Use when passing a lambda or
-   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
-   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
-   * supposed to be a {@code Relation} or one of its sister interfaces (it will complain about an
+   * (Not a check) Simply returns the specified {@code Relation}. Use when passing a lambda or method reference to the
+   * {@code Check.has()} and {@code Check.notHas()} methods. Because these methods are heavily overloaded, the compiler
+   * may not be able to establish whether the lambda is supposed to be a {@code Relation} or one of its sister
+   * interfaces (it will complain about an
    * <b>Ambiguous method call</b>). This method clears that up for the compiler.
    *
    * <p>NB this method is meant to wrap the {@code test} argument of a {@code Check.has()} or {@code
-   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the
-   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
+   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the arguments to
+   * disambiguate the call. It is a matter of taste which one you prefer.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the subject of the {@code Relation}
@@ -1497,15 +1471,15 @@ public final class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code ObjIntRelation}. Use when passing a lambda or
-   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
-   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
-   * supposed to be an {@code ObjIntRelation} or one of its sister interfaces (it will complain
-   * about an <b>Ambiguous method call</b>). This method clears that up for the compiler.
+   * (Not a check) Simply returns the specified {@code ObjIntRelation}. Use when passing a lambda or method reference to
+   * the {@code Check.has()} and {@code Check.notHas()} methods. Because these methods are heavily overloaded, the
+   * compiler may not be able to establish whether the lambda is supposed to be an {@code ObjIntRelation} or one of its
+   * sister interfaces (it will complain about an <b>Ambiguous method call</b>). This method clears that up for the
+   * compiler.
    *
    * <p>NB this method is meant to wrap the {@code test} argument of a {@code Check.has()} or {@code
-   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the
-   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
+   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the arguments to
+   * disambiguate the call. It is a matter of taste which one you prefer.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the subject of the {@code Relation}
@@ -1514,16 +1488,17 @@ public final class CommonChecks {
   public static <T> ObjIntRelation<T> objInt(ObjIntRelation<T> lambdaOrMethodReference) {
     return lambdaOrMethodReference;
   }
+
   /**
-   * (Not a check) Simply returns the specified {@code IntObjRelation}. Use when passing a lambda or
-   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
-   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
-   * supposed to be an {@code IntObjRelation} or one of its sister interfaces (it will complain
-   * about an <b>Ambiguous method call</b>). This method clears that up for the compiler.
+   * (Not a check) Simply returns the specified {@code IntObjRelation}. Use when passing a lambda or method reference to
+   * the {@code Check.has()} and {@code Check.notHas()} methods. Because these methods are heavily overloaded, the
+   * compiler may not be able to establish whether the lambda is supposed to be an {@code IntObjRelation} or one of its
+   * sister interfaces (it will complain about an <b>Ambiguous method call</b>). This method clears that up for the
+   * compiler.
    *
    * <p>NB this method is meant to wrap the {@code test} argument of a {@code Check.has()} or {@code
-   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the
-   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
+   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the arguments to
+   * disambiguate the call. It is a matter of taste which one you prefer.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the object of the {@code Relation}
@@ -1534,15 +1509,15 @@ public final class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code IntRelation}. Use when passing a lambda or
-   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
-   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
-   * supposed to be an {@code IntRelation} or one of its sister interfaces (it will complain about
-   * an <b>Ambiguous method call</b>). This method clears that up for the compiler.
+   * (Not a check) Simply returns the specified {@code IntRelation}. Use when passing a lambda or method reference to
+   * the {@code Check.has()} and {@code Check.notHas()} methods. Because these methods are heavily overloaded, the
+   * compiler may not be able to establish whether the lambda is supposed to be an {@code IntRelation} or one of its
+   * sister interfaces (it will complain about an <b>Ambiguous method call</b>). This method clears that up for the
+   * compiler.
    *
    * <p>NB this method is meant to wrap the {@code test} argument of a {@code Check.has()} or {@code
-   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the
-   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
+   * Check.notHas()} method, not the {@code property} argument. You only need to wrap one of the arguments to
+   * disambiguate the call. It is a matter of taste which one you prefer.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @return The same {@code IntRelation}
@@ -1552,15 +1527,15 @@ public final class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code ToIntFunction}. Use when passing a lambda or
-   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
-   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
-   * supposed to be an {@code ToIntFunction} or some other kind of function (it will complain about
-   * an <b>Ambiguous method call</b>). This method clears that up for the compiler.
+   * (Not a check) Simply returns the specified {@code ToIntFunction}. Use when passing a lambda or method reference to
+   * the {@code Check.has()} and {@code Check.notHas()} methods. Because these methods are heavily overloaded, the
+   * compiler may not be able to establish whether the lambda is supposed to be an {@code ToIntFunction} or some other
+   * kind of function (it will complain about an <b>Ambiguous method call</b>). This method clears that up for the
+   * compiler.
    *
    * <p>NB this method is meant to wrap the {@code property} argument of a {@code Check.has()} or
-   * {@code Check.notHas()} method, not the {@code test} argument. You only need to wrap one of the
-   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
+   * {@code Check.notHas()} method, not the {@code test} argument. You only need to wrap one of the arguments to
+   * disambiguate the call. It is a matter of taste which one you prefer.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the subject of the {@code Relation}
@@ -1571,15 +1546,15 @@ public final class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code IntFunction}. Use when passing a lambda or
-   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
-   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
-   * supposed to be an {@code IntFunction} or some other kind of function (it will complain about an
+   * (Not a check) Simply returns the specified {@code IntFunction}. Use when passing a lambda or method reference to
+   * the {@code Check.has()} and {@code Check.notHas()} methods. Because these methods are heavily overloaded, the
+   * compiler may not be able to establish whether the lambda is supposed to be an {@code IntFunction} or some other
+   * kind of function (it will complain about an
    * <b>Ambiguous method call</b>). This method clears that up for the compiler.
    *
    * <p>NB this method is meant to wrap the {@code property} argument of a {@code Check.has()} or
-   * {@code Check.notHas()} method, not the {@code test} argument. You only need to wrap one of the
-   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
+   * {@code Check.notHas()} method, not the {@code test} argument. You only need to wrap one of the arguments to
+   * disambiguate the call. It is a matter of taste which one you prefer.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the subject of the {@code Relation}
@@ -1590,15 +1565,15 @@ public final class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code Function}. Use when passing a lambda or
-   * method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because these
-   * methods are heavily overloaded, the compiler may not be able to establish whether the lambda is
-   * supposed to be an {@code Function} or, for example, an {@code IntFunction} (it will complain
-   * about an <b>Ambiguous method call</b>). This method clears that up for the compiler.
+   * (Not a check) Simply returns the specified {@code Function}. Use when passing a lambda or method reference to the
+   * {@code Check.has()} and {@code Check.notHas()} methods. Because these methods are heavily overloaded, the compiler
+   * may not be able to establish whether the lambda is supposed to be an {@code Function} or, for example, an {@code
+   * IntFunction} (it will complain about an <b>Ambiguous method call</b>). This method clears that up for the
+   * compiler.
    *
    * <p>NB this method is meant to wrap the {@code property} argument of a {@code Check.has()} or
-   * {@code Check.notHas()} method, not the {@code test} argument. You only need to wrap one of the
-   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
+   * {@code Check.notHas()} method, not the {@code test} argument. You only need to wrap one of the arguments to
+   * disambiguate the call. It is a matter of taste which one you prefer.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @param <T> The type of the subject of the {@code Relation}
@@ -1609,15 +1584,15 @@ public final class CommonChecks {
   }
 
   /**
-   * (Not a check) Simply returns the specified {@code IntUnaryOperator}. Use when passing a lambda
-   * or method reference to the {@code Check.has()} and {@code Check.notHas()} methods. Because
-   * these methods are heavily overloaded, the compiler may not be able to establish whether the
-   * lambda is supposed to be an {@code IntUnaryOperator} or some other kind of function (it will
-   * complain about an <b>Ambiguous method call</b>). This method clears that up for the compiler.
+   * (Not a check) Simply returns the specified {@code IntUnaryOperator}. Use when passing a lambda or method reference
+   * to the {@code Check.has()} and {@code Check.notHas()} methods. Because these methods are heavily overloaded, the
+   * compiler may not be able to establish whether the lambda is supposed to be an {@code IntUnaryOperator} or some
+   * other kind of function (it will complain about an <b>Ambiguous method call</b>). This method clears that up for the
+   * compiler.
    *
    * <p>NB this method is meant to wrap the {@code property} argument of a {@code Check.has()} or
-   * {@code Check.notHas()} method, not the {@code test} argument. You only need to wrap one of the
-   * arguments to disambiguate the call. It is a matter of taste which one you prefer.
+   * {@code Check.notHas()} method, not the {@code test} argument. You only need to wrap one of the arguments to
+   * disambiguate the call. It is a matter of taste which one you prefer.
    *
    * @param lambdaOrMethodReference A lambda or method reference
    * @return The same {@code ObjIntRelation}

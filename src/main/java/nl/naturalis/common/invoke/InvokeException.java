@@ -14,13 +14,13 @@ public class InvokeException extends RuntimeException {
   private static final String ERR_INCLUDES = "At least one of %s must be a property of %s";
   private static final String ERR_EXCLUDES = "No properties remain after excluding %s from %s";
   private static final String ERR_NOT_READABLE =
-      "Cannot read beans of type %s (bean must be instance of %s)";
+          "Cannot read beans of type %s (bean must be instance of %s)";
 
   public static InvokeException missingNoArgConstructor(Class<?> clazz) {
     return new InvokeException("Missing no-arg constructor on %s", simpleClassName(clazz));
   }
 
-  public static InvokeException noSuchConstructor(Class<?> clazz,Class<?>... params) {
+  public static InvokeException noSuchConstructor(Class<?> clazz, Class<?>... params) {
     return new InvokeException(
             "No such constructor: %s(%s)",
             simpleClassName(clazz),
@@ -48,7 +48,7 @@ public class InvokeException extends RuntimeException {
   }
 
   public static Function<String, InvokeException> noPropertiesSelected(
-      Class<?> clazz, boolean exclude, String... properties) {
+          Class<?> clazz, boolean exclude, String... properties) {
     if (exclude) {
       return s -> new InvokeException(ERR_EXCLUDES, implode(properties), clazz);
     }
@@ -56,7 +56,7 @@ public class InvokeException extends RuntimeException {
   }
 
   public static InvokeException wrap(Throwable t) {
-    if(t instanceof InvokeException ie) {
+    if (t instanceof InvokeException ie) {
       return ie;
     }
     return new InvokeException(getRootCause(t).toString());

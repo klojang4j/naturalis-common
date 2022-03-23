@@ -2,7 +2,7 @@ package nl.naturalis.common;
 
 import java.math.BigDecimal;
 
-class NumberParser<T extends Number> {
+final class NumberParser<T extends Number> {
 
   private final Class<T> targetType;
 
