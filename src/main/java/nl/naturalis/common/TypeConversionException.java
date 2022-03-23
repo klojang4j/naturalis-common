@@ -1,10 +1,14 @@
 package nl.naturalis.common;
 
-import nl.naturalis.common.check.Check;
 import static java.lang.String.format;
 import static nl.naturalis.common.ClassMethods.className;
-import static nl.naturalis.common.ClassMethods.simpleClassName;
 
+/**
+ * Thrown by various methods that convert values of one type into values of another type.
+ *
+ * @see Bool
+ * @see Morph
+ */
 public class TypeConversionException extends RuntimeException {
 
   private final Object objectToConvert;

@@ -116,9 +116,9 @@ public class PathTest {
   public void getPurePath() {
     Path path = new Path("identifications.0.scientificName.fullScientificName");
     assertEquals(
-        "01",
-        "identifications.scientificName.fullScientificName",
-        path.getCanonicalPath().toString());
+            "01",
+            "identifications.scientificName.fullScientificName",
+            path.getCanonicalPath().toString());
   }
 
   @Test
@@ -142,19 +142,19 @@ public class PathTest {
     p.subpath(3);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = IndexOutOfBoundsException.class)
   public void subpath02() {
     Path p = new Path("identifications.0.scientificName");
     p.subpath(2, 4);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = IndexOutOfBoundsException.class)
   public void subpath03() {
     Path p = new Path("identifications.0.scientificName");
     p.subpath(-1, 5);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = IndexOutOfBoundsException.class)
   public void subpath04() {
     Path p = new Path("identifications.0.scientificName");
     p.subpath(3, 3);

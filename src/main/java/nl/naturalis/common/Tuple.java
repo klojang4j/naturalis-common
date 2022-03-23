@@ -15,6 +15,7 @@ import nl.naturalis.common.check.Check;
  * @param <T> The type of the first element (or key) of the tuple
  * @param <U> The type of the second element (or value) of the tuple
  */
+@Deprecated
 public final class Tuple<T, U> {
 
   /**
