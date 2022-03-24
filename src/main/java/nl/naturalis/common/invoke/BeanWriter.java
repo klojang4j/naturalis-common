@@ -23,7 +23,7 @@ import static nl.naturalis.common.invoke.NoSuchPropertyException.*;
  * @param <T> The type of the bean
  * @author Ayco Holleman
  */
-public class BeanWriter<T> {
+public final class BeanWriter<T> {
 
   /**
    * Returns a {@code BeanWriter} that allows for "loose typing" of the values to be assigned to the
@@ -46,8 +46,8 @@ public class BeanWriter<T> {
 
   /**
    * Creates a {@code BeanWriter} for the specified class. You can optionally specify an array of
-   * properties that you intend to write. Specifying a zero-length array means all properties will
-   * be writable.
+   * properties that you intend to write. If you specify a zero-length array all properties will be
+   * writable.
    *
    * @param beanClass The bean class
    * @param properties The properties you allow to be written
@@ -58,8 +58,8 @@ public class BeanWriter<T> {
 
   /**
    * Creates a {@code BeanWriter} for the specified class. You can optionally specify an array of
-   * properties that you intend to write. Specifying a zero-length array means all properties will
-   * be writable. Input values will first be converted by the specified conversion function before
+   * properties that you intend to write. If you specify a zero-length array all properties will be
+   * writable. Input values will first be converted by the specified conversion function before
    * being assigned to properties.
    *
    * @param beanClass The bean class
@@ -75,8 +75,8 @@ public class BeanWriter<T> {
 
   /**
    * Creates a {@code BeanWriter} for the specified class. You can optionally specify an array of
-   * properties that you intend or do <i>not</i> intend to write. Specifying a zero-length array
-   * means all properties will be writable.
+   * properties that you intend or do <i>not</i> intend to write. If you specify a zero-length array
+   * all properties will be writable.
    *
    * @param beanClass The bean class
    * @param includeExclude Whether to include or exclude the specified properties
@@ -92,12 +92,14 @@ public class BeanWriter<T> {
 
   /**
    * Creates a {@code BeanWriter} for the specified class. You can optionally specify an array of
-   * properties that you intend or do <i>not</i> intend to write. Specifying a zero-length array
-   * means all properties will be writable. If you intend to use this {@code BeanWriter} to
-   * repetitively to write just one or two properties from bulky bean types, explicitly specifying
-   * the properties you intend to write might make the {@code BeanWriter} more efficient. Input
-   * values will first be converted by the specified conversion function before being assigned to
-   * properties.
+   * properties that you intend or do <i>not</i> intend to write. If you specify a zero-length array
+   * all properties will be writable. If you intend to use this {@code BeanWriter} to repetitively
+   * to write just one or two properties from bulky bean types, explicitly specifying the properties
+   * you intend to write might make the {@code BeanWriter} more efficient. Input values will first
+   * be converted by the specified conversion function before being assigned to properties.
+   *
+   * <p><i>Specifying one or more non-existent properties will not cause an exception to be
+   * thrown.</i> They will be quietly ignored.
    *
    * @param beanClass The bean class
    * @param converter A conversion function for input values
@@ -299,21 +301,20 @@ public class BeanWriter<T> {
     return setters;
   }
 
-  private Map<String, Setter> getSetters(IncludeExclude ic, String[] props) {
+  private Map<String, Setter> getSetters(IncludeExclude ie, String[] props) {
     Map<String, Setter> tmp = SetterFactory.INSTANCE.getSetters(beanClass);
     if (props.length == 0) {
       return tmp;
-    } else {
-      Check.that(props, "properties").is(deepNotEmpty());
-      Map<String, Setter> copy = new HashMap<>(tmp);
-      if (ic.isExclude()) {
-        copy.keySet().removeAll(Set.of(props));
-      } else {
-        copy.keySet().retainAll(Set.of(props));
-      }
-      Check.that(props).isNot(empty(), () -> noPropertiesSelected(beanClass, ic, props));
-      return Map.copyOf(copy);
     }
+    Map<String, Setter> copy = new HashMap<>(tmp);
+    if (ie.isExclude()) {
+      copy.keySet().removeAll(Set.of(props));
+    } else {
+      copy.keySet().retainAll(Set.of(props));
+    }
+    Check.that(props).isNot(empty(), () -> noPropertiesSelected(beanClass, ie, props));
+    return Map.copyOf(copy);
+
   }
 
   private void set(T bean, Setter setter, Object value) throws Throwable {

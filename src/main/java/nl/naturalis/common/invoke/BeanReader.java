@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.invoke.IncludeExclude.INCLUDE;
 import static nl.naturalis.common.invoke.InvokeException.typeMismatch;
 import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 
@@ -25,78 +26,67 @@ import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
  * @param <T> The type of the bean
  * @author Ayco Holleman
  */
-public class BeanReader<T> {
+public final class BeanReader<T> {
 
   private final Class<? super T> beanClass;
   private final Map<String, Getter> getters;
 
   /**
    * Creates a {@code BeanReader} for the specified properties of the specified class. You can
-   * optionally specify an array of properties that you intend to read. Specifying {@code null} or a
-   * zero-length array will allow you to read
-   * <i>all</i> of the bean's properties. Strict naming conventions will be applied to what
-   * qualifies as a getter. See
-   * {@link ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method,
-   * boolean)}.
+   * optionally specify an array of properties that you intend to read.  If you specify a
+   * zero-length array all properties will be readable. Strict naming conventions will be applied
+   * regarding what which methods qualify as getters.
    *
    * @param beanClass The bean class
-   * @param properties The properties you intend to read (may be {@code null} or zero-length)
+   * @param properties The properties to be included/excluded
    */
   public BeanReader(Class<? super T> beanClass, String... properties) {
-    this(beanClass, true, false, properties);
+    this(beanClass, true, INCLUDE, properties);
   }
 
   /**
-   * Creates a {@code BeanReader} for the specified class. You can optionally specify an array of
-   * properties that you intend or do <i>not</i> intend to read. Specifying {@code null} or a
-   * zero-length array will allow you to read
-   * <i>all</i> of the bean's properties. Strict naming conventions will be applied to what
-   * qualifies what counts as a getter. See
-   * {@link ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method,
-   * boolean)}.
+   * Creates a {@code BeanReader} for the specified properties of the specified class. You can
+   * optionally specify an array of properties that you intend to read.  If you specify a
+   * zero-length array all properties will be readable. Strict naming conventions will be applied
+   * regarding what which methods qualify as getters.
    *
    * @param beanClass The bean class
-   * @param exclude Whether to exclude or include the specified properties
-   * @param properties The properties you intend to read (may be {@code null} or zero-length)
+   * @param includeExclude Whether to include or exclude the specified properties
+   * @param properties The properties to be included/excluded
    */
-  public BeanReader(Class<? super T> beanClass, boolean exclude, String... properties) {
-    this(beanClass, true, exclude, properties);
+  public BeanReader(Class<? super T> beanClass,
+      IncludeExclude includeExclude,
+      String... properties) {
+    this(beanClass, true, includeExclude, properties);
   }
 
   /**
-   * Creates a {@code BeanReader} for the specified class and the specified properties on that
-   * class. You can optionally specify an array of properties that you intend or do <i>not</i>
-   * intend to read. Specifying {@code null} or a zero-length array will allow you to read
-   * <i>all</i> of the bean's properties. If you intend to use this {@code BeanReader} to
-   * repetitively to read just one or two properties from bulky bean types, explicitly specifying
-   * the properties you intend to read might make the {@code BeanReader} marginally more efficient.
+   * Creates a {@code BeanReader} for the specified properties of the specified class. You can
+   * optionally specify an array of properties that you intend to read.  If you specify a
+   * zero-length array all properties will be readable. If you intend to use this {@code BeanReader}
+   * to repetitively to read just one or two properties from bulky bean types, explicitly specifying
+   * the properties you intend to read might make the {@code BeanReader} more efficient.
    *
-   * <p>Specifying non-existent properties (names that do not correspond to getters) will have no
-   * effect. They will silently be ignored.
+   * <p><i>Specifying one or more non-existent properties will not cause an exception to be
+   * thrown.</i> They will be quietly ignored.
    *
    * @param beanClass The bean class
-   * @param strictNaming Whether or not to apply strict naming conventions to what qualifies as
-   *     a getter. See {@link ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method,
-   *     boolean)}.
-   * @param exclude Whether to exclude or include the specified properties
-   * @param properties The properties you intend to read (may be {@code null} or zero-length)
+   * @param strictNaming If {@code false} all methods with a zero-length parameter list and a
+   *     non-{@code void} return type will be regarded as getters; otherwise strict naming
+   *     conventions will be applied regarding what which methods qualify as getters.
+   * @param includeExclude Whether to include or exclude the specified properties
+   * @param properties The properties to be included/excluded
    */
   public BeanReader(
-      Class<? super T> beanClass, boolean strictNaming, boolean exclude, String... properties) {
-    this.beanClass = Check.notNull(beanClass, "beanClass").ok();
+      Class<? super T> beanClass,
+      boolean strictNaming,
+      IncludeExclude includeExclude,
+      String... properties) {
+    Check.notNull(beanClass);
+    Check.notNull(includeExclude);
     Check.that(properties, "properties").is(deepNotNull());
-    if (properties == null || properties.length == 0) {
-      this.getters = GetterFactory.INSTANCE.getGetters(beanClass, strictNaming);
-    } else {
-      GetterFactory gf = GetterFactory.INSTANCE;
-      Map<String, Getter> copy = new HashMap<>(gf.getGetters(beanClass, strictNaming));
-      if (exclude) {
-        copy.keySet().removeAll(Set.of(properties));
-      } else {
-        copy.keySet().retainAll(Set.of(properties));
-      }
-      this.getters = Map.copyOf(copy);
-    }
+    this.beanClass = beanClass;
+    this.getters = getGetters(strictNaming, includeExclude, properties);
   }
 
   /**
@@ -148,4 +138,19 @@ public class BeanReader<T> {
   public Map<String, Getter> getIncludedGetters() {
     return getters;
   }
+
+  private Map<String, Getter> getGetters(boolean strictNaming, IncludeExclude ie, String[] props) {
+    Map<String, Getter> tmp = GetterFactory.INSTANCE.getGetters(beanClass, strictNaming);
+    if (props.length == 0) {
+      return tmp;
+    }
+    Map<String, Getter> copy = new HashMap<>(tmp);
+    if (ie.isExclude()) {
+      copy.keySet().removeAll(Set.of(props));
+    } else {
+      copy.keySet().retainAll(Set.of(props));
+    }
+    return Map.copyOf(copy);
+  }
+
 }
