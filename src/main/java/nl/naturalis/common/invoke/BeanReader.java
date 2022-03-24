@@ -1,6 +1,5 @@
 package nl.naturalis.common.invoke;
 
-import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
 
