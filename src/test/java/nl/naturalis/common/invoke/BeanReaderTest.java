@@ -8,16 +8,19 @@ public class BeanReaderTest {
 
   @Test
   public void test00() {
-    FooBean fb = new FooBean();
-    fb.setId(10);
-    fb.setFirstName("John");
-    fb.setLastName("Smith");
-    BeanReader<FooBean> br = new BeanReader<>(FooBean.class);
-    int i = br.read(fb, "id");
+
+    Person person = new Person();
+    person.setId(10);
+    person.setFirstName("John");
+    person.setLastName("Smith");
+
+    BeanReader<Person> br = new BeanReader<>(Person.class);
+
+    int i = br.read(person, "id");
     assertEquals(10, i);
-    String s = br.read(fb, "firstName");
+    String s = br.read(person, "firstName");
     assertEquals("John", s);
-    s = br.read(fb, "lastName");
+    s = br.read(person, "lastName");
     assertEquals("Smith", s);
   }
 }

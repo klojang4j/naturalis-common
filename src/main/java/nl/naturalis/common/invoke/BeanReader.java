@@ -14,16 +14,16 @@ import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 
 /**
  * Reads properties from a predetermined type of JavaBean. This class uses the {@code
- * java.lang.invoke} package in stead of reflection to read bean properties. Yet it still uses
+ * java.lang.invoke} package instead of reflection to read bean properties. Yet it still uses
  * reflection to identify getter methods on the bean class. Therefore if you use this class from
  * within a Java module you must still open the module to the naturalis-common module.
  *
- * <p>This class caches relevant data about the bean class such that after the first time you create
- * an instance of a {@code BeanReader} for a particular bean class, subsequent instantiations are
- * essentially for free (no matter which constructor you use).
+ * <p>This class caches relevant data about the bean class such that after the first time you
+ * create an instance of a {@code BeanReader} for a particular bean class, subsequent instantiations
+ * are essentially for free (no matter which constructor you use).
  *
- * @author Ayco Holleman
  * @param <T> The type of the bean
+ * @author Ayco Holleman
  */
 public class BeanReader<T> {
 
@@ -33,9 +33,11 @@ public class BeanReader<T> {
   /**
    * Creates a {@code BeanReader} for the specified properties of the specified class. You can
    * optionally specify an array of properties that you intend to read. Specifying {@code null} or a
-   * zero-length array will allow you to read <i>all</i> of the bean's properties. Strict naming
-   * conventions will be applied to what qualifies as a getter. See {@link
-   * ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method, boolean)}.
+   * zero-length array will allow you to read
+   * <i>all</i> of the bean's properties. Strict naming conventions will be applied to what
+   * qualifies as a getter. See
+   * {@link ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method,
+   * boolean)}.
    *
    * @param beanClass The bean class
    * @param properties The properties you intend to read (may be {@code null} or zero-length)
@@ -47,9 +49,11 @@ public class BeanReader<T> {
   /**
    * Creates a {@code BeanReader} for the specified class. You can optionally specify an array of
    * properties that you intend or do <i>not</i> intend to read. Specifying {@code null} or a
-   * zero-length array will allow you to read <i>all</i> of the bean's properties. Strict naming
-   * conventions will be applied to what qualifies what counts as a getter. See {@link
-   * ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method, boolean)}.
+   * zero-length array will allow you to read
+   * <i>all</i> of the bean's properties. Strict naming conventions will be applied to what
+   * qualifies what counts as a getter. See
+   * {@link ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method,
+   * boolean)}.
    *
    * @param beanClass The bean class
    * @param exclude Whether to exclude or include the specified properties
@@ -71,8 +75,8 @@ public class BeanReader<T> {
    * effect. They will silently be ignored.
    *
    * @param beanClass The bean class
-   * @param strictNaming Whether or not to apply strict naming conventions to what qualifies as a
-   *     getter. See {@link ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method,
+   * @param strictNaming Whether or not to apply strict naming conventions to what qualifies as
+   *     a getter. See {@link ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method,
    *     boolean)}.
    * @param exclude Whether to exclude or include the specified properties
    * @param properties The properties you intend to read (may be {@code null} or zero-length)
@@ -106,12 +110,12 @@ public class BeanReader<T> {
    */
   @SuppressWarnings("unchecked")
   public <U> U read(T bean, String property) throws NoSuchPropertyException {
-    Check.notNull(bean, "bean");
+    Check.notNull(bean, "bean").is(instanceOf(), beanClass, () -> typeMismatch(this, bean));
     Check.notNull(property, "property");
-    Check.on(s -> typeMismatch(this, bean), bean).is(instanceOf(), beanClass);
-    Check.on(s -> noSuchProperty(bean, property), property).is(keyIn(), getters);
+    Getter getter = getters.get(property);
+    Check.that(getter).is(notNull(), () -> noSuchProperty(bean, property));
     try {
-      return (U) getters.get(property).read(bean);
+      return (U) getter.read(bean);
     } catch (Throwable t) {
       throw ExceptionMethods.uncheck(t);
     }

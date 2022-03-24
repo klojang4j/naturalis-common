@@ -14,7 +14,7 @@ public class InvokeException extends RuntimeException {
   private static final String ERR_INCLUDES = "At least one of %s must be a property of %s";
   private static final String ERR_EXCLUDES = "No properties remain after excluding %s from %s";
   private static final String ERR_NOT_READABLE =
-          "Cannot read beans of type %s (bean must be instance of %s)";
+      "Cannot read beans of type %s (bean must be instance of %s)";
 
   public static InvokeException missingNoArgConstructor(Class<?> clazz) {
     return new InvokeException("Missing no-arg constructor on %s", simpleClassName(clazz));
@@ -22,9 +22,9 @@ public class InvokeException extends RuntimeException {
 
   public static InvokeException noSuchConstructor(Class<?> clazz, Class<?>... params) {
     return new InvokeException(
-            "No such constructor: %s(%s)",
-            simpleClassName(clazz),
-            implode(params, ClassMethods::simpleClassName, ", ", 0, -1));
+        "No such constructor: %s(%s)",
+        simpleClassName(clazz),
+        implode(params, ClassMethods::simpleClassName, ", ", 0, -1));
   }
 
   public static Function<String, InvokeException> cannotInstantiate(Class<?> clazz) {
@@ -47,12 +47,12 @@ public class InvokeException extends RuntimeException {
     return s -> new InvokeException(ERR_NOT_PUBLIC, clazz.getName());
   }
 
-  public static Function<String, InvokeException> noPropertiesSelected(
-          Class<?> clazz, boolean exclude, String... properties) {
-    if (exclude) {
-      return s -> new InvokeException(ERR_EXCLUDES, implode(properties), clazz);
+  public static InvokeException noPropertiesSelected(
+      Class<?> clazz, IncludeExclude includeExclude, String... properties) {
+    if (includeExclude.isExclude()) {
+      return new InvokeException(ERR_EXCLUDES, implode(properties), clazz);
     }
-    return s -> new InvokeException(ERR_INCLUDES, implode(properties), clazz);
+    return new InvokeException(ERR_INCLUDES, implode(properties), clazz);
   }
 
   public static InvokeException wrap(Throwable t) {

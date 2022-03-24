@@ -1,55 +1,80 @@
 package nl.naturalis.common.invoke;
 
+import nl.naturalis.common.ExceptionMethods;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
-import nl.naturalis.common.ExceptionMethods;
-import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.ClassMethods.simpleClassName;
-import static nl.naturalis.common.check.CommonChecks.notNull;
 
+/**
+ * Represents a setter for a single property.
+ *
+ * @author Ayco Holleman
+ */
 public class Setter {
 
-  private static final String ERR_NULL = "Value for %s.%s (%s) must be not be null";
-  private static final String ERR_BAD_TYPE = "Value for %s.%s must be instance of %s (was %s)";
-
-  private final MethodHandle method;
+  private final Method method;
+  private final MethodHandle handle;
   private final String property;
-  private final Class<?> paramType;
 
   Setter(Method method, String property) {
-    paramType = method.getParameterTypes()[0];
+    this.method = method;
     this.property = property;
     try {
-      this.method = MethodHandles.lookup().unreflect(method);
+      this.handle = MethodHandles.lookup().unreflect(method);
     } catch (IllegalAccessException e) {
       throw ExceptionMethods.uncheck(e);
     }
   }
 
+  /**
+   * Returns the name of the property.
+   *
+   * @return The name of the property
+   */
   public String getProperty() {
     return property;
   }
 
+  /**
+   * Returns the type of the property.
+   *
+   * @return The type of the property
+   */
   public Class<?> getParamType() {
-    return paramType;
+    return method.getParameterTypes()[0];
   }
 
-  public void write(Object bean, Object value) throws Throwable {
+  /**
+   * Sets the property on the specified bean to the specified value.
+   *
+   * @param bean The object receiving the value
+   * @param value The value
+   * @throws IllegalAssignmentException If the value cannot be cast to the type of the property,
+   *     or if the value is {@code null} and the property has a primitive type. This is a {@link
+   *     RuntimeException}, but you might still want to catch it as it can often be handled in a
+   *     meaningful way.
+   * @throws Throwable The {@code Throwable} thrown from inside the {@code java.lang.invoke}
+   *     package
+   */
+  public void write(Object bean, Object value) throws IllegalAssignmentException, Throwable {
     if (value == null) {
       if (getParamType().isPrimitive()) {
-        String cn0 = bean.getClass().getSimpleName();
-        String cn1 = getParamType().getSimpleName();
-        Check.that(value).is(notNull(), ERR_NULL, cn0, property, cn1);
+        throw illegalAssignment(null);
       }
     }
     try {
-      method.invoke(bean, value);
+      handle.invoke(bean, value);
     } catch (ClassCastException e) {
-      String cn0 = bean.getClass().getSimpleName();
-      String cn1 = simpleClassName(getParamType());
-      String cn2 = simpleClassName(value.getClass());
-      Check.fail(ERR_BAD_TYPE, cn0, property, cn1, cn2);
+      throw illegalAssignment(value);
     }
+  }
+
+  private IllegalAssignmentException illegalAssignment(Object value) {
+    return new IllegalAssignmentException(
+        method.getDeclaringClass(),
+        property,
+        getParamType(),
+        value);
   }
 }
