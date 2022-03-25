@@ -15,10 +15,10 @@ import static nl.naturalis.common.invoke.IncludeExclude.INCLUDE;
 import static nl.naturalis.common.invoke.NoSuchPropertyException.*;
 
 /**
- * A bean writer class that uses the {@code java.lang.invoke} package instead of reflection to set
- * bean properties. Although this class uses {@link MethodHandle} instances to extract values from
- * the bean, it still uses reflection to identify the getter methods on the bean class. Therefore if
- * you use this class within a Java module you must open the module to the naturalis-common module.
+ * A dynamic bean writer class. This class uses the {@code java.lang.invoke} package instead of
+ * reflection to read bean properties. Yet it still uses reflection to identify the getter methods
+ * of the bean class. Therefore, if you use this class from within a Java module you must still open
+ * the module to the naturalis-common module.
  *
  * @param <T> The type of the bean
  * @author Ayco Holleman
@@ -27,9 +27,9 @@ public final class BeanWriter<T> {
 
   /**
    * Returns a {@code BeanWriter} that allows for "loose typing" of the values to be assigned to the
-   * bean's properties. A {@link Morph} object will be used to morph input values to the type of the
-   * destination property. You can optionally specify an array of properties that you intend to
-   * write. Specifying a zero-length array means all properties will be writable.
+   * bean's properties. A {@link Morph} object will be used to adapt (if necessary) input values to
+   * the type of the destination property. You can optionally specify an array of properties that
+   * you intend to write. Specifying a zero-length array means all properties will be writable.
    *
    * @param <U> The type of the bean
    * @param beanClass The bean class
@@ -37,11 +37,14 @@ public final class BeanWriter<T> {
    * @return A {@code BeanWriter} with "loose typing" behavior
    */
   public static <U> BeanWriter<U> getTolerantWriter(Class<U> beanClass, String... properties) {
-    return new BeanWriter<>(beanClass, Morph::convert, INCLUDE, properties);
+    return new BeanWriter<>(beanClass,
+        (setter, value) -> Morph.convert(value, setter.getParamType()),
+        INCLUDE,
+        properties);
   }
 
   private final Class<T> beanClass;
-  private final ThrowingBiFunction<Object, Class<?>, Object, Throwable> converter;
+  private final ThrowingBiFunction<Setter, Object, Object, Throwable> converter;
   private final Map<String, Setter> setters;
 
   /**
@@ -63,12 +66,20 @@ public final class BeanWriter<T> {
    * being assigned to properties.
    *
    * @param beanClass The bean class
-   * @param converter A conversion function for input values
+   * @param converter A conversion function for input values. The conversion is given the {@link
+   *     Setter} for the property to be set as the first argument, and the input value as the second
+   *     argument. The return value should be the actual value to assign to the property. The {@code
+   *     Setter} should only be used to get the {@link Setter#getProperty() name} and {@link
+   *     Setter#getParamType() type} of the property to be set. You <i>should not</i> use it to
+   *     actually {@link Setter#write(Object, Object) write} the property, as this will happen
+   *     anyhow once the conversion function returns. Unless the conversion fails for extraordinary
+   *     reasons, it should throw an {@link IllegalAssignmentException} upon failure. You can again
+   *     use the {@code Setter} to {@link Setter#illegalAssignment(Object) generate} the exception.
    * @param properties The properties you allow to be written
    */
   public BeanWriter(
       Class<T> beanClass,
-      ThrowingBiFunction<Object, Class<?>, Object, Throwable> converter,
+      ThrowingBiFunction<Setter, Object, Object, Throwable> converter,
       String... properties) {
     this(beanClass, converter, INCLUDE, properties);
   }
@@ -94,7 +105,7 @@ public final class BeanWriter<T> {
    * Creates a {@code BeanWriter} for the specified class. You can optionally specify an array of
    * properties that you intend or do <i>not</i> intend to write. If you specify a zero-length array
    * all properties will be writable. If you intend to use this {@code BeanWriter} to repetitively
-   * to write just one or two properties from bulky bean types, explicitly specifying the properties
+   * write just one or two properties from bulky bean types, explicitly specifying the properties
    * you intend to write might make the {@code BeanWriter} more efficient. Input values will first
    * be converted by the specified conversion function before being assigned to properties.
    *
@@ -102,13 +113,21 @@ public final class BeanWriter<T> {
    * thrown.</i> They will be quietly ignored.
    *
    * @param beanClass The bean class
-   * @param converter A conversion function for input values
+   * @param converter A conversion function for input values. The conversion is given the {@link
+   *     Setter} for the property to be set as the first argument, and the input value as the second
+   *     argument. The return value should be the actual value to assign to the property. The {@code
+   *     Setter} should only be used to get the {@link Setter#getProperty() name} and {@link
+   *     Setter#getParamType() type} of the property to be set. You <i>should not</i> use it to
+   *     actually {@link Setter#write(Object, Object) write} the property, as this will happen
+   *     anyhow once the conversion function returns. Unless the conversion fails for extraordinary
+   *     reasons, it should throw an {@link IllegalAssignmentException} upon failure. You can again
+   *     use the {@code Setter} to {@link Setter#illegalAssignment(Object) generate} the exception.
    * @param includeExclude Whether to include or exclude the specified properties
    * @param properties The properties to be included/excluded
    */
   public BeanWriter(
       Class<T> beanClass,
-      ThrowingBiFunction<Object, Class<?>, Object, Throwable> converter,
+      ThrowingBiFunction<Setter, Object, Object, Throwable> converter,
       IncludeExclude includeExclude,
       String... properties) {
     this.beanClass = Check.notNull(beanClass, "beanClass").ok();
@@ -147,7 +166,7 @@ public final class BeanWriter<T> {
    *     package
    */
   public void copy(T fromBean, T toBean) throws Throwable {
-    BeanReader<T> reader = new BeanReader<>(beanClass);
+    BeanReader<T> reader = getBeanReader();
     for (Setter setter : setters.values()) {
       set(toBean, setter, reader.read(fromBean, setter.getProperty()));
     }
@@ -162,7 +181,7 @@ public final class BeanWriter<T> {
    *     package
    */
   public void copyNonNull(T fromBean, T toBean) throws Throwable {
-    BeanReader<T> reader = new BeanReader<>(beanClass);
+    BeanReader<T> reader = getBeanReader();
     for (Setter setter : setters.values()) {
       Object v = reader.read(fromBean, setter.getProperty());
       if (v != null) {
@@ -181,7 +200,7 @@ public final class BeanWriter<T> {
    *     package
    */
   public void enrich(T fromBean, T toBean) throws Throwable {
-    BeanReader<T> reader = new BeanReader<>(beanClass);
+    BeanReader<T> reader = getBeanReader();
     for (Setter setter : setters.values()) {
       Object v = reader.read(fromBean, setter.getProperty());
       if (v != null && reader.read(toBean, setter.getProperty()) == null) {
@@ -199,11 +218,11 @@ public final class BeanWriter<T> {
    * @throws IllegalAssignmentException If a value cannot be cast or converted to the type of
    *     the destination property, or if the value is {@code null} and the destination property has
    *     a primitive type. This is a {@link RuntimeException}, but you might still want to catch it
-   *     as it can often be handled it in a meaningful way.
+   *     as it can often be handled in a meaningful way.
    * @throws Throwable The {@code Throwable} thrown from inside the {@code java.lang.invoke}
    *     package
    */
-  public void copy(Map<String, ?> fromMap, T toBean) throws Throwable {
+  public void copy(Map<String, ?> fromMap, T toBean) throws IllegalAssignmentException, Throwable {
     Check.notNull(fromMap, "fromMap");
     Check.notNull(toBean, "toBean");
     for (Map.Entry<String, ?> e : fromMap.entrySet()) {
@@ -225,7 +244,7 @@ public final class BeanWriter<T> {
    * @throws IllegalAssignmentException If a value cannot be cast or converted to the type of
    *     the destination property, or if the value is {@code null} and the destination property has
    *     a primitive type. This is a {@link RuntimeException}, but you might still want to catch it
-   *     as it can often be handled it in a meaningful way.
+   *     as it can often be handled in a meaningful way.
    * @throws Throwable The {@code Throwable} thrown from inside the {@code java.lang.invoke}
    *     package
    */
@@ -252,7 +271,7 @@ public final class BeanWriter<T> {
    * @throws IllegalAssignmentException If a value cannot be cast or converted to the type of
    *     the destination property, or if the value is {@code null} and the destination property has
    *     a primitive type. This is a {@link RuntimeException}, but you might still want to catch it
-   *     as it can often be handled it in a meaningful way.
+   *     as it can often be handled in a meaningful way.
    * @throws Throwable The {@code Throwable} thrown from inside the {@code java.lang.invoke}
    *     package
    */
@@ -260,7 +279,7 @@ public final class BeanWriter<T> {
       throws IllegalAssignmentException, Throwable {
     Check.notNull(fromMap, "fromMap");
     Check.notNull(toBean, "toBean");
-    BeanReader<T> reader = new BeanReader<>(beanClass);
+    BeanReader<T> reader = getBeanReader();
     for (Map.Entry<String, ?> e : fromMap.entrySet()) {
       if (e.getValue() != null && e.getKey() != null) {
         Setter setter = setters.get(e.getKey());
@@ -272,18 +291,19 @@ public final class BeanWriter<T> {
   }
 
   /**
-   * Returns the type of the objects this {@code BeanReader} can read.
+   * Returns the type of the objects this {@code BeanWriter} can write to.
    *
-   * @return The type of the objects this {@code BeanReader} can read
+   * @return The type of the objects this {@code BeanWriter} can write to
    */
   public Class<? super T> getBeanClass() {
     return beanClass;
   }
 
   /**
-   * Returns the bean properties that can be set by this {@code BeanWriter}, which may not be all
-   * properties, as the constructor allows you to {@link BeanWriter#BeanWriter(Class, String...)
-   * exclude} from being set by the {@code BeanWriter}.
+   * Returns the bean properties that can be set by this {@code BeanWriter}. This may be a subset of
+   * all writable properties of the bean class, as the constructor allows you to {@link
+   * BeanWriter#BeanWriter(Class, String...) exclude} properties from being set by this {@code
+   * BeanWriter}.
    *
    * @return The bean properties that can be set by this {@code BeanWriter}
    */
@@ -323,16 +343,21 @@ public final class BeanWriter<T> {
     } else {
       Object val;
       try {
-        val = converter.apply(value, setter.getParamType());
+        val = converter.apply(setter, value);
       } catch (TypeConversionException e) {
-        throw new IllegalAssignmentException(
-            beanClass,
-            setter.getProperty(),
-            setter.getParamType(),
-            value);
+        throw setter.illegalAssignment(value);
       }
       setter.write(bean, val);
     }
+  }
+
+  private BeanReader<T> beanReader;
+
+  private BeanReader<T> getBeanReader() {
+    if (beanReader == null) {
+      beanReader = new BeanReader<>(beanClass, setters.keySet().toArray(String[]::new));
+    }
+    return beanReader;
   }
 
 }

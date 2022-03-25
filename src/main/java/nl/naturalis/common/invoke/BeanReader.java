@@ -13,14 +13,10 @@ import static nl.naturalis.common.invoke.InvokeException.typeMismatch;
 import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 
 /**
- * Reads properties from a predetermined type of JavaBean. This class uses the {@code
- * java.lang.invoke} package instead of reflection to read bean properties. Yet it still uses
- * reflection to identify getter methods on the bean class. Therefore if you use this class from
- * within a Java module you must still open the module to the naturalis-common module.
- *
- * <p>This class caches relevant data about the bean class such that after the first time you
- * create an instance of a {@code BeanReader} for a particular bean class, subsequent instantiations
- * are essentially for free (no matter which constructor you use).
+ * A dynamic bean reader class. This class uses the {@code java.lang.invoke} package instead of
+ * reflection to read bean properties. Yet it still uses reflection to identify the getter methods
+ * of the bean class. Therefore, if you use this class from within a Java module you must still open
+ * the module to the naturalis-common module.
  *
  * @param <T> The type of the bean
  * @author Ayco Holleman
@@ -61,10 +57,10 @@ public final class BeanReader<T> {
 
   /**
    * Creates a {@code BeanReader} for the specified properties of the specified class. You can
-   * optionally specify an array of properties that you intend to read.  If you specify a
-   * zero-length array all properties will be readable. If you intend to use this {@code BeanReader}
-   * to repetitively to read just one or two properties from bulky bean types, explicitly specifying
-   * the properties you intend to read might make the {@code BeanReader} more efficient.
+   * optionally specify an array of properties that you intend to read. If you specify a zero-length
+   * array all properties will be readable. If you intend to use this {@code BeanReader} to
+   * repetitively read just one or two properties from bulky bean types, explicitly specifying the
+   * properties you intend to read might make the {@code BeanReader} more efficient.
    *
    * <p><i>Specifying one or more non-existent properties will not cause an exception to be
    * thrown.</i> They will be quietly ignored.

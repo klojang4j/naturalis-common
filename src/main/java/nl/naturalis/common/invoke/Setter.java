@@ -70,7 +70,14 @@ public class Setter {
     }
   }
 
-  private IllegalAssignmentException illegalAssignment(Object value) {
+  /**
+   * Generates an {@link IllegalAssignmentException} indicating that the specified value cannot be
+   * assigned to the property encapsulated by this {@code Setter}.
+   *
+   * @param value The value
+   * @return An {@link IllegalAssignmentException} for the specified value
+   */
+  public IllegalAssignmentException illegalAssignment(Object value) {
     return new IllegalAssignmentException(
         method.getDeclaringClass(),
         property,

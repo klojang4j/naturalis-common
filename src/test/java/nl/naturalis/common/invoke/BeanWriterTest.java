@@ -116,6 +116,79 @@ public class BeanWriterTest {
     assertEquals(person0.getFirstName(), person1.getFirstName());
     assertEquals(person0.getLastName(), person1.getLastName());
     assertEquals(person0.getHobbies(), person1.getHobbies());
+    assertEquals(person0.getLastModified(), person1.getLastModified());
+    assertEquals(person0.getSomeCharSequence(), person1.getSomeCharSequence());
+    assertEquals('A', person1.getSomeChar());
+  }
+
+  @Test
+  public void copyNonNull00() throws Throwable {
+    Person person0 = new Person();
+    person0.setId(100);
+    person0.setFirstName("John");
+    person0.setLastName(null);
+    person0.setHobbies(null);
+    person0.setLastModified(LocalDate.of(2022, 04, 03));
+    person0.setSomeCharSequence("Hello World");
+
+    Person person1 = new Person();
+    person1.setId(80);
+    person1.setFirstName("Patrick");
+    person1.setLastName("Steward");
+    person1.setHobbies(List.of("Tennis"));
+    person1.setLastModified(LocalDate.of(2021, 04, 03));
+    person1.setSomeCharSequence("Hi There");
+    person1.setSomeChar('A');
+
+    BeanWriter writer = new BeanWriter(Person.class, INCLUDE,
+        "id",
+        "firstName",
+        "lastName",
+        "hobbies",
+        "lastModified",
+        "someCharSequence");
+
+    writer.copyNonNull(person0, person1);
+    assertEquals(person0.getId(), person1.getId());
+    assertEquals(person0.getFirstName(), person1.getFirstName());
+    assertEquals("Steward", person1.getLastName());
+    assertEquals(List.of("Tennis"), person1.getHobbies());
+    assertEquals(person0.getSomeCharSequence(), person1.getSomeCharSequence());
+    assertEquals('A', person1.getSomeChar());
+  }
+
+  @Test
+  public void enrich00() throws Throwable {
+    Person person0 = new Person();
+    person0.setId(100);
+    person0.setFirstName("John");
+    person0.setLastName(null);
+    person0.setHobbies(null);
+    person0.setLastModified(LocalDate.of(2022, 04, 03));
+    person0.setSomeCharSequence("Hello World");
+
+    Person person1 = new Person();
+    person1.setId(80);
+    person1.setFirstName("Patrick");
+    person1.setLastName("Steward");
+    person1.setHobbies(List.of("Tennis"));
+    person1.setLastModified(null);
+    person1.setSomeCharSequence(null);
+    person1.setSomeChar('A');
+
+    BeanWriter writer = new BeanWriter(Person.class, INCLUDE,
+        "id",
+        "firstName",
+        "lastName",
+        "hobbies",
+        "lastModified",
+        "someCharSequence");
+
+    writer.enrich(person0, person1);
+    assertEquals(80, person1.getId());
+    assertEquals("Patrick", person1.getFirstName());
+    assertEquals("Steward", person1.getLastName());
+    assertEquals(List.of("Tennis"), person1.getHobbies());
     assertEquals(person0.getSomeCharSequence(), person1.getSomeCharSequence());
     assertEquals('A', person1.getSomeChar());
   }
