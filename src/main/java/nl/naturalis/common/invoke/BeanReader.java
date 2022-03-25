@@ -28,9 +28,9 @@ public final class BeanReader<T> {
 
   /**
    * Creates a {@code BeanReader} for the specified properties of the specified class. You can
-   * optionally specify an array of properties that you intend to read.  If you specify a
-   * zero-length array all properties will be readable. Strict naming conventions will be applied
-   * regarding what which methods qualify as getters.
+   * optionally specify an array of properties that you intend to read. If you specify a zero-length
+   * array all properties will be readable. Strict naming conventions will be applied regarding what
+   * which methods qualify as getters.
    *
    * @param beanClass The bean class
    * @param properties The properties to be included/excluded
@@ -41,9 +41,9 @@ public final class BeanReader<T> {
 
   /**
    * Creates a {@code BeanReader} for the specified properties of the specified class. You can
-   * optionally specify an array of properties that you intend to read.  If you specify a
-   * zero-length array all properties will be readable. Strict naming conventions will be applied
-   * regarding what which methods qualify as getters.
+   * optionally specify an array of properties that you intend to read. If you specify a zero-length
+   * array all properties will be readable. Strict naming conventions will be applied regarding what
+   * which methods qualify as getters.
    *
    * @param beanClass The bean class
    * @param includeExclude Whether to include or exclude the specified properties

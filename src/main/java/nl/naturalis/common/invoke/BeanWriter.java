@@ -5,14 +5,15 @@ import nl.naturalis.common.TypeConversionException;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.ThrowingBiFunction;
 
-import java.lang.invoke.MethodHandle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonChecks.empty;
+import static nl.naturalis.common.check.CommonChecks.notNull;
 import static nl.naturalis.common.invoke.IncludeExclude.INCLUDE;
-import static nl.naturalis.common.invoke.NoSuchPropertyException.*;
+import static nl.naturalis.common.invoke.NoSuchPropertyException.noPropertiesSelected;
+import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 
 /**
  * A dynamic bean writer class. This class uses the {@code java.lang.invoke} package instead of
@@ -158,7 +159,8 @@ public final class BeanWriter<T> {
   }
 
   /**
-   * Copies all values, including null-values, from the first bean to the second bean.
+   * Overwrites all properties in the second bean with the values they have in the first bean. This
+   * can potentially nullify non-null values in the second bean.
    *
    * @param fromBean The bean from which to copy the values.
    * @param toBean The bean to which to copy the values.
@@ -191,8 +193,8 @@ public final class BeanWriter<T> {
   }
 
   /**
-   * Copies all values from the first bean to the second bean, but only if the value in the second
-   * bean is {@code null}.
+   * Overwrites all properties in the second bean whose value is {@codd null} with the values they
+   * have in the first bean. Non-null properties in the second bean are left alone.
    *
    * @param fromBean The bean from which to copy the values.
    * @param toBean The bean to which to copy the values.
@@ -210,8 +212,8 @@ public final class BeanWriter<T> {
   }
 
   /**
-   * Copies all values, including null-values, from the specified map to the specified bean. Map
-   * keys that do not correspond to bean properties are quietly ignored.
+   * Overwrites all properties in the specified bean with the corresponding values in the specified
+   * map. This can potentially nullify non-null values in the target bean.
    *
    * @param fromMap The {@code Map} providing the data for the JavaBean
    * @param toBean The JavaBean to populate
@@ -262,9 +264,9 @@ public final class BeanWriter<T> {
   }
 
   /**
-   * Copies all values from the specified map to the specified bean, but only if the value in the
-   * target bean is {@code null}. Map keys that do not correspond to bean properties are quietly
-   * ignored.
+   * Overwrites all properties in the specified bean whose value is {@codd null} with the
+   * corresponding values in the specified map. Non-null properties in the target bean are left
+   * alone.
    *
    * @param fromMap The {@code Map} providing the data for the JavaBean
    * @param toBean The JavaBean to populate

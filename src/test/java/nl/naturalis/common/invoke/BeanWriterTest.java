@@ -1,10 +1,13 @@
 package nl.naturalis.common.invoke;
 
+import nl.naturalis.common.util.MapWriter;
 import org.junit.Test;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
+import static nl.naturalis.common.invoke.IncludeExclude.EXCLUDE;
 import static nl.naturalis.common.invoke.IncludeExclude.INCLUDE;
 import static org.junit.Assert.*;
 
@@ -110,8 +113,8 @@ public class BeanWriterTest {
         "hobbies",
         "lastModified",
         "someCharSequence");
-
     writer.copy(person0, person1);
+
     assertEquals(person0.getId(), person1.getId());
     assertEquals(person0.getFirstName(), person1.getFirstName());
     assertEquals(person0.getLastName(), person1.getLastName());
@@ -119,6 +122,73 @@ public class BeanWriterTest {
     assertEquals(person0.getLastModified(), person1.getLastModified());
     assertEquals(person0.getSomeCharSequence(), person1.getSomeCharSequence());
     assertEquals('A', person1.getSomeChar());
+  }
+
+  @Test
+  public void copy01() throws Throwable {
+    Person person0 = new Person();
+    person0.setId(100);
+    person0.setFirstName("John");
+    person0.setLastName("Smith");
+    person0.setHobbies(null);
+    person0.setLastModified(LocalDate.of(2022, 04, 03));
+    person0.setSomeCharSequence("Hello World");
+
+    Person person1 = new Person();
+    person1.setId(80);
+    person1.setFirstName("Patrick");
+    person1.setLastName("Steward");
+    person1.setHobbies(List.of("Tennis"));
+    person1.setLastModified(LocalDate.of(2021, 04, 03));
+    person1.setSomeCharSequence("Hi There");
+    person1.setSomeChar('A');
+
+    BeanWriter writer = new BeanWriter(Person.class, INCLUDE,
+        "firstName",
+        "lastName",
+        "hobbies",
+        "lastModified",
+        "someCharSequence");
+    writer.copy(person0, person1);
+
+    assertEquals(80, person1.getId()); // id not included
+    assertEquals(person0.getFirstName(), person1.getFirstName());
+    assertEquals(person0.getLastName(), person1.getLastName());
+    assertEquals(person0.getHobbies(), person1.getHobbies());
+    assertEquals(person0.getLastModified(), person1.getLastModified());
+    assertEquals(person0.getSomeCharSequence(), person1.getSomeCharSequence());
+    assertEquals('A', person1.getSomeChar());
+  }
+
+  @Test
+  public void copy02() throws Throwable {
+    Person person0 = new Person();
+    person0.setId(100);
+    person0.setFirstName("John");
+    person0.setLastName("Smith");
+    person0.setHobbies(null);
+    person0.setLastModified(LocalDate.of(2022, 04, 03));
+    person0.setSomeCharSequence("Hello World");
+
+    Person person1 = new Person();
+    person1.setId(80);
+    person1.setFirstName("Patrick");
+    person1.setLastName("Steward");
+    person1.setHobbies(List.of("Tennis"));
+    person1.setLastModified(LocalDate.of(2021, 04, 03));
+    person1.setSomeCharSequence("Hi There");
+    person1.setSomeChar('A');
+
+    BeanWriter writer = new BeanWriter(Person.class, EXCLUDE, "firstName", "lastName");
+    writer.copy(person0, person1);
+
+    assertEquals(person0.getId(), person1.getId()); // id not included
+    assertEquals("Patrick", person1.getFirstName());
+    assertEquals("Steward", person1.getLastName());
+    assertEquals(person0.getHobbies(), person1.getHobbies());
+    assertEquals(person0.getLastModified(), person1.getLastModified());
+    assertEquals(person0.getSomeCharSequence(), person1.getSomeCharSequence());
+    assertEquals('\0', person1.getSomeChar()); // Yes, that's EXCLUDE for you
   }
 
   @Test
@@ -147,12 +217,49 @@ public class BeanWriterTest {
         "hobbies",
         "lastModified",
         "someCharSequence");
-
     writer.copyNonNull(person0, person1);
+
     assertEquals(person0.getId(), person1.getId());
     assertEquals(person0.getFirstName(), person1.getFirstName());
     assertEquals("Steward", person1.getLastName());
     assertEquals(List.of("Tennis"), person1.getHobbies());
+    assertEquals(person0.getLastModified(), person1.getLastModified());
+    assertEquals(person0.getSomeCharSequence(), person1.getSomeCharSequence());
+    assertEquals('A', person1.getSomeChar());
+  }
+
+  @Test
+  public void copyNonNull01() throws Throwable {
+    Person person0 = new Person();
+    person0.setId(100);
+    person0.setFirstName("John");
+    person0.setLastName(null);
+    person0.setHobbies(null);
+    person0.setLastModified(LocalDate.of(2022, 04, 03));
+    person0.setSomeCharSequence("Hello World");
+
+    Person person1 = new Person();
+    person1.setId(80);
+    person1.setFirstName("Patrick");
+    person1.setLastName("Steward");
+    person1.setHobbies(List.of("Tennis"));
+    person1.setLastModified(LocalDate.of(2021, 04, 03));
+    person1.setSomeCharSequence("Hi There");
+    person1.setSomeChar('A');
+
+    BeanWriter writer = new BeanWriter(Person.class, INCLUDE,
+        "firstName",
+        "lastName",
+        "hobbies",
+        "lastModified",
+        "someCharSequence");
+    writer.copyNonNull(person0, person1);
+
+    assertEquals(80, person1.getId()); // id not included
+    assertEquals(person0.getFirstName(), person1.getFirstName());
+    assertEquals("Steward", person1.getLastName());
+    assertEquals(List.of("Tennis"), person1.getHobbies());
+    assertEquals(person0.getLastModified(), person1.getLastModified());
     assertEquals(person0.getSomeCharSequence(), person1.getSomeCharSequence());
     assertEquals('A', person1.getSomeChar());
   }
@@ -183,13 +290,88 @@ public class BeanWriterTest {
         "hobbies",
         "lastModified",
         "someCharSequence");
-
     writer.enrich(person0, person1);
+
     assertEquals(80, person1.getId());
     assertEquals("Patrick", person1.getFirstName());
     assertEquals("Steward", person1.getLastName());
     assertEquals(List.of("Tennis"), person1.getHobbies());
+    assertEquals(person0.getLastModified(), person1.getLastModified());
     assertEquals(person0.getSomeCharSequence(), person1.getSomeCharSequence());
+    assertEquals('A', person1.getSomeChar());
+  }
+
+  @Test
+  public void enrich01() throws Throwable {
+    Person person0 = new Person();
+    person0.setId(100);
+    person0.setFirstName("John");
+    person0.setLastName(null);
+    person0.setHobbies(null);
+    person0.setLastModified(LocalDate.of(2022, 04, 03));
+    person0.setSomeCharSequence("Hello World");
+
+    Person person1 = new Person();
+    person1.setId(80);
+    person1.setFirstName("Patrick");
+    person1.setLastName("Steward");
+    person1.setHobbies(List.of("Tennis"));
+    person1.setLastModified(null);
+    person1.setSomeCharSequence(null);
+    person1.setSomeChar('A');
+
+    BeanWriter writer = new BeanWriter(Person.class, INCLUDE,
+        "id",
+        "firstName",
+        "lastName",
+        "hobbies",
+        "someCharSequence");
+    writer.enrich(person0, person1);
+
+    assertEquals(80, person1.getId());
+    assertEquals("Patrick", person1.getFirstName());
+    assertEquals("Steward", person1.getLastName());
+    assertEquals(List.of("Tennis"), person1.getHobbies());
+    assertNull(person1.getLastModified()); // dateLastModified not included
+    assertEquals(person0.getSomeCharSequence(), person1.getSomeCharSequence());
+    assertEquals('A', person1.getSomeChar());
+  }
+
+  @Test
+  public void mapCopy00() throws Throwable {
+    Map<String, Object> person0 = new MapWriter()
+        .set("id", 100)
+        .set("firstName", "John")
+        .set("lastName", "Smith")
+        .set("hobbies", null)
+        .set("lastModified", LocalDate.of(2022, 04, 03))
+        .set("someCharSequence", "Hello World")
+        .getMap();
+
+    Person person1 = new Person();
+    person1.setId(80);
+    person1.setFirstName("Patrick");
+    person1.setLastName("Steward");
+    person1.setHobbies(List.of("Tennis"));
+    person1.setLastModified(LocalDate.of(2021, 04, 03));
+    person1.setSomeCharSequence("Hi There");
+    person1.setSomeChar('A');
+
+    BeanWriter writer = new BeanWriter(Person.class, INCLUDE,
+        "id",
+        "firstName",
+        "lastName",
+        "hobbies",
+        "lastModified",
+        "someCharSequence");
+    writer.copy(person0, person1);
+
+    assertEquals(person0.get("id"), person1.getId());
+    assertEquals(person0.get("firstName"), person1.getFirstName());
+    assertEquals(person0.get("lastName"), person1.getLastName());
+    assertEquals(person0.get("hobbies"), person1.getHobbies());
+    assertEquals(person0.get("lastModified"), person1.getLastModified());
+    assertEquals(person0.get("someCharSequence"), person1.getSomeCharSequence());
     assertEquals('A', person1.getSomeChar());
   }
 
