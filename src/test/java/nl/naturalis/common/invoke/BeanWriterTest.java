@@ -375,4 +375,82 @@ public class BeanWriterTest {
     assertEquals('A', person1.getSomeChar());
   }
 
+  @Test
+  public void mapCopyNonNull00() throws Throwable {
+
+    Map<String, Object> person0 = new MapWriter()
+        .set("id", 100)
+        .set("firstName", "John")
+        .set("lastName", null)
+        .set("hobbies", null)
+        .set("lastModified", LocalDate.of(2022, 04, 03))
+        .set("someCharSequence", "Hello World")
+        .getMap();
+
+    Person person1 = new Person();
+    person1.setId(80);
+    person1.setFirstName("Patrick");
+    person1.setLastName("Steward");
+    person1.setHobbies(List.of("Tennis"));
+    person1.setLastModified(LocalDate.of(2021, 04, 03));
+    person1.setSomeCharSequence("Hi There");
+    person1.setSomeChar('A');
+
+    BeanWriter writer = new BeanWriter(Person.class, INCLUDE,
+        "id",
+        "firstName",
+        "lastName",
+        "hobbies",
+        "lastModified",
+        "someCharSequence");
+    writer.copyNonNull(person0, person1);
+
+    assertEquals(person0.get("id"), person1.getId());
+    assertEquals(person0.get("firstName"), person1.getFirstName());
+    assertEquals("Steward", person1.getLastName());
+    assertEquals(List.of("Tennis"), person1.getHobbies());
+    assertEquals(person0.get("lastModified"), person1.getLastModified());
+    assertEquals(person0.get("someCharSequence"), person1.getSomeCharSequence());
+    assertEquals('A', person1.getSomeChar());
+  }
+
+  @Test
+  public void mapEnrich00() throws Throwable {
+
+    Map<String, Object> person0 = new MapWriter()
+        .set("id", 100)
+        .set("firstName", "John")
+        .set("lastName", null)
+        .set("hobbies", null)
+        .set("lastModified", LocalDate.of(2022, 04, 03))
+        .set("someCharSequence", "Hello World")
+        .getMap();
+
+    Person person1 = new Person();
+    person1.setId(80);
+    person1.setFirstName("Patrick");
+    person1.setLastName("Steward");
+    person1.setHobbies(List.of("Tennis"));
+    person1.setLastModified(null);
+    person1.setSomeCharSequence(null);
+    person1.setSomeChar('A');
+
+    BeanWriter writer = new BeanWriter(Person.class, INCLUDE,
+        "id",
+        "firstName",
+        "lastName",
+        "hobbies",
+        "lastModified",
+        "someCharSequence");
+    writer.enrich(person0, person1);
+
+    assertEquals(80, person1.getId());
+    assertEquals("Patrick", person1.getFirstName());
+    assertEquals("Steward", person1.getLastName());
+    assertEquals(List.of("Tennis"), person1.getHobbies());
+    assertEquals(person0.get("lastModified"), person1.getLastModified());
+    assertEquals(person0.get("someCharSequence"), person1.getSomeCharSequence());
+    assertEquals('A', person1.getSomeChar());
+  }
+
 }
