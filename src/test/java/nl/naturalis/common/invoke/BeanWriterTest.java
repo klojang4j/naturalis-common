@@ -1,11 +1,13 @@
 package nl.naturalis.common.invoke;
 
+import nl.naturalis.common.function.ThrowingBiFunction;
 import nl.naturalis.common.util.MapWriter;
 import org.junit.Test;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 import static nl.naturalis.common.invoke.IncludeExclude.EXCLUDE;
 import static nl.naturalis.common.invoke.IncludeExclude.INCLUDE;
@@ -179,6 +181,22 @@ public class BeanWriterTest {
   }
 
   @Test
+  public void set17() throws Throwable {
+    ThrowingBiFunction<Setter, Object, Object, Throwable> tbf = (setter, value) -> {
+      if (setter.getParamType() == String.class) {
+        return String.valueOf(value);
+      }
+      return value;
+    };
+    Person person = new Person();
+    BeanWriter writer = new BeanWriter(Person.class, tbf);
+    writer.set(person, "firstName", new StringBuilder("Jack"));
+    writer.set(person, "lastName", 42);
+    assertEquals("Jack", person.getFirstName());
+    assertEquals("42", person.getLastName());
+  }
+
+  @Test
   public void copy00() throws Throwable {
     Person person0 = new Person();
     person0.setId(100);
@@ -197,7 +215,8 @@ public class BeanWriterTest {
     person1.setSomeCharSequence("Hi There");
     person1.setSomeChar('A');
 
-    BeanWriter writer = new BeanWriter(Person.class, INCLUDE,
+    BeanWriter writer = new BeanWriter(Person.class,
+        INCLUDE,
         "id",
         "firstName",
         "lastName",
@@ -234,7 +253,8 @@ public class BeanWriterTest {
     person1.setSomeCharSequence("Hi There");
     person1.setSomeChar('A');
 
-    BeanWriter writer = new BeanWriter(Person.class, INCLUDE,
+    BeanWriter writer = new BeanWriter(Person.class,
+        INCLUDE,
         "firstName",
         "lastName",
         "hobbies",
@@ -301,7 +321,8 @@ public class BeanWriterTest {
     person1.setSomeCharSequence("Hi There");
     person1.setSomeChar('A');
 
-    BeanWriter writer = new BeanWriter(Person.class, INCLUDE,
+    BeanWriter writer = new BeanWriter(Person.class,
+        INCLUDE,
         "id",
         "firstName",
         "lastName",
@@ -338,7 +359,8 @@ public class BeanWriterTest {
     person1.setSomeCharSequence("Hi There");
     person1.setSomeChar('A');
 
-    BeanWriter writer = new BeanWriter(Person.class, INCLUDE,
+    BeanWriter writer = new BeanWriter(Person.class,
+        INCLUDE,
         "firstName",
         "lastName",
         "hobbies",
@@ -374,7 +396,8 @@ public class BeanWriterTest {
     person1.setSomeCharSequence(null);
     person1.setSomeChar('A');
 
-    BeanWriter writer = new BeanWriter(Person.class, INCLUDE,
+    BeanWriter writer = new BeanWriter(Person.class,
+        INCLUDE,
         "id",
         "firstName",
         "lastName",
@@ -411,7 +434,8 @@ public class BeanWriterTest {
     person1.setSomeCharSequence(null);
     person1.setSomeChar('A');
 
-    BeanWriter writer = new BeanWriter(Person.class, INCLUDE,
+    BeanWriter writer = new BeanWriter(Person.class,
+        INCLUDE,
         "id",
         "firstName",
         "lastName",
@@ -430,8 +454,7 @@ public class BeanWriterTest {
 
   @Test
   public void mapCopy00() throws Throwable {
-    Map<String, Object> person0 = new MapWriter()
-        .set("id", 100)
+    Map<String, Object> person0 = new MapWriter().set("id", 100)
         .set("firstName", "John")
         .set("lastName", "Smith")
         .set("hobbies", null)
@@ -448,7 +471,8 @@ public class BeanWriterTest {
     person1.setSomeCharSequence("Hi There");
     person1.setSomeChar('A');
 
-    BeanWriter writer = new BeanWriter(Person.class, INCLUDE,
+    BeanWriter writer = new BeanWriter(Person.class,
+        INCLUDE,
         "id",
         "firstName",
         "lastName",
@@ -469,8 +493,7 @@ public class BeanWriterTest {
   @Test
   public void mapCopyNonNull00() throws Throwable {
 
-    Map<String, Object> person0 = new MapWriter()
-        .set("id", 100)
+    Map<String, Object> person0 = new MapWriter().set("id", 100)
         .set("firstName", "John")
         .set("lastName", null)
         .set("hobbies", null)
@@ -487,7 +510,8 @@ public class BeanWriterTest {
     person1.setSomeCharSequence("Hi There");
     person1.setSomeChar('A');
 
-    BeanWriter writer = new BeanWriter(Person.class, INCLUDE,
+    BeanWriter writer = new BeanWriter(Person.class,
+        INCLUDE,
         "id",
         "firstName",
         "lastName",
@@ -508,8 +532,7 @@ public class BeanWriterTest {
   @Test
   public void mapEnrich00() throws Throwable {
 
-    Map<String, Object> person0 = new MapWriter()
-        .set("id", 100)
+    Map<String, Object> person0 = new MapWriter().set("id", 100)
         .set("firstName", "John")
         .set("lastName", null)
         .set("hobbies", null)
@@ -526,7 +549,8 @@ public class BeanWriterTest {
     person1.setSomeCharSequence(null);
     person1.setSomeChar('A');
 
-    BeanWriter writer = new BeanWriter(Person.class, INCLUDE,
+    BeanWriter writer = new BeanWriter(Person.class,
+        INCLUDE,
         "id",
         "firstName",
         "lastName",
