@@ -21,29 +21,28 @@ import static nl.naturalis.common.check.CommonChecks.asObj;
 public class ClassMethods {
 
   // primitive-to-wrapper
-  private static final Map<Class<?>, Class<?>> P2W =
-      Map.of(
-          double.class,
-          Double.class,
-          float.class,
-          Float.class,
-          long.class,
-          Long.class,
-          int.class,
-          Integer.class,
-          char.class,
-          Character.class,
-          short.class,
-          Short.class,
-          byte.class,
-          Byte.class,
-          boolean.class,
-          Boolean.class);
+  private static final Map<Class<?>, Class<?>> P2W = Map.of(double.class,
+      Double.class,
+      float.class,
+      Float.class,
+      long.class,
+      Long.class,
+      int.class,
+      Integer.class,
+      char.class,
+      Character.class,
+      short.class,
+      Short.class,
+      byte.class,
+      Byte.class,
+      boolean.class,
+      Boolean.class);
 
   // wrapper-to-primitive
   private static final Map<Class<?>, Class<?>> W2P = swapAndFreeze(P2W);
 
-  private ClassMethods() {}
+  private ClassMethods() {
+  }
 
   /**
    * Performs a brute-force cast to {@code <R>} of the specified object. Mainly meant to be used as
@@ -115,8 +114,9 @@ public class ClassMethods {
    */
   public static boolean isNumerical(Class<?> clazz) {
     Check.notNull(clazz);
-    return Number.class.isAssignableFrom(clazz)
-        || (clazz.isPrimitive() && clazz != boolean.class && clazz != char.class);
+    return Number.class.isAssignableFrom(clazz) || (clazz.isPrimitive()
+                                                        && clazz != boolean.class
+                                                        && clazz != char.class);
   }
 
   /**
@@ -201,9 +201,8 @@ public class ClassMethods {
   public static boolean isNumericalArray(Class<?> clazz) {
     Check.notNull(clazz);
     Class<?> c;
-    return clazz.isArray()
-        && (Number.class.isAssignableFrom(c = clazz.getComponentType())
-            || (c.isPrimitive() && c != boolean.class && c != char.class));
+    return clazz.isArray() && (Number.class.isAssignableFrom(c = clazz.getComponentType())
+                                   || (c.isPrimitive() && c != boolean.class && c != char.class));
   }
 
   /**
@@ -256,7 +255,8 @@ public class ClassMethods {
    * @return The corresponding wrapper class
    */
   public static Class<?> box(Class<?> clazz) {
-    return Check.notNull(clazz).ok().isPrimitive() ? P2W.get(clazz) : clazz;
+    Check.notNull(clazz);
+    return clazz.isPrimitive() ? P2W.get(clazz) : clazz;
   }
 
   /**
@@ -267,7 +267,8 @@ public class ClassMethods {
    * @return The corresponding primitive class
    */
   public static Class<?> unbox(Class<?> clazz) {
-    return isWrapper(Check.notNull(clazz).ok()) ? W2P.get(clazz) : clazz;
+    Check.notNull(clazz);
+    return clazz.isPrimitive() ? clazz : W2P.getOrDefault(clazz, clazz);
   }
 
   /**
@@ -443,11 +444,17 @@ public class ClassMethods {
     return sb.toString();
   }
 
+  private static final Set<String> IGNORE = Set.of("getClass", "toString", "hashCode");
+
   /**
-   * Returns all getters of the specified class. See {@link #getPropertyNameFromGetter(Method,
-   * boolean)} for an explanation of the {@code strict} parameter.
+   * Returns all getters of the specified class. If {@code strict} is {@code false}, any method with
+   * a zero-length parameter list and a non-{@code void} return type is regarded as a getter
+   * <i>except</i> {@code getClass()}, {@code hashCode()} and {@code toString()}. Otherwise the
+   * JavaBeans naming conventions are followed, with the exception that methods returning a {@link
+   * Boolean} (rather than {@code boolean}) are allowed to have a name starting with "is".
    *
    * @param beanClass The bean class from which to extract the getter methods
+   * @param strict Whether to apply strict JavaBeans naming conventions
    * @return The getters on the specified bean class
    */
   public static List<Method> getGetters(Class<?> beanClass, boolean strict) {
@@ -461,6 +468,8 @@ public class ClassMethods {
         continue;
       } else if (m.getReturnType() == void.class) {
         continue;
+      } else if (IGNORE.contains(m.getName())) {
+        continue;
       } else if (strict && !validGetterName(m)) {
         continue;
       }
@@ -472,11 +481,11 @@ public class ClassMethods {
   /**
    * Returns all setters of the specified class.
    *
-   * @see #getPropertyNameFromSetter(Method)
    * @param beanClass The bean class from which to extract the setter methods
    * @return The setters on the specified bean class
+   * @see #getPropertyNameFromSetter(Method)
    */
-  public static List<Method> geSetters(Class<?> beanClass) {
+  public static List<Method> getSetters(Class<?> beanClass) {
     Check.notNull(beanClass, "beanClass");
     Method[] methods = beanClass.getMethods();
     List<Method> setters = new ArrayList<>();
@@ -498,10 +507,10 @@ public class ClassMethods {
   /**
    * Returns the property name corresponding to the specified method, which is assumed to be a
    * getter. If the method cannot be identified as a getter, an {@link IllegalArgumentException} is
-   * thrown. If {@code strict} equals {@code false}, any method that has a zero-length parameter
-   * list and that does not return {@code void} is taken to be a getter. Otherwise the JavaBeans
-   * naming conventions are followed strictly, with the exception that methods returning a {@link
-   * Boolean} (rather than {@code boolean}) are allowed to have a name starting with "is".
+   * thrown. If {@code strict} is {@code false}, any method with a zero-length parameter list and a
+   * non-{@code void} return type is regarded as a getter. Otherwise the JavaBeans naming
+   * conventions are followed strictly, with the exception that methods returning a {@link Boolean}
+   * (rather than {@code boolean}) are allowed to have a name starting with "is".
    *
    * @param m The method from which to extract a property name
    * @param strict Whether to be strict as regards the method name

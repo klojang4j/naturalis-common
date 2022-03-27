@@ -1,27 +1,30 @@
 package nl.naturalis.common.invoke;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.check.Check;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Map.Entry;
+import static java.util.Map.entry;
 import static nl.naturalis.common.check.CommonChecks.empty;
-import static nl.naturalis.common.invoke.NoPublicSettersException.noPublicSetters;
 
 /**
  * Provides and caches {@link Setter setters} for classes.
  *
  * @author Ayco Holleman
  */
-public class SetterFactory {
+public final class SetterFactory {
 
   public static final SetterFactory INSTANCE = new SetterFactory();
 
-  private final Map<Class<?>, Map<String, Setter>> cache;
+  private final Map<Class<?>, Map<String, Setter>> cache = new HashMap<>();
 
-  private SetterFactory() {
-    cache = new HashMap<>();
-  }
+  private SetterFactory() {}
 
   /**
    * Returns the public {@link Setter setters} for the specified class. The returned {@code Map}
@@ -29,18 +32,20 @@ public class SetterFactory {
    *
    * @param clazz The class for which to retrieve the public setters
    * @return The public setters of the specified class
-   * @throws NoPublicSettersException If the specified class does not have any public setters
+   * @throws IllegalAssignmentException If the does not have any public setters
    */
-  public Map<String, Setter> getSetters(Class<?> clazz) throws NoPublicSettersException {
+  public Map<String, Setter> getSetters(Class<?> clazz) {
     Map<String, Setter> setters = cache.get(clazz);
     if (setters == null) {
-      setters = new HashMap<>();
-      for (Method m : ClassMethods.geSetters(clazz)) {
+      List<Method> methods = ClassMethods.getSetters(clazz);
+      Check.that(methods).isNot(empty(), "class ${0} does not have any public setters", clazz);
+      List<Entry<String, Setter>> entries = new ArrayList<>(methods.size());
+      for (Method m : methods) {
         String prop = ClassMethods.getPropertyNameFromSetter(m);
-        setters.put(prop, new Setter(m, prop));
+        entries.add(entry(prop, new Setter(m, prop)));
       }
-      Check.on(s -> noPublicSetters(clazz), setters).isNot(empty());
-      cache.put(clazz, Map.copyOf(setters));
+      setters = Map.ofEntries(entries.toArray(Entry[]::new));
+      cache.put(clazz, setters);
     }
     return setters;
   }

@@ -4,7 +4,8 @@ import static nl.naturalis.common.check.MsgUtil.formatPredicate;
 
 final class MsgIntPredicate {
 
-  private MsgIntPredicate() {}
+  private MsgIntPredicate() {
+  }
 
   static Formatter msgEven() {
     return formatPredicate("be even", true);
@@ -25,4 +26,5 @@ final class MsgIntPredicate {
   static Formatter msgZero() {
     return formatPredicate("be 0", true, false);
   }
+
 }

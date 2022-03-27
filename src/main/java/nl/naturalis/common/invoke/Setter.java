@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
  *
  * @author Ayco Holleman
  */
-public class Setter {
+public final class Setter {
 
   private final Method method;
   private final MethodHandle handle;
@@ -54,8 +54,8 @@ public class Setter {
    *     or if the value is {@code null} and the property has a primitive type. This is a {@link
    *     RuntimeException}, but you might still want to catch it as it can often be handled in a
    *     meaningful way.
-   * @throws Throwable The {@code Throwable} thrown from inside the {@code java.lang.invoke}
-   *     package
+   * @throws Throwable The unspecified {@code Throwable} associated with calls to {@link
+   *     MethodHandle#invoke(Object...) MethodHandle.invoke}.
    */
   public void write(Object bean, Object value) throws IllegalAssignmentException, Throwable {
     if (value == null) {

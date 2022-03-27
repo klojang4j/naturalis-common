@@ -88,6 +88,97 @@ public class BeanWriterTest {
   }
 
   @Test
+  public void set08() throws Throwable {
+    Person person = new Person();
+    BeanWriter writer = new BeanWriter(Person.class);
+    writer.set(person, "id", (byte) 125);
+    assertEquals(125, person.getId());
+  }
+
+  @Test
+  public void set09() throws Throwable {
+    Person person = new Person();
+    BeanWriter writer = new BeanWriter(Person.class);
+    writer.set(person, "id", 'a');
+    assertEquals(97, person.getId());
+  }
+
+  @Test
+  // So, which casts/conversions exactly take place automatically?
+  public void set10() throws Throwable {
+    int i = (short) 3;
+    // i = 6L; won't compile
+    short s = (int) 3;
+    // s = (int) Short.MAX_VALUE + 1; won't compile
+    // s = 3L; won't compile
+    s = 'a';
+    byte b = (short) 3;
+    // b = Short.MAX_VALUE; won't compile
+    // b = 'ć'; won't compile: c-acute == 263
+    float f = (byte) 4;
+    f = Long.MAX_VALUE;
+    long l = (int) 7;
+    // l = 2.4F; won't compile
+    char c = (short) 97;
+    Short bigShort = (byte) 3;
+    assertTrue(Short.class.isInstance((short) c));
+    assertFalse(Short.class.isInstance(null)); // false but no NPE
+  }
+
+  @Test(expected = IllegalAssignmentException.class)
+  public void set11() throws Throwable {
+    // int i = 6L;
+    Person person = new Person();
+    BeanWriter writer = new BeanWriter(Person.class);
+    writer.set(person, "id", 6L);
+  }
+
+  @Test(expected = IllegalAssignmentException.class)
+  public void set12() throws Throwable {
+    byte b = (short) 3; // compiles!
+    Person person = new Person();
+    BeanWriter writer = new BeanWriter(Person.class);
+    writer.set(person, "someByte", (short) 3);
+    // So that interesting. While we can write:
+    // byte b = (short) 3;
+    // we can't do the same via method handles (in spite of
+    // java.lang.invoke stating that all necessary conversions
+    // will be done behind the scenes)!
+  }
+
+  @Test(expected = IllegalAssignmentException.class)
+  public void set13() throws Throwable {
+    char c = (short) 97; // compiles!
+    Person person = new Person();
+    BeanWriter writer = new BeanWriter(Person.class);
+    writer.set(person, "someChar", (short) 97);
+  }
+
+  @Test(expected = IllegalAssignmentException.class)
+  public void set14() throws Throwable {
+    Person person = new Person();
+    BeanWriter writer = new BeanWriter(Person.class);
+    writer.set(person, "someChar", null);
+  }
+
+  @Test(expected = IllegalAssignmentException.class)
+  public void set15() throws Throwable {
+    // Double d = (byte) 4; won't compile
+    Person person = new Person();
+    BeanWriter writer = new BeanWriter(Person.class);
+    writer.set(person, "someDoubleWrapper", (byte) 4);
+  }
+
+  @Test(expected = IllegalAssignmentException.class)
+  public void set16() throws Throwable {
+    Short s = (byte) 4; // compiles!
+    // s = Byte.valueOf((byte)4); won't compile
+    Person person = new Person();
+    BeanWriter writer = new BeanWriter(Person.class);
+    writer.set(person, "someShortWrapper", (byte) 4);
+  }
+
+  @Test
   public void copy00() throws Throwable {
     Person person0 = new Person();
     person0.setId(100);

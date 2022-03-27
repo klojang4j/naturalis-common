@@ -1,22 +1,26 @@
 package nl.naturalis.common.invoke;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Map;
 import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.check.Check;
-import static nl.naturalis.common.check.CommonChecks.empty;
-import static nl.naturalis.common.check.CommonChecks.yes;
-import static nl.naturalis.common.invoke.InvokeException.classNotPublic;
-import static nl.naturalis.common.invoke.NoPublicGettersException.noPublicGetters;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Map.Entry;
+import static java.util.Map.entry;
+import static nl.naturalis.common.ClassMethods.getPropertyNameFromGetter;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * Provides and caches {@link Getter getters} for classes.
  *
  * @author Ayco Holleman
  */
-public class GetterFactory {
+public final class GetterFactory {
 
   public static final GetterFactory INSTANCE = new GetterFactory();
 
@@ -25,27 +29,26 @@ public class GetterFactory {
   private GetterFactory() {}
 
   /**
+   * Returns the public {@link Getter getters} for the specified class. The returned {@code Map}
+   * maps property names to {@code Getter} instances.
+   *
    * @param clazz The class for which to retrieve the public getters
-   * @param strict Wheter or not to apply strict JavaBeans naming conventions to what qualifies as a
-   *     getter. See {@link ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method,
-   *     boolean)}. Note that {@code getClass()} will anyhow never be included as a getter.
-   * @return The public setters of the specified class
-   * @throws NoPublicGettersException If the specified class does not have any public getters
+   * @param strict Whether to apply strict JavaBeans naming conventions as to what qualifies as
+   *     a getter. See {@link ClassMethods#getGetters(Class, boolean)}.
+   * @return The public getters of the specified class
+   * @throws IllegalAssignmentException If the does not have any public getters
    */
-  public Map<String, Getter> getGetters(Class<?> clazz, boolean strict)
-      throws NoPublicGettersException {
-    Check.on(classNotPublic(clazz), clazz.getModifiers()).has(Modifier::isPublic, yes());
+  public Map<String, Getter> getGetters(Class<?> clazz, boolean strict) {
     Map<String, Getter> getters = cache.get(clazz);
     if (getters == null) {
-      getters = new HashMap<>();
-      for (Method m : ClassMethods.getGetters(clazz, strict)) {
-        if (!m.getName().equals("getClass")) {
-          String property = ClassMethods.getPropertyNameFromGetter(m, strict);
-          getters.put(property, new Getter(m, property));
-        }
+      List<Method> methods = ClassMethods.getGetters(clazz, strict);
+      Check.that(methods).isNot(empty(), "class ${0} does not have any public getters", clazz);
+      List<Entry<String, Getter>> entries = new ArrayList<>(methods.size());
+      for (Method m : methods) {
+        String prop = getPropertyNameFromGetter(m, strict);
+        entries.add(entry(prop, new Getter(m, prop)));
       }
-      Check.on(s -> noPublicGetters(clazz), getters).isNot(empty());
-      getters = Map.copyOf(getters);
+      getters = Map.ofEntries(entries.toArray(Entry[]::new));
       cache.put(clazz, getters);
     }
     return getters;

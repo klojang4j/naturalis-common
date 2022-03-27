@@ -17,6 +17,8 @@ public class Person {
   private int someInt;
   private short someShort;
   private char someChar;
+  private byte someByte;
+  private Short someShortWrapper;
   private Double someDoubleWrapper;
   private Number someNumber;
   private CharSequence someCharSequence;
@@ -107,6 +109,22 @@ public class Person {
 
   public void setSomeChar(char someChar) {
     this.someChar = someChar;
+  }
+
+  public byte getSomeByte() {
+    return someByte;
+  }
+
+  public void setSomeByte(byte someByte) {
+    this.someByte = someByte;
+  }
+
+  public Short getSomeShortWrapper() {
+    return someShortWrapper;
+  }
+
+  public void setSomeShortWrapper(Short someShortWrapper) {
+    this.someShortWrapper = someShortWrapper;
   }
 
   public Double getSomeDoubleWrapper() {

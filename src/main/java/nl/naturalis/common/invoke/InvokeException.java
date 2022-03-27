@@ -3,6 +3,7 @@ package nl.naturalis.common.invoke;
 import nl.naturalis.common.ClassMethods;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static nl.naturalis.common.ArrayMethods.implode;
 import static nl.naturalis.common.ClassMethods.simpleClassName;
@@ -37,14 +38,8 @@ public class InvokeException extends RuntimeException {
     return new InvokeException(ERR_NOT_READABLE, name0, name1);
   }
 
-  public static <T> InvokeException typeMismatch(SaveBeanReader<? super T> reader, T bean) {
-    String name0 = ClassMethods.className(bean);
-    String name1 = ClassMethods.className(reader.getBeanClass());
-    return new InvokeException(ERR_NOT_READABLE, name0, name1);
-  }
-
-  public static Function<String, InvokeException> classNotPublic(Class<?> clazz) {
-    return s -> new InvokeException(ERR_NOT_PUBLIC, clazz.getName());
+  public static Supplier<InvokeException> classNotPublic(Class<?> clazz) {
+    return () -> new InvokeException(ERR_NOT_PUBLIC, clazz.getName());
   }
 
   public static InvokeException noPropertiesSelected(

@@ -2,7 +2,9 @@ package nl.naturalis.common;
 
 import java.io.Serializable;
 import java.util.*;
+
 import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -10,37 +12,42 @@ import static org.junit.Assert.assertTrue;
 public class ClassMethodsTest {
 
   @Test
-  public void isA_01() {
+  public void isA01() {
     assertTrue(ClassMethods.isA(String.class, Object.class));
   }
 
   @Test
-  public void isA_02() {
+  public void isA02() {
     assertTrue(ClassMethods.isA(String.class, CharSequence.class));
   }
 
   @Test
-  public void isA_03() {
+  public void isA03() {
     assertFalse(ClassMethods.isA(Object.class, String.class));
   }
 
   @Test
-  public void isA_04() {
+  public void isA04() {
     assertFalse(ClassMethods.isA(CharSequence.class, String.class));
   }
 
   @Test
-  public void isA_05() {
+  public void isA05() {
     assertTrue(ClassMethods.isA(String.class, String.class));
   }
 
   @Test
-  public void getArrayTypeName_01() {
+  public void isA06() {
+    assertFalse(ClassMethods.isA(short.class, int.class));
+  }
+
+  @Test
+  public void getArrayTypeName01() {
     assertEquals("java.lang.String[][][]", ClassMethods.arrayClassName(new String[0][0][0]));
   }
 
   @Test
-  public void getArrayTypeSimpleName_01() {
+  public void getArrayTypeSimpleName01() {
     assertEquals("String[][][]", ClassMethods.arrayClassSimpleName(new String[0][0][0]));
   }
 
