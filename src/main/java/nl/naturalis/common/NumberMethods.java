@@ -10,6 +10,7 @@ import java.util.function.UnaryOperator;
 import static nl.naturalis.common.ObjectMethods.isEmpty;
 import static nl.naturalis.common.ObjectMethods.isNotEmpty;
 import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonGetters.type;
 
 /**
  * Methods for working with {@code Number} instances.
@@ -17,7 +18,14 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * @author Ayco Holleman
  */
 @SuppressWarnings("rawtypes")
-public class NumberMethods {
+public final class NumberMethods {
+
+  private static final int STRLEN_MAX_INT = String.valueOf(Integer.MAX_VALUE).length();
+  private static final int STRLEN_MAX_SHORT = String.valueOf(Short.MAX_VALUE).length();
+
+  private NumberMethods() {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Returns whether the specified string represents a valid integer. This method delegates to
@@ -25,7 +33,7 @@ public class NumberMethods {
    * Integer#parseInt(String)}.
    *
    * @param str The string
-   * @return Whether the specified string represents a valid integer
+   * @return Whether it represents a valid integer
    */
   @SuppressWarnings({"ResultOfMethodCallIgnored"})
   public static boolean isInteger(String str) {
@@ -49,18 +57,12 @@ public class NumberMethods {
    */
   @SuppressWarnings("ResultOfMethodCallIgnored")
   public static boolean isPlainInt(String str) {
-    if (isEmpty(str)) {
+    if (isEmpty(str) || str.length() > STRLEN_MAX_INT) {
       return false;
     } else if (str.charAt(0) == '0') {
       return str.length() == 1;
-    } else if (str.codePoints().allMatch(Character::isDigit)) {
-      try {
-        new BigInteger(str).intValueExact();
-        return true;
-      } catch (ArithmeticException ignored) {
-      }
     }
-    return false;
+    return str.codePoints().allMatch(Character::isDigit) && isInteger(str);
   }
 
   /**
@@ -71,7 +73,7 @@ public class NumberMethods {
    */
   @SuppressWarnings("ResultOfMethodCallIgnored")
   public static boolean isShort(String str) {
-    if (!isEmpty(str) && str.codePoints().allMatch(Character::isDigit)) {
+    if (!isEmpty(str)) {
       try {
         new BigInteger(str).shortValueExact();
         return true;
@@ -86,24 +88,16 @@ public class NumberMethods {
    * without leading zeros, and fitting into a 16-bit integer.
    *
    * @param str The string
-   * @return Whether the specified string is a valid, digit-only integer
+   * @return Whether the specified string is a valid, digit-only 16-but integer
    */
   @SuppressWarnings("ResultOfMethodCallIgnored")
   public static boolean isPlainShort(String str) {
-    if (isEmpty(str)) {
+    if (isEmpty(str) || str.length() > STRLEN_MAX_SHORT) {
       return false;
-    } else if (str.charAt(0) == '+' || str.charAt(0) == '-') {
-      return false;
-    } else if (str.charAt(0) == '0') {
+    } else if (str.charAt(0) != '0') {
       return str.length() == 1;
-    } else if (str.codePoints().allMatch(Character::isDigit)) {
-      try {
-        new BigInteger(str).shortValueExact();
-        return true;
-      } catch (ArithmeticException ignored) {
-      }
     }
-    return false;
+    return str.codePoints().allMatch(Character::isDigit) && isShort(str);
   }
 
   /**
@@ -114,17 +108,11 @@ public class NumberMethods {
    */
   public static BigDecimal toBigDecimal(Number n) {
     Class<? extends Number> t = n.getClass();
-    return t == BigDecimal.class
-        ? (BigDecimal) n
-        : t == BigInteger.class
-            ? new BigDecimal((BigInteger) n)
-            : t == Double.class
-                ? BigDecimal.valueOf((Double) n)
-                : t == Long.class
-                    ? new BigDecimal((Long) n)
-                    : t == Float.class
-                        ? BigDecimal.valueOf((Float) n)
-                        : new BigDecimal(n.intValue());
+    return t == BigDecimal.class ? (BigDecimal) n : t
+        == BigInteger.class ? new BigDecimal((BigInteger) n) : t
+        == Double.class ? BigDecimal.valueOf((Double) n) : t
+        == Long.class ? new BigDecimal((Long) n) : t
+        == Float.class ? BigDecimal.valueOf((Float) n) : new BigDecimal(n.intValue());
   }
 
   /**
@@ -179,8 +167,13 @@ public class NumberMethods {
    * @return Whether conversion will be lossless
    */
   public static <T extends Number> boolean fitsInto(Number number, Class<T> targetType) {
-    Class<?> myType = Check.notNull(number, "number").ok(Object::getClass);
-    Check.notNull(targetType, "targetType");
+    Class<?> myType = Check.notNull(number, "number")
+        .isNot(instanceOf(), BigDecimal.class)
+        .isNot(instanceOf(), BigInteger.class)
+        .ok(Object::getClass);
+    Check.notNull(targetType, "targetType")
+        .isNot(instanceOf(), BigDecimal.class)
+        .isNot(instanceOf(), BigInteger.class);
     if (myType == targetType || targetType == Double.class) {
       return true;
     } else if (targetType == Float.class) {
@@ -231,16 +224,24 @@ public class NumberMethods {
     }
   }
 
-  private static final Map<Class, UnaryOperator<? extends Number>> absFunctions =
-      Map.of(
-          Integer.class, n -> n.intValue() >= 0 ? n : Integer.valueOf(-n.intValue()),
-          Double.class, n -> n.doubleValue() >= 0 ? n : Double.valueOf(-n.doubleValue()),
-          Long.class, n -> n.longValue() >= 0 ? n : Long.valueOf(-n.longValue()),
-          Float.class, n -> n.floatValue() >= 0 ? n : Float.valueOf(-n.floatValue()),
-          Short.class, n -> n.shortValue() >= 0 ? n : Short.valueOf((short) -n.shortValue()),
-          Byte.class, n -> n.byteValue() >= 0 ? n : Byte.valueOf((byte) -n.byteValue()),
-          BigInteger.class, n -> ((BigInteger) n).abs(),
-          BigDecimal.class, n -> ((BigDecimal) n).abs());
+  private static final Map<Class, UnaryOperator<? extends Number>>
+      absFunctions =
+      Map.of(Integer.class,
+          n -> n.intValue() >= 0 ? n : Integer.valueOf(-n.intValue()),
+          Double.class,
+          n -> n.doubleValue() >= 0 ? n : Double.valueOf(-n.doubleValue()),
+          Long.class,
+          n -> n.longValue() >= 0 ? n : Long.valueOf(-n.longValue()),
+          Float.class,
+          n -> n.floatValue() >= 0 ? n : Float.valueOf(-n.floatValue()),
+          Short.class,
+          n -> n.shortValue() >= 0 ? n : Short.valueOf((short) -n.shortValue()),
+          Byte.class,
+          n -> n.byteValue() >= 0 ? n : Byte.valueOf((byte) -n.byteValue()),
+          BigInteger.class,
+          n -> ((BigInteger) n).abs(),
+          BigDecimal.class,
+          n -> ((BigDecimal) n).abs());
 
   /**
    * Returns the absolute value of an arbitrary type of number.
@@ -275,8 +276,9 @@ public class NumberMethods {
    * @param upperBoundInclusive The upper bound of the range (inclusive)
    * @return Whether {@code subject} lies within the specified range
    */
-  public static boolean inRangeClosed(
-      int subject, int lowerBoundInclusive, int upperBoundInclusive) {
+  public static boolean inRangeClosed(int subject,
+      int lowerBoundInclusive,
+      int upperBoundInclusive) {
     return subject >= lowerBoundInclusive && subject <= upperBoundInclusive;
   }
 
@@ -335,5 +337,4 @@ public class NumberMethods {
     return pageSize - rowsOnLastPage(rowCount, pageSize);
   }
 
-  private NumberMethods() {}
 }

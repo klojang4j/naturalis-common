@@ -8,9 +8,10 @@ import java.lang.invoke.MethodHandle;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import nl.naturalis.common.ClassMethods;
+
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.x.invoke.InvokeUtils;
 
 /**
  * Reads properties of any type of bean. This makes {@code AnyBeanReader} easier to use than the
@@ -24,7 +25,8 @@ import nl.naturalis.common.check.Check;
  * still uses reflection to identify the getter methods on the bean class. Therefore if you use this
  * class from within a Java module you must still open the module to the naturalis-common module.
  *
- * <p>This class caches relevant data about the bean class such that after the first time you create
+ * <p>This class caches relevant data about the bean class such that after the first time you
+ * create
  * an instance of a {@code BeanReader} for a particular bean class, subsequent instantiations are
  * essentially for free (no matter which constructor you use).
  *
@@ -37,8 +39,9 @@ public class AnyBeanReader {
 
   /**
    * Creates a new {@code AnyBeanReader}. Strict naming conventions will be applied to what
-   * qualifies as a getter. See {@link
-   * ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method, boolean)}.
+   * qualifies as a getter. See
+   * {@link InvokeUtils#getPropertyNameFromGetter(java.lang.reflect.Method,
+   * boolean)}.
    */
   public AnyBeanReader() {
     this(true);
@@ -48,7 +51,7 @@ public class AnyBeanReader {
    * Creates a new {@code AnyBeanReader}.
    *
    * @param strictNaming hether or not to apply strict naming conventions for what counts as a
-   *     getter. See {@link ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method,
+   *     getter. See {@link InvokeUtils#getPropertyNameFromGetter(java.lang.reflect.Method,
    *     boolean)}.
    */
   public AnyBeanReader(boolean strictNaming) {
@@ -75,7 +78,7 @@ public class AnyBeanReader {
    *
    * @param valueCacheSize The size of the value cache
    * @param strictNaming hether or not to apply strict naming conventions for what counts as a
-   *     getter. See {@link ClassMethods#getPropertyNameFromGetter(java.lang.reflect.Method,
+   *     getter. See {@link InvokeUtils#getPropertyNameFromGetter(java.lang.reflect.Method,
    *     boolean)}
    */
   public AnyBeanReader(int valueCacheSize, boolean strictNaming) {

@@ -1,10 +1,9 @@
 package nl.naturalis.common.invoke;
 
-import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.x.invoke.InvokeUtils;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +11,7 @@ import java.util.Map;
 
 import static java.util.Map.Entry;
 import static java.util.Map.entry;
-import static nl.naturalis.common.ClassMethods.getPropertyNameFromGetter;
+import static nl.naturalis.common.x.invoke.InvokeUtils.getPropertyNameFromGetter;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
@@ -34,14 +33,14 @@ public final class GetterFactory {
    *
    * @param clazz The class for which to retrieve the public getters
    * @param strict Whether to apply strict JavaBeans naming conventions as to what qualifies as
-   *     a getter. See {@link ClassMethods#getGetters(Class, boolean)}.
+   *     a getter. See {@link InvokeUtils#getGetters(Class, boolean)}.
    * @return The public getters of the specified class
    * @throws IllegalAssignmentException If the does not have any public getters
    */
   public Map<String, Getter> getGetters(Class<?> clazz, boolean strict) {
     Map<String, Getter> getters = cache.get(clazz);
     if (getters == null) {
-      List<Method> methods = ClassMethods.getGetters(clazz, strict);
+      List<Method> methods = InvokeUtils.getGetters(clazz, strict);
       Check.that(methods).isNot(empty(), "class ${0} does not have any public getters", clazz);
       List<Entry<String, Getter>> entries = new ArrayList<>(methods.size());
       for (Method m : methods) {

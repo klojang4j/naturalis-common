@@ -1,7 +1,7 @@
 package nl.naturalis.common.invoke;
 
-import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.x.invoke.InvokeUtils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -37,11 +37,11 @@ public final class SetterFactory {
   public Map<String, Setter> getSetters(Class<?> clazz) {
     Map<String, Setter> setters = cache.get(clazz);
     if (setters == null) {
-      List<Method> methods = ClassMethods.getSetters(clazz);
+      List<Method> methods = InvokeUtils.getSetters(clazz);
       Check.that(methods).isNot(empty(), "class ${0} does not have any public setters", clazz);
       List<Entry<String, Setter>> entries = new ArrayList<>(methods.size());
       for (Method m : methods) {
-        String prop = ClassMethods.getPropertyNameFromSetter(m);
+        String prop = InvokeUtils.getPropertyNameFromSetter(m);
         entries.add(entry(prop, new Setter(m, prop)));
       }
       setters = Map.ofEntries(entries.toArray(Entry[]::new));
