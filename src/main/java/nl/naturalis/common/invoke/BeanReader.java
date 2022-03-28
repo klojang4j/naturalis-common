@@ -1,6 +1,5 @@
 package nl.naturalis.common.invoke;
 
-import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
 
 import java.util.HashMap;
@@ -9,8 +8,8 @@ import java.util.Set;
 
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.invoke.IncludeExclude.INCLUDE;
-import static nl.naturalis.common.invoke.InvokeException.typeMismatch;
 import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
+import static nl.naturalis.common.invoke.InvokeException.*;
 
 /**
  * A dynamic bean reader class. This class uses the {@code java.lang.invoke} package instead of
@@ -29,7 +28,7 @@ public final class BeanReader<T> {
   /**
    * Creates a {@code BeanReader} for the specified properties of the specified class. You can
    * optionally specify an array of properties that you intend to read. If you specify a zero-length
-   * array all properties will be readable. Strict naming conventions will be applied regarding what
+   * array all properties will be readable. JavaBeans naming conventions will be applied regarding
    * which methods qualify as getters.
    *
    * @param beanClass The bean class
@@ -42,7 +41,7 @@ public final class BeanReader<T> {
   /**
    * Creates a {@code BeanReader} for the specified properties of the specified class. You can
    * optionally specify an array of properties that you intend to read. If you specify a zero-length
-   * array all properties will be readable. Strict naming conventions will be applied regarding what
+   * array all properties will be readable. JavaBeans naming conventions will be applied regarding
    * which methods qualify as getters.
    *
    * @param beanClass The bean class
@@ -66,9 +65,11 @@ public final class BeanReader<T> {
    * thrown.</i> They will be quietly ignored.
    *
    * @param beanClass The bean class
-   * @param strictNaming If {@code false} all methods with a zero-length parameter list and a
-   *     non-{@code void} return type will be regarded as getters; otherwise strict naming
-   *     conventions will be applied regarding what which methods qualify as getters.
+   * @param strictNaming If {@code false}, all methods with a zero-length parameter list and a
+   *     non-{@code void} return type, except {@code getClass()}, {@code hashCode()} and {@code
+   *     toString()}, will be regarded as getters. Otherwise JavaBeans naming conventions will be
+   *     applied regarding which methods qualify as getters, with the exception that methods
+   *     returning a {@link Boolean} are allowed to have a name starting with "is".
    * @param includeExclude Whether to include or exclude the specified properties
    * @param properties The properties to be included/excluded
    */
@@ -95,14 +96,14 @@ public final class BeanReader<T> {
    */
   @SuppressWarnings("unchecked")
   public <U> U read(T bean, String property) throws NoSuchPropertyException {
-    Check.notNull(bean, "bean").is(instanceOf(), beanClass, () -> typeMismatch(this, bean));
+    Check.notNull(bean, "bean");
     Check.notNull(property, "property");
     Getter getter = getters.get(property);
     Check.that(getter).is(notNull(), () -> noSuchProperty(bean, property));
     try {
       return (U) getter.read(bean);
-    } catch (Throwable t) {
-      throw ExceptionMethods.uncheck(t);
+    } catch (Throwable exc) {
+      throw InvokeException.wrap(exc, bean, getter);
     }
   }
 
@@ -136,16 +137,17 @@ public final class BeanReader<T> {
 
   private Map<String, Getter> getGetters(boolean strictNaming, IncludeExclude ie, String[] props) {
     Map<String, Getter> tmp = GetterFactory.INSTANCE.getGetters(beanClass, strictNaming);
-    if (props.length == 0) {
-      return tmp;
+    if (props.length != 0) {
+      tmp = new HashMap<>(tmp);
+      if (ie.isExclude()) {
+        tmp.keySet().removeAll(Set.of(props));
+      } else {
+        tmp.keySet().retainAll(Set.of(props));
+      }
+      Check.that(tmp).isNot(empty(), allPropertiesExcluded(beanClass));
+      tmp = Map.copyOf(tmp);
     }
-    Map<String, Getter> copy = new HashMap<>(tmp);
-    if (ie.isExclude()) {
-      copy.keySet().removeAll(Set.of(props));
-    } else {
-      copy.keySet().retainAll(Set.of(props));
-    }
-    return Map.copyOf(copy);
+    return tmp;
   }
 
 }

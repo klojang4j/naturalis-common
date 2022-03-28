@@ -5,31 +5,25 @@ import org.junit.Test;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
-import static nl.naturalis.common.invoke.IncludeExclude.EXCLUDE;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
 
-public class BeanReaderTest {
+public class AnyBeanReaderTest {
 
   @Test
-  public void test00() {
+  public void read00() {
     Person p0 = new Person();
     p0.setFirstName("John");
     p0.setLastName("Smith");
     p0.setHobbies(List.of("Soccer", "Tennis"));
     p0.setLastModified(LocalDate.of(2022, 03, 07));
 
-    BeanReader<Person> reader = new BeanReader<>(Person.class);
-
-    assertSame(Person.class, reader.getBeanClass());
+    AnyBeanReader reader = new AnyBeanReader();
 
     assertEquals(p0.getFirstName(), reader.read(p0, "firstName"));
     assertEquals(p0.getLastName(), reader.read(p0, "lastName"));
     assertEquals(p0.getHobbies(), reader.read(p0, "hobbies"));
     assertEquals(p0.getLastModified(), reader.read(p0, "lastModified"));
-
   }
 
   @Test
@@ -50,7 +44,7 @@ public class BeanReaderTest {
     Random random0 = new Random();
     Random random1 = new Random();
 
-    BeanReader<Person> reader = new BeanReader<>(Person.class);
+    AnyBeanReader reader = new AnyBeanReader();
 
     for (int i = 0; i < 100; ++i) {
       Person p = random0.nextBoolean() ? p0 : p1;
@@ -63,22 +57,10 @@ public class BeanReaderTest {
     }
   }
 
-  @Test
-  public void test02() {
-    BeanReader<Person> reader = new BeanReader<>(Person.class, "firstName", "lastName");
-    assertEquals(Set.of("firstName", "lastName"), reader.getIncludedProperties());
-  }
-
   @Test(expected = NoSuchPropertyException.class)
-  public void test04() {
-    BeanReader<Person> reader = new BeanReader<>(Person.class, "firstName", "lastName");
-    reader.read(new Person(), "lastModified");
-  }
-
-  @Test(expected = NoSuchPropertyException.class)
-  public void test05() {
-    BeanReader<Person> reader = new BeanReader<>(Person.class, EXCLUDE, "firstName", "lastName");
-    reader.read(new Person(), "firstName");
+  public void read02() {
+    AnyBeanReader reader = new AnyBeanReader();
+    reader.read(new Person(), "this_is_not_a_property");
   }
 
 }

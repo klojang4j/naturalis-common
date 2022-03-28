@@ -6,55 +6,38 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static nl.naturalis.common.ArrayMethods.implode;
+import static nl.naturalis.common.ClassMethods.className;
 import static nl.naturalis.common.ClassMethods.simpleClassName;
 import static nl.naturalis.common.ExceptionMethods.getRootCause;
 
 public class InvokeException extends RuntimeException {
 
-  private static final String ERR_NOT_PUBLIC = "Class %s is not public";
-  private static final String ERR_INCLUDES = "At least one of %s must be a property of %s";
-  private static final String ERR_EXCLUDES = "No properties remain after excluding %s from %s";
-  private static final String ERR_NOT_READABLE =
-      "Cannot read beans of type %s (bean must be instance of %s)";
+  static Supplier<InvokeException> noPublicStuff(Class<?> clazz, String stuff) {
+    return () -> new InvokeException("class %s does ot have any public %s",
+        className(clazz),
+        stuff);
+  }
+
+  static Supplier<InvokeException> allPropertiesExcluded(Class<?> clazz) {
+    return () -> new InvokeException("all properties excluded for %s", clazz);
+  }
 
   public static InvokeException missingNoArgConstructor(Class<?> clazz) {
-    return new InvokeException("Missing no-arg constructor on %s", simpleClassName(clazz));
+    return new InvokeException("missing no-arg constructor for class %s", className(clazz));
   }
 
   public static InvokeException noSuchConstructor(Class<?> clazz, Class<?>... params) {
     return new InvokeException(
-        "No such constructor: %s(%s)",
+        "no such constructor: %s(%s)",
         simpleClassName(clazz),
         implode(params, ClassMethods::simpleClassName, ", ", 0, -1));
   }
 
-  public static Function<String, InvokeException> cannotInstantiate(Class<?> clazz) {
-    return s -> new InvokeException("Cannot instantiate %s", simpleClassName(clazz));
-  }
-
-  public static <T> InvokeException typeMismatch(BeanReader<? super T> reader, T bean) {
-    String name0 = ClassMethods.className(bean);
-    String name1 = ClassMethods.className(reader.getBeanClass());
-    return new InvokeException(ERR_NOT_READABLE, name0, name1);
-  }
-
-  public static Supplier<InvokeException> classNotPublic(Class<?> clazz) {
-    return () -> new InvokeException(ERR_NOT_PUBLIC, clazz.getName());
-  }
-
-  public static InvokeException noPropertiesSelected(
-      Class<?> clazz, IncludeExclude includeExclude, String... properties) {
-    if (includeExclude.isExclude()) {
-      return new InvokeException(ERR_EXCLUDES, implode(properties), clazz);
-    }
-    return new InvokeException(ERR_INCLUDES, implode(properties), clazz);
-  }
-
-  public static InvokeException wrap(Throwable t) {
-    if (t instanceof InvokeException ie) {
-      return ie;
-    }
-    return new InvokeException(getRootCause(t).toString());
+  static InvokeException wrap(Throwable t, Object bean, Getter getter) {
+    return new InvokeException("Error while reading %s.%s: %s",
+        simpleClassName(bean),
+        getter.getProperty(),
+        getRootCause(t));
   }
 
   InvokeException(String message, Object... msgArgs) {

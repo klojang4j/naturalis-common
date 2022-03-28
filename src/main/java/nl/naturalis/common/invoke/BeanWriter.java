@@ -12,7 +12,7 @@ import java.util.Set;
 import static nl.naturalis.common.check.CommonChecks.empty;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 import static nl.naturalis.common.invoke.IncludeExclude.INCLUDE;
-import static nl.naturalis.common.invoke.NoSuchPropertyException.noPropertiesSelected;
+import static nl.naturalis.common.invoke.InvokeException.allPropertiesExcluded;
 import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 
 /**
@@ -325,18 +325,17 @@ public final class BeanWriter<T> {
 
   private Map<String, Setter> getSetters(IncludeExclude ie, String[] props) {
     Map<String, Setter> tmp = SetterFactory.INSTANCE.getSetters(beanClass);
-    if (props.length == 0) {
-      return tmp;
+    if (props.length != 0) {
+      tmp = new HashMap<>(tmp);
+      if (ie.isExclude()) {
+        tmp.keySet().removeAll(Set.of(props));
+      } else {
+        tmp.keySet().retainAll(Set.of(props));
+      }
+      Check.that(tmp).isNot(empty(), allPropertiesExcluded(beanClass));
+      tmp = Map.copyOf(tmp);
     }
-    Map<String, Setter> copy = new HashMap<>(tmp);
-    if (ie.isExclude()) {
-      copy.keySet().removeAll(Set.of(props));
-    } else {
-      copy.keySet().retainAll(Set.of(props));
-    }
-    Check.that(props).isNot(empty(), () -> noPropertiesSelected(beanClass, ie, props));
-    return Map.copyOf(copy);
-
+    return tmp;
   }
 
   private void set(T bean, Setter setter, Object value) throws Throwable {

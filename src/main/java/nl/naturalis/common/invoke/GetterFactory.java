@@ -11,6 +11,7 @@ import java.util.Map;
 
 import static java.util.Map.Entry;
 import static java.util.Map.entry;
+import static nl.naturalis.common.invoke.InvokeException.noPublicStuff;
 import static nl.naturalis.common.x.invoke.InvokeUtils.getPropertyNameFromGetter;
 import static nl.naturalis.common.check.CommonChecks.*;
 
@@ -32,8 +33,11 @@ public final class GetterFactory {
    * maps property names to {@code Getter} instances.
    *
    * @param clazz The class for which to retrieve the public getters
-   * @param strict Whether to apply strict JavaBeans naming conventions as to what qualifies as
-   *     a getter. See {@link InvokeUtils#getGetters(Class, boolean)}.
+   * @param strict If {@code false}, all methods with a zero-length parameter list and a
+   *     non-{@code void} return type, except {@code getClass()}, {@code hashCode()} and {@code
+   *     toString()}, will be regarded as getters. Otherwise JavaBeans naming conventions will be
+   *     applied regarding which methods qualify as getters, with the exception that methods
+   *     returning a {@link Boolean} are allowed to have a name starting with "is".
    * @return The public getters of the specified class
    * @throws IllegalAssignmentException If the does not have any public getters
    */
@@ -41,7 +45,7 @@ public final class GetterFactory {
     Map<String, Getter> getters = cache.get(clazz);
     if (getters == null) {
       List<Method> methods = InvokeUtils.getGetters(clazz, strict);
-      Check.that(methods).isNot(empty(), "class ${0} does not have any public getters", clazz);
+      Check.that(methods).isNot(empty(), noPublicStuff(clazz, "getters"));
       List<Entry<String, Getter>> entries = new ArrayList<>(methods.size());
       for (Method m : methods) {
         String prop = getPropertyNameFromGetter(m, strict);
