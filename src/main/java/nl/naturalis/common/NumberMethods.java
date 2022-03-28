@@ -9,6 +9,7 @@ import java.util.function.UnaryOperator;
 
 import static nl.naturalis.common.ObjectMethods.isEmpty;
 import static nl.naturalis.common.ObjectMethods.isNotEmpty;
+import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.type;
 
@@ -172,8 +173,8 @@ public final class NumberMethods {
         .isNot(instanceOf(), BigInteger.class)
         .ok(Object::getClass);
     Check.notNull(targetType, "targetType")
-        .isNot(instanceOf(), BigDecimal.class)
-        .isNot(instanceOf(), BigInteger.class);
+        .isNot(sameAs(), BigDecimal.class)
+        .isNot(sameAs(), BigInteger.class);
     if (myType == targetType || targetType == Double.class) {
       return true;
     } else if (targetType == Float.class) {
@@ -191,37 +192,34 @@ public final class NumberMethods {
     } else if (targetType == Integer.class) {
       if (myType == Double.class) {
         return (int) number.doubleValue() == number.doubleValue();
-      } else if (myType == Long.class) {
-        return number.longValue() <= Integer.MAX_VALUE && number.longValue() >= Integer.MIN_VALUE;
       } else if (myType == Float.class) {
         return (int) number.floatValue() == number.floatValue();
+      } else if (myType == Long.class) {
+        return number.longValue() <= Integer.MAX_VALUE && number.longValue() >= Integer.MIN_VALUE;
       }
       return true;
     } else if (targetType == Short.class) {
       if (myType == Double.class) {
         return (short) number.doubleValue() == number.doubleValue();
-      } else if (myType == Long.class) {
-        return number.longValue() <= Short.MAX_VALUE && number.longValue() >= Short.MIN_VALUE;
       } else if (myType == Float.class) {
         return (short) number.floatValue() == number.floatValue();
+      } else if (myType == Long.class) {
+        return number.longValue() <= Short.MAX_VALUE && number.longValue() >= Short.MIN_VALUE;
       } else if (myType == Integer.class) {
         return number.intValue() <= Short.MAX_VALUE && number.intValue() >= Short.MIN_VALUE;
       }
       return true;
-    } else /* Byte.class */ {
-      if (myType == Double.class) {
-        return (byte) number.doubleValue() == number.doubleValue();
-      } else if (myType == Long.class) {
-        return number.longValue() <= Byte.MAX_VALUE && number.longValue() >= Byte.MIN_VALUE;
-      } else if (myType == Float.class) {
-        return (byte) number.floatValue() == number.floatValue();
-      } else if (myType == Integer.class) {
-        return number.intValue() <= Byte.MAX_VALUE && number.intValue() >= Byte.MIN_VALUE;
-      } else if (myType == Short.class) {
-        return number.shortValue() <= Byte.MAX_VALUE && number.shortValue() >= Byte.MIN_VALUE;
-      }
-      return true;
     }
+    if (myType == Double.class) {
+      return (byte) number.doubleValue() == number.doubleValue();
+    } else if (myType == Float.class) {
+      return (byte) number.floatValue() == number.floatValue();
+    } else if (myType == Long.class) {
+      return number.longValue() <= Byte.MAX_VALUE && number.longValue() >= Byte.MIN_VALUE;
+    } else if (myType == Integer.class) {
+      return number.intValue() <= Byte.MAX_VALUE && number.intValue() >= Byte.MIN_VALUE;
+    }
+    return number.shortValue() <= Byte.MAX_VALUE && number.shortValue() >= Byte.MIN_VALUE;
   }
 
   private static final Map<Class, UnaryOperator<? extends Number>>

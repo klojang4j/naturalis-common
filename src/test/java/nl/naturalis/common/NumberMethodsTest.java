@@ -4,58 +4,186 @@ import static nl.naturalis.common.NumberMethods.fitsInto;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertTrue;
 
+import nl.naturalis.common.invoke.IllegalAssignmentException;
 import org.junit.Test;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public class NumberMethodsTest {
 
   @Test
   public void fitsInto01() {
-    assertTrue(fitsInto(Integer.MAX_VALUE, Float.class));
+    assertTrue(fitsInto(Double.MAX_VALUE, Double.class));
+    assertTrue(fitsInto(Double.MIN_VALUE, Double.class));
+    assertTrue(fitsInto(Float.MAX_VALUE, Double.class));
+    assertTrue(fitsInto(Float.MIN_VALUE, Double.class));
+    assertTrue(fitsInto(Long.MAX_VALUE, Double.class));
+    assertTrue(fitsInto(Long.MIN_VALUE, Double.class));
+    assertTrue(fitsInto(Integer.MAX_VALUE, Double.class));
+    assertTrue(fitsInto(Integer.MIN_VALUE, Double.class));
+    assertTrue(fitsInto(Short.MAX_VALUE, Double.class));
+    assertTrue(fitsInto(Short.MIN_VALUE, Double.class));
+    assertTrue(fitsInto(Byte.MAX_VALUE, Double.class));
+    assertTrue(fitsInto(Byte.MIN_VALUE, Double.class));
+    assertTrue(fitsInto((short) 2, Double.class));
+    assertTrue(fitsInto(3L, Double.class));
   }
 
   @Test
   public void fitsInto02() {
+    assertFalse(fitsInto(Double.MAX_VALUE, Float.class));
+    assertFalse(fitsInto(Double.MIN_VALUE, Float.class));
+    assertTrue(fitsInto(Double.valueOf(Float.MAX_VALUE), Float.class));
+    assertTrue(fitsInto(Double.valueOf(Float.MIN_VALUE), Float.class));
+    assertFalse(fitsInto(Double.MIN_VALUE, Float.class));
+    assertTrue(fitsInto(Float.MAX_VALUE, Float.class));
+    assertTrue(fitsInto(Float.MIN_VALUE, Float.class));
+    assertTrue(fitsInto(Long.MAX_VALUE, Float.class));
+    assertTrue(fitsInto(Long.MIN_VALUE, Float.class));
+    assertTrue(fitsInto(Integer.MAX_VALUE, Float.class));
     assertTrue(fitsInto(Integer.MIN_VALUE, Float.class));
+    assertTrue(fitsInto(Short.MAX_VALUE, Float.class));
+    assertTrue(fitsInto(Short.MIN_VALUE, Float.class));
+    assertTrue(fitsInto(Byte.MAX_VALUE, Float.class));
+    assertTrue(fitsInto(Byte.MIN_VALUE, Float.class));
+    assertTrue(fitsInto(3.00000D, Float.class));
+    assertFalse(fitsInto(3.00001D, Float.class));
   }
 
   @Test
   public void fitsInto03() {
-    assertFalse(fitsInto(Float.MAX_VALUE, Integer.class));
-  }
-
-  @Test
-  public void fitsInto04() {
-    assertFalse(fitsInto(Float.MIN_VALUE, Integer.class));
+    assertFalse(fitsInto(Double.MAX_VALUE, Long.class));
+    assertFalse(fitsInto(Double.MIN_VALUE, Long.class));
+    assertFalse(fitsInto(Float.MAX_VALUE, Long.class));
+    assertFalse(fitsInto(Float.MIN_VALUE, Long.class));
+    assertTrue(fitsInto(Double.valueOf(Long.MAX_VALUE), Long.class));
+    assertTrue(fitsInto(Double.valueOf(Long.MIN_VALUE), Long.class));
+    assertTrue(fitsInto(Float.valueOf(Long.MAX_VALUE), Long.class));
+    assertTrue(fitsInto(Float.valueOf(Long.MIN_VALUE), Long.class));
+    assertTrue(fitsInto(Long.MAX_VALUE, Long.class));
+    assertTrue(fitsInto(Long.MIN_VALUE, Long.class));
+    assertTrue(fitsInto(Integer.MAX_VALUE, Long.class));
+    assertTrue(fitsInto(Integer.MIN_VALUE, Long.class));
+    assertTrue(fitsInto(Short.MAX_VALUE, Long.class));
+    assertTrue(fitsInto(Short.MIN_VALUE, Long.class));
+    assertTrue(fitsInto(Byte.MAX_VALUE, Long.class));
+    assertTrue(fitsInto(Byte.MIN_VALUE, Long.class));
+    assertTrue(fitsInto(3.0000000D, Long.class));
+    assertFalse(fitsInto(3.0000001D, Long.class));
   }
 
   @Test
   public void fitsInto05() {
-    assertTrue(fitsInto(3.00F, Integer.class));
-  }
-
-  @Test
-  public void fitsInto06() {
+    assertFalse(fitsInto(Double.MAX_VALUE, Integer.class));
+    assertFalse(fitsInto(Double.MIN_VALUE, Integer.class));
+    assertFalse(fitsInto(Float.MAX_VALUE, Integer.class));
+    assertFalse(fitsInto(Float.MIN_VALUE, Integer.class));
+    assertFalse(fitsInto(Long.MAX_VALUE, Integer.class));
+    assertFalse(fitsInto(Long.MIN_VALUE, Integer.class));
+    assertTrue(fitsInto(Double.valueOf(Integer.MAX_VALUE), Integer.class));
+    assertTrue(fitsInto(Double.valueOf(Integer.MIN_VALUE), Integer.class));
+    assertTrue(fitsInto(Float.valueOf(Integer.MAX_VALUE), Integer.class));
+    assertTrue(fitsInto(Float.valueOf(Integer.MIN_VALUE), Integer.class));
+    assertTrue(fitsInto(Long.valueOf(Integer.MAX_VALUE), Integer.class));
+    assertTrue(fitsInto(Long.valueOf(Integer.MIN_VALUE), Integer.class));
+    assertTrue(fitsInto(Integer.MAX_VALUE, Integer.class));
+    assertTrue(fitsInto(Integer.MIN_VALUE, Integer.class));
+    assertTrue(fitsInto(Short.MAX_VALUE, Integer.class));
+    assertTrue(fitsInto(Short.MIN_VALUE, Integer.class));
+    assertTrue(fitsInto(Byte.MAX_VALUE, Integer.class));
+    assertTrue(fitsInto(Byte.MIN_VALUE, Integer.class));
+    assertTrue(fitsInto(3.0000000D, Integer.class));
+    assertFalse(fitsInto(3.0000001D, Integer.class));
+    assertTrue(fitsInto(3.00000D, Integer.class));
     assertFalse(fitsInto(3.00001F, Integer.class));
   }
 
   @Test
+  public void fitsInto06() {
+    assertFalse(fitsInto(Double.MAX_VALUE, Short.class));
+    assertFalse(fitsInto(Double.MIN_VALUE, Short.class));
+    assertFalse(fitsInto(Float.MAX_VALUE, Short.class));
+    assertFalse(fitsInto(Float.MIN_VALUE, Short.class));
+    assertFalse(fitsInto(Long.MAX_VALUE, Short.class));
+    assertFalse(fitsInto(Long.MIN_VALUE, Short.class));
+    assertFalse(fitsInto(Integer.MAX_VALUE, Short.class));
+    assertFalse(fitsInto(Integer.MIN_VALUE, Short.class));
+    assertTrue(fitsInto(Double.valueOf(Short.MAX_VALUE), Short.class));
+    assertTrue(fitsInto(Double.valueOf(Short.MIN_VALUE), Short.class));
+    assertTrue(fitsInto(Float.valueOf(Short.MAX_VALUE), Short.class));
+    assertTrue(fitsInto(Float.valueOf(Short.MIN_VALUE), Short.class));
+    assertTrue(fitsInto(Long.valueOf(Short.MAX_VALUE), Short.class));
+    assertTrue(fitsInto(Long.valueOf(Short.MIN_VALUE), Short.class));
+    assertTrue(fitsInto(Integer.valueOf(Short.MAX_VALUE), Short.class));
+    assertTrue(fitsInto(Integer.valueOf(Short.MIN_VALUE), Short.class));
+    assertTrue(fitsInto(Short.MAX_VALUE, Short.class));
+    assertTrue(fitsInto(Short.MIN_VALUE, Short.class));
+    assertTrue(fitsInto(Byte.MAX_VALUE, Short.class));
+    assertTrue(fitsInto(Byte.MIN_VALUE, Short.class));
+    assertTrue(fitsInto(3.0000000D, Short.class));
+    assertFalse(fitsInto(3.0000001D, Short.class));
+    assertTrue(fitsInto(3.00000D, Short.class));
+    assertFalse(fitsInto(3.00001F, Short.class));
+  }
+
+  @Test
   public void fitsInto07() {
+    assertFalse(fitsInto(Double.MAX_VALUE, Byte.class));
+    assertFalse(fitsInto(Double.MIN_VALUE, Byte.class));
+    assertFalse(fitsInto(Float.MAX_VALUE, Byte.class));
+    assertFalse(fitsInto(Float.MIN_VALUE, Byte.class));
+    assertFalse(fitsInto(Long.MAX_VALUE, Byte.class));
+    assertFalse(fitsInto(Long.MIN_VALUE, Byte.class));
+    assertFalse(fitsInto(Integer.MAX_VALUE, Byte.class));
+    assertFalse(fitsInto(Integer.MIN_VALUE, Byte.class));
+    assertFalse(fitsInto(Short.MAX_VALUE, Byte.class));
+    assertFalse(fitsInto(Short.MIN_VALUE, Byte.class));
+    assertTrue(fitsInto(Double.valueOf(Byte.MAX_VALUE), Byte.class));
+    assertTrue(fitsInto(Double.valueOf(Byte.MIN_VALUE), Byte.class));
+    assertTrue(fitsInto(Float.valueOf(Byte.MAX_VALUE), Byte.class));
+    assertTrue(fitsInto(Float.valueOf(Byte.MIN_VALUE), Byte.class));
+    assertTrue(fitsInto(Long.valueOf(Byte.MAX_VALUE), Byte.class));
+    assertTrue(fitsInto(Long.valueOf(Byte.MIN_VALUE), Byte.class));
+    assertTrue(fitsInto(Integer.valueOf(Byte.MAX_VALUE), Byte.class));
+    assertTrue(fitsInto(Integer.valueOf(Byte.MIN_VALUE), Byte.class));
+    assertTrue(fitsInto(Short.valueOf(Byte.MAX_VALUE), Byte.class));
+    assertTrue(fitsInto(Short.valueOf(Byte.MIN_VALUE), Byte.class));
+    assertTrue(fitsInto(Byte.MAX_VALUE, Byte.class));
+    assertTrue(fitsInto(Byte.MIN_VALUE, Byte.class));
+    assertTrue(fitsInto(3.0000000D, Byte.class));
+    assertFalse(fitsInto(3.0000001D, Byte.class));
+    assertTrue(fitsInto(3.00000D, Byte.class));
+    assertTrue(fitsInto(3L, Byte.class));
+    assertFalse(fitsInto(3.00001F, Byte.class));
+    assertFalse(fitsInto(400, Byte.class));
+    assertFalse(fitsInto(300L, Byte.class));
+  }
+
+  @Test
+  public void fitsInto08() {
     assertFalse(fitsInto(Double.valueOf("3.000000000000001"), Integer.class));
   }
 
-  @Test // Ouch - apparently, here we go past the precision of double.
-  public void fitsInto08() {
-    assertTrue(fitsInto(Double.valueOf("3.0000000000000001"), Integer.class));
-  }
-
-  @Test // Ouch - apparently, here we go past the precision of double.
+  @Test // Ouch - here we go past the precision of double.
   public void fitsInto09() {
+    assertTrue(fitsInto(Double.valueOf("3.0000000000000001"), Integer.class));
     assertTrue(fitsInto(3.0000000000000001D, Integer.class));
   }
 
   @Test(expected = TypeConversionException.class)
-  public void convert01() {
+  public void convert10() {
     NumberMethods.convert(300345, Byte.class);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void fitsInto11() {
+    fitsInto(42L, BigInteger.class);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void fitsInto12() {
+    fitsInto(42L, BigDecimal.class);
   }
 
   @Test
