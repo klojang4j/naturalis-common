@@ -65,7 +65,7 @@ public final class AnyBeanReader {
     Getter getter = getters.get(prop);
     Check.that(getter).is(notNull(), () -> noSuchProperty(bean, prop)).ok();
     try {
-      return (U) getters.get(prop).read(bean);
+      return (U) getter.read(bean);
     } catch (Throwable exc) {
       throw InvokeException.wrap(exc, bean, getter);
     }
