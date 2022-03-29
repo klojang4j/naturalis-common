@@ -37,8 +37,64 @@ public class FormatNormalizerTest {
 
   @Test
   public void test04() {
-    String in = "${arg} did nit have required relation to ${obj}";
+    String in = "${arg} did not have required relation to ${obj}";
     String out = normalize(in);
-    assertEquals("%2$s did nit have required relation to %5$s", out);
+    assertEquals("%2$s did not have required relation to %5$s", out);
+  }
+
+  @Test
+  public void test05() {
+    String in = "${arg} did not have required relation to ${9}";
+    String out = normalize(in);
+    assertEquals("%2$s did not have required relation to %15$s", out);
+  }
+
+  @Test
+  public void test06() {
+    String in = "${arg} did not have required relation to ${42}";
+    String out = normalize(in);
+    assertEquals("%2$s did not have required relation to ${42}", out);
+  }
+
+  @Test
+  public void test07() {
+    String in = "${arg} did not have required relation to $";
+    String out = normalize(in);
+    assertEquals("%2$s did not have required relation to $", out);
+  }
+
+  @Test
+  public void test08() {
+    String in = "${arg} did not have required relation to ${";
+    String out = normalize(in);
+    assertEquals("%2$s did not have required relation to ${", out);
+  }
+
+  @Test
+  public void test09() {
+    String in = "${arg} did not have required relation to ${a";
+    String out = normalize(in);
+    assertEquals("%2$s did not have required relation to ${a", out);
+  }
+
+  @Test
+  public void test10() {
+    String in = "${arg} did not have required relation to ${arg";
+    String out = normalize(in);
+    assertEquals("%2$s did not have required relation to ${arg", out);
+  }
+
+  @Test
+  public void test11() {
+    String in = "${arg} did not have required relation to ${skunk} (sorry)";
+    String out = normalize(in);
+    assertEquals("%2$s did not have required relation to ${skunk} (sorry)", out);
+  }
+
+  @Test
+  public void test12() {
+    String in = "";
+    String out = normalize(in);
+    assertEquals("", out);
   }
 }
