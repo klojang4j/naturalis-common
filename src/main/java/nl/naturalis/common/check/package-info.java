@@ -1,13 +1,11 @@
 /**
- *
- *
  * <h1>Precondition and Postcondition Verification</h1>
  *
  * <p>The classes in this package facilitate the validation of method arguments, variables, object
  * state (preconditions) and computational outcomes (postconditions). Contrary to Google Guava's <a
- * href="https://guava.dev/releases/21.0/api/docs/com/google/common/base/Preconditions.html}">Preconditions</a>
- * class and Apache's <a
- * href="https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html">Validate</a>
+ * href="https://guava.dev/releases/21.0/api/docs/com/google/common/base/Preconditions.html}
+ * ">Preconditions</a> class and Apache's
+ * <a href="https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html">Validate</a>
  * class, validation happens through instance methods. For example:
  *
  * <blockquote>
@@ -54,50 +52,44 @@
  *
  * <h2>Custom error messages</h2>
  *
- * <p>If you prefer to send out a custom error message, you van do so by specifying a {@code
- * String.format} message pattern and zero or more message arguments. Note, however, that the
- * following five message arguments are tacitly prefixed to your own message arguments:
+ * <p>If you prefer to send out a custom error message, you van do so by specifying a message
+ * pattern and zero or more message arguments. The first message argument can be referenced as
+ * <code>${0}</code>; the second as <code>${1}</code>, etc. For example:
+ *
+ * <blockquote>
+ *
+ * <pre>{@code
+ * // import static nl.naturalis.common.check.CommonChecks.keyIn;
+ * Check.that(word).is(keyIn(), dictionary, "Spelling error. Did you mean: ${0}?", "colleague");
+ * // Error message: "Spelling error. Did you mean: colleague?"
+ * }</pre>
+ *
+ * </blockquote>
+ *
+ * <p>The following message arguments are automatically available within the message pattern:
  *
  * <ol>
- *   <li>The name of the check that was executed. E.g. "gt" or "notNull". Within the message pattern
- *       this message argument can be referenced using a standard {@code printf} indexed message
- *       argument: <code>%1$s</code>. You can also use <code>${check}</code> to reference this
- *       message argument. This will get translated into <code>%1$s</code> before the message
- *       pattern is passed off to {@code String.format}.
- *   <li>The argument being validated. Within the message pattern this message argument can be
- *       referenced as <code>${arg}</code> or <code>%2$s</code>.
- *   <li>The simple class name of the argument, or {@code null} if the argument was {@code null}.
- *       Within the message pattern this message argument can be referenced as <code>
- *       ${type}</code> or <code>%3$s</code>.
- *   <li>The name of the argument, or {@code null} if no argument name was provided. Within the
- *       message pattern this message argument can be referenced as <code>${name}</code> or <code>
- *       %4$s</code>.
- *   <li>The object of the relationship in case the check took the form of a {@link
- *       nl.naturalis.common.function.Relation}. For example, for the {@code gt} (greater-than)
- *       check that would be the number that the argument must surpass. Within the message pattern
- *       this message argument can be referenced as <code>
- *       ${obj}</code> or <code>%5$s</code>. For checks expressed through a {@link
- *       java.util.function.Predicate} this message argument will be {@code null}.
+ *   <li><b>${test}</b> The name of the check that was executed. E.g. "gt" or "notNull".
+ *   <li><b>${arg}</b> The argument being validated.
+ *   <li><b>${type}</b> The simple class name of the argument.
+ *   <li><b>${name}</b> The name of the argument if you provided one through the static factory
+ *   methods of the {@code Check} class. Otherwise it will also be the simple class name of the
+ *   argument.
+ *   <li>${obj} The object of the relationship in case the check took the form of a {@link
+ *       nl.naturalis.common.function.Relation}. For example, for the
+ *       {@link nl.naturalis.common.check.CommonChecks#instanceOf()} () instanceOf}
+ *       check that would be the class that the argument must be an instance of. For checks
+ *       expressed through a {@code Predicate} or {@code IntPredicate} ${obj} will
+ *       be {@code null}.
  * </ol>
  *
- * <p>In other words, if your custom message only references these elements of the check, you don't
- * need to specify any message arguments yourself at all. The first of your own message arguments
- * can be referenced from within the message pattern as <code>${0}</code> or <code>%6$s
- * </code>, the second as <code>${1}</code> or <code>%7$s</code>, etc.
- *
- * <p>Examples:
+ * <p>For example:
  *
  * <blockquote>
  *
  * <pre>{@code
  * // import static nl.naturalis.common.check.CommonChecks.keyIn;
  * Check.that(word).is(keyIn(), dictionary, "Missing key: ${arg}");
- * // Or as pure printf-style format string:
- * Check.that(word).is(keyIn(), dictionary, "Missing key: %2$s");
- *
- * Check.that(word).is(keyIn(), dictionary, "You forgot about ${0}", "your spelling");
- * // Or as pure printf-style format string:
- * Check.that(word).is(keyIn(), dictionary, "You forgot about %6$s", "your spelling");
  * }</pre>
  *
  * </blockquote>

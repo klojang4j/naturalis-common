@@ -7,6 +7,13 @@ import java.util.function.*;
 import static nl.naturalis.common.check.MsgUtil.getCustomMessage;
 import static nl.naturalis.common.check.MsgUtil.getPrefabMessage;
 
+/**
+ * Facilitates the validation of arbitrarily typed values. See the {@linkplain
+ * nl.naturalis.common.check package description} for a detailed explanation.
+ *
+ * @param <T> The type of the value to be validated
+ * @param <E> The type of the exception thrown if the value does not pass the test
+ */
 public final class ObjectCheck<T, E extends Exception> {
 
   final T arg;
@@ -169,7 +176,8 @@ public final class ObjectCheck<T, E extends Exception> {
    * informative error message is generated if the argument turns out to be invalid.
    *
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param <O> The type of the value being tested against
    * @return This instance
    * @throws E If the argument is invalid
@@ -187,7 +195,8 @@ public final class ObjectCheck<T, E extends Exception> {
    * informative error message is generated if the argument turns out to be invalid.
    *
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param <O> The type of the value being tested against
    * @return This instance
    * @throws E If the argument is invalid
@@ -205,7 +214,8 @@ public final class ObjectCheck<T, E extends Exception> {
    * message.
    *
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param message The message pattern
    * @param msgArgs The message arguments
    * @param <O> The type of the value being tested against
@@ -226,7 +236,8 @@ public final class ObjectCheck<T, E extends Exception> {
    * message.
    *
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param message The message pattern
    * @param msgArgs The message arguments
    * @param <O> The type of the value being tested against
@@ -246,7 +257,8 @@ public final class ObjectCheck<T, E extends Exception> {
    * exception for this particular test.
    *
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param exception The supplier of the exception to be thrown if the argument is invalid
    * @param <O> The type of the value being tested against
    * @param <X> The type of the exception thrown if the argument is invalid
@@ -266,7 +278,8 @@ public final class ObjectCheck<T, E extends Exception> {
    * exception for this particular test.
    *
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param exception The supplier of the exception to be thrown if the argument is invalid
    * @param <O> The type of the value being tested against
    * @param <X> The type of the exception thrown if the argument is invalid
@@ -284,7 +297,8 @@ public final class ObjectCheck<T, E extends Exception> {
    * informative error message is generated if the argument turns out to be invalid.
    *
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @return This instance
    * @throws E If the argument is invalid
    */
@@ -301,7 +315,8 @@ public final class ObjectCheck<T, E extends Exception> {
    * informative error message is generated if the argument turns out to be invalid.
    *
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @return This instance
    * @throws E If the argument is invalid
    */
@@ -318,7 +333,8 @@ public final class ObjectCheck<T, E extends Exception> {
    * message.
    *
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param message The message pattern
    * @param msgArgs The message arguments
    * @return This instance
@@ -338,7 +354,8 @@ public final class ObjectCheck<T, E extends Exception> {
    * message.
    *
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param message The message pattern
    * @param msgArgs The message arguments
    * @return This instance
@@ -357,7 +374,8 @@ public final class ObjectCheck<T, E extends Exception> {
    * exception for this particular test.
    *
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param exception The supplier of the exception to be thrown if the argument is invalid
    * @param <X> The type of the exception thrown if the argument is invalid
    * @return This instance
@@ -376,7 +394,8 @@ public final class ObjectCheck<T, E extends Exception> {
    * exception for this particular test.
    *
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param exception The supplier of the exception to be thrown if the argument is invalid
    * @param <X> The type of the exception thrown if the argument is invalid
    * @return This instance
@@ -428,8 +447,8 @@ public final class ObjectCheck<T, E extends Exception> {
    * generated if the argument turns out to be invalid.
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
    * @param <P> The type of the extracted value
    * @return This instance
@@ -447,8 +466,8 @@ public final class ObjectCheck<T, E extends Exception> {
    * generated if the argument turns out to be invalid.
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
    * @param <P> The type of the extracted value
    * @return This instance
@@ -538,7 +557,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param <P> The type of the extracted value
    * @param <O> The type of the value being tested against
    * @return This instance
@@ -558,7 +578,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param <P> The type of the extracted value
    * @param <O> The type of the value being tested against
    * @return This instance
@@ -576,10 +597,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * generated if the argument turns out to be invalid.
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param <P> The type of the extracted value
    * @param <O> The type of the value being tested against
    * @return This instance
@@ -597,10 +619,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * generated if the argument turns out to be invalid.
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param <P> The type of the extracted value
    * @param <O> The type of the value being tested against
    * @return This instance
@@ -618,7 +641,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param message The message pattern
    * @param msgArgs The message arguments
    * @param <P> The type of the extracted value
@@ -639,7 +663,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param message The message pattern
    * @param msgArgs The message arguments
    * @param <P> The type of the extracted value
@@ -659,7 +684,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param exception The supplier of the exception to be thrown if the argument is invalid
    * @param <P> The type of the extracted value
    * @param <O> The type of the value being tested against
@@ -678,7 +704,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param exception The supplier of the exception to be thrown if the argument is invalid
    * @param <P> The type of the extracted value
    * @param <O> The type of the value being tested against
@@ -700,7 +727,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param <P> The type of the extracted value
    * @return This instance
    * @throws E If the argument is invalid
@@ -719,7 +747,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param <P> The type of the extracted value
    * @return This instance
    * @throws E If the argument is invalid
@@ -736,10 +765,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * generated if the argument turns out to be invalid.
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param <P> The type of the extracted value
    * @return This instance
    * @throws E If the argument is invalid
@@ -756,10 +786,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * generated if the argument turns out to be invalid.
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param <P> The type of the extracted value
    * @return This instance
    * @throws E If the argument is invalid
@@ -776,7 +807,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param message The message pattern
    * @param msgArgs The message arguments
    * @param <P> The type of the extracted value
@@ -800,7 +832,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param message The message pattern
    * @param msgArgs The message arguments
    * @param <P> The type of the extracted value
@@ -823,7 +856,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param exception The supplier of the exception to be thrown if the argument is invalid
    * @param <P> The type of the extracted value
    * @param <X> The type of the exception thrown if the argument is invalid
@@ -841,7 +875,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param exception The supplier of the exception to be thrown if the argument is invalid
    * @param <P> The type of the extracted value
    * @param <X> The type of the exception thrown if the argument is invalid
@@ -892,8 +927,8 @@ public final class ObjectCheck<T, E extends Exception> {
    * generated if the argument turns out to be invalid.
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
    * @return This instance
    * @throws E If the argument is invalid
@@ -909,8 +944,8 @@ public final class ObjectCheck<T, E extends Exception> {
    * generated if the argument turns out to be invalid.
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
    * @return This instance
    * @throws E If the argument is invalid
@@ -1014,7 +1049,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param <O> The type of the value being tested against
    * @return This instance
    * @throws E If the argument is invalid
@@ -1052,7 +1088,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param <O> The type of the value being tested against
    * @return This instance
    * @throws E If the argument is invalid
@@ -1088,10 +1125,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * </ul>
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param <O> The type of the value being tested against
    * @return This instance
    * @throws E If the argument is invalid
@@ -1127,10 +1165,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * </ul>
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param <O> The type of the value being tested against
    * @return This instance
    * @throws E If the argument is invalid
@@ -1166,7 +1205,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param message The message pattern
    * @param msgArgs The message arguments
    * @param <O> The type of the value being tested against
@@ -1209,7 +1249,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param message The message pattern
    * @param msgArgs The message arguments
    * @param <O> The type of the value being tested against
@@ -1232,7 +1273,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param exception The supplier of the exception to be thrown if the argument is invalid
    * @param <O> The type of the value being tested against
    * @param <X> The type of the exception thrown if the argument is invalid
@@ -1269,7 +1311,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param exception The supplier of the exception to be thrown if the argument is invalid
    * @param <O> The type of the value being tested against
    * @param <X> The type of the exception thrown if the argument is invalid
@@ -1309,7 +1352,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @return This instance
    * @throws E If the argument is invalid
    */
@@ -1345,7 +1389,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @return This instance
    * @throws E If the argument is invalid
    */
@@ -1380,10 +1425,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * </ul>
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @return This instance
    * @throws E If the argument is invalid
    */
@@ -1418,10 +1464,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * </ul>
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @return This instance
    * @throws E If the argument is invalid
    */
@@ -1456,7 +1503,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param message The message pattern
    * @param msgArgs The message arguments
    * @return This instance
@@ -1494,7 +1542,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param message The message pattern
    * @param msgArgs The message arguments
    * @return This instance
@@ -1531,7 +1580,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param exception The supplier of the exception to be thrown if the argument is invalid
    * @param <X> The type of the exception thrown if the argument is invalid
    * @return This instance
@@ -1567,7 +1617,8 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param exception The supplier of the exception to be thrown if the argument is invalid
    * @param <X> The type of the exception thrown if the argument is invalid
    * @return This instance

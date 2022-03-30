@@ -8,8 +8,10 @@ import java.util.regex.Pattern;
 
 class CustomMsgFormatter {
 
-  private static boolean USE_REGEX = false;
-
+  // We used to have a regex impl as well, but it was ever so slightly slower
+  // than the hand-woven impl, and it fell by the wayside for maintenance
+  // reasons. Nevertheless, let's keep this around.
+  private static final boolean USE_REGEX = false;
   private static final String REGEX = "\\$\\{(test|arg|type|name|obj|\\d+)}";
   private static final Pattern PATTERN = Pattern.compile(REGEX);
 
@@ -75,7 +77,7 @@ class CustomMsgFormatter {
           if (i + 5 < args.length) {
             return Objects.toString(args[i + 5]);
           }
-        } catch (TypeConversionException e) {
+        } catch (TypeConversionException ignored) {
         }
         return "${" + arg + "}";
     }

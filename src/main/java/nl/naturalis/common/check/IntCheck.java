@@ -9,9 +9,9 @@ import static nl.naturalis.common.check.MsgUtil.getPrefabMessage;
 
 /**
  * Facilitates the validation of {@code int} values. See the {@link nl.naturalis.common.check
- * package description} for more details.
+ * package description} for a detailed explanation.
  *
- * @param <E> The type of the exception throw if the argument turns out to be invalid
+ * @param <E> The type of the exception throw if the value does not pass the test
  */
 public final class IntCheck<E extends Exception> {
 
@@ -429,8 +429,8 @@ public final class IntCheck<E extends Exception> {
    * generated if the argument turns out to be invalid.
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
    * @param <P> The type of the extracted value
    * @return This instance
@@ -447,8 +447,8 @@ public final class IntCheck<E extends Exception> {
    * generated if the argument turns out to be invalid.
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
    * @param <P> The type of the extracted value
    * @return This instance
@@ -567,8 +567,8 @@ public final class IntCheck<E extends Exception> {
    * generated if the argument turns out to be invalid.
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
    * @return This instance
    * @throws E If the argument is invalid
@@ -584,8 +584,8 @@ public final class IntCheck<E extends Exception> {
    * generated if the argument turns out to be invalid.
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
    * @return This instance
    * @throws E If the argument is invalid
@@ -669,7 +669,8 @@ public final class IntCheck<E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @return This instance
    * @throws E If the argument is invalid
    */
@@ -686,7 +687,8 @@ public final class IntCheck<E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @return This instance
    * @throws E If the argument is invalid
    */
@@ -701,10 +703,11 @@ public final class IntCheck<E extends Exception> {
    * generated if the argument turns out to be invalid.
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @return This instance
    * @throws E If the argument is invalid
    */
@@ -720,10 +723,11 @@ public final class IntCheck<E extends Exception> {
    * generated if the argument turns out to be invalid.
    *
    * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified name
-   *     will be used and constructed using {@code argName + "." + name}.
+   * @param name The name of the property being tested. In error messages the fully-qualified
+   *     name will be used and constructed using {@code argName + "." + name}.
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @return This instance
    * @throws E If the argument is invalid
    */
@@ -739,7 +743,8 @@ public final class IntCheck<E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param message The message pattern
    * @param msgArgs The message arguments
    * @return This instance
@@ -758,7 +763,8 @@ public final class IntCheck<E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param message The message pattern
    * @param msgArgs The message arguments
    * @return This instance
@@ -776,7 +782,8 @@ public final class IntCheck<E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param exception The supplier of the exception to be thrown if the argument is invalid
    * @param <X> The type of the exception thrown if the argument is invalid
    * @return This instance
@@ -793,7 +800,8 @@ public final class IntCheck<E extends Exception> {
    *
    * @param property A function that extracts the value to be tested from the argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a relation)
+   * @param object The value that the argument is tested against (called "the object" of a
+   *     relation)
    * @param exception The supplier of the exception to be thrown if the argument is invalid
    * @param <X> The type of the exception thrown if the argument is invalid
    * @return This instance
