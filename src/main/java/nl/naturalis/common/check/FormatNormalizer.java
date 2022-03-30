@@ -9,7 +9,7 @@ class FormatNormalizer {
 
   private static boolean USE_REGEX = false;
 
-  private static final String REGEX = "\\$\\{(test|arg|type|name|obj|\\d{1,2})}";
+  private static final String REGEX = "\\$\\{(test|arg|type|name|obj|\\d)}";
   private static final Pattern PATTERN = Pattern.compile(REGEX);
 
   private static final Map<String, String> VARS_REGEX = Map.ofEntries(entry("test", "%1\\$s"),
@@ -56,9 +56,6 @@ class FormatNormalizer {
   }
 
   private static String normalizeNoRegex(String fmt) {
-    if (fmt.isEmpty()) {
-      return fmt;
-    }
     StringBuilder out = new StringBuilder(fmt.length());
     StringBuilder tmp = new StringBuilder(4);
     int EOL = fmt.length() - 1;
