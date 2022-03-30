@@ -55,7 +55,7 @@ final class MsgUtil {
       Object obj) {
     throwIf(pattern == null, () -> new InvalidCheckException("message pattern must not be null"));
     throwIf(msgArgs == null, () -> new InvalidCheckException("message arguments must not be null"));
-    String fmt = FormatNormalizer.normalize(pattern);
+    //String fmt = FormatNormalizer.normalize(pattern);
     Object[] all = new Object[msgArgs.length + 5];
     all[0] = NAMES.getOrDefault(test, test.getClass().getSimpleName());
     all[1] = toStr(argVal);
@@ -66,7 +66,7 @@ final class MsgUtil {
     all[3] = argName;
     all[4] = toStr(obj);
     System.arraycopy(msgArgs, 0, all, 5, msgArgs.length);
-    return format(fmt, all);
+    return FormatNormalizer.format(pattern, all);
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -190,19 +190,19 @@ final class MsgUtil {
   private static String formatRelationShowArg(MsgArgs args, String relation, boolean negative) {
     return negative
         ? format(
-            MSG_RELATION_WAS,
-            args.name(),
-            args.notNot(),
-            relation,
-            toStr(args.obj()),
-            toStr(args.arg()))
+        MSG_RELATION_WAS,
+        args.name(),
+        args.notNot(),
+        relation,
+        toStr(args.obj()),
+        toStr(args.arg()))
         : format(
-            MSG_RELATION_WAS,
-            args.name(),
-            args.not(),
-            relation,
-            toStr(args.obj()),
-            toStr(args.arg()));
+        MSG_RELATION_WAS,
+        args.name(),
+        args.not(),
+        relation,
+        toStr(args.obj()),
+        toStr(args.arg()));
   }
 
   //////////////////////////////////////////////////////////////////////////

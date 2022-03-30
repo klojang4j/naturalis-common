@@ -139,8 +139,12 @@ public final class NumberMethods {
    * @param s The string to be parsed
    * @return The {@code Integer} representation of the string
    */
-  public static Integer parseInt(String s) throws TypeConversionException {
-    return parse(s, Integer.class);
+  public static int parseInt(String s) throws TypeConversionException {
+    try {
+      return new BigInteger(s).intValueExact();
+    } catch (NumberFormatException | ArithmeticException e) {
+      throw new TypeConversionException(s, int.class, e.getMessage());
+    }
   }
 
   /**

@@ -1635,8 +1635,10 @@ public final class CommonChecks {
   /* ++++++++++++++ END OF CHECKS ++++++++++++++ */
 
   static {
-    MESSAGE_PATTERNS = Map.copyOf(tmp0);
-    NAMES = Map.copyOf(tmp1);
+    MESSAGE_PATTERNS = new IdentityHashMap<>(tmp0.size());
+    MESSAGE_PATTERNS.putAll(tmp0);
+    NAMES = new IdentityHashMap<>((tmp1.size()));
+    NAMES.putAll(tmp1);
     tmp0 = null;
     tmp1 = null;
   }
