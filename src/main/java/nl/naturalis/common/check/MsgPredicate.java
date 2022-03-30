@@ -10,48 +10,48 @@ final class MsgPredicate {
 
   private MsgPredicate() {}
 
-  static Formatter msgNull() {
+  static PrefabMsgFormatter msgNull() {
     return formatPredicate("be null", true, false);
   }
 
-  static Formatter msgNotNull() {
+  static PrefabMsgFormatter msgNotNull() {
     return formatNegativePredicate("be null", false, true);
   }
 
-  static Formatter msgYes() {
+  static PrefabMsgFormatter msgYes() {
     return formatPredicate("be true", false);
   }
 
-  static Formatter msgNo() {
+  static PrefabMsgFormatter msgNo() {
     return formatPredicate("be false", false);
   }
 
-  static Formatter msgEmpty() {
+  static PrefabMsgFormatter msgEmpty() {
     return formatPredicate("be null or empty", true);
   }
 
-  static Formatter msgDeepNotNull() {
+  static PrefabMsgFormatter msgDeepNotNull() {
     return formatNegativePredicate("be null or contain null values", true);
   }
 
-  static Formatter msgDeepNotEmpty() {
+  static PrefabMsgFormatter msgDeepNotEmpty() {
     return formatNegativePredicate("be empty or contain empty values", true);
   }
 
-  static Formatter msgBlank() {
+  static PrefabMsgFormatter msgBlank() {
     return formatPredicate("be null or blank", true);
   }
 
-  static Formatter msgInteger() {
+  static PrefabMsgFormatter msgInteger() {
     return formatPredicate("be parsable as integer", true);
   }
 
-  static Formatter msgArray() {
+  static PrefabMsgFormatter msgArray() {
     return args ->
         format(MSG_PREDICATE_WAS, args.name(), args.not(), "be an array", className(args.type()));
   }
 
-  static Formatter msgFile() {
+  static PrefabMsgFormatter msgFile() {
     return args -> {
       File f = (File) args.arg();
       if (f.isDirectory()) {
@@ -61,7 +61,7 @@ final class MsgPredicate {
     };
   }
 
-  static Formatter msgDirectory() {
+  static PrefabMsgFormatter msgDirectory() {
     return args -> {
       File f = (File) args.arg();
       if (f.isFile()) {
@@ -72,11 +72,11 @@ final class MsgPredicate {
     };
   }
 
-  static Formatter msgFileExists() {
+  static PrefabMsgFormatter msgFileExists() {
     return args -> format(MSG_PREDICATE_WAS, args.typeAndName(), args.not(), "exist", args.arg());
   }
 
-  static Formatter msgReadable() {
+  static PrefabMsgFormatter msgReadable() {
     return args -> {
       File f = (File) args.arg();
       if (!f.exists()) {
@@ -87,7 +87,7 @@ final class MsgPredicate {
     };
   }
 
-  static Formatter msgWritable() {
+  static PrefabMsgFormatter msgWritable() {
     return args -> {
       File f = (File) args.arg();
       if (!f.exists()) {

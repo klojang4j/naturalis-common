@@ -26,7 +26,7 @@ final class MsgUtil {
 
   static String getPrefabMessage(
       Object test, boolean negated, String argName, Object argVal, Class<?> argType, Object obj) {
-    Formatter formatter = MESSAGE_PATTERNS.get(test);
+    PrefabMsgFormatter formatter = MESSAGE_PATTERNS.get(test);
     if (formatter == null) {
       if (obj == null) {
         return "Invalid value for " + argName + ": " + toStr(argVal);
@@ -66,20 +66,20 @@ final class MsgUtil {
     all[3] = argName;
     all[4] = toStr(obj);
     System.arraycopy(msgArgs, 0, all, 5, msgArgs.length);
-    return FormatNormalizer.format(pattern, all);
+    return CustomMsgFormatter.format(pattern, all);
   }
 
   //////////////////////////////////////////////////////////////////////////
 
   // Default message for predicates
-  static Formatter formatPredicate(String predicate, boolean showArgument) {
+  static PrefabMsgFormatter formatPredicate(String predicate, boolean showArgument) {
     return showArgument
         ? args -> formatPredicateShowArg(args, predicate, false)
         : args -> formatPredicate(args, predicate, false);
   }
 
   // Default message for negatively formulated predicates like notNull()
-  static Formatter formatNegativePredicate(String predicate, boolean showArgument) {
+  static PrefabMsgFormatter formatNegativePredicate(String predicate, boolean showArgument) {
     return showArgument
         ? args -> formatPredicateShowArg(args, predicate, true)
         : args -> formatPredicate(args, predicate, true);
@@ -87,7 +87,7 @@ final class MsgUtil {
 
   // showArgIfAffirmative: show argument when executed in is() or has() method
   // showArgIfNegated: show argument when executed in isNot() or notHas() method
-  static Formatter formatPredicate(
+  static PrefabMsgFormatter formatPredicate(
       String predicate, boolean showArgIfAffirmative, boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
       if (showArgIfNegated) {
@@ -106,7 +106,7 @@ final class MsgUtil {
     return args -> formatPredicate(args, predicate, false);
   }
 
-  static Formatter formatNegativePredicate(
+  static PrefabMsgFormatter formatNegativePredicate(
       String predicate, boolean showArgIfAffirmative, boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
       if (showArgIfNegated) {
@@ -125,13 +125,13 @@ final class MsgUtil {
     return args -> formatPredicate(args, predicate, true);
   }
 
-  static Formatter formatRelation(String relation, boolean showArgument) {
+  static PrefabMsgFormatter formatRelation(String relation, boolean showArgument) {
     return showArgument
         ? args -> formatRelationShowArg(args, relation, false)
         : args -> formatRelation(args, relation, false);
   }
 
-  static Formatter formatRelation(
+  static PrefabMsgFormatter formatRelation(
       String relation, boolean showArgIfAffirmative, boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
       if (showArgIfNegated) {
@@ -150,7 +150,7 @@ final class MsgUtil {
     return args -> formatRelation(args, relation, false);
   }
 
-  static Formatter formatNegativeRelation(
+  static PrefabMsgFormatter formatNegativeRelation(
       String relation, boolean showArgIfAffirmative, boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
       if (showArgIfNegated) {

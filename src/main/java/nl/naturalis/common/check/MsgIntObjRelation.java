@@ -11,7 +11,7 @@ final class MsgIntObjRelation {
 
   private MsgIntObjRelation() {}
 
-  static Formatter msgIndexOf() {
+  static PrefabMsgFormatter msgIndexOf() {
     return args -> {
       int max;
       if (args.obj().getClass().isArray()) {
@@ -30,31 +30,31 @@ final class MsgIntObjRelation {
     };
   }
 
-  static Formatter msgInRange() {
+  static PrefabMsgFormatter msgInRange() {
     return args ->
         args.negated()
             ? format(
-                "%s must be < %s or >= %s (was %s)",
-                args.name(), ((IntPair) args.obj()).one(), ((IntPair) args.obj()).two(), args.arg())
+            "%s must be < %s or >= %s (was %s)",
+            args.name(), ((IntPair) args.obj()).one(), ((IntPair) args.obj()).two(), args.arg())
             : format(
-                "%s must be >= %s and < %s (was %s)",
-                args.name(),
-                ((IntPair) args.obj()).one(),
-                ((IntPair) args.obj()).two(),
-                args.arg());
+            "%s must be >= %s and < %s (was %s)",
+            args.name(),
+            ((IntPair) args.obj()).one(),
+            ((IntPair) args.obj()).two(),
+            args.arg());
   }
 
-  static Formatter msgInRangeClosed() {
+  static PrefabMsgFormatter msgInRangeClosed() {
     return args ->
         args.negated()
             ? format(
-                "%s must be < %s or > %s (was %s)",
-                args.name(), ((IntPair) args.obj()).one(), ((IntPair) args.obj()).two(), args.arg())
+            "%s must be < %s or > %s (was %s)",
+            args.name(), ((IntPair) args.obj()).one(), ((IntPair) args.obj()).two(), args.arg())
             : format(
-                "%s must be >= %s and <= %s (was %s)",
-                args.name(),
-                ((IntPair) args.obj()).one(),
-                ((IntPair) args.obj()).two(),
-                args.arg());
+            "%s must be >= %s and <= %s (was %s)",
+            args.name(),
+            ((IntPair) args.obj()).one(),
+            ((IntPair) args.obj()).two(),
+            args.arg());
   }
 }

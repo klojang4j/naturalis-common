@@ -3,4 +3,4 @@ package nl.naturalis.common.check;
 import java.util.function.Function;
 
 @FunctionalInterface
-interface Formatter extends Function<MsgArgs, String> {}
+interface PrefabMsgFormatter extends Function<MsgArgs, String> {}

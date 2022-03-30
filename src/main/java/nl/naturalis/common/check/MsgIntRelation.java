@@ -7,31 +7,31 @@ final class MsgIntRelation {
 
   private MsgIntRelation() {}
 
-  static Formatter msgEq() {
+  static PrefabMsgFormatter msgEq() {
     return formatRelation("equal", true, false);
   }
 
-  static Formatter msgNe() {
+  static PrefabMsgFormatter msgNe() {
     return formatNegativeRelation("equal", false, true);
   }
 
-  static Formatter msgGt() {
+  static PrefabMsgFormatter msgGt() {
     return formatRelation("be >", true);
   }
 
-  static Formatter msgGte() {
+  static PrefabMsgFormatter msgGte() {
     return formatRelation("be >=", true);
   }
 
-  static Formatter msgLt() {
+  static PrefabMsgFormatter msgLt() {
     return formatRelation("be <", true);
   }
 
-  static Formatter msgLte() {
+  static PrefabMsgFormatter msgLte() {
     return formatRelation("be <=", true);
   }
 
-  static Formatter msgMultipleOf() {
+  static PrefabMsgFormatter msgMultipleOf() {
     return formatRelation("be multiple of", true);
   }
 }

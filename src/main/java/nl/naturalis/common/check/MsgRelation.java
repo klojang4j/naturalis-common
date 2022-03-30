@@ -10,7 +10,7 @@ final class MsgRelation {
 
   private MsgRelation() {}
 
-  static Formatter msgSameAs() {
+  static PrefabMsgFormatter msgSameAs() {
     return args -> {
       String idObj =
           args.obj() == null
@@ -29,11 +29,11 @@ final class MsgRelation {
     };
   }
 
-  static Formatter msgNullOr() {
+  static PrefabMsgFormatter msgNullOr() {
     return formatRelation("be null or", true);
   }
 
-  static Formatter msgInstanceOf() {
+  static PrefabMsgFormatter msgInstanceOf() {
     return args -> {
       String cnObj = className(args.obj());
       if (args.negated()) {
@@ -47,63 +47,63 @@ final class MsgRelation {
     };
   }
 
-  static Formatter msgSubtypeOf() {
+  static PrefabMsgFormatter msgSubtypeOf() {
     return formatRelation("extend/implement", true);
   }
 
-  static Formatter msgSupertypeOf() {
+  static PrefabMsgFormatter msgSupertypeOf() {
     return formatRelation("be supertype of", true);
   }
 
-  static Formatter msgContains() {
+  static PrefabMsgFormatter msgContains() {
     return formatRelation("contain", false);
   }
 
-  static Formatter msgHasKey() {
+  static PrefabMsgFormatter msgHasKey() {
     return formatRelation("contain key", false);
   }
 
-  static Formatter msgHasValue() {
+  static PrefabMsgFormatter msgHasValue() {
     return formatRelation("contain value", false);
   }
 
-  static Formatter msgIn() {
+  static PrefabMsgFormatter msgIn() {
     return formatRelation("be element of", true);
   }
 
-  static Formatter msgKeyIn() {
+  static PrefabMsgFormatter msgKeyIn() {
     return formatRelation("be key in", true);
   }
 
-  static Formatter msgValueIn() {
+  static PrefabMsgFormatter msgValueIn() {
     return formatRelation("be value in", true);
   }
 
-  static Formatter msgSupersetOf() {
+  static PrefabMsgFormatter msgSupersetOf() {
     return formatRelation("be superset of", true);
   }
 
-  static Formatter msgSubsetOf() {
+  static PrefabMsgFormatter msgSubsetOf() {
     return formatRelation("be subset of", true);
   }
 
-  static Formatter msgHasSubstring() {
+  static PrefabMsgFormatter msgHasSubstring() {
     return formatRelation("contain", true);
   }
 
-  static Formatter msgSubstringOf() {
+  static PrefabMsgFormatter msgSubstringOf() {
     return formatRelation("be substring of", true);
   }
 
-  static Formatter msgEqualsIgnoreCase() {
+  static PrefabMsgFormatter msgEqualsIgnoreCase() {
     return formatRelation("be equal ignoring case to", true);
   }
 
-  static Formatter msgStartsWith() {
+  static PrefabMsgFormatter msgStartsWith() {
     return formatRelation("start with", true);
   }
 
-  static Formatter msgEndsWith() {
+  static PrefabMsgFormatter msgEndsWith() {
     return formatRelation("end with", true);
   }
 }

@@ -7,23 +7,23 @@ final class MsgIntPredicate {
   private MsgIntPredicate() {
   }
 
-  static Formatter msgEven() {
+  static PrefabMsgFormatter msgEven() {
     return formatPredicate("be even", true);
   }
 
-  static Formatter msgOdd() {
+  static PrefabMsgFormatter msgOdd() {
     return formatPredicate("be odd", true);
   }
 
-  static Formatter msgPositive() {
+  static PrefabMsgFormatter msgPositive() {
     return formatPredicate("be positive", true);
   }
 
-  static Formatter msgNegative() {
+  static PrefabMsgFormatter msgNegative() {
     return formatPredicate("be negative", true);
   }
 
-  static Formatter msgZero() {
+  static PrefabMsgFormatter msgZero() {
     return formatPredicate("be 0", true, false);
   }
 

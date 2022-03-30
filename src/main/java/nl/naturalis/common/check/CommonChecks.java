@@ -9,7 +9,6 @@ import nl.naturalis.common.function.Relation;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
-import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.*;
 
@@ -53,10 +52,10 @@ import static nl.naturalis.common.check.MsgRelation.*;
 @SuppressWarnings("rawtypes")
 public final class CommonChecks {
 
-  static final Map<Object, Formatter> MESSAGE_PATTERNS;
+  static final Map<Object, PrefabMsgFormatter> MESSAGE_PATTERNS;
   static final Map<Object, String> NAMES;
 
-  private static Map<Object, Formatter> tmp0 = new HashMap<>(64);
+  private static Map<Object, PrefabMsgFormatter> tmp0 = new HashMap<>(64);
   private static Map<Object, String> tmp1 = new HashMap<>(64);
 
   private CommonChecks() {
@@ -1643,7 +1642,7 @@ public final class CommonChecks {
     tmp1 = null;
   }
 
-  private static void setMessagePattern(Object test, Formatter message) {
+  private static void setMessagePattern(Object test, PrefabMsgFormatter message) {
     tmp0.put(test, message);
   }
 
