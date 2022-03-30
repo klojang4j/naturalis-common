@@ -14,7 +14,11 @@ import static nl.naturalis.common.check.MsgUtil.getPrefabMessage;
  *
  * @author Ayco Holleman
  */
-public abstract class Check {
+public final class Check {
+
+  private Check() {
+    throw new UnsupportedOperationException();
+  }
 
   static final String DEF_ARG_NAME = "argument";
 
@@ -79,8 +83,7 @@ public abstract class Check {
   public static <U> ObjectCheck<U, IllegalArgumentException> notNull(U arg)
       throws IllegalArgumentException {
     if (arg == null) {
-      String msg = getPrefabMessage(CommonChecks.notNull(), false, null, null, null, null);
-      throw DEF_EXC_FACTORY.apply(msg);
+      throw new IllegalArgumentException(DEF_ARG_NAME + " must not be null");
     }
     return new ObjectCheck<>(arg, null, DEF_EXC_FACTORY);
   }
@@ -98,8 +101,7 @@ public abstract class Check {
   public static <U> ObjectCheck<U, IllegalArgumentException> notNull(U arg, String argName)
       throws IllegalArgumentException {
     if (arg == null) {
-      String msg = getPrefabMessage(CommonChecks.notNull(), false, argName, null, null, null);
-      throw DEF_EXC_FACTORY.apply(msg);
+      throw new IllegalArgumentException(argName + " must not be null");
     }
     return new ObjectCheck<>(arg, argName, DEF_EXC_FACTORY);
   }
@@ -130,8 +132,8 @@ public abstract class Check {
    * @param arg The argument
    * @return A {@code Check} object suitable for testing the provided argument
    */
-  public static <U, X extends Exception> ObjectCheck<U, X> on(
-      Function<String, X> excFactory, U arg) {
+  public static <U, X extends Exception> ObjectCheck<U, X> on(Function<String, X> excFactory,
+      U arg) {
     return new ObjectCheck<>(arg, null, excFactory);
   }
 
@@ -189,7 +191,7 @@ public abstract class Check {
    * thrown. Returns {@code off + len}.
    *
    * @param size The length of the array or array-like object from which to extract the segment
-   * @param off The offset of the segment
+   * @param off The offset of the segment within the array or array-like object
    * @param len The length of the segment
    * @return The "to" index of the segment
    */
@@ -294,6 +296,13 @@ public abstract class Check {
    */
   public static <U, X extends Exception> U fail(
       Function<String, X> excFactory, String msg, Object... msgArgs) throws X {
-    return Check.on(excFactory, 1).is(eq(), 0, msg, msgArgs).ok(i -> null);
+    if (msg == null) {
+      throw excFactory.apply(StringMethods.EMPTY);
+    } else if (msgArgs == null || msgArgs.length == 0) {
+      throw excFactory.apply(msg);
+    }
+    Object[] args = new Object[msgArgs.length + 5];
+    System.arraycopy(msgArgs, 0, args, 5, msgArgs.length);
+    throw excFactory.apply(CustomMsgFormatter.format(msg, args));
   }
 }

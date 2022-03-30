@@ -6,7 +6,7 @@
  * href="https://guava.dev/releases/21.0/api/docs/com/google/common/base/Preconditions.html}
  * ">Preconditions</a> class and Apache's
  * <a href="https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html">Validate</a>
- * class, validation happens through instance methods. For example:
+ * class, validation happens through instance methods rather than class methods. For example:
  *
  * <blockquote>
  *
@@ -20,15 +20,19 @@
  *
  * <h2>Performance</h2>
  *
- * <p>In spite of the checks being carried out on an instance of {@link
+ * <p>In spite of the checks being carried out on an actual instance of {@link
  * nl.naturalis.common.check.IntCheck IntCheck} or {@link nl.naturalis.common.check.ObjectCheck
- * ObjectCheck} microbenchmarking their performance using JMH yield no difference with manually
- * coded argument checks. Clearly, the compiler is quite capable of compiling the whose {@code
- * Check} instance away. If the argument fails the test, the {@code check} becomes somewhat slower
- * than a manually coded test because the construction of the exception, notably the error message,
- * takes more time. However, you generally don't to recover from pre- and postcondition failures
- * anyhow. They are end-of-story failures, if not for the application as a whoe, then at least for
- * the rquest being serviced.
+ * ObjectCheck}, benchmarking their performance yield no difference with hand-coded argument checks.
+ * If the argument passes the test, there is literally no difference outside the error margin of the
+ * benchmark. If the argument fails the test, it depends on which type of check you choose. If you
+ * choose the {@link nl.naturalis.common.check.ObjectCheck#is(java.util.function.Predicate,
+ * java.util.function.Supplier) variant} where you provide your own exception, there is again no
+ * difference with a hand-coded check. Otherwise, if a hand-coded check would allow you use a
+ * "hard-coded" exception message (i.e. without resorting to string concatenation or {@code
+ * String.format}), it performs somewhat better, because the check framework will always have to
+ * assemble the exception message. Note, however, that you don't generally want to recover from pre-
+ * and postcondition failures anyhow. They tend to be end-of-story failures, if not for the
+ * application as a whole, then at least for the request being serviced.
  *
  * <h2>Common checks</h2>
  *
