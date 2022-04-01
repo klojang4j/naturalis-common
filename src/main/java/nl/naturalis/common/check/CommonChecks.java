@@ -1059,7 +1059,7 @@ public final class CommonChecks {
    * // Validate the size property of a collection argument (preferred):
    * Check.that(List.of("A", "B", "C")).has(size(), eq(), 3);
    *
-   * // Validate the size property of the employees list of the company argument:
+   * // Validate the size property of the employees property of the company argument:
    * Check.that(company).has(Company::getEmployees, sizeEQ(), 3);
    * }</pre>
    *
@@ -1093,7 +1093,7 @@ public final class CommonChecks {
    * // Validate the size property of a collection argument (preferred):
    * Check.that(List.of("A", "B", "C")).has(size(), gt(), 2);
    *
-   * // Validate the size property of the employees list of the company argument:
+   * // Validate the size property of the employees property of the company argument:
    * Check.that(company).has(Company::getEmployees, sizeGT(), 2);
    * }</pre>
    *
@@ -1402,11 +1402,12 @@ public final class CommonChecks {
 
   /**
    * (Not a check) Shortcut for {@link IllegalStateException#IllegalStateException(String)
-   * IllegalStateException::new}. Can be used in combination with {@link Check#on(Function, Object)
-   * Check.on(...)}. For example:
+   * IllegalStateException::new}. Can be used in combination with the {@link Check#on(Function,
+   * Object) Check.on()} static factory method. For example:
    * <code>Check.on(illegalState(), out.isClosed()).is(no())</code>.
    *
-   * @return A {@code Function} that produces an {@code IllegalStateException}
+   * @return A {@code Function} that takes a {@code String} (the exception message) and produces an
+   *     {@code IllegalStateException}
    */
   public static Function<String, IllegalStateException> illegalState() {
     return IllegalStateException::new;
@@ -1416,7 +1417,8 @@ public final class CommonChecks {
    * (Not a check) Shortcut for {@link IndexOutOfBoundsException#IndexOutOfBoundsException(String)
    * IndexOutOfBoundsException::new}.
    *
-   * @return A {@code Function} that produces an {@code IndexOutOfBoundsException}
+   * @return A {@code Function} that takes a {@code String} (the exception message) and produces an
+   *     {@code IndexOutOfBoundsException}
    */
   public static Function<String, IndexOutOfBoundsException> indexOutOfBounds() {
     return IndexOutOfBoundsException::new;
@@ -1427,7 +1429,8 @@ public final class CommonChecks {
    * {@link UnsupportedOperationException#UnsupportedOperationException(String)
    * UnsupportedOperationException::new}.
    *
-   * @return A {@code Function} that produces an {@code UnsupportedOperationException}
+   * @return A {@code Function} that takes a {@code String} (the exception message) and produces an
+   *     {@code UnsupportedOperationException}
    */
   public static Function<String, UnsupportedOperationException> unsupportedOperation() {
     return UnsupportedOperationException::new;
@@ -1436,10 +1439,30 @@ public final class CommonChecks {
   /**
    * (Not a check) Shortcut for {@link IOException#IOException(String) IOException::new}.
    *
-   * @return A {@code Function} that produces an {@code UnsupportedOperationException}
+   * @return A {@code Function} that takes a {@code String} (the exception message) and produces an
+   *     {@code IOException}
    */
   public static Function<String, IOException> io() {
     return IOException::new;
+  }
+
+  /**
+   * (Not a check) Shortcut for {@link NullPointerException#NullPointerException(String)
+   * NullPointerException::new}. Could be used if you prefer illegal {@code null} values to cause a
+   * {@code NullPointerException} rather than an {@cod IllegalArgumentException} (as is the
+   * default).
+   *
+   * <blockquote>
+   * <pre>{@code
+   * Check.on(nullPointer(), foo, "foo").isNot(NULL());
+   * }</pre>
+   * </blockquote>
+   *
+   * @return A {@code Function} that takes a {@code String} (the exception message) and produces a
+   *     {@code NullPointerException}
+   */
+  public static Function<String, NullPointerException> nullPointer() {
+    return NullPointerException::new;
   }
 
   /**
@@ -1634,10 +1657,9 @@ public final class CommonChecks {
   /* ++++++++++++++ END OF CHECKS ++++++++++++++ */
 
   static {
-    MESSAGE_PATTERNS = new IdentityHashMap<>(tmp0.size());
-    MESSAGE_PATTERNS.putAll(tmp0);
-    NAMES = new IdentityHashMap<>((tmp1.size()));
-    NAMES.putAll(tmp1);
+    MESSAGE_PATTERNS = Map.copyOf(tmp0);
+    System.out.println(tmp0.size() + " common checks registered");
+    NAMES = Map.copyOf(tmp1);
     tmp0 = null;
     tmp1 = null;
   }

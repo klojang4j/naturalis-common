@@ -12,18 +12,16 @@ final class MsgRelation {
 
   static PrefabMsgFormatter msgSameAs() {
     return args -> {
-      String idObj =
-          args.obj() == null
-              ? "null"
-              : simpleClassName(args.obj()) + '@' + identityHashCode(args.obj());
+      String idObj = args.obj() == null
+          ? "null"
+          : simpleClassName(args.obj()) + '@' + identityHashCode(args.obj());
       if (args.negated()) {
         String fmt = "%s must not be reference to %s";
         return format(fmt, args.name(), idObj);
       }
-      String idArg =
-          args.arg() == null
-              ? "null"
-              : simpleClassName(args.arg()) + '@' + identityHashCode(args.arg());
+      String idArg = args.arg() == null
+          ? "null"
+          : simpleClassName(args.arg()) + '@' + identityHashCode(args.arg());
       String fmt = "%s must be reference to %s (was %s)";
       return format(fmt, args.name(), idObj, idArg);
     };
@@ -36,14 +34,13 @@ final class MsgRelation {
   static PrefabMsgFormatter msgInstanceOf() {
     return args -> {
       String cnObj = className(args.obj());
-      if (args.negated()) {
+      if (args.negated() && args.arg().getClass() == args.obj()) {
         String fmt = "%s must not be instance of %s (was %s)";
-        String arg = toStr(args.arg());
-        return format(fmt, args.name(), cnObj, arg);
+        return format(fmt, args.name(), cnObj, toStr(args.arg()));
       }
-      String fmt = "%s must be instance of %s (was %s)";
-      String cnArg = ifNotNull(args.arg(), MsgUtil::className);
-      return format(fmt, args.name(), cnObj, cnArg);
+      String fmt = "%s must %sbe instance of %s (was %s)";
+      String cnArg = className(args.arg());
+      return format(fmt, args.name(), args.not(), cnObj, cnArg);
     };
   }
 

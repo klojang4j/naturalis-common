@@ -22,17 +22,17 @@ class MsgArgs {
 
   private final Object test;
   private final boolean negated;
-  private final String name;
   private final Object arg;
   private final Class<?> type;
+  private final String name;
   private final Object obj;
 
   MsgArgs(Object test, boolean negated, String name, Object arg, Class<?> type, Object obj) {
     this.test = test;
     this.negated = negated;
-    this.name = name;
     this.arg = arg;
     this.type = type;
+    this.name = name;
     this.obj = obj;
   }
 
@@ -44,16 +44,17 @@ class MsgArgs {
     return negated;
   }
 
-  String name() {
-    return name != null ? name : ifNotNull(type(), MsgUtil::simpleClassName, DEF_ARG_NAME);
-  }
-
   Object arg() {
     return arg;
   }
 
   Class<?> type() {
-    return type != null ? type : ifNotNull(arg, Object::getClass);
+    return type == null ? arg == null ? null : arg.getClass() : type;
+  }
+
+  String name() {
+    Class<?> c;
+    return name == null ? (c = type()) == null ? DEF_ARG_NAME : simpleClassName(c) : name;
   }
 
   Object obj() {
@@ -61,10 +62,14 @@ class MsgArgs {
   }
 
   String typeAndName() {
-    if (name != null) {
-      return ifNotNull(type(), t -> simpleClassName(t) + ' ' + name, name);
+    Class<?> c = type();
+    String n = name();
+    if (c == null) {
+      return n;
+    } else if (n == DEF_ARG_NAME || name != null) {
+      return simpleClassName(c) + ' ' + n;
     }
-    return ifNotNull(type(), MsgUtil::simpleClassName, DEF_ARG_NAME);
+    return simpleClassName(c);
   }
 
   String not() {

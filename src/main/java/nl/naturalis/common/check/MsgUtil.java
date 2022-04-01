@@ -9,11 +9,12 @@ import static nl.naturalis.common.ArrayMethods.DEFAULT_IMPLODE_SEPARATOR;
 import static nl.naturalis.common.ArrayMethods.implodeAny;
 import static nl.naturalis.common.CollectionMethods.implode;
 import static nl.naturalis.common.ObjectMethods.throwIf;
+import static nl.naturalis.common.check.Check.DEF_ARG_NAME;
 import static nl.naturalis.common.check.CommonChecks.MESSAGE_PATTERNS;
 import static nl.naturalis.common.check.CommonChecks.NAMES;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-final class MsgUtil {
+class MsgUtil {
 
   // Common message patterns:
   static final String MSG_PREDICATE = "%s must%s %s";
@@ -28,21 +29,10 @@ final class MsgUtil {
       Object test, boolean negated, String argName, Object argVal, Class<?> argType, Object obj) {
     PrefabMsgFormatter formatter = MESSAGE_PATTERNS.get(test);
     if (formatter == null) {
-      if (obj == null) {
-        return "Invalid value for " + argName + ": " + toStr(argVal);
-      }
-      return "Invalid value for "
-          + argName
-          + ": "
-          + toStr(argVal)
-          + " and "
-          + toStr(obj)
-          + " must "
-          + (negated ? "not " : "")
-          + "have the specified relationship";
+      String s = argName == null ? DEF_ARG_NAME : argName;
+      return "Invalid value for " + s + ": " + toStr(argVal);
     }
-    Class<?> type = argType != null ? argType : argVal != null ? argVal.getClass() : null;
-    return formatter.apply(new MsgArgs(test, negated, argName, argVal, type, obj));
+    return formatter.apply(new MsgArgs(test, negated, argName, argVal, argType, obj));
   }
 
   static String getCustomMessage(
