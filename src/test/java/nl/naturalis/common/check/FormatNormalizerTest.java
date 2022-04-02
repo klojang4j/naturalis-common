@@ -3,6 +3,7 @@ package nl.naturalis.common.check;
 import org.junit.Test;
 
 import static nl.naturalis.common.ArrayMethods.pack;
+import static nl.naturalis.common.check.CommonChecks.instanceOf;
 import static nl.naturalis.common.check.CustomMsgFormatter.*;
 import static nl.naturalis.common.check.MsgUtil.simpleClassName;
 import static org.junit.Assert.assertEquals;
@@ -10,20 +11,13 @@ import static org.junit.Assert.assertEquals;
 public class FormatNormalizerTest {
 
   private static final Object[] args =
-      pack("TEST",
-          "VALUE",
-          "TYPE",
-          "ARG_NAME",
-          "OBJ",
-          "extra1",
-          "extra2",
-          "extra3");
+      pack(instanceOf(), "VALUE", String.class, "ARG_NAME", "OBJ", "extra1", "extra2", "extra3");
 
   @Test
   public void test00() {
     String in = "Check \"${test}\" did not go wel for argument ${name}";
     String out = format(in, args);
-    assertEquals("Check \"TEST\" did not go wel for argument ARG_NAME", out);
+    assertEquals("Check \"instanceOf\" did not go wel for argument ARG_NAME", out);
   }
 
   @Test
@@ -44,7 +38,7 @@ public class FormatNormalizerTest {
   public void test03() {
     String in = "Unexpected type: ${type}";
     String out = format(in, args);
-    assertEquals("Unexpected type: TYPE", out);
+    assertEquals("Unexpected type: String", out);
   }
 
   @Test

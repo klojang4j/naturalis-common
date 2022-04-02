@@ -6,6 +6,10 @@ import nl.naturalis.common.TypeConversionException;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import static nl.naturalis.common.check.CommonChecks.NAMES;
+import static nl.naturalis.common.check.MsgUtil.simpleClassName;
+import static nl.naturalis.common.check.MsgUtil.toStr;
+
 class CustomMsgFormatter {
 
   // We used to have a regex impl as well, but it was ever so slightly slower
@@ -20,12 +24,16 @@ class CustomMsgFormatter {
   }
 
   private static String formatNoRegex(String fmt, Object[] msgArgs) {
+    int x = fmt.indexOf("${");
+    if (x == -1 || x == fmt.length() - 2) { // fmt ending with "${"
+      return fmt;
+    }
+    int EOL = fmt.length() - 1;
     StringBuilder out = new StringBuilder(fmt.length());
     StringBuilder tmp = new StringBuilder(4);
-    int EOL = fmt.length() - 1;
-    int i = 0;
-    boolean assembling = false;
-    while (i < fmt.length()) {
+    boolean assembling = true;
+    int i = x + 2;
+    do {
       char c = fmt.charAt(i);
       if (assembling) {
         if (c == '}') {
@@ -55,22 +63,24 @@ class CustomMsgFormatter {
         out.append(c);
         ++i;
       }
-    }
-    return out.toString();
+    } while (i < fmt.length());
+    return fmt.substring(0, x) + out.toString();
   }
 
   private static String lookup(String arg, Object[] args) {
     switch (arg) {
       case "test":
-        return (String) args[0];
+        return NAMES.getOrDefault(args[0], args[0].getClass().getSimpleName());
       case "arg":
-        return (String) args[1];
+        return toStr(args[1]);
       case "type":
-        return (String) args[2];
+        return args[2] == null
+            ? args[1] == null ? null : simpleClassName(args[1])
+            : simpleClassName(args[2]);
       case "name":
         return (String) args[3];
       case "obj":
-        return (String) args[4];
+        return toStr(args[4]);
       default:
         try {
           int i = NumberMethods.parseInt(arg);

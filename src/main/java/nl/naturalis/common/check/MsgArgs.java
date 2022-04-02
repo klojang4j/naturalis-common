@@ -18,7 +18,7 @@ import static nl.naturalis.common.check.MsgUtil.simpleClassName;
  * o obj If the check was a Relation or one of its sister interfaces, the value of
  *   the object of the relationship, otherwise null (for Predicate or IntPredicate)
  */
-class MsgArgs {
+final class MsgArgs {
 
   private final Object test;
   private final boolean negated;

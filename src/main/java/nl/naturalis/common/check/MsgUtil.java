@@ -8,13 +8,13 @@ import static java.lang.String.format;
 import static nl.naturalis.common.ArrayMethods.DEFAULT_IMPLODE_SEPARATOR;
 import static nl.naturalis.common.ArrayMethods.implodeAny;
 import static nl.naturalis.common.CollectionMethods.implode;
-import static nl.naturalis.common.ObjectMethods.throwIf;
 import static nl.naturalis.common.check.Check.DEF_ARG_NAME;
 import static nl.naturalis.common.check.CommonChecks.MESSAGE_PATTERNS;
-import static nl.naturalis.common.check.CommonChecks.NAMES;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 class MsgUtil {
+
+  private MsgUtil() {}
 
   // Common message patterns:
   static final String MSG_PREDICATE = "%s must%s %s";
@@ -25,8 +25,12 @@ class MsgUtil {
   // Max display width (characters) for stringified values.
   private static final int MAX_DISPLAY_WIDTH = 55;
 
-  static String getPrefabMessage(
-      Object test, boolean negated, String argName, Object argVal, Class<?> argType, Object obj) {
+  static String getPrefabMessage(Object test,
+      boolean negated,
+      String argName,
+      Object argVal,
+      Class<?> argType,
+      Object obj) {
     PrefabMsgFormatter formatter = MESSAGE_PATTERNS.get(test);
     if (formatter == null) {
       String s = argName == null ? DEF_ARG_NAME : argName;
@@ -35,26 +39,24 @@ class MsgUtil {
     return formatter.apply(new MsgArgs(test, negated, argName, argVal, argType, obj));
   }
 
-  static String getCustomMessage(
-      String pattern,
+  static String getCustomMessage(String pattern,
       Object[] msgArgs,
       Object test,
       String argName,
       Object argVal,
       Class<?> argType,
       Object obj) {
-    throwIf(pattern == null, () -> new InvalidCheckException("message pattern must not be null"));
-    throwIf(msgArgs == null, () -> new InvalidCheckException("message arguments must not be null"));
-    //String fmt = FormatNormalizer.normalize(pattern);
+    if (pattern == null) {
+      throw new InvalidCheckException("message pattern must not be null");
+    } else if (msgArgs == null) {
+      throw new InvalidCheckException("message arguments must not be null");
+    }
     Object[] all = new Object[msgArgs.length + 5];
-    all[0] = NAMES.getOrDefault(test, test.getClass().getSimpleName());
-    all[1] = toStr(argVal);
-    all[2] =
-        argType != null
-            ? simpleClassName(argType)
-            : argVal != null ? simpleClassName(argVal.getClass()) : null;
+    all[0] = test;
+    all[1] = argVal;
+    all[2] = argType;
     all[3] = argName;
-    all[4] = toStr(obj);
+    all[4] = obj;
     System.arraycopy(msgArgs, 0, all, 5, msgArgs.length);
     return CustomMsgFormatter.format(pattern, all);
   }
@@ -77,40 +79,38 @@ class MsgUtil {
 
   // showArgIfAffirmative: show argument when executed in is() or has() method
   // showArgIfNegated: show argument when executed in isNot() or notHas() method
-  static PrefabMsgFormatter formatPredicate(
-      String predicate, boolean showArgIfAffirmative, boolean showArgIfNegated) {
+  static PrefabMsgFormatter formatPredicate(String predicate,
+      boolean showArgIfAffirmative,
+      boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
       if (showArgIfNegated) {
         return args -> formatPredicateShowArg(args, predicate, false);
       }
-      return args ->
-          args.negated()
-              ? formatPredicate(args, predicate, false)
-              : formatPredicateShowArg(args, predicate, false);
+      return args -> args.negated()
+          ? formatPredicate(args, predicate, false)
+          : formatPredicateShowArg(args, predicate, false);
     } else if (showArgIfNegated) {
-      return args ->
-          args.negated()
-              ? formatPredicateShowArg(args, predicate, false)
-              : formatPredicate(args, predicate, false);
+      return args -> args.negated()
+          ? formatPredicateShowArg(args, predicate, false)
+          : formatPredicate(args, predicate, false);
     }
     return args -> formatPredicate(args, predicate, false);
   }
 
-  static PrefabMsgFormatter formatNegativePredicate(
-      String predicate, boolean showArgIfAffirmative, boolean showArgIfNegated) {
+  static PrefabMsgFormatter formatNegativePredicate(String predicate,
+      boolean showArgIfAffirmative,
+      boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
       if (showArgIfNegated) {
         return args -> formatPredicateShowArg(args, predicate, true);
       }
-      return args ->
-          args.negated()
-              ? formatPredicate(args, predicate, true)
-              : formatPredicateShowArg(args, predicate, true);
+      return args -> args.negated()
+          ? formatPredicate(args, predicate, true)
+          : formatPredicateShowArg(args, predicate, true);
     } else if (showArgIfNegated) {
-      return args ->
-          args.negated()
-              ? formatPredicateShowArg(args, predicate, true)
-              : formatPredicate(args, predicate, true);
+      return args -> args.negated()
+          ? formatPredicateShowArg(args, predicate, true)
+          : formatPredicate(args, predicate, true);
     }
     return args -> formatPredicate(args, predicate, true);
   }
@@ -121,40 +121,38 @@ class MsgUtil {
         : args -> formatRelation(args, relation, false);
   }
 
-  static PrefabMsgFormatter formatRelation(
-      String relation, boolean showArgIfAffirmative, boolean showArgIfNegated) {
+  static PrefabMsgFormatter formatRelation(String relation,
+      boolean showArgIfAffirmative,
+      boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
       if (showArgIfNegated) {
         return args -> formatRelationShowArg(args, relation, false);
       }
-      return args ->
-          args.negated()
-              ? formatRelation(args, relation, false)
-              : formatRelationShowArg(args, relation, false);
+      return args -> args.negated()
+          ? formatRelation(args, relation, false)
+          : formatRelationShowArg(args, relation, false);
     } else if (showArgIfNegated) {
-      return args ->
-          args.negated()
-              ? formatRelationShowArg(args, relation, false)
-              : formatRelation(args, relation, false);
+      return args -> args.negated()
+          ? formatRelationShowArg(args, relation, false)
+          : formatRelation(args, relation, false);
     }
     return args -> formatRelation(args, relation, false);
   }
 
-  static PrefabMsgFormatter formatNegativeRelation(
-      String relation, boolean showArgIfAffirmative, boolean showArgIfNegated) {
+  static PrefabMsgFormatter formatNegativeRelation(String relation,
+      boolean showArgIfAffirmative,
+      boolean showArgIfNegated) {
     if (showArgIfAffirmative) {
       if (showArgIfNegated) {
         return args -> formatRelationShowArg(args, relation, true);
       }
-      return args ->
-          args.negated()
-              ? formatRelation(args, relation, true)
-              : formatRelationShowArg(args, relation, true);
+      return args -> args.negated()
+          ? formatRelation(args, relation, true)
+          : formatRelationShowArg(args, relation, true);
     } else if (showArgIfNegated) {
-      return args ->
-          args.negated()
-              ? formatRelationShowArg(args, relation, true)
-              : formatRelation(args, relation, true);
+      return args -> args.negated()
+          ? formatRelationShowArg(args, relation, true)
+          : formatRelation(args, relation, true);
     }
     return args -> formatRelation(args, relation, true);
   }
@@ -167,7 +165,11 @@ class MsgUtil {
 
   private static String formatPredicateShowArg(MsgArgs args, String predicate, boolean negative) {
     return negative
-        ? format(MSG_PREDICATE_WAS, args.name(), args.notNot(), predicate, toStr(args.arg()))
+        ? format(MSG_PREDICATE_WAS,
+        args.name(),
+        args.notNot(),
+        predicate,
+        toStr(args.arg()))
         : format(MSG_PREDICATE_WAS, args.name(), args.not(), predicate, toStr(args.arg()));
   }
 
@@ -179,20 +181,18 @@ class MsgUtil {
 
   private static String formatRelationShowArg(MsgArgs args, String relation, boolean negative) {
     return negative
-        ? format(
-        MSG_RELATION_WAS,
+        ? format(MSG_RELATION_WAS,
         args.name(),
         args.notNot(),
         relation,
         toStr(args.obj()),
         toStr(args.arg()))
-        : format(
-        MSG_RELATION_WAS,
-        args.name(),
-        args.not(),
-        relation,
-        toStr(args.obj()),
-        toStr(args.arg()));
+        : format(MSG_RELATION_WAS,
+            args.name(),
+            args.not(),
+            relation,
+            toStr(args.obj()),
+            toStr(args.arg()));
   }
 
   //////////////////////////////////////////////////////////////////////////

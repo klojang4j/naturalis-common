@@ -1658,7 +1658,6 @@ public final class CommonChecks {
 
   static {
     MESSAGE_PATTERNS = Map.copyOf(tmp0);
-    System.out.println(tmp0.size() + " common checks registered");
     NAMES = Map.copyOf(tmp1);
     tmp0 = null;
     tmp1 = null;
