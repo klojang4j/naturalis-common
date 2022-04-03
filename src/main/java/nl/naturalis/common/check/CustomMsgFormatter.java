@@ -12,6 +12,8 @@ import static nl.naturalis.common.check.MsgUtil.toStr;
 
 class CustomMsgFormatter {
 
+  private CustomMsgFormatter() {}
+
   // Can we squeeze out some extra performance by manually
   // parsing the message pattern? Yes, we consistently get
   // about +/- 50% better performance
@@ -33,7 +35,7 @@ class CustomMsgFormatter {
     if (x == -1) {
       return fmt;
     }
-    StringBuilder out = new StringBuilder(fmt.length());
+    StringBuilder out = new StringBuilder(fmt.length() + 20);
     int y = 0;
     do {
       out.append(fmt.substring(y, x));
@@ -70,9 +72,9 @@ class CustomMsgFormatter {
         } catch (TypeConversionException ignored) {
         }
         if (USE_REGEX) {
-          return "\\${" + arg + "}";
+          return "\\${" + arg + '}';
         }
-        return "${" + arg + "}";
+        return "${" + arg + '}';
     }
   }
 

@@ -12,7 +12,7 @@ import static nl.naturalis.common.check.Check.DEF_ARG_NAME;
 import static nl.naturalis.common.check.CommonChecks.MESSAGE_PATTERNS;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-class MsgUtil {
+final class MsgUtil {
 
   private MsgUtil() {}
 
@@ -336,4 +336,5 @@ class MsgUtil {
     int to = Math.max(0, MAX_DISPLAY_WIDTH - 3);
     return str.substring(0, to) + "...";
   }
+
 }
