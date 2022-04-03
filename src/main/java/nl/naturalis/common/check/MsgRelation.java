@@ -2,7 +2,6 @@ package nl.naturalis.common.check;
 
 import static java.lang.String.format;
 import static java.lang.System.identityHashCode;
-import static nl.naturalis.common.ObjectMethods.ifNotNull;
 import static nl.naturalis.common.check.MsgUtil.*;
 
 @SuppressWarnings("rawtypes")
@@ -33,14 +32,12 @@ final class MsgRelation {
 
   static PrefabMsgFormatter msgInstanceOf() {
     return args -> {
-      String cnObj = className(args.obj());
-      if (args.negated() && args.arg().getClass() == args.obj()) {
-        String fmt = "%s must not be instance of %s (was %s)";
-        return format(fmt, args.name(), cnObj, toStr(args.arg()));
+      if (args.negated()) {
+        return args.name() + " must not be instance of " + className(args.obj()) + " (was " + toStr(
+            args.arg()) + ")";
       }
-      String fmt = "%s must %sbe instance of %s (was %s)";
-      String cnArg = className(args.arg());
-      return format(fmt, args.name(), args.not(), cnObj, cnArg);
+      return args.name() + " must be instance of " + className(args.obj()) + " (was " + className(
+          args.arg()) + ")";
     };
   }
 

@@ -12,59 +12,39 @@ import static nl.naturalis.common.check.MsgUtil.toStr;
 
 class CustomMsgFormatter {
 
-  // We used to have a regex impl as well, but it was ever so slightly slower
-  // than the hand-woven impl, and it fell by the wayside for maintenance
-  // reasons. Nevertheless, let's keep this around.
+  // Can we squeeze out some extra performance by manually
+  // parsing the message pattern? Yes, we consistently get
+  // about +/- 50% better performance
   private static final boolean USE_REGEX = false;
+
   private static final String REGEX = "\\$\\{(test|arg|type|name|obj|\\d+)}";
   private static final Pattern PATTERN = Pattern.compile(REGEX);
 
   static String format(String fmt, Object[] msgArgs) {
-    return formatNoRegex(fmt, msgArgs);
+    return USE_REGEX ? formatRegex(fmt, msgArgs) : formatNoRegex(fmt, msgArgs);
+  }
+
+  private static String formatRegex(String fmt, Object[] msgArgs) {
+    return PATTERN.matcher(fmt).replaceAll(mr -> lookup(mr.group(1), msgArgs));
   }
 
   private static String formatNoRegex(String fmt, Object[] msgArgs) {
     int x = fmt.indexOf("${");
-    if (x == -1 || x == fmt.length() - 2) { // fmt ending with "${"
+    if (x == -1) {
       return fmt;
     }
-    int EOL = fmt.length() - 1;
     StringBuilder out = new StringBuilder(fmt.length());
-    StringBuilder tmp = new StringBuilder(4);
-    boolean assembling = true;
-    int i = x + 2;
+    int y = 0;
     do {
-      char c = fmt.charAt(i);
-      if (assembling) {
-        if (c == '}') {
-          out.append(lookup(tmp.toString(), msgArgs));
-          assembling = false;
-          tmp.setLength(0);
-          ++i;
-        } else if (i == EOL) {
-          out.append("${").append(tmp).append(c);
-          break;
-        } else {
-          tmp.append(c);
-          ++i;
-        }
-      } else if (c == '$') {
-        if (i == EOL || fmt.charAt(i + 1) != '{') {
-          out.append('$');
-          ++i;
-        } else if (i + 1 == EOL) {
-          out.append("${");
-          break;
-        } else {
-          assembling = true;
-          i += 2;
-        }
-      } else {
-        out.append(c);
-        ++i;
+      out.append(fmt.substring(y, x));
+      if ((y = fmt.indexOf('}', x += 2)) == -1) {
+        return out.append("${").append(fmt.substring(x)).toString();
       }
-    } while (i < fmt.length());
-    return fmt.substring(0, x) + out.toString();
+      out.append(lookup(fmt.substring(x, y), msgArgs));
+      if ((x = fmt.indexOf("${", y += 1)) == -1) {
+        return out.append(fmt.substring(y)).toString();
+      }
+    } while (true);
   }
 
   private static String lookup(String arg, Object[] args) {
@@ -89,7 +69,11 @@ class CustomMsgFormatter {
           }
         } catch (TypeConversionException ignored) {
         }
+        if (USE_REGEX) {
+          return "\\${" + arg + "}";
+        }
         return "${" + arg + "}";
     }
   }
+
 }

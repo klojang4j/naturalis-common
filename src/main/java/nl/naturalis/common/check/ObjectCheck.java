@@ -4,8 +4,7 @@ import nl.naturalis.common.function.*;
 
 import java.util.function.*;
 
-import static nl.naturalis.common.check.MsgUtil.getCustomMessage;
-import static nl.naturalis.common.check.MsgUtil.getPrefabMessage;
+import static nl.naturalis.common.check.MsgUtil.*;
 
 /**
  * Facilitates the validation of arbitrarily typed values. See the {@linkplain
@@ -244,8 +243,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <O> ObjectCheck<T, E> isNot(
-      Relation<T, O> test, O object, String message, Object... msgArgs) throws E {
+  public <O> ObjectCheck<T, E> isNot(Relation<T, O> test,
+      O object,
+      String message,
+      Object... msgArgs) throws E {
     if (!test.exists(arg, object)) {
       return this;
     }
@@ -265,8 +266,9 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <O, X extends Exception> ObjectCheck<T, E> is(
-      Relation<T, O> test, O object, Supplier<X> exception) throws X {
+  public <O, X extends Exception> ObjectCheck<T, E> is(Relation<T, O> test,
+      O object,
+      Supplier<X> exception) throws X {
     if (test.exists(arg, object)) {
       return this;
     }
@@ -286,8 +288,9 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <O, X extends Exception> ObjectCheck<T, E> isNot(
-      Relation<T, O> test, O object, Supplier<X> exception) throws X {
+  public <O, X extends Exception> ObjectCheck<T, E> isNot(Relation<T, O> test,
+      O object,
+      Supplier<X> exception) throws X {
     return is(test.negate(), object, exception);
   }
 
@@ -361,8 +364,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public ObjectCheck<T, E> isNot(
-      ObjIntRelation<T> test, int object, String message, Object... msgArgs) throws E {
+  public ObjectCheck<T, E> isNot(ObjIntRelation<T> test,
+      int object,
+      String message,
+      Object... msgArgs) throws E {
     if (!test.exists(arg, object)) {
       return this;
     }
@@ -381,8 +386,9 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <X extends Exception> ObjectCheck<T, E> is(
-      ObjIntRelation<T> test, int object, Supplier<X> exception) throws X {
+  public <X extends Exception> ObjectCheck<T, E> is(ObjIntRelation<T> test,
+      int object,
+      Supplier<X> exception) throws X {
     if (test.exists(arg, object)) {
       return this;
     }
@@ -401,8 +407,9 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <X extends Exception> ObjectCheck<T, E> isNot(
-      ObjIntRelation<T> test, int object, Supplier<X> exception) throws X {
+  public <X extends Exception> ObjectCheck<T, E> isNot(ObjIntRelation<T> test,
+      int object,
+      Supplier<X> exception) throws X {
     return is(test.negate(), object, exception);
   }
 
@@ -491,8 +498,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <P> ObjectCheck<T, E> has(
-      Function<T, P> property, Predicate<P> test, String message, Object... msgArgs) throws E {
+  public <P> ObjectCheck<T, E> has(Function<T, P> property,
+      Predicate<P> test,
+      String message,
+      Object... msgArgs) throws E {
     return ObjHasObj.get(this).has(property, test, message, msgArgs);
   }
 
@@ -509,8 +518,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <P> ObjectCheck<T, E> notHas(
-      Function<T, P> property, Predicate<P> test, String message, Object... msgArgs) throws E {
+  public <P> ObjectCheck<T, E> notHas(Function<T, P> property,
+      Predicate<P> test,
+      String message,
+      Object... msgArgs) throws E {
     return ObjHasObj.get(this).notHas(property, test, message, msgArgs);
   }
 
@@ -526,8 +537,9 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <P, X extends Exception> ObjectCheck<T, E> has(
-      Function<T, P> property, Predicate<P> test, Supplier<X> exception) throws X {
+  public <P, X extends Exception> ObjectCheck<T, E> has(Function<T, P> property,
+      Predicate<P> test,
+      Supplier<X> exception) throws X {
     return ObjHasObj.get(this).has(property, test, exception);
   }
 
@@ -543,8 +555,9 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <P, X extends Exception> ObjectCheck<T, E> notHas(
-      Function<T, P> property, Predicate<P> test, Supplier<X> exception) throws X {
+  public <P, X extends Exception> ObjectCheck<T, E> notHas(Function<T, P> property,
+      Predicate<P> test,
+      Supplier<X> exception) throws X {
     return ObjHasObj.get(this).has(property, test.negate(), exception);
   }
 
@@ -607,8 +620,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <P, O> ObjectCheck<T, E> has(
-      Function<T, P> property, String name, Relation<P, O> test, O object) throws E {
+  public <P, O> ObjectCheck<T, E> has(Function<T, P> property,
+      String name,
+      Relation<P, O> test,
+      O object) throws E {
     return ObjHasObj.get(this).has(property, name, test, object);
   }
 
@@ -629,8 +644,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <P, O> ObjectCheck<T, E> notHas(
-      Function<T, P> property, String name, Relation<P, O> test, O object) throws E {
+  public <P, O> ObjectCheck<T, E> notHas(Function<T, P> property,
+      String name,
+      Relation<P, O> test,
+      O object) throws E {
     return ObjHasObj.get(this).notHas(property, name, test, object);
   }
 
@@ -650,9 +667,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <P, O> ObjectCheck<T, E> has(
-      Function<T, P> property, Relation<P, O> test, O object, String message, Object... msgArgs)
-      throws E {
+  public <P, O> ObjectCheck<T, E> has(Function<T, P> property,
+      Relation<P, O> test,
+      O object,
+      String message,
+      Object... msgArgs) throws E {
     return ObjHasObj.get(this).has(property, test, object, message, msgArgs);
   }
 
@@ -672,9 +691,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <P, O> ObjectCheck<T, E> notHas(
-      Function<T, P> property, Relation<P, O> test, O object, String message, Object... msgArgs)
-      throws E {
+  public <P, O> ObjectCheck<T, E> notHas(Function<T, P> property,
+      Relation<P, O> test,
+      O object,
+      String message,
+      Object... msgArgs) throws E {
     return ObjHasObj.get(this).notHas(property, test, object, message, msgArgs);
   }
 
@@ -693,8 +714,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <P, O, X extends Exception> ObjectCheck<T, E> has(
-      Function<T, P> property, Relation<P, O> test, O object, Supplier<X> exception) throws X {
+  public <P, O, X extends Exception> ObjectCheck<T, E> has(Function<T, P> property,
+      Relation<P, O> test,
+      O object,
+      Supplier<X> exception) throws X {
     return ObjHasObj.get(this).has(property, test, object, exception);
   }
 
@@ -713,8 +736,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <P, O, X extends Exception> ObjectCheck<T, E> notHas(
-      Function<T, P> property, Relation<P, O> test, O object, Supplier<X> exception) throws X {
+  public <P, O, X extends Exception> ObjectCheck<T, E> notHas(Function<T, P> property,
+      Relation<P, O> test,
+      O object,
+      Supplier<X> exception) throws X {
     return ObjHasObj.get(this).has(property, test.negate(), object, exception);
   }
 
@@ -774,8 +799,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <P> ObjectCheck<T, E> has(
-      Function<T, P> property, String name, ObjIntRelation<P> test, int object) throws E {
+  public <P> ObjectCheck<T, E> has(Function<T, P> property,
+      String name,
+      ObjIntRelation<P> test,
+      int object) throws E {
     return ObjHasObj.get(this).has(property, name, test, object);
   }
 
@@ -795,8 +822,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <P> ObjectCheck<T, E> notHas(
-      Function<T, P> property, String name, ObjIntRelation<P> test, int object) throws E {
+  public <P> ObjectCheck<T, E> notHas(Function<T, P> property,
+      String name,
+      ObjIntRelation<P> test,
+      int object) throws E {
     return ObjHasObj.get(this).notHas(property, name, test, object);
   }
 
@@ -815,13 +844,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <P> ObjectCheck<T, E> has(
-      Function<T, P> property,
+  public <P> ObjectCheck<T, E> has(Function<T, P> property,
       ObjIntRelation<P> test,
       int object,
       String message,
-      Object... msgArgs)
-      throws E {
+      Object... msgArgs) throws E {
     return ObjHasObj.get(this).has(property, test, object, message, msgArgs);
   }
 
@@ -840,13 +867,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <P> ObjectCheck<T, E> notHas(
-      Function<T, P> property,
+  public <P> ObjectCheck<T, E> notHas(Function<T, P> property,
       ObjIntRelation<P> test,
       int object,
       String message,
-      Object... msgArgs)
-      throws E {
+      Object... msgArgs) throws E {
     return ObjHasObj.get(this).notHas(property, test, object, message, msgArgs);
   }
 
@@ -864,8 +889,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <P, X extends Exception> ObjectCheck<T, E> has(
-      Function<T, P> property, ObjIntRelation<P> test, int object, Supplier<X> exception) throws X {
+  public <P, X extends Exception> ObjectCheck<T, E> has(Function<T, P> property,
+      ObjIntRelation<P> test,
+      int object,
+      Supplier<X> exception) throws X {
     return ObjHasObj.get(this).has(property, test, object, exception);
   }
 
@@ -883,8 +910,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <P, X extends Exception> ObjectCheck<T, E> notHas(
-      Function<T, P> property, ObjIntRelation<P> test, int object, Supplier<X> exception) throws X {
+  public <P, X extends Exception> ObjectCheck<T, E> notHas(Function<T, P> property,
+      ObjIntRelation<P> test,
+      int object,
+      Supplier<X> exception) throws X {
     return ObjHasObj.get(this).has(property, test.negate(), object, exception);
   }
 
@@ -967,8 +996,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public ObjectCheck<T, E> has(
-      ToIntFunction<T> property, IntPredicate test, String message, Object... msgArgs) throws E {
+  public ObjectCheck<T, E> has(ToIntFunction<T> property,
+      IntPredicate test,
+      String message,
+      Object... msgArgs) throws E {
     return ObjHasInt.get(this).has(property, test, message, msgArgs);
   }
 
@@ -984,8 +1015,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public ObjectCheck<T, E> notHas(
-      ToIntFunction<T> property, IntPredicate test, String message, Object... msgArgs) throws E {
+  public ObjectCheck<T, E> notHas(ToIntFunction<T> property,
+      IntPredicate test,
+      String message,
+      Object... msgArgs) throws E {
     return ObjHasInt.get(this).notHas(property, test, message, msgArgs);
   }
 
@@ -1000,8 +1033,9 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <X extends Exception> ObjectCheck<T, E> has(
-      ToIntFunction<T> property, IntPredicate test, Supplier<X> exception) throws X {
+  public <X extends Exception> ObjectCheck<T, E> has(ToIntFunction<T> property,
+      IntPredicate test,
+      Supplier<X> exception) throws X {
     return ObjHasInt.get(this).has(property, test, exception);
   }
 
@@ -1016,8 +1050,9 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <X extends Exception> ObjectCheck<T, E> notHas(
-      ToIntFunction<T> property, IntPredicate test, Supplier<X> exception) throws X {
+  public <X extends Exception> ObjectCheck<T, E> notHas(ToIntFunction<T> property,
+      IntPredicate test,
+      Supplier<X> exception) throws X {
     return ObjHasInt.get(this).has(property, test.negate(), exception);
   }
 
@@ -1134,8 +1169,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <O> ObjectCheck<T, E> has(
-      ToIntFunction<T> property, String name, IntObjRelation<O> test, O object) throws E {
+  public <O> ObjectCheck<T, E> has(ToIntFunction<T> property,
+      String name,
+      IntObjRelation<O> test,
+      O object) throws E {
     return ObjHasInt.get(this).has(property, name, test, object);
   }
 
@@ -1174,8 +1211,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <O> ObjectCheck<T, E> notHas(
-      ToIntFunction<T> property, String name, IntObjRelation<O> test, O object) throws E {
+  public <O> ObjectCheck<T, E> notHas(ToIntFunction<T> property,
+      String name,
+      IntObjRelation<O> test,
+      O object) throws E {
     return ObjHasInt.get(this).notHas(property, name, test, object);
   }
 
@@ -1213,13 +1252,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <O> ObjectCheck<T, E> has(
-      ToIntFunction<T> property,
+  public <O> ObjectCheck<T, E> has(ToIntFunction<T> property,
       IntObjRelation<O> test,
       O object,
       String message,
-      Object... msgArgs)
-      throws E {
+      Object... msgArgs) throws E {
     return ObjHasInt.get(this).has(property, test, object, message, msgArgs);
   }
 
@@ -1257,13 +1294,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <O> ObjectCheck<T, E> notHas(
-      ToIntFunction<T> property,
+  public <O> ObjectCheck<T, E> notHas(ToIntFunction<T> property,
       IntObjRelation<O> test,
       O object,
       String message,
-      Object... msgArgs)
-      throws E {
+      Object... msgArgs) throws E {
     return ObjHasInt.get(this).notHas(property, test, object, message, msgArgs);
   }
 
@@ -1281,8 +1316,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <O, X extends Exception> ObjectCheck<T, E> has(
-      ToIntFunction<T> property, IntObjRelation<O> test, O object, Supplier<X> exception) throws X {
+  public <O, X extends Exception> ObjectCheck<T, E> has(ToIntFunction<T> property,
+      IntObjRelation<O> test,
+      O object,
+      Supplier<X> exception) throws X {
     return ObjHasInt.get(this).has(property, test, object, exception);
   }
 
@@ -1319,8 +1356,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <O, X extends Exception> ObjectCheck<T, E> notHas(
-      ToIntFunction<T> property, IntObjRelation<O> test, O object, Supplier<X> exception) throws X {
+  public <O, X extends Exception> ObjectCheck<T, E> notHas(ToIntFunction<T> property,
+      IntObjRelation<O> test,
+      O object,
+      Supplier<X> exception) throws X {
     return ObjHasInt.get(this).has(property, test.negate(), object, exception);
   }
 
@@ -1472,8 +1511,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public ObjectCheck<T, E> notHas(
-      ToIntFunction<T> property, String name, IntRelation test, int object) throws E {
+  public ObjectCheck<T, E> notHas(ToIntFunction<T> property,
+      String name,
+      IntRelation test,
+      int object) throws E {
     return ObjHasInt.get(this).notHas(property, name, test, object);
   }
 
@@ -1510,9 +1551,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public ObjectCheck<T, E> has(
-      ToIntFunction<T> property, IntRelation test, int object, String message, Object... msgArgs)
-      throws E {
+  public ObjectCheck<T, E> has(ToIntFunction<T> property,
+      IntRelation test,
+      int object,
+      String message,
+      Object... msgArgs) throws E {
     return ObjHasInt.get(this).has(property, test, object, message, msgArgs);
   }
 
@@ -1549,9 +1592,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public ObjectCheck<T, E> notHas(
-      ToIntFunction<T> property, IntRelation test, int object, String message, Object... msgArgs)
-      throws E {
+  public ObjectCheck<T, E> notHas(ToIntFunction<T> property,
+      IntRelation test,
+      int object,
+      String message,
+      Object... msgArgs) throws E {
     return ObjHasInt.get(this).notHas(property, test, object, message, msgArgs);
   }
 
@@ -1587,8 +1632,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <X extends Exception> ObjectCheck<T, E> has(
-      ToIntFunction<T> property, IntRelation test, int object, Supplier<X> exception) throws X {
+  public <X extends Exception> ObjectCheck<T, E> has(ToIntFunction<T> property,
+      IntRelation test,
+      int object,
+      Supplier<X> exception) throws X {
     return ObjHasInt.get(this).has(property, test, object, exception);
   }
 
@@ -1624,8 +1671,10 @@ public final class ObjectCheck<T, E extends Exception> {
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <X extends Exception> ObjectCheck<T, E> notHas(
-      ToIntFunction<T> property, IntRelation test, int object, Supplier<X> exception) throws X {
+  public <X extends Exception> ObjectCheck<T, E> notHas(ToIntFunction<T> property,
+      IntRelation test,
+      int object,
+      Supplier<X> exception) throws X {
     return ObjHasInt.get(this).has(property, test.negate(), object, exception);
   }
 

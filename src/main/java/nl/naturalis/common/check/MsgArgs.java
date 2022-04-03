@@ -18,47 +18,17 @@ import static nl.naturalis.common.check.MsgUtil.simpleClassName;
  * o obj If the check was a Relation or one of its sister interfaces, the value of
  *   the object of the relationship, otherwise null (for Predicate or IntPredicate)
  */
-final class MsgArgs {
+record MsgArgs(Object test, boolean negated, String name, Object arg, Class<?> type, Object obj) {
 
-  private final Object test;
-  private final boolean negated;
-  private final Object arg;
-  private final Class<?> type;
-  private final String name;
-  private final Object obj;
-
-  MsgArgs(Object test, boolean negated, String name, Object arg, Class<?> type, Object obj) {
-    this.test = test;
-    this.negated = negated;
-    this.arg = arg;
-    this.type = type;
-    this.name = name;
-    this.obj = obj;
-  }
-
-  Object test() {
-    return test;
-  }
-
-  boolean negated() {
-    return negated;
-  }
-
-  Object arg() {
-    return arg;
-  }
-
-  Class<?> type() {
+  @Override
+  public Class<?> type() {
     return type == null ? arg == null ? null : arg.getClass() : type;
   }
 
-  String name() {
+  @Override
+  public String name() {
     Class<?> c;
     return name == null ? (c = type()) == null ? DEF_ARG_NAME : simpleClassName(c) : name;
-  }
-
-  Object obj() {
-    return obj;
   }
 
   String typeAndName() {

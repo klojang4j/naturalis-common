@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.function.Function;
 
 import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.check.MsgUtil.getPrefabMessage;
 
 /**
  * Facilitates precondition and postcondition checking. See the {@linkplain
@@ -22,7 +21,7 @@ public final class Check {
 
   static final String DEF_ARG_NAME = "argument";
 
-  private static final Function<String, IllegalArgumentException> DEF_EXC_FACTORY =
+  static final Function<String, IllegalArgumentException> DEF_EXC_FACTORY =
       IllegalArgumentException::new;
 
   /**
@@ -148,8 +147,9 @@ public final class Check {
    * @param <X> The type of {@code Exception} thrown if the argument fails to pass a test
    * @return A new {@code Check} object
    */
-  public static <X extends Exception> IntCheck<X> on(
-      Function<String, X> excFactory, int arg, String argName) {
+  public static <X extends Exception> IntCheck<X> on(Function<String, X> excFactory,
+      int arg,
+      String argName) {
     return new IntCheck<>(arg, argName, excFactory);
   }
 
@@ -166,8 +166,9 @@ public final class Check {
    * @param argName The name of the argument
    * @return A new {@code Check} object
    */
-  public static <U, X extends Exception> ObjectCheck<U, X> on(
-      Function<String, X> excFactory, U arg, String argName) {
+  public static <U, X extends Exception> ObjectCheck<U, X> on(Function<String, X> excFactory,
+      U arg,
+      String argName) {
     return new ObjectCheck<>(arg, argName, excFactory);
   }
 
@@ -294,8 +295,9 @@ public final class Check {
    *     statement
    * @throws X The exception that is thrown
    */
-  public static <U, X extends Exception> U fail(
-      Function<String, X> excFactory, String msg, Object... msgArgs) throws X {
+  public static <U, X extends Exception> U fail(Function<String, X> excFactory,
+      String msg,
+      Object... msgArgs) throws X {
     if (msg == null) {
       throw excFactory.apply(StringMethods.EMPTY);
     } else if (msgArgs == null || msgArgs.length == 0) {

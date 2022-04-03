@@ -11,11 +11,16 @@ final class MsgPredicate {
   private MsgPredicate() {}
 
   static PrefabMsgFormatter msgNull() {
-    return formatPredicate("be null", true, false);
+    return args -> args.negated()
+        ? args.name() + " must not be null"
+        : args.name() + " must be null (was " + toStr(args.arg()) + ")";
+
   }
 
   static PrefabMsgFormatter msgNotNull() {
-    return formatNegativePredicate("be null", false, true);
+    return args -> args.negated()
+        ? args.name() + " must be null (was " + toStr(args.arg()) + ")"
+        : args.name() + " must not be null";
   }
 
   static PrefabMsgFormatter msgYes() {
@@ -47,8 +52,11 @@ final class MsgPredicate {
   }
 
   static PrefabMsgFormatter msgArray() {
-    return args ->
-        format(MSG_PREDICATE_WAS, args.name(), args.not(), "be an array", className(args.type()));
+    return args -> format(MSG_PREDICATE_WAS,
+        args.name(),
+        args.not(),
+        "be an array",
+        className(args.type()));
   }
 
   static PrefabMsgFormatter msgFile() {

@@ -39,17 +39,18 @@ class MsgUtil {
     return formatter.apply(new MsgArgs(test, negated, argName, argVal, argType, obj));
   }
 
-  static String getCustomMessage(String pattern,
+  static String getCustomMessage(String message,
       Object[] msgArgs,
       Object test,
       String argName,
       Object argVal,
       Class<?> argType,
       Object obj) {
-    if (pattern == null) {
-      throw new InvalidCheckException("message pattern must not be null");
-    } else if (msgArgs == null) {
-      throw new InvalidCheckException("message arguments must not be null");
+    if (message == null) {
+      throw new InvalidCheckException("message must not be null");
+    }
+    if (msgArgs == null) {
+      return message;
     }
     Object[] all = new Object[msgArgs.length + 5];
     all[0] = test;
@@ -58,7 +59,7 @@ class MsgUtil {
     all[3] = argName;
     all[4] = obj;
     System.arraycopy(msgArgs, 0, all, 5, msgArgs.length);
-    return CustomMsgFormatter.format(pattern, all);
+    return CustomMsgFormatter.format(message, all);
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -128,13 +129,15 @@ class MsgUtil {
       if (showArgIfNegated) {
         return args -> formatRelationShowArg(args, relation, false);
       }
-      return args -> args.negated()
-          ? formatRelation(args, relation, false)
-          : formatRelationShowArg(args, relation, false);
+      return args -> args.negated() ? formatRelation(args, relation, false) : formatRelationShowArg(
+          args,
+          relation,
+          false);
     } else if (showArgIfNegated) {
-      return args -> args.negated()
-          ? formatRelationShowArg(args, relation, false)
-          : formatRelation(args, relation, false);
+      return args -> args.negated() ? formatRelationShowArg(args, relation, false) : formatRelation(
+          args,
+          relation,
+          false);
     }
     return args -> formatRelation(args, relation, false);
   }
@@ -146,31 +149,37 @@ class MsgUtil {
       if (showArgIfNegated) {
         return args -> formatRelationShowArg(args, relation, true);
       }
-      return args -> args.negated()
-          ? formatRelation(args, relation, true)
-          : formatRelationShowArg(args, relation, true);
+      return args -> args.negated() ? formatRelation(args, relation, true) : formatRelationShowArg(
+          args,
+          relation,
+          true);
     } else if (showArgIfNegated) {
-      return args -> args.negated()
-          ? formatRelationShowArg(args, relation, true)
-          : formatRelation(args, relation, true);
+      return args -> args.negated() ? formatRelationShowArg(args, relation, true) : formatRelation(
+          args,
+          relation,
+          true);
     }
     return args -> formatRelation(args, relation, true);
   }
 
   private static String formatPredicate(MsgArgs args, String predicate, boolean negative) {
-    return negative
-        ? format(MSG_PREDICATE, args.name(), args.notNot(), predicate)
-        : format(MSG_PREDICATE, args.name(), args.not(), predicate);
+    return negative ? format(MSG_PREDICATE, args.name(), args.notNot(), predicate) : format(
+        MSG_PREDICATE,
+        args.name(),
+        args.not(),
+        predicate);
   }
 
   private static String formatPredicateShowArg(MsgArgs args, String predicate, boolean negative) {
-    return negative
-        ? format(MSG_PREDICATE_WAS,
+    return negative ? format(MSG_PREDICATE_WAS,
         args.name(),
         args.notNot(),
         predicate,
-        toStr(args.arg()))
-        : format(MSG_PREDICATE_WAS, args.name(), args.not(), predicate, toStr(args.arg()));
+        toStr(args.arg())) : format(MSG_PREDICATE_WAS,
+        args.name(),
+        args.not(),
+        predicate,
+        toStr(args.arg()));
   }
 
   private static String formatRelation(MsgArgs args, String relation, boolean negative) {
@@ -180,19 +189,17 @@ class MsgUtil {
   }
 
   private static String formatRelationShowArg(MsgArgs args, String relation, boolean negative) {
-    return negative
-        ? format(MSG_RELATION_WAS,
+    return negative ? format(MSG_RELATION_WAS,
         args.name(),
         args.notNot(),
         relation,
         toStr(args.obj()),
-        toStr(args.arg()))
-        : format(MSG_RELATION_WAS,
-            args.name(),
-            args.not(),
-            relation,
-            toStr(args.obj()),
-            toStr(args.arg()));
+        toStr(args.arg())) : format(MSG_RELATION_WAS,
+        args.name(),
+        args.not(),
+        relation,
+        toStr(args.obj()),
+        toStr(args.arg()));
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -203,7 +210,7 @@ class MsgUtil {
     }
     Class type = val.getClass();
     if (val instanceof CharSequence) {
-      String s = ((CharSequence) val).toString();
+      String s = val.toString();
       if (s.isBlank()) {
         return '"' + s + '"';
       }

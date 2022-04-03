@@ -10,8 +10,14 @@ import static org.junit.Assert.assertEquals;
 
 public class FormatNormalizerTest {
 
-  private static final Object[] args =
-      pack(instanceOf(), "VALUE", String.class, "ARG_NAME", "OBJ", "extra1", "extra2", "extra3");
+  private static final Object[] args = pack(instanceOf(),
+      "VALUE",
+      String.class,
+      "ARG_NAME",
+      "OBJ",
+      "extra1",
+      "extra2",
+      "extra3");
 
   @Test
   public void test00() {
@@ -96,4 +102,54 @@ public class FormatNormalizerTest {
     String out = format(in, args);
     assertEquals("", out);
   }
+
+  @Test
+  public void test013() {
+    String in = "Unexpected type: ${type}!";
+    String out = format(in, args);
+    assertEquals("Unexpected type: String!", out);
+  }
+
+  @Test
+  public void test014() {
+    String in = "*${arg}*${type}";
+    String out = format(in, args);
+    assertEquals("*VALUE*String", out);
+  }
+
+  @Test
+  public void test015() {
+    String in = "*${arg}${type}";
+    String out = format(in, args);
+    assertEquals("*VALUEString", out);
+  }
+
+  @Test
+  public void test016() {
+    String in = "*${arg}${2}${type}";
+    String out = format(in, args);
+    assertEquals("*VALUEextra3String", out);
+  }
+
+  @Test
+  public void test017() {
+    String in = "*${arg}${4}${type}";
+    String out = format(in, args);
+    assertEquals("*VALUE${4}String", out);
+  }
+
+  @Test
+  public void test018() {
+    String in = "${arg";
+    String out = format(in, args);
+    assertEquals("${arg", out);
+  }
+
+  @Test
+  public void test019() {
+    String in = "${arg${}";
+    String out = format(in, args);
+    assertEquals("${arg${}", out);
+  }
+
 }
