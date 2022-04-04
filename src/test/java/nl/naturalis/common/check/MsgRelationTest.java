@@ -15,7 +15,7 @@ import static nl.naturalis.common.CollectionMethods.newArrayList;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static org.junit.Assert.*;
 
-public class CheckRelationTest {
+public class MsgRelationTest {
 
   private static final Map<String, String> beatles = newHashMap(0,
       String.class,
@@ -329,8 +329,7 @@ public class CheckRelationTest {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("babbage must extend/implement java.io.OutputStream[] (was java.io"
-              + ".OutputStream)",
-          e.getMessage());
+          + ".OutputStream)", e.getMessage());
       return;
     }
     fail();
@@ -356,8 +355,7 @@ public class CheckRelationTest {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("babbage must not extend/implement java.lang.CharSequence (was java.lang"
-              + ".String)",
-          e.getMessage());
+          + ".String)", e.getMessage());
       return;
     }
     fail();
@@ -561,10 +559,8 @@ public class CheckRelationTest {
       Check.that("star", "werner").is(valueIn(), beatles);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals(
-          "werner must be value in HashMap[4] of {george: harrison, john: lennon, paul: "
-              + "mccartney, gue...} (was star)",
-          e.getMessage());
+      assertEquals("werner must be value in HashMap[4] of {george: harrison, john: lennon, paul: "
+          + "mccartney, gue...} (was star)", e.getMessage());
       return;
     }
     fail();

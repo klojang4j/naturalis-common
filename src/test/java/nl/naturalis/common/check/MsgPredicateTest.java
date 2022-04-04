@@ -14,7 +14,7 @@ import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.ArrayMethods.pack;
 import static org.junit.Assert.*;
 
-public class CheckPredicateTest {
+public class MsgPredicateTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void lambdaAsPredicate00() {
@@ -196,8 +196,8 @@ public class CheckPredicateTest {
       Check.that(pack("foo", "bar"), "gold").isNot(deepNotNull());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals(
-          "gold must be null or contain null values (was String[2] of [foo, bar])", e.getMessage());
+      assertEquals("gold must be null or contain null values (was String[2] of [foo, bar])",
+          e.getMessage());
       return;
     }
     fail();
@@ -223,8 +223,7 @@ public class CheckPredicateTest {
       Check.that(pack("foo", "bar"), "silver").isNot(deepNotEmpty());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals(
-          "silver must be empty or contain empty values (was String[2] of [foo, bar])",
+      assertEquals("silver must be empty or contain empty values (was String[2] of [foo, bar])",
           e.getMessage());
       return;
     }
@@ -370,7 +369,7 @@ public class CheckPredicateTest {
       Check.that(f, "thorium").is(directory());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("Directory thorium must exist (was /bla/bla/bar.foo)", e.getMessage());
+      assertEquals("directory thorium must exist (was /bla/bla/bar.foo)", e.getMessage());
       return;
     } finally {
       f.delete();
@@ -385,7 +384,7 @@ public class CheckPredicateTest {
       Check.that(f, "thorium").isNot(directory());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("Directory thorium must not exist (was " + f + ")", e.getMessage());
+      assertEquals("directory thorium must not exist (was " + f + ")", e.getMessage());
       return;
     } finally {
       f.delete();
@@ -400,7 +399,7 @@ public class CheckPredicateTest {
       Check.that(f, "xenon").is(fileExists());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("File xenon must exist (was " + f + ")", e.getMessage());
+      assertEquals("xenon must exist (was " + f + ")", e.getMessage());
       return;
     }
     fail();
@@ -413,7 +412,7 @@ public class CheckPredicateTest {
       Check.that(f, "xenon").isNot(fileExists());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("File xenon must not exist (was " + f + ")", e.getMessage());
+      assertEquals("xenon must not exist (was " + f + ")", e.getMessage());
       return;
     }
     fail();
@@ -426,7 +425,7 @@ public class CheckPredicateTest {
       Check.that(f, "krypton").is(readable());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("No such file/directory: " + f, e.getMessage());
+      assertEquals("krypton must be readable (was " + f + ")", e.getMessage());
       return;
     }
     fail();
@@ -439,7 +438,7 @@ public class CheckPredicateTest {
       Check.that(f, "krypton").isNot(readable());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("File krypton must not be readable (was " + f + ")", e.getMessage());
+      assertEquals("krypton must not be readable (was " + f + ")", e.getMessage());
       return;
     }
     fail();
@@ -452,7 +451,7 @@ public class CheckPredicateTest {
       Check.that(f, "krypton").isNot(readable());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("Directory krypton must not be readable (was " + f + ")", e.getMessage());
+      assertEquals("krypton must not be readable (was " + f + ")", e.getMessage());
       return;
     }
     fail();
@@ -465,7 +464,7 @@ public class CheckPredicateTest {
       Check.that(f, "argon").is(writable());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("No such file/directory: " + f, e.getMessage());
+      assertEquals("argon must be writable (was " + f + ")", e.getMessage());
       return;
     }
     fail();
@@ -478,7 +477,7 @@ public class CheckPredicateTest {
       Check.that(f, "argon").isNot(writable());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("File argon must not be writable (was " + f + ")", e.getMessage());
+      assertEquals("argon must not be writable (was " + f + ")", e.getMessage());
       return;
     }
     fail();
@@ -491,9 +490,10 @@ public class CheckPredicateTest {
       Check.that(f, "argon").isNot(writable());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("Directory argon must not be writable (was " + f + ")", e.getMessage());
+      assertEquals("argon must not be writable (was " + f + ")", e.getMessage());
       return;
     }
     fail();
   }
+
 }

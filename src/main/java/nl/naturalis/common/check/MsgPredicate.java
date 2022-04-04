@@ -2,7 +2,6 @@ package nl.naturalis.common.check;
 
 import java.io.File;
 
-import static java.lang.String.format;
 import static nl.naturalis.common.ClassMethods.className;
 import static nl.naturalis.common.check.MsgUtil.*;
 
@@ -11,98 +10,105 @@ final class MsgPredicate {
   private MsgPredicate() {}
 
   static PrefabMsgFormatter msgNull() {
-    return args -> args.negated()
-        ? args.name() + " must not be null"
-        : args.name() + " must be null (was " + toStr(args.arg()) + ")";
-
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "null"
+        : x.name() + MUST_BE + "null" + was(x);
   }
 
   static PrefabMsgFormatter msgNotNull() {
-    return args -> args.negated()
-        ? args.name() + " must be null (was " + toStr(args.arg()) + ")"
-        : args.name() + " must not be null";
+    return x -> x.negated()
+        ? x.name() + MUST_BE + "null" + was(x)
+        : x.name() + MUST_NOT_BE + "null";
   }
 
   static PrefabMsgFormatter msgYes() {
-    return formatPredicate("be true", false);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "true"
+        : x.name() + MUST_BE + "true";
   }
 
   static PrefabMsgFormatter msgNo() {
-    return formatPredicate("be false", false);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "false"
+        : x.name() + MUST_BE + "false";
   }
 
   static PrefabMsgFormatter msgEmpty() {
-    return formatPredicate("be null or empty", true);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "null or empty" + was(x)
+        : x.name() + MUST_BE + "null or empty" + was(x);
   }
 
   static PrefabMsgFormatter msgDeepNotNull() {
-    return formatNegativePredicate("be null or contain null values", true);
+    return x -> x.negated()
+        ? x.name() + MUST_BE + "null or contain null values" + was(x)
+        : x.name() + MUST_NOT_BE + "null or contain null values" + was(x);
   }
 
   static PrefabMsgFormatter msgDeepNotEmpty() {
-    return formatNegativePredicate("be empty or contain empty values", true);
+    return x -> x.negated()
+        ? x.name() + MUST_BE + "empty or contain empty values" + was(x)
+        : x.name() + MUST_NOT_BE + "empty or contain empty values" + was(x);
   }
 
   static PrefabMsgFormatter msgBlank() {
-    return formatPredicate("be null or blank", true);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "null or blank" + was(x)
+        : x.name() + MUST_BE + "null or blank" + was(x);
   }
 
   static PrefabMsgFormatter msgInteger() {
-    return formatPredicate("be parsable as integer", true);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "parsable as integer" + was(x)
+        : x.name() + MUST_BE + "parsable as integer" + was(x);
   }
 
   static PrefabMsgFormatter msgArray() {
-    return args -> format(MSG_PREDICATE_WAS,
-        args.name(),
-        args.not(),
-        "be an array",
-        className(args.type()));
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "an array" + was(className(x.arg()))
+        : x.name() + MUST_BE + "an array" + was(className(x.arg()));
   }
 
   static PrefabMsgFormatter msgFile() {
-    return args -> {
-      File f = (File) args.arg();
+    return x -> {
+      File f = (File) x.arg();
       if (f.isDirectory()) {
-        return format("%s must not be a directory (was %s)", args.name(), f);
+        return x.name() + MUST_NOT_BE + "a directory" + was(f.getAbsolutePath());
       }
-      return format(MSG_PREDICATE_WAS, args.typeAndName(), args.not(), "exist", args.arg());
+      return x.negated()
+          ? x.typeAndName() + MUST_NOT + "exist" + was(x)
+          : x.typeAndName() + MUST + "exist" + was(x);
     };
   }
 
   static PrefabMsgFormatter msgDirectory() {
-    return args -> {
-      File f = (File) args.arg();
+    return x -> {
+      File f = (File) x.arg();
       if (f.isFile()) {
-        return format("%s must not be a directory (was %s)", args.name(), f);
+        return x.name() + MUST_NOT_BE + "a directory" + was(f.getAbsolutePath());
       }
-      var fmt = "Directory %s must%s exist (was %s)";
-      return format(fmt, args.name(), args.not(), args.arg());
+      return x.negated()
+          ? "directory " + x.name() + MUST_NOT + "exist" + was(x)
+          : "directory " + x.name() + MUST + "exist" + was(x);
     };
   }
 
   static PrefabMsgFormatter msgFileExists() {
-    return args -> format(MSG_PREDICATE_WAS, args.typeAndName(), args.not(), "exist", args.arg());
+    return x -> x.negated()
+        ? x.name() + MUST_NOT + "exist" + was(x)
+        : x.name() + MUST + "exist" + was(x);
   }
 
   static PrefabMsgFormatter msgReadable() {
-    return args -> {
-      File f = (File) args.arg();
-      if (!f.exists()) {
-        return format("No such file/directory: %s", f);
-      }
-      String s = f.isDirectory() ? "Directory" : File.class.getSimpleName();
-      return format("%s %s must%s be readable (was %s)", s, args.name(), args.not(), f);
-    };
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "readable" + was(x)
+        : x.name() + MUST_BE + "readable" + was(x);
   }
 
   static PrefabMsgFormatter msgWritable() {
-    return args -> {
-      File f = (File) args.arg();
-      if (!f.exists()) {
-        return format("No such file/directory: %s", f);
-      }
-      String s = f.isDirectory() ? "Directory" : File.class.getSimpleName();
-      return format("%s %s must%s be writable (was %s)", s, args.name(), args.not(), f);
-    };
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "writable" + was(x)
+        : x.name() + MUST_BE + "writable" + was(x);
   }
+
 }

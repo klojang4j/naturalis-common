@@ -5,7 +5,7 @@ import org.junit.Test;
 import static nl.naturalis.common.check.MsgUtil.*;
 import static org.junit.Assert.assertEquals;
 
-public class MsagUtilTest {
+public class MsgUtilTest {
 
   @Test
   public void formatPredicate_simple_00() {
@@ -326,4 +326,5 @@ public class MsagUtilTest {
     System.out.println(formatter.apply(args));
     assertEquals("guiseppe4 must equal 7", formatter.apply(args));
   }
+
 }
