@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import static java.lang.String.format;
+import static java.lang.System.identityHashCode;
 import static nl.naturalis.common.ArrayMethods.DEFAULT_IMPLODE_SEPARATOR;
 import static nl.naturalis.common.ArrayMethods.implodeAny;
 import static nl.naturalis.common.CollectionMethods.implode;
@@ -13,6 +14,12 @@ import static nl.naturalis.common.check.CommonChecks.MESSAGE_PATTERNS;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 final class MsgUtil {
+
+  static final String MUST = " must ";
+  static final String MUST_NOT = " must not ";
+  static final String MUST_BE = " must be ";
+  static final String MUST_NOT_BE = " must not be ";
+  static final String WAS = " (was ";
 
   private MsgUtil() {}
 
@@ -33,7 +40,9 @@ final class MsgUtil {
       Object obj) {
     PrefabMsgFormatter formatter = MESSAGE_PATTERNS.get(test);
     if (formatter == null) {
-      String s = argName == null ? DEF_ARG_NAME : argName;
+      String s = argName == null
+          ? DEF_ARG_NAME
+          : argName;
       return "Invalid value for " + s + ": " + toStr(argVal);
     }
     return formatter.apply(new MsgArgs(test, negated, argName, argVal, argType, obj));
@@ -63,6 +72,18 @@ final class MsgUtil {
   }
 
   //////////////////////////////////////////////////////////////////////////
+
+  static String was(String actual) {
+    return WAS + actual + ')';
+  }
+
+  static String was(MsgArgs args) {
+    return WAS + toStr(args.arg()) + ')';
+  }
+
+  static String obj(MsgArgs args) {
+    return toStr(args.obj());
+  }
 
   // Default message for predicates
   static PrefabMsgFormatter formatPredicate(String predicate, boolean showArgument) {
@@ -129,15 +150,13 @@ final class MsgUtil {
       if (showArgIfNegated) {
         return args -> formatRelationShowArg(args, relation, false);
       }
-      return args -> args.negated() ? formatRelation(args, relation, false) : formatRelationShowArg(
-          args,
-          relation,
-          false);
+      return args -> args.negated()
+          ? formatRelation(args, relation, false)
+          : formatRelationShowArg(args, relation, false);
     } else if (showArgIfNegated) {
-      return args -> args.negated() ? formatRelationShowArg(args, relation, false) : formatRelation(
-          args,
-          relation,
-          false);
+      return args -> args.negated()
+          ? formatRelationShowArg(args, relation, false)
+          : formatRelation(args, relation, false);
     }
     return args -> formatRelation(args, relation, false);
   }
@@ -149,37 +168,27 @@ final class MsgUtil {
       if (showArgIfNegated) {
         return args -> formatRelationShowArg(args, relation, true);
       }
-      return args -> args.negated() ? formatRelation(args, relation, true) : formatRelationShowArg(
-          args,
-          relation,
-          true);
+      return args -> args.negated()
+          ? formatRelation(args, relation, true)
+          : formatRelationShowArg(args, relation, true);
     } else if (showArgIfNegated) {
-      return args -> args.negated() ? formatRelationShowArg(args, relation, true) : formatRelation(
-          args,
-          relation,
-          true);
+      return args -> args.negated()
+          ? formatRelationShowArg(args, relation, true)
+          : formatRelation(args, relation, true);
     }
     return args -> formatRelation(args, relation, true);
   }
 
   private static String formatPredicate(MsgArgs args, String predicate, boolean negative) {
-    return negative ? format(MSG_PREDICATE, args.name(), args.notNot(), predicate) : format(
-        MSG_PREDICATE,
-        args.name(),
-        args.not(),
-        predicate);
+    return negative
+        ? format(MSG_PREDICATE, args.name(), args.notNot(), predicate)
+        : format(MSG_PREDICATE, args.name(), args.not(), predicate);
   }
 
   private static String formatPredicateShowArg(MsgArgs args, String predicate, boolean negative) {
-    return negative ? format(MSG_PREDICATE_WAS,
-        args.name(),
-        args.notNot(),
-        predicate,
-        toStr(args.arg())) : format(MSG_PREDICATE_WAS,
-        args.name(),
-        args.not(),
-        predicate,
-        toStr(args.arg()));
+    return negative
+        ? format(MSG_PREDICATE_WAS, args.name(), args.notNot(), predicate, toStr(args.arg()))
+        : format(MSG_PREDICATE_WAS, args.name(), args.not(), predicate, toStr(args.arg()));
   }
 
   private static String formatRelation(MsgArgs args, String relation, boolean negative) {
@@ -189,17 +198,19 @@ final class MsgUtil {
   }
 
   private static String formatRelationShowArg(MsgArgs args, String relation, boolean negative) {
-    return negative ? format(MSG_RELATION_WAS,
+    return negative
+        ? format(MSG_RELATION_WAS,
         args.name(),
         args.notNot(),
         relation,
         toStr(args.obj()),
-        toStr(args.arg())) : format(MSG_RELATION_WAS,
-        args.name(),
-        args.not(),
-        relation,
-        toStr(args.obj()),
-        toStr(args.arg()));
+        toStr(args.arg()))
+        : format(MSG_RELATION_WAS,
+            args.name(),
+            args.not(),
+            relation,
+            toStr(args.obj()),
+            toStr(args.arg()));
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -228,7 +239,9 @@ final class MsgUtil {
   }
 
   static String className(Object obj) {
-    return obj.getClass() == Class.class ? className((Class) obj) : className(obj.getClass());
+    return obj.getClass() == Class.class
+        ? className((Class) obj)
+        : className(obj.getClass());
   }
 
   static String simpleClassName(Object obj) {
@@ -238,11 +251,21 @@ final class MsgUtil {
   }
 
   static String className(Class c) {
-    return c.isArray() ? arrayClassName(c) : c.getName();
+    return c.isArray()
+        ? arrayClassName(c)
+        : c.getName();
   }
 
   static String simpleClassName(Class c) {
-    return c.isArray() ? simpleArrayClassName(c) : c.getSimpleName();
+    return c.isArray()
+        ? simpleArrayClassName(c)
+        : c.getSimpleName();
+  }
+
+  static String sysId(Object arg) {
+    return arg == null
+        ? "null"
+        : simpleClassName(arg) + '@' + identityHashCode(arg);
   }
 
   private static String collectionToString(Collection c) {

@@ -1,7 +1,5 @@
 package nl.naturalis.common.check;
 
-import static java.lang.String.format;
-import static java.lang.System.identityHashCode;
 import static nl.naturalis.common.check.MsgUtil.*;
 
 @SuppressWarnings("rawtypes")
@@ -10,94 +8,112 @@ final class MsgRelation {
   private MsgRelation() {}
 
   static PrefabMsgFormatter msgSameAs() {
-    return args -> {
-      String idObj = args.obj() == null
-          ? "null"
-          : simpleClassName(args.obj()) + '@' + identityHashCode(args.obj());
-      if (args.negated()) {
-        String fmt = "%s must not be reference to %s";
-        return format(fmt, args.name(), idObj);
-      }
-      String idArg = args.arg() == null
-          ? "null"
-          : simpleClassName(args.arg()) + '@' + identityHashCode(args.arg());
-      String fmt = "%s must be reference to %s (was %s)";
-      return format(fmt, args.name(), idObj, idArg);
-    };
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "reference to " + sysId(x.obj())
+        : x.name() + MUST_BE + "reference to " + sysId(x.obj()) + was(sysId((x.arg())));
   }
 
   static PrefabMsgFormatter msgNullOr() {
-    return formatRelation("be null or", true);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "null or " + obj(x) + was(x)
+        : x.name() + MUST_BE + "null or " + obj(x) + was(x);
+
   }
 
   static PrefabMsgFormatter msgInstanceOf() {
-    return args -> {
-      if (args.negated()) {
-        return args.name() + " must not be instance of " + className(args.obj()) + " (was " + toStr(
-            args.arg()) + ")";
-      }
-      return args.name() + " must be instance of " + className(args.obj()) + " (was " + className(
-          args.arg()) + ")";
-    };
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "instance of " + className(x.obj()) + was(x)
+        : x.name() + MUST_BE + "instance of " + className(x.obj()) + was(className(x.arg()));
   }
 
   static PrefabMsgFormatter msgSubtypeOf() {
-    return formatRelation("extend/implement", true);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT + "extend/implement " + className(x.obj()) + was(x)
+        : x.name() + MUST + "extend/implement " + className(x.obj()) + was(x);
   }
 
   static PrefabMsgFormatter msgSupertypeOf() {
-    return formatRelation("be supertype of", true);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "supertype of " + className(x.obj()) + was(x)
+        : x.name() + MUST_BE + "supertype of " + className(x.obj()) + was(x);
   }
 
   static PrefabMsgFormatter msgContains() {
-    return formatRelation("contain", false);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT + "contain " + obj(x)
+        : x.name() + MUST + "contain " + obj(x);
   }
 
   static PrefabMsgFormatter msgHasKey() {
-    return formatRelation("contain key", false);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT + "contain key " + obj(x)
+        : x.name() + MUST + "contain key " + obj(x);
   }
 
   static PrefabMsgFormatter msgHasValue() {
-    return formatRelation("contain value", false);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT + "contain value " + obj(x)
+        : x.name() + MUST + "contain value " + obj(x);
   }
 
   static PrefabMsgFormatter msgIn() {
-    return formatRelation("be element of", true);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "element of " + obj(x) + was(x)
+        : x.name() + MUST_BE + "element of " + obj(x) + was(x);
   }
 
   static PrefabMsgFormatter msgKeyIn() {
-    return formatRelation("be key in", true);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "key in " + obj(x) + was(x)
+        : x.name() + MUST_BE + "key in " + obj(x) + was(x);
   }
 
   static PrefabMsgFormatter msgValueIn() {
-    return formatRelation("be value in", true);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "value in " + obj(x) + was(x)
+        : x.name() + MUST_BE + "value in " + obj(x) + was(x);
   }
 
   static PrefabMsgFormatter msgSupersetOf() {
-    return formatRelation("be superset of", true);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "superset of " + obj(x) + was(x)
+        : x.name() + MUST_BE + "superset of " + obj(x) + was(x);
   }
 
   static PrefabMsgFormatter msgSubsetOf() {
-    return formatRelation("be subset of", true);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "subset of " + obj(x) + was(x)
+        : x.name() + MUST_BE + "subset of " + obj(x) + was(x);
   }
 
   static PrefabMsgFormatter msgHasSubstring() {
-    return formatRelation("contain", true);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT + "contain " + obj(x) + was(x)
+        : x.name() + MUST + "contain " + obj(x) + was(x);
   }
 
   static PrefabMsgFormatter msgSubstringOf() {
-    return formatRelation("be substring of", true);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "substring of " + obj(x) + was(x)
+        : x.name() + MUST_BE + "substring of " + obj(x) + was(x);
   }
 
   static PrefabMsgFormatter msgEqualsIgnoreCase() {
-    return formatRelation("be equal ignoring case to", true);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "equal (ignoring case) to " + obj(x) + was(x)
+        : x.name() + MUST_BE + "equal (ignoring case) to " + obj(x) + was(x);
   }
 
   static PrefabMsgFormatter msgStartsWith() {
-    return formatRelation("start with", true);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT + "start with " + obj(x) + was(x)
+        : x.name() + MUST + "start with " + obj(x) + was(x);
   }
 
   static PrefabMsgFormatter msgEndsWith() {
-    return formatRelation("end with", true);
+    return x -> x.negated()
+        ? x.name() + MUST_NOT + "end with " + obj(x) + was(x)
+        : x.name() + MUST + "end with " + obj(x) + was(x);
   }
+
 }

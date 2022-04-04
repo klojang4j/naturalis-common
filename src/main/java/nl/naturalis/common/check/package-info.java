@@ -23,13 +23,11 @@
  * nl.naturalis.common.check.IntCheck IntCheck} or {@link nl.naturalis.common.check.ObjectCheck
  * ObjectCheck}, benchmarking their performance yield no difference with hand-coded argument checks.
  * If the argument passes the test, there is literally no difference outside the error margin of the
- * benchmark. If the argument fails the test, it depends on which type of check you choose. If you
- * choose the {@link nl.naturalis.common.check.ObjectCheck#is(java.util.function.Predicate,
- * java.util.function.Supplier) variant} where you provide your own exception, there is again no
- * difference with a hand-coded check. Otherwise there is a sm. Note, however, that you don't
- * generally want to recover from pre- and postcondition failures anyhow. They tend to be
- * end-of-story failures, if not for the application as a whole, then at least for the request being
- * serviced.
+ * benchmark. If the argument fails the test and an exception needs to be thrown, the check
+ * framework also performs equally well except when you provide your own error message (see below).
+ * In this case the message needs to be scanned for message arguments, which turns out to be
+ * relatively costly. You can view the results of the JMH benchmarks
+ * <a href="https://github.com/klojang4j/naturalis-common-jmh">here</a>.
  *
  *
  * <h2>Common checks</h2>

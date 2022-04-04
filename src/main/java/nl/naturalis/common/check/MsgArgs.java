@@ -1,6 +1,5 @@
 package nl.naturalis.common.check;
 
-import static nl.naturalis.common.ObjectMethods.ifNotNull;
 import static nl.naturalis.common.check.Check.DEF_ARG_NAME;
 import static nl.naturalis.common.check.MsgUtil.simpleClassName;
 
@@ -22,24 +21,36 @@ record MsgArgs(Object test, boolean negated, String name, Object arg, Class<?> t
 
   @Override
   public Class<?> type() {
-    return type == null ? arg == null ? null : arg.getClass() : type;
+    if (type != null) {
+      return type;
+    }
+    if (arg != null) {
+      return arg.getClass();
+    }
+    return null;
   }
 
   @Override
   public String name() {
-    Class<?> c;
-    return name == null ? (c = type()) == null ? DEF_ARG_NAME : simpleClassName(c) : name;
+    if (name != null) {
+      return name;
+    }
+    Class<?> clazz = type();
+    if (clazz != null) {
+      return simpleClassName(clazz);
+    }
+    return DEF_ARG_NAME;
   }
 
   String typeAndName() {
-    Class<?> c = type();
-    String n = name();
-    if (c == null) {
-      return n;
-    } else if (n == DEF_ARG_NAME || name != null) {
-      return simpleClassName(c) + ' ' + n;
+    Class<?> clazz = type();
+    String name = name();
+    if (clazz == null) {
+      return name;
+    } else if (name == DEF_ARG_NAME || this.name != null) {
+      return simpleClassName(clazz) + ' ' + name;
     }
-    return simpleClassName(c);
+    return simpleClassName(clazz);
   }
 
   String not() {
@@ -50,4 +61,5 @@ record MsgArgs(Object test, boolean negated, String name, Object arg, Class<?> t
   String notNot() {
     return negated ? "" : " not";
   }
+
 }

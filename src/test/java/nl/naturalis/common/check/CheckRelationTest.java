@@ -17,19 +17,17 @@ import static org.junit.Assert.*;
 
 public class CheckRelationTest {
 
-  private static final Map<String, String> beatles =
-      newHashMap(
-          0,
-          String.class,
-          String.class,
-          "john",
-          "lennon",
-          "paul",
-          "mccartney",
-          "george",
-          "harrison",
-          "guess who",
-          "huh?");
+  private static final Map<String, String> beatles = newHashMap(0,
+      String.class,
+      String.class,
+      "john",
+      "lennon",
+      "paul",
+      "mccartney",
+      "george",
+      "harrison",
+      "guess who",
+      "huh?");
 
   @Test(expected = IllegalArgumentException.class)
   public void relation00() { // Just to cover check without parameter name
@@ -60,10 +58,10 @@ public class CheckRelationTest {
     Check.that((Integer) 4).isNot(in(), List.of(1, 2, 3));
     Check.that(Set.of("1", "2", "3")).is(supersetOf(), List.of("1", "2"));
     Check.that(Set.of("1", "4", "5")).isNot(supersetOf(), List.of("1", "2"));
-    Check.that(Set.of(MONDAY, TUESDAY, WEDNESDAY))
-        .is(subsetOf(), List.of(MONDAY, TUESDAY, WEDNESDAY, THURSDAY));
-    Check.that(Set.of(MONDAY, TUESDAY, SATURDAY))
-        .isNot(subsetOf(), List.of(MONDAY, TUESDAY, WEDNESDAY, THURSDAY));
+    Check.that(Set.of(MONDAY, TUESDAY, WEDNESDAY)).is(subsetOf(),
+        List.of(MONDAY, TUESDAY, WEDNESDAY, THURSDAY));
+    Check.that(Set.of(MONDAY, TUESDAY, SATURDAY)).isNot(subsetOf(),
+        List.of(MONDAY, TUESDAY, WEDNESDAY, THURSDAY));
     Map<Integer, Integer> map = Map.of(1, 1, 2, 4, 3, 6, 4, 8, 5, 10);
     Check.that(map).is(hasKey(), 1);
     Check.that(map).isNot(hasKey(), 11);
@@ -278,8 +276,8 @@ public class CheckRelationTest {
       Check.that(9.7F, "pipe").is(instanceOf(), String.class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals(
-          "pipe must be instance of java.lang.String (was java.lang.Float)", e.getMessage());
+      assertEquals("pipe must be instance of java.lang.String (was java.lang.Float)",
+          e.getMessage());
       return;
     }
     fail();
@@ -303,8 +301,7 @@ public class CheckRelationTest {
       Check.that(OutputStream.class, "trevor").is(supertypeOf(), OutputStream[].class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals(
-          "trevor must be supertype of java.io.OutputStream[] (was java.io.OutputStream)",
+      assertEquals("trevor must be supertype of java.io.OutputStream[] (was java.io.OutputStream)",
           e.getMessage());
       return;
     }
@@ -331,8 +328,8 @@ public class CheckRelationTest {
       Check.that(OutputStream.class, "babbage").is(subtypeOf(), OutputStream[].class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals(
-          "babbage must extend/implement java.io.OutputStream[] (was java.io.OutputStream)",
+      assertEquals("babbage must extend/implement java.io.OutputStream[] (was java.io"
+              + ".OutputStream)",
           e.getMessage());
       return;
     }
@@ -345,8 +342,7 @@ public class CheckRelationTest {
       Check.that(OutputStream.class, "babbage").is(subtypeOf(), Comparable.class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals(
-          "babbage must extend/implement java.lang.Comparable (was java.io.OutputStream)",
+      assertEquals("babbage must extend/implement java.lang.Comparable (was java.io.OutputStream)",
           e.getMessage());
       return;
     }
@@ -359,8 +355,8 @@ public class CheckRelationTest {
       Check.that(String.class, "babbage").isNot(subtypeOf(), CharSequence.class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals(
-          "babbage must not extend/implement java.lang.CharSequence (was java.lang.String)",
+      assertEquals("babbage must not extend/implement java.lang.CharSequence (was java.lang"
+              + ".String)",
           e.getMessage());
       return;
     }
@@ -373,8 +369,7 @@ public class CheckRelationTest {
       Check.that(Float.class, "babbage").isNot(subtypeOf(), Comparable.class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals(
-          "babbage must not extend/implement java.lang.Comparable (was java.lang.Float)",
+      assertEquals("babbage must not extend/implement java.lang.Comparable (was java.lang.Float)",
           e.getMessage());
       return;
     }
@@ -410,19 +405,17 @@ public class CheckRelationTest {
   @Test
   public void hasKey00() {
     try {
-      Map<String, String> map =
-          newHashMap(
-              0,
-              String.class,
-              String.class,
-              "john",
-              "lennon",
-              "paul",
-              "mccartney",
-              "george",
-              "harrison",
-              "guess who",
-              "huh?");
+      Map<String, String> map = newHashMap(0,
+          String.class,
+          String.class,
+          "john",
+          "lennon",
+          "paul",
+          "mccartney",
+          "george",
+          "harrison",
+          "guess who",
+          "huh?");
       Check.on(unsupportedOperation(), map, "thor").is(hasKey(), "ringo");
     } catch (UnsupportedOperationException e) {
       System.out.println(e.getMessage());
@@ -435,19 +428,17 @@ public class CheckRelationTest {
   @Test
   public void hasKey01() {
     try {
-      Map<String, String> map =
-          newHashMap(
-              0,
-              String.class,
-              String.class,
-              "john",
-              "lennon",
-              "paul",
-              "mccartney",
-              "george",
-              "harrison",
-              "guess who",
-              "huh?");
+      Map<String, String> map = newHashMap(0,
+          String.class,
+          String.class,
+          "john",
+          "lennon",
+          "paul",
+          "mccartney",
+          "george",
+          "harrison",
+          "guess who",
+          "huh?");
       Check.on(unsupportedOperation(), map, "thor").isNot(hasKey(), "john");
     } catch (UnsupportedOperationException e) {
       System.out.println(e.getMessage());
@@ -460,19 +451,17 @@ public class CheckRelationTest {
   @Test
   public void hasValue00() {
     try {
-      Map<String, String> map =
-          newHashMap(
-              0,
-              String.class,
-              String.class,
-              "john",
-              "lennon",
-              "paul",
-              "mccartney",
-              "george",
-              "harrison",
-              "guess who",
-              "huh?");
+      Map<String, String> map = newHashMap(0,
+          String.class,
+          String.class,
+          "john",
+          "lennon",
+          "paul",
+          "mccartney",
+          "george",
+          "harrison",
+          "guess who",
+          "huh?");
       Check.that(map, "morpheus").is(hasValue(), "star");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
@@ -485,19 +474,17 @@ public class CheckRelationTest {
   @Test
   public void hasValue01() {
     try {
-      Map<String, String> map =
-          newHashMap(
-              0,
-              String.class,
-              String.class,
-              "john",
-              "lennon",
-              "paul",
-              "mccartney",
-              "george",
-              "harrison",
-              "guess who",
-              "huh?");
+      Map<String, String> map = newHashMap(0,
+          String.class,
+          String.class,
+          "john",
+          "lennon",
+          "paul",
+          "mccartney",
+          "george",
+          "harrison",
+          "guess who",
+          "huh?");
       Check.that(map, "morpheus").isNot(hasValue(), "huh?");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
@@ -530,7 +517,8 @@ public class CheckRelationTest {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
-          "tetrapod must not be element of ArrayList[4] of [john, paul, george, guess who] (was paul)",
+          "tetrapod must not be element of ArrayList[4] of [john, paul, george, guess who] (was "
+              + "paul)",
           e.getMessage());
       return;
     }
@@ -544,7 +532,8 @@ public class CheckRelationTest {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
-          "flavius must be key in HashMap[4] of {george: harrison, john: lennon, paul: mccartney, gue...} (was ringo)",
+          "flavius must be key in HashMap[4] of {george: harrison, john: lennon, paul: mccartney,"
+              + " gue...} (was ringo)",
           e.getMessage());
       return;
     }
@@ -558,7 +547,8 @@ public class CheckRelationTest {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
-          "flavius must not be key in HashMap[4] of {george: harrison, john: lennon, paul: mccartney, gue...} (was john)",
+          "flavius must not be key in HashMap[4] of {george: harrison, john: lennon, paul: "
+              + "mccartney, gue...} (was john)",
           e.getMessage());
       return;
     }
@@ -572,7 +562,8 @@ public class CheckRelationTest {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
-          "werner must be value in HashMap[4] of {george: harrison, john: lennon, paul: mccartney, gue...} (was star)",
+          "werner must be value in HashMap[4] of {george: harrison, john: lennon, paul: "
+              + "mccartney, gue...} (was star)",
           e.getMessage());
       return;
     }
@@ -586,7 +577,8 @@ public class CheckRelationTest {
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
-          "werner must not be value in HashMap[4] of {george: harrison, john: lennon, paul: mccartney, gue...} (was lennon)",
+          "werner must not be value in HashMap[4] of {george: harrison, john: lennon, paul: "
+              + "mccartney, gue...} (was lennon)",
           e.getMessage());
       return;
     }
@@ -624,14 +616,12 @@ public class CheckRelationTest {
   @Test
   public void supersetOf00() {
     try {
-      Check.that(List.of("mccartney", "harrisson", "lennon"), "frodo")
-          .is(supersetOf(), List.of("mccartney", "harrisson", "star"));
+      Check.that(List.of("mccartney", "harrisson", "lennon"), "frodo").is(supersetOf(),
+          List.of("mccartney", "harrisson", "star"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals(
-          "frodo must be superset of ListN[3] of [mccartney, harrisson, star] "
-              + "(was ListN[3] of [mccartney, harrisson, lennon])",
-          e.getMessage());
+      assertEquals("frodo must be superset of ListN[3] of [mccartney, harrisson, star] "
+          + "(was ListN[3] of [mccartney, harrisson, lennon])", e.getMessage());
       return;
     }
     fail();
@@ -640,14 +630,12 @@ public class CheckRelationTest {
   @Test
   public void superset01() {
     try {
-      Check.that(List.of("lennon", "mccartney", "harrisson", "star"), "frodo")
-          .isNot(supersetOf(), List.of("mccartney", "harrisson", "star"));
+      Check.that(List.of("lennon", "mccartney", "harrisson", "star"), "frodo").isNot(supersetOf(),
+          List.of("mccartney", "harrisson", "star"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals(
-          "frodo must not be superset of ListN[3] of [mccartney, harrisson, star] "
-              + "(was ListN[4] of [lennon, mccartney, harrisson, star])",
-          e.getMessage());
+      assertEquals("frodo must not be superset of ListN[3] of [mccartney, harrisson, star] "
+          + "(was ListN[4] of [lennon, mccartney, harrisson, star])", e.getMessage());
       return;
     }
     fail();
@@ -656,14 +644,12 @@ public class CheckRelationTest {
   @Test
   public void subsetOf00() {
     try {
-      Check.that(List.of("mccartney", "harrisson", "lennon"), "kremlin")
-          .is(subsetOf(), List.of("mccartney", "harrisson", "star"));
+      Check.that(List.of("mccartney", "harrisson", "lennon"), "kremlin").is(subsetOf(),
+          List.of("mccartney", "harrisson", "star"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals(
-          "kremlin must be subset of ListN[3] of [mccartney, harrisson, star] "
-              + "(was ListN[3] of [mccartney, harrisson, lennon])",
-          e.getMessage());
+      assertEquals("kremlin must be subset of ListN[3] of [mccartney, harrisson, star] "
+          + "(was ListN[3] of [mccartney, harrisson, lennon])", e.getMessage());
       return;
     }
     fail();
@@ -672,14 +658,12 @@ public class CheckRelationTest {
   @Test
   public void subsetOf01() {
     try {
-      Check.that(List.of("lennon", "mccartney", "harrisson", "star"), "kremlin")
-          .isNot(subsetOf(), List.of("lennon", "mccartney", "harrisson", "star"));
+      Check.that(List.of("lennon", "mccartney", "harrisson", "star"), "kremlin").isNot(subsetOf(),
+          List.of("lennon", "mccartney", "harrisson", "star"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals(
-          "kremlin must not be subset of ListN[4] of [lennon, mccartney, harrisson, star] "
-              + "(was ListN[4] of [lennon, mccartney, harrisson, star])",
-          e.getMessage());
+      assertEquals("kremlin must not be subset of ListN[4] of [lennon, mccartney, harrisson, star] "
+          + "(was ListN[4] of [lennon, mccartney, harrisson, star])", e.getMessage());
       return;
     }
     fail();
@@ -768,7 +752,7 @@ public class CheckRelationTest {
       Check.that("abc", "mordor").is(equalsIgnoreCase(), "XYZ");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("mordor must be equal ignoring case to XYZ (was abc)", e.getMessage());
+      assertEquals("mordor must be equal (ignoring case) to XYZ (was abc)", e.getMessage());
       return;
     }
     fail();
@@ -780,7 +764,7 @@ public class CheckRelationTest {
       Check.that("123", "mordor").isNot(equalsIgnoreCase(), "123");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("mordor must not be equal ignoring case to 123 (was 123)", e.getMessage());
+      assertEquals("mordor must not be equal (ignoring case) to 123 (was 123)", e.getMessage());
       return;
     }
     fail();
@@ -849,4 +833,5 @@ public class CheckRelationTest {
     }
     fail();
   }
+
 }

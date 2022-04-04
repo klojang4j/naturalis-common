@@ -10,7 +10,7 @@ import static nl.naturalis.common.check.CommonChecks.NAMES;
 import static nl.naturalis.common.check.MsgUtil.simpleClassName;
 import static nl.naturalis.common.check.MsgUtil.toStr;
 
-class CustomMsgFormatter {
+final class CustomMsgFormatter {
 
   private CustomMsgFormatter() {}
 
@@ -22,6 +22,9 @@ class CustomMsgFormatter {
   private static final String REGEX = "\\$\\{(test|arg|type|name|obj|\\d+)}";
   private static final Pattern PATTERN = Pattern.compile(REGEX);
 
+  private static final String ARG_START = "${";
+  private static final char ARG_END = '}';
+
   static String format(String fmt, Object[] msgArgs) {
     return USE_REGEX ? formatRegex(fmt, msgArgs) : formatNoRegex(fmt, msgArgs);
   }
@@ -31,7 +34,7 @@ class CustomMsgFormatter {
   }
 
   private static String formatNoRegex(String fmt, Object[] msgArgs) {
-    int x = fmt.indexOf("${");
+    int x = fmt.indexOf(ARG_START);
     if (x == -1) {
       return fmt;
     }
@@ -39,11 +42,11 @@ class CustomMsgFormatter {
     int y = 0;
     do {
       out.append(fmt.substring(y, x));
-      if ((y = fmt.indexOf('}', x += 2)) == -1) {
-        return out.append("${").append(fmt.substring(x)).toString();
+      if ((y = fmt.indexOf(ARG_END, x += 2)) == -1) {
+        return out.append(ARG_START).append(fmt.substring(x)).toString();
       }
       out.append(lookup(fmt.substring(x, y), msgArgs));
-      if ((x = fmt.indexOf("${", y += 1)) == -1) {
+      if ((x = fmt.indexOf(ARG_START, y += 1)) == -1) {
         return out.append(fmt.substring(y)).toString();
       }
     } while (true);
@@ -72,9 +75,9 @@ class CustomMsgFormatter {
         } catch (TypeConversionException ignored) {
         }
         if (USE_REGEX) {
-          return "\\${" + arg + '}';
+          return '\\' + ARG_START + arg + ARG_END;
         }
-        return "${" + arg + '}';
+        return ARG_START + arg + ARG_END;
     }
   }
 
