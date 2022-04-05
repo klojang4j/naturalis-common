@@ -4,7 +4,9 @@ import static nl.naturalis.common.check.MsgUtil.*;
 
 final class MsgIntRelation {
 
-  private MsgIntRelation() {}
+  private MsgIntRelation() {
+    throw new AssertionError();
+  }
 
   static PrefabMsgFormatter msgEq() {
     return x -> x.negated()
@@ -19,33 +21,29 @@ final class MsgIntRelation {
   }
 
   static PrefabMsgFormatter msgGt() {
-    return x -> x.negated()
-        ? x.name() + MUST_NOT_BE + ">" + obj(x) + was(x)
-        : x.name() + MUST_BE + ">" + obj(x) + was(x);
+    return x -> message(x, ">");
   }
 
   static PrefabMsgFormatter msgGte() {
-    return x -> x.negated()
-        ? x.name() + MUST_NOT_BE + ">=" + obj(x) + was(x)
-        : x.name() + MUST_BE + ">=" + obj(x) + was(x);
+    return x -> message(x, ">=");
   }
 
   static PrefabMsgFormatter msgLt() {
-    return x -> x.negated()
-        ? x.name() + MUST_NOT_BE + "<" + obj(x) + was(x)
-        : x.name() + MUST_BE + "<" + obj(x) + was(x);
+    return x -> message(x, "<");
   }
 
   static PrefabMsgFormatter msgLte() {
-    return x -> x.negated()
-        ? x.name() + MUST_NOT_BE + "<=" + obj(x) + was(x)
-        : x.name() + MUST_BE + "<=" + obj(x) + was(x);
+    return x -> message(x, "<=");
   }
 
   static PrefabMsgFormatter msgMultipleOf() {
-    return x -> x.negated()
-        ? x.name() + MUST_NOT_BE + "multiple of" + obj(x) + was(x)
-        : x.name() + MUST_BE + "multiple of" + obj(x) + was(x);
+    return x -> message(x, "multiple of");
+  }
+
+  private static String message(MsgArgs x, String descr) {
+    return x.negated()
+        ? x.name() + MUST_NOT_BE + descr + obj(x) + was(x)
+        : x.name() + MUST_BE + descr + obj(x) + was(x);
   }
 
 }

@@ -8,7 +8,7 @@ import static nl.naturalis.common.check.CommonChecks.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class CheckIntPredicateTest {
+public class MsgIntPredicateTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void lambdaAsIntPredicate00() { // Using asInt utility method
@@ -21,7 +21,7 @@ public class CheckIntPredicateTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void methodReferenceAsIntPredicate00() {
-    Check.that(3, "foo").is(CheckIntPredicateTest::notEqualsThree);
+    Check.that(3, "foo").is(MsgIntPredicateTest::notEqualsThree);
   }
 
   @Test
@@ -162,4 +162,5 @@ public class CheckIntPredicateTest {
   public void intPredicateCustomExc01() throws IOException {
     Check.that(-2, "foo").is(odd(), () -> new IOException());
   }
+
 }

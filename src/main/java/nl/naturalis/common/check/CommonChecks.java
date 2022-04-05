@@ -55,10 +55,11 @@ public final class CommonChecks {
   static final Map<Object, PrefabMsgFormatter> MESSAGE_PATTERNS;
   static final Map<Object, String> NAMES;
 
-  private static Map<Object, PrefabMsgFormatter> tmp0 = new HashMap<>(64);
-  private static Map<Object, String> tmp1 = new HashMap<>(64);
+  private static Map<Object, PrefabMsgFormatter> tmp0 = new HashMap<>(128);
+  private static Map<Object, String> tmp1 = new HashMap<>(128);
 
   private CommonChecks() {
+    throw new AssertionError();
   }
 
   //////////////////////////////////////////////////////////////////////////////////

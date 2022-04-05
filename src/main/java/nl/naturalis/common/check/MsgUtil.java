@@ -21,7 +21,9 @@ final class MsgUtil {
   static final String MUST_NOT_BE = " must not be ";
   static final String WAS = " (was ";
 
-  private MsgUtil() {}
+  private MsgUtil() {
+    throw new AssertionError();
+  }
 
   // Common message patterns:
   static final String MSG_PREDICATE = "%s must%s %s";
