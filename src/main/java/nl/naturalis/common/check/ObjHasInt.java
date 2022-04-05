@@ -12,8 +12,10 @@ import static nl.naturalis.common.check.CommonGetters.formatProperty;
 import static nl.naturalis.common.check.MsgUtil.getCustomMessage;
 import static nl.naturalis.common.check.MsgUtil.getPrefabMessage;
 
-/** Helper class for ObjectCheck. */
-class ObjHasInt<T, E extends Exception> {
+/**
+ * Helper class for ObjectCheck.
+ */
+final class ObjHasInt<T, E extends Exception> {
 
   static <T0, E0 extends Exception> ObjHasInt<T0, E0> get(ObjectCheck<T0, E0> check) {
     return new ObjHasInt<>(check);
@@ -70,23 +72,36 @@ class ObjHasInt<T, E extends Exception> {
     if (test.test(val)) {
       return check;
     }
-    throw check.exc.apply(
-        getCustomMessage(msg, msgArgs, test, check.argName, val, int.class, null));
+    throw check.exc.apply(getCustomMessage(msg,
+        msgArgs,
+        test,
+        check.argName,
+        val,
+        int.class,
+        null));
   }
 
-  <O> ObjectCheck<T, E> notHas(
-      ToIntFunction<T> prop, IntPredicate test, String msg, Object[] msgArgs) throws E {
+  <O> ObjectCheck<T, E> notHas(ToIntFunction<T> prop,
+      IntPredicate test,
+      String msg,
+      Object[] msgArgs) throws E {
     ObjectCheck<T, E> check = this.check;
     int val = prop.applyAsInt(check.arg);
     if (!test.test(val)) {
       return check;
     }
-    throw check.exc.apply(
-        getCustomMessage(msg, msgArgs, test, check.argName, val, int.class, null));
+    throw check.exc.apply(getCustomMessage(msg,
+        msgArgs,
+        test,
+        check.argName,
+        val,
+        int.class,
+        null));
   }
 
-  <O, X extends Exception> ObjectCheck<T, E> has(
-      ToIntFunction<T> prop, IntPredicate test, Supplier<X> exception) throws X {
+  <O, X extends Exception> ObjectCheck<T, E> has(ToIntFunction<T> prop,
+      IntPredicate test,
+      Supplier<X> exception) throws X {
     ObjectCheck<T, E> check = this.check;
     if (test.test(prop.applyAsInt(check.arg))) {
       return check;
@@ -135,8 +150,11 @@ class ObjHasInt<T, E extends Exception> {
     throw check.exc.apply(getPrefabMessage(test, true, check.FQN(name), val, int.class, obj));
   }
 
-  <O> ObjectCheck<T, E> has(
-      ToIntFunction<T> prop, IntObjRelation<O> test, O obj, String msg, Object[] msgArgs) throws E {
+  <O> ObjectCheck<T, E> has(ToIntFunction<T> prop,
+      IntObjRelation<O> test,
+      O obj,
+      String msg,
+      Object[] msgArgs) throws E {
     ObjectCheck<T, E> check = this.check;
     int val = prop.applyAsInt(check.arg);
     if (test.exists(val, obj)) {
@@ -145,8 +163,11 @@ class ObjHasInt<T, E extends Exception> {
     throw check.exc.apply(getCustomMessage(msg, msgArgs, test, check.argName, val, int.class, obj));
   }
 
-  <O> ObjectCheck<T, E> notHas(
-      ToIntFunction<T> prop, IntObjRelation<O> test, O obj, String msg, Object[] msgArgs) throws E {
+  <O> ObjectCheck<T, E> notHas(ToIntFunction<T> prop,
+      IntObjRelation<O> test,
+      O obj,
+      String msg,
+      Object[] msgArgs) throws E {
     ObjectCheck<T, E> check = this.check;
     int val = prop.applyAsInt(check.arg);
     if (!test.exists(val, obj)) {
@@ -155,8 +176,10 @@ class ObjHasInt<T, E extends Exception> {
     throw check.exc.apply(getCustomMessage(msg, msgArgs, test, check.argName, val, int.class, obj));
   }
 
-  <O, X extends Exception> ObjectCheck<T, E> has(
-      ToIntFunction<T> prop, IntObjRelation<O> test, O obj, Supplier<X> exception) throws X {
+  <O, X extends Exception> ObjectCheck<T, E> has(ToIntFunction<T> prop,
+      IntObjRelation<O> test,
+      O obj,
+      Supplier<X> exception) throws X {
     ObjectCheck<T, E> check = this.check;
     if (test.exists(prop.applyAsInt(check.arg), obj)) {
       return check;
@@ -202,8 +225,11 @@ class ObjHasInt<T, E extends Exception> {
     throw check.exc.apply(getPrefabMessage(test, true, check.FQN(name), val, int.class, obj));
   }
 
-  ObjectCheck<T, E> has(
-      ToIntFunction<T> prop, IntRelation test, int obj, String msg, Object[] msgArgs) throws E {
+  ObjectCheck<T, E> has(ToIntFunction<T> prop,
+      IntRelation test,
+      int obj,
+      String msg,
+      Object[] msgArgs) throws E {
     ObjectCheck<T, E> check = this.check;
     int val = prop.applyAsInt(check.arg);
     if (test.exists(val, obj)) {
@@ -212,8 +238,11 @@ class ObjHasInt<T, E extends Exception> {
     throw check.exc.apply(getCustomMessage(msg, msgArgs, test, check.argName, val, int.class, obj));
   }
 
-  ObjectCheck<T, E> notHas(
-      ToIntFunction<T> prop, IntRelation test, int obj, String msg, Object[] msgArgs) throws E {
+  ObjectCheck<T, E> notHas(ToIntFunction<T> prop,
+      IntRelation test,
+      int obj,
+      String msg,
+      Object[] msgArgs) throws E {
     ObjectCheck<T, E> check = this.check;
     int val = prop.applyAsInt(check.arg);
     if (!test.exists(val, obj)) {
@@ -222,12 +251,15 @@ class ObjHasInt<T, E extends Exception> {
     throw check.exc.apply(getCustomMessage(msg, msgArgs, test, check.argName, val, int.class, obj));
   }
 
-  <X extends Exception> ObjectCheck<T, E> has(
-      ToIntFunction<T> prop, IntRelation test, int obj, Supplier<X> exception) throws X {
+  <X extends Exception> ObjectCheck<T, E> has(ToIntFunction<T> prop,
+      IntRelation test,
+      int obj,
+      Supplier<X> exception) throws X {
     ObjectCheck<T, E> check = this.check;
     if (test.exists(prop.applyAsInt(check.arg), obj)) {
       return check;
     }
     throw exception.get();
   }
+
 }
