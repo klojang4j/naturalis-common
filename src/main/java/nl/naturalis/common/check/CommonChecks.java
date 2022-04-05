@@ -239,7 +239,9 @@ public final class CommonChecks {
    * @return A function implementing the test described above
    */
   public static <T> Predicate<T> array() {
-    return x -> x.getClass() == Class.class ? ((Class) x).isArray() : x.getClass().isArray();
+    return x -> x.getClass() == Class.class
+        ? ((Class) x).isArray()
+        : x.getClass().isArray();
   }
 
   static {
@@ -1321,7 +1323,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(indexOf(), msgIndexOf()); // Recycle message
+    setMessagePattern(indexOf(), msgIndexOf());
     setName(indexOf(), "indexOf");
   }
 
@@ -1335,7 +1337,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(listIndexOf(), msgIndexOf());
+    setMessagePattern(listIndexOf(), msgListIndexOf());
     setName(listIndexOf(), "listIndexOf");
   }
 
@@ -1349,7 +1351,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(strIndexOf(), msgIndexOf()); // Recycle message
+    setMessagePattern(strIndexOf(), msgStrIndexOf());
     setName(strIndexOf(), "strIndexOf");
   }
 
@@ -1670,4 +1672,5 @@ public final class CommonChecks {
   private static void setName(Object test, String name) {
     tmp1.put(test, name);
   }
+
 }

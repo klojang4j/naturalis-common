@@ -8,7 +8,7 @@ import java.util.Set;
 import static nl.naturalis.common.ArrayMethods.ints;
 import static nl.naturalis.common.check.CommonChecks.*;
 
-public class CheckObjIntRelationTest {
+public class MsgObjIntRelationTest {
 
   /*
    * There is currently no need to test the messages being generated if the checks fail, because
@@ -69,4 +69,5 @@ public class CheckObjIntRelationTest {
     Check.that(ints(1, 2, 3, 4, 5, 6, 7, 8, 9, 0), "length").isNot(lenLTE(), 4);
     Check.that(ints(1, 2, 3, 4, 5, 6, 7, 8, 9, 0), "length").isNot(lenLT(), 4);
   }
+
 }

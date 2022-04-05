@@ -14,19 +14,21 @@ final class MsgIntObjRelation {
   private MsgIntObjRelation() {}
 
   static PrefabMsgFormatter msgIndexOf() {
-    return x -> {
-      int max;
-      if (x.obj().getClass().isArray()) {
-        max = Array.getLength(x.obj());
-      } else if (x.obj() instanceof List) {
-        max = ((List) x.obj()).size();
-      } else { // String
-        max = ((String) x.obj()).length();
-      }
-      return x.negated()
-          ? x.name() + MUST_BE + "< 0 or >= " + max + was(x.arg())
-          : x.name() + MUST_BE + ">= 0 and < " + max + was(x.arg());
-    };
+    return x -> indexOf(x, Array.getLength(x.obj()));
+  }
+
+  static PrefabMsgFormatter msgListIndexOf() {
+    return x -> indexOf(x, ((List) x.obj()).size());
+  }
+
+  static PrefabMsgFormatter msgStrIndexOf() {
+    return x -> indexOf(x, ((String) x.obj()).length());
+  }
+
+  private static String indexOf(MsgArgs x, int max) {
+    return x.negated()
+        ? x.name() + MUST_BE + "< 0 or >= " + max + was(x.arg())
+        : x.name() + MUST_BE + ">= 0 and < " + max + was(x.arg());
   }
 
   static PrefabMsgFormatter msgInRange() {
