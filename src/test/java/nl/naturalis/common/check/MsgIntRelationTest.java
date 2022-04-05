@@ -7,7 +7,7 @@ import java.io.IOException;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static org.junit.Assert.assertEquals;
 
-public class CheckIntRelationTest {
+public class MsgIntRelationTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void lambdaAsIntRelation() {
@@ -59,8 +59,9 @@ public class CheckIntRelationTest {
   @Test
   public void intRelation04() {
     try {
-      Check.on(IOException::new, 8, "foo")
-          .is(gte(), 9, "${name} incorrect: ${arg}. Required: ${obj}");
+      Check.on(IOException::new, 8, "foo").is(gte(),
+          9,
+          "${name} incorrect: ${arg}. Required: ${obj}");
     } catch (IOException e) {
       System.out.println(e.getMessage());
       assertEquals("foo incorrect: 8. Required: 9", e.getMessage());
@@ -106,4 +107,5 @@ public class CheckIntRelationTest {
       assertEquals("foo must not be multiple of 3 (was 21)", e.getMessage());
     }
   }
+
 }

@@ -85,8 +85,16 @@ final class MsgUtil {
     return was(toStr(args.arg()));
   }
 
+  static String obj(String obj) {
+    return ' ' + obj;
+  }
+
+  static String obj(Object obj) {
+    return obj(String.valueOf(obj));
+  }
+
   static String obj(MsgArgs args) {
-    return ' ' + toStr(args.obj());
+    return obj(toStr(args.obj()));
   }
 
   // Default message for predicates
@@ -226,6 +234,8 @@ final class MsgUtil {
       return s.isBlank()
           ? '"' + s + '"'
           : ellipsis(s);
+    } else if (val instanceof Integer i) {
+      return i.toString();
     } else if (val instanceof Collection c) {
       return collectionToString(c);
     } else if (val instanceof Map m) {
