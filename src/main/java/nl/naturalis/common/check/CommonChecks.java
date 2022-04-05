@@ -78,7 +78,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(NULL(), msgNull(), "NULL");
+    setMetadata(NULL(), msgNull(), "NULL");
   }
 
   /**
@@ -93,7 +93,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(notNull(), msgNotNull(), "notNull");
+    setMetadata(notNull(), msgNotNull(), "notNull");
   }
 
   /**
@@ -116,7 +116,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(yes(), msgYes(), "yes");
+    setMetadata(yes(), msgYes(), "yes");
   }
 
   /**
@@ -130,7 +130,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(no(), msgNo(), "no");
+    setMetadata(no(), msgNo(), "no");
   }
 
   /**
@@ -148,7 +148,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(empty(), msgEmpty(), "empty");
+    setMetadata(empty(), msgEmpty(), "empty");
   }
 
   /**
@@ -169,7 +169,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(deepNotNull(), msgDeepNotNull(), "deepNotNull");
+    setMetadata(deepNotNull(), msgDeepNotNull(), "deepNotNull");
   }
 
   /**
@@ -189,7 +189,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(deepNotEmpty(), msgDeepNotEmpty(), "deepNotEmpty");
+    setMetadata(deepNotEmpty(), msgDeepNotEmpty(), "deepNotEmpty");
   }
 
   /**
@@ -206,7 +206,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(blank(), msgBlank(), "blank");
+    setMetadata(blank(), msgBlank(), "blank");
   }
 
   /**
@@ -220,7 +220,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(integer(), msgInteger(), "integer");
+    setMetadata(integer(), msgInteger(), "integer");
   }
 
   /**
@@ -237,7 +237,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(array(), msgArray(), "array");
+    setMetadata(array(), msgArray(), "array");
   }
 
   /**
@@ -251,7 +251,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(file(), msgFile(), "file");
+    setMetadata(file(), msgFile(), "file");
   }
 
   /**
@@ -265,7 +265,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(directory(), msgDirectory(), "directory");
+    setMetadata(directory(), msgDirectory(), "directory");
   }
 
   /**
@@ -279,7 +279,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(fileExists(), msgFileExists(), "fileExists");
+    setMetadata(fileExists(), msgFileExists(), "fileExists");
   }
 
   /**
@@ -293,7 +293,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(readable(), msgReadable(), "readable");
+    setMetadata(readable(), msgReadable(), "readable");
   }
 
   /**
@@ -307,7 +307,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(writable(), msgWritable(), "writable");
+    setMetadata(writable(), msgWritable(), "writable");
   }
 
   //////////////////////////////////////////////////////////////////////////////////
@@ -324,7 +324,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(even(), msgEven(), "even");
+    setMetadata(even(), msgEven(), "even");
   }
 
   /**
@@ -337,7 +337,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(odd(), msgOdd(), "odd");
+    setMetadata(odd(), msgOdd(), "odd");
   }
 
   /**
@@ -351,7 +351,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(positive(), msgPositive(), "positive");
+    setMetadata(positive(), msgPositive(), "positive");
   }
 
   /**
@@ -364,7 +364,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(negative(), msgNegative(), "negative");
+    setMetadata(negative(), msgNegative(), "negative");
   }
 
   /**
@@ -377,7 +377,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(zero(), msgZero(), "zero");
+    setMetadata(zero(), msgZero(), "zero");
   }
 
   //////////////////////////////////////////////////////////////////////////////////
@@ -394,7 +394,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(eq(), msgEq(), "eq");
+    setMetadata(eq(), msgEq(), "eq");
   }
 
   /**
@@ -407,7 +407,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(ne(), msgNe(), "ne");
+    setMetadata(ne(), msgNe(), "ne");
   }
 
   /**
@@ -420,7 +420,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(gt(), msgGt(), "gt");
+    setMetadata(gt(), msgGt(), "gt");
   }
 
   /**
@@ -433,7 +433,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(gte(), msgGte(), "gte");
+    setMetadata(gte(), msgGte(), "gte");
   }
 
   /**
@@ -446,7 +446,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(lt(), msgLt(), "lt");
+    setMetadata(lt(), msgLt(), "lt");
   }
 
   /**
@@ -459,7 +459,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(lte(), msgLte(), "lte");
+    setMetadata(lte(), msgLte(), "lte");
   }
 
   /**
@@ -472,7 +472,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(multipleOf(), msgMultipleOf(), "multipleOf");
+    setMetadata(multipleOf(), msgMultipleOf(), "multipleOf");
   }
 
   //////////////////////////////////////////////////////////////////////////////////
@@ -491,7 +491,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(EQ(), msgEq(), "EQ"); // Recycle message
+    setMetadata(EQ(), msgEq(), "EQ"); // Recycle message
   }
 
   /**
@@ -508,7 +508,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(GT(), msgGt(), "GT"); // Recycle message
+    setMetadata(GT(), msgGt(), "GT"); // Recycle message
   }
 
   /**
@@ -525,7 +525,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(LT(), msgLt(), "LT"); // Recycle message
+    setMetadata(LT(), msgLt(), "LT"); // Recycle message
   }
 
   /**
@@ -542,7 +542,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(GTE(), msgGte(), "GTE"); // Recycle message
+    setMetadata(GTE(), msgGte(), "GTE"); // Recycle message
   }
 
   /**
@@ -559,7 +559,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(LTE(), msgLte(), "LTE"); // Recycle message
+    setMetadata(LTE(), msgLte(), "LTE"); // Recycle message
   }
 
   /**
@@ -574,7 +574,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(sameAs(), msgSameAs(), "sameAs");
+    setMetadata(sameAs(), msgSameAs(), "sameAs");
   }
 
   /**
@@ -588,7 +588,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(nullOr(), msgNullOr(), "nullOr");
+    setMetadata(nullOr(), msgNullOr(), "nullOr");
   }
 
   /**
@@ -602,7 +602,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(instanceOf(), msgInstanceOf(), "instanceOf");
+    setMetadata(instanceOf(), msgInstanceOf(), "instanceOf");
   }
 
   /**
@@ -616,7 +616,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(supertypeOf(), msgSupertypeOf(), "supertypeOf");
+    setMetadata(supertypeOf(), msgSupertypeOf(), "supertypeOf");
   }
 
   /**
@@ -629,7 +629,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(subtypeOf(), msgSubtypeOf(), "subtypeOf");
+    setMetadata(subtypeOf(), msgSubtypeOf(), "subtypeOf");
   }
 
   /**
@@ -645,7 +645,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(contains(), msgContains(), "contains");
+    setMetadata(contains(), msgContains(), "contains");
   }
 
   /**
@@ -661,7 +661,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(hasKey(), msgHasKey(), "hasKey");
+    setMetadata(hasKey(), msgHasKey(), "hasKey");
   }
 
   /**
@@ -677,7 +677,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(hasValue(), msgHasValue(), "msgHasValue");
+    setMetadata(hasValue(), msgHasValue(), "msgHasValue");
   }
 
   /**
@@ -692,7 +692,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(in(), msgIn(), "in");
+    setMetadata(in(), msgIn(), "in");
   }
 
   /**
@@ -707,7 +707,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(keyIn(), msgKeyIn(), "keyIn");
+    setMetadata(keyIn(), msgKeyIn(), "keyIn");
   }
 
   /**
@@ -722,7 +722,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(valueIn(), msgValueIn(), "valueIn");
+    setMetadata(valueIn(), msgValueIn(), "valueIn");
   }
 
   /**
@@ -738,7 +738,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(elementOf(), msgIn(), "elementOf"); // Recycle message
+    setMetadata(elementOf(), msgIn(), "elementOf"); // Recycle message
   }
 
   /**
@@ -765,7 +765,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(supersetOf(), msgSupersetOf(), "supersetOf");
+    setMetadata(supersetOf(), msgSupersetOf(), "supersetOf");
   }
 
   /**
@@ -791,7 +791,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(subsetOf(), msgSubsetOf(), "subsetOf");
+    setMetadata(subsetOf(), msgSubsetOf(), "subsetOf");
   }
 
   /**
@@ -805,7 +805,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(hasSubstring(), msgHasSubstring(), "hasSubstring");
+    setMetadata(hasSubstring(), msgHasSubstring(), "hasSubstring");
   }
 
   /**
@@ -818,7 +818,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(substringOf(), msgSubstringOf(), "substringOf");
+    setMetadata(substringOf(), msgSubstringOf(), "substringOf");
   }
 
   /**
@@ -831,7 +831,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(equalsIgnoreCase(), msgEqualsIgnoreCase(), "equalsIgnoreCase");
+    setMetadata(equalsIgnoreCase(), msgEqualsIgnoreCase(), "equalsIgnoreCase");
   }
 
   /**
@@ -845,7 +845,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(startsWith(), msgStartsWith(), "startsWith");
+    setMetadata(startsWith(), msgStartsWith(), "startsWith");
   }
 
   /**
@@ -859,7 +859,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(endsWith(), msgEndsWith(), "endsWith");
+    setMetadata(endsWith(), msgEndsWith(), "endsWith");
   }
 
   //////////////////////////////////////////////////////////////////////////////////
@@ -896,7 +896,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(strlenEQ(), msgEq(), "strlenEQ"); // Recycle message
+    setMetadata(strlenEQ(), msgEq(), "strlenEQ"); // Recycle message
   }
 
   /**
@@ -929,7 +929,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(strlenGT(), msgGt(), "strlenGT"); // Recycle message
+    setMetadata(strlenGT(), msgGt(), "strlenGT"); // Recycle message
   }
 
   /**
@@ -948,7 +948,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(strlenGTE(), msgGte(), "strlenGTE"); // Recycle message
+    setMetadata(strlenGTE(), msgGte(), "strlenGTE"); // Recycle message
   }
 
   /**
@@ -967,7 +967,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(strlenLT(), msgLt(), "strlenLT"); // Recycle message
+    setMetadata(strlenLT(), msgLt(), "strlenLT"); // Recycle message
   }
 
   /**
@@ -986,7 +986,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(strlenLTE(), msgLte(), "strlenLTE"); // Recycle message
+    setMetadata(strlenLTE(), msgLte(), "strlenLTE"); // Recycle message
   }
 
   /**
@@ -1019,7 +1019,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(sizeEQ(), msgEq(), "sizeEQ"); // Recycle message
+    setMetadata(sizeEQ(), msgEq(), "sizeEQ"); // Recycle message
   }
 
   /**
@@ -1052,7 +1052,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(sizeGT(), msgGt(), "sizeGT"); // Recycle message
+    setMetadata(sizeGT(), msgGt(), "sizeGT"); // Recycle message
   }
 
   /**
@@ -1071,7 +1071,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(sizeGTE(), msgGte(), "sizeGTE"); // Recycle message
+    setMetadata(sizeGTE(), msgGte(), "sizeGTE"); // Recycle message
   }
 
   /**
@@ -1090,7 +1090,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(sizeLT(), msgLt(), "sizeLT"); // Recycle message
+    setMetadata(sizeLT(), msgLt(), "sizeLT"); // Recycle message
   }
 
   /**
@@ -1109,7 +1109,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(sizeLTE(), msgLte(), "sizeLTE"); // Recycle message
+    setMetadata(sizeLTE(), msgLte(), "sizeLTE"); // Recycle message
   }
 
   /**
@@ -1146,7 +1146,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(lenEQ(), msgEq(), "lenEQ"); // Recycle message
+    setMetadata(lenEQ(), msgEq(), "lenEQ"); // Recycle message
   }
 
   /**
@@ -1167,7 +1167,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(lenGT(), msgGt(), "lenGT"); // Recycle message
+    setMetadata(lenGT(), msgGt(), "lenGT"); // Recycle message
   }
 
   /**
@@ -1187,7 +1187,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(lenGTE(), msgGte(), "lenGTE"); // Recycle message
+    setMetadata(lenGTE(), msgGte(), "lenGTE"); // Recycle message
   }
 
   /**
@@ -1208,7 +1208,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(lenLT(), msgLt(), "lenLT"); // Recycle message
+    setMetadata(lenLT(), msgLt(), "lenLT"); // Recycle message
   }
 
   /**
@@ -1228,7 +1228,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(lenLTE(), msgLte(), "lenLTE"); // Recycle message
+    setMetadata(lenLTE(), msgLte(), "lenLTE"); // Recycle message
   }
 
   //////////////////////////////////////////////////////////////////////////////////
@@ -1258,7 +1258,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(indexOf(), msgIndexOf(), "indexOf");
+    setMetadata(indexOf(), msgIndexOf(), "indexOf");
   }
 
   /**
@@ -1271,7 +1271,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(listIndexOf(), msgListIndexOf(), "listIndexOf");
+    setMetadata(listIndexOf(), msgListIndexOf(), "listIndexOf");
   }
 
   /**
@@ -1284,7 +1284,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(strIndexOf(), msgStrIndexOf(), "strIndexOf");
+    setMetadata(strIndexOf(), msgStrIndexOf(), "strIndexOf");
   }
 
   /**
@@ -1298,7 +1298,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(intElementOf(), msgIn(), "intElementOf"); // Recycle message
+    setMetadata(intElementOf(), msgIn(), "intElementOf"); // Recycle message
   }
 
   /**
@@ -1312,7 +1312,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(inRange(), msgInRange(), "inRange");
+    setMetadata(inRange(), msgInRange(), "inRange");
   }
 
   /**
@@ -1326,7 +1326,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMessagePattern(inRangeClosed(), msgInRangeClosed(), "inRangeClosed");
+    setMetadata(inRangeClosed(), msgInRangeClosed(), "inRangeClosed");
   }
 
   /* ++++++++++++++ Miscellaneous ++++++++++++++ */
@@ -1594,7 +1594,7 @@ public final class CommonChecks {
     tmp1 = null;
   }
 
-  private static void setMessagePattern(Object test, PrefabMsgFormatter message, String name) {
+  private static void setMetadata(Object test, PrefabMsgFormatter message, String name) {
     tmp0.put(test, message);
     tmp1.put(test, name);
   }
