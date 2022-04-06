@@ -11,6 +11,7 @@ import java.util.stream.IntStream;
 
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.length;
+import static nl.naturalis.common.check.CommonGetters.size;
 import static nl.naturalis.common.path.PathWalker.OnDeadEnd.RETURN_NULL;
 
 /**
@@ -65,7 +66,7 @@ public final class PathWalker {
   public static final Object DEAD = new Object();
 
   private final Path[] paths;
-  private final OnDeadEnd dea;
+  private final OnDeadEnd ode;
   private final Function<Path, Object> kds;
 
   /**
@@ -76,7 +77,7 @@ public final class PathWalker {
   public PathWalker(Path... paths) {
     Check.that(paths, "paths").isNot(empty()).is(deepNotNull());
     this.paths = Arrays.copyOf(paths, paths.length);
-    this.dea = RETURN_NULL;
+    this.ode = RETURN_NULL;
     this.kds = null;
   }
 
@@ -88,7 +89,7 @@ public final class PathWalker {
   public PathWalker(String... paths) {
     Check.that(paths, "paths").isNot(empty()).is(deepNotNull());
     this.paths = Arrays.stream(paths).map(Path::new).toArray(Path[]::new);
-    this.dea = RETURN_NULL;
+    this.ode = RETURN_NULL;
     this.kds = null;
   }
 
@@ -98,7 +99,7 @@ public final class PathWalker {
    * @param paths The paths to walk through the provided host objects
    */
   public PathWalker(List<Path> paths) {
-    this(paths, RETURN_NULL, null);
+    this(paths, RETURN_NULL);
   }
 
   /**
@@ -108,7 +109,10 @@ public final class PathWalker {
    * @param onDeadEnd The action to take if the {@code PathWalker} hits a dead end
    */
   public PathWalker(List<Path> paths, OnDeadEnd onDeadEnd) {
-    this(paths, onDeadEnd, null);
+    Check.notNull(paths, "paths").has(size(), positive());
+    this.paths = paths.toArray(Path[]::new);
+    this.ode = Check.notNull(onDeadEnd, "onDeadEnd").ok();
+    this.kds = null;
   }
 
   /**
@@ -122,15 +126,15 @@ public final class PathWalker {
    *     <i>represents</i> the key, and it should return the <i>actual</i> key
    */
   public PathWalker(List<Path> paths, OnDeadEnd onDeadEnd, Function<Path, Object> keyDeserializer) {
-    Check.that(paths, "paths").isNot(empty()).is(deepNotNull());
+    Check.notNull(paths, "paths").has(size(), positive());
     this.paths = paths.toArray(Path[]::new);
-    this.dea = onDeadEnd;
-    this.kds = keyDeserializer;
+    this.ode = Check.notNull(onDeadEnd, "onDeadEnd").ok();
+    this.kds = Check.notNull(keyDeserializer, "keyDeserializer").ok();
   }
 
   PathWalker(Path path, OnDeadEnd onDeadEnd, Function<Path, Object> keyDeserializer) {
     this.paths = new Path[] {path};
-    this.dea = onDeadEnd;
+    this.ode = onDeadEnd;
     this.kds = keyDeserializer;
   }
 
@@ -221,11 +225,11 @@ public final class PathWalker {
   }
 
   private Object readObj(Object obj, Path path) {
-    return new ObjectReader(dea, kds).read(obj, path);
+    return new ObjectReader(ode, kds).read(obj, path);
   }
 
   private boolean write(Object host, Path path, Object value) {
-    return new ObjectWriter(dea, kds).write(host, path, value);
+    return new ObjectWriter(ode, kds).write(host, path, value);
   }
 
 }
