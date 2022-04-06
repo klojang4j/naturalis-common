@@ -9,8 +9,8 @@ import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 final class PrimitiveArraySegmentReader extends SegmentReader<Object> {
 
-  PrimitiveArraySegmentReader(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
-    super(deadEndAction, keyDeserializer);
+  PrimitiveArraySegmentReader(OnDeadEnd ode, Function<Path, Object> kds) {
+    super(ode, kds);
   }
 
   @Override

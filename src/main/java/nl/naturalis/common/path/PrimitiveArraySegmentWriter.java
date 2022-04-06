@@ -11,8 +11,8 @@ import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 final class PrimitiveArraySegmentWriter extends SegmentWriter<Object> {
 
-  PrimitiveArraySegmentWriter(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
-    super(deadEndAction, keyDeserializer);
+  PrimitiveArraySegmentWriter(OnDeadEnd ode, Function<Path, Object> kds) {
+    super(ode, kds);
   }
 
   @Override
