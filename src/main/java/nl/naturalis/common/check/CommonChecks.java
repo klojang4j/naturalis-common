@@ -15,6 +15,7 @@ import java.util.function.*;
 import static nl.naturalis.common.check.MsgIntObjRelation.*;
 import static nl.naturalis.common.check.MsgIntPredicate.*;
 import static nl.naturalis.common.check.MsgIntRelation.*;
+import static nl.naturalis.common.check.MsgObjIntRelation.*;
 import static nl.naturalis.common.check.MsgPredicate.*;
 import static nl.naturalis.common.check.MsgRelation.*;
 
@@ -491,7 +492,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMetadata(EQ(), msgEq(), "EQ"); // Recycle message
+    setMetadata(EQ(), msgEQ(), "EQ");
   }
 
   /**
@@ -508,7 +509,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMetadata(GT(), msgGt(), "GT"); // Recycle message
+    setMetadata(GT(), msgGT(), "GT");
   }
 
   /**
@@ -525,7 +526,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMetadata(LT(), msgLt(), "LT"); // Recycle message
+    setMetadata(LT(), msgLT(), "LT");
   }
 
   /**
@@ -559,7 +560,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMetadata(LTE(), msgLte(), "LTE"); // Recycle message
+    setMetadata(LTE(), msgLTE(), "LTE");
   }
 
   /**
@@ -1019,7 +1020,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMetadata(sizeEQ(), msgEq(), "sizeEQ"); // Recycle message
+    setMetadata(sizeEQ(), msgEQ(), "sizeEQ"); // Recycle message
   }
 
   /**
@@ -1052,7 +1053,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMetadata(sizeGT(), msgGt(), "sizeGT"); // Recycle message
+    setMetadata(sizeGT(), msgGT(), "sizeGT"); // Recycle message
   }
 
   /**
@@ -1071,7 +1072,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMetadata(sizeGTE(), msgGte(), "sizeGTE"); // Recycle message
+    setMetadata(sizeGTE(), msgGTE(), "sizeGTE"); // Recycle message
   }
 
   /**
@@ -1090,7 +1091,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMetadata(sizeLT(), msgLt(), "sizeLT"); // Recycle message
+    setMetadata(sizeLT(), msgLT(), "sizeLT"); // Recycle message
   }
 
   /**
@@ -1109,7 +1110,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMetadata(sizeLTE(), msgLte(), "sizeLTE"); // Recycle message
+    setMetadata(sizeLTE(), msgLTE(), "sizeLTE"); // Recycle message
   }
 
   /**
@@ -1146,7 +1147,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMetadata(lenEQ(), msgEq(), "lenEQ"); // Recycle message
+    setMetadata(lenEQ(), msgEQ(), "lenEQ"); // Recycle message
   }
 
   /**
@@ -1167,7 +1168,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMetadata(lenGT(), msgGt(), "lenGT"); // Recycle message
+    setMetadata(lenGT(), msgGT(), "lenGT"); // Recycle message
   }
 
   /**
@@ -1187,7 +1188,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMetadata(lenGTE(), msgGte(), "lenGTE"); // Recycle message
+    setMetadata(lenGTE(), msgGTE(), "lenGTE"); // Recycle message
   }
 
   /**
@@ -1208,7 +1209,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMetadata(lenLT(), msgLt(), "lenLT"); // Recycle message
+    setMetadata(lenLT(), msgLT(), "lenLT"); // Recycle message
   }
 
   /**
@@ -1228,7 +1229,7 @@ public final class CommonChecks {
   }
 
   static {
-    setMetadata(lenLTE(), msgLte(), "lenLTE"); // Recycle message
+    setMetadata(lenLTE(), msgLTE(), "lenLTE"); // Recycle message
   }
 
   //////////////////////////////////////////////////////////////////////////////////

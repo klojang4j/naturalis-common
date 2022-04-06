@@ -10,14 +10,14 @@ final class MsgIntRelation {
 
   static PrefabMsgFormatter msgEq() {
     return x -> x.negated()
-        ? x.name() + MUST_NOT + "equal" + obj(x)
-        : x.name() + MUST + "equal" + obj(x) + was(x);
+        ? x.name() + MUST_NOT + "equal" + obj1(x)
+        : x.name() + MUST + "equal" + obj1(x) + was1(x);
   }
 
   static PrefabMsgFormatter msgNe() {
     return x -> x.negated()
-        ? x.name() + MUST + "equal" + obj(x) + was(x)
-        : x.name() + MUST_NOT + "equal" + obj(x);
+        ? x.name() + MUST + "equal" + obj1(x) + was1(x)
+        : x.name() + MUST_NOT + "equal" + obj1(x);
   }
 
   static PrefabMsgFormatter msgGt() {
@@ -42,8 +42,8 @@ final class MsgIntRelation {
 
   private static String message(MsgArgs x, String descr) {
     return x.negated()
-        ? x.name() + MUST_NOT_BE + descr + obj(x) + was(x)
-        : x.name() + MUST_BE + descr + obj(x) + was(x);
+        ? x.name() + MUST_NOT_BE + descr + obj1(x) + was1(x)
+        : x.name() + MUST_BE + descr + obj1(x) + was1(x);
   }
 
 }

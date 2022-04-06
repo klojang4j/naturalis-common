@@ -27,13 +27,13 @@ final class MsgIntPredicate {
   static PrefabMsgFormatter msgZero() {
     return x -> x.negated()
         ? x.name() + MUST_NOT_BE + "0"
-        : x.name() + MUST_BE + "0" + was(x);
+        : x.name() + MUST_BE + "0" + was2(x);
   }
 
   private static String message(MsgArgs x, String descr) {
     return x.negated()
-        ? x.name() + MUST_NOT_BE + descr + was(x)
-        : x.name() + MUST_BE + descr + was(x);
+        ? x.name() + MUST_NOT_BE + descr + was2(x)
+        : x.name() + MUST_BE + descr + was2(x);
   }
 
 }

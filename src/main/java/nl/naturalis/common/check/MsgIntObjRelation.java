@@ -29,8 +29,8 @@ final class MsgIntObjRelation {
 
   private static String indexOf(MsgArgs x, int max) {
     return x.negated()
-        ? x.name() + MUST_BE + "< 0 or >= " + max + was(x)
-        : x.name() + MUST_BE + ">= 0 and < " + max + was(x);
+        ? x.name() + MUST_BE + "< 0 or >= " + max + was2(x)
+        : x.name() + MUST_BE + ">= 0 and < " + max + was2(x);
   }
 
   static PrefabMsgFormatter msgInRange() {
@@ -38,8 +38,8 @@ final class MsgIntObjRelation {
       int min = ((IntPair) x.obj()).one();
       int max = ((IntPair) x.obj()).two();
       return x.negated()
-          ? x.name() + MUST_BE + "< " + min + " or >= " + max + was(x)
-          : x.name() + MUST_BE + ">= " + min + " and < " + max + was(x);
+          ? x.name() + MUST_BE + "< " + min + " or >= " + max + was2(x)
+          : x.name() + MUST_BE + ">= " + min + " and < " + max + was2(x);
     };
   }
 
@@ -48,8 +48,8 @@ final class MsgIntObjRelation {
       int min = ((IntPair) x.obj()).one();
       int max = ((IntPair) x.obj()).two();
       return x.negated()
-          ? x.name() + MUST_BE + "< " + min + " or > " + max + was(x)
-          : x.name() + MUST_BE + ">= " + min + " and <= " + max + was(x);
+          ? x.name() + MUST_BE + "< " + min + " or > " + max + was2(x)
+          : x.name() + MUST_BE + ">= " + min + " and <= " + max + was2(x);
     };
   }
 

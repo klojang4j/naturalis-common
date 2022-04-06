@@ -75,156 +75,28 @@ final class MsgUtil {
 
   //////////////////////////////////////////////////////////////////////////
 
-  static String was(String actual) {
-    return WAS + actual + ')';
+  static String was(Object arg) {
+    return WAS + String.valueOf(arg) + ')';
   }
 
-  static String was(Object actual) {
-    return was(String.valueOf(actual));
+  static String was1(MsgArgs args) {
+    return WAS + String.valueOf(args.arg()) + ')';
   }
 
-  static String was(MsgArgs args) {
-    return was(toStr(args.arg()));
+  static String was2(MsgArgs args) {
+    return WAS + toStr(args.arg()) + ')';
   }
 
-  static String obj(String obj) {
-    return ' ' + obj;
+  static String obj0(Object obj) {
+    return " " + obj;
   }
 
-  static String obj(Object obj) {
-    return obj(String.valueOf(obj));
+  static String obj1(MsgArgs args) {
+    return " " + args.obj();
   }
 
-  static String obj(MsgArgs args) {
-    return obj(toStr(args.obj()));
-  }
-
-  // Default message for predicates
-  static PrefabMsgFormatter formatPredicate(String predicate, boolean showArgument) {
-    return showArgument
-        ? args -> formatPredicateShowArg(args, predicate, false)
-        : args -> formatPredicate(args, predicate, false);
-  }
-
-  // Default message for negatively formulated predicates like notNull()
-  static PrefabMsgFormatter formatNegativePredicate(String predicate, boolean showArgument) {
-    return showArgument
-        ? args -> formatPredicateShowArg(args, predicate, true)
-        : args -> formatPredicate(args, predicate, true);
-  }
-
-  // showArgIfAffirmative: show argument when executed in is() or has() method
-  // showArgIfNegated: show argument when executed in isNot() or notHas() method
-  static PrefabMsgFormatter formatPredicate(String predicate,
-      boolean showArgIfAffirmative,
-      boolean showArgIfNegated) {
-    if (showArgIfAffirmative) {
-      if (showArgIfNegated) {
-        return args -> formatPredicateShowArg(args, predicate, false);
-      }
-      return args -> args.negated()
-          ? formatPredicate(args, predicate, false)
-          : formatPredicateShowArg(args, predicate, false);
-    } else if (showArgIfNegated) {
-      return args -> args.negated()
-          ? formatPredicateShowArg(args, predicate, false)
-          : formatPredicate(args, predicate, false);
-    }
-    return args -> formatPredicate(args, predicate, false);
-  }
-
-  static PrefabMsgFormatter formatNegativePredicate(String predicate,
-      boolean showArgIfAffirmative,
-      boolean showArgIfNegated) {
-    if (showArgIfAffirmative) {
-      if (showArgIfNegated) {
-        return args -> formatPredicateShowArg(args, predicate, true);
-      }
-      return args -> args.negated()
-          ? formatPredicate(args, predicate, true)
-          : formatPredicateShowArg(args, predicate, true);
-    } else if (showArgIfNegated) {
-      return args -> args.negated()
-          ? formatPredicateShowArg(args, predicate, true)
-          : formatPredicate(args, predicate, true);
-    }
-    return args -> formatPredicate(args, predicate, true);
-  }
-
-  static PrefabMsgFormatter formatRelation(String relation, boolean showArgument) {
-    return showArgument
-        ? args -> formatRelationShowArg(args, relation, false)
-        : args -> formatRelation(args, relation, false);
-  }
-
-  static PrefabMsgFormatter formatRelation(String relation,
-      boolean showArgIfAffirmative,
-      boolean showArgIfNegated) {
-    if (showArgIfAffirmative) {
-      if (showArgIfNegated) {
-        return args -> formatRelationShowArg(args, relation, false);
-      }
-      return args -> args.negated()
-          ? formatRelation(args, relation, false)
-          : formatRelationShowArg(args, relation, false);
-    } else if (showArgIfNegated) {
-      return args -> args.negated()
-          ? formatRelationShowArg(args, relation, false)
-          : formatRelation(args, relation, false);
-    }
-    return args -> formatRelation(args, relation, false);
-  }
-
-  static PrefabMsgFormatter formatNegativeRelation(String relation,
-      boolean showArgIfAffirmative,
-      boolean showArgIfNegated) {
-    if (showArgIfAffirmative) {
-      if (showArgIfNegated) {
-        return args -> formatRelationShowArg(args, relation, true);
-      }
-      return args -> args.negated()
-          ? formatRelation(args, relation, true)
-          : formatRelationShowArg(args, relation, true);
-    } else if (showArgIfNegated) {
-      return args -> args.negated()
-          ? formatRelationShowArg(args, relation, true)
-          : formatRelation(args, relation, true);
-    }
-    return args -> formatRelation(args, relation, true);
-  }
-
-  private static String formatPredicate(MsgArgs args, String predicate, boolean negative) {
-    return negative
-        ? format(MSG_PREDICATE, args.name(), args.notNot(), predicate)
-        : format(MSG_PREDICATE, args.name(), args.not(), predicate);
-  }
-
-  private static String formatPredicateShowArg(MsgArgs args, String predicate, boolean negative) {
-    return negative
-        ? format(MSG_PREDICATE_WAS, args.name(), args.notNot(), predicate, toStr(args.arg()))
-        : format(MSG_PREDICATE_WAS, args.name(), args.not(), predicate, toStr(args.arg()));
-  }
-
-  private static String formatRelation(MsgArgs args, String relation, boolean negative) {
-    return negative
-        ? format(MSG_RELATION, args.name(), args.notNot(), relation, toStr(args.obj()))
-        : format(MSG_RELATION, args.name(), args.not(), relation, toStr(args.obj()));
-  }
-
-  private static String formatRelationShowArg(MsgArgs args, String relation, boolean negative) {
-    return negative
-        ? format(MSG_RELATION_WAS,
-        args.name(),
-        args.notNot(),
-        relation,
-        toStr(args.obj()),
-        toStr(args.arg()))
-        : format(MSG_RELATION_WAS,
-            args.name(),
-            args.not(),
-            relation,
-            toStr(args.obj()),
-            toStr(args.arg()));
+  static String obj2(MsgArgs args) {
+    return " " + toStr(args.obj());
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -236,8 +108,8 @@ final class MsgUtil {
       return s.isBlank()
           ? '"' + s + '"'
           : ellipsis(s);
-    } else if (val instanceof Integer i) {
-      return i.toString();
+    } else if (val instanceof Number) {
+      return val.toString();
     } else if (val instanceof Collection c) {
       return collectionToString(c);
     } else if (val instanceof Map m) {
