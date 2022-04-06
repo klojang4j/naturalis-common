@@ -6,12 +6,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.function.Function;
 
-import nl.naturalis.common.path.PathWalker.DeadEndAction;
+import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 @SuppressWarnings("rawtypes")
 final class CollectionSegmentReader extends SegmentReader<Collection> {
 
-  CollectionSegmentReader(DeadEndAction deadEndAction, Function<Path, Object> keyDeserializer) {
+  CollectionSegmentReader(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
     super(deadEndAction, keyDeserializer);
   }
 

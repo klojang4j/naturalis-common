@@ -7,11 +7,11 @@ import static nl.naturalis.common.path.PathWalkerException.wrap;
 import java.util.function.Function;
 
 import nl.naturalis.common.invoke.BeanWriter;
-import nl.naturalis.common.path.PathWalker.DeadEndAction;
+import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 final class BeanSegmentWriter<T> extends SegmentWriter<T> {
 
-  BeanSegmentWriter(DeadEndAction deadEndAction, Function<Path, Object> keyDeserializer) {
+  BeanSegmentWriter(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
     super(deadEndAction, keyDeserializer);
   }
 

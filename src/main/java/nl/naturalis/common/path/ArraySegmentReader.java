@@ -4,11 +4,11 @@ import static nl.naturalis.common.path.PathWalkerException.arrayIndexExpected;
 
 import java.util.function.Function;
 
-import nl.naturalis.common.path.PathWalker.DeadEndAction;
+import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 final class ArraySegmentReader extends SegmentReader<Object[]> {
 
-  ArraySegmentReader(DeadEndAction deadEndAction, Function<Path, Object> keyDeserializer) {
+  ArraySegmentReader(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
     super(deadEndAction, keyDeserializer);
   }
 

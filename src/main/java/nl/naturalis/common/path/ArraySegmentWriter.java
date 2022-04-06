@@ -8,11 +8,11 @@ import static nl.naturalis.common.path.PathWalkerException.invalidType;
 
 import java.util.function.Function;
 
-import nl.naturalis.common.path.PathWalker.DeadEndAction;
+import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 final class ArraySegmentWriter extends SegmentWriter<Object[]> {
 
-  ArraySegmentWriter(DeadEndAction deadEndAction, Function<Path, Object> keyDeserializer) {
+  ArraySegmentWriter(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
     super(deadEndAction, keyDeserializer);
   }
 

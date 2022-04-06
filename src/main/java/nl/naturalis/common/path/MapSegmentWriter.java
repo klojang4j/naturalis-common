@@ -5,12 +5,12 @@ import static nl.naturalis.common.path.PathWalkerException.invalidType;
 import java.util.Map;
 import java.util.function.Function;
 
-import nl.naturalis.common.path.PathWalker.DeadEndAction;
+import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 @SuppressWarnings("rawtypes")
 final class MapSegmentWriter extends SegmentWriter<Map> {
 
-  MapSegmentWriter(DeadEndAction deadEndAction, Function<Path, Object> keyDeserializer) {
+  MapSegmentWriter(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
     super(deadEndAction, keyDeserializer);
   }
 

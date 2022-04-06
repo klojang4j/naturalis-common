@@ -5,12 +5,12 @@ import static nl.naturalis.common.path.PathWalkerException.noSuchKey;
 import java.util.Map;
 import java.util.function.Function;
 
-import nl.naturalis.common.path.PathWalker.DeadEndAction;
+import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 @SuppressWarnings("rawtypes")
 final class MapSegmentReader extends SegmentReader<Map<String, Object>> {
 
-  MapSegmentReader(DeadEndAction deadEndAction, Function<Path, Object> keyDeserializer) {
+  MapSegmentReader(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
     super(deadEndAction, keyDeserializer);
   }
 

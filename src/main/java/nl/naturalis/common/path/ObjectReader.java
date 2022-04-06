@@ -1,27 +1,27 @@
 package nl.naturalis.common.path;
 
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
-import static nl.naturalis.common.path.PathWalker.DEAD_END;
+import static nl.naturalis.common.path.PathWalker.DEAD;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 
-import nl.naturalis.common.path.PathWalker.DeadEndAction;
+import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 @SuppressWarnings("rawtypes")
 final class ObjectReader {
 
-  DeadEndAction dea;
+  OnDeadEnd dea;
   Function<Path, Object> kds;
 
-  ObjectReader(DeadEndAction deadEndAction, Function<Path, Object> keyDeserializer) {
+  ObjectReader(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
     this.dea = deadEndAction;
     this.kds = keyDeserializer;
   }
 
   Object read(Object obj, Path path) {
-    if (path.isEmpty() || obj == null || obj == DEAD_END) {
+    if (path.isEmpty() || obj == null || obj == DEAD) {
       return obj;
     } else if (obj instanceof Collection) {
       return new CollectionSegmentReader(dea, kds).read((Collection) obj, path);

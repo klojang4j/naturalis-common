@@ -7,11 +7,11 @@ import java.util.function.Function;
 
 import nl.naturalis.common.invoke.BeanReader;
 import nl.naturalis.common.invoke.NoSuchPropertyException;
-import nl.naturalis.common.path.PathWalker.DeadEndAction;
+import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 final class BeanSegmentReader<T> extends SegmentReader<T> {
 
-  BeanSegmentReader(DeadEndAction deadEndAction, Function<Path, Object> keyDeserializer) {
+  BeanSegmentReader(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
     super(deadEndAction, keyDeserializer);
   }
 

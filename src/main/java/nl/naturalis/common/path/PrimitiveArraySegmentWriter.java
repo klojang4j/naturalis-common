@@ -7,11 +7,11 @@ import static nl.naturalis.common.path.PathWalkerException.nullInvalidForPrimiti
 import java.lang.reflect.Array;
 import java.util.function.Function;
 
-import nl.naturalis.common.path.PathWalker.DeadEndAction;
+import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 final class PrimitiveArraySegmentWriter extends SegmentWriter<Object> {
 
-  PrimitiveArraySegmentWriter(DeadEndAction deadEndAction, Function<Path, Object> keyDeserializer) {
+  PrimitiveArraySegmentWriter(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
     super(deadEndAction, keyDeserializer);
   }
 

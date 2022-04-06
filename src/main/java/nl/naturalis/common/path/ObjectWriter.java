@@ -2,7 +2,7 @@ package nl.naturalis.common.path;
 
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
 import static nl.naturalis.common.check.CommonChecks.gt;
-import static nl.naturalis.common.path.PathWalker.DEAD_END;
+import static nl.naturalis.common.path.PathWalker.DEAD;
 import static nl.naturalis.common.path.PathWalkerException.cannotWrite;
 import static nl.naturalis.common.path.PathWalkerException.cannotWriteToDeadEnd;
 import static nl.naturalis.common.path.PathWalkerException.cannotWriteToNullObject;
@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.path.PathWalker.DeadEndAction;
+import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 @SuppressWarnings("rawtypes")
 final class ObjectWriter {
@@ -30,10 +30,10 @@ final class ObjectWriter {
    */
   private static final List<Class<?>> NOT_WRITABLE = List.of(Set.class);
 
-  private DeadEndAction dea;
+  private OnDeadEnd dea;
   private Function<Path, Object> kds;
 
-  ObjectWriter(DeadEndAction deadEndAction, Function<Path, Object> keyDeserializer) {
+  ObjectWriter(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
     this.dea = deadEndAction;
     this.kds = keyDeserializer;
   }
@@ -49,7 +49,7 @@ final class ObjectWriter {
     }
     if (obj == null) {
       return deadEnd(() -> cannotWriteToNullObject());
-    } else if (obj == DEAD_END) {
+    } else if (obj == DEAD) {
       return deadEnd(() -> cannotWriteToDeadEnd(path));
     } else if (obj instanceof List) {
       return new ListSegmentWriter(dea, kds).write((List) obj, path, value);
@@ -70,7 +70,7 @@ final class ObjectWriter {
   }
 
   private boolean deadEnd(Supplier<PathWalkerException> e) {
-    if (dea == DeadEndAction.THROW_EXCEPTION) {
+    if (dea == OnDeadEnd.THROW_EXCEPTION) {
       throw e.get();
     }
     return false;
