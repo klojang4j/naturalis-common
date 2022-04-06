@@ -44,7 +44,7 @@ final class ObjectWriter {
     if (path.size() == 1) {
       obj = host;
     } else {
-      PathWalker pw = pwCache.computeIfAbsent(path.parent(), this::createPathWalker).get();
+      PathWalker pw = new PathWalker(path.parent(), dea, kds);
       obj = pw.read(host);
     }
     if (obj == null) {

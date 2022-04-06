@@ -128,6 +128,12 @@ public final class PathWalker {
     this.kds = keyDeserializer;
   }
 
+  PathWalker(Path path, OnDeadEnd onDeadEnd, Function<Path, Object> keyDeserializer) {
+    this.paths = new Path[] {path};
+    this.dea = onDeadEnd;
+    this.kds = keyDeserializer;
+  }
+
   /**
    * Returns the values of all paths within the specified host object.
    *
