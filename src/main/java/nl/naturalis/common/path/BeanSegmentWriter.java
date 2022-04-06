@@ -5,10 +5,11 @@ import static nl.naturalis.common.path.PathWalkerException.emptySegment;
 import static nl.naturalis.common.path.PathWalkerException.wrap;
 
 import java.util.function.Function;
+
 import nl.naturalis.common.invoke.BeanWriter;
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
 
-class BeanSegmentWriter<T> extends SegmentWriter<T> {
+final class BeanSegmentWriter<T> extends SegmentWriter<T> {
 
   BeanSegmentWriter(DeadEndAction deadEndAction, Function<Path, Object> keyDeserializer) {
     super(deadEndAction, keyDeserializer);
@@ -30,4 +31,5 @@ class BeanSegmentWriter<T> extends SegmentWriter<T> {
       return deadEnd(() -> wrap(t));
     }
   }
+
 }

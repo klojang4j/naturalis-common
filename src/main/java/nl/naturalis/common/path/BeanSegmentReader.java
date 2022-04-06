@@ -4,11 +4,12 @@ import static nl.naturalis.common.path.PathWalkerException.noSuchProperty;
 import static nl.naturalis.common.path.PathWalkerException.wrap;
 
 import java.util.function.Function;
+
 import nl.naturalis.common.invoke.BeanReader;
 import nl.naturalis.common.invoke.NoSuchPropertyException;
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
 
-class BeanSegmentReader<T> extends SegmentReader<T> {
+final class BeanSegmentReader<T> extends SegmentReader<T> {
 
   BeanSegmentReader(DeadEndAction deadEndAction, Function<Path, Object> keyDeserializer) {
     super(deadEndAction, keyDeserializer);
@@ -31,4 +32,5 @@ class BeanSegmentReader<T> extends SegmentReader<T> {
       return deadEnd(() -> wrap(t));
     }
   }
+
 }

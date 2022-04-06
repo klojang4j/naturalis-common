@@ -4,9 +4,10 @@ import static nl.naturalis.common.path.PathWalkerException.pathExtendsBeyondPrim
 
 import java.lang.reflect.Array;
 import java.util.function.Function;
+
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
 
-class PrimitiveArraySegmentReader extends SegmentReader<Object> {
+final class PrimitiveArraySegmentReader extends SegmentReader<Object> {
 
   PrimitiveArraySegmentReader(DeadEndAction deadEndAction, Function<Path, Object> keyDeserializer) {
     super(deadEndAction, keyDeserializer);
@@ -26,4 +27,5 @@ class PrimitiveArraySegmentReader extends SegmentReader<Object> {
     }
     return deadEnd(() -> pathExtendsBeyondPrimitive(path));
   }
+
 }

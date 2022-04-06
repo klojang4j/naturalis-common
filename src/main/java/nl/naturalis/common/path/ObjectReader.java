@@ -6,10 +6,11 @@ import static nl.naturalis.common.path.PathWalker.DEAD_END;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
+
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
 
 @SuppressWarnings("rawtypes")
-class ObjectReader {
+final class ObjectReader {
 
   DeadEndAction dea;
   Function<Path, Object> kds;
@@ -34,4 +35,5 @@ class ObjectReader {
       return new BeanSegmentReader<>(dea, kds).read(obj, path);
     }
   }
+
 }

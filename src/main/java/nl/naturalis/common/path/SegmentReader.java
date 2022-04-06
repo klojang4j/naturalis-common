@@ -1,12 +1,14 @@
 package nl.naturalis.common.path;
 
-import static nl.naturalis.common.path.PathWalker.DEAD_END;
+import nl.naturalis.common.path.PathWalker.DeadEndAction;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
-import nl.naturalis.common.path.PathWalker.DeadEndAction;
 
-abstract class SegmentReader<T> {
+import static nl.naturalis.common.path.PathWalker.DEAD_END;
+
+abstract sealed class SegmentReader<T> permits ArraySegmentReader, BeanSegmentReader,
+    CollectionSegmentReader, MapSegmentReader, PrimitiveArraySegmentReader {
 
   DeadEndAction dea;
   Function<Path, Object> kds;
@@ -33,4 +35,5 @@ abstract class SegmentReader<T> {
   ObjectReader nextSegmentReader() {
     return new ObjectReader(dea, kds);
   }
+
 }

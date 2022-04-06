@@ -3,9 +3,10 @@ package nl.naturalis.common.path;
 import static nl.naturalis.common.path.PathWalkerException.arrayIndexExpected;
 
 import java.util.function.Function;
+
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
 
-class ArraySegmentReader extends SegmentReader<Object[]> {
+final class ArraySegmentReader extends SegmentReader<Object[]> {
 
   ArraySegmentReader(DeadEndAction deadEndAction, Function<Path, Object> keyDeserializer) {
     super(deadEndAction, keyDeserializer);
@@ -22,4 +23,5 @@ class ArraySegmentReader extends SegmentReader<Object[]> {
     }
     return deadEnd(() -> arrayIndexExpected(path));
   }
+
 }

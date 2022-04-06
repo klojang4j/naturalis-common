@@ -14,11 +14,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
 
 @SuppressWarnings("rawtypes")
-class ObjectWriter {
+final class ObjectWriter {
 
   private static final Map<Path, WeakReference<PathWalker>> pwCache = new HashMap<>();
 
@@ -78,4 +79,5 @@ class ObjectWriter {
   private static boolean isWritable(Object obj) {
     return NOT_WRITABLE.stream().noneMatch(c -> c.isInstance(obj));
   }
+
 }

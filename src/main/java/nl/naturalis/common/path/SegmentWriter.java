@@ -2,9 +2,11 @@ package nl.naturalis.common.path;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
+
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
 
-abstract class SegmentWriter<T> {
+abstract sealed class SegmentWriter<T> permits ArraySegmentWriter, BeanSegmentWriter,
+    ListSegmentWriter, MapSegmentWriter, PrimitiveArraySegmentWriter {
 
   DeadEndAction dea;
   Function<Path, Object> kds;
@@ -22,4 +24,5 @@ abstract class SegmentWriter<T> {
     }
     return false;
   }
+
 }

@@ -7,9 +7,10 @@ import static nl.naturalis.common.path.PathWalkerException.emptySegment;
 import static nl.naturalis.common.path.PathWalkerException.invalidType;
 
 import java.util.function.Function;
+
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
 
-class ArraySegmentWriter extends SegmentWriter<Object[]> {
+final class ArraySegmentWriter extends SegmentWriter<Object[]> {
 
   ArraySegmentWriter(DeadEndAction deadEndAction, Function<Path, Object> keyDeserializer) {
     super(deadEndAction, keyDeserializer);
@@ -36,4 +37,5 @@ class ArraySegmentWriter extends SegmentWriter<Object[]> {
     }
     return deadEnd(() -> arrayIndexOutOfBounds(path));
   }
+
 }

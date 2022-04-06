@@ -7,10 +7,11 @@ import static nl.naturalis.common.path.PathWalkerException.invalidType;
 
 import java.util.List;
 import java.util.function.Function;
+
 import nl.naturalis.common.path.PathWalker.DeadEndAction;
 
 @SuppressWarnings("rawtypes")
-class ListSegmentWriter extends SegmentWriter<List> {
+final class ListSegmentWriter extends SegmentWriter<List> {
 
   ListSegmentWriter(DeadEndAction deadEndAction, Function<Path, Object> keyDeserializer) {
     super(deadEndAction, keyDeserializer);
@@ -35,4 +36,5 @@ class ListSegmentWriter extends SegmentWriter<List> {
     }
     return deadEnd(() -> arrayIndexExpected(path));
   }
+
 }
