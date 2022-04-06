@@ -59,8 +59,8 @@ final class MsgPredicate {
 
   static PrefabMsgFormatter msgInteger() {
     return x -> x.negated()
-        ? x.name() + MUST_NOT_BE + "parsable as integer" + was2(x)
-        : x.name() + MUST_BE + "parsable as integer" + was2(x);
+        ? x.name() + MUST_NOT_BE + "parsable as integer" + was1(x)
+        : x.name() + MUST_BE + "parsable as integer" + was1(x);
   }
 
   static PrefabMsgFormatter msgArray() {
@@ -73,7 +73,7 @@ final class MsgPredicate {
     return x -> {
       File f = (File) x.arg();
       if (f.isDirectory()) {
-        return x.name() + MUST_NOT_BE + "a directory" + was(f.getAbsolutePath());
+        return x.name() + MUST_NOT_BE + "a directory" + was(f);
       }
       return x.negated()
           ? x.typeAndName() + MUST_NOT + "exist" + was2(x)
@@ -85,7 +85,7 @@ final class MsgPredicate {
     return x -> {
       File f = (File) x.arg();
       if (f.isFile()) {
-        return x.name() + MUST_NOT_BE + "a directory" + was(f.getAbsolutePath());
+        return x.name() + MUST_NOT_BE + "a directory" + was(f);
       }
       return x.negated()
           ? "directory " + x.name() + MUST_NOT + "exist" + was2(x)

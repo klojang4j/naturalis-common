@@ -22,8 +22,8 @@ final class MsgRelation {
 
   static PrefabMsgFormatter msgInstanceOf() {
     return x -> x.negated()
-        ? x.name() + MUST_NOT_BE + "instance of" + obj2(x) + was2(x)
-        : x.name() + MUST_BE + "instance of" + obj2(x) + was(className(x.arg()));
+        ? x.name() + MUST_NOT_BE + "instance of" + obj(className(x.obj())) + was(x.arg())
+        : x.name() + MUST_BE + "instance of" + obj(className(x.obj())) + was(className(x.arg()));
   }
 
   static PrefabMsgFormatter msgSubtypeOf() {

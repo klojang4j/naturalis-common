@@ -276,8 +276,7 @@ public class MsgRelationTest {
       Check.that(9.7F, "pipe").is(instanceOf(), String.class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("pipe must be instance of java.lang.String (was java.lang.Float)",
-          e.getMessage());
+      assertEquals("pipe must be instance of String (was Float)", e.getMessage());
       return;
     }
     fail();
@@ -289,7 +288,7 @@ public class MsgRelationTest {
       Check.on(illegalState(), 9.7F, "pipe").isNot(instanceOf(), Float.class);
     } catch (IllegalStateException e) {
       System.out.println(e.getMessage());
-      assertEquals("pipe must not be instance of java.lang.Float (was 9.7)", e.getMessage());
+      assertEquals("pipe must not be instance of Float (was 9.7)", e.getMessage());
       return;
     }
     fail();
@@ -341,7 +340,7 @@ public class MsgRelationTest {
       Check.that(OutputStream.class, "babbage").is(subtypeOf(), Comparable.class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("babbage must extend/implement java.lang.Comparable (was java.io.OutputStream)",
+      assertEquals("babbage must extend/implement Comparable (was java.io.OutputStream)",
           e.getMessage());
       return;
     }
@@ -354,8 +353,7 @@ public class MsgRelationTest {
       Check.that(String.class, "babbage").isNot(subtypeOf(), CharSequence.class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("babbage must not extend/implement java.lang.CharSequence (was java.lang"
-          + ".String)", e.getMessage());
+      assertEquals("babbage must not extend/implement CharSequence (was String)", e.getMessage());
       return;
     }
     fail();
@@ -367,8 +365,7 @@ public class MsgRelationTest {
       Check.that(Float.class, "babbage").isNot(subtypeOf(), Comparable.class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("babbage must not extend/implement java.lang.Comparable (was java.lang.Float)",
-          e.getMessage());
+      assertEquals("babbage must not extend/implement Comparable (was Float)", e.getMessage());
       return;
     }
     fail();

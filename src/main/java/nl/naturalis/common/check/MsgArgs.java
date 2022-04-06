@@ -53,13 +53,4 @@ record MsgArgs(Object test, boolean negated, String name, Object arg, Class<?> t
     return simpleClassName(clazz);
   }
 
-  String not() {
-    return negated ? " not" : "";
-  }
-
-  // For negatively formulated checks like notNull() or deepNotEmpty()
-  String notNot() {
-    return negated ? "" : " not";
-  }
-
 }

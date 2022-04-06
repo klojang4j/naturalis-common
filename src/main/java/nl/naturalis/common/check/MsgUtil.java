@@ -76,18 +76,18 @@ final class MsgUtil {
   //////////////////////////////////////////////////////////////////////////
 
   static String was(Object arg) {
-    return WAS + String.valueOf(arg) + ')';
+    return WAS + arg + ')';
   }
 
   static String was1(MsgArgs args) {
-    return WAS + String.valueOf(args.arg()) + ')';
+    return WAS + args.arg() + ')';
   }
 
   static String was2(MsgArgs args) {
     return WAS + toStr(args.arg()) + ')';
   }
 
-  static String obj0(Object obj) {
+  static String obj(Object obj) {
     return " " + obj;
   }
 
@@ -137,7 +137,9 @@ final class MsgUtil {
   static String className(Class c) {
     return c.isArray()
         ? arrayClassName(c)
-        : c.getName();
+        : c.getPackageName().equalsIgnoreCase("java.lang")
+            ? c.getSimpleName()
+            : c.getName();
   }
 
   static String simpleClassName(Class c) {
