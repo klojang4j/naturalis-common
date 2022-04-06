@@ -1,15 +1,15 @@
 package nl.naturalis.common.path;
 
-import static nl.naturalis.common.path.PathWalkerException.arrayIndexExpected;
+import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 import java.util.function.Function;
 
-import nl.naturalis.common.path.PathWalker.OnDeadEnd;
+import static nl.naturalis.common.path.PathWalkerException.arrayIndexExpected;
 
 final class ArraySegmentReader extends SegmentReader<Object[]> {
 
-  ArraySegmentReader(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
-    super(deadEndAction, keyDeserializer);
+  ArraySegmentReader(OnDeadEnd ode, Function<Path, Object> kds) {
+    super(ode, kds);
   }
 
   @Override

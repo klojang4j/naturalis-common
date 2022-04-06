@@ -12,27 +12,27 @@ import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 @SuppressWarnings("rawtypes")
 final class ObjectReader {
 
-  OnDeadEnd dea;
+  OnDeadEnd ode;
   Function<Path, Object> kds;
 
-  ObjectReader(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
-    this.dea = deadEndAction;
-    this.kds = keyDeserializer;
+  ObjectReader(OnDeadEnd ode, Function<Path, Object> kds) {
+    this.ode = ode;
+    this.kds = kds;
   }
 
   Object read(Object obj, Path path) {
     if (path.isEmpty() || obj == null || obj == DEAD) {
       return obj;
     } else if (obj instanceof Collection) {
-      return new CollectionSegmentReader(dea, kds).read((Collection) obj, path);
+      return new CollectionSegmentReader(ode, kds).read((Collection) obj, path);
     } else if (obj instanceof Object[]) {
-      return new ArraySegmentReader(dea, kds).read((Object[]) obj, path);
+      return new ArraySegmentReader(ode, kds).read((Object[]) obj, path);
     } else if (obj instanceof Map) {
-      return new MapSegmentReader(dea, kds).read((Map) obj, path);
+      return new MapSegmentReader(ode, kds).read((Map) obj, path);
     } else if (isPrimitiveArray(obj)) {
-      return new PrimitiveArraySegmentReader(dea, kds).read(obj, path);
+      return new PrimitiveArraySegmentReader(ode, kds).read(obj, path);
     } else {
-      return new BeanSegmentReader<>(dea, kds).read(obj, path);
+      return new BeanSegmentReader<>(ode, kds).read(obj, path);
     }
   }
 

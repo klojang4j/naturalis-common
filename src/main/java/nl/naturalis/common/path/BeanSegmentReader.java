@@ -11,19 +11,17 @@ import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 final class BeanSegmentReader<T> extends SegmentReader<T> {
 
-  BeanSegmentReader(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
-    super(deadEndAction, keyDeserializer);
+  BeanSegmentReader(OnDeadEnd ode, Function<Path, Object> kds) {
+    super(ode, kds);
   }
 
   @Override
   @SuppressWarnings("unchecked")
   Object read(T bean, Path path) {
-    Class<T> beanClass = (Class<T>) bean.getClass();
-    String property = path.segment(0);
-    BeanReader<T> reader = new BeanReader<>(beanClass, property);
+    BeanReader<T> reader = new BeanReader<>((Class<T>) bean.getClass());
     try {
       try {
-        Object val = reader.read(bean, property);
+        Object val = reader.read(bean, path.segment(0));
         return nextSegmentReader().read(val, path.shift());
       } catch (NoSuchPropertyException e) {
         return deadEnd(() -> noSuchProperty(path, e));
