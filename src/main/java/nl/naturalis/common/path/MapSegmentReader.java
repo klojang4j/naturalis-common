@@ -1,17 +1,17 @@
 package nl.naturalis.common.path;
 
-import static nl.naturalis.common.path.PathWalkerException.noSuchKey;
+import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 import java.util.Map;
 import java.util.function.Function;
 
-import nl.naturalis.common.path.PathWalker.OnDeadEnd;
+import static nl.naturalis.common.path.PathWalkerException.noSuchKey;
 
 @SuppressWarnings("rawtypes")
 final class MapSegmentReader extends SegmentReader<Map<String, Object>> {
 
-  MapSegmentReader(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
-    super(deadEndAction, keyDeserializer);
+  MapSegmentReader(OnDeadEnd ode, Function<Path, Object> kds) {
+    super(ode, kds);
   }
 
   @Override

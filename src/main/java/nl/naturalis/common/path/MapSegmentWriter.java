@@ -10,8 +10,8 @@ import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 @SuppressWarnings("rawtypes")
 final class MapSegmentWriter extends SegmentWriter<Map> {
 
-  MapSegmentWriter(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
-    super(deadEndAction, keyDeserializer);
+  MapSegmentWriter(OnDeadEnd ode, Function<Path, Object> kds) {
+    super(ode, kds);
   }
 
   @Override

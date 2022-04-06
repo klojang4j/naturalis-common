@@ -11,8 +11,8 @@ import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 final class BeanSegmentWriter<T> extends SegmentWriter<T> {
 
-  BeanSegmentWriter(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
-    super(deadEndAction, keyDeserializer);
+  BeanSegmentWriter(OnDeadEnd ode, Function<Path, Object> kds) {
+    super(ode, kds);
   }
 
   @Override
@@ -22,8 +22,7 @@ final class BeanSegmentWriter<T> extends SegmentWriter<T> {
     if (isEmpty(segment)) {
       return deadEnd(() -> emptySegment(path));
     }
-    Class<T> beanClass = (Class<T>) bean.getClass();
-    BeanWriter<T> bw = new BeanWriter<>(beanClass, segment);
+    BeanWriter<T> bw = new BeanWriter<>((Class<T>) bean.getClass());
     try {
       bw.set(bean, segment, value);
       return true;

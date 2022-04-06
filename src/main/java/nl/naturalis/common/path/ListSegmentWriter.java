@@ -1,20 +1,18 @@
 package nl.naturalis.common.path;
 
-import static nl.naturalis.common.ObjectMethods.isEmpty;
-import static nl.naturalis.common.path.PathWalkerException.arrayIndexExpected;
-import static nl.naturalis.common.path.PathWalkerException.emptySegment;
-import static nl.naturalis.common.path.PathWalkerException.invalidType;
+import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 import java.util.List;
 import java.util.function.Function;
 
-import nl.naturalis.common.path.PathWalker.OnDeadEnd;
+import static nl.naturalis.common.ObjectMethods.isEmpty;
+import static nl.naturalis.common.path.PathWalkerException.*;
 
 @SuppressWarnings("rawtypes")
 final class ListSegmentWriter extends SegmentWriter<List> {
 
-  ListSegmentWriter(OnDeadEnd deadEndAction, Function<Path, Object> keyDeserializer) {
-    super(deadEndAction, keyDeserializer);
+  ListSegmentWriter(OnDeadEnd ode, Function<Path, Object> kds) {
+    super(ode, kds);
   }
 
   @Override
