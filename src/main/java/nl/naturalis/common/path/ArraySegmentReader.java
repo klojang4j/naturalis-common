@@ -21,7 +21,6 @@ final class ArraySegmentReader extends SegmentReader<Object[]> {
     if (isEmpty(segment)) {
       return deadEnd(() -> emptySegment(path));
     }
-
     OptionalInt opt = NumberMethods.toPlainInt(segment);
     if (opt.isEmpty()) {
       return deadEnd(() -> arrayIndexExpected(path));
