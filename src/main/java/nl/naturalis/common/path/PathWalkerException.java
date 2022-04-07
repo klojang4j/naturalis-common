@@ -14,7 +14,7 @@ import static nl.naturalis.common.ClassMethods.simpleClassName;
  */
 public class PathWalkerException extends RuntimeException {
 
-  private static final String INVALID_PATH = "Invalid path: %s";
+  private static final String INVALID_PATH = "Invalid path: \"%s\"";
 
   static PathWalkerException noSuchProperty(Path p, NoSuchPropertyException e) {
     String fmt = INVALID_PATH + " (%s)";
