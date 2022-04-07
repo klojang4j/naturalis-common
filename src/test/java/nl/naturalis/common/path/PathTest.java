@@ -1,10 +1,10 @@
 package nl.naturalis.common.path;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import java.util.Iterator;
+
+import static org.junit.Assert.*;
 
 public class PathTest {
 
@@ -115,10 +115,9 @@ public class PathTest {
   @Test
   public void getPurePath() {
     Path path = new Path("identifications.0.scientificName.fullScientificName");
-    assertEquals(
-            "01",
-            "identifications.scientificName.fullScientificName",
-            path.getCanonicalPath().toString());
+    assertEquals("01",
+        "identifications.scientificName.fullScientificName",
+        path.getCanonicalPath().toString());
   }
 
   @Test
@@ -186,4 +185,49 @@ public class PathTest {
     assertEquals("04", Path.EMPTY_PATH, p.parent().parent().parent());
     assertEquals("05", null, p.parent().parent().parent().parent());
   }
+
+  @Test
+  public void equals00() {
+    assertEquals(new Path("a.b.c"), new Path("a.b.c"));
+    assertNotEquals(new Path("a.b.c"), new Path("a.b"));
+    assertNotEquals(new Path("a.b.c"), null);
+    assertNotEquals(new Path("a.b.c"), new Object());
+  }
+
+  @Test
+  public void compareTo00() {
+    assertEquals(0, new Path("a.b.c").compareTo(new Path("a.b.c")));
+    assertEquals(1, new Path("a.b.c").compareTo(new Path("a.b")));
+    assertEquals(-1, new Path("a.b.c").compareTo(new Path("a.b.d")));
+  }
+
+  @Test
+  public void iterator00() {
+    Iterator<String> iter = new Path("a.b.c").iterator();
+    assertTrue(iter.hasNext());
+    assertEquals("a", iter.next());
+    assertTrue(iter.hasNext());
+    assertEquals("b", iter.next());
+    assertTrue(iter.hasNext());
+    assertEquals("c", iter.next());
+    assertFalse(iter.hasNext());
+  }
+
+  @Test(expected = ArrayIndexOutOfBoundsException.class)
+  public void iterator01() {
+    Path.EMPTY_PATH.iterator().next();
+  }
+
+  @Test
+  public void replace00() {
+    assertEquals(new Path("a.b.c").replace(1, "x"), new Path("a.x.c"));
+  }
+
+  @Test
+  public void copy00() {
+    Path p0 = new Path("a.b.c");
+    Path p1 = new Path(p0);
+    assertEquals(new Path("a.b.c"), p1);
+  }
+
 }

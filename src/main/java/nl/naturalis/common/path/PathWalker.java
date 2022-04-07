@@ -54,8 +54,8 @@ public final class PathWalker {
      */
     RETURN_DEAD,
     /**
-     * Instructs the {@code PathWalker} to throw a {@link NoSuchPropertyException} if it reaches a
-     * dead end.
+     * Instructs the {@code PathWalker} to throw a {@link PathWalkerException} if it reaches a dead
+     * end.
      */
     THROW_EXCEPTION;
   }

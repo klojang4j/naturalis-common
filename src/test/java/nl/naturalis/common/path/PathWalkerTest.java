@@ -6,9 +6,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static nl.naturalis.common.CollectionMethods.newHashMap;
@@ -269,6 +267,41 @@ public class PathWalkerTest {
     devops.setHipsterFriendly(true);
     devops.setTelNos(new String[] {null, "035-123456"});
     return company;
+  }
+
+  @Test
+  public void readValues00() {
+    PathWalker pw = new PathWalker(Path.of("a"), Path.of("b"), Path.of("c"));
+    Map<String, Integer> map = Map.of("a", 100, "b", 200, "c", 300);
+    Object[] vals = pw.readValues(map);
+    assertEquals(3, vals.length);
+    assertEquals(100, vals[0]);
+    assertEquals(200, vals[1]);
+    assertEquals(300, vals[2]);
+  }
+
+  @Test
+  public void readValues01() {
+    PathWalker pw = new PathWalker(Path.of("a"), Path.of("b"), Path.of("c"));
+    Map<String, Integer> map = Map.of("a", 100, "b", 200, "c", 300);
+    Object[] vals = new Object[4];
+    pw.readValues(map, vals);
+    assertEquals(100, vals[0]);
+    assertEquals(200, vals[1]);
+    assertEquals(300, vals[2]);
+    assertNull(vals[3]);
+  }
+
+  @Test
+  public void readValues02() {
+    PathWalker pw = new PathWalker(Path.of("a"), Path.of("b"), Path.of("c"));
+    Map<String, Integer> mapIn = Map.of("a", 100, "b", 200, "c", 300);
+    Map<Path, Object> mapOut = new HashMap();
+    pw.readValues(mapIn, mapOut);
+    assertEquals(3, mapOut.size());
+    assertEquals(100, mapOut.get(Path.of("a")));
+    assertEquals(200, mapOut.get(Path.of("b")));
+    assertEquals(300, mapOut.get(Path.of("c")));
   }
 
 }

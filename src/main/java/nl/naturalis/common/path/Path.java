@@ -60,6 +60,16 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   public static final String NULL_SEGMENT = "^0";
 
   /**
+   * Static factory method. Returns a new {@code Path} instance for the specified path string.
+   *
+   * @param path The path
+   * @return a new {@code Path} instance for the specified path string
+   */
+  public static Path of(String path) {
+    return new Path(path);
+  }
+
+  /**
    * Applies escaping to a path segment. Can be used to construct complete path strings. Do
    * <i>not</i> use when passing individual path segments as a {@code String} array to the {@link
    * #Path(String[]) constructor}.
@@ -273,8 +283,8 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
       }
 
       public String next() {
-        if (++i < elems.length) {
-          return elems[i];
+        if (i < elems.length) {
+          return elems[i++];
         }
         throw new ArrayIndexOutOfBoundsException(i);
       }
@@ -335,6 +345,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    */
   @Override
   public int compareTo(Path other) {
+    Check.notNull(other);
     return Arrays.compare(elems, other.elems);
   }
 
