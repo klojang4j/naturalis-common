@@ -84,10 +84,6 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
     return sb.toString();
   }
 
-  static boolean isArrayIndex(String segment) {
-    return NumberMethods.isPlainInt(segment);
-  }
-
   private final String[] elems;
 
   private String str; // Caches toString()
@@ -202,7 +198,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    * @return A new {@code Path} without any array indices
    */
   public Path getCanonicalPath() {
-    return new Path(stream().filter(not(Path::isArrayIndex)).toArray(String[]::new));
+    return new Path(stream().filter(not(NumberMethods::isPlainInt)).toArray(String[]::new));
   }
 
   /**
@@ -320,10 +316,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
     if (this == obj) {
       return true;
     }
-    if (obj == null || obj.getClass() != Path.class) {
-      return false;
-    }
-    return Arrays.deepEquals(this.elems, ((Path) obj).elems);
+    return obj != null && obj instanceof Path p && Arrays.deepEquals(elems, p.elems);
   }
 
   /**
@@ -342,7 +335,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    */
   @Override
   public int compareTo(Path other) {
-    return toString().compareTo(other.toString());
+    return Arrays.compare(elems, other.elems);
   }
 
   /**

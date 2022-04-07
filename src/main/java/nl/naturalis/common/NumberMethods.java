@@ -37,7 +37,7 @@ public final class NumberMethods {
    */
   @SuppressWarnings({"ResultOfMethodCallIgnored"})
   public static boolean isInteger(String str) {
-    if (isNotEmpty(str)) {
+    if (!isEmpty(str)) {
       try {
         new BigInteger(str).intValueExact();
         return true;
