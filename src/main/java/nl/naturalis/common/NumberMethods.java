@@ -5,13 +5,12 @@ import nl.naturalis.common.check.Check;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.function.UnaryOperator;
 
 import static nl.naturalis.common.ObjectMethods.isEmpty;
 import static nl.naturalis.common.ObjectMethods.isNotEmpty;
-import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.check.CommonGetters.type;
 
 /**
  * Methods for working with {@code Number} instances.
@@ -49,21 +48,60 @@ public final class NumberMethods {
   }
 
   /**
+   * Parses the specified string into an {@code Integer}. Throws an {@link TypeConversionException}
+   * if the string is not a number or if the number is too big to fit into an {@code Integer}. This
+   * method delegates to {@link BigDecimal#intValueExact()} and is therefore stricter than {@link
+   * Integer#parseInt(String)}.
+   *
+   * @param s The string to be parsed
+   * @return The {@code Integer} representation of the string
+   */
+  public static int parseInt(String s) throws TypeConversionException {
+    try {
+      return new BigInteger(s).intValueExact();
+    } catch (NumberFormatException | ArithmeticException e) {
+      throw new TypeConversionException(s, int.class, e.getMessage());
+    }
+  }
+
+  /**
    * Returns whether the specified string represents a plain, non-negative integer, consisting of
    * digits only, without plus or minus sign, without leading zeros, and fitting into a 32-bit
    * integer.
    *
-   * @param str The string
+   * @param s The string
    * @return Whether the specified string is a valid, digit-only integer
    */
   @SuppressWarnings("ResultOfMethodCallIgnored")
-  public static boolean isPlainInt(String str) {
-    if (isEmpty(str) || str.length() > STRLEN_MAX_INT) {
+  public static boolean isPlainInt(String s) {
+    if (isEmpty(s) || s.length() > STRLEN_MAX_INT) {
       return false;
-    } else if (str.charAt(0) == '0') {
-      return str.length() == 1;
+    } else if (s.charAt(0) == '0') {
+      return s.length() == 1;
     }
-    return str.codePoints().allMatch(Character::isDigit) && isInteger(str);
+    return s.codePoints().allMatch(Character::isDigit) && isInteger(s);
+  }
+
+  /**
+   * Returns an empty {@code OptionalInt} if the specified string does not represent a {@link
+   * #isPlainInt(String) plain integer}, else the integer parsed from the string.
+   *
+   * @param s The string
+   * @return An {@code OptionalInt} plain, non-negative integer, consisting of digits only, without
+   *     plus or minus sign, without leading zeros, and fitting into a 32-bit integer, or an empty
+   *     {@code OptionalInt}
+   */
+  public static OptionalInt toPlainInt(String s) {
+    if (isEmpty(s) || s.length() > STRLEN_MAX_INT) {
+      return OptionalInt.empty();
+    } else if (s.charAt(0) == '0') {
+      return s.length() == 1
+          ? OptionalInt.of(0)
+          : OptionalInt.empty();
+    }
+    return s.codePoints().allMatch(Character::isDigit)
+        ? OptionalInt.of(parseInt(s))
+        : OptionalInt.empty();
   }
 
   /**
@@ -109,11 +147,17 @@ public final class NumberMethods {
    */
   public static BigDecimal toBigDecimal(Number n) {
     Class<? extends Number> t = n.getClass();
-    return t == BigDecimal.class ? (BigDecimal) n : t
-        == BigInteger.class ? new BigDecimal((BigInteger) n) : t
-        == Double.class ? BigDecimal.valueOf((Double) n) : t
-        == Long.class ? new BigDecimal((Long) n) : t
-        == Float.class ? BigDecimal.valueOf((Float) n) : new BigDecimal(n.intValue());
+    return t == BigDecimal.class
+        ? (BigDecimal) n
+        : t == BigInteger.class
+            ? new BigDecimal((BigInteger) n)
+            : t == Double.class
+                ? BigDecimal.valueOf((Double) n)
+                : t == Long.class
+                    ? new BigDecimal((Long) n)
+                    : t == Float.class
+                        ? BigDecimal.valueOf((Float) n)
+                        : new BigDecimal(n.intValue());
   }
 
   /**
@@ -128,23 +172,6 @@ public final class NumberMethods {
    */
   public static <T extends Number, U extends Number> U convert(T number, Class<U> targetType) {
     return new NumberConverter<>(targetType).convert(number);
-  }
-
-  /**
-   * Parses the specified string into an {@code Integer}. Throws an {@link TypeConversionException}
-   * if the string is not a number or if the number is too big to fit into an {@code Integer}. This
-   * method delegates to {@link BigDecimal#intValueExact()} and is therefore stricter than {@link
-   * Integer#parseInt(String)}.
-   *
-   * @param s The string to be parsed
-   * @return The {@code Integer} representation of the string
-   */
-  public static int parseInt(String s) throws TypeConversionException {
-    try {
-      return new BigInteger(s).intValueExact();
-    } catch (NumberFormatException | ArithmeticException e) {
-      throw new TypeConversionException(s, int.class, e.getMessage());
-    }
   }
 
   /**
@@ -172,13 +199,11 @@ public final class NumberMethods {
    * @return Whether conversion will be lossless
    */
   public static <T extends Number> boolean fitsInto(Number number, Class<T> targetType) {
-    Class<?> myType = Check.notNull(number, "number")
-        .isNot(instanceOf(), BigDecimal.class)
-        .isNot(instanceOf(), BigInteger.class)
-        .ok(Object::getClass);
-    Check.notNull(targetType, "targetType")
-        .isNot(sameAs(), BigDecimal.class)
-        .isNot(sameAs(), BigInteger.class);
+    Class<?> myType = Check.notNull(number, "number").isNot(instanceOf(), BigDecimal.class).isNot(
+        instanceOf(),
+        BigInteger.class).ok(Object::getClass);
+    Check.notNull(targetType, "targetType").isNot(sameAs(), BigDecimal.class).isNot(sameAs(),
+        BigInteger.class);
     if (myType == targetType || targetType == Double.class) {
       return true;
     } else if (targetType == Float.class) {
@@ -226,20 +251,31 @@ public final class NumberMethods {
     return number.shortValue() <= Byte.MAX_VALUE && number.shortValue() >= Byte.MIN_VALUE;
   }
 
-  private static final Map<Class, UnaryOperator<? extends Number>>
-      absFunctions =
+  private static final Map<Class, UnaryOperator<? extends Number>> absFunctions =
       Map.of(Integer.class,
-          n -> n.intValue() >= 0 ? n : Integer.valueOf(-n.intValue()),
+          n -> n.intValue() >= 0
+              ? n
+              : Integer.valueOf(-n.intValue()),
           Double.class,
-          n -> n.doubleValue() >= 0 ? n : Double.valueOf(-n.doubleValue()),
+          n -> n.doubleValue() >= 0
+              ? n
+              : Double.valueOf(-n.doubleValue()),
           Long.class,
-          n -> n.longValue() >= 0 ? n : Long.valueOf(-n.longValue()),
+          n -> n.longValue() >= 0
+              ? n
+              : Long.valueOf(-n.longValue()),
           Float.class,
-          n -> n.floatValue() >= 0 ? n : Float.valueOf(-n.floatValue()),
+          n -> n.floatValue() >= 0
+              ? n
+              : Float.valueOf(-n.floatValue()),
           Short.class,
-          n -> n.shortValue() >= 0 ? n : Short.valueOf((short) -n.shortValue()),
+          n -> n.shortValue() >= 0
+              ? n
+              : Short.valueOf((short) -n.shortValue()),
           Byte.class,
-          n -> n.byteValue() >= 0 ? n : Byte.valueOf((byte) -n.byteValue()),
+          n -> n.byteValue() >= 0
+              ? n
+              : Byte.valueOf((byte) -n.byteValue()),
           BigInteger.class,
           n -> ((BigInteger) n).abs(),
           BigDecimal.class,

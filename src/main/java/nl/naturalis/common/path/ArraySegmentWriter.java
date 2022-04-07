@@ -1,7 +1,9 @@
 package nl.naturalis.common.path;
 
+import nl.naturalis.common.NumberMethods;
 import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
+import java.util.OptionalInt;
 import java.util.function.Function;
 
 import static nl.naturalis.common.ObjectMethods.isEmpty;
@@ -18,21 +20,17 @@ final class ArraySegmentWriter extends SegmentWriter<Object[]> {
     String segment = path.segment(-1);
     if (isEmpty(segment)) {
       return deadEnd(() -> emptySegment(path));
-    } else if (!Path.isArrayIndex(segment)) {
+    }
+    OptionalInt opt = NumberMethods.toPlainInt(segment);
+    if (opt.isEmpty()) {
       return deadEnd(() -> arrayIndexExpected(path));
     }
-    int idx = Integer.parseInt(segment);
-    if (idx > 0 && idx < array.length) {
-      try {
-        array[idx] = value;
-        return true;
-      } catch (ClassCastException e) {
-        Class<?> expected = array.getClass().getComponentType();
-        Class<?> actual = value.getClass();
-        return deadEnd(() -> invalidType(path, expected, actual));
-      }
+    int idx = opt.getAsInt();
+    if (idx < array.length) {
+      array[idx] = value;
+      return true;
     }
-    return deadEnd(() -> arrayIndexOutOfBounds(path));
+    return deadEnd(() -> indexOutOfBounds(path));
   }
 
 }

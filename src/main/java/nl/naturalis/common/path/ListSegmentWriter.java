@@ -1,11 +1,14 @@
 package nl.naturalis.common.path;
 
+import nl.naturalis.common.NumberMethods;
 import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.function.Function;
 
 import static nl.naturalis.common.ObjectMethods.isEmpty;
+import static nl.naturalis.common.path.PathWalkerException.arrayIndexExpected;
 import static nl.naturalis.common.path.PathWalkerException.*;
 
 @SuppressWarnings("rawtypes")
@@ -20,19 +23,17 @@ final class ListSegmentWriter extends SegmentWriter<List> {
     String segment = path.segment(-1);
     if (isEmpty(segment)) {
       return deadEnd(() -> emptySegment(path));
-    } else if (!Path.isArrayIndex(segment)) {
+    }
+    OptionalInt opt = NumberMethods.toPlainInt(segment);
+    if (opt.isEmpty()) {
       return deadEnd(() -> arrayIndexExpected(path));
     }
-    int idx = Integer.parseInt(segment);
-    if (idx > 0 && idx < list.size()) {
-      try {
-        list.set(idx, value);
-        return true;
-      } catch (ClassCastException e) {
-        return deadEnd(() -> invalidType(path, e));
-      }
+    int idx = opt.getAsInt();
+    if (idx < list.size()) {
+      list.set(opt.getAsInt(), value);
+      return true;
     }
-    return deadEnd(() -> arrayIndexExpected(path));
+    return deadEnd(() -> indexOutOfBounds(path));
   }
 
 }

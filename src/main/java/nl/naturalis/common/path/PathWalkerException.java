@@ -2,6 +2,7 @@ package nl.naturalis.common.path;
 
 import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.invoke.NoSuchPropertyException;
+
 import static java.lang.String.format;
 import static nl.naturalis.common.ClassMethods.className;
 import static nl.naturalis.common.ClassMethods.simpleClassName;
@@ -33,7 +34,7 @@ public class PathWalkerException extends RuntimeException {
     return new PathWalkerException(msg);
   }
 
-  static PathWalkerException arrayIndexOutOfBounds(Path p) {
+  static PathWalkerException indexOutOfBounds(Path p) {
     String fmt = INVALID_PATH + " (array index %s out of bounds)";
     String msg = String.format(fmt, p, p.segment(-1));
     return new PathWalkerException(msg);
@@ -52,7 +53,7 @@ public class PathWalkerException extends RuntimeException {
   }
 
   static PathWalkerException cannotWriteToNullObject() {
-    return new PathWalkerException("Cannot set write to null object");
+    return new PathWalkerException("Cannot write to null object");
   }
 
   static PathWalkerException cannotWriteToDeadEnd(Path p) {
@@ -108,4 +109,5 @@ public class PathWalkerException extends RuntimeException {
   private PathWalkerException(String message, Throwable cause) {
     super(message, cause);
   }
+
 }

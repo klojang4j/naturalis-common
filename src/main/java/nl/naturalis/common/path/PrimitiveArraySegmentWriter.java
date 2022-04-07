@@ -1,13 +1,14 @@
 package nl.naturalis.common.path;
 
-import static nl.naturalis.common.path.PathWalkerException.arrayIndexExpected;
-import static nl.naturalis.common.path.PathWalkerException.arrayIndexOutOfBounds;
-import static nl.naturalis.common.path.PathWalkerException.nullInvalidForPrimitiveArray;
+import nl.naturalis.common.NumberMethods;
+import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 import java.lang.reflect.Array;
+import java.util.OptionalInt;
 import java.util.function.Function;
 
-import nl.naturalis.common.path.PathWalker.OnDeadEnd;
+import static nl.naturalis.common.ObjectMethods.isEmpty;
+import static nl.naturalis.common.path.PathWalkerException.*;
 
 final class PrimitiveArraySegmentWriter extends SegmentWriter<Object> {
 
@@ -17,17 +18,20 @@ final class PrimitiveArraySegmentWriter extends SegmentWriter<Object> {
 
   @Override
   boolean write(Object obj, Path path, Object value) {
-    if (!Path.isArrayIndex(path.segment(-1))) {
+    String segment = path.segment(-1);
+    if (isEmpty(segment)) {
+      return deadEnd(() -> emptySegment(path));
+    }
+    OptionalInt opt = NumberMethods.toPlainInt(segment);
+    if (opt.isEmpty()) {
       return deadEnd(() -> arrayIndexExpected(path));
     }
-    if (value == null) {
-      return deadEnd(() -> nullInvalidForPrimitiveArray(path, obj));
-    }
-    int idx = Integer.parseInt(path.segment(-1));
-    if (idx > 0 && idx < Array.getLength(obj)) {
+    int idx = opt.getAsInt();
+    if (idx < Array.getLength(obj)) {
       Array.set(obj, idx, value);
+      return true;
     }
-    return deadEnd(() -> arrayIndexOutOfBounds(path));
+    return deadEnd(() -> indexOutOfBounds(path));
   }
 
 }
