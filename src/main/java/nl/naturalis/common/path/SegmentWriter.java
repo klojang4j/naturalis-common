@@ -5,10 +5,16 @@ import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static nl.naturalis.common.path.PathWalker.OnDeadEnd.THROW_EXCEPTION;
-
 abstract sealed class SegmentWriter<T> permits ArraySegmentWriter, BeanSegmentWriter,
     ListSegmentWriter, MapSegmentWriter, PrimitiveArraySegmentWriter {
+
+  static DeadEnd deadEnd(OnDeadEnd ode, DeadEnd deadEnd, Supplier<DeadEndException> exc) {
+    return switch (ode) {
+      case RETURN_NULL -> null;
+      case RETURN_DEAD -> deadEnd;
+      case THROW_EXCEPTION -> throw exc.get();
+    };
+  }
 
   final Function<Path, Object> kds;
 
@@ -19,13 +25,10 @@ abstract sealed class SegmentWriter<T> permits ArraySegmentWriter, BeanSegmentWr
     this.kds = kds;
   }
 
-  abstract boolean write(T obj, Path path, Object value);
+  abstract DeadEnd write(T obj, Path path, Object value);
 
-  boolean deadEnd(Supplier<PathWalkerException> e) {
-    if (ode == THROW_EXCEPTION) {
-      throw e.get();
-    }
-    return false;
+  DeadEnd deadEnd(DeadEnd deadEnd, Supplier<DeadEndException> exc) {
+    return deadEnd(ode, deadEnd, exc);
   }
 
 }

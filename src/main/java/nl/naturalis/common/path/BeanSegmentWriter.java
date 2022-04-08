@@ -1,8 +1,8 @@
 package nl.naturalis.common.path;
 
 import static nl.naturalis.common.ObjectMethods.isEmpty;
-import static nl.naturalis.common.path.PathWalkerException.emptySegment;
-import static nl.naturalis.common.path.PathWalkerException.wrap;
+import static nl.naturalis.common.path.DeadEndException.*;
+import static nl.naturalis.common.path.DeadEnd.*;
 
 import java.util.function.Function;
 
@@ -17,17 +17,17 @@ final class BeanSegmentWriter<T> extends SegmentWriter<T> {
 
   @Override
   @SuppressWarnings("unchecked")
-  boolean write(T bean, Path path, Object value) {
+  DeadEnd write(T bean, Path path, Object value) {
     String segment = path.segment(-1);
     if (isEmpty(segment)) {
-      return deadEnd(() -> emptySegment(path));
+      return deadEnd(EMPTY_SEGMENT, () -> emptySegment(path));
     }
     BeanWriter<T> bw = new BeanWriter<>((Class<T>) bean.getClass());
     try {
       bw.set(bean, segment, value);
-      return true;
+      return OK;
     } catch (Throwable t) {
-      return deadEnd(() -> wrap(t));
+      return deadEnd(READ_ERROR, () -> readError(path, t));
     }
   }
 

@@ -9,7 +9,6 @@ import java.util.function.Function;
 
 import static nl.naturalis.common.path.DeadEnd.*;
 import static nl.naturalis.common.path.DeadEndException.*;
-import static nl.naturalis.common.path.PathWalkerException.wrap;
 
 final class BeanSegmentReader<T> extends SegmentReader<T> {
 

@@ -1,5 +1,6 @@
 package nl.naturalis.common.path;
 
+import static nl.naturalis.common.ClassMethods.className;
 import static nl.naturalis.common.path.DeadEnd.*;
 
 public final class DeadEndException extends RuntimeException {
@@ -42,9 +43,15 @@ public final class DeadEndException extends RuntimeException {
     return new DeadEndException(EMPTY_SEGMENT, msg);
   }
 
+  static DeadEndException typeNotSupported(Object host) {
+    String fmt = "Don't know how to read/write instances of %s";
+    String msg = String.format(fmt, className(host));
+    return new DeadEndException(TYPE_NOT_SUPPORTED, msg);
+  }
+
   static DeadEndException readError(Path p, Throwable t) {
-    String fmt = INVALID_PATH + t;
-    String msg = String.format(fmt, p);
+    String fmt = "error while reading/writing \"%s\": t";
+    String msg = String.format(fmt, p, t);
     return new DeadEndException(READ_ERROR, msg);
   }
 

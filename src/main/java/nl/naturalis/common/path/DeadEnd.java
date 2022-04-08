@@ -34,13 +34,24 @@ public enum DeadEnd {
    */
   EMPTY_SEGMENT,
   /**
-   * The {@code Path} extended beyond a terminal value (a primitive, a {@code String}, or some other
-   * type of value that the {@code PathWalker} cannot descend into).
+   * The {@code Path} extended beyond a terminal value ({@code null}, a primitive, a {@code String},
+   * or some other type of value that the {@code PathWalker} cannot descend into).
    */
   TERMINAL_VALUE,
   /**
-   * An exception was thrown while reading the value corresponding to the current path segment.
+   * Thrown if the {@code PathWalker} encounters a value in the host object that it cannot read or
+   * write.
    */
-  READ_ERROR;
+  TYPE_NOT_SUPPORTED,
+  /**
+   * Thrown if the  {@code PathWalker} trapped an exception from underlying code while
+   * reading/writing a value.
+   */
+  READ_ERROR,
+  /**
+   * The {@code PathWalker} successfully set the property corresponding to a {@code Path} (only
+   * returned when writing values).
+   */
+  OK;
 
 }

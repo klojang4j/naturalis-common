@@ -7,12 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
 import static nl.naturalis.common.check.CommonChecks.gt;
-import static nl.naturalis.common.path.PathWalker.DEAD;
-import static nl.naturalis.common.path.PathWalkerException.*;
+import static nl.naturalis.common.path.DeadEnd.TERMINAL_VALUE;
+import static nl.naturalis.common.path.DeadEnd.TYPE_NOT_SUPPORTED;
+import static nl.naturalis.common.path.DeadEndException.terminalValue;
+import static nl.naturalis.common.path.DeadEndException.typeNotSupported;
 
 @SuppressWarnings("rawtypes")
 final class ObjectWriter {
@@ -32,7 +33,7 @@ final class ObjectWriter {
     this.kds = keyDeserializer;
   }
 
-  boolean write(Object host, Path path, Object value) {
+  DeadEnd write(Object host, Path path, Object value) {
     Check.notNull(path, "path").has(Path::size, gt(), 0);
     Object obj;
     if (path.size() == 1) {
@@ -41,10 +42,8 @@ final class ObjectWriter {
       PathWalker pw = new PathWalker(path.parent(), ode, kds);
       obj = pw.read(host);
     }
-    if (obj == null) {
-      return deadEnd(() -> cannotWriteToNullObject());
-    } else if (obj instanceof DeadEnd) {
-      return deadEnd(() -> cannotWriteToDeadEnd(path));
+    if (obj == null || obj instanceof DeadEnd) {
+      return SegmentWriter.deadEnd(ode, TERMINAL_VALUE, () -> terminalValue(path));
     } else if (obj instanceof List) {
       return new ListSegmentWriter(ode, kds).write((List) obj, path, value);
     } else if (obj instanceof Map) {
@@ -56,14 +55,7 @@ final class ObjectWriter {
     } else if (isWritable(obj)) {
       return new BeanSegmentWriter<>(ode, kds).write(obj, path, value);
     }
-    return deadEnd(() -> cannotWrite(obj));
-  }
-
-  private boolean deadEnd(Supplier<PathWalkerException> e) {
-    if (ode == OnDeadEnd.THROW_EXCEPTION) {
-      throw e.get();
-    }
-    return false;
+    return SegmentWriter.deadEnd(ode, TYPE_NOT_SUPPORTED, () -> typeNotSupported(obj));
   }
 
   private static boolean isWritable(Object obj) {

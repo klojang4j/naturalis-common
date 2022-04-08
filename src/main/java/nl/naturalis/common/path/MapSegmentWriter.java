@@ -1,11 +1,11 @@
 package nl.naturalis.common.path;
 
-import static nl.naturalis.common.path.PathWalkerException.invalidType;
+import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 import java.util.Map;
 import java.util.function.Function;
 
-import nl.naturalis.common.path.PathWalker.OnDeadEnd;
+import static nl.naturalis.common.path.DeadEnd.OK;
 
 @SuppressWarnings("rawtypes")
 final class MapSegmentWriter extends SegmentWriter<Map> {
@@ -15,19 +15,15 @@ final class MapSegmentWriter extends SegmentWriter<Map> {
   }
 
   @Override
-  boolean write(Map map, Path path, Object value) {
+  DeadEnd write(Map map, Path path, Object value) {
     String segment = path.segment(-1);
     Object key = segment == null
         ? null
         : kds == null
             ? segment
             : kds.apply(path);
-    try {
-      map.put(key, value);
-      return true;
-    } catch (ClassCastException e) {
-      return deadEnd(() -> invalidType(path, e));
-    }
+    map.put(key, value);
+    return OK;
   }
 
 }

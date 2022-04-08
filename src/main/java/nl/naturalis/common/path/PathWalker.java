@@ -12,6 +12,7 @@ import java.util.stream.IntStream;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.length;
 import static nl.naturalis.common.check.CommonGetters.size;
+import static nl.naturalis.common.path.DeadEnd.OK;
 import static nl.naturalis.common.path.PathWalker.OnDeadEnd.RETURN_NULL;
 
 /**
@@ -143,9 +144,9 @@ public final class PathWalker {
    *
    * @param host The object to read the path values from
    * @return The values of all paths within the specified host object
-   * @throws PathWalkerException
+   * @throws DeadEndException
    */
-  public Object[] readValues(Object host) throws PathWalkerException {
+  public Object[] readValues(Object host) throws DeadEndException {
     return IntStream.range(0, paths.length).mapToObj(i -> readObj(host, paths[i])).toArray();
   }
 
@@ -157,9 +158,9 @@ public final class PathWalker {
    *
    * @param host The object from which to read the values
    * @param output An array into which to place the values
-   * @throws PathWalkerException
+   * @throws DeadEndException
    */
-  public void readValues(Object host, Object[] output) throws PathWalkerException {
+  public void readValues(Object host, Object[] output) throws DeadEndException {
     Check.notNull(output, "output").has(length(), gte(), paths.length);
     IntStream.range(0, paths.length).forEach(i -> output[i] = readObj(host, paths[i]));
   }
@@ -170,9 +171,9 @@ public final class PathWalker {
    *
    * @param host The object from which to read the values
    * @param output The {@code Map} into which to put the values
-   * @throws PathWalkerException
+   * @throws DeadEndException
    */
-  public void readValues(Object host, Map<Path, Object> output) throws PathWalkerException {
+  public void readValues(Object host, Map<Path, Object> output) throws DeadEndException {
     Check.notNull(output, "output");
     Arrays.stream(paths).forEach(p -> output.put(p, readObj(host, p)));
   }
@@ -204,7 +205,7 @@ public final class PathWalker {
     Check.notNull(values, "values").has(length(), gte(), paths.length);
     boolean success = true;
     for (int i = 0; i < paths.length; ++i) {
-      success = success && write(host, paths[i], values[i]);
+      success = success && OK == write(host, paths[i], values[i]);
     }
     return success;
   }
@@ -220,7 +221,7 @@ public final class PathWalker {
    * @param value The value to write
    * @return Whether the value was successfully written
    */
-  public boolean write(Object host, Object value) {
+  public DeadEnd write(Object host, Object value) {
     return write(host, paths[0], value);
   }
 
@@ -228,7 +229,7 @@ public final class PathWalker {
     return new ObjectReader(ode, kds).read(obj, path);
   }
 
-  private boolean write(Object host, Path path, Object value) {
+  private DeadEnd write(Object host, Path path, Object value) {
     return new ObjectWriter(ode, kds).write(host, path, value);
   }
 
