@@ -31,11 +31,6 @@ import static nl.naturalis.common.path.PathWalker.OnDeadEnd.RETURN_NULL;
  *   <li>An array index within the {@code Path} was out of bounds
  * </ul>
  *
- * <p>By default {@code PathWalker} will return {@code null} in all of these cases. If you need to
- * distinguish between true nulls and the "dead ends" described above, you can instruct the {@code
- * PathWalker} to return a special value, {@link #DEAD}, instead of null. You can also instruct
- * to throw a {@link NoSuchPropertyException}. See {@link OnDeadEnd}.
- *
  * @author Ayco Holleman
  */
 @SuppressWarnings({"unchecked"})
@@ -48,23 +43,13 @@ public final class PathWalker {
     /**
      * Instructs the {@code PathWalker} to return {@code null} if it reaches a dead end.
      */
-    RETURN_NULL,
+    RETURN_NULL, RETURN_DEAD,
     /**
-     * Instructs the {@code PathWalker} to return the special value {@link PathWalker#DEAD} if it
-     * reaches a dead end. Use a reference comparison to check for this value.
-     */
-    RETURN_DEAD,
-    /**
-     * Instructs the {@code PathWalker} to throw a {@link PathWalkerException} if it reaches a dead
+     * Instructs the {@code PathWalker} to throw a {@link DeadEndException} if it reaches a dead
      * end.
      */
     THROW_EXCEPTION;
   }
-
-  /**
-   * A special value, optionally returned to indicate that the {@code PathWalker} hits a dead end.
-   */
-  public static final Object DEAD = new Object();
 
   private final Path[] paths;
   private final OnDeadEnd ode;
@@ -185,7 +170,7 @@ public final class PathWalker {
    * @param <T> The type of the value being returned
    * @param host The object to walk
    * @return The value referenced by the first path
-   * @throws PathWalkerException
+   * @throws DeadEndException
    */
   public <T> T read(Object host) {
     return (T) readObj(host, paths[0]);
@@ -194,7 +179,7 @@ public final class PathWalker {
   /**
    * Sets the values of all configured paths to the specified values. This method returns {@code
    * true} if <i>all</i> values were successfully written. If {@link OnDeadEnd} is {@code
-   * THROW_EXCEPTION}, a {@link PathWalkerException} detailing the error is thrown, otherwise this
+   * THROW_EXCEPTION}, a {@link DeadEndException} detailing the error is thrown, otherwise this
    * method returns {@code false}.
    *
    * @param host The object into which to write the values
@@ -214,7 +199,7 @@ public final class PathWalker {
    * Sets the value of the first path within the provided object to the specified value. Useful if
    * the {@code PathWalker} was created with just one path. This method will return {@code true} if
    * the value was successfully written to the host object. If {@link OnDeadEnd} is {@code
-   * THROW_EXCEPTION}, a {@link PathWalkerException} detailing the error is thrown, otherwise this
+   * THROW_EXCEPTION}, a {@link DeadEndException} detailing the error is thrown, otherwise this
    * method will return false.
    *
    * @param host The object into which to write the value

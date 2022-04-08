@@ -1,13 +1,12 @@
 package nl.naturalis.common.path;
 
-import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
-import static nl.naturalis.common.path.PathWalker.DEAD;
+import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 
-import nl.naturalis.common.path.PathWalker.OnDeadEnd;
+import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
 
 @SuppressWarnings("rawtypes")
 final class ObjectReader {
