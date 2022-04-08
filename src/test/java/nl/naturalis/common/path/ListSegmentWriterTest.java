@@ -87,12 +87,12 @@ public class ListSegmentWriterTest {
     assertFalse(lsw.write(l, new Path("this.is.a.path."), 42));
   }
 
-  @Test(expected = PathWalkerException.class)
-  public void test06b() {
-    List l = new ArrayList(List.of(1, 2, 3, 4));
-    ListSegmentWriter lsw = new ListSegmentWriter(THROW_EXCEPTION, null);
-    // empty segment
-    lsw.write(l, new Path("this.is.a.path."), 42);
-  }
+  //  @Test
+  //  public void test06b() {
+  //    List l = new ArrayList(List.of(1, 2, 3, 4));
+  //    ListSegmentWriter lsw = new ListSegmentWriter(THROW_EXCEPTION, null);
+  //    // empty segment
+  //    lsw.write(l, new Path("this.is.a.path."), 42);
+  //  }
 
 }

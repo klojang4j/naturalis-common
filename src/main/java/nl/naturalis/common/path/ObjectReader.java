@@ -21,7 +21,7 @@ final class ObjectReader {
   }
 
   Object read(Object obj, Path path) {
-    if (path.isEmpty() || obj == null || obj == DEAD) {
+    if (path.isEmpty() || obj == null || obj instanceof DeadEnd) {
       return obj;
     } else if (obj instanceof Collection) {
       return new CollectionSegmentReader(ode, kds).read((Collection) obj, path);

@@ -9,7 +9,6 @@ import java.util.Set;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.invoke.IncludeExclude.INCLUDE;
 import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
-import static nl.naturalis.common.invoke.InvokeException.*;
 
 /**
  * A dynamic bean reader class. This class uses the {@code java.lang.invoke} package instead of
@@ -73,8 +72,7 @@ public final class BeanReader<T> {
    * @param includeExclude Whether to include or exclude the specified properties
    * @param properties The properties to be included/excluded
    */
-  public BeanReader(
-      Class<? super T> beanClass,
+  public BeanReader(Class<? super T> beanClass,
       boolean strictNaming,
       IncludeExclude includeExclude,
       String... properties) {
@@ -144,7 +142,7 @@ public final class BeanReader<T> {
       } else {
         tmp.keySet().retainAll(Set.of(props));
       }
-      Check.that(tmp).isNot(empty(), allPropertiesExcluded(beanClass));
+      Check.that(tmp).isNot(empty(), () -> new NoPublicGettersException(beanClass));
       tmp = Map.copyOf(tmp);
     }
     return tmp;

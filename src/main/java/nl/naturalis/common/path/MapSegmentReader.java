@@ -5,7 +5,8 @@ import nl.naturalis.common.path.PathWalker.OnDeadEnd;
 import java.util.Map;
 import java.util.function.Function;
 
-import static nl.naturalis.common.path.PathWalkerException.noSuchKey;
+import static nl.naturalis.common.path.DeadEnd.NO_SUCH_KEY;
+import static nl.naturalis.common.path.DeadEndException.noSuchKey;
 
 @SuppressWarnings("rawtypes")
 final class MapSegmentReader extends SegmentReader<Map<String, Object>> {
@@ -23,7 +24,7 @@ final class MapSegmentReader extends SegmentReader<Map<String, Object>> {
     if (map.containsKey(key)) {
       return nextSegmentReader().read(map.get(key), path.shift());
     }
-    return deadEnd(() -> noSuchKey(path));
+    return deadEnd(NO_SUCH_KEY, () -> noSuchKey(path));
   }
 
 }

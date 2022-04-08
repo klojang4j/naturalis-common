@@ -11,9 +11,8 @@ import java.util.Map;
 
 import static java.util.Map.Entry;
 import static java.util.Map.entry;
-import static nl.naturalis.common.invoke.InvokeException.noPublicStuff;
+import static nl.naturalis.common.check.CommonChecks.empty;
 import static nl.naturalis.common.x.invoke.InvokeUtils.getPropertyNameFromGetter;
-import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * Provides and caches {@link Getter getters} for classes.
@@ -45,7 +44,7 @@ public final class GetterFactory {
     Map<String, Getter> getters = cache.get(clazz);
     if (getters == null) {
       List<Method> methods = InvokeUtils.getGetters(clazz, strict);
-      Check.that(methods).isNot(empty(), noPublicStuff(clazz, "getters"));
+      Check.that(methods).isNot(empty(), () -> new NoPublicGettersException(clazz));
       List<Entry<String, Getter>> entries = new ArrayList<>(methods.size());
       for (Method m : methods) {
         String prop = getPropertyNameFromGetter(m, strict);
@@ -56,4 +55,5 @@ public final class GetterFactory {
     }
     return getters;
   }
+
 }

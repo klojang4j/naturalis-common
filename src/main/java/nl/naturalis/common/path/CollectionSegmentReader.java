@@ -9,7 +9,8 @@ import java.util.OptionalInt;
 import java.util.function.Function;
 
 import static nl.naturalis.common.ObjectMethods.isEmpty;
-import static nl.naturalis.common.path.PathWalkerException.*;
+import static nl.naturalis.common.path.DeadEnd.*;
+import static nl.naturalis.common.path.DeadEndException.*;
 
 @SuppressWarnings("rawtypes")
 final class CollectionSegmentReader extends SegmentReader<Collection> {
@@ -22,11 +23,11 @@ final class CollectionSegmentReader extends SegmentReader<Collection> {
   Object read(Collection collection, Path path) {
     String segment = path.segment(0);
     if (isEmpty(segment)) {
-      return deadEnd(() -> emptySegment(path));
+      return deadEnd(EMPTY_SEGMENT, () -> emptySegment(path));
     }
     OptionalInt opt = NumberMethods.toPlainInt(segment);
     if (opt.isEmpty()) {
-      return deadEnd(() -> arrayIndexExpected(path));
+      return deadEnd(INDEX_EXPECTED, () -> indexExpected(path));
     }
     int idx = opt.getAsInt();
     if (idx < collection.size()) {
@@ -37,7 +38,7 @@ final class CollectionSegmentReader extends SegmentReader<Collection> {
         return nextSegmentReader().read(iter.next(), path.shift());
       }
     }
-    return deadEnd(() -> indexOutOfBounds(path));
+    return deadEnd(INDEX_OUT_OF_BOUNDS, () -> indexOutOfBounds(path));
   }
 
 }

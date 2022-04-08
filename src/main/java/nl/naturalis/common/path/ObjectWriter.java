@@ -43,7 +43,7 @@ final class ObjectWriter {
     }
     if (obj == null) {
       return deadEnd(() -> cannotWriteToNullObject());
-    } else if (obj == DEAD) {
+    } else if (obj instanceof DeadEnd) {
       return deadEnd(() -> cannotWriteToDeadEnd(path));
     } else if (obj instanceof List) {
       return new ListSegmentWriter(ode, kds).write((List) obj, path, value);

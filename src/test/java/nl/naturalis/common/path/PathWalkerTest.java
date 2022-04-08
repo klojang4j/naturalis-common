@@ -10,6 +10,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static nl.naturalis.common.CollectionMethods.newHashMap;
+import static nl.naturalis.common.path.DeadEnd.INDEX_OUT_OF_BOUNDS;
+import static nl.naturalis.common.path.DeadEnd.NO_SUCH_KEY;
 import static nl.naturalis.common.path.PathWalker.OnDeadEnd.RETURN_DEAD;
 import static org.junit.Assert.*;
 
@@ -68,14 +70,14 @@ public class PathWalkerTest {
   public void test08() throws MalformedURLException {
     Company shell = shell();
     List<Path> paths = paths("quarterlySales.10");
-    assertTrue(PathWalker.DEAD == new PathWalker(paths, RETURN_DEAD).read(shell));
+    assertEquals(INDEX_OUT_OF_BOUNDS, new PathWalker(paths, RETURN_DEAD).read(shell));
   }
 
   @Test
   public void test09() throws MalformedURLException {
     Company shell = shell();
     List<Path> paths = paths("quarterlySales.10.foo");
-    assertTrue(PathWalker.DEAD == new PathWalker(paths, RETURN_DEAD).read(shell));
+    assertEquals(INDEX_OUT_OF_BOUNDS, new PathWalker(paths, RETURN_DEAD).read(shell));
   }
 
   @Test
@@ -112,7 +114,7 @@ public class PathWalkerTest {
   public void test14() throws MalformedURLException {
     Company shell = shell();
     List<Path> paths = paths("departments.0.employees.0.extraInfo.https://nos^.nl");
-    assertEquals(PathWalker.DEAD, new PathWalker(paths, RETURN_DEAD).read(shell));
+    assertEquals(NO_SUCH_KEY, new PathWalker(paths, RETURN_DEAD).read(shell));
   }
 
   @Test

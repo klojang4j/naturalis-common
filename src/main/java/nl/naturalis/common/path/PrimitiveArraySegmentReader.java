@@ -1,7 +1,8 @@
 package nl.naturalis.common.path;
 
 import static nl.naturalis.common.ObjectMethods.isEmpty;
-import static nl.naturalis.common.path.PathWalkerException.*;
+import static nl.naturalis.common.path.DeadEnd.*;
+import static nl.naturalis.common.path.DeadEndException.*;
 
 import java.lang.reflect.Array;
 import java.util.OptionalInt;
@@ -21,20 +22,20 @@ final class PrimitiveArraySegmentReader extends SegmentReader<Object> {
     if (path.size() == 1) { // primitive *must* be the end of the trail
       String segment = path.segment(0);
       if (isEmpty(segment)) {
-        return deadEnd(() -> emptySegment(path));
+        return deadEnd(EMPTY_SEGMENT, () -> emptySegment(path));
       }
       OptionalInt opt = NumberMethods.toPlainInt(segment);
       if (opt.isEmpty()) {
-        return deadEnd(() -> arrayIndexExpected(path));
+        return deadEnd(INDEX_EXPECTED, () -> indexExpected(path));
       }
       int idx = opt.getAsInt();
       if (idx < Array.getLength(array)) {
         Object val = Array.get(array, idx);
         return nextSegmentReader().read(val, path.shift());
       }
-      return deadEnd(() -> indexOutOfBounds(path));
+      return deadEnd(INDEX_OUT_OF_BOUNDS, () -> indexOutOfBounds(path));
     }
-    return deadEnd(() -> pathExtendsBeyondPrimitive(path));
+    return deadEnd(TERMINAL_VALUE, () -> terminalValue(path));
   }
 
 }

@@ -12,7 +12,6 @@ import java.util.Map;
 import static java.util.Map.Entry;
 import static java.util.Map.entry;
 import static nl.naturalis.common.check.CommonChecks.empty;
-import static nl.naturalis.common.invoke.InvokeException.noPublicStuff;
 
 /**
  * Provides and caches {@link Setter setters} for classes.
@@ -39,7 +38,7 @@ public final class SetterFactory {
     Map<String, Setter> setters = cache.get(clazz);
     if (setters == null) {
       List<Method> methods = InvokeUtils.getSetters(clazz);
-      Check.that(methods).isNot(empty(), noPublicStuff(clazz, "setters"));
+      Check.that(methods).isNot(empty(), () -> new NoPublicSettersException(clazz));
       List<Entry<String, Setter>> entries = new ArrayList<>(methods.size());
       for (Method m : methods) {
         String prop = InvokeUtils.getPropertyNameFromSetter(m);
@@ -50,4 +49,5 @@ public final class SetterFactory {
     }
     return setters;
   }
+
 }

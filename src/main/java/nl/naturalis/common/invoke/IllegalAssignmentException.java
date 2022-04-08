@@ -6,10 +6,10 @@ import static nl.naturalis.common.ClassMethods.simpleClassName;
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
 
 /**
- * Thrown from a {@link BeanWriter} if an attempt to assign a value to a bean property failed, for
- * example because of a type mismatch.
+ * Thrown by a {@link BeanWriter} if it failed to write a value to a property, for example because
+ * of a type mismatch.
  */
-public class IllegalAssignmentException extends InvokeException {
+public final class IllegalAssignmentException extends InvokeException {
 
   private final Class<?> beanClass;
   private final String propertyName;
@@ -17,9 +17,9 @@ public class IllegalAssignmentException extends InvokeException {
   private final Object value;
 
   IllegalAssignmentException(Class<?> beanClass,
-          String propertyName,
-          Class<?> propertyType,
-          Object value) {
+      String propertyName,
+      Class<?> propertyType,
+      Object value) {
     super(createMessage(beanClass, propertyName, propertyType, value));
     this.beanClass = beanClass;
     this.propertyName = propertyName;
@@ -28,18 +28,18 @@ public class IllegalAssignmentException extends InvokeException {
   }
 
   private static String createMessage(Class<?> beanClass,
-          String propertyName,
-          Class<?> propertyType,
-          Object value) {
+      String propertyName,
+      Class<?> propertyType,
+      Object value) {
     String valueType = ifNotNull(value, ClassMethods::simpleClassName, "null");
     return "illegal assignment for "
-            + simpleClassName(beanClass)
-            + "."
-            + propertyName
-            + ": cannot assign "
-            + valueType
-            + " to "
-            + simpleClassName(propertyType);
+        + simpleClassName(beanClass)
+        + "."
+        + propertyName
+        + ": cannot assign "
+        + valueType
+        + " to "
+        + simpleClassName(propertyType);
   }
 
   /**

@@ -12,7 +12,6 @@ import java.util.Set;
 import static nl.naturalis.common.check.CommonChecks.empty;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 import static nl.naturalis.common.invoke.IncludeExclude.INCLUDE;
-import static nl.naturalis.common.invoke.InvokeException.allPropertiesExcluded;
 import static nl.naturalis.common.invoke.NoSuchPropertyException.noSuchProperty;
 
 /**
@@ -78,8 +77,7 @@ public final class BeanWriter<T> {
    *     use the {@code Setter} to {@link Setter#illegalAssignment(Object) generate} the exception.
    * @param properties The properties you allow to be written
    */
-  public BeanWriter(
-      Class<T> beanClass,
+  public BeanWriter(Class<T> beanClass,
       ThrowingBiFunction<Setter, Object, Object, Throwable> converter,
       String... properties) {
     this(beanClass, converter, INCLUDE, properties);
@@ -126,8 +124,7 @@ public final class BeanWriter<T> {
    * @param includeExclude Whether to include or exclude the specified properties
    * @param properties The properties to be included/excluded
    */
-  public BeanWriter(
-      Class<T> beanClass,
+  public BeanWriter(Class<T> beanClass,
       ThrowingBiFunction<Setter, Object, Object, Throwable> converter,
       IncludeExclude includeExclude,
       String... properties) {
@@ -332,7 +329,7 @@ public final class BeanWriter<T> {
       } else {
         tmp.keySet().retainAll(Set.of(props));
       }
-      Check.that(tmp).isNot(empty(), allPropertiesExcluded(beanClass));
+      Check.that(tmp).isNot(empty(), () -> new NoPublicSettersException(beanClass));
       tmp = Map.copyOf(tmp);
     }
     return tmp;
