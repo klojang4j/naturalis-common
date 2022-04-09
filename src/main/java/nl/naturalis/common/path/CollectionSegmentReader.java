@@ -9,8 +9,8 @@ import java.util.OptionalInt;
 import java.util.function.Function;
 
 import static nl.naturalis.common.ObjectMethods.isEmpty;
-import static nl.naturalis.common.path.DeadEnd.*;
-import static nl.naturalis.common.path.DeadEndException.*;
+import static nl.naturalis.common.path.ErrorCode.*;
+import static nl.naturalis.common.path.PathWalkerException.*;
 
 @SuppressWarnings("rawtypes")
 final class CollectionSegmentReader extends SegmentReader<Collection> {

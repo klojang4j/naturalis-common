@@ -8,8 +8,8 @@ import java.util.OptionalInt;
 import java.util.function.Function;
 
 import static nl.naturalis.common.ObjectMethods.isEmpty;
-import static nl.naturalis.common.path.DeadEndException.*;
-import static nl.naturalis.common.path.DeadEnd.*;
+import static nl.naturalis.common.path.PathWalkerException.*;
+import static nl.naturalis.common.path.ErrorCode.*;
 
 final class PrimitiveArraySegmentWriter extends SegmentWriter<Object> {
 
@@ -18,21 +18,21 @@ final class PrimitiveArraySegmentWriter extends SegmentWriter<Object> {
   }
 
   @Override
-  DeadEnd write(Object obj, Path path, Object value) {
+  ErrorCode write(Object obj, Path path, Object value) {
     String segment = path.segment(-1);
     if (isEmpty(segment)) {
-      return deadEnd(EMPTY_SEGMENT, () -> emptySegment(path));
+      return error(EMPTY_SEGMENT, () -> emptySegment(path));
     }
     OptionalInt opt = NumberMethods.toPlainInt(segment);
     if (opt.isEmpty()) {
-      return deadEnd(INDEX_EXPECTED, () -> indexExpected(path));
+      return error(INDEX_EXPECTED, () -> indexExpected(path));
     }
     int idx = opt.getAsInt();
     if (idx < Array.getLength(obj)) {
       Array.set(obj, idx, value);
       return OK;
     }
-    return deadEnd(INDEX_OUT_OF_BOUNDS, () -> indexOutOfBounds(path));
+    return error(INDEX_OUT_OF_BOUNDS, () -> indexOutOfBounds(path));
   }
 
 }

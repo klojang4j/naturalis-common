@@ -1,6 +1,9 @@
 package nl.naturalis.common.path;
 
-public enum DeadEnd {
+/**
+ * Symbolic constants for read/write failures.
+ */
+public enum ErrorCode {
 
   /**
    * The {@code PathWalker} had arrived on a list or array, so expected the next segment in the
@@ -8,13 +11,13 @@ public enum DeadEnd {
    */
   INDEX_EXPECTED,
   /**
-   * The {@code PathWalker} encountered an array index in the {@code Path}, but it was not
-   * processing a list or array.
+   * The {@code PathWalker} encountered an array index in the {@code Path}, but the value of the
+   * preceding path segment was something other than a list or array.
    */
   INDEX_NOT_ALLOWED,
   /**
-   * The {@code PathWalker} encountered an array index that was out of bounds for the list or array
-   * it was processing.
+   * The {@code PathWalker} encountered an array index in the {@code Path} that was out of bounds
+   * for the list or array it was processing.
    */
   INDEX_OUT_OF_BOUNDS,
   /**
@@ -39,18 +42,17 @@ public enum DeadEnd {
    */
   TERMINAL_VALUE,
   /**
-   * Thrown if the {@code PathWalker} encounters a value in the host object that it cannot read or
-   * write.
+   * Thrown if the {@code PathWalker} encounters a value that it doesn't know how to read or write.
    */
   TYPE_NOT_SUPPORTED,
   /**
-   * Thrown if the  {@code PathWalker} trapped an exception from underlying code while
-   * reading/writing a value.
+   * Thrown if the  {@code PathWalker} trapped an exception from underlying code.
    */
-  READ_ERROR,
+  EXCEPTION,
   /**
-   * The {@code PathWalker} successfully set the property corresponding to a {@code Path} (only
-   * returned when writing values).
+   * Indicates that a write action was successful. This code is only returned by the {@code write}
+   * methods of the {@code PathWalker} class. The {@code read} methods just return the value that
+   * was read.
    */
   OK;
 

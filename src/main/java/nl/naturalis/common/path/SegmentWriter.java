@@ -8,27 +8,30 @@ import java.util.function.Supplier;
 abstract sealed class SegmentWriter<T> permits ArraySegmentWriter, BeanSegmentWriter,
     ListSegmentWriter, MapSegmentWriter, PrimitiveArraySegmentWriter {
 
-  static DeadEnd deadEnd(OnDeadEnd ode, DeadEnd deadEnd, Supplier<DeadEndException> exc) {
+  static ErrorCode error(OnDeadEnd ode, ErrorCode deadEnd, Supplier<PathWalkerException> exc) {
     return switch (ode) {
       case RETURN_NULL -> null;
-      case RETURN_DEAD -> deadEnd;
+      case RETURN_CODE -> deadEnd;
       case THROW_EXCEPTION -> throw exc.get();
     };
   }
 
-  final Function<Path, Object> kds;
-
   private final OnDeadEnd ode;
+  private final Function<Path, Object> kds;
 
   SegmentWriter(OnDeadEnd ode, Function<Path, Object> kds) {
     this.ode = ode;
     this.kds = kds;
   }
 
-  abstract DeadEnd write(T obj, Path path, Object value);
+  abstract ErrorCode write(T obj, Path path, Object value);
 
-  DeadEnd deadEnd(DeadEnd deadEnd, Supplier<DeadEndException> exc) {
-    return deadEnd(ode, deadEnd, exc);
+  ErrorCode error(ErrorCode code, Supplier<PathWalkerException> exc) {
+    return error(ode, code, exc);
+  }
+
+  Function<Path, Object> keyDeserializer() {
+    return kds;
   }
 
 }

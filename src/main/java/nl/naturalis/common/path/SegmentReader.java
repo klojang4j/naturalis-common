@@ -8,17 +8,8 @@ import java.util.function.Supplier;
 abstract sealed class SegmentReader<T> permits ArraySegmentReader, BeanSegmentReader,
     CollectionSegmentReader, MapSegmentReader, PrimitiveArraySegmentReader {
 
-  static DeadEnd deadEnd(OnDeadEnd ode, DeadEnd deadEnd, Supplier<DeadEndException> exc) {
-    return switch (ode) {
-      case RETURN_NULL -> null;
-      case RETURN_DEAD -> deadEnd;
-      case THROW_EXCEPTION -> throw exc.get();
-    };
-  }
-
-  final Function<Path, Object> kds;
-
   private final OnDeadEnd ode;
+  private final Function<Path, Object> kds;
 
   SegmentReader(OnDeadEnd ode, Function<Path, Object> kds) {
     this.ode = ode;
@@ -27,12 +18,20 @@ abstract sealed class SegmentReader<T> permits ArraySegmentReader, BeanSegmentRe
 
   abstract Object read(T obj, Path path);
 
-  DeadEnd deadEnd(DeadEnd deadEnd, Supplier<DeadEndException> exc) {
-    return deadEnd(ode, deadEnd, exc);
+  ErrorCode deadEnd(ErrorCode code, Supplier<PathWalkerException> exc) {
+    return switch (ode) {
+      case RETURN_NULL -> null;
+      case RETURN_CODE -> code;
+      case THROW_EXCEPTION -> throw exc.get();
+    };
   }
 
   ObjectReader nextSegmentReader() {
     return new ObjectReader(ode, kds);
+  }
+
+  Function<Path, Object> keyDeserializer() {
+    return kds;
   }
 
 }

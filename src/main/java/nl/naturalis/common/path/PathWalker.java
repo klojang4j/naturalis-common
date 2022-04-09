@@ -1,7 +1,6 @@
 package nl.naturalis.common.path;
 
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.invoke.NoSuchPropertyException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,24 +11,16 @@ import java.util.stream.IntStream;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.length;
 import static nl.naturalis.common.check.CommonGetters.size;
-import static nl.naturalis.common.path.DeadEnd.OK;
+import static nl.naturalis.common.path.ErrorCode.OK;
 import static nl.naturalis.common.path.PathWalker.OnDeadEnd.RETURN_NULL;
 
 /**
- * A {@code PathWalker} lets you read and write deeply nested values within objects using {@link
- * Path} objects. The {@code PathWalker} class is useful for reading large batches of sparsely
- * populated objects or maps. For some of these objects or maps, the {@code PathWalker} may not be
- * able to follow a path all the way to the end. This can be due to any of the following reasons:
- *
- * <p>
- *
- * <ul>
- *   <li>The {@code PathWalker} hit a {@code null} value before it reached the end of the {@code
- *   Path}
- *   <li>The {@code PathWalker} hit a terminal value before it reached the end of the {@code
- *   Path} (a primitive, a {@code String}, or some other type of object that it cannot descend into)
- *   <li>An array index within the {@code Path} was out of bounds
- * </ul>
+ * A {@code PathWalker} lets you read and write deeply nested values using {@link Path} objects. The
+ * {@code PathWalker} class is useful for reading large batches of sparsely populated objects. For
+ * some of these objects, the {@code PathWalker} may not be able to follow the path all the way to
+ * the end, for example because it hit a {@code null} value before it reached the last path segment,
+ * or some other kind of terminal value: a primitive, a {@code String}, etc. By default, this will
+ * not cause the {@code PathWalker} to throw an exception. It will just return {@code null}.
  *
  * @author Ayco Holleman
  */
@@ -37,16 +28,19 @@ import static nl.naturalis.common.path.PathWalker.OnDeadEnd.RETURN_NULL;
 public final class PathWalker {
 
   /**
-   * Symbolic constants for what to do if a {@code PathWalker} hits a dead end.
+   * Symbolic constants for what to do if a read/write action fails.
    */
   public static enum OnDeadEnd {
     /**
-     * Instructs the {@code PathWalker} to return {@code null} if it reaches a dead end.
+     * Instructs the {@code PathWalker} to just return {@code null}. This is the default behaviour.
      */
-    RETURN_NULL, RETURN_DEAD,
+    RETURN_NULL,
     /**
-     * Instructs the {@code PathWalker} to throw a {@link DeadEndException} if it reaches a dead
-     * end.
+     * Instructs the {@code PathWalker} to return an {@link ErrorCode}.
+     */
+    RETURN_CODE,
+    /**
+     * Instructs the {@code PathWalker} to throw a {@link PathWalkerException}.
      */
     THROW_EXCEPTION;
   }
@@ -129,9 +123,9 @@ public final class PathWalker {
    *
    * @param host The object to read the path values from
    * @return The values of all paths within the specified host object
-   * @throws DeadEndException
+   * @throws PathWalkerException
    */
-  public Object[] readValues(Object host) throws DeadEndException {
+  public Object[] readValues(Object host) throws PathWalkerException {
     return IntStream.range(0, paths.length).mapToObj(i -> readObj(host, paths[i])).toArray();
   }
 
@@ -143,9 +137,9 @@ public final class PathWalker {
    *
    * @param host The object from which to read the values
    * @param output An array into which to place the values
-   * @throws DeadEndException
+   * @throws PathWalkerException
    */
-  public void readValues(Object host, Object[] output) throws DeadEndException {
+  public void readValues(Object host, Object[] output) throws PathWalkerException {
     Check.notNull(output, "output").has(length(), gte(), paths.length);
     IntStream.range(0, paths.length).forEach(i -> output[i] = readObj(host, paths[i]));
   }
@@ -156,9 +150,9 @@ public final class PathWalker {
    *
    * @param host The object from which to read the values
    * @param output The {@code Map} into which to put the values
-   * @throws DeadEndException
+   * @throws PathWalkerException
    */
-  public void readValues(Object host, Map<Path, Object> output) throws DeadEndException {
+  public void readValues(Object host, Map<Path, Object> output) throws PathWalkerException {
     Check.notNull(output, "output");
     Arrays.stream(paths).forEach(p -> output.put(p, readObj(host, p)));
   }
@@ -170,7 +164,7 @@ public final class PathWalker {
    * @param <T> The type of the value being returned
    * @param host The object to walk
    * @return The value referenced by the first path
-   * @throws DeadEndException
+   * @throws PathWalkerException
    */
   public <T> T read(Object host) {
     return (T) readObj(host, paths[0]);
@@ -179,7 +173,7 @@ public final class PathWalker {
   /**
    * Sets the values of all configured paths to the specified values. This method returns {@code
    * true} if <i>all</i> values were successfully written. If {@link OnDeadEnd} is {@code
-   * THROW_EXCEPTION}, a {@link DeadEndException} detailing the error is thrown, otherwise this
+   * THROW_EXCEPTION}, a {@link PathWalkerException} detailing the error is thrown, otherwise this
    * method returns {@code false}.
    *
    * @param host The object into which to write the values
@@ -199,14 +193,14 @@ public final class PathWalker {
    * Sets the value of the first path within the provided object to the specified value. Useful if
    * the {@code PathWalker} was created with just one path. This method will return {@code true} if
    * the value was successfully written to the host object. If {@link OnDeadEnd} is {@code
-   * THROW_EXCEPTION}, a {@link DeadEndException} detailing the error is thrown, otherwise this
+   * THROW_EXCEPTION}, a {@link PathWalkerException} detailing the error is thrown, otherwise this
    * method will return false.
    *
    * @param host The object into which to write the value
    * @param value The value to write
    * @return Whether the value was successfully written
    */
-  public DeadEnd write(Object host, Object value) {
+  public ErrorCode write(Object host, Object value) {
     return write(host, paths[0], value);
   }
 
@@ -214,7 +208,7 @@ public final class PathWalker {
     return new ObjectReader(ode, kds).read(obj, path);
   }
 
-  private DeadEnd write(Object host, Path path, Object value) {
+  private ErrorCode write(Object host, Path path, Object value) {
     return new ObjectWriter(ode, kds).write(host, path, value);
   }
 

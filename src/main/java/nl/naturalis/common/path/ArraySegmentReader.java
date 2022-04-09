@@ -7,8 +7,8 @@ import java.util.OptionalInt;
 import java.util.function.Function;
 
 import static nl.naturalis.common.ObjectMethods.isEmpty;
-import static nl.naturalis.common.path.DeadEndException.*;
-import static nl.naturalis.common.path.DeadEnd.*;
+import static nl.naturalis.common.path.PathWalkerException.*;
+import static nl.naturalis.common.path.ErrorCode.*;
 
 final class ArraySegmentReader extends SegmentReader<Object[]> {
 

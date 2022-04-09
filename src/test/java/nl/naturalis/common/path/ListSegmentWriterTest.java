@@ -1,17 +1,10 @@
 package nl.naturalis.common.path;
 
-import nl.naturalis.common.ExceptionMethods;
 import org.junit.Test;
 
-import java.math.BigDecimal;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static nl.naturalis.common.CollectionMethods.newHashMap;
 import static nl.naturalis.common.path.PathWalker.OnDeadEnd.*;
 import static org.junit.Assert.*;
 
@@ -41,7 +34,7 @@ public class ListSegmentWriterTest {
     lsw.write(l, new Path("8"), 42);
   }
 
-  @Test(expected = DeadEndException.class)
+  @Test(expected = PathWalkerException.class)
   public void test03b() {
     List l = new ArrayList(List.of(1, 2, 3, 4));
     ListSegmentWriter lsw = new ListSegmentWriter(THROW_EXCEPTION, null);
@@ -52,11 +45,11 @@ public class ListSegmentWriterTest {
   @Test
   public void test04a() {
     List l = new ArrayList(List.of(1, 2, 3, 4));
-    ListSegmentWriter lsw = new ListSegmentWriter(RETURN_DEAD, null);
+    ListSegmentWriter lsw = new ListSegmentWriter(RETURN_CODE, null);
     lsw.write(l, new Path("path.to.list.8"), 42);
   }
 
-  @Test(expected = DeadEndException.class)
+  @Test(expected = PathWalkerException.class)
   public void test04b() {
     List l = new ArrayList(List.of(1, 2, 3, 4));
     ListSegmentWriter lsw = new ListSegmentWriter(THROW_EXCEPTION, null);
@@ -71,7 +64,7 @@ public class ListSegmentWriterTest {
     lsw.write(l, new Path("path.to.list.foo"), 42);
   }
 
-  @Test(expected = DeadEndException.class)
+  @Test(expected = PathWalkerException.class)
   public void test05b() {
     List l = new ArrayList(List.of(1, 2, 3, 4));
     ListSegmentWriter lsw = new ListSegmentWriter(THROW_EXCEPTION, null);
@@ -82,7 +75,7 @@ public class ListSegmentWriterTest {
   @Test
   public void test06a() {
     List l = new ArrayList(List.of(1, 2, 3, 4));
-    ListSegmentWriter lsw = new ListSegmentWriter(RETURN_DEAD, null);
+    ListSegmentWriter lsw = new ListSegmentWriter(RETURN_CODE, null);
     // empty segment
     lsw.write(l, new Path("this.is.a.path."), 42);
   }

@@ -8,11 +8,10 @@ import java.util.function.Function;
 
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
 
-@SuppressWarnings("rawtypes")
 final class ObjectReader {
 
-  OnDeadEnd ode;
-  Function<Path, Object> kds;
+  private final OnDeadEnd ode;
+  private final Function<Path, Object> kds;
 
   ObjectReader(OnDeadEnd ode, Function<Path, Object> kds) {
     this.ode = ode;
@@ -20,18 +19,18 @@ final class ObjectReader {
   }
 
   Object read(Object obj, Path path) {
-    if (path.isEmpty() || obj == null || obj instanceof DeadEnd) {
+    if (path.isEmpty() || obj == null || obj instanceof ErrorCode) {
       return obj;
-    } else if (obj instanceof Collection) {
-      return new CollectionSegmentReader(ode, kds).read((Collection) obj, path);
-    } else if (obj instanceof Object[]) {
-      return new ArraySegmentReader(ode, kds).read((Object[]) obj, path);
-    } else if (obj instanceof Map) {
-      return new MapSegmentReader(ode, kds).read((Map) obj, path);
+    } else if (obj instanceof Collection c) {
+      return new CollectionSegmentReader(ode, kds).read(c, path);
+    } else if (obj instanceof Object[] o) {
+      return new ArraySegmentReader(ode, kds).read(o, path);
+    } else if (obj instanceof Map m) {
+      return new MapSegmentReader(ode, kds).read(m, path);
     } else if (isPrimitiveArray(obj)) {
       return new PrimitiveArraySegmentReader(ode, kds).read(obj, path);
     } else {
-      return new BeanSegmentReader<>(ode, kds).read(obj, path);
+      return new BeanSegmentReader(ode, kds).read(obj, path);
     }
   }
 

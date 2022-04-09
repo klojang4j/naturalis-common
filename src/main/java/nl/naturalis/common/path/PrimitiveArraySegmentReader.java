@@ -1,8 +1,8 @@
 package nl.naturalis.common.path;
 
 import static nl.naturalis.common.ObjectMethods.isEmpty;
-import static nl.naturalis.common.path.DeadEnd.*;
-import static nl.naturalis.common.path.DeadEndException.*;
+import static nl.naturalis.common.path.ErrorCode.*;
+import static nl.naturalis.common.path.PathWalkerException.*;
 
 import java.lang.reflect.Array;
 import java.util.OptionalInt;
