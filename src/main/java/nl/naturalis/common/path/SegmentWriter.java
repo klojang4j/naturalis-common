@@ -5,15 +5,20 @@ import nl.naturalis.common.path.PathWalker.OnError;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static nl.naturalis.common.path.ErrorCode.OK;
+import static nl.naturalis.common.path.PathWalker.OnError.RETURN_CODE;
+import static nl.naturalis.common.path.PathWalker.OnError.RETURN_NULL;
+
 abstract sealed class SegmentWriter<T> permits ArraySegmentWriter, BeanSegmentWriter,
     ListSegmentWriter, MapSegmentWriter, PrimitiveArraySegmentWriter {
 
   static ErrorCode error(OnError oe, ErrorCode code, Supplier<PathWalkerException> exc) {
-    return switch (oe) {
-      case RETURN_NULL -> null;
-      case RETURN_CODE -> code;
-      case THROW_EXCEPTION -> throw exc.get();
-    };
+    if (oe == RETURN_CODE) {
+      return code;
+    } else if (oe == RETURN_NULL || code == OK) {
+      return null;
+    }
+    throw exc.get();
   }
 
   private final OnError oe;

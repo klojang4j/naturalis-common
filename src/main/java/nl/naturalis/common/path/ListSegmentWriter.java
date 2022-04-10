@@ -31,7 +31,7 @@ final class ListSegmentWriter extends SegmentWriter<List> {
     int idx = opt.getAsInt();
     if (idx < list.size()) {
       list.set(opt.getAsInt(), value);
-      return OK;
+      return error(OK, null);
     }
     return error(INDEX_OUT_OF_BOUNDS, () -> indexOutOfBounds(path));
   }
