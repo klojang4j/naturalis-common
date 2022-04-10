@@ -1,7 +1,7 @@
 package nl.naturalis.common.path;
 
 import nl.naturalis.common.NumberMethods;
-import nl.naturalis.common.path.PathWalker.OnDeadEnd;
+import nl.naturalis.common.path.PathWalker.OnError;
 
 import java.util.OptionalInt;
 import java.util.function.Function;
@@ -12,8 +12,8 @@ import static nl.naturalis.common.path.ErrorCode.*;
 
 final class ArraySegmentReader extends SegmentReader<Object[]> {
 
-  ArraySegmentReader(OnDeadEnd ode, Function<Path, Object> kds) {
-    super(ode, kds);
+  ArraySegmentReader(OnError oe, Function<Path, Object> kd) {
+    super(oe, kd);
   }
 
   @Override

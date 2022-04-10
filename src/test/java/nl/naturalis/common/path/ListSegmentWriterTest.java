@@ -5,7 +5,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static nl.naturalis.common.path.PathWalker.OnDeadEnd.*;
+import static nl.naturalis.common.path.PathWalker.OnError.*;
 import static org.junit.Assert.*;
 
 public class ListSegmentWriterTest {

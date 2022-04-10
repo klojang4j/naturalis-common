@@ -1,17 +1,17 @@
 package nl.naturalis.common.path;
 
-import nl.naturalis.common.path.PathWalker.OnDeadEnd;
+import nl.naturalis.common.path.PathWalker.OnError;
 
 import java.util.Map;
 import java.util.function.Function;
 
 import static nl.naturalis.common.path.ErrorCode.OK;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "unchecked"})
 final class MapSegmentWriter extends SegmentWriter<Map> {
 
-  MapSegmentWriter(OnDeadEnd ode, Function<Path, Object> kds) {
-    super(ode, kds);
+  MapSegmentWriter(OnError oe, Function<Path, Object> kd) {
+    super(oe, kd);
   }
 
   @Override

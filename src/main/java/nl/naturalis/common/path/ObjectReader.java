@@ -1,6 +1,6 @@
 package nl.naturalis.common.path;
 
-import nl.naturalis.common.path.PathWalker.OnDeadEnd;
+import nl.naturalis.common.path.PathWalker.OnError;
 
 import java.util.Collection;
 import java.util.Map;
@@ -10,27 +10,27 @@ import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
 
 final class ObjectReader {
 
-  private final OnDeadEnd ode;
-  private final Function<Path, Object> kds;
+  private final OnError oe;
+  private final Function<Path, Object> kd;
 
-  ObjectReader(OnDeadEnd ode, Function<Path, Object> kds) {
-    this.ode = ode;
-    this.kds = kds;
+  ObjectReader(OnError onError, Function<Path, Object> keyDeserializer) {
+    this.oe = onError;
+    this.kd = keyDeserializer;
   }
 
   Object read(Object obj, Path path) {
     if (path.isEmpty() || obj == null || obj instanceof ErrorCode) {
       return obj;
     } else if (obj instanceof Collection c) {
-      return new CollectionSegmentReader(ode, kds).read(c, path);
+      return new CollectionSegmentReader(oe, kd).read(c, path);
     } else if (obj instanceof Object[] o) {
-      return new ArraySegmentReader(ode, kds).read(o, path);
+      return new ArraySegmentReader(oe, kd).read(o, path);
     } else if (obj instanceof Map m) {
-      return new MapSegmentReader(ode, kds).read(m, path);
+      return new MapSegmentReader(oe, kd).read(m, path);
     } else if (isPrimitiveArray(obj)) {
-      return new PrimitiveArraySegmentReader(ode, kds).read(obj, path);
+      return new PrimitiveArraySegmentReader(oe, kd).read(obj, path);
     } else {
-      return new BeanSegmentReader(ode, kds).read(obj, path);
+      return new BeanSegmentReader(oe, kd).read(obj, path);
     }
   }
 

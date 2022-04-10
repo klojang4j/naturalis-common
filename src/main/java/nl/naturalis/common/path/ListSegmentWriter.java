@@ -1,7 +1,7 @@
 package nl.naturalis.common.path;
 
 import nl.naturalis.common.NumberMethods;
-import nl.naturalis.common.path.PathWalker.OnDeadEnd;
+import nl.naturalis.common.path.PathWalker.OnError;
 
 import java.util.List;
 import java.util.OptionalInt;
@@ -11,11 +11,11 @@ import static nl.naturalis.common.ObjectMethods.isEmpty;
 import static nl.naturalis.common.path.ErrorCode.*;
 import static nl.naturalis.common.path.PathWalkerException.*;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "unchecked"})
 final class ListSegmentWriter extends SegmentWriter<List> {
 
-  ListSegmentWriter(OnDeadEnd ode, Function<Path, Object> kds) {
-    super(ode, kds);
+  ListSegmentWriter(OnError oe, Function<Path, Object> kd) {
+    super(oe, kd);
   }
 
   @Override

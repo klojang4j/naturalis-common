@@ -323,10 +323,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    return obj != null && obj instanceof Path p && Arrays.deepEquals(elems, p.elems);
+    return this == obj || (obj instanceof Path p && Arrays.deepEquals(elems, p.elems));
   }
 
   /**

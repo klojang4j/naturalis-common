@@ -9,12 +9,12 @@ import java.util.OptionalInt;
 import java.util.function.Function;
 
 import nl.naturalis.common.NumberMethods;
-import nl.naturalis.common.path.PathWalker.OnDeadEnd;
+import nl.naturalis.common.path.PathWalker.OnError;
 
 final class PrimitiveArraySegmentReader extends SegmentReader<Object> {
 
-  PrimitiveArraySegmentReader(OnDeadEnd ode, Function<Path, Object> kds) {
-    super(ode, kds);
+  PrimitiveArraySegmentReader(OnError oe, Function<Path, Object> kd) {
+    super(oe, kd);
   }
 
   @Override

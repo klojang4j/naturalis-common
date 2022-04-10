@@ -1,24 +1,23 @@
 package nl.naturalis.common.path;
 
 import nl.naturalis.common.invoke.BeanReader;
-import nl.naturalis.common.invoke.InvokeException;
 import nl.naturalis.common.invoke.NoPublicGettersException;
 import nl.naturalis.common.invoke.NoSuchPropertyException;
-import nl.naturalis.common.path.PathWalker.OnDeadEnd;
+import nl.naturalis.common.path.PathWalker.OnError;
 
 import java.util.function.Function;
 
 import static nl.naturalis.common.path.ErrorCode.*;
 import static nl.naturalis.common.path.PathWalkerException.*;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 final class BeanSegmentReader extends SegmentReader<Object> {
 
-  BeanSegmentReader(OnDeadEnd ode, Function<Path, Object> kds) {
-    super(ode, kds);
+  BeanSegmentReader(OnError oe, Function<Path, Object> kd) {
+    super(oe, kd);
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   Object read(Object bean, Path path) {
     BeanReader reader;
     try {

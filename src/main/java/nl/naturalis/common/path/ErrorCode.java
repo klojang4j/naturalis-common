@@ -1,7 +1,7 @@
 package nl.naturalis.common.path;
 
 /**
- * Symbolic constants for read/write failures.
+ * Symbolic constants for types of read/write failures.
  */
 public enum ErrorCode {
 
@@ -27,7 +27,8 @@ public enum ErrorCode {
   NO_SUCH_PROPERTY,
   /**
    * The {@code PathWalker} encountered a segment that did not correspond to any key of the {@code
-   * Map} it was processing.
+   * Map} it was processing. This code is only returned by the {@code read} methods of the {@code
+   * PathWalker} class. The {@code write} methods just add the key to the map.
    */
   NO_SUCH_KEY,
   /**
@@ -54,6 +55,6 @@ public enum ErrorCode {
    * methods of the {@code PathWalker} class. The {@code read} methods just return the value that
    * was read.
    */
-  OK;
+  OK
 
 }

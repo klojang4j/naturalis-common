@@ -3,6 +3,9 @@ package nl.naturalis.common.path;
 import static nl.naturalis.common.ClassMethods.className;
 import static nl.naturalis.common.path.ErrorCode.*;
 
+/**
+ * Thrown by a {@link PathWalker} if a path-read or path-write error occurs.
+ */
 public final class PathWalkerException extends RuntimeException {
 
   private static final String INVALID_PATH = "Invalid path: \"%s\". ";
@@ -55,15 +58,20 @@ public final class PathWalkerException extends RuntimeException {
     return new PathWalkerException(EXCEPTION, msg);
   }
 
-  private final ErrorCode deadEnd;
+  private final ErrorCode errorCode;
 
-  private PathWalkerException(ErrorCode deadEnd, String message) {
+  private PathWalkerException(ErrorCode errorCode, String message) {
     super(message);
-    this.deadEnd = deadEnd;
+    this.errorCode = errorCode;
   }
 
-  public ErrorCode getDeadEnd() {
-    return deadEnd;
+  /**
+   * Return a symbolic constant for the error encountered by the {@link PathWalker}
+   *
+   * @return A symbolic constant for the error encountered by the {@link PathWalker}.
+   */
+  public ErrorCode getErrorCode() {
+    return errorCode;
   }
 
 }

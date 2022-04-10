@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import static nl.naturalis.common.CollectionMethods.newHashMap;
 import static nl.naturalis.common.path.ErrorCode.INDEX_OUT_OF_BOUNDS;
 import static nl.naturalis.common.path.ErrorCode.NO_SUCH_KEY;
-import static nl.naturalis.common.path.PathWalker.OnDeadEnd.RETURN_CODE;
+import static nl.naturalis.common.path.PathWalker.OnError.RETURN_CODE;
 import static org.junit.Assert.*;
 
 public class PathWalkerTest {

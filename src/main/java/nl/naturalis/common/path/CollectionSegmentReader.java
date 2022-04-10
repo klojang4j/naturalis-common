@@ -1,7 +1,7 @@
 package nl.naturalis.common.path;
 
 import nl.naturalis.common.NumberMethods;
-import nl.naturalis.common.path.PathWalker.OnDeadEnd;
+import nl.naturalis.common.path.PathWalker.OnError;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -15,8 +15,8 @@ import static nl.naturalis.common.path.PathWalkerException.*;
 @SuppressWarnings("rawtypes")
 final class CollectionSegmentReader extends SegmentReader<Collection> {
 
-  CollectionSegmentReader(OnDeadEnd ode, Function<Path, Object> kds) {
-    super(ode, kds);
+  CollectionSegmentReader(OnError oe, Function<Path, Object> kd) {
+    super(oe, kd);
   }
 
   @Override

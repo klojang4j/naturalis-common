@@ -1,7 +1,7 @@
 package nl.naturalis.common.path;
 
 import nl.naturalis.common.NumberMethods;
-import nl.naturalis.common.path.PathWalker.OnDeadEnd;
+import nl.naturalis.common.path.PathWalker.OnError;
 
 import java.lang.reflect.Array;
 import java.util.OptionalInt;
@@ -13,8 +13,8 @@ import static nl.naturalis.common.path.ErrorCode.*;
 
 final class PrimitiveArraySegmentWriter extends SegmentWriter<Object> {
 
-  PrimitiveArraySegmentWriter(OnDeadEnd ode, Function<Path, Object> kds) {
-    super(ode, kds);
+  PrimitiveArraySegmentWriter(OnError oe, Function<Path, Object> kd) {
+    super(oe, kd);
   }
 
   @Override

@@ -8,16 +8,16 @@ import java.util.function.Function;
 
 import nl.naturalis.common.invoke.BeanWriter;
 import nl.naturalis.common.invoke.NoPublicSettersException;
-import nl.naturalis.common.path.PathWalker.OnDeadEnd;
+import nl.naturalis.common.path.PathWalker.OnError;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 final class BeanSegmentWriter extends SegmentWriter<Object> {
 
-  BeanSegmentWriter(OnDeadEnd ode, Function<Path, Object> kds) {
-    super(ode, kds);
+  BeanSegmentWriter(OnError oe, Function<Path, Object> kd) {
+    super(oe, kd);
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   ErrorCode write(Object bean, Path path, Object value) {
     String segment = path.segment(-1);
     if (isEmpty(segment)) {
