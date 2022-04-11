@@ -1,15 +1,16 @@
 package nl.naturalis.common.path;
 
-import static nl.naturalis.common.ObjectMethods.isEmpty;
-import static nl.naturalis.common.path.ErrorCode.*;
-import static nl.naturalis.common.path.PathWalkerException.*;
+import nl.naturalis.common.NumberMethods;
+import nl.naturalis.common.path.PathWalker.OnError;
 
-import java.lang.reflect.Array;
 import java.util.OptionalInt;
 import java.util.function.Function;
 
-import nl.naturalis.common.NumberMethods;
-import nl.naturalis.common.path.PathWalker.OnError;
+import static java.lang.invoke.MethodHandles.arrayElementGetter;
+import static java.lang.invoke.MethodHandles.arrayLength;
+import static nl.naturalis.common.ObjectMethods.isEmpty;
+import static nl.naturalis.common.path.ErrorCode.*;
+import static nl.naturalis.common.path.PathWalkerException.*;
 
 final class PrimitiveArraySegmentReader extends SegmentReader<Object> {
 
@@ -18,24 +19,24 @@ final class PrimitiveArraySegmentReader extends SegmentReader<Object> {
   }
 
   @Override
-  Object read(Object array, Path path) {
+  Object read(Object array, Path path) throws Throwable {
     if (path.size() == 1) { // primitive *must* be the end of the trail
       String segment = path.segment(0);
       if (isEmpty(segment)) {
-        return deadEnd(EMPTY_SEGMENT, () -> emptySegment(path));
+        return error(EMPTY_SEGMENT, () -> emptySegment(path));
       }
       OptionalInt opt = NumberMethods.toPlainInt(segment);
       if (opt.isEmpty()) {
-        return deadEnd(INDEX_EXPECTED, () -> indexExpected(path));
+        return error(INDEX_EXPECTED, () -> indexExpected(path));
       }
       int idx = opt.getAsInt();
-      if (idx < Array.getLength(array)) {
-        Object val = Array.get(array, idx);
+      if (idx < (int) arrayLength(array.getClass()).invoke(array)) {
+        Object val = arrayElementGetter(array.getClass()).invoke(array, idx);
         return nextSegmentReader().read(val, path.shift());
       }
-      return deadEnd(INDEX_OUT_OF_BOUNDS, () -> indexOutOfBounds(path));
+      return error(INDEX_OUT_OF_BOUNDS, () -> indexOutOfBounds(path));
     }
-    return deadEnd(TERMINAL_VALUE, () -> terminalValue(path));
+    return error(TERMINAL_VALUE, () -> terminalValue(path));
   }
 
 }

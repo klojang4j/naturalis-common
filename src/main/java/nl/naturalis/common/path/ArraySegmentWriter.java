@@ -17,7 +17,13 @@ final class ArraySegmentWriter extends SegmentWriter<Object[]> {
   }
 
   @Override
-  ErrorCode write(Object[] array, Path path, Object value) {
+  ErrorCode write(Object[] array, Path path, Object value) throws Throwable {
+    if (value != null) {
+      Class elemClass = array.getClass().getComponentType();
+      if (!elemClass.isInstance(value)) {
+        return error(TYPE_MISMATCH, () -> typeMismatch(path, elemClass, value.getClass()));
+      }
+    }
     String segment = path.segment(-1);
     if (isEmpty(segment)) {
       return error(EMPTY_SEGMENT, () -> emptySegment(path));
@@ -29,7 +35,7 @@ final class ArraySegmentWriter extends SegmentWriter<Object[]> {
     int idx = opt.getAsInt();
     if (idx < array.length) {
       array[idx] = value;
-      return OK;
+      return error(OK, null);
     }
     return error(INDEX_OUT_OF_BOUNDS, () -> indexOutOfBounds(path));
   }

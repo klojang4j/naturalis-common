@@ -1,7 +1,12 @@
 package nl.naturalis.common.path;
 
+import java.util.function.Supplier;
+
 import static nl.naturalis.common.ClassMethods.className;
+import static nl.naturalis.common.ClassMethods.simpleClassName;
 import static nl.naturalis.common.path.ErrorCode.*;
+import static nl.naturalis.common.path.PathWalker.OnError.RETURN_CODE;
+import static nl.naturalis.common.path.PathWalker.OnError.RETURN_NULL;
 
 /**
  * Thrown by a {@link PathWalker} if a path-read or path-write error occurs.
@@ -9,6 +14,15 @@ import static nl.naturalis.common.path.ErrorCode.*;
 public final class PathWalkerException extends RuntimeException {
 
   private static final String INVALID_PATH = "Invalid path: \"%s\". ";
+
+  static ErrorCode error(PathWalker.OnError oe, ErrorCode code, Supplier<PathWalkerException> exc) {
+    if (oe == RETURN_CODE) {
+      return code;
+    } else if (oe == RETURN_NULL || code == OK) {
+      return null;
+    }
+    throw exc.get();
+  }
 
   static PathWalkerException noSuchProperty(Path p) {
     String fmt = INVALID_PATH + " No such property: \"%s\"";
@@ -46,14 +60,20 @@ public final class PathWalkerException extends RuntimeException {
     return new PathWalkerException(EMPTY_SEGMENT, msg);
   }
 
+  static PathWalkerException typeMismatch(Path p, Class expected, Class actual) {
+    String fmt = "Error while writing %s. Cannot assign instances of %s to %s";
+    String msg = String.format(fmt, p, simpleClassName(actual), simpleClassName(expected));
+    return new PathWalkerException(TYPE_MISMATCH, msg);
+  }
+
   static PathWalkerException typeNotSupported(Object host) {
     String fmt = "Don't know how to read/write instances of %s";
     String msg = String.format(fmt, className(host));
     return new PathWalkerException(TYPE_NOT_SUPPORTED, msg);
   }
 
-  static PathWalkerException readError(Path p, Throwable t) {
-    String fmt = "error while reading/writing \"%s\": t";
+  static PathWalkerException exception(Path p, Throwable t) {
+    String fmt = "error while reading/writing \"%s\": %s";
     String msg = String.format(fmt, p, t);
     return new PathWalkerException(EXCEPTION, msg);
   }

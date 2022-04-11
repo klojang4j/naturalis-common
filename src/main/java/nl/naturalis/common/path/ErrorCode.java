@@ -32,6 +32,10 @@ public enum ErrorCode {
    */
   NO_SUCH_KEY,
   /**
+   * The key deserializer used to generate map keys from path segments failed.
+   */
+  KEY_DESERIALIZER_FAILED,
+  /**
    * The {@code PathWalker} encountered a {@link Path#NULL_SEGMENT null} or empty segment in the
    * {@code Path} while not processing a {@code Map}. (Null and empty path segments can only
    * possibly be valid as map keys.)
@@ -46,6 +50,10 @@ public enum ErrorCode {
    * Thrown if the {@code PathWalker} encounters a value that it doesn't know how to read or write.
    */
   TYPE_NOT_SUPPORTED,
+  /**
+   * Thrown if the {@code PathWalker} cannot write a value because of a type mismatch.
+   */
+  TYPE_MISMATCH,
   /**
    * Thrown if the  {@code PathWalker} trapped an exception from underlying code.
    */

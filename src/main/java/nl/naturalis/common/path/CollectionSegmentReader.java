@@ -23,11 +23,11 @@ final class CollectionSegmentReader extends SegmentReader<Collection> {
   Object read(Collection collection, Path path) {
     String segment = path.segment(0);
     if (isEmpty(segment)) {
-      return deadEnd(EMPTY_SEGMENT, () -> emptySegment(path));
+      return error(EMPTY_SEGMENT, () -> emptySegment(path));
     }
     OptionalInt opt = NumberMethods.toPlainInt(segment);
     if (opt.isEmpty()) {
-      return deadEnd(INDEX_EXPECTED, () -> indexExpected(path));
+      return error(INDEX_EXPECTED, () -> indexExpected(path));
     }
     int idx = opt.getAsInt();
     if (idx < collection.size()) {
@@ -38,7 +38,7 @@ final class CollectionSegmentReader extends SegmentReader<Collection> {
         return nextSegmentReader().read(iter.next(), path.shift());
       }
     }
-    return deadEnd(INDEX_OUT_OF_BOUNDS, () -> indexOutOfBounds(path));
+    return error(INDEX_OUT_OF_BOUNDS, () -> indexOutOfBounds(path));
   }
 
 }

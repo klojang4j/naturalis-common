@@ -18,13 +18,11 @@ final class MapSegmentReader extends SegmentReader<Map<String, Object>> {
   @Override
   Object read(Map map, Path path) {
     String segment = path.segment(0);
-    Object key = keyDeserializer() == null
-        ? segment
-        : keyDeserializer().apply(path);
+    Object key = keyDeserializer() == null ? segment : keyDeserializer().apply(path);
     if (map.containsKey(key)) {
       return nextSegmentReader().read(map.get(key), path.shift());
     }
-    return deadEnd(NO_SUCH_KEY, () -> noSuchKey(path));
+    return error(NO_SUCH_KEY, () -> noSuchKey(path));
   }
 
 }

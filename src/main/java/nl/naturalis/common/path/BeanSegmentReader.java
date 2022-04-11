@@ -23,17 +23,14 @@ final class BeanSegmentReader extends SegmentReader<Object> {
     try {
       reader = new BeanReader(bean.getClass());
     } catch (NoPublicGettersException e) {
-      return deadEnd(TERMINAL_VALUE, () -> terminalValue(path));
+      return error(TERMINAL_VALUE, () -> terminalValue(path));
     }
     try {
       Object val = reader.read(bean, path.segment(0));
       return nextSegmentReader().read(val, path.shift());
     } catch (NoSuchPropertyException e) {
-      return deadEnd(NO_SUCH_PROPERTY, () -> noSuchProperty(path));
-    } catch (Throwable t) {
-      return deadEnd(EXCEPTION, () -> readError(path, t));
+      return error(NO_SUCH_PROPERTY, () -> noSuchProperty(path));
     }
-
   }
 
 }

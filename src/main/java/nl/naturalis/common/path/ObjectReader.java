@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
+import static nl.naturalis.common.path.ErrorCode.EXCEPTION;
+import static nl.naturalis.common.path.PathWalkerException.exception;
 
 final class ObjectReader {
 
@@ -21,16 +23,23 @@ final class ObjectReader {
   Object read(Object obj, Path path) {
     if (path.isEmpty() || obj == null || obj instanceof ErrorCode) {
       return obj;
-    } else if (obj instanceof Collection c) {
-      return new CollectionSegmentReader(oe, kd).read(c, path);
-    } else if (obj instanceof Object[] o) {
-      return new ArraySegmentReader(oe, kd).read(o, path);
-    } else if (obj instanceof Map m) {
-      return new MapSegmentReader(oe, kd).read(m, path);
-    } else if (isPrimitiveArray(obj)) {
-      return new PrimitiveArraySegmentReader(oe, kd).read(obj, path);
-    } else {
-      return new BeanSegmentReader(oe, kd).read(obj, path);
+    }
+    try {
+      if (obj instanceof Collection c) {
+        return new CollectionSegmentReader(oe, kd).read(c, path);
+      } else if (obj instanceof Object[] o) {
+        return new ArraySegmentReader(oe, kd).read(o, path);
+      } else if (obj instanceof Map m) {
+        return new MapSegmentReader(oe, kd).read(m, path);
+      } else if (isPrimitiveArray(obj)) {
+        return new PrimitiveArraySegmentReader(oe, kd).read(obj, path);
+      } else {
+        return new BeanSegmentReader(oe, kd).read(obj, path);
+      }
+    } catch (PathWalkerException e) {
+      throw e;
+    } catch (Throwable t) {
+      return PathWalkerException.error(oe, EXCEPTION, () -> exception(path, t));
     }
   }
 

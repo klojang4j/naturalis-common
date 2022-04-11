@@ -9,10 +9,8 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
-import static nl.naturalis.common.path.ErrorCode.TERMINAL_VALUE;
-import static nl.naturalis.common.path.ErrorCode.TYPE_NOT_SUPPORTED;
-import static nl.naturalis.common.path.PathWalkerException.terminalValue;
-import static nl.naturalis.common.path.PathWalkerException.typeNotSupported;
+import static nl.naturalis.common.path.ErrorCode.*;
+import static nl.naturalis.common.path.PathWalkerException.*;
 
 final class ObjectWriter {
 
@@ -40,19 +38,26 @@ final class ObjectWriter {
       obj = pw.read(host);
     }
     if (obj == null || obj instanceof ErrorCode) {
-      return SegmentWriter.error(oe, TERMINAL_VALUE, () -> terminalValue(path));
-    } else if (obj instanceof List l) {
-      return new ListSegmentWriter(oe, kd).write(l, path, value);
-    } else if (obj instanceof Map m) {
-      return new MapSegmentWriter(oe, kd).write(m, path, value);
-    } else if (obj instanceof Object[] o) {
-      return new ArraySegmentWriter(oe, kd).write(o, path, value);
-    } else if (isPrimitiveArray(obj)) {
-      return new PrimitiveArraySegmentWriter(oe, kd).write(obj, path, value);
-    } else if (isWritable(obj)) {
-      return new BeanSegmentWriter(oe, kd).write(obj, path, value);
+      return error(oe, TERMINAL_VALUE, () -> terminalValue(path));
     }
-    return SegmentWriter.error(oe, TYPE_NOT_SUPPORTED, () -> typeNotSupported(obj));
+    try {
+      if (obj instanceof List l) {
+        return new ListSegmentWriter(oe, kd).write(l, path, value);
+      } else if (obj instanceof Map m) {
+        return new MapSegmentWriter(oe, kd).write(m, path, value);
+      } else if (obj instanceof Object[] o) {
+        return new ArraySegmentWriter(oe, kd).write(o, path, value);
+      } else if (isPrimitiveArray(obj)) {
+        return new PrimitiveArraySegmentWriter(oe, kd).write(obj, path, value);
+      } else if (isWritable(obj)) {
+        return new BeanSegmentWriter(oe, kd).write(obj, path, value);
+      }
+    } catch (PathWalkerException e) {
+      throw e;
+    } catch (Throwable t) {
+      return error(oe, EXCEPTION, () -> exception(path, t));
+    }
+    return error(oe, TYPE_NOT_SUPPORTED, () -> typeNotSupported(obj));
   }
 
   private static boolean isWritable(Object obj) {

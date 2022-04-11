@@ -16,14 +16,48 @@ import static java.lang.invoke.MethodHandles.arrayConstructor;
 import static java.lang.invoke.MethodHandles.publicLookup;
 import static java.lang.invoke.MethodType.methodType;
 import static java.lang.reflect.Modifier.isStatic;
+import static nl.naturalis.common.ArrayMethods.pack;
+import static nl.naturalis.common.ClassMethods.unbox;
+import static nl.naturalis.common.check.Check.fail;
 
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class InvokeUtils {
 
   private static final Map<Class<?>, MethodHandle> noArgConstructors = new HashMap<>();
   private static final Map<Class<?>, MethodHandle> intArgConstructors = new HashMap<>();
-  private static final Set<String> IGNORE = Set.of("getClass", "toString", "hashCode");
+  private static final Set<String> NON_GETTERS = Set.of("getClass", "toString", "hashCode");
 
-  @SuppressWarnings({"unchecked"})
+  private static final Class[] NARROW_TO_WIDE = pack(byte.class,
+      short.class,
+      int.class,
+      long.class,
+      float.class,
+      double.class);
+
+  public static boolean isDynamicallyAssignable(Object val, Class<?> type) {
+    if (type.isInstance(val)) {
+      return true;
+    }
+    if (!type.isPrimitive()) {
+      return false;
+    }
+    Class clazz = unbox(val.getClass());
+    if (!clazz.isPrimitive()) {
+      return false;
+    }
+    type = type == char.class ? int.class : type;
+    clazz = clazz == char.class ? int.class : clazz;
+    for (Class c : NARROW_TO_WIDE) {
+      if (clazz == c) {
+        return true;
+      }
+      if (type == c) {
+        return false;
+      }
+    }
+    return fail("huh?");
+  }
+
   public static <T> T newInstance(Class<T> clazz) throws Throwable {
     try {
       return (T) getNoArgConstructor(clazz).invoke();
@@ -98,7 +132,7 @@ public class InvokeUtils {
         continue;
       } else if (m.getReturnType() == void.class) {
         continue;
-      } else if (IGNORE.contains(m.getName())) {
+      } else if (NON_GETTERS.contains(m.getName())) {
         continue;
       } else if (strict && !validGetterName(m)) {
         continue;
@@ -216,4 +250,5 @@ public class InvokeUtils {
     String n = m.getName();
     return n.length() > 3 && n.startsWith("set") && isUpperCase(n.charAt(3));
   }
+
 }

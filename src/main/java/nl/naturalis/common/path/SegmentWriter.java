@@ -5,21 +5,8 @@ import nl.naturalis.common.path.PathWalker.OnError;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static nl.naturalis.common.path.ErrorCode.OK;
-import static nl.naturalis.common.path.PathWalker.OnError.RETURN_CODE;
-import static nl.naturalis.common.path.PathWalker.OnError.RETURN_NULL;
-
 abstract sealed class SegmentWriter<T> permits ArraySegmentWriter, BeanSegmentWriter,
     ListSegmentWriter, MapSegmentWriter, PrimitiveArraySegmentWriter {
-
-  static ErrorCode error(OnError oe, ErrorCode code, Supplier<PathWalkerException> exc) {
-    if (oe == RETURN_CODE) {
-      return code;
-    } else if (oe == RETURN_NULL || code == OK) {
-      return null;
-    }
-    throw exc.get();
-  }
 
   private final OnError oe;
   private final Function<Path, Object> kd;
@@ -29,10 +16,10 @@ abstract sealed class SegmentWriter<T> permits ArraySegmentWriter, BeanSegmentWr
     this.kd = kd;
   }
 
-  abstract ErrorCode write(T obj, Path path, Object value);
+  abstract ErrorCode write(T obj, Path path, Object value) throws Throwable;
 
   ErrorCode error(ErrorCode code, Supplier<PathWalkerException> exc) {
-    return error(oe, code, exc);
+    return PathWalkerException.error(oe, code, exc);
   }
 
   Function<Path, Object> keyDeserializer() {

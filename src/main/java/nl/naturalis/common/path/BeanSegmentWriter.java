@@ -18,7 +18,7 @@ final class BeanSegmentWriter extends SegmentWriter<Object> {
   }
 
   @Override
-  ErrorCode write(Object bean, Path path, Object value) {
+  ErrorCode write(Object bean, Path path, Object value) throws Throwable {
     String segment = path.segment(-1);
     if (isEmpty(segment)) {
       return error(EMPTY_SEGMENT, () -> emptySegment(path));
@@ -29,12 +29,8 @@ final class BeanSegmentWriter extends SegmentWriter<Object> {
     } catch (NoPublicSettersException e) {
       return error(TERMINAL_VALUE, () -> terminalValue(path));
     }
-    try {
-      bw.set(bean, segment, value);
-      return OK;
-    } catch (Throwable t) {
-      return error(EXCEPTION, () -> readError(path, t));
-    }
+    bw.set(bean, segment, value);
+    return error(OK, null);
   }
 
 }

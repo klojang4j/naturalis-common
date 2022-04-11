@@ -5,10 +5,6 @@ import nl.naturalis.common.path.PathWalker.OnError;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static nl.naturalis.common.path.ErrorCode.OK;
-import static nl.naturalis.common.path.PathWalker.OnError.RETURN_CODE;
-import static nl.naturalis.common.path.PathWalker.OnError.RETURN_NULL;
-
 abstract sealed class SegmentReader<T> permits ArraySegmentReader, BeanSegmentReader,
     CollectionSegmentReader, MapSegmentReader, PrimitiveArraySegmentReader {
 
@@ -20,15 +16,10 @@ abstract sealed class SegmentReader<T> permits ArraySegmentReader, BeanSegmentRe
     this.kd = kd;
   }
 
-  abstract Object read(T obj, Path path);
+  abstract Object read(T obj, Path path) throws Throwable;
 
-  ErrorCode deadEnd(ErrorCode code, Supplier<PathWalkerException> exc) {
-    if (oe == RETURN_CODE) {
-      return code;
-    } else if (oe == RETURN_NULL || code == OK) {
-      return null;
-    }
-    throw exc.get();
+  ErrorCode error(ErrorCode code, Supplier<PathWalkerException> exc) {
+    return PathWalkerException.error(oe, code, exc);
   }
 
   ObjectReader nextSegmentReader() {
