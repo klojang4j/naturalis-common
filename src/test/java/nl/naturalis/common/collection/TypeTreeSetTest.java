@@ -9,61 +9,62 @@ import java.time.DayOfWeek;
 import java.time.Month;
 import java.util.*;
 import java.util.function.Function;
+
 import org.junit.Test;
 import nl.naturalis.common.util.ExpansionType;
+
 import static nl.naturalis.common.ArrayMethods.implode;
 
 public class TypeTreeSetTest {
 
   @Test
   public void test01() {
-    TypeTreeSet tts =
-        TypeTreeSet.of(
-            true,
-            FileOutputStream.class,
-            StringBuilder.class,
-            Map.class,
-            Character.class,
-            char.class,
-            boolean.class,
-            Set[].class,
-            Double.class,
-            Number.class,
-            SortedSet.class,
-            Closeable.class,
-            Short.class,
-            NavigableMap.class,
-            int[][].class,
-            AutoCloseable.class,
-            ExpansionType.class,
-            LinkedList.class,
-            ArrayList.class,
-            Iterable.class,
-            ByteArrayOutputStream.class,
-            DayOfWeek.class,
-            Set.class,
-            OutputStream.class,
-            Object.class,
-            short.class,
-            NavigableMap.class,
-            NavigableSet.class,
-            String.class,
-            Month.class,
-            Object[].class,
-            AbstractTypeMap.class,
-            Collection.class,
-            RoundingMode.class,
-            Integer.class,
-            List.class,
-            SortedMap.class,
-            Enum.class,
-            short.class,
-            MyArrayList.class,
-            Long.class,
-            CharSequence.class,
-            Function.class,
-            int.class,
-            MyArrayList2.class);
+    TypeTreeSet tts = TypeTreeSet.of(true,
+        FileOutputStream.class,
+        StringBuilder.class,
+        Map.class,
+        Character.class,
+        char.class,
+        boolean.class,
+        Set[].class,
+        Double.class,
+        Number.class,
+        SortedSet.class,
+        Closeable.class,
+        Short.class,
+        NavigableMap.class,
+        int[][].class,
+        AutoCloseable.class,
+        ExpansionType.class,
+        WiredList.class,
+        ArrayList.class,
+        Iterable.class,
+        ByteArrayOutputStream.class,
+        DayOfWeek.class,
+        Set.class,
+        OutputStream.class,
+        Object.class,
+        short.class,
+        NavigableMap.class,
+        NavigableSet.class,
+        String.class,
+        Month.class,
+        Object[].class,
+        AbstractTypeMap.class,
+        Collection.class,
+        RoundingMode.class,
+        Integer.class,
+        List.class,
+        SortedMap.class,
+        Enum.class,
+        short.class,
+        MyArrayList.class,
+        Long.class,
+        CharSequence.class,
+        Function.class,
+        int.class,
+        MyArrayList2.class);
     System.out.println(implode(tts.prettySimpleTypeNames().toArray(), "\n"));
   }
+
 }
