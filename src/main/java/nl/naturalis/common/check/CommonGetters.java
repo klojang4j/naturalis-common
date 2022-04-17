@@ -240,6 +240,18 @@ public class CommonGetters {
     return Collection::size;
   }
 
+  /**
+   * Alias for the {@link #size()} getter. This getter may come in handy when you create an
+   * extension or implementation of a collection framework class, in which case using the {@code
+   * #size()} getter would cause a name clash.
+   *
+   * @param <C> The type of the {@code Collection}
+   * @return The size of a {@code Collection} argument
+   */
+  public static <C extends Collection<?>> ToIntFunction<C> count() {
+    return size();
+  }
+
   static {
     tmp.put(size(), (arg, argName) -> base(argName, arg) + ".size()");
   }
@@ -411,4 +423,5 @@ public class CommonGetters {
   private static String base(String argName, Object arg) {
     return ifNull(argName, simpleClassName(arg));
   }
+
 }

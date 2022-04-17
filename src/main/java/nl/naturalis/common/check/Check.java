@@ -243,12 +243,12 @@ public final class Check {
    *
    * @param size The length of the {@code String}, {@code List}, (etc.) from which to extract
    *     the segment
-   * @param from The start index of the segment
-   * @param to The end index of the segment
+   * @param fromIndex The start index of the segment
+   * @param toIndex The end index of the segment
    */
-  public static void fromTo(int size, int from, int to) {
-    Check.on(indexOutOfBounds(), from, "from").isNot(negative()).isNot(gt(), to);
-    Check.on(indexOutOfBounds(), to, "to").isNot(gt(), size);
+  public static void fromTo(int size, int fromIndex, int toIndex) {
+    Check.on(indexOutOfBounds(), fromIndex, "fromIndex").isNot(negative()).isNot(gt(), toIndex);
+    Check.on(indexOutOfBounds(), toIndex, "toIndex").isNot(gt(), size);
   }
 
   /**
@@ -307,4 +307,5 @@ public final class Check {
     System.arraycopy(msgArgs, 0, args, 5, msgArgs.length);
     throw excFactory.apply(CustomMsgFormatter.format(msg, args));
   }
+
 }
