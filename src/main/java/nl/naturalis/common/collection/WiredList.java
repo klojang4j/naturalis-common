@@ -6,6 +6,7 @@ import nl.naturalis.common.check.IntCheck;
 import nl.naturalis.common.x.invoke.InvokeUtils;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 import static java.util.Collections.emptyListIterator;
 import static nl.naturalis.common.check.CommonChecks.*;
@@ -71,6 +72,7 @@ public class WiredList<E> implements List<E> {
 
     @Override
     public E next() {
+      Check.that(curr).isNot(sameAs(), tail, NO_SUCH_ELEMENT);
       return (curr = curr.next).val;
     }
 
@@ -82,7 +84,7 @@ public class WiredList<E> implements List<E> {
 
   private class ListItr implements ListIterator<E> {
 
-    final int start;
+    int idx;
 
     Node<E> curr;
 
@@ -91,7 +93,7 @@ public class WiredList<E> implements List<E> {
     }
 
     ListItr(int index) {
-      this.start = index;
+      this.idx = index;
     }
 
     @Override
@@ -102,10 +104,9 @@ public class WiredList<E> implements List<E> {
     @Override
     public E next() {
       if (curr == null) {
-        return (curr = node(start)).val;
-      } else if (curr == tail) {
-        throw new NoSuchElementException();
+        return (curr = node(idx)).val;
       }
+      Check.that(curr).isNot(sameAs(), tail, NO_SUCH_ELEMENT);
       return (curr = curr.next).val;
     }
 
@@ -117,18 +118,23 @@ public class WiredList<E> implements List<E> {
     @Override
     public E previous() {
       if (curr == null) {
-        return (curr = node(start)).val;
-      } else if (curr == head) {
-        throw new NoSuchElementException();
+        return (curr = node(idx)).val;
       }
+      Check.that(curr).isNot(sameAs(), head, NO_SUCH_ELEMENT);
       return (curr = curr.prev).val;
     }
 
+    /**
+     * <b>Not supported by this implementation of {@code ListIterator}.</b>
+     */
     @Override
     public int nextIndex() {
       throw new UnsupportedOperationException();
     }
 
+    /**
+     * <b>Not supported by this implementation of {@code ListIterator}.</b>
+     */
     @Override
     public int previousIndex() {
       throw new UnsupportedOperationException();
@@ -141,7 +147,8 @@ public class WiredList<E> implements List<E> {
 
     @Override
     public void set(E e) {
-
+      Check.on(illegalState(), curr).isNot(NULL(), "previousIndex/nextIndex not called yet");
+      curr.val = e;
     }
 
     @Override
@@ -156,9 +163,14 @@ public class WiredList<E> implements List<E> {
   // ======================================================= //
 
   // Ubiquitous parameter names within this class
-
   private static final String INDEX = "index";
   private static final String VALUES = "values";
+
+  // Error messages
+  private static final String ALREADY_EMBEDDED = "Cannot embed the same list twice";
+
+  private static final Supplier<NoSuchElementException> NO_SUCH_ELEMENT =
+      () -> new NoSuchElementException();
 
   public static <E> WiredList<E> of(E e) {
     WiredList<E> wl = new WiredList<>();
@@ -173,6 +185,7 @@ public class WiredList<E> implements List<E> {
     return wl;
   }
 
+  @SafeVarargs
   public static <E> WiredList<E> of(E e0, E e1, E e2, E... moreElems) {
     WiredList<E> wl = new WiredList<>();
     wl.append(e0);
@@ -183,6 +196,7 @@ public class WiredList<E> implements List<E> {
   }
 
   private int sz;
+  private boolean embedded;
 
   private Node<E> head;
   private Node<E> tail;
@@ -231,6 +245,40 @@ public class WiredList<E> implements List<E> {
   public void insertAll(int index, Collection<? extends E> values) {
     var nodes = Check.notNull(values, VALUES).ok(this::asNodes);
     insertAll(index, nodes);
+  }
+
+  /**
+   * Embeds the specified {@code WiredList} within this {@code WiredList}. This method is very
+   * efficient, but it will modify the provided list. Lists that have already been embedded within
+   * another list will be rejected. Changes made afterwards to the provided list will be reflected
+   * in this {@code WiredList} and vice versa.
+   *
+   * @param index The index at which to embed the {@code WiredList}
+   * @param other The {@code WiredList} to embed
+   */
+  public void embed(int index, WiredList<E> other) {
+    Check.notNull(other, "other");
+    if (!other.isEmpty()) {
+      if (this.isEmpty()) {
+        head = other.head;
+        tail = other.tail;
+      } else if (index == 0) {
+        other.tail.next = head;
+        head.prev = other.tail;
+        head = other.head;
+      } else if (index == sz) {
+        tail.next = other.head;
+        other.head.prev = tail;
+      } else {
+        Check.that(index, INDEX).is(gte(), 0).is(lte(), sz);
+        var node = node(index);
+        node.next.prev = other.tail;
+        other.tail.next = node.next;
+        node.next = other.head;
+        other.head.prev = node;
+      }
+      sz += other.sz;
+    }
   }
 
   public E cut(int index) {
@@ -397,7 +445,10 @@ public class WiredList<E> implements List<E> {
 
   @Override
   public E set(int index, E element) {
-    return null;
+    var node = checkIndex(index).ok(this::node);
+    E old = node.val;
+    node.val = element;
+    return old;
   }
 
   @Override
@@ -472,7 +523,7 @@ public class WiredList<E> implements List<E> {
         nodes[0].prev = tail;
         tail = nodes[nodes.length - 1];
       } else {
-        checkIndex(index);
+        Check.that(index, INDEX).is(gte(), 0).is(lte(), sz);
         var node = node(index);
         nodes[0].prev = node.prev;
         nodes[nodes.length - 1].next = node;

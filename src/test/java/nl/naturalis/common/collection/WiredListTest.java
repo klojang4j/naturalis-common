@@ -221,6 +221,26 @@ public class WiredListTest {
   }
 
   @Test
+  public void cut08() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = wl0.cut(5, 2);
+    assertEquals(8, wl0.size());
+    assertEquals(2, wl1.size());
+    assertEquals(WiredList.of(0, 1, 2, 3, 4, 7, 8, 9), wl0);
+    assertEquals(WiredList.of(5, 6), wl1);
+  }
+
+  @Test
+  public void cut09() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = wl0.cut(5, 3);
+    assertEquals(7, wl0.size());
+    assertEquals(3, wl1.size());
+    assertEquals(WiredList.of(0, 1, 2, 3, 4, 8, 9), wl0);
+    assertEquals(WiredList.of(5, 6, 7), wl1);
+  }
+
+  @Test
   public void ItrTest00() {
     var wl = new WiredList<Integer>();
     var itr = wl.iterator();
