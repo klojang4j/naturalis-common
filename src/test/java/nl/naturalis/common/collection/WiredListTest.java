@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import static nl.naturalis.common.ArrayMethods.pack;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -266,6 +267,21 @@ public class WiredListTest {
     assertEquals(2, (int) itr.next());
     assertEquals(3, (int) itr.next());
     assertFalse(itr.hasNext());
+  }
+
+  @Test
+  public void toArray00() {
+    var wl = WiredList.of(0, 1, 2, 3);
+    assertArrayEquals(pack(0, 1, 2, 3), wl.toArray(new Integer[0]));
+    assertArrayEquals(pack(0, 1, 2, 3), wl.toArray(new Integer[4]));
+    Integer[] ints = wl.toArray(new Integer[5]);
+    assertNull(ints[4]);
+  }
+
+  @Test
+  public void toArray01() {
+    var wl = WiredList.of(0, 1, 2, 3);
+    assertArrayEquals(pack(0, 1, 2, 3), wl.toArray());
   }
 
 }
