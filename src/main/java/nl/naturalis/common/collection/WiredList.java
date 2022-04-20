@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 
 import static java.util.Collections.emptyListIterator;
 import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
+import static nl.naturalis.common.ArrayMethods.pack;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
@@ -19,6 +20,24 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * @param <E> The type of the elements in the list
  */
 public class WiredList<E> implements List<E> {
+
+  // ======================================================= //
+  // ====================== [ Chain ] ====================== //
+  // ======================================================= //
+
+  private class Chain {
+
+    final Node<E> head;
+    final Node<E> tail;
+    final int length;
+
+    Chain(Node<E> head, Node<E> tail, int length) {
+      this.head = head;
+      this.tail = tail;
+      this.length = length;
+    }
+
+  }
 
   // ======================================================= //
   // ======================= [ Node ] ====================== //
@@ -188,11 +207,14 @@ public class WiredList<E> implements List<E> {
 
   @SafeVarargs
   public static <E> WiredList<E> of(E e0, E e1, E e2, E... moreElems) {
+    Check.notNull(moreElems, "moreElems");
     WiredList<E> wl = new WiredList<>();
     wl.append(e0);
     wl.append(e1);
     wl.append(e2);
-    wl.insertAll(3, wl.asNodes(moreElems));
+    if (moreElems.length != 0) {
+      wl.insert(3, wl.chain(moreElems));
+    }
     return wl;
   }
 
@@ -208,10 +230,11 @@ public class WiredList<E> implements List<E> {
     insertAll(0, c);
   }
 
-  private WiredList(Node<E> head, Node<E> tail, int sz) {
+  private WiredList(Node<E> head, Node<E> tail, int sz, boolean embedded) {
     this.head = head;
     this.tail = tail;
     this.sz = sz;
+    this.embedded = embedded;
   }
 
   public void prepend(E value) {
@@ -231,25 +254,56 @@ public class WiredList<E> implements List<E> {
   }
 
   public void insert(int index, E value) {
-    if (sz == 0) {
-      head = tail = new Node<>(value);
-    } else if (index == 0) {
-      head.prev = new Node<>(value, head);
-      head = head.prev;
-    } else if (index == sz) {
-      tail.next = new Node<>(tail, value);
-      tail = tail.next;
-    } else {
-      Check.that(index, INDEX).is(gte(), 0).is(lte(), sz);
-      var node = node(index);
-      new Node<>(node.prev, value, node);
-    }
-    ++sz;
+    insert(index, chain(pack(value)));
+    //    if (sz == 0) {
+    //      head = tail = new Node<>(value);
+    //    } else if (index == 0) {
+    //      head.prev = new Node<>(value, head);
+    //      head = head.prev;
+    //    } else if (index == sz) {
+    //      tail.next = new Node<>(tail, value);
+    //      tail = tail.next;
+    //    } else {
+    //      Check.that(index, INDEX).is(gte(), 0).is(lte(), sz);
+    //      var node = node(index);
+    //      new Node<>(node.prev, value, node);
+    //    }
+    //    ++sz;
   }
 
   public void insertAll(int index, Collection<? extends E> values) {
-    var nodes = Check.notNull(values, VALUES).ok(this::asNodes);
-    insertAll(index, nodes);
+    Check.notNull(values, "values");
+    if (!values.isEmpty()) {
+      insert(index, chain(values));
+    }
+  }
+
+  public WiredList<E> region(int fromIndex, int toIndex) {
+    int length = Check.fromTo(this, fromIndex, toIndex);
+    Node<E> start = node(fromIndex);
+    Node<E> end = node(start, fromIndex, length);
+    return new WiredList<>(start, end, length, true);
+  }
+
+  public WiredList<E> segment(int offset, int length) {
+    Check.offsetLength(this, offset, length);
+    Node<E> start = node(offset);
+    Node<E> end = node(start, offset, length);
+    return new WiredList<>(start, end, length, true);
+  }
+
+  public WiredList<E> copyRegion(int fromIndex, int toIndex) {
+    int length = Check.fromTo(this, fromIndex, toIndex);
+    Node<E> start = node(fromIndex);
+    Node<E> end = node(start, fromIndex, length);
+    return new WiredList<>(start, end, length, true);
+  }
+
+  public WiredList<E> copySegment(int offset, int length) {
+    Check.offsetLength(this, offset, length);
+    Node<E> start = node(offset);
+    Node<E> end = node(start, offset, length);
+    return new WiredList<>(start, end, length, true);
   }
 
   /**
@@ -287,42 +341,15 @@ public class WiredList<E> implements List<E> {
   }
 
   public E cut(int index) {
-    var node = checkIndex(index).ok(this::node);
-    if (sz == 1) {
-      if (embedded) {
-        if (head.prev != null) {
-          head.prev.next = tail.next;
-        }
-        if (tail.next != null) {
-          tail.next.prev = head.prev;
-        }
-        embedded = false;
-      }
-      head = tail = null;
-    } else if (node == head) {
-      head = node.next;
-      if (!embedded) {
-        head.prev = null;  // don't hog the heap
-      }
-    } else if (node == tail) {
-      tail = node.prev;
-      if (!embedded) {
-        tail.next = null;
-      }
-    } else {
-      node.prev.next = node.next;
-      node.next.prev = node.prev;
-    }
-    --sz;
-    return node.val;
+    return cut0(index, 1).head.val;
   }
 
-  public WiredList<E> delete(int fromIndex, int toIndex) {
+  public WiredList<E> deleteRegion(int fromIndex, int toIndex) {
     Check.fromTo(this, fromIndex, toIndex);
     return cut0(fromIndex, fromIndex - toIndex);
   }
 
-  public WiredList<E> cut(int offset, int length) {
+  public WiredList<E> deleteSegment(int offset, int length) {
     Check.offsetLength(sz, offset, length);
     return cut0(offset, length);
   }
@@ -330,45 +357,6 @@ public class WiredList<E> implements List<E> {
   public WiredList<E> copy(int offset, int length) {
     Check.offsetLength(sz, offset, length);
     return cut0(offset, length);
-  }
-
-  private WiredList<E> cut0(int offset, int len) {
-    WiredList<E> wl;
-    if (len == 0) {
-      wl = new WiredList<>();
-    } else if (len == sz) {
-      wl = new WiredList<>(head, tail, sz);
-      if (embedded) {
-        if (head.prev != null) {
-          head.prev.next = tail.next;
-        }
-        if (tail.next != null) {
-          tail.next.prev = head.prev;
-        }
-        embedded = false;
-      }
-      head = tail = null;
-    } else {
-      var start = node(offset);
-      var end = node(start, offset, len);
-      if (start == head) {
-        head = end.next;
-        if (!embedded) {
-          head.prev = null;
-        }
-      } else if (end == tail) {
-        tail = start.prev;
-        if (!embedded) {
-          tail.next = null;
-        }
-      } else {
-        start.prev.next = end.next;
-        end.next.prev = start.prev;
-      }
-      wl = new WiredList<>(start, end, len);
-    }
-    sz -= len;
-    return wl;
   }
 
   @Override
@@ -515,11 +503,7 @@ public class WiredList<E> implements List<E> {
 
   @Override
   public List<E> subList(int fromIndex, int toIndex) {
-    if (fromIndex == 0 && toIndex == sz) {
-      return this;
-    }
-    Check.fromTo(this, fromIndex, toIndex);
-    return null;
+    return region(fromIndex, toIndex);
   }
 
   @Override
@@ -558,59 +542,109 @@ public class WiredList<E> implements List<E> {
     return '[' + CollectionMethods.implode(this) + ']';
   }
 
-  private void insertAll(int index, Node[] nodes) {
-    if (nodes.length > 0) {
-      if (sz == 0) {
-        head = nodes[0];
-        tail = nodes[nodes.length - 1];
-      } else if (index == 0) {
-        nodes[nodes.length - 1].next = head;
-        head.prev = nodes[nodes.length - 1];
-        head = nodes[0];
-      } else if (index == sz) {
-        tail.next = nodes[0];
-        nodes[0].prev = tail;
-        tail = nodes[nodes.length - 1];
+  private void insert(int index, Chain chain) {
+    if (sz == 0) {
+      head = chain.head;
+      tail = chain.tail;
+    } else if (index == 0) {
+      chain.tail.next = head;
+      head.prev = chain.tail;
+      head = chain.head;
+    } else if (index == sz) {
+      tail.next = chain.head;
+      chain.head.prev = tail;
+      tail = chain.tail;
+    } else {
+      Check.that(index, INDEX).is(gte(), 0).is(lte(), sz);
+      var node = node(index);
+      chain.head.prev = node.prev;
+      if (chain.length == 1) {
+        chain.head.next = node;
+        node.prev.next = node.prev = chain.head;
       } else {
-        Check.that(index, INDEX).is(gte(), 0).is(lte(), sz);
-        var node = node(index);
-        nodes[0].prev = node.prev;
-        nodes[nodes.length - 1].next = node;
-        node.prev = nodes[nodes.length - 1];
+        node.prev.next = chain.head;
+        chain.tail.next = node;
+        node.prev = chain.tail;
       }
-      sz += nodes.length;
     }
+    sz += chain.length;
   }
 
-  private static final Node[] ZERO_NODES = new Node[0];
-
-  private Node[] asNodes(Collection<? extends E> values) {
-    if (values.size() == 0) {
-      return ZERO_NODES;
+  private WiredList<E> cut0(int off, int len) {
+    WiredList<E> wl;
+    if (len == 0) {
+      wl = new WiredList<>();
+    } else if (len == sz) {
+      wl = new WiredList<>(head, tail, sz, false);
+      if (embedded) {
+        if (head.prev != null) {
+          head.prev.next = tail.next;
+        }
+        if (tail.next != null) {
+          tail.next.prev = head.prev;
+        }
+        embedded = false;
+      }
+      head = tail = null;
+    } else {
+      var start = node(off);
+      var end = node(start, off, len);
+      if (start == head) {
+        head = end.next;
+        if (!embedded) {
+          head.prev = null;
+        }
+      } else if (end == tail) {
+        tail = start.prev;
+        if (!embedded) {
+          tail.next = null;
+        }
+      } else {
+        start.prev.next = end.next;
+        end.next.prev = start.prev;
+      }
+      wl = new WiredList<>(start, end, len, false);
     }
-    Node[] nodes = new Node[values.size()];
-    Iterator<? extends E> iter = values.iterator();
-    nodes[0] = new Node<>(iter.next());
-    for (int i = 1; i < nodes.length; ++i) {
-      nodes[i] = new Node<>(nodes[i - 1], iter.next());
-    }
-    return nodes;
+    sz -= len;
+    return wl;
   }
 
-  private Node[] asNodes(E[] values) {
-    if (values.length == 0) {
-      return ZERO_NODES;
+  private Chain chain(Collection<? extends E> values) {
+    if (values instanceof WiredList wl) {
+      return copy(wl.head, wl.size());
     }
-    Node[] nodes = new Node[values.length];
-    nodes[0] = new Node<>(values[0]);
+    Iterator<? extends E> itr = values.iterator();
+    var firstNode = new Node<>((E) itr.next());
+    var lastNode = firstNode;
+    while (itr.hasNext()) {
+      lastNode = new Node<>(lastNode, itr.next());
+      lastNode.prev.next = lastNode;
+    }
+    return new Chain(firstNode, lastNode, values.size());
+  }
+
+  private Chain chain(E[] values) {
+    var firstNode = new Node<>(values[0]);
+    var lastNode = firstNode;
     for (int i = 1; i < values.length; ++i) {
-      nodes[i] = new Node<>(nodes[i - 1], values[i]);
+      lastNode = new Node<>(lastNode, values[i]);
+      lastNode.prev.next = lastNode;
     }
-    return nodes;
+    return new Chain(firstNode, lastNode, values.length);
+  }
+
+  private Chain copy(Node<E> node, int len) {
+    var firstNode = new Node<>(node.val);
+    var lastNode = firstNode;
+    for (int i = 1; i < len; ++i) {
+      lastNode = new Node<>(lastNode, (node = node.next).val);
+      lastNode.prev.next = lastNode;
+    }
+    return new Chain(firstNode, lastNode, len);
   }
 
   private Node<E> node(int index) {
-    if (index < (sz / 2)) {
+    if (index < (sz >> 1)) {
       Node<E> n = head;
       for (int i = 0; i < index; i++) {
         n = n.next;
@@ -627,7 +661,7 @@ public class WiredList<E> implements List<E> {
 
   // Will only be called if len > 0
   private Node<E> node(Node<E> startNode, int startIndex, int len) {
-    if (len < ((sz - startIndex) / 2)) {
+    if (len < ((sz - startIndex) >> 1)) {
       Node<E> node = startNode;
       for (int i = 1; i < len; i++) {
         node = node.next;

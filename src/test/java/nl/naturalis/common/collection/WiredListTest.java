@@ -1,6 +1,5 @@
 package nl.naturalis.common.collection;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Test;
@@ -108,12 +107,100 @@ public class WiredListTest {
   @Test
   public void insert00() {
     var wl = new WiredList<String>();
-    wl.insert(0, "John"); // John
-    wl.insert(0, "Mark"); // Mark, John
+    wl.insert(0, "John");
+    assertEquals(List.of("John"), wl);
+    wl.insert(0, "Mark");
+    assertEquals(List.of("Mark", "John"), wl);
     wl.insert(2, "Michael"); // Mark, John, Michael
-    wl.insert(2, "James"); // Mark, John, James, Michael
-    wl.insert(1, "Simon"); // Mark, Simon, John, James, Michael
+    assertEquals(List.of("Mark", "John", "Michael"), wl);
+    wl.insert(2, "James");
+    assertEquals(List.of("Mark", "John", "James", "Michael"), wl);
+    wl.insert(1, "Simon");
     assertEquals(List.of("Mark", "Simon", "John", "James", "Michael"), wl);
+  }
+
+  @Test
+  public void insertAll00() {
+    var wl = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6);
+    wl.insertAll(2, List.of("a", "b", "c"));
+    assertEquals(List.of(0, 1, "a", "b", "c", 2, 3, 4, 5, 6), wl);
+  }
+
+  @Test
+  public void insertAll01() {
+    var wl = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6);
+    wl.insertAll(2, List.of("a"));
+    assertEquals(List.of(0, 1, "a", 2, 3, 4, 5, 6), wl);
+  }
+
+  @Test
+  public void insertAll02() {
+    var wl = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6);
+    wl.insertAll(2, List.of());
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6), wl);
+  }
+
+  @Test
+  public void insertAll03() {
+    var wl = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6);
+    wl.insertAll(wl.size(), List.of("a", "b", "c"));
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, "a", "b", "c"), wl);
+  }
+
+  @Test
+  public void insertAll04() {
+    var wl = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6);
+    wl.insertAll(0, List.of("a", "b", "c"));
+    assertEquals(List.of("a", "b", "c", 0, 1, 2, 3, 4, 5, 6), wl);
+  }
+
+  @Test
+  public void insertAll05() {
+    var wl = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6);
+    wl.insertAll(wl.size(), List.of("a"));
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, "a"), wl);
+  }
+
+  @Test
+  public void insertAll06() {
+    var wl = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6);
+    wl.insertAll(0, List.of("a"));
+    assertEquals(List.of("a", 0, 1, 2, 3, 4, 5, 6), wl);
+  }
+
+  @Test
+  public void insertAll07() {
+    var wl = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6);
+    wl.insertAll(wl.size(), List.of());
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6), wl);
+  }
+
+  @Test
+  public void insertAll08() {
+    var wl = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6);
+    wl.insertAll(0, List.of());
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6), wl);
+  }
+
+  @Test
+  public void insertAll09() {
+    var wl = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6);
+    wl.insertAll(2, WiredList.of("a", "b", "c"));
+    assertEquals(List.of(0, 1, "a", "b", "c", 2, 3, 4, 5, 6), wl);
+  }
+
+  @Test
+  public void insertAll10() {
+    var wl = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6);
+    wl.insertAll(2, WiredList.of("a"));
+    assertEquals(List.of(0, 1, "a", 2, 3, 4, 5, 6), wl);
+  }
+
+  @Test
+  public void insertAll11() {
+    var wl = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6);
+    wl.insertAll(2, new WiredList<>());
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6), wl);
   }
 
   @Test
@@ -145,7 +232,7 @@ public class WiredListTest {
   @Test
   public void cut00() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.cut(0, 0);
+    var wl1 = wl0.deleteSegment(0, 0);
     assertEquals(10, wl0.size());
     assertEquals(0, wl1.size());
     assertEquals(new WiredList<>(), wl1);
@@ -154,7 +241,7 @@ public class WiredListTest {
   @Test
   public void cut01() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.cut(0, 1);
+    var wl1 = wl0.deleteSegment(0, 1);
     assertEquals(9, wl0.size());
     assertEquals(1, wl1.size());
     assertEquals(WiredList.of(1, 2, 3, 4, 5, 6, 7, 8, 9), wl0);
@@ -164,7 +251,7 @@ public class WiredListTest {
   @Test
   public void cut02() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.cut(9, 1);
+    var wl1 = wl0.deleteSegment(9, 1);
     assertEquals(9, wl0.size());
     assertEquals(1, wl1.size());
     assertEquals(WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8), wl0);
@@ -174,7 +261,7 @@ public class WiredListTest {
   @Test
   public void cut03() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.cut(8, 1);
+    var wl1 = wl0.deleteSegment(8, 1);
     assertEquals(9, wl0.size());
     assertEquals(1, wl1.size());
     assertEquals(WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 9), wl0);
@@ -184,7 +271,7 @@ public class WiredListTest {
   @Test
   public void cut04() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.cut(0, 2);
+    var wl1 = wl0.deleteSegment(0, 2);
     assertEquals(8, wl0.size());
     assertEquals(2, wl1.size());
     assertEquals(WiredList.of(2, 3, 4, 5, 6, 7, 8, 9), wl0);
@@ -194,7 +281,7 @@ public class WiredListTest {
   @Test
   public void cut05() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.cut(8, 2);
+    var wl1 = wl0.deleteSegment(8, 2);
     assertEquals(8, wl0.size());
     assertEquals(2, wl1.size());
     assertEquals(WiredList.of(0, 1, 2, 3, 4, 5, 6, 7), wl0);
@@ -204,7 +291,7 @@ public class WiredListTest {
   @Test
   public void cut06() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.cut(1, 8);
+    var wl1 = wl0.deleteSegment(1, 8);
     assertEquals(2, wl0.size());
     assertEquals(8, wl1.size());
     assertEquals(WiredList.of(0, 9), wl0);
@@ -214,7 +301,7 @@ public class WiredListTest {
   @Test
   public void cut07() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.cut(5, 1);
+    var wl1 = wl0.deleteSegment(5, 1);
     assertEquals(9, wl0.size());
     assertEquals(1, wl1.size());
     assertEquals(WiredList.of(0, 1, 2, 3, 4, 6, 7, 8, 9), wl0);
@@ -224,7 +311,7 @@ public class WiredListTest {
   @Test
   public void cut08() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.cut(5, 2);
+    var wl1 = wl0.deleteSegment(5, 2);
     assertEquals(8, wl0.size());
     assertEquals(2, wl1.size());
     assertEquals(WiredList.of(0, 1, 2, 3, 4, 7, 8, 9), wl0);
@@ -234,7 +321,7 @@ public class WiredListTest {
   @Test
   public void cut09() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.cut(5, 3);
+    var wl1 = wl0.deleteSegment(5, 3);
     assertEquals(7, wl0.size());
     assertEquals(3, wl1.size());
     assertEquals(WiredList.of(0, 1, 2, 3, 4, 8, 9), wl0);

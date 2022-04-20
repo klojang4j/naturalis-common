@@ -3,6 +3,7 @@ package nl.naturalis.common.check;
 import org.junit.Test;
 
 import java.util.List;
+
 import static org.junit.Assert.*;
 
 @SuppressWarnings({"rawtypes"})
@@ -103,7 +104,7 @@ public class CheckTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void offsetLength09() {
-    Check.offsetLength(null, 1, 10);
+    Check.offsetLength((List) null, 1, 10);
   }
 
   @Test
@@ -148,4 +149,5 @@ public class CheckTest {
   public void fromTo06() {
     Check.fromTo(10, 3, -4);
   }
+
 }

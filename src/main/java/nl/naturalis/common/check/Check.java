@@ -1,9 +1,12 @@
 package nl.naturalis.common.check;
 
 import nl.naturalis.common.StringMethods;
+import nl.naturalis.common.function.Relation;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static nl.naturalis.common.check.CommonChecks.*;
 
@@ -173,82 +176,134 @@ public final class Check {
   }
 
   /**
-   * Verifies that both {@code off} and {@code off + len} remain with the bounds of the specified
-   * byte array. If not, an {@link IndexOutOfBoundsException} is thrown. Returns {@code off + len}.
-   *
-   * @param array The byte array
-   * @param off The offset within byte array
-   * @param len The length of the segment within the byte array
-   * @see #offsetLength(int, int, int)
-   */
-  public static void offsetLength(byte[] array, int off, int len) {
-    Check.notNull(array, "array");
-    Check.offsetLength(array.length, off, len);
-  }
-
-  /**
-   * Verifies that both {@code off} and {@code off + len} remain with the bounds of an array or
-   * array-like object of the specified size. If not, an {@link IndexOutOfBoundsException} is
-   * thrown. Returns {@code off + len}.
-   *
-   * @param size The length of the array or array-like object from which to extract the segment
-   * @param off The offset of the segment within the array or array-like object
-   * @param len The length of the segment
-   * @return The "to" index of the segment
-   */
-  public static int offsetLength(int size, int off, int len) {
-    Check.on(indexOutOfBounds(), size | off | len, "size/offset/length").isNot(negative());
-    return Check.on(indexOutOfBounds(), off + len, "offset + length").is(lte(), size).ok();
-  }
-
-  /**
-   * Verifies that the specified {@code from} and {@code to} indices can be used to extract a
-   * substring from the specified {@code String}. This method already performs a null-check on the
-   * {@code src} argument, so there is no need to do that first, so there is no need to do that
+   * Verifies that {@code offset + length} is not greater than the size of the specified array and
+   * that {@code offset} is not negative and not greater than the length of the specified array. If
+   * any of these requirements do not apply, an {@link IndexOutOfBoundsException} is thrown. Returns
+   * {@code off + len} (i.e. the {@code toIndex}). A null check is executed on the string argument
    * first.
    *
-   * @param src The string to extract the substring from
-   * @param from The start index
-   * @param to The end index
-   * @see #fromTo(int, int, int)
-   * @see String#substring(int, int)
+   * @param array The  array
+   * @param offset The offset within the array
+   * @param length The length of the segment
+   * @return The {@code toIndex} of the segment
+   * @see #offsetLength(int, int, int)
    */
-  public static void fromTo(String src, int from, int to) {
-    Check.notNull(src, "src");
-    Check.fromTo(src.length(), from, to);
+  public static int offsetLength(byte[] array, int offset, int length) {
+    Check.notNull(array, "array");
+    return Check.offsetLength(array.length, offset, length);
   }
 
   /**
-   * Verifies that the specified {@code from} and {@code to} indices can be used to extract a
-   * sublist from the specified {@code List}. This method already performs a null-check on the
-   * {@code src} argument, so there is no need to do that first.
+   * Verifies that {@code offset + length} is not greater than the size of the specified list and
+   * that {@code offset} is not negative and not greater than the length of the specified list. If
+   * any of these requirements do not apply, an {@link IndexOutOfBoundsException} is thrown. Returns
+   * {@code off + len} (i.e. the {@code toIndex}). A null check is executed on the string argument
+   * first.
    *
-   * @param src The string to extract the substring from
-   * @param from The start index
-   * @param to The end index
+   * @param list The list
+   * @param offset The offset within the list
+   * @param length The length of the segment
+   * @return The {@code toIndex} of the segment
+   * @see #offsetLength(int, int, int)
+   */
+  public static int offsetLength(List<?> list, int offset, int length) {
+    Check.notNull(list, "list");
+    return Check.offsetLength(list.size(), offset, length);
+  }
+
+  /**
+   * Verifies that {@code offset + length} is not greater than the size of the specified string and
+   * that {@code offset} is not negative and not greater than the length of the specified string. If
+   * any of these requirements do not apply, an {@link IndexOutOfBoundsException} is thrown. Returns
+   * {@code off + len} (i.e. the {@code toIndex}). A null check is executed on the string argument
+   * first.
+   *
+   * @param string The string
+   * @param offset The offset within the string
+   * @param length The length of the segment
+   * @return The {@code toIndex} of the segment
+   * @see #offsetLength(int, int, int)
+   */
+  public static int offsetLength(String string, int offset, int length) {
+    Check.notNull(string, "string");
+    return Check.offsetLength(string.length(), offset, length);
+  }
+
+  /**
+   * Verifies that {@code offset + length} is not greater than the specified size and that {@code
+   * offset} is not negative and not greater than the specified size. If any of these requirements
+   * do not apply, an {@link IndexOutOfBoundsException} is thrown. Returns {@code off + len} (i.e.
+   * the {@code toIndex}). This check stands somewhat apart from the rest of the check framework: it
+   * tests multiple things at once, and it does not ask you to provide a {@link Predicate} or {@link
+   * Relation} implementing the tests. It is included for convenience and performance reasons, and
+   * because it is such a ubiquitous check.
+   *
+   * @param size The length of the array or array-like object from which to extract the segment
+   * @param offset The offset of the segment
+   * @param length The length of the segment
+   * @return The {@code toIndex} of the segment
+   */
+  public static int offsetLength(int size, int offset, int length) {
+    Check.on(indexOutOfBounds(), size | offset | length, "size/offset/length").isNot(negative());
+    return Check.on(indexOutOfBounds(), offset + length, "offset + length").is(lte(), size).ok();
+  }
+
+  /**
+   * Verifies that {@code toIndex} is not greater than the size of the specified list and that
+   * {@code fromIndex} is not negative and not greater than {@code toIndex}. If any of these
+   * requirements do not apply, an {@link IndexOutOfBoundsException} is thrown. Returns {@code
+   * toIndex - fromIndex} (i.e. the {@code length} of the segment). A null check is executed on the
+   * string argument first.
+   *
+   * @param list The list
+   * @param fromIndex The start index
+   * @param toIndex The end index
+   * @return the {@code length} of the segment
    * @see #fromTo(int, int, int)
    * @see List#subList(int, int)
    */
-  public static <E> void fromTo(List<E> src, int from, int to) {
-    Check.notNull(src, "src");
-    Check.fromTo(src.size(), from, to);
+  public static int fromTo(List<?> list, int fromIndex, int toIndex) {
+    Check.notNull(list, "list");
+    return Check.fromTo(list.size(), fromIndex, toIndex);
   }
 
   /**
-   * Verifies that the specified {@code from} and {@code to} indices can be used for typical segment
-   * extraction methods like {@link String#substring(int, int) String.substring} and {@link
-   * java.util.List#subList(int, int) List.subList}. Note that both {@code from} and to {@code to}
-   * may be one position past the end of the {@code String}, {@code List}, etc. In other words, they
-   * may both be equal to {@code len}.
+   * Verifies that {@code toIndex} is not greater than the size of the specified string and that
+   * {@code fromIndex} is not negative and not greater than {@code toIndex}. If any of these
+   * requirements do not apply, an {@link IndexOutOfBoundsException} is thrown. Returns {@code
+   * toIndex - fromIndex} (i.e. the {@code length} of the segment). A null check is executed on the
+   * string argument first.
    *
-   * @param size The length of the {@code String}, {@code List}, (etc.) from which to extract
-   *     the segment
+   * @param string The string
+   * @param fromIndex The start index
+   * @param toIndex The end index
+   * @return the {@code length} of the segment
+   * @see #fromTo(int, int, int)
+   * @see String#substring(int, int)
+   */
+  public static int fromTo(String string, int fromIndex, int toIndex) {
+    Check.notNull(string, "string");
+    return Check.fromTo(string.length(), fromIndex, toIndex);
+  }
+
+  /**
+   * Verifies that {@code toIndex} is not greater than the specified size and that {@code fromIndex}
+   * is not negative and not greater than {@code toIndex}. If any of these requirements do not
+   * apply, an {@link IndexOutOfBoundsException} is thrown. Returns {@code toIndex - fromIndex}
+   * (i.e. the {@code length} of the segment). This check stands somewhat apart from the rest of the
+   * check framework: it tests multiple things at once, and it does not ask you to provide a {@link
+   * Predicate} or {@link Relation} implementing the tests. It is included for convenience and
+   * performance reasons, and because it is such a ubiquitous check.
+   *
+   * @param size The size
    * @param fromIndex The start index of the segment
    * @param toIndex The end index of the segment
+   * @return the {@code length} of the segment
    */
-  public static void fromTo(int size, int fromIndex, int toIndex) {
+  public static int fromTo(int size, int fromIndex, int toIndex) {
     Check.on(indexOutOfBounds(), fromIndex, "fromIndex").isNot(negative()).isNot(gt(), toIndex);
     Check.on(indexOutOfBounds(), toIndex, "toIndex").isNot(gt(), size);
+    return toIndex - fromIndex;
   }
 
   /**
