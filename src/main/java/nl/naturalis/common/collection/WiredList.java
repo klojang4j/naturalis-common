@@ -10,12 +10,17 @@ import java.util.function.Supplier;
 
 import static java.util.Collections.emptyListIterator;
 import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
-import static nl.naturalis.common.ArrayMethods.pack;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
- * A doubly-linked list, much like the JDK's {@link LinkedList}, but more focused on list
- * manipulation, and less on its queue-like aspects.
+ * A doubly-linked list, much like {@link LinkedList}, but more focused on list manipulation, and
+ * less on queue-like behaviour. As with any doubly-linked list, it is relatively inefficient at
+ * index-based searches, but it can be very efficient and deleting and moving around relatively
+ * large chunks of list elements (the larger the chunks the bigger the gain, compared to, for
+ * example, {@link ArrayList}). This {@code List} implementation does <i>not</i> support the {@link
+ * List#subList(int, int) subList} method. Its specification requires an administration that would
+ * almost completely undo again the efficiency of the operations that linked lists are supposed to
+ * be good at.
  *
  * @param <E> The type of the elements in the list
  */
@@ -55,19 +60,6 @@ public class WiredList<E> implements List<E> {
       this.prev = prev;
       this.val = val;
       prev.next = this;
-    }
-
-    Node(F val, Node<F> next) {
-      this.val = val;
-      this.next = next;
-      next.prev = this;
-    }
-
-    Node(Node<F> prev, F val, Node<F> next) {
-      this.val = val;
-      this.prev = prev;
-      this.next = next;
-      prev.next = next.prev = this;
     }
 
   }
@@ -173,7 +165,7 @@ public class WiredList<E> implements List<E> {
 
     @Override
     public void add(E e) {
-
+      append(e);
     }
 
   }
@@ -186,11 +178,8 @@ public class WiredList<E> implements List<E> {
   private static final String INDEX = "index";
   private static final String VALUES = "values";
 
-  // Error messages
-  private static final String ALREADY_EMBEDDED = "Cannot embed the same list twice";
-
   private static final Supplier<NoSuchElementException> NO_SUCH_ELEMENT =
-      () -> new NoSuchElementException();
+      NoSuchElementException::new;
 
   public static <E> WiredList<E> of(E e) {
     WiredList<E> wl = new WiredList<>();
@@ -218,99 +207,88 @@ public class WiredList<E> implements List<E> {
     return wl;
   }
 
-  private int sz;
-  private boolean embedded;
-
   private Node<E> head;
   private Node<E> tail;
+  private int sz;
 
   public WiredList() {}
 
-  public WiredList(Collection c) {
+  public WiredList(Collection<? extends E> c) {
     insertAll(0, c);
   }
 
-  private WiredList(Node<E> head, Node<E> tail, int sz, boolean embedded) {
+  private WiredList(Node<E> head, Node<E> tail, int sz) {
     this.head = head;
     this.tail = tail;
     this.sz = sz;
-    this.embedded = embedded;
   }
 
+  /**
+   * Inserts the specified value at the start of the list, right-shifting the elements currently in
+   * the list.
+   *
+   * @param value The value to insert
+   */
   public void prepend(E value) {
     insert(0, value);
   }
 
+  /**
+   * Inserts the specified values at the start of the list, right-shifting the elements currently in
+   * the list.
+   *
+   * @param values The values to insert
+   */
   public void prependAll(Collection<? extends E> values) {
     insertAll(0, values);
   }
 
+  /**
+   * Inserts the specified value at the end of the list.
+   *
+   * @param value The value to insert
+   */
   public void append(E value) {
     insert(sz, value);
   }
 
+  /**
+   * Inserts the specified values at the end of the list.
+   *
+   * @param values The values to insert
+   */
   public void appendAll(Collection<? extends E> values) {
     insertAll(sz, values);
   }
 
+  /**
+   * Inserts the specified value at the specified location, right-shifting the elements at and after
+   * that location.
+   *
+   * @param value The value to insert
+   */
+  @SuppressWarnings({"unchecked"})
   public void insert(int index, E value) {
-    insert(index, chain(pack(value)));
-    //    if (sz == 0) {
-    //      head = tail = new Node<>(value);
-    //    } else if (index == 0) {
-    //      head.prev = new Node<>(value, head);
-    //      head = head.prev;
-    //    } else if (index == sz) {
-    //      tail.next = new Node<>(tail, value);
-    //      tail = tail.next;
-    //    } else {
-    //      Check.that(index, INDEX).is(gte(), 0).is(lte(), sz);
-    //      var node = node(index);
-    //      new Node<>(node.prev, value, node);
-    //    }
-    //    ++sz;
+    insert(index, chain((E[]) new Object[] {value}));
   }
 
+  /**
+   * Inserts the specified values at the specified location, right-shifting the elements at and
+   * following that location.
+   *
+   * @param values The values to insert
+   */
   public void insertAll(int index, Collection<? extends E> values) {
-    Check.notNull(values, "values");
+    Check.notNull(values, VALUES);
     if (!values.isEmpty()) {
       insert(index, chain(values));
     }
   }
 
-  public WiredList<E> region(int fromIndex, int toIndex) {
-    int length = Check.fromTo(this, fromIndex, toIndex);
-    Node<E> start = node(fromIndex);
-    Node<E> end = node(start, fromIndex, length);
-    return new WiredList<>(start, end, length, true);
-  }
-
-  public WiredList<E> segment(int offset, int length) {
-    Check.offsetLength(this, offset, length);
-    Node<E> start = node(offset);
-    Node<E> end = node(start, offset, length);
-    return new WiredList<>(start, end, length, true);
-  }
-
-  public WiredList<E> copyRegion(int fromIndex, int toIndex) {
-    int length = Check.fromTo(this, fromIndex, toIndex);
-    Node<E> start = node(fromIndex);
-    Node<E> end = node(start, fromIndex, length);
-    return new WiredList<>(start, end, length, true);
-  }
-
-  public WiredList<E> copySegment(int offset, int length) {
-    Check.offsetLength(this, offset, length);
-    Node<E> start = node(offset);
-    Node<E> end = node(start, offset, length);
-    return new WiredList<>(start, end, length, true);
-  }
-
   /**
-   * Embeds the specified {@code WiredList} within this {@code WiredList}. This method is very
-   * efficient, but it will modify the provided list. Lists that have already been embedded within
-   * another list will be rejected. Changes made afterwards to the provided list will be reflected
-   * in this {@code WiredList} and vice versa.
+   * Embeds the specified list within this {@code WiredList}. This method is very efficient, but
+   * <b>the provided list will empty afterwards</b>. If you don't want this to happen, use
+   * {@link #insertAll(int, Collection) insertAll}.
    *
    * @param index The index at which to embed the {@code WiredList}
    * @param other The {@code WiredList} to embed
@@ -329,34 +307,59 @@ public class WiredList<E> implements List<E> {
         tail.next = other.head;
         other.head.prev = tail;
       } else {
-        Check.that(index, INDEX).is(gte(), 0).is(lte(), sz);
-        var node = node(index);
+        var node = checkToIndex(index).ok(this::node);
         node.next.prev = other.tail;
         other.tail.next = node.next;
         node.next = other.head;
         other.head.prev = node;
       }
       sz += other.sz;
+      other.clear();
     }
   }
 
-  public E cut(int index) {
-    return cut0(index, 1).head.val;
+  /**
+   * Removes the first element from the list, left-shifting the elements following it.
+   *
+   * @return The value of the first element
+   */
+  public E deleteFirst() {
+    return delete(0, 1).head.val;
+  }
+
+  /**
+   * Removes the last element from the list.
+   *
+   * @return The value of the last element
+   */
+  public E deleteLast() {
+    return delete(sz, 1).head.val;
+  }
+
+  /**
+   * Removes the element at the specified location, left-shifting the elements at and following that
+   * location.
+   *
+   * @param index The index of the element to remove
+   * @return The value of the removed element
+   */
+  public E delete(int index) {
+    return delete(index, 1).head.val;
   }
 
   public WiredList<E> deleteRegion(int fromIndex, int toIndex) {
-    Check.fromTo(this, fromIndex, toIndex);
-    return cut0(fromIndex, fromIndex - toIndex);
+    Check.fromTo(sz, fromIndex, toIndex);
+    return delete(fromIndex, fromIndex - toIndex);
   }
 
   public WiredList<E> deleteSegment(int offset, int length) {
     Check.offsetLength(sz, offset, length);
-    return cut0(offset, length);
+    return delete(offset, length);
   }
 
   public WiredList<E> copy(int offset, int length) {
     Check.offsetLength(sz, offset, length);
-    return cut0(offset, length);
+    return delete(offset, length);
   }
 
   @Override
@@ -366,26 +369,42 @@ public class WiredList<E> implements List<E> {
 
   @Override
   public boolean isEmpty() {
+
     return sz == 0;
   }
 
   @Override
   public boolean contains(Object o) {
-    return false;
+    for (Node<E> n = head; ; n = n.next) {
+      if (Objects.equals(o, n.val)) {
+        return true;
+      } else if (n == tail) {
+        return false;
+      }
+    }
+  }
+
+  @Override
+  public boolean containsAll(Collection<?> c) {
+    Check.notNull(c, "collection");
+    return new HashSet<>(this).containsAll(c);
   }
 
   @Override
   public Iterator<E> iterator() {
+
     return sz == 0 ? emptyListIterator() : new Itr();
   }
 
   @Override
   public ListIterator<E> listIterator() {
+
     return sz == 0 ? emptyListIterator() : new ListItr();
   }
 
   @Override
   public ListIterator<E> listIterator(int index) {
+
     return checkIndex(index).ok(ListItr::new);
   }
 
@@ -407,6 +426,7 @@ public class WiredList<E> implements List<E> {
 
   @Override
   public <T> T[] toArray(T[] a) {
+    Check.notNull(a, "array");
     if (a.length < sz) {
       a = InvokeUtils.newArray(a.getClass(), sz);
     }
@@ -432,24 +452,26 @@ public class WiredList<E> implements List<E> {
 
   @Override
   public boolean remove(Object o) {
-    return false;
-  }
-
-  @Override
-  public boolean containsAll(Collection<?> c) {
-    return false;
+    for (Node<E> n = head; ; n = n.next) {
+      if (Objects.equals(o, n.val)) {
+        deleteNode(n);
+        return true;
+      } else if (n == tail) {
+        return false;
+      }
+    }
   }
 
   @Override
   public boolean addAll(Collection<? extends E> c) {
-    appendAll(c);
+    insertAll(sz, c);
     return true;
   }
 
   @Override
   public boolean addAll(int index, Collection<? extends E> c) {
     insertAll(index, c);
-    return false;
+    return !c.isEmpty();
   }
 
   @Override
@@ -488,7 +510,7 @@ public class WiredList<E> implements List<E> {
 
   @Override
   public E remove(int index) {
-    return cut(index);
+    return delete(index);
   }
 
   @Override
@@ -503,7 +525,7 @@ public class WiredList<E> implements List<E> {
 
   @Override
   public List<E> subList(int fromIndex, int toIndex) {
-    return region(fromIndex, toIndex);
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -555,8 +577,7 @@ public class WiredList<E> implements List<E> {
       chain.head.prev = tail;
       tail = chain.tail;
     } else {
-      Check.that(index, INDEX).is(gte(), 0).is(lte(), sz);
-      var node = node(index);
+      var node = checkToIndex(index).ok(this::node);
       chain.head.prev = node.prev;
       if (chain.length == 1) {
         chain.head.next = node;
@@ -570,43 +591,50 @@ public class WiredList<E> implements List<E> {
     sz += chain.length;
   }
 
-  private WiredList<E> cut0(int off, int len) {
+  private WiredList<E> delete(int off, int len) {
     WiredList<E> wl;
     if (len == 0) {
       wl = new WiredList<>();
     } else if (len == sz) {
-      wl = new WiredList<>(head, tail, sz, false);
-      if (embedded) {
-        if (head.prev != null) {
-          head.prev.next = tail.next;
-        }
-        if (tail.next != null) {
-          tail.next.prev = head.prev;
-        }
-        embedded = false;
-      }
+      wl = new WiredList<>(head, tail, sz);
       head = tail = null;
     } else {
       var start = node(off);
       var end = node(start, off, len);
       if (start == head) {
         head = end.next;
-        if (!embedded) {
-          head.prev = null;
-        }
+        head.prev = null;
       } else if (end == tail) {
         tail = start.prev;
-        if (!embedded) {
-          tail.next = null;
-        }
+        tail.next = null;
       } else {
         start.prev.next = end.next;
         end.next.prev = start.prev;
       }
-      wl = new WiredList<>(start, end, len, false);
+      wl = new WiredList<>(start, end, len);
     }
     sz -= len;
     return wl;
+  }
+
+  private E deleteNode(Node<E> node) {
+    E val = node.val;
+    if (node == head) {
+      if (node == tail) {
+        head = tail = null;
+      } else {
+        head = head.next;
+        head.prev = null;
+      }
+    } else if (node == tail) {
+      tail = tail.prev;
+      tail.next = null;
+    } else {
+      node.prev.next = node.next;
+      node.next.prev = node.prev;
+    }
+    --sz;
+    return val;
   }
 
   private Chain chain(Collection<? extends E> values) {
@@ -618,7 +646,6 @@ public class WiredList<E> implements List<E> {
     var lastNode = firstNode;
     while (itr.hasNext()) {
       lastNode = new Node<>(lastNode, itr.next());
-      lastNode.prev.next = lastNode;
     }
     return new Chain(firstNode, lastNode, values.size());
   }
@@ -628,7 +655,6 @@ public class WiredList<E> implements List<E> {
     var lastNode = firstNode;
     for (int i = 1; i < values.length; ++i) {
       lastNode = new Node<>(lastNode, values[i]);
-      lastNode.prev.next = lastNode;
     }
     return new Chain(firstNode, lastNode, values.length);
   }
@@ -638,21 +664,24 @@ public class WiredList<E> implements List<E> {
     var lastNode = firstNode;
     for (int i = 1; i < len; ++i) {
       lastNode = new Node<>(lastNode, (node = node.next).val);
-      lastNode.prev.next = lastNode;
     }
     return new Chain(firstNode, lastNode, len);
   }
 
   private Node<E> node(int index) {
-    if (index < (sz >> 1)) {
-      Node<E> n = head;
-      for (int i = 0; i < index; i++) {
+    if (index == 0) {
+      return head;
+    } else if (index == sz) {
+      return tail;
+    } else if (index < (sz >> 1)) {
+      Node<E> n = head.next;
+      for (int i = 1; i < index; ++i) {
         n = n.next;
       }
       return n;
     } else {
       Node<E> n = tail;
-      for (int i = sz - 1; i > index; i--) {
+      for (int i = sz - 1; i > index; --i) {
         n = n.prev;
       }
       return n;
@@ -663,13 +692,13 @@ public class WiredList<E> implements List<E> {
   private Node<E> node(Node<E> startNode, int startIndex, int len) {
     if (len < ((sz - startIndex) >> 1)) {
       Node<E> node = startNode;
-      for (int i = 1; i < len; i++) {
+      for (int i = 1; i < len; ++i) {
         node = node.next;
       }
       return node;
     } else {
       Node<E> node = tail;
-      for (int i = sz; i > startIndex + len; i--) {
+      for (int i = sz; i > startIndex + len; --i) {
         node = node.prev;
       }
       return node;
@@ -678,6 +707,10 @@ public class WiredList<E> implements List<E> {
 
   private IntCheck<IndexOutOfBoundsException> checkIndex(int index) {
     return Check.on(indexOutOfBounds(), index, INDEX).is(listIndexOf(), this);
+  }
+
+  private IntCheck<IndexOutOfBoundsException> checkToIndex(int index) {
+    return Check.on(indexOutOfBounds(), index, INDEX).is(gte(), 0).is(lte(), sz);
   }
 
 }
