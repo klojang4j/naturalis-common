@@ -345,14 +345,72 @@ public class WiredListTest {
   }
 
   @Test
-  public void ItrTest00() {
+  public void deleteRegion00() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = wl0.deleteRegion(0, 2);
+    assertEquals(8, wl0.size());
+    assertEquals(2, wl1.size());
+    assertEquals(WiredList.of(2, 3, 4, 5, 6, 7, 8, 9), wl0);
+    assertEquals(WiredList.of(0, 1), wl1);
+  }
+
+  @Test
+  public void deleteRegion01() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = wl0.deleteRegion(10, 10);
+    assertEquals(10, wl0.size());
+    assertEquals(0, wl1.size());
+    assertEquals(WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl0);
+    assertEquals(List.of(), wl1);
+  }
+
+  @Test
+  public void deleteRegion02() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = wl0.deleteRegion(9, 10);
+    assertEquals(9, wl0.size());
+    assertEquals(1, wl1.size());
+    assertEquals(WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8), wl0);
+    assertEquals(List.of(9), wl1);
+  }
+
+  @Test
+  public void embed00() {
+    var wl0 = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = WiredList.of("a", "b");
+    wl0.embed(0, wl1);
+    assertEquals(12, wl0.size());
+    assertEquals(0, wl1.size());
+    assertEquals(WiredList.of("a", "b", 0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl0);
+  }
+
+  @Test
+  public void embed01() {
+    var wl0 = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = WiredList.of("a", "b");
+    wl0.embed(10, wl1);
+    assertEquals(12, wl0.size());
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "a", "b"), wl0);
+  }
+
+  @Test
+  public void embed02() {
+    var wl0 = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = WiredList.of("a", "b");
+    wl0.embed(9, wl1);
+    assertEquals(12, wl0.size());
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, "a", "b", 9), wl0);
+  }
+
+  @Test
+  public void IteratorTest00() {
     var wl = new WiredList<Integer>();
     var itr = wl.iterator();
     assertFalse(itr.hasNext());
   }
 
   @Test
-  public void ItrTest01() {
+  public void IteratorTest01() {
     var wl = WiredList.of(0);
     var itr = wl.iterator();
     assertTrue(itr.hasNext());
@@ -361,7 +419,7 @@ public class WiredListTest {
   }
 
   @Test
-  public void ItrTest02() {
+  public void IteratorTest02() {
     var wl = WiredList.of(0, 1, 2, 3);
     var itr = wl.iterator();
     assertTrue(itr.hasNext());

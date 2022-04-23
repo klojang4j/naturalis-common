@@ -8,7 +8,7 @@ import nl.naturalis.common.x.invoke.InvokeUtils;
 import java.util.*;
 import java.util.function.Supplier;
 
-import static java.util.Collections.emptyListIterator;
+import static java.util.Collections.*;
 import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
 import static nl.naturalis.common.check.CommonChecks.*;
 
@@ -65,39 +65,12 @@ public class WiredList<E> implements List<E> {
   }
 
   // ======================================================= //
-  // ======================= [ Itr ] ======================= //
-  // ======================================================= //
-
-  private class Itr implements Iterator<E> {
-
-    private Node<E> curr;
-
-    Itr() {
-      curr = new Node<>(null);
-      curr.next = head;
-    }
-
-    @Override
-    public boolean hasNext() {
-      return curr != tail;
-    }
-
-    @Override
-    public E next() {
-      Check.that(curr).isNot(sameAs(), tail, NO_SUCH_ELEMENT);
-      return (curr = curr.next).val;
-    }
-
-  }
-
-  // ======================================================= //
   // ===================== [ ListItr ]  ==================== //
   // ======================================================= //
 
   private class ListItr implements ListIterator<E> {
 
     int idx;
-
     Node<E> curr;
 
     ListItr() {
@@ -293,25 +266,27 @@ public class WiredList<E> implements List<E> {
    * @param index The index at which to embed the {@code WiredList}
    * @param other The {@code WiredList} to embed
    */
-  public void embed(int index, WiredList<E> other) {
-    Check.notNull(other, "other");
+  public void embed(int index, WiredList<? extends E> other) {
+    embed0(index, other);
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private void embed0(int index, WiredList other) {
+    Check.notNull(other, "other").isNot(sameAs(), this, "list cannot be embedded within itself");
     if (!other.isEmpty()) {
       if (this.isEmpty()) {
         head = other.head;
         tail = other.tail;
       } else if (index == 0) {
-        other.tail.next = head;
-        head.prev = other.tail;
+        join(other.tail, head);
         head = other.head;
       } else if (index == sz) {
-        tail.next = other.head;
-        other.head.prev = tail;
+        join(tail, other.head);
+        tail = other.tail;
       } else {
         var node = checkToIndex(index).ok(this::node);
-        node.next.prev = other.tail;
-        other.tail.next = node.next;
-        node.next = other.head;
-        other.head.prev = node;
+        join(node.prev, other.head);
+        join(other.tail, node);
       }
       sz += other.sz;
       other.clear();
@@ -324,7 +299,7 @@ public class WiredList<E> implements List<E> {
    * @return The value of the first element
    */
   public E deleteFirst() {
-    return delete(0, 1).head.val;
+    return delete0(0, 1).head.val;
   }
 
   /**
@@ -333,7 +308,7 @@ public class WiredList<E> implements List<E> {
    * @return The value of the last element
    */
   public E deleteLast() {
-    return delete(sz, 1).head.val;
+    return delete0(sz, 1).head.val;
   }
 
   /**
@@ -344,22 +319,22 @@ public class WiredList<E> implements List<E> {
    * @return The value of the removed element
    */
   public E delete(int index) {
-    return delete(index, 1).head.val;
+    return delete0(index, 1).head.val;
   }
 
   public WiredList<E> deleteRegion(int fromIndex, int toIndex) {
-    Check.fromTo(sz, fromIndex, toIndex);
-    return delete(fromIndex, fromIndex - toIndex);
+    int length = Check.fromTo(sz, fromIndex, toIndex);
+    return delete0(fromIndex, length);
   }
 
   public WiredList<E> deleteSegment(int offset, int length) {
     Check.offsetLength(sz, offset, length);
-    return delete(offset, length);
+    return delete0(offset, length);
   }
 
   public WiredList<E> copy(int offset, int length) {
     Check.offsetLength(sz, offset, length);
-    return delete(offset, length);
+    return delete0(offset, length);
   }
 
   @Override
@@ -369,7 +344,6 @@ public class WiredList<E> implements List<E> {
 
   @Override
   public boolean isEmpty() {
-
     return sz == 0;
   }
 
@@ -392,8 +366,27 @@ public class WiredList<E> implements List<E> {
 
   @Override
   public Iterator<E> iterator() {
+    return sz == 0 ? emptyIterator() : new Iterator<E>() {
 
-    return sz == 0 ? emptyListIterator() : new Itr();
+      private Node<E> curr = justBeforeHead();
+
+      @Override
+      public boolean hasNext() {
+        return curr != tail;
+      }
+
+      @Override
+      public E next() {
+        Check.that(curr).isNot(sameAs(), tail, NO_SUCH_ELEMENT);
+        return (curr = curr.next).val;
+      }
+
+      private Node<E> justBeforeHead() {
+        Node<E> n = new Node(null);
+        n.next = head;
+        return n;
+      }
+    };
   }
 
   @Override
@@ -476,12 +469,14 @@ public class WiredList<E> implements List<E> {
 
   @Override
   public boolean removeAll(Collection<?> c) {
-    return false;
+    Check.notNull(c, "collection");
+    return new HashSet<>(this).removeAll(c);
   }
 
   @Override
   public boolean retainAll(Collection<?> c) {
-    return false;
+    Check.notNull(c, "collection");
+    return new HashSet<>(this).retainAll(c);
   }
 
   @Override
@@ -569,29 +564,24 @@ public class WiredList<E> implements List<E> {
       head = chain.head;
       tail = chain.tail;
     } else if (index == 0) {
-      chain.tail.next = head;
-      head.prev = chain.tail;
+      join(chain.tail, head);
       head = chain.head;
     } else if (index == sz) {
-      tail.next = chain.head;
-      chain.head.prev = tail;
+      join(tail, chain.head);
       tail = chain.tail;
     } else {
       var node = checkToIndex(index).ok(this::node);
-      chain.head.prev = node.prev;
+      join(node.prev, chain.head);
       if (chain.length == 1) {
-        chain.head.next = node;
-        node.prev.next = node.prev = chain.head;
+        join(chain.head, node);
       } else {
-        node.prev.next = chain.head;
-        chain.tail.next = node;
-        node.prev = chain.tail;
+        join(chain.tail, node);
       }
     }
     sz += chain.length;
   }
 
-  private WiredList<E> delete(int off, int len) {
+  private WiredList<E> delete0(int off, int len) {
     WiredList<E> wl;
     if (len == 0) {
       wl = new WiredList<>();
@@ -599,19 +589,16 @@ public class WiredList<E> implements List<E> {
       wl = new WiredList<>(head, tail, sz);
       head = tail = null;
     } else {
-      var start = node(off);
-      var end = node(start, off, len);
-      if (start == head) {
-        head = end.next;
-        head.prev = null;
-      } else if (end == tail) {
-        tail = start.prev;
-        tail.next = null;
+      var first = node(off);
+      var last = node(first, off, len);
+      if (first == head) {
+        makeHead(last.next);
+      } else if (last == tail) {
+        makeTail(first.prev);
       } else {
-        start.prev.next = end.next;
-        end.next.prev = start.prev;
+        join(first.prev, last.next);
       }
-      wl = new WiredList<>(start, end, len);
+      wl = new WiredList<>(first, last, len);
     }
     sz -= len;
     return wl;
@@ -619,19 +606,14 @@ public class WiredList<E> implements List<E> {
 
   private E deleteNode(Node<E> node) {
     E val = node.val;
-    if (node == head) {
-      if (node == tail) {
-        head = tail = null;
-      } else {
-        head = head.next;
-        head.prev = null;
-      }
+    if (sz == 1) {
+      head = tail = null;
+    } else if (node == head) {
+      makeHead(head.next);
     } else if (node == tail) {
-      tail = tail.prev;
-      tail.next = null;
+      makeTail(tail.prev);
     } else {
-      node.prev.next = node.next;
-      node.next.prev = node.prev;
+      join(node.prev, node.next);
     }
     --sz;
     return val;
@@ -703,6 +685,21 @@ public class WiredList<E> implements List<E> {
       }
       return node;
     }
+  }
+
+  private void makeHead(Node<E> node) {
+    node.prev = null;
+    head = node;
+  }
+
+  private void makeTail(Node<E> node) {
+    node.next = null;
+    tail = node;
+  }
+
+  private static void join(Node prev, Node next) {
+    prev.next = next;
+    next.prev = prev;
   }
 
   private IntCheck<IndexOutOfBoundsException> checkIndex(int index) {
