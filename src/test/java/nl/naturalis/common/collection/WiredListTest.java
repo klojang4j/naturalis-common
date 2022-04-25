@@ -460,6 +460,104 @@ public class WiredListTest {
   }
 
   @Test
+  public void transfer01() {
+    var wl0 = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = WiredList.of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j');
+    wl0.transfer(2, wl1, 0, 3);
+    assertEquals(13, wl0.size());
+    assertEquals(7, wl1.size());
+    assertEquals(List.of(0, 1, 'a', 'b', 'c', 2, 3, 4, 5, 6, 7, 8, 9), wl0);
+    assertEquals(List.of('d', 'e', 'f', 'g', 'h', 'i', 'j'), wl1);
+  }
+
+  @Test
+  public void transfer02() {
+    var wl0 = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = WiredList.of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j');
+    wl0.transfer(0, wl1, 8, 10);
+    assertEquals(12, wl0.size());
+    assertEquals(8, wl1.size());
+    assertEquals(List.of('i', 'j', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl0);
+    assertEquals(List.of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'), wl1);
+  }
+
+  @Test
+  public void transfer03() {
+    var wl0 = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = WiredList.of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j');
+    wl0.transfer(4, wl1, 3, 9);
+    assertEquals(16, wl0.size());
+    assertEquals(4, wl1.size());
+    assertEquals(List.of(0, 1, 2, 3, 'd', 'e', 'f', 'g', 'h', 'i', 4, 5, 6, 7, 8, 9), wl0);
+    assertEquals(List.of('a', 'b', 'c', 'j'), wl1);
+  }
+
+  @Test
+  public void transfer04() {
+    var wl0 = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = WiredList.of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j');
+    wl0.transfer(4, wl1, 2, 3);
+    assertEquals(11, wl0.size());
+    assertEquals(9, wl1.size());
+    assertEquals(List.of(0, 1, 2, 3, 'c', 4, 5, 6, 7, 8, 9), wl0);
+    assertEquals(List.of('a', 'b', 'd', 'e', 'f', 'g', 'h', 'i', 'j'), wl1);
+  }
+
+  @Test
+  public void transfer05() {
+    var wl0 = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = WiredList.of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j');
+    wl0.transfer(0, wl1, 2, 3);
+    assertEquals(11, wl0.size());
+    assertEquals(9, wl1.size());
+    assertEquals(List.of('c', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl0);
+    assertEquals(List.of('a', 'b', 'd', 'e', 'f', 'g', 'h', 'i', 'j'), wl1);
+  }
+
+  @Test
+  public void transfer06() {
+    var wl0 = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = WiredList.of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j');
+    wl0.transfer(10, wl1, 2, 3);
+    assertEquals(11, wl0.size());
+    assertEquals(9, wl1.size());
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'c'), wl0);
+    assertEquals(List.of('a', 'b', 'd', 'e', 'f', 'g', 'h', 'i', 'j'), wl1);
+  }
+
+  @Test
+  public void transfer07() {
+    var wl0 = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = WiredList.of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j');
+    wl0.transfer(9, wl1, 2, 3);
+    assertEquals(11, wl0.size());
+    assertEquals(9, wl1.size());
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 'c', 9), wl0);
+    assertEquals(List.of('a', 'b', 'd', 'e', 'f', 'g', 'h', 'i', 'j'), wl1);
+  }
+
+  @Test
+  public void transfer08() {
+    var wl0 = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = WiredList.of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j');
+    wl0.transfer(9, wl1, 2, 2); // Allowed !
+    assertEquals(10, wl0.size());
+    assertEquals(10, wl1.size());
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl0);
+    assertEquals(List.of('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'), wl1);
+  }
+
+  @Test
+  public void transfer09() {
+    var wl0 = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = new WiredList<Character>();
+    wl0.transfer(9, wl1, 0, 0); // Allowed !
+    assertEquals(10, wl0.size());
+    assertEquals(0, wl1.size());
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl0);
+  }
+
+  @Test
   public void IteratorTest00() {
     var wl = new WiredList<Integer>();
     var itr = wl.iterator();

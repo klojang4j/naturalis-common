@@ -31,25 +31,6 @@ import static nl.naturalis.common.check.CommonChecks.*;
 public class WiredList<E> implements List<E> {
 
   // ======================================================= //
-  // ====================== [ Chain ] ====================== //
-  // ======================================================= //
-
-  @SuppressWarnings("rawtypes")
-  private static class Chain {
-
-    final Node head;
-    final Node tail;
-    final int length;
-
-    Chain(Node head, Node tail, int length) {
-      this.head = head;
-      this.tail = tail;
-      this.length = length;
-    }
-
-  }
-
-  // ======================================================= //
   // ======================= [ Node ] ====================== //
   // ======================================================= //
 
@@ -69,6 +50,60 @@ public class WiredList<E> implements List<E> {
 
   }
 
+  // ======================================================= //
+  // ====================== [ Chain ] ====================== //
+  // ======================================================= //
+
+  @SuppressWarnings("unchecked,rawtypes")
+  private static class Chain {
+
+    static <F> Chain ofSingle(F value) {
+      Node n = new Node(value);
+      return new Chain(n, n, 1);
+    }
+
+    static <F> Chain of(F[] values) {
+      var head = new Node(values[0]);
+      var tail = head;
+      for (int i = 1; i < values.length; ++i) {
+        tail = new Node(tail, values[i]);
+      }
+      return new Chain(head, tail, values.length);
+    }
+
+    static <F> Chain of(Collection<F> values) {
+      if (values instanceof WiredList wl) {
+        return copyOf(wl.head, wl.size());
+      }
+      Iterator<F> itr = values.iterator();
+      var head = new Node<>(itr.next());
+      var tail = head;
+      while (itr.hasNext()) {
+        tail = new Node<>(tail, itr.next());
+      }
+      return new Chain(head, tail, values.size());
+    }
+
+    static Chain copyOf(Node node, int len) {
+      var head = new Node(node.val);
+      var tail = head;
+      for (int i = 1; i < len; ++i) {
+        tail = new Node(tail, (node = node.next).val);
+      }
+      return new Chain(head, tail, len);
+    }
+
+    final Node head;
+    final Node tail;
+    final int length;
+
+    Chain(Node head, Node tail, int length) {
+      this.head = head;
+      this.tail = tail;
+      this.length = length;
+    }
+
+  }
   // ======================================================= //
   // ===================== [ ListItr ]  ==================== //
   // ======================================================= //
@@ -137,7 +172,7 @@ public class WiredList<E> implements List<E> {
 
     @Override
     public void set(E e) {
-      Check.on(illegalState(), curr).isNot(NULL(), "previousIndex/nextIndex not called yet");
+      Check.on(illegalState(), curr).isNot(NULL(), "previous/next not called yet", null);
       curr.val = e;
     }
 
@@ -184,7 +219,7 @@ public class WiredList<E> implements List<E> {
     wl.append(e1);
     wl.append(e2);
     if (moreElems.length != 0) {
-      wl.insert(3, wl.chain(moreElems));
+      wl.insert(3, Chain.of(moreElems));
     }
     return wl;
   }
@@ -222,7 +257,7 @@ public class WiredList<E> implements List<E> {
    * Sets the element at the specified index to the specified value <i>if</i> the original value
    * passes the specified test. This method mitigates the relatively large cost of index-based
    * retrieval with linked lists, which would double if you had to execute a get-test-set sequence.
-   * Note that the {@link CommonChecks} contains some common tests that you may be able to use.
+   * See also {@link CommonChecks}.
    *
    * @param index The index of the element to set
    * @param test The test that the original value has to pass in order to be replaced with the
@@ -244,8 +279,7 @@ public class WiredList<E> implements List<E> {
    * Sets the element at the specified index to the specified value <i>if</i> the original value has
    * the specified relation to that value. This method mitigates the relatively large cost of
    * index-based retrieval with linked lists, which would double if you had to execute a
-   * get-test-set sequence. Note that the {@link CommonChecks} contains some common tests that you
-   * may be able to use.
+   * get-test-set sequence. See also {@link CommonChecks}.
    *
    * @param index The index of the element to set
    * @param test The test that the original value has to pass in order to be replaced with the
@@ -337,9 +371,8 @@ public class WiredList<E> implements List<E> {
    *
    * @param value The value to insert
    */
-  @SuppressWarnings({"unchecked"})
   public void insert(int index, E value) {
-    insert(index, chain((E[]) new Object[] {value}));
+    insert(index, Chain.ofSingle(value));
   }
 
   /**
@@ -351,7 +384,7 @@ public class WiredList<E> implements List<E> {
   public void insertAll(int index, Collection<? extends E> values) {
     Check.notNull(values, VALUES);
     if (!values.isEmpty()) {
-      insert(index, chain(values));
+      insert(index, Chain.of(values));
     }
   }
 
@@ -380,6 +413,7 @@ public class WiredList<E> implements List<E> {
    * @param fromIndex The start index of the segment (inclusive)
    * @param toIndex The end index of the segment (exclusive)
    */
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public void transfer(int index, WiredList<? extends E> other, int fromIndex, int toIndex) {
     checkInclusive(index);
     Check.notNull(other, "list").isNot(sameAs(), this, ERR_AUTO_EMBED, null);
@@ -440,12 +474,11 @@ public class WiredList<E> implements List<E> {
    * {@inheritDoc}
    */
   @Override
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public boolean removeAll(Collection<?> c) {
     Check.notNull(c, "collection");
     int sz = this.sz;
-    Collection collection = c;
-    removeIf(0, sz, in(), collection);
+    removeIf(0, sz, in(), (Collection) c);
     return sz != this.sz;
   }
 
@@ -453,12 +486,11 @@ public class WiredList<E> implements List<E> {
    * {@inheritDoc}
    */
   @Override
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public boolean retainAll(Collection<?> c) {
     Check.notNull(c, "collection");
     int sz = this.sz;
-    Collection collection = c;
-    Relation notIn = in().negate();
-    removeIf(0, sz, notIn, collection);
+    removeIf(0, sz, (Relation) in().negate(), (Collection) c);
     return sz != this.sz;
   }
 
@@ -560,9 +592,6 @@ public class WiredList<E> implements List<E> {
       return sz != this.sz;
     }
     return false;
-  }
-
-  public void transferTo(int myFrom, int myTo, WiredList<E> other, int itsFrom) {
   }
 
   public void exchange(int myFrom, int myTo, WiredList<E> other, int itsFrom, int itsTo) {
@@ -763,6 +792,7 @@ public class WiredList<E> implements List<E> {
     throw new UnsupportedOperationException();
   }
 
+  @SuppressWarnings("unchecked")
   private void insert(int index, Chain chain) {
     if (sz == 0) {
       makeHead(chain.head);
@@ -810,6 +840,7 @@ public class WiredList<E> implements List<E> {
     return val;
   }
 
+  @SuppressWarnings("unchecked")
   private void delete(Chain chain) {
     if (chain.length == sz) {
       head = tail = null;
@@ -821,37 +852,6 @@ public class WiredList<E> implements List<E> {
       join(chain.head.prev, chain.tail.next);
     }
     sz -= chain.length;
-  }
-
-  private Chain chain(Collection<? extends E> values) {
-    if (values instanceof WiredList wl) {
-      return copy(wl.head, wl.size());
-    }
-    Iterator<? extends E> itr = values.iterator();
-    var firstNode = new Node<>((E) itr.next());
-    var lastNode = firstNode;
-    while (itr.hasNext()) {
-      lastNode = new Node<>(lastNode, itr.next());
-    }
-    return new Chain(firstNode, lastNode, values.size());
-  }
-
-  private Chain chain(E[] values) {
-    var firstNode = new Node<>(values[0]);
-    var lastNode = firstNode;
-    for (int i = 1; i < values.length; ++i) {
-      lastNode = new Node<>(lastNode, values[i]);
-    }
-    return new Chain(firstNode, lastNode, values.length);
-  }
-
-  private Chain copy(Node<E> node, int len) {
-    var firstNode = new Node<>(node.val);
-    var lastNode = firstNode;
-    for (int i = 1; i < len; ++i) {
-      lastNode = new Node<>(lastNode, (node = node.next).val);
-    }
-    return new Chain(firstNode, lastNode, len);
   }
 
   private Node<E> node(int index) {
@@ -901,6 +901,7 @@ public class WiredList<E> implements List<E> {
     tail = node;
   }
 
+  @SuppressWarnings("rawtypes")
   private static void join(Node prev, Node next) {
     prev.next = next;
     next.prev = prev;
