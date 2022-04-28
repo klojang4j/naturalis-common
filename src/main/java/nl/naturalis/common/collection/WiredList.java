@@ -514,26 +514,17 @@ public class WiredList<E> implements List<E> {
     Node<E> oldLast = node(oldFirst, from, len);
     Node<E> newFirst = (len == pos + 1) ? oldLast : node(oldFirst, from, pos + 1);
     Node<E> newLast = node(oldLast, to - 1, pos + 1);
-    System.out.println(">>> oldFirst : " + oldFirst);
-    System.out.println(">>> oldLast  : " + oldLast);
-    System.out.println(">>> newFirst : " + newFirst);
-    System.out.println(">>> newLast  : " + newLast);
     if (from == 0) { // oldFirst == head
       makeHead(oldLast.next);
-      if (newLast == tail) {
-
-      }
-      join(oldLast, newLast.next);
-      join(newLast, oldFirst);
     } else {
       join(oldFirst.prev, oldLast.next);
-      if (newLast == tail) {
-        join(newLast, oldFirst);
-        makeTail(oldLast);
-      } else {
-        join(oldLast, newLast.next);
-        join(newLast, oldFirst);
-      }
+    }
+    if (newLast == tail) {
+      join(newLast, oldFirst);
+      makeTail(oldLast);
+    } else {
+      join(oldLast, newLast.next);
+      join(newLast, oldFirst);
     }
   }
 
