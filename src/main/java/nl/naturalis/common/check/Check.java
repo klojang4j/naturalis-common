@@ -3,10 +3,10 @@ package nl.naturalis.common.check;
 import nl.naturalis.common.StringMethods;
 import nl.naturalis.common.function.Relation;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static nl.naturalis.common.check.CommonChecks.*;
 
@@ -17,6 +17,15 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * @author Ayco Holleman
  */
 public final class Check {
+
+  private static final Supplier<IndexOutOfBoundsException> ERR_NEGATIVE_FROM =
+      () -> new IndexOutOfBoundsException("from-index must not be negative");
+
+  private static final Supplier<IndexOutOfBoundsException> ERR_FROM_GT_TO =
+      () -> new IndexOutOfBoundsException("from-index must not be greater than to-index");
+
+  private static final Supplier<IndexOutOfBoundsException> ERR_TO_GT_SIZE =
+      () -> new IndexOutOfBoundsException("to-index exceeds size");
 
   private Check() {
     throw new UnsupportedOperationException();
@@ -249,49 +258,48 @@ public final class Check {
   }
 
   /**
-   * Verifies that {@code toIndex} is not greater than the size of the specified list and that
-   * {@code fromIndex} is not negative and not greater than {@code toIndex}. If any of these
-   * requirements do not apply, an {@link IndexOutOfBoundsException} is thrown. Returns {@code
-   * toIndex - fromIndex} (i.e. the {@code length} of the segment). A null check is executed on the
-   * string argument first.
+   * Checks that the specified list is not {@code null} and verifies that the specified from-index
+   * and to-index are valid given the list. Returns {@code toIndex - fromIndex} (i.e. the size of
+   * the list). Note that custom has it that both the from-index and the to-index are allowed to be
+   * one position past last element of the list (i.e. they are both allowed to be {@code
+   * list.size()}).
    *
    * @param list The list
-   * @param fromIndex The start index
-   * @param toIndex The end index
-   * @return the {@code length} of the segment
+   * @param fromIndex The start index of the sublist
+   * @param toIndex The end index of the sublist
+   * @return the {@code size} of the sublist
    * @see #fromTo(int, int, int)
    * @see List#subList(int, int)
    */
   public static int fromTo(List<?> list, int fromIndex, int toIndex) {
-    Check.notNull(list, "list");
+    Check.that(list).isNot(NULL(), () -> new IllegalArgumentException("list must not be null"));
     return Check.fromTo(list.size(), fromIndex, toIndex);
   }
 
   /**
-   * Verifies that {@code toIndex} is not greater than the size of the specified string and that
-   * {@code fromIndex} is not negative and not greater than {@code toIndex}. If any of these
-   * requirements do not apply, an {@link IndexOutOfBoundsException} is thrown. Returns {@code
-   * toIndex - fromIndex} (i.e. the {@code length} of the segment). A null check is executed on the
-   * string argument first.
+   * Checks that the specified string is not {@code null} and verifies that the specified from-index
+   * and to-index are valid given the string. Returns {@code toIndex - fromIndex} (i.e. the length
+   * of the string). Note that custom has it that both the from-index and the to-index are allowed
+   * to be one position past last character of the string (i.e. they are both allowed to be {@code
+   * string.length()}).
    *
    * @param string The string
-   * @param fromIndex The start index
-   * @param toIndex The end index
-   * @return the {@code length} of the segment
+   * @param fromIndex The start index of the substring
+   * @param toIndex The end index of the substring
+   * @return the {@code length} of the substring
    * @see #fromTo(int, int, int)
    * @see String#substring(int, int)
    */
   public static int fromTo(String string, int fromIndex, int toIndex) {
-    Check.notNull(string, "string");
+    Check.that(string).isNot(NULL(), () -> new IllegalArgumentException("string must not be null"));
     return Check.fromTo(string.length(), fromIndex, toIndex);
   }
 
   /**
-   * Verifies that {@code toIndex} is not greater than the specified size and that {@code fromIndex}
-   * is not negative and not greater than {@code toIndex}. If any of these requirements do not
-   * apply, an {@link IndexOutOfBoundsException} is thrown. Returns {@code toIndex - fromIndex}
-   * (i.e. the {@code length} of the segment). This check stands somewhat apart from the rest of the
-   * check framework: it tests multiple things at once, and it does not ask you to provide a {@link
+   * Verifies that the specified from-index and to-index are valid given the specified size
+   * (supposedly of a string, an array, a list, etc&#46;). Returns {@code toIndex - fromIndex} (i.e.
+   * the length of the segment).This check stands somewhat apart from the rest of the check
+   * framework: it tests multiple things at once, and it does not ask you to provide a {@link
    * Predicate} or {@link Relation} implementing the tests. It is included for convenience and
    * performance reasons, and because it is such a ubiquitous check.
    *
@@ -301,8 +309,8 @@ public final class Check {
    * @return the {@code length} of the segment
    */
   public static int fromTo(int size, int fromIndex, int toIndex) {
-    Check.on(indexOutOfBounds(), fromIndex, "fromIndex").isNot(negative()).isNot(gt(), toIndex);
-    Check.on(indexOutOfBounds(), toIndex, "toIndex").isNot(gt(), size);
+    Check.that(fromIndex).isNot(negative(), ERR_NEGATIVE_FROM).isNot(gt(), toIndex, ERR_FROM_GT_TO);
+    Check.that(toIndex).isNot(gt(), size, ERR_TO_GT_SIZE);
     return toIndex - fromIndex;
   }
 

@@ -48,6 +48,10 @@ public class WiredList<E> implements List<E> {
       prev.next = this;
     }
 
+    public String toString() {
+      return String.valueOf(val);
+    }
+
   }
 
   // ======================================================= //
@@ -178,7 +182,7 @@ public class WiredList<E> implements List<E> {
 
     @Override
     public void add(E e) {
-      append(e);
+      push(e);
     }
 
   }
@@ -200,14 +204,14 @@ public class WiredList<E> implements List<E> {
 
   public static <E> WiredList<E> of(E e) {
     WiredList<E> wl = new WiredList<>();
-    wl.append(e);
+    wl.push(e);
     return wl;
   }
 
   public static <E> WiredList<E> of(E e0, E e1) {
     WiredList<E> wl = new WiredList<>();
-    wl.append(e0);
-    wl.append(e1);
+    wl.push(e0);
+    wl.push(e1);
     return wl;
   }
 
@@ -215,9 +219,9 @@ public class WiredList<E> implements List<E> {
   public static <E> WiredList<E> of(E e0, E e1, E e2, E... moreElems) {
     Check.notNull(moreElems, "moreElems");
     WiredList<E> wl = new WiredList<>();
-    wl.append(e0);
-    wl.append(e1);
-    wl.append(e2);
+    wl.push(e0);
+    wl.push(e1);
+    wl.push(e2);
     if (moreElems.length != 0) {
       wl.insert(3, Chain.of(moreElems));
     }
@@ -328,32 +332,48 @@ public class WiredList<E> implements List<E> {
   }
 
   /**
-   * Inserts the specified value at the start of the list, right-shifting the elements currently in
-   * the list.
-   *
-   * @param value The value to insert
-   */
-  public void prepend(E value) {
-    insert(0, value);
-  }
-
-  /**
-   * Inserts the specified values at the start of the list, right-shifting the elements currently in
-   * the list.
-   *
-   * @param values The values to insert
-   */
-  public void prependAll(Collection<? extends E> values) {
-    insertAll(0, values);
-  }
-
-  /**
    * Inserts the specified value at the end of the list.
    *
    * @param value The value to insert
    */
-  public void append(E value) {
+  public void push(E value) {
     insert(sz, value);
+  }
+
+  /**
+   * Removes the last element from the list.
+   *
+   * @return The value of the removed element
+   */
+  public E pop() {
+    return delete0(sz, 1).head.val;
+  }
+
+  /**
+   * Removes the first element from the list.
+   *
+   * @return The value of the removed element
+   */
+  public E shift() {
+    return delete0(0, 1).head.val;
+  }
+
+  /**
+   * Inserts the specified value at the start of the list.
+   *
+   * @param value The value to insert
+   */
+  public void unshift(E value) {
+    insert(0, value);
+  }
+
+  /**
+   * Inserts the specified values at the start of the list.
+   *
+   * @param values The values to insert
+   */
+  public void prepend(Collection<? extends E> values) {
+    insertAll(0, values);
   }
 
   /**
@@ -361,13 +381,13 @@ public class WiredList<E> implements List<E> {
    *
    * @param values The values to insert
    */
-  public void appendAll(Collection<? extends E> values) {
+  public void append(Collection<? extends E> values) {
     insertAll(sz, values);
   }
 
   /**
-   * Inserts the specified value at the specified location, right-shifting the elements at and after
-   * that location.
+   * Inserts the specified value at the specified location, right-shifting the elements following
+   * it.
    *
    * @param value The value to insert
    */
@@ -376,8 +396,8 @@ public class WiredList<E> implements List<E> {
   }
 
   /**
-   * Inserts the specified values at the specified location, right-shifting the elements at and
-   * following that location.
+   * Inserts the specified values at the specified location, right-shifting the elements following
+   * it.
    *
    * @param values The values to insert
    */
@@ -398,7 +418,7 @@ public class WiredList<E> implements List<E> {
    */
   public void embed(int index, WiredList<? extends E> other) {
     checkInclusive(index);
-    Check.notNull(other, "list").isNot(sameAs(), this, ERR_AUTO_EMBED, null);
+    Check.notNull(other, "list");
     if (!other.isEmpty()) {
       insert(index, new Chain(other.head, other.tail, other.sz));
       other.clear();
@@ -406,23 +426,114 @@ public class WiredList<E> implements List<E> {
   }
 
   /**
-   * Removes a segment of the specified list and embeds it in this list.
+   * Removes a segment from the specified list and embeds it in this list.
    *
    * @param index The index at which to embed the list
    * @param other The list to remove the segment from
    * @param fromIndex The start index of the segment (inclusive)
    * @param toIndex The end index of the segment (exclusive)
    */
-  @SuppressWarnings({"rawtypes", "unchecked"})
   public void transfer(int index, WiredList<? extends E> other, int fromIndex, int toIndex) {
     checkInclusive(index);
-    Check.notNull(other, "list").isNot(sameAs(), this, ERR_AUTO_EMBED, null);
     int length = Check.fromTo(other, fromIndex, toIndex);
+    transfer0(index, other, fromIndex, length);
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private void transfer0(int index, WiredList<? extends E> other, int offset, int length) {
+    Check.that(other, "list").isNot(sameAs(), this, ERR_AUTO_EMBED, null);
     if (length > 0) {
-      Node start = other.node(fromIndex);
-      Node end = other.node(start, fromIndex, length);
-      other.delete(new Chain(start, end, length));
-      insert(index, new Chain(start, end, length));
+      Node first = other.node(offset);
+      Node last = other.node(first, offset, length);
+      other.delete(new Chain(first, last, length));
+      insert(index, new Chain(first, last, length));
+    }
+  }
+
+  /**
+   * Exchanges list segments between this list and the specified list.
+   *
+   * @param myFrom The start index of the segment in this list (inclusive)
+   * @param myTo The end index of the segment in this list (exclusive)
+   * @param other The list with which to exchange the segments
+   * @param itsFrom The start index of the segment in the other list (inclusive)
+   * @param itsTo The end index of the segment in the other list (exclusive)
+   */
+  public void exchange(int myFrom, int myTo, WiredList<E> other, int itsFrom, int itsTo) {
+    int myLen = Check.fromTo(this, myFrom, myTo);
+    int itsLen = Check.fromTo(other, itsFrom, itsTo);
+    if (myLen == 0) {
+      if (itsLen == 0) {
+        return;
+      }
+      transfer0(myFrom, other, itsFrom, itsLen);
+    } else if (itsLen == 0) {
+      other.transfer0(itsFrom, this, myFrom, myLen);
+    } else {
+      Node<E> myStart = node(myFrom);
+      Node<E> myEnd = node(myStart, myFrom, myLen);
+      Node<E> itsStart = other.node(itsFrom);
+      Node<E> itsEnd = other.node(itsStart, itsFrom, itsLen);
+      Node<E> tmp = myStart.prev;
+      myStart.prev = itsStart.prev;
+      itsStart.prev = tmp;
+      tmp = myStart.next;
+      myStart.next = itsStart.next;
+      itsStart.next = tmp;
+      tmp = myEnd.prev;
+      myEnd.prev = itsEnd.prev;
+      itsEnd.prev = tmp;
+      tmp = myEnd.next;
+      myEnd.next = itsEnd.next;
+      itsEnd.next = tmp;
+      if ((sz += itsLen - myLen) == 0) {
+        head = tail = null;
+      }
+      if ((other.sz += myLen - itsLen) == 0) {
+        other.head = other.tail = null;
+      }
+    }
+  }
+
+  /**
+   * Moves a list segment forward or backward in the list. Use a negative value for the {@code
+   * positions} argument to make the segment move towards the start of the list.
+   *
+   * @param fromIndex The start index of the segment (inclusive)
+   * @param toIndex The end index of the segment (exclusive)
+   * @param positions The number of positions to move the segment forward (positive) or
+   *     backwards (negative)
+   */
+  public void move(int fromIndex, int toIndex, int positions) {
+    moveForward(fromIndex, toIndex, positions);
+  }
+
+  private void moveForward(int from, int to, int pos) {
+    int len = Check.fromTo(sz, from, to);
+    Node<E> oldFirst = node(from);
+    Node<E> oldLast = node(oldFirst, from, len);
+    Node<E> newFirst = (len == pos + 1) ? oldLast : node(oldFirst, from, pos + 1);
+    Node<E> newLast = node(oldLast, to - 1, pos + 1);
+    System.out.println(">>> oldFirst : " + oldFirst);
+    System.out.println(">>> oldLast  : " + oldLast);
+    System.out.println(">>> newFirst : " + newFirst);
+    System.out.println(">>> newLast  : " + newLast);
+    if (from == 0) { // oldFirst == head
+      makeHead(oldLast.next);
+      if (newLast == tail) {
+
+      }
+      join(oldLast, newLast.next);
+      join(newLast, oldFirst);
+    } else {
+      join(oldFirst.prev, oldLast.next);
+      if (newLast == tail) {
+        join(newLast, oldFirst);
+        makeTail(oldLast);
+      } else {
+        join(oldLast, newLast.next);
+        join(newLast, oldFirst);
+      }
     }
   }
 
@@ -450,24 +561,6 @@ public class WiredList<E> implements List<E> {
         return false;
       }
     }
-  }
-
-  /**
-   * Removes the first element from the list, left-shifting the elements following it.
-   *
-   * @return The value of the first element
-   */
-  public E shift() {
-    return delete0(0, 1).head.val;
-  }
-
-  /**
-   * Removes the last element from the list.
-   *
-   * @return The value of the last element
-   */
-  public E pop() {
-    return delete0(sz, 1).head.val;
   }
 
   /**
@@ -594,36 +687,6 @@ public class WiredList<E> implements List<E> {
     return false;
   }
 
-  public void exchange(int myFrom, int myTo, WiredList<E> other, int itsFrom, int itsTo) {
-    int myLen = Check.fromTo(this, myFrom, myTo);
-    int itsLen = Check.fromTo(other, itsFrom, itsTo);
-    if (myLen == 0) {
-
-    }
-    Node<E> myStart = node(myFrom);
-    Node<E> myEnd = node(myStart, myFrom, myLen);
-    Node<E> itsStart = other.node(itsFrom);
-    Node<E> itsEnd = other.node(itsStart, itsFrom, itsLen);
-    Node<E> tmp = myStart.prev;
-    myStart.prev = itsStart.prev;
-    itsStart.prev = tmp;
-    tmp = myStart.next;
-    myStart.next = itsStart.next;
-    itsStart.next = tmp;
-    tmp = myEnd.prev;
-    myEnd.prev = itsEnd.prev;
-    itsEnd.prev = tmp;
-    tmp = myEnd.next;
-    myEnd.next = itsEnd.next;
-    itsEnd.next = tmp;
-    if ((sz += itsLen - myLen) == 0) {
-      head = tail = null;
-    }
-    if ((other.sz += myLen - itsLen) == 0) {
-      other.head = other.tail = null;
-    }
-  }
-
   @Override
   public int size() {
     return sz;
@@ -689,7 +752,7 @@ public class WiredList<E> implements List<E> {
 
   @Override
   public boolean add(E e) {
-    append(e);
+    push(e);
     return true;
   }
 
@@ -825,8 +888,7 @@ public class WiredList<E> implements List<E> {
     return new WiredList<>(first, last, len);
   }
 
-  private E deleteNode(Node<E> node) {
-    E val = node.val;
+  private void deleteNode(Node<E> node) {
     if (sz == 1) {
       head = tail = null;
     } else if (node == head) {
@@ -837,7 +899,6 @@ public class WiredList<E> implements List<E> {
       join(node.prev, node.next);
     }
     --sz;
-    return val;
   }
 
   @SuppressWarnings("unchecked")
@@ -876,19 +937,19 @@ public class WiredList<E> implements List<E> {
 
   // Will only be called if len > 0
   private Node<E> node(Node<E> startNode, int startIndex, int len) {
+    Node<E> node;
     if (len < ((sz - startIndex) >> 1)) {
-      Node<E> node = startNode;
+      node = startNode;
       for (int i = 1; i < len; ++i) {
         node = node.next;
       }
-      return node;
     } else {
-      Node<E> node = tail;
+      node = tail;
       for (int i = sz; i > startIndex + len; --i) {
         node = node.prev;
       }
-      return node;
     }
+    return node;
   }
 
   private void makeHead(Node<E> node) {
