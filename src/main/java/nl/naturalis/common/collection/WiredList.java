@@ -127,7 +127,7 @@ public class WiredList<E> implements List<E> {
 
     @Override
     public boolean hasNext() {
-      return curr == null || curr != tail;
+      return idx != sz || curr == null;
     }
 
     @Override
@@ -135,13 +135,14 @@ public class WiredList<E> implements List<E> {
       if (curr == null) {
         return (curr = node(idx)).val;
       }
-      Check.that(curr).isNot(sameAs(), tail, NO_SUCH_ELEMENT);
+      Check.that(idx).is(ne(), sz, NO_SUCH_ELEMENT);
+      ++idx;
       return (curr = curr.next).val;
     }
 
     @Override
     public boolean hasPrevious() {
-      return curr == null || curr != head;
+      return idx != 0 || curr == null;
     }
 
     @Override
@@ -149,24 +150,19 @@ public class WiredList<E> implements List<E> {
       if (curr == null) {
         return (curr = node(idx)).val;
       }
-      Check.that(curr).isNot(sameAs(), head, NO_SUCH_ELEMENT);
+      Check.that(idx).is(ne(), 0, NO_SUCH_ELEMENT);
+      --idx;
       return (curr = curr.prev).val;
     }
 
-    /**
-     * <b>Not supported by this implementation of {@code ListIterator}.</b>
-     */
     @Override
     public int nextIndex() {
-      throw new UnsupportedOperationException();
+      return idx + 1;
     }
 
-    /**
-     * <b>Not supported by this implementation of {@code ListIterator}.</b>
-     */
     @Override
     public int previousIndex() {
-      throw new UnsupportedOperationException();
+      return idx - 1;
     }
 
     @Override
@@ -336,7 +332,7 @@ public class WiredList<E> implements List<E> {
   }
 
   /**
-   * Inserts the specified value at the end of the list.
+   * Appends the specified value to the end of the list.
    *
    * @param value The value to insert
    */
@@ -354,7 +350,7 @@ public class WiredList<E> implements List<E> {
   }
 
   /**
-   * Removes the first element from the list.
+   * Removes the first element from the list, left-shifting the remaining elements.
    *
    * @return The value of the removed element
    */
@@ -363,7 +359,7 @@ public class WiredList<E> implements List<E> {
   }
 
   /**
-   * Inserts the specified value at the start of the list.
+   * Inserts the specified value at the start of the list, right-shifting the original elements.
    *
    * @param value The value to insert
    */
@@ -512,8 +508,7 @@ public class WiredList<E> implements List<E> {
     int len = Check.fromTo(sz, fromIndex, toIndex);
     if ((len | positions) == 0) {
       return;
-    }
-    if (positions > 0) {
+    } else if (positions > 0) {
       Check.that(len + positions).is(lte(), sz, MOVE_BEYOND_BOUNDS);
       moveToTail(fromIndex, len, positions);
     } else {
@@ -646,11 +641,19 @@ public class WiredList<E> implements List<E> {
   @Override
   public boolean removeIf(Predicate<? super E> test) {
     Check.notNull(test, TEST);
-    return deleteIf0(0, sz, test);
+    return removeIf0(0, sz, test);
   }
 
   /**
-   * Removes all elements of the list that have the specified relation to the test value.
+   * Removes all elements of the list that have the specified relation to the test value. For
+   * example, to remove all dates before 1900-01-01 from a list of {@link java.time.LocalDate}
+   * instances:
+   * <blockquote>
+   * <pre>{@code
+   * WireList<LocalDate> wl = ....
+   * wl.removeIf(LT(), LocalDate.of(1900, 1, 1));
+   * }</pre>
+   * </blockquote>
    *
    * @param test The relation
    * @param testValue The value to test the list elements against
@@ -659,7 +662,7 @@ public class WiredList<E> implements List<E> {
    */
   public <O> boolean removeIf(Relation<E, O> test, O testValue) {
     Check.notNull(test, TEST);
-    return deleteIf0(0, sz, test, testValue);
+    return removeIf0(0, sz, test, testValue);
   }
 
   /**
@@ -674,16 +677,24 @@ public class WiredList<E> implements List<E> {
   public boolean removeIf(Predicate<? super E> test, int fromIndex, int toIndex) {
     Check.notNull(test, TEST);
     int length = Check.fromTo(sz, fromIndex, toIndex);
-    return deleteIf0(fromIndex, length, test);
+    return removeIf0(fromIndex, length, test);
   }
 
+  /**
+   * @param fromIndex
+   * @param toIndex
+   * @param test
+   * @param testValue
+   * @param <O>
+   * @return
+   */
   public <O> boolean removeIf(int fromIndex, int toIndex, Relation<E, O> test, O testValue) {
     Check.notNull(test, TEST);
     int length = Check.fromTo(sz, fromIndex, toIndex);
-    return deleteIf0(fromIndex, length, test, testValue);
+    return removeIf0(fromIndex, length, test, testValue);
   }
 
-  private boolean deleteIf0(int fromIndex, int length, Predicate<? super E> test) {
+  private boolean removeIf0(int fromIndex, int length, Predicate<? super E> test) {
     if (length > 0) {
       int sz = this.sz;
       Node<E> node = node(fromIndex);
@@ -699,7 +710,7 @@ public class WiredList<E> implements List<E> {
     return false;
   }
 
-  private <O> boolean deleteIf0(int fromIndex, int length, Relation<E, O> test, O testValue) {
+  private <O> boolean removeIf0(int fromIndex, int length, Relation<E, O> test, O testValue) {
     if (length > 0) {
       int sz = this.sz;
       Node<E> node = node(fromIndex);
@@ -715,16 +726,25 @@ public class WiredList<E> implements List<E> {
     return false;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int size() {
     return sz;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean isEmpty() {
     return sz == 0;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean contains(Object o) {
     for (Node<E> n = head; ; n = n.next) {
@@ -736,12 +756,18 @@ public class WiredList<E> implements List<E> {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean containsAll(Collection<?> c) {
     Check.notNull(c, "collection");
     return new HashSet<>(this).containsAll(c);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Object[] toArray() {
     if (sz == 0) {
@@ -758,6 +784,9 @@ public class WiredList<E> implements List<E> {
     return result;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public <T> T[] toArray(T[] a) {
     Check.notNull(a, "array");
@@ -778,35 +807,53 @@ public class WiredList<E> implements List<E> {
     return a;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean add(E e) {
     push(e);
     return true;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void add(int index, E element) {
     insert(index, element);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean addAll(Collection<? extends E> c) {
     insertAll(sz, c);
     return true;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean addAll(int index, Collection<? extends E> c) {
     insertAll(index, c);
     return !c.isEmpty();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void clear() {
     head = tail = null;
     sz = 0;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Iterator<E> iterator() {
     return sz == 0 ? emptyIterator() : new Iterator<>() {
@@ -832,16 +879,25 @@ public class WiredList<E> implements List<E> {
     };
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public ListIterator<E> listIterator() {
     return sz == 0 ? emptyListIterator() : new ListItr();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public ListIterator<E> listIterator(int index) {
     return checkIndex(index).ok(ListItr::new);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -862,6 +918,9 @@ public class WiredList<E> implements List<E> {
     return false;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int hashCode() {
     int hash = 1;
@@ -874,10 +933,16 @@ public class WiredList<E> implements List<E> {
     return hash;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public String toString() {
     return '[' + CollectionMethods.implode(this) + ']';
   }
 
+  /**
+   * <b>Not supported by this implementation.</b>
+   */
   @Override
   public List<E> subList(int fromIndex, int toIndex) {
     throw new UnsupportedOperationException();
