@@ -198,6 +198,10 @@ public class WiredList<E> implements List<E> {
 
   // Error messages
   private static final String ERR_AUTO_EMBED = "list cannot be embedded within itself";
+  private static final String ERR_MOVE_TOO_FAR = "cannot move segment beyond list boundary";
+
+  private static final Supplier<IndexOutOfBoundsException> MOVE_BEYOND_BOUNDS =
+      () -> new IndexOutOfBoundsException("cannot move segment beyond list boundary");
 
   private static final Supplier<NoSuchElementException> NO_SUCH_ELEMENT =
       NoSuchElementException::new;
@@ -505,16 +509,28 @@ public class WiredList<E> implements List<E> {
    *     backwards (negative)
    */
   public void move(int fromIndex, int toIndex, int positions) {
-    moveForward(fromIndex, toIndex, positions);
+    int len = Check.fromTo(sz, fromIndex, toIndex);
+    if ((len | positions) == 0) {
+      return;
+    }
+    if (positions > 0) {
+      Check.that(len + positions).is(lte(), sz, MOVE_BEYOND_BOUNDS);
+      moveToTail(fromIndex, len, positions);
+    } else {
+      Check.that(fromIndex + positions).is(gte(), 0, MOVE_BEYOND_BOUNDS);
+      moveToHead(fromIndex, len, positions);
+    }
   }
 
-  private void moveForward(int from, int to, int pos) {
-    int len = Check.fromTo(sz, from, to);
-    Node<E> oldFirst = node(from);
-    Node<E> oldLast = node(oldFirst, from, len);
-    Node<E> newFirst = (len == pos + 1) ? oldLast : node(oldFirst, from, pos + 1);
-    Node<E> newLast = node(oldLast, to - 1, pos + 1);
-    if (from == 0) { // oldFirst == head
+  private void moveToTail(int off, int len, int pos) {
+    // pos is the number of steps we must make, but we must
+    // express it as a to-index **exclusive**:
+    pos += 1;
+    Node<E> oldFirst = node(off);
+    Node<E> oldLast = node(oldFirst, off, len);
+    Node<E> newFirst = (len == pos) ? oldLast : node(oldFirst, off, pos);
+    Node<E> newLast = node(oldLast, off + len - 1, pos);
+    if (off == 0) { // oldFirst == head
       makeHead(oldLast.next);
     } else {
       join(oldFirst.prev, oldLast.next);
@@ -525,6 +541,27 @@ public class WiredList<E> implements List<E> {
     } else {
       join(oldLast, newLast.next);
       join(newLast, oldFirst);
+    }
+  }
+
+  private void moveToHead(int off, int len, int pos) {
+    int newFrom = off + pos;
+    pos = 1 - pos;
+    Node<E> newFirst = node(newFrom);
+    Node<E> newLast = node(newFirst, newFrom, len);
+    Node<E> oldFirst = (pos == len) ? newLast : node(newFirst, newFrom, pos);
+    Node<E> oldLast = node(oldFirst, off, len);
+    if (oldLast == tail) {
+      makeTail(oldFirst.prev);
+    } else {
+      join(oldFirst.prev, oldLast.next);
+    }
+    if (newFrom == 0) {
+      join(oldLast, newFirst);
+      makeHead(oldFirst);
+    } else {
+      join(newFirst.prev, oldFirst);
+      join(oldLast, newFirst);
     }
   }
 

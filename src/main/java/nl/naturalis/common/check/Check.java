@@ -18,14 +18,17 @@ import static nl.naturalis.common.check.CommonChecks.*;
  */
 public final class Check {
 
-  private static final Supplier<IndexOutOfBoundsException> ERR_NEGATIVE_FROM =
-      () -> new IndexOutOfBoundsException("from-index must not be negative");
+  private static final Supplier<IndexOutOfBoundsException> NEGATIVE_SIZE_OR_INDEX =
+      () -> new IndexOutOfBoundsException("Negative indices and length/size not allowed");
 
-  private static final Supplier<IndexOutOfBoundsException> ERR_FROM_GT_TO =
+  private static final Supplier<IndexOutOfBoundsException> NEGATIVE_OFFSET_LENGTH =
+      () -> new IndexOutOfBoundsException("Negative offset, length and size not allowed");
+
+  private static final Supplier<IndexOutOfBoundsException> FROM_GREATER_THAN_TO =
       () -> new IndexOutOfBoundsException("from-index must not be greater than to-index");
 
-  private static final Supplier<IndexOutOfBoundsException> ERR_TO_GT_SIZE =
-      () -> new IndexOutOfBoundsException("to-index exceeds size");
+  private static final Supplier<IndexOutOfBoundsException> TO_GREATER_THAN_SIZE =
+      () -> new IndexOutOfBoundsException("to-index must not be greater than size or length");
 
   private Check() {
     throw new UnsupportedOperationException();
@@ -94,7 +97,7 @@ public final class Check {
   public static <U> ObjectCheck<U, IllegalArgumentException> notNull(U arg)
       throws IllegalArgumentException {
     if (arg == null) {
-      throw new IllegalArgumentException(DEF_ARG_NAME + " must not be null");
+      throw new IllegalArgumentException("illegal null value");
     }
     return new ObjectCheck<>(arg, null, DEF_EXC_FACTORY);
   }
@@ -198,7 +201,7 @@ public final class Check {
    * @see #offsetLength(int, int, int)
    */
   public static int offsetLength(byte[] array, int offset, int length) {
-    Check.notNull(array, "array");
+    Check.that(array).isNot(NULL(), () -> new IllegalArgumentException("array must not be null"));
     return Check.offsetLength(array.length, offset, length);
   }
 
@@ -216,7 +219,7 @@ public final class Check {
    * @see #offsetLength(int, int, int)
    */
   public static int offsetLength(List<?> list, int offset, int length) {
-    Check.notNull(list, "list");
+    Check.that(list).isNot(NULL(), () -> new IllegalArgumentException("list must not be null"));
     return Check.offsetLength(list.size(), offset, length);
   }
 
@@ -234,7 +237,7 @@ public final class Check {
    * @see #offsetLength(int, int, int)
    */
   public static int offsetLength(String string, int offset, int length) {
-    Check.notNull(string, "string");
+    Check.that(string).isNot(NULL(), () -> new IllegalArgumentException("string must not be null"));
     return Check.offsetLength(string.length(), offset, length);
   }
 
@@ -253,7 +256,7 @@ public final class Check {
    * @return The {@code toIndex} of the segment
    */
   public static int offsetLength(int size, int offset, int length) {
-    Check.on(indexOutOfBounds(), size | offset | length, "size/offset/length").isNot(negative());
+    Check.that(size | offset | length).is(gte(), 0, NEGATIVE_SIZE_OR_INDEX);
     return Check.on(indexOutOfBounds(), offset + length, "offset + length").is(lte(), size).ok();
   }
 
@@ -297,20 +300,21 @@ public final class Check {
 
   /**
    * Verifies that the specified from-index and to-index are valid given the specified size
-   * (supposedly of a string, an array, a list, etc&#46;). Returns {@code toIndex - fromIndex} (i.e.
-   * the length of the segment).This check stands somewhat apart from the rest of the check
-   * framework: it tests multiple things at once, and it does not ask you to provide a {@link
-   * Predicate} or {@link Relation} implementing the tests. It is included for convenience and
-   * performance reasons, and because it is such a ubiquitous check.
+   * (supposedly of an array or array-like object). Returns {@code toIndex - fromIndex} (i.e. the
+   * length of the segment). This check stands somewhat apart from the rest of the check framework:
+   * it tests multiple things at once, and it does not ask you to provide a {@link Predicate} or
+   * {@link Relation} implementing the tests. It is included for convenience and performance
+   * reasons, and because it is such a ubiquitous check.
    *
-   * @param size The size
+   * @param size The size (or length) of the array, string, list, etc.
    * @param fromIndex The start index of the segment
    * @param toIndex The end index of the segment
    * @return the {@code length} of the segment
    */
   public static int fromTo(int size, int fromIndex, int toIndex) {
-    Check.that(fromIndex).isNot(negative(), ERR_NEGATIVE_FROM).isNot(gt(), toIndex, ERR_FROM_GT_TO);
-    Check.that(toIndex).isNot(gt(), size, ERR_TO_GT_SIZE);
+    Check.that(size | fromIndex | toIndex).is(gte(), 0, NEGATIVE_SIZE_OR_INDEX);
+    Check.that(fromIndex).is(lte(), toIndex, FROM_GREATER_THAN_TO);
+    Check.that(toIndex).is(lte(), size, TO_GREATER_THAN_SIZE);
     return toIndex - fromIndex;
   }
 
