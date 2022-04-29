@@ -6,13 +6,14 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
-import static nl.naturalis.common.check.CommonChecks.*;
-
 import static nl.naturalis.common.ArrayMethods.pack;
-import static org.junit.Assert.*;
+import static nl.naturalis.common.check.CommonChecks.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class MsgPredicateTest {
 
@@ -319,12 +320,12 @@ public class MsgPredicateTest {
 
   @Test
   public void file01() throws IOException {
-    File f = new File("/bla/bla/bar.foo");
+    File f = Path.of("bla", "bla", "bar.foo").toFile();
     try {
       Check.that(f, "lithium").is(file());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("File lithium must exist (was /bla/bla/bar.foo)", e.getMessage());
+      assertEquals("File lithium must exist (was " + f + ")", e.getMessage());
       return;
     } finally {
       f.delete();
@@ -332,19 +333,10 @@ public class MsgPredicateTest {
     fail();
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void file02() throws IOException {
     File f = IOMethods.createTempFile(getClass(), true);
-    try {
-      Check.that(f, "lithium").isNot(file());
-    } catch (IllegalArgumentException e) {
-      System.out.println(e.getMessage());
-      assertEquals("File lithium must not exist (was " + f + ")", e.getMessage());
-      return;
-    } finally {
-      f.delete();
-    }
-    fail();
+    Check.that(f, "lithium").isNot(file());
   }
 
   @Test
@@ -364,12 +356,13 @@ public class MsgPredicateTest {
 
   @Test
   public void directory01() throws IOException {
-    File f = new File("/bla/bla/bar.foo");
+    Path p = Path.of("bla", "bla", "bar.foo");
+    File f = p.toFile();
     try {
       Check.that(f, "thorium").is(directory());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("directory thorium must exist (was /bla/bla/bar.foo)", e.getMessage());
+      assertEquals("directory thorium must exist (was " + f + ")", e.getMessage());
       return;
     } finally {
       f.delete();
@@ -377,24 +370,16 @@ public class MsgPredicateTest {
     fail();
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void directory02() throws IOException {
     File f = IOMethods.createTempDir();
-    try {
-      Check.that(f, "thorium").isNot(directory());
-    } catch (IllegalArgumentException e) {
-      System.out.println(e.getMessage());
-      assertEquals("directory thorium must not exist (was " + f + ")", e.getMessage());
-      return;
-    } finally {
-      f.delete();
-    }
-    fail();
+    Check.that(f, "thorium").isNot(directory());
   }
 
   @Test
   public void fileExists00() throws IOException {
-    File f = new File("/bla/foo/bla/bar");
+    Path p = Path.of("bla", "foo", "bla", "bar");
+    File f = p.toFile();
     try {
       Check.that(f, "xenon").is(fileExists());
     } catch (IllegalArgumentException e) {
@@ -405,17 +390,10 @@ public class MsgPredicateTest {
     fail();
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void fileExists01() throws IOException {
     File f = IOMethods.createTempFile();
-    try {
-      Check.that(f, "xenon").isNot(fileExists());
-    } catch (IllegalArgumentException e) {
-      System.out.println(e.getMessage());
-      assertEquals("xenon must not exist (was " + f + ")", e.getMessage());
-      return;
-    }
-    fail();
+    Check.that(f, "xenon").isNot(fileExists());
   }
 
   @Test
@@ -431,30 +409,16 @@ public class MsgPredicateTest {
     fail();
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void readable01() throws IOException {
     File f = IOMethods.createTempFile();
-    try {
-      Check.that(f, "krypton").isNot(readable());
-    } catch (IllegalArgumentException e) {
-      System.out.println(e.getMessage());
-      assertEquals("krypton must not be readable (was " + f + ")", e.getMessage());
-      return;
-    }
-    fail();
+    Check.that(f, "krypton").isNot(readable());
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void readable02() throws IOException {
     File f = IOMethods.createTempDir();
-    try {
-      Check.that(f, "krypton").isNot(readable());
-    } catch (IllegalArgumentException e) {
-      System.out.println(e.getMessage());
-      assertEquals("krypton must not be readable (was " + f + ")", e.getMessage());
-      return;
-    }
-    fail();
+    Check.that(f, "krypton").isNot(readable());
   }
 
   @Test
@@ -470,30 +434,16 @@ public class MsgPredicateTest {
     fail();
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void writable01() throws IOException {
     File f = IOMethods.createTempFile();
-    try {
-      Check.that(f, "argon").isNot(writable());
-    } catch (IllegalArgumentException e) {
-      System.out.println(e.getMessage());
-      assertEquals("argon must not be writable (was " + f + ")", e.getMessage());
-      return;
-    }
-    fail();
+    Check.that(f, "argon").isNot(writable());
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void writable02() throws IOException {
     File f = IOMethods.createTempDir();
-    try {
-      Check.that(f, "argon").isNot(writable());
-    } catch (IllegalArgumentException e) {
-      System.out.println(e.getMessage());
-      assertEquals("argon must not be writable (was " + f + ")", e.getMessage());
-      return;
-    }
-    fail();
+    Check.that(f, "argon").isNot(writable());
   }
 
 }
