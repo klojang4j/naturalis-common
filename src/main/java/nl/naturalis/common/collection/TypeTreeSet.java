@@ -16,15 +16,15 @@ import static nl.naturalis.common.collection.TypeTreeMap.EMPTY_TYPE_ARRAY;
  * of its super types</i>. Its elements are ordered in ascending order of abstraction. That is, for
  * any two elements in the set, the one that comes first will never be a super type of the one that
  * comes second and, conversely, the one that comes second will never be a subtype of the one that
- * comes first. As with {@link TypeMap} and {@link TypeTreeMap} you can optionally enable
- * "autoboxing" and auto-expansion. See {@link TypeMap} for a description of these features. A
+ * comes first. As with {@link TypeHashMap} and {@link TypeTreeMap} you can optionally enable
+ * "autoboxing" and auto-expansion. See {@link TypeHashMap} for a description of these features. A
  * {@code TypeTreeSet} is unmodifiable and does not allow {@code null} values. It is backed by a
  * {@link TypeTreeMap}.
  *
- * @see TypeMap
+ * @author Ayco Holleman
+ * @see TypeHashMap
  * @see TypeSet
  * @see TypeTreeMap
- * @author Ayco Holleman
  */
 public class TypeTreeSet extends AbstractTypeSet {
 
@@ -93,7 +93,7 @@ public class TypeTreeSet extends AbstractTypeSet {
   /**
    * Returns an autoboxing {@code TypeTreeSet} for the specified types.
    *
-   * @param autoExpand Whether to enable auto-expansion (see {@link TypeMap})
+   * @param autoExpand Whether to enable auto-expansion (see {@link TypeHashMap})
    * @param types The types to add to the {@code Set}.
    * @return An autoboxing {@code TypeTreeSet} for the specified types
    */
@@ -105,7 +105,8 @@ public class TypeTreeSet extends AbstractTypeSet {
    * Returns a {@code TypeTreeSet} for the specified types.
    *
    * @param autoExpand Whether to enable auto-expansion. See {@link
-   *     TypeMap.Builder#autoExpand(boolean) TypeMap} for more information about this parameter.
+   *     TypeHashMap.Builder#autoExpand(boolean) TypeMap} for more information about this
+   *     parameter.
    * @param autobox Whether to enable "autoboxing"
    * @param types The types to add to the {@code Set}.
    * @return A {@code TypeTreeSet} for the specified types
@@ -130,7 +131,7 @@ public class TypeTreeSet extends AbstractTypeSet {
    * Converts the specified {@code Collection} to an autoboxing {@code TypeTreeSet}.
    *
    * @param c The {@code Collection} to convert
-   * @param autoExpand Whether to enable auto-expansion (see {@link TypeMap})
+   * @param autoExpand Whether to enable auto-expansion (see {@link TypeHashMap})
    * @return An autoboxing {@code TypeTreeSet}
    */
   public static TypeTreeSet copyOf(Collection<Class<?>> c, boolean autoExpand) {
@@ -141,7 +142,7 @@ public class TypeTreeSet extends AbstractTypeSet {
    * Converts the specified {@code Collection} to a {@code TypeTreeSet}.
    *
    * @param c The {@code Collection} to convert
-   * @param autoExpand Whether to enable auto-expansion (see {@link TypeMap})
+   * @param autoExpand Whether to enable auto-expansion (see {@link TypeHashMap})
    * @param autobox Whether to enable "autoboxing"
    * @return A {@code TypeTreeSet}
    */
@@ -159,4 +160,5 @@ public class TypeTreeSet extends AbstractTypeSet {
   private TypeTreeSet(Collection<? extends Class<?>> s, boolean autoExpand, boolean autobox) {
     super(new TypeTreeMap<>(toMap(s), autoExpand, autobox, EMPTY_TYPE_ARRAY));
   }
+
 }

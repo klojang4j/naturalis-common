@@ -1,22 +1,26 @@
 package nl.naturalis.common.collection;
 
 import java.util.*;
+
 import nl.naturalis.common.check.Check;
+
 import static nl.naturalis.common.check.CommonChecks.sameAs;
 import static nl.naturalis.common.check.CommonGetters.type;
 
 /**
  * A {@code Set} implementation built on the same logic as, and is in fact back by a {@link
- * TypeMap}.
+ * TypeHashMap}.
  *
- * @see TypeMap
  * @author Ayco Holleman
+ * @see TypeHashMap
  */
 abstract class AbstractTypeSet implements Set<Class<?>> {
 
   @FunctionalInterface
   static interface TypeMapFactory2 {
-    AbstractTypeMap<Object> create(Map<Class<?>, Object> src, boolean autoExpand, boolean autobox);
+
+    MultiPassTypeMap<Object> create(Map<Class<?>, Object> src, boolean autoExpand, boolean autobox);
+
   }
 
   private static final Object FOO = new Object();
@@ -27,9 +31,9 @@ abstract class AbstractTypeSet implements Set<Class<?>> {
     return m;
   }
 
-  final AbstractTypeMap<Object> map;
+  final MultiPassTypeMap<Object> map;
 
-  AbstractTypeSet(AbstractTypeMap<Object> map) {
+  AbstractTypeSet(MultiPassTypeMap<Object> map) {
     this.map = map;
   }
 
@@ -127,4 +131,5 @@ abstract class AbstractTypeSet implements Set<Class<?>> {
   private static UnsupportedOperationException notModifiable() {
     return new UnsupportedOperationException("TypeSet not modifiable");
   }
+
 }

@@ -50,7 +50,7 @@ public class TypeTreeSetTest {
         String.class,
         Month.class,
         Object[].class,
-        AbstractTypeMap.class,
+        MultiPassTypeMap.class,
         Collection.class,
         RoundingMode.class,
         Integer.class,

@@ -13,71 +13,38 @@ import static nl.naturalis.common.check.CommonChecks.sameAs;
 import static nl.naturalis.common.check.CommonGetters.type;
 
 /**
- * A specialized {@link Map} implementation used to map types to values. Its main feature is that,
- * if the requested type is not present, but one of its super types is, it will return the value
- * associated with the super type. A {@code TypeMap} does not allow {@code null} keys or values. If
- * the map contains {@code Object.class}, it is guaranteed to always return a non-null value. Note
- * that this is actually a deviation from Java's type hierarchy since primitive types do not extend
- * {@code Object.class}. However, the main goal of the {@code TypeMap} class is to elegantly provide
- * default values for groups of types through their common ancestor, and we want {@code
- * Object.class} to give us the ultimate, last-resort, fall-back value.
- *
- * <h4>Autoboxing</h4>
- *
- * <p>The map is configured by default to "autobox" (and unbox) types: if the requested type is a
- * primitive type, and there is no entry for it in the map, but there is one for the corresponding
- * wrapper type, then the map will return the value associated with the wrapper type (and vice
- * versa). You can {@link #autobox disable} the autoboxing feature.
+ * Base class for {@link TypeHashMap} and {@link TypeTreeMap}. These two classes are backed by a
+ * regular {@code Map} (a {@link HashMap} and a {@link TreeMap}, respectively). The type lookup
+ * mechanism may involve multiple queries against the backing map. If the requested type is not
+ * itself present in the backing map, a {@code MultiPassTypeMap} will first climb the type's class
+ * hierarchy up to, but not including {@code Object.class}. If none of the classes in the type's
+ * class hierarchy were found in the backing map, it will climb up the type's interfaces (if any);
+ * and finally it will check to see if the backing map contains an entry for {@code Object.class}.
  *
  * <h4>Auto-expansion</h4>
  *
  * <p>A {@code TypeMap} unmodifiable. All map-altering methods will throw an {@link
- * UnsupportedOperationException}. However, the map can be configured to automatically absorb
- * subtypes of types that already are in the map. Thus, when the subtype is requested again, it will
- * result in a direct hit. Auto-expansion is disabled by default.
+ * UnsupportedOperationException}. However, {@code TypeHashMap} and {@code TypeTreeMap} can be
+ * configured to automatically absorb subtypes of types that already are in the map. That is, with
+ * auto-expansion enabled, if a type is not present in the map, but one of its supertypes is, the
+ * {@link #get(Object) get} and {@link #containsKey(Object) containsKey} will tacitly add the
+ * subtype to the map, associating it with the same value as the supertype. Thus, when the subtype
+ * is requested again, it will result in a direct hit. (NB auto-expansion is not a feature of the
+ * {@link TypeGraphMap} class as it would actually be detrimental to its performance.)
  *
- * <h4>Type-lookup Logic</h4>
- *
- * <p>When looking for a super type of the requested type, the map will first climb the type's class
- * hierarchy up to, but not including {@code Object.class}; then it will climb up the type's
- * interfaces (if any); and finally it will check to see if it contains an entry for {@code
- * Object.class}.
- *
- * @see TypeMap
- * @see TypeTreeMap
  * @param <V> The type of the values in the {@code Map}
  * @author Ayco Holleman
+ * @see TypeHashMap
+ * @see TypeTreeMap
  */
-public abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
-
-  private interface AnyNumber {}
-
-  private interface AnyNumberArray {}
-
-  /**
-   * Special type constant. If this type is present in the map, it will provide the default value
-   * for any {@link ClassMethods#isNumerical(Class) type of number}. This allows you to keep the map
-   * very small (especially with "autoboxing" and auto-expansion disabled) while still having all
-   * numerical types covered.
-   */
-  public static final Class<?> ANY_NUMBER = AnyNumber.class;
-
-  /**
-   * Special type constant. If this type is present in the map, it will provide the default value
-   * for any type of {@link ClassMethods#isNumericalArray(Class) numerical array}. See also {@link
-   * #ANY_NUMBER}.
-   */
-  public static final Class<?> ANY_NUMBER_ARRAY = AnyNumberArray.class;
-
-  static final String ERR_NULL_KEY = "Source map must not contain null keys";
-  static final String ERR_NULL_VAL = "Illegal null value for type ${0}";
+public abstract sealed class MultiPassTypeMap<V> extends TypeMap<V> permits TypeHashMap,
+    TypeTreeMap {
 
   final boolean autoExpand;
-  final boolean autobox;
 
-  AbstractTypeMap(boolean autoExpand, boolean autobox) {
+  MultiPassTypeMap(boolean autoExpand, boolean autobox) {
+    super(autobox);
     this.autoExpand = autoExpand;
-    this.autobox = autobox;
   }
 
   abstract Map<Class<?>, V> backend();
@@ -244,16 +211,6 @@ public abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
   }
 
   @Override
-  public V put(Class<?> key, V value) {
-    throw notModifiable();
-  }
-
-  @Override
-  public void putAll(Map<? extends Class<?>, ? extends V> m) {
-    throw notModifiable();
-  }
-
-  @Override
   public int size() {
     return backend().size();
   }
@@ -266,16 +223,6 @@ public abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
   @Override
   public boolean containsValue(Object value) {
     return backend().containsValue(value);
-  }
-
-  @Override
-  public V remove(Object key) {
-    throw notModifiable();
-  }
-
-  @Override
-  public void clear() {
-    throw notModifiable();
   }
 
   @Override
@@ -308,15 +255,4 @@ public abstract class AbstractTypeMap<V> implements Map<Class<?>, V> {
     return backend().toString();
   }
 
-  public List<String> typeNames() {
-    return keySet().stream().map(ClassMethods::className).collect(toUnmodifiableList());
-  }
-
-  public List<String> simpleTypeNames() {
-    return keySet().stream().map(ClassMethods::simpleClassName).collect(toUnmodifiableList());
-  }
-
-  private UnsupportedOperationException notModifiable() {
-    return new UnsupportedOperationException(getClass().getSimpleName() + " not modifiable");
-  }
 }

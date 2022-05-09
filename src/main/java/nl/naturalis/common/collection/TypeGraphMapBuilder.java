@@ -11,7 +11,7 @@ import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.check.CommonChecks.deepNotNull;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
-public final class TypeMapBuilder<V> {
+public final class TypeGraphMapBuilder<V> {
 
   private static class WritableTypeNode {
 
@@ -35,12 +35,11 @@ public final class TypeMapBuilder<V> {
       } else {
         children = new TypeNode[subtypes.size()];
         WiredList<WritableTypeNode> classes = subtypes.removeUntil(IS_INTERFACE).reverse();
-        WiredList<WritableTypeNode> interfaces = subtypes.reverse();
         int i = 0;
         for (WritableTypeNode child : classes) {
           children[i++] = child.toTypeNode();
         }
-        for (WritableTypeNode child : interfaces) {
+        for (WritableTypeNode child : subtypes) { // now only contains interfaces
           children[i++] = child.toTypeNode();
         }
       }
@@ -79,7 +78,7 @@ public final class TypeMapBuilder<V> {
 
   private boolean autobox = true;
 
-  TypeMapBuilder(Class<V> valueType) {
+  TypeGraphMapBuilder(Class<V> valueType) {
     this.valueType = valueType;
     this.root = new WritableTypeNode(null, null);
   }
@@ -90,7 +89,7 @@ public final class TypeMapBuilder<V> {
    *
    * @return This {@code Builder} instance
    */
-  public TypeMapBuilder<V> autobox(boolean autobox) {
+  public TypeGraphMapBuilder<V> autobox(boolean autobox) {
     this.autobox = autobox;
     return this;
   }
@@ -102,7 +101,7 @@ public final class TypeMapBuilder<V> {
    * @param value The value
    * @return This {@code Builder} instance
    */
-  public TypeMapBuilder<V> add(Class<?> type, V value) {
+  public TypeGraphMapBuilder<V> add(Class<?> type, V value) {
     Check.notNull(type, "type");
     Check.notNull(value, "value").is(instanceOf(), valueType);
     if (type == Object.class) {
@@ -125,7 +124,7 @@ public final class TypeMapBuilder<V> {
    * @param types The types to associate the value with
    * @return This {@code Builder} instance
    */
-  public TypeMapBuilder<V> addMultiple(V value, Class<?>... types) {
+  public TypeGraphMapBuilder<V> addMultiple(V value, Class<?>... types) {
     Check.notNull(value, "value").is(instanceOf(), valueType);
     Check.that(types, "types").is(deepNotNull());
     Arrays.stream(types).forEach(t -> add(t, value));

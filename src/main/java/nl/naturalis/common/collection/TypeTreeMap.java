@@ -8,12 +8,12 @@ import static nl.naturalis.common.check.CommonChecks.deepNotNull;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
 /**
- * A subclass of {@link AbstractTypeMap} that is internally backed by a {@link TreeMap}.
+ * A subclass of {@link MultiPassTypeMap} that is internally backed by a {@link TreeMap}.
  *
- * @author Ayco Holleman
  * @param <V> The type of the values in the {@code Map}
+ * @author Ayco Holleman
  */
-public final class TypeTreeMap<V> extends AbstractTypeMap<V> {
+public final class TypeTreeMap<V> extends MultiPassTypeMap<V> {
 
   static final Class<?>[] EMPTY_TYPE_ARRAY = new Class[0];
 
@@ -24,10 +24,11 @@ public final class TypeTreeMap<V> extends AbstractTypeMap<V> {
   /**
    * A builder class for {@code TypeTreeMap} instances.
    *
-   * @author Ayco Holleman
    * @param <U> The type of the values in the {@code TypeTreeMap} to be built
+   * @author Ayco Holleman
    */
   public static final class Builder<U> {
+
     private final Class<U> valueType;
     private final LinkedHashMap<Class<?>, U> tmp = new LinkedHashMap<>();
     private boolean autoExpand = false;
@@ -114,6 +115,7 @@ public final class TypeTreeMap<V> extends AbstractTypeMap<V> {
       }
       return (TypeTreeMap<W>) new TypeTreeMap<>(tmp, autoExpand, autobox, bumped);
     }
+
   }
 
   /////////////////////////////////////////////////////////////////////
@@ -140,8 +142,9 @@ public final class TypeTreeMap<V> extends AbstractTypeMap<V> {
    * @param autobox Whether to enable the "autoboxing" feature (see class comments)
    * @return A {@code TypeTreeMap} instance that will grow as new types are being requested from it
    */
-  public static <U> TypeTreeMap<U> copyOf(
-      Map<Class<?>, U> src, boolean autoExpand, boolean autobox) {
+  public static <U> TypeTreeMap<U> copyOf(Map<Class<?>, U> src,
+      boolean autoExpand,
+      boolean autobox) {
     Check.notNull(src, "src");
     if (src.getClass() == TypeTreeMap.class) {
       TypeTreeMap<U> ttm = (TypeTreeMap<U>) src;
@@ -167,8 +170,10 @@ public final class TypeTreeMap<V> extends AbstractTypeMap<V> {
 
   private final TreeMap<Class<?>, V> backend;
 
-  TypeTreeMap(
-      Map<Class<?>, ? extends V> m, boolean autoExpand, boolean autobox, Class<?>[] bumped) {
+  TypeTreeMap(Map<Class<?>, ? extends V> m,
+      boolean autoExpand,
+      boolean autobox,
+      Class<?>[] bumped) {
     super(autoExpand, autobox);
     Comparator<Class<?>> cmp = TypeComparatorFactory.getComparator(bumped);
     TreeMap<Class<?>, V> tmp = new TreeMap<>(cmp);
@@ -188,4 +193,5 @@ public final class TypeTreeMap<V> extends AbstractTypeMap<V> {
   Map<Class<?>, V> backend() {
     return backend;
   }
+
 }

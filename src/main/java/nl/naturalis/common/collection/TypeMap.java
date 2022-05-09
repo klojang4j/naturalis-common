@@ -1,204 +1,104 @@
 package nl.naturalis.common.collection;
 
-import nl.naturalis.common.check.Check;
+import nl.naturalis.common.ClassMethods;
 
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import static nl.naturalis.common.check.CommonChecks.*;
+import static java.util.stream.Collectors.toUnmodifiableList;
 
 /**
- * A subclass of {@link AbstractTypeMap} that is internally backed by a {@link HashMap}.
+ * Base class for {@link TypeGraphMap}, {@link TypeHashMap} and  {@link TypeTreeMap}. A {@code
+ * TypeMap} is a specialized {@link Map} implementation used to map types to values. Its main
+ * feature is that, if a type (requested via the {@link #get(Object) get} or {@link
+ * #containsKey(Object) containsKey} method) is not present in the map, but one of its super types
+ * is, then it will return the value associated with the super type. A {@code TypeMap} is not
+ * modifiable and does not allow {@code null} keys and {@code null} values. If the map contains
+ * {@code Object.class}, it is guaranteed to always return a non-null value. Note that this is
+ * actually a deviation from Java's type hierarchy since primitive types do not extend {@code
+ * Object.class}. However, the point of the {@code TypeMap} class is to elegantly provide default
+ * values for groups of types through their common ancestor, and we want {@code Object.class} to be
+ * associated with the ultimate, last-resort, fall-back value.
+ *
+ * <p>The requested type's class hierarchy takes precedence over its interface hierarchy.
+ *
+ * <h4>Autoboxing</h4>
+ *
+ * <p>A {@code TypeMap} can be configured to "autobox" the types requested by the client. That
+ * is, if, for example, the client makes a request for {@code double.class}, but the map only
+ * contains an entry for {@code Double.class}, then that is the type being served (i.e. {@code
+ * containsKey} returns {@code true} and {@code get} returns the value associated with {@code
+ * Double.class}). If there is no entry for {@code Double.class} either, but there is one for {@code
+ * Number.class}, then that is the type being served. Thus, with autoboxing enabled, you need (and
+ * should) only add the wrapper types to the map, unless you want the primitive type to be
+ * associated with a different value than the wrapper type.
  *
  * @param <V> The type of the values in the {@code Map}
  * @author Ayco Holleman
+ * @see TypeMap
+ * @see TypeHashMap
+ * @see TypeTreeMap
  */
-public final class TypeMap<V> extends AbstractTypeMap<V> {
+public abstract sealed class TypeMap<V> implements Map<Class<?>, V> permits MultiPassTypeMap,
+    TypeGraphMap {
 
   /**
-   * A builder class for {@code TypeMap} instances.
-   *
-   * @param <U> The type of the values in the {@code TypeMap} to be built
-   * @author Ayco Holleman
+   * Special type constant. If this type is present in the map, it will provide the default value
+   * for any {@link ClassMethods#isNumerical(Class) type of number}. This allows you to keep the map
+   * very small (especially with "autoboxing" and auto-expansion disabled) while still having all
+   * numerical types covered.
    */
-  public static final class Builder<U> {
-    private final Class<U> valueType;
-    private final HashMap<Class<?>, U> tmp = new HashMap<>();
-    private Integer expectedSize = null;
-    private boolean autobox = true;
-
-    private Builder(Class<U> valueType) {
-      this.valueType = valueType;
-    }
-
-    /**
-     * Whether to enable the auto-expand feature. See description above. Specifying {@code true} is
-     * equivalent to calling {@link #autoExpand(int) autoExpand(2)}.
-     *
-     * @return This {@code Builder} instance
-     */
-    public Builder<U> autoExpand(boolean autoExpand) {
-      expectedSize = autoExpand ? 2 : null;
-      return this;
-    }
-
-    /**
-     * Enables the auto-expansion feature. See description above. If the {@code expectedSize}
-     * argument is less than or equal to the total number of entries you {@link #add(Class, Object)
-     * added}, it will be interpreted as a multiplier. So, for example, 3 would mean that you expect
-     * the map to grow to about three times its original size.
-     *
-     * @param expectedSize An estimate of the final size of the auto-expanding map
-     * @return This {@code Builder} instance
-     */
-    public Builder<U> autoExpand(int expectedSize) {
-      this.expectedSize = Check.that(expectedSize).is(gt(), 1).ok();
-      return this;
-    }
-
-    /**
-     * Whether to enable the "autoboxing" feature. See description above. By default, autoboxing is
-     * enabled.
-     *
-     * @return This {@code Builder} instance
-     */
-    public Builder<U> autobox(boolean autobox) {
-      this.autobox = autobox;
-      return this;
-    }
-
-    /**
-     * Associates the specified type with the specified value.
-     *
-     * @param type The type
-     * @param value The value
-     * @return This {@code Builder} instance
-     */
-    public Builder<U> add(Class<?> type, U value) {
-      Check.notNull(type, "type");
-      Check.notNull(value, "value").is(instanceOf(), valueType);
-      tmp.put(type, value);
-      return this;
-    }
-
-    /**
-     * Associates the specified value with the specified types.
-     *
-     * @param value The value
-     * @param types The types to associate the value with
-     * @return This {@code Builder} instance
-     */
-    public Builder<U> addMultiple(U value, Class<?>... types) {
-      Check.notNull(value, "value").is(instanceOf(), valueType);
-      Check.that(types, "types").is(deepNotNull());
-      Arrays.stream(types).forEach(t -> tmp.put(t, value));
-      return this;
-    }
-
-    /**
-     * Returns an unmodifiable {@code TypeMap} with the configured types and behaviour.
-     *
-     * @param <W> The type of the values in the returned {@code TypeMap}
-     * @return S new {@code TypeMap} instance with the configured types and behaviour
-     */
-    @SuppressWarnings("unchecked")
-    public <W> TypeMap<W> freeze() {
-      if (expectedSize == null) { // No auto-expand
-        return (TypeMap<W>) new TypeMap<>(tmp, autobox);
-      }
-      int sz = expectedSize > tmp.size() ? expectedSize : tmp.size() * expectedSize;
-      return (TypeMap<W>) new TypeMap<>(tmp, sz, autobox);
-    }
-  }
-
+  public static final Class<?> ANY_NUMBER = AnyNumber.class;
   /**
-   * Converts the specified {@code Map} to a non-auto-expanding, autoboxing {@code TypeMap} .
-   *
-   * @param <U> The type of the values in the {@code Map}
-   * @param src The {@code Map} to convert
-   * @return A non-auto-expanding, non-autoboxing {@code TypeMap}
+   * Special type constant. If this type is present in the map, it will provide the default value
+   * for any type of {@link ClassMethods#isNumericalArray(Class) numerical array}. See also {@link
+   * #ANY_NUMBER}.
    */
-  public static <U> TypeMap<U> copyOf(Map<Class<?>, U> src) {
-    return copyOf(src, true);
-  }
+  public static final Class<?> ANY_NUMBER_ARRAY = AnyNumberArray.class;
 
-  /**
-   * Converts the specified {@code Map} to a non-auto-expanding {@code TypeMap} .
-   *
-   * @param <U> The type of the values in the {@code Map}
-   * @param src The {@code Map} to convert
-   * @param autobox Whether to enable the "autoboxing" feature (see class comments)
-   * @return A non-auto-expanding {@code TypeMap}
-   */
-  public static <U> TypeMap<U> copyOf(Map<Class<?>, U> src, boolean autobox) {
-    Check.that(src, "src").is(deepNotNull());
-    return new TypeMap<>(src, autobox);
-  }
+  static final String ERR_NULL_KEY = "Source map must not contain null keys";
+  static final String ERR_NULL_VAL = "Illegal null value for type ${0}";
 
-  /**
-   * Converts the specified {@code Map} to an auto-expanding, autoboxing {@code TypeMap}. If the
-   * {@code expectedSize} argument is less than or equal to the size of the source map, it will be
-   * interpreted as a multiplier. So, for example, 3 would mean that you expect the map to grow to
-   * about three times its original size.
-   *
-   * @param <U> The type of the values in the {@code Map}
-   * @param src The {@code Map} to convert
-   * @param expectedSize The expected size of the map
-   * @return An auto-expanding, autoboxing {@code TypeMap}
-   */
-  public static <U> TypeMap<U> copyOf(Map<Class<?>, U> src, int expectedSize) {
-    return copyOf(src, expectedSize, true);
-  }
+  final boolean autobox;
 
-  /**
-   * Converts the specified {@code Map} to an auto-expanding {@code TypeMap}. If the {@code
-   * expectedSize} argument is less than or equal to the size of the source map, it will be
-   * interpreted as a multiplier. So, for example, 3 would mean that you expect the map to grow to
-   * about three times its original size.
-   *
-   * @param <U> The type of the values in the {@code Map}
-   * @param src The {@code Map} to convert
-   * @param expectedSize An estimate of the final size of the auto-expanding map
-   * @param autobox Whether to enable the "autoboxing" feature (see class comments)
-   * @return An auto-expanding {@code TypeMap}
-   */
-  public static <U> TypeMap<U> copyOf(Map<Class<?>, U> src, int expectedSize, boolean autobox) {
-    Check.that(src, "src").is(deepNotNull());
-    Check.that(expectedSize, "expectedSize").is(gt(), 1);
-    int sz = expectedSize > src.size() ? expectedSize : expectedSize * src.size();
-    return new TypeMap<>(src, sz, autobox);
-  }
-
-  /**
-   * Returns a {@code Builder} instance that lets you configure a {@code TypeMap}
-   *
-   * @param <U> The type of the values in the {@code TypeMap}
-   * @param valueType The class object corresponding to the type of the values in the {@code
-   *     TypeMap} to be built
-   * @return A {@code Builder} instance that lets you configure a {@code TypeMap}
-   */
-  public static <U> Builder<U> build(Class<U> valueType) {
-    Check.notNull(valueType);
-    return new Builder<>(valueType);
-  }
-
-  private final Map<Class<?>, V> backend;
-
-  TypeMap(Map<Class<?>, ? extends V> m, boolean autobox) {
-    super(false, autobox);
-    this.backend = Map.copyOf(m);
-  }
-
-  TypeMap(Map<Class<?>, ? extends V> m, int sz, boolean autobox) {
-    super(true, autobox);
-    Map<Class<?>, V> tmp = new HashMap<>(1 + sz * 4 / 3);
-    tmp.putAll(m);
-    this.backend = tmp;
+  public TypeMap(boolean autobox) {
+    this.autobox = autobox;
   }
 
   @Override
-  Map<Class<?>, V> backend() {
-    return backend;
+  public V put(Class<?> key, V value) {
+    throw notModifiable();
   }
+
+  @Override
+  public void putAll(Map<? extends Class<?>, ? extends V> m) {
+    throw notModifiable();
+  }
+
+  @Override
+  public V remove(Object key) {
+    throw notModifiable();
+  }
+
+  @Override
+  public void clear() {
+    throw notModifiable();
+  }
+
+  public List<String> typeNames() {
+    return keySet().stream().map(ClassMethods::className).collect(toUnmodifiableList());
+  }
+
+  public List<String> simpleTypeNames() {
+    return keySet().stream().map(ClassMethods::simpleClassName).collect(toUnmodifiableList());
+  }
+
+  private UnsupportedOperationException notModifiable() {
+    return new UnsupportedOperationException();
+  }
+
+  private interface AnyNumber {}
+
+  private interface AnyNumberArray {}
+
 }
