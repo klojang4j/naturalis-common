@@ -5,22 +5,25 @@ import nl.naturalis.common.collection.TypeGraphMap.TypeNode;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.function.Predicate;
+import java.util.Map;
 
+import static java.util.Map.Entry;
+import static java.util.Map.entry;
 import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.check.CommonChecks.deepNotNull;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
 public final class TypeGraphMapBuilder<V> {
 
+  // ================================================================== //
+  // ======================= [ WritableTypeNode ] ===================== //
+  // ================================================================== //
+
   private static class WritableTypeNode {
 
-    static final TypeNode[] WITHOUT_SUBTYPES = new TypeNode[0];
-    static final Predicate<WritableTypeNode> IS_INTERFACE = tn -> tn.type.isInterface();
-
     private final WiredList<WritableTypeNode> subtypes = new WiredList<>();
+    private final Class<?> type;
 
-    private Class<?> type;
     private Object value;
 
     WritableTypeNode(Class<?> type, Object val) {
@@ -29,21 +32,15 @@ public final class TypeGraphMapBuilder<V> {
     }
 
     TypeNode toTypeNode() {
-      TypeNode[] children;
-      if (subtypes.size() == 0) {
-        children = WITHOUT_SUBTYPES;
-      } else {
-        children = new TypeNode[subtypes.size()];
-        WiredList<WritableTypeNode> classes = subtypes.removeUntil(IS_INTERFACE).reverse();
-        int i = 0;
-        for (WritableTypeNode child : classes) {
-          children[i++] = child.toTypeNode();
-        }
-        for (WritableTypeNode child : subtypes) { // now only contains interfaces
-          children[i++] = child.toTypeNode();
-        }
-      }
-      return new TypeNode(type, value, children);
+      Map<Class<?>, TypeNode> subclasses =
+          Map.ofEntries(subtypes.removeUntil(tn -> tn.type.isInterface())
+              .stream()
+              .map(wtn -> entry(wtn.type, wtn.toTypeNode()))
+              .toArray(Entry[]::new));
+      Map<Class<?>, TypeNode> subinterfaces = Map.ofEntries(subtypes.stream()
+          .map(wtn -> entry(wtn.type, wtn.toTypeNode()))
+          .toArray(Entry[]::new));
+      return new TypeNode(type, value, subclasses, subinterfaces);
     }
 
     void addChild(WritableTypeNode node) {
@@ -73,19 +70,24 @@ public final class TypeGraphMapBuilder<V> {
 
   }
 
+  // ================================================================== //
+  // ===================== [ TypeGraphMapBuilder ] ==================== //
+  // ================================================================== //
+
   private final Class<V> valueType;
   private final WritableTypeNode root;
 
+  private int size;
   private boolean autobox = true;
 
   TypeGraphMapBuilder(Class<V> valueType) {
     this.valueType = valueType;
-    this.root = new WritableTypeNode(null, null);
+    this.root = new WritableTypeNode(Object.class, null);
   }
 
   /**
-   * Whether to enable the "autoboxing" feature. See description above. By default, autoboxing is
-   * enabled.
+   * Whether to enable the "autoboxing" feature. See {@link TypeMap for an explanation of this
+   * feature. By default, autoboxing is enabled.
    *
    * @return This {@code Builder} instance
    */
@@ -105,14 +107,15 @@ public final class TypeGraphMapBuilder<V> {
     Check.notNull(type, "type");
     Check.notNull(value, "value").is(instanceOf(), valueType);
     if (type == Object.class) {
-      if (root.type == null) {
-        root.type = Object.class;
+      if (root.value == null) {
         root.value = value;
+        ++size;
       } else {
         throw new DuplicateKeyException(Object.class);
       }
     } else {
       root.addChild(new WritableTypeNode(type, value));
+      ++size;
     }
     return this;
   }
@@ -138,7 +141,7 @@ public final class TypeGraphMapBuilder<V> {
    * @return S new {@code TypeMap} instance with the configured types and behaviour
    */
   public <W> TypeGraphMap<W> freeze() {
-    return new TypeGraphMap<>(root.toTypeNode(), autobox);
+    return new TypeGraphMap<>(root.toTypeNode(), size, autobox);
   }
 
 }

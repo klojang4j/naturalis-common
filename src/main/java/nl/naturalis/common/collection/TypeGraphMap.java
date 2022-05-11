@@ -1,13 +1,14 @@
 package nl.naturalis.common.collection;
 
-import nl.naturalis.common.check.Check;
-
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static java.util.AbstractMap.SimpleImmutableEntry;
 import static nl.naturalis.common.ClassMethods.box;
 import static nl.naturalis.common.ClassMethods.isA;
-import static nl.naturalis.common.check.CommonChecks.instanceOf;
+import static nl.naturalis.common.ObjectMethods.ifNull;
 
 /**
  * The {@code TypeGraphMap} class provides a native implementation of the logic specified by the
@@ -29,66 +30,76 @@ import static nl.naturalis.common.check.CommonChecks.instanceOf;
  */
 public final class TypeGraphMap<V> extends TypeMap<V> {
 
+  // ================================================================== //
+  // ========================== [ TypeNode ] ========================== //
+  // ================================================================== //
+
   static final class TypeNode {
 
     private final Class<?> type;
     private final Object value;
-    private final TypeNode[] subtypes;
+    Map<Class<?>, TypeNode> subclasses;
+    Map<Class<?>, TypeNode> subinterfaces;
 
-    TypeNode(Class<?> type, Object value, TypeNode[] subtypes) {
+    TypeNode(Class<?> type,
+        Object value,
+        Map<Class<?>, TypeNode> subclasses,
+        Map<Class<?>, TypeNode> subinterfaces) {
       this.type = type;
       this.value = value;
-      this.subtypes = subtypes;
+      this.subclasses = subclasses;
+      this.subinterfaces = subinterfaces;
     }
 
     Object find(Class<?> type, boolean autobox) {
-      if (type == this.type) {
-        return value;
-      } else if (isA(type, this.type)) {
+      if (isA(type, this.type)) {
         if (type.isInterface()) {
           // interfaces can only be subtypes of other interfaces
-          for (int i = subtypes.length - 1; i >= 0 && subtypes[i].type.isInterface(); --i) {
-            Object val = find(subtypes[i].type, false);
-            if (val != null) {
-              return val;
-            }
-          }
-        } else {
-          // class can be subtypes of classes and interfaces
-          for (TypeNode subtype : subtypes) {
-            Object val = find(subtype.type, false);
-            if (val != null) {
-              return val;
-            }
-          }
+          return ifNull(find(type, subinterfaces), value);
         }
-        return value;
+        Object val = find(type, subclasses);
+        if (val == null) {
+          val = find(type, subinterfaces);
+        }
+        return ifNull(val, value);
       } else if (autobox && type.isPrimitive()) {
         return find(box(type), false);
       }
       return null;
     }
 
-    int countDescendants() {
-      int x = subtypes.length;
-      for (TypeNode tn : subtypes) {
-        x += tn.countDescendants();
+    static Object find(Class<?> type, Map<Class<?>, TypeNode> typeNodes) {
+      TypeNode tn = typeNodes.get(type);
+      if (tn == null) {
+        for (TypeNode typeNode : typeNodes.values()) {
+          Object val = typeNode.find(type, false);
+          if (val != null) {
+            return val;
+          }
+        }
+        return null;
       }
-      return x;
+      return tn.value;
     }
 
     void collectTypes(Set<Class<?>> set) {
-      for (TypeNode tn : subtypes) {
+      for (TypeNode tn : subclasses.values()) {
         set.add(tn.type);
+        tn.collectTypes(set);
       }
-      for (TypeNode tn : subtypes) {
+      for (TypeNode tn : subinterfaces.values()) {
+        set.add((tn.type));
         tn.collectTypes(set);
       }
     }
 
     @SuppressWarnings({"unchecked"})
     <E> void collectValues(Set<E> set) {
-      for (TypeNode tn : subtypes) {
+      for (TypeNode tn : subclasses.values()) {
+        set.add((E) tn.value);
+        tn.collectValues(set);
+      }
+      for (TypeNode tn : subinterfaces.values()) {
         set.add((E) tn.value);
         tn.collectValues(set);
       }
@@ -96,39 +107,62 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
 
     @SuppressWarnings({"unchecked"})
     <E> void collectEntries(Set<Entry<Class<?>, E>> set) {
-      for (TypeNode tn : subtypes) {
+      for (TypeNode tn : subclasses.values()) {
         set.add(new SimpleImmutableEntry<>(tn.type, (E) tn.value));
+        tn.collectEntries(set);
       }
-      for (TypeNode tn : subtypes) {
-        tn.collectValues(set);
+      for (TypeNode tn : subinterfaces.values()) {
+        set.add(new SimpleImmutableEntry<>(tn.type, (E) tn.value));
+        tn.collectEntries(set);
       }
     }
 
   }
 
-  private final TypeNode root;
+  // ================================================================== //
+  // ========================= [ TypeGraphMap ] ======================== //
+  // ================================================================== //
 
-  private int size = -1;
+  private final TypeNode root;
+  private final int size;
+
   private Set<Class<?>> keys;
   private Collection<V> values;
   private Set<Entry<Class<?>, V>> entries;
 
-  TypeGraphMap(TypeNode root, boolean autobox) {
+  TypeGraphMap(TypeNode root, int size, boolean autobox) {
     super(autobox);
     this.root = root;
+    this.size = size;
   }
 
   @Override
   @SuppressWarnings({"unchecked"})
   public V get(Object key) {
-    Check.that(key, "key").is(instanceOf(), Class.class);
-    return (V) root.find((Class<?>) key, autobox);
+    if (key instanceof Class type) {
+      return (V) root.find(type, autobox);
+    }
+    return null;
   }
 
   @Override
   public boolean containsKey(Object key) {
-    Check.that(key, "key").is(instanceOf(), Class.class);
-    return root.find((Class<?>) key, autobox) != null;
+    if (key instanceof Class type) {
+      if (root.value != null) {
+        return true;
+      }
+      for (TypeNode tn : root.subclasses.values()) {
+        if (isA(type, tn.type)) {
+          return true;
+        }
+      }
+      for (TypeNode tn : root.subinterfaces.values()) {
+        if (isA(type, tn.type)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   @Override
@@ -139,12 +173,12 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
   @Override
   public Set<Class<?>> keySet() {
     if (keys == null) {
-      Set<Class<?>> set = new LinkedHashSet<>(1 + size() * 4 / 3);
-      if (root.type != null) { // map contains Object.class
+      Set<Class<?>> set = new HashSet<>(1 + size * 4 / 3);
+      if (root.value != null) { // map contains Object.class
         set.add(Object.class);
       }
       root.collectTypes(set);
-      keys = Collections.unmodifiableSet(set);
+      keys = Set.copyOf(set);
     }
     return keys;
   }
@@ -153,7 +187,7 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
   @SuppressWarnings({"unchecked"})
   public Collection<V> values() {
     if (values == null) {
-      Set<V> set = new HashSet<>(1 + size() * 4 / 3);
+      Set<V> set = new HashSet<>(1 + size * 4 / 3);
       if (root.value != null) {
         set.add((V) root.value);
       }
@@ -167,30 +201,24 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
   @SuppressWarnings({"unchecked"})
   public Set<Entry<Class<?>, V>> entrySet() {
     if (entries == null) {
-      Set<Entry<Class<?>, V>> set = new LinkedHashSet<>(1 + size() * 4 / 3);
-      if (root.type != null) {
+      Set<Entry<Class<?>, V>> set = new HashSet<>(1 + size() * 4 / 3);
+      if (root.value != null) {
         set.add(new SimpleImmutableEntry<>(Object.class, (V) root.value));
       }
       root.collectEntries(set);
-      entries = Collections.unmodifiableSet(set);
+      entries = Set.copyOf(set);
     }
     return entries;
   }
 
   @Override
   public int size() {
-    if (size == -1) {
-      size = root.countDescendants();
-      if (root.type != null) {
-        ++size;
-      }
-    }
     return size;
   }
 
   @Override
   public boolean isEmpty() {
-    return size() != 0;
+    return size != 0;
   }
 
 }

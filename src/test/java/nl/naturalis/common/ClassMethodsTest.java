@@ -2,6 +2,7 @@ package nl.naturalis.common;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Function;
 
 import org.junit.Test;
 
@@ -12,33 +13,24 @@ import static org.junit.Assert.assertTrue;
 public class ClassMethodsTest {
 
   @Test
-  public void isA01() {
-    assertTrue(ClassMethods.isA(String.class, Object.class));
-  }
-
-  @Test
-  public void isA02() {
-    assertTrue(ClassMethods.isA(String.class, CharSequence.class));
-  }
-
-  @Test
-  public void isA03() {
-    assertFalse(ClassMethods.isA(Object.class, String.class));
-  }
-
-  @Test
-  public void isA04() {
-    assertFalse(ClassMethods.isA(CharSequence.class, String.class));
-  }
-
-  @Test
-  public void isA05() {
+  public void isA00() {
     assertTrue(ClassMethods.isA(String.class, String.class));
+    assertTrue(ClassMethods.isA(String.class, Object.class));
+    assertTrue(ClassMethods.isA(String.class, CharSequence.class));
+    assertFalse(ClassMethods.isA(Object.class, String.class));
+    assertFalse(ClassMethods.isA(CharSequence.class, String.class));
+    assertTrue(ClassMethods.isA(String.class, String.class));
+    assertFalse(ClassMethods.isA(short.class, int.class));
+    assertTrue(ClassMethods.isA(Serializable.class, Object.class));
+    assertTrue(ClassMethods.isA(Function.class, Object.class));
   }
 
-  @Test
-  public void isA06() {
-    assertFalse(ClassMethods.isA(short.class, int.class));
+  public void isA01() {
+    assertTrue(ClassMethods.isA("Foo", String.class));
+    assertTrue(ClassMethods.isA("Foo", Object.class));
+    assertTrue(ClassMethods.isA("Foo", CharSequence.class));
+    assertTrue(ClassMethods.isA(new Object(), String.class));
+    assertFalse(ClassMethods.isA((short) 42, int.class));
   }
 
   @Test
@@ -59,15 +51,13 @@ public class ClassMethodsTest {
 
   @Test
   public void getAllInterfaces00() {
-    Set<Class<?>> expected =
-        Set.of(
-            NavigableSet.class,
-            Cloneable.class,
-            Serializable.class,
-            SortedSet.class,
-            Set.class,
-            Collection.class,
-            Iterable.class);
+    Set<Class<?>> expected = Set.of(NavigableSet.class,
+        Cloneable.class,
+        Serializable.class,
+        SortedSet.class,
+        Set.class,
+        Collection.class,
+        Iterable.class);
     Set<Class<?>> actual = ClassMethods.getAllInterfaces(TreeSet.class);
     // System.out.println(implode(actual.toArray(), "\n"));
     assertEquals(expected, actual);
@@ -80,4 +70,5 @@ public class ClassMethodsTest {
     // System.out.println(implode(actual.toArray(), "\n"));
     assertEquals(expected, actual);
   }
+
 }

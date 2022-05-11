@@ -58,7 +58,8 @@ public class ClassMethods {
    * Tests whether the 1st argument is an instance of the specified class or interface. Equivalent
    * to <code>superOrInterface.isInstance(instance)</code>. Since this method is overloaded with
    * {@code Class} as the type of the first parameter, you cannot and should not use this method to
-   * test whether a {@code Class} object itself is an instance of something.
+   * test whether a {@code Class} object itself is an instance of something (even though it
+   * <i>is</i>, for example, an instance of {@link java.io.Serializable}).
    *
    * @param instance The object to test
    * @param superOrInterface The class or interface to test the object against
@@ -110,10 +111,9 @@ public class ClassMethods {
    */
   public static boolean isNumerical(Class<?> clazz) {
     Check.notNull(clazz);
-    return Number.class.isAssignableFrom(clazz)
-        || (clazz.isPrimitive()
-                && clazz != boolean.class
-                && clazz != char.class);
+    return Number.class.isAssignableFrom(clazz) || (clazz.isPrimitive()
+                                                        && clazz != boolean.class
+                                                        && clazz != char.class);
   }
 
   /**
