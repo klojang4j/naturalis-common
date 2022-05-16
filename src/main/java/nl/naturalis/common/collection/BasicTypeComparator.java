@@ -9,13 +9,23 @@ class BasicTypeComparator implements Comparator<Class<?>> {
 
   @Override
   public int compare(Class<?> c1, Class<?> c2) {
+    return doCompare(c1, c2);
+  }
+
+  static int doCompare(Class<?> c1, Class<?> c2) {
     if (c1 == c2) {
       return 0;
     }
     return subBeforeSuper(c1, c2);
   }
 
-  int subBeforeSuper(Class<?> c1, Class<?> c2) {
+  static int subBeforeSuper(Class<?> c1, Class<?> c2) {
+    if (c1 == Object.class) {
+      return 1;
+    }
+    if (c2 == Object.class) {
+      return -1;
+    }
     if (c1.isInterface()) {
       if (c2.isInterface()) {
         int i = getAllInterfaces(c2).size() - getAllInterfaces(c1).size();
@@ -37,14 +47,9 @@ class BasicTypeComparator implements Comparator<Class<?>> {
       return i;
     }
     if (c1.isArray() && c2.isArray()) {
-      if (c1.getComponentType() == Object.class) {
-        return 1;
-      }
-      if (c2.getComponentType() == Object.class) {
-        return -1;
-      }
-      return compare(c1.getComponentType(), c2.getComponentType());
+      return doCompare(c1.getComponentType(), c2.getComponentType());
     }
     return c1.hashCode() - c2.hashCode();
   }
+
 }

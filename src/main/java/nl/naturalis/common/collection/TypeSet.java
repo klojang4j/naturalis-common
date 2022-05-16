@@ -1,162 +1,117 @@
 package nl.naturalis.common.collection;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import nl.naturalis.common.check.Check;
 
-/**
- * A specialized {@link Set} implementation for {@code Class} objects. It returns {@code true} from
- * its {@link Set#contains(Object) contains} method if the set contains the specified type <i>or any
- * of its super types</i>. As with {@link TypeHashMap} and {@link TypeTreeMap}, you can optionally
- * enable "autoboxing" and auto-expansion. See {@link MultiPassTypeMap} for a description of these
- * features. A {@code TypeSet} is unmodifiable and does not allow {@code null} values. It is backed
- * by a {@link TypeHashMap}.
- *
- * @author Ayco Holleman
- * @see TypeHashMap
- * @see TypeSet
- * @see TypeTreeMap
- */
-public class TypeSet extends AbstractTypeSet {
+import java.util.*;
 
-  /**
-   * Returns an auto-expanding, autoboxing {@code TypeSet} for the specified types.
-   *
-   * @param types The types to add to the {@code Set}.
-   * @return A non-auto-expanding, autoboxing {@code TypeSet} for the specified types
-   */
-  public static TypeSet of(Class<?>... types) {
-    return copyOf(List.of(types));
+import static nl.naturalis.common.check.CommonChecks.sameAs;
+import static nl.naturalis.common.check.CommonGetters.type;
+
+abstract class TypeSet<M extends TypeMap<Object>> implements Set<Class<?>> {
+
+  static final Object FOO = new Object();
+
+  static Map<Class<?>, Object> toMap(Collection<? extends Class<?>> types) {
+    Map<Class<?>, Object> m = new LinkedHashMap<>(types.size());
+    types.forEach(x -> m.put(x, FOO));
+    return m;
   }
 
-  /**
-   * Returns an auto-expanding, autoboxing {@code TypeSet} for the specified types.
-   *
-   * @param expectedSize An estimate of the final size of the auto-expanding set.See {@link
-   *     TypeHashMap.Builder#autoExpand(int) TypeMap} for more information about this parameter.
-   * @param types The types to add to the {@code Set}.
-   * @return An autoboxing {@code TypeSet} for the specified types
-   */
-  public static TypeSet of(int expectedSize, Class<?>... types) {
-    return of(expectedSize, true, types);
+  final M map;
+
+  TypeSet(M map) {
+    this.map = map;
   }
 
-  /**
-   * Returns an autoboxing {@code TypeSet} for the specified types.
-   *
-   * @param autoExpand Whether to enable auto-expansion. See {@link
-   *     TypeHashMap.Builder#autoExpand(boolean) TypeMap} for more information about this
-   *     parameter.
-   * @param types The types to add to the {@code Set}.
-   * @return An autoboxing {@code TypeSet} for the specified types
-   */
-  public static TypeSet of(boolean autoExpand, Class<?>... types) {
-    return copyOf(List.of(types), autoExpand);
+  @Override
+  public int size() {
+    return map.size();
   }
 
-  /**
-   * Returns a {@code TypeSet} for the specified types.
-   *
-   * @param expectedSize An estimate of the final size of the auto-expanding set.See {@link
-   *     TypeHashMap.Builder#autoExpand(int) TypeMap} for more information about this parameter.
-   * @param autobox Whether to enable "autoboxing"
-   * @param types The types to add to the {@code Set}.
-   * @return A {@code TypeSet} for the specified types
-   */
-  public static TypeSet of(int expectedSize, boolean autobox, Class<?>... types) {
-    return copyOf(List.of(types), expectedSize, autobox);
+  @Override
+  public boolean isEmpty() {
+    return size() == 0;
   }
 
-  /**
-   * Returns a {@code TypeSet} for the specified types.
-   *
-   * @param autoExpand Whether to enable auto-expansion. See {@link
-   *     TypeHashMap.Builder#autoExpand(boolean) TypeMap} for more information about this
-   *     parameter.
-   * @param autobox Whether to enable "autoboxing"
-   * @param types The types to add to the {@code Set}.
-   * @return A {@code TypeSet} for the specified types
-   */
-  public static TypeSet of(boolean autoExpand, boolean autobox, Class<?>... types) {
-    return copyOf(List.of(types), autoExpand, autobox);
+  @Override
+  public boolean contains(Object o) {
+    Check.notNull(o).has(type(), sameAs(), Class.class);
+    return map.containsKey(o);
   }
 
-  /**
-   * Converts the specified {@code Collection} to a non-auto-expanding, autoboxing {@code TypeSet}.
-   *
-   * @param src The {@code Collection} to convert
-   * @return A non-auto-expanding, autoboxing {@code TypeSet}
-   */
-  public static TypeSet copyOf(Collection<Class<?>> src) {
-    return copyOf(src, 2, true);
+  @Override
+  public Iterator<Class<?>> iterator() {
+    return map.keySet().iterator();
   }
 
-  /**
-   * Converts the specified {@code Collection} to an auto-expanding, autoboxing {@code TypeSet}.
-   *
-   * @param src The {@code Collection} to convert
-   * @param expectedSize An estimate of the final size of the auto-expanding set.See {@link
-   *     TypeHashMap.Builder#autoExpand(int) TypeMap} for more information about this parameter.
-   * @return An auto-expanding, autoboxing {@code TypeSet}
-   */
-  public static TypeSet copyOf(Collection<Class<?>> src, int expectedSize) {
-    return copyOf(src, expectedSize, true);
+  @Override
+  public Object[] toArray() {
+    return map.keySet().toArray();
   }
 
-  /**
-   * Converts the specified {@code Collection} to an auto-expanding, autoboxing {@code TypeSet}.
-   *
-   * @param src The {@code Collection} to convert
-   * @param autoExpand Whether to enable auto-expansion. See {@link
-   *     TypeHashMap.Builder#autoExpand(boolean) TypeMap} for more information about this
-   *     parameter.
-   * @return An auto-expanding, autoboxing {@code TypeSet}
-   */
-  public static TypeSet copyOf(Collection<Class<?>> src, boolean autoExpand) {
-    return copyOf(src, autoExpand, true);
+  @Override
+  public <T> T[] toArray(T[] a) {
+    Check.notNull(a);
+    return map.keySet().toArray(a);
   }
 
-  /**
-   * Converts the specified {@code Collection} to a {@code TypeSet}.
-   *
-   * @param src The {@code Collection} to convert
-   * @param expectedSize An estimate of the final size of the auto-expanding set. See {@link
-   *     TypeHashMap.Builder#autoExpand(int) TypeMap} for more information about this parameter.
-   * @param autobox Whether to enable "autoboxing"
-   * @return A {@code TypeSet} containing the types in the specified collection
-   */
-  public static TypeSet copyOf(Collection<Class<?>> src, int expectedSize, boolean autobox) {
-    return new TypeSet(src, expectedSize, autobox);
+  @Override
+  public boolean add(Class<?> e) {
+    throw new UnsupportedOperationException();
   }
 
-  /**
-   * Converts the specified {@code Collection} to a {@code TypeSet}.
-   *
-   * @param src The {@code Collection} to convert
-   * @param autoExpand Whether to enable auto-expansion. See {@link
-   *     TypeHashMap.Builder#autoExpand(boolean) TypeMap} for more information about this
-   *     parameter.
-   * @param autobox Whether to enable "autoboxing"
-   * @return A {@code TypeSet} containing the types in the specified collection
-   */
-  public static TypeSet copyOf(Collection<Class<?>> src, boolean autoExpand, boolean autobox) {
-    if (autoExpand) {
-      return copyOf(src, 2, autobox);
-    } else if (src.getClass() == TypeSet.class) {
-      TypeSet ts = (TypeSet) src;
-      if (ts.map.autobox == autobox) {
-        return ts;
-      }
-    }
-    return new TypeSet(src, autobox);
+  @Override
+  public boolean remove(Object o) {
+    throw new UnsupportedOperationException();
   }
 
-  private TypeSet(Collection<? extends Class<?>> s, boolean autobox) {
-    super(new TypeHashMap<>(toMap(s), autobox));
+  @Override
+  public boolean containsAll(Collection<?> c) {
+    Check.notNull(c);
+    return c.stream().filter(map::containsKey).count() == c.size();
   }
 
-  private TypeSet(Collection<? extends Class<?>> s, int sz, boolean autobox) {
-    super(new TypeHashMap<>(toMap(s), sz, autobox));
+  @Override
+  public boolean addAll(Collection<? extends Class<?>> c) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean retainAll(Collection<?> c) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean removeAll(Collection<?> c) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void clear() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public int hashCode() {
+    return map.keySet().hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return map.keySet().equals(obj);
+  }
+
+  public List<String> typeNames() {
+    return map.typeNames();
+  }
+
+  public List<String> simpleTypeNames() {
+    return map.simpleTypeNames();
+  }
+
+  @Override
+  public String toString() {
+    return map.keySet().toString();
   }
 
 }

@@ -594,49 +594,49 @@ public class WiredListTest {
   }
 
   @Test
-  public void removeUntil00() {
+  public void ltrim00() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.removeUntil(i -> i == 5);
+    var wl1 = wl0.lchop(i -> i == 5);
     assertEquals(List.of(5, 6, 7, 8, 9), wl0);
     assertEquals(List.of(0, 1, 2, 3, 4), wl1);
   }
 
   @Test
-  public void removeUntil01() {
+  public void ltrim01() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.removeUntil(i -> i == 0);
+    var wl1 = wl0.lchop(i -> i == 0);
     assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl0);
     assertEquals(List.of(), wl1);
   }
 
   @Test
-  public void removeUntil02() {
+  public void ltrim02() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.removeUntil(i -> i == 9);
+    var wl1 = wl0.lchop(i -> i == 9);
     assertEquals(List.of(9), wl0);
     assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8), wl1);
   }
 
   @Test
-  public void removeUntil03() {
+  public void ltrim03() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.removeUntil(i -> i == 8);
+    var wl1 = wl0.lchop(i -> i == 8);
     assertEquals(List.of(8, 9), wl0);
     assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7), wl1);
   }
 
   @Test
-  public void removeUntil04() {
+  public void ltrim04() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.removeUntil(i -> i == 6666);
+    var wl1 = wl0.lchop(i -> i == 6666);
     assertSame(wl0, wl1);
     assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl0);
   }
 
   @Test
-  public void removeUntil05() {
+  public void ltrim05() {
     WiredList<Integer> wl0 = new WiredList<>();
-    var wl1 = wl0.removeUntil(i -> i == 6666);
+    var wl1 = wl0.lchop(i -> i == 6666);
     assertEquals(List.of(), wl0);
     assertEquals(List.of(), wl1);
   }

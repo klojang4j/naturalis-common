@@ -1,19 +1,16 @@
 package nl.naturalis.common.collection;
 
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.collection.TypeGraphMap.TypeNode;
+import nl.naturalis.common.collection.LinkedTypeGraphMap.LinkedTypeNode;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Map;
 
-import static java.util.Map.Entry;
-import static java.util.Map.entry;
 import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.check.CommonChecks.deepNotNull;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
-public final class TypeGraphMapBuilder<V> {
+public final class LinkedTypeGraphMapBuilder<V> {
 
   // ================================================================== //
   // ======================= [ WritableTypeNode ] ===================== //
@@ -31,15 +28,13 @@ public final class TypeGraphMapBuilder<V> {
       this.value = val;
     }
 
-    TypeNode toTypeNode() {
-      Map<Class<?>, TypeNode> subclasses = Map.ofEntries(subtypes.lchop(tn -> tn.type.isInterface())
-          .stream()
-          .map(wtn -> entry(wtn.type, wtn.toTypeNode()))
-          .toArray(Entry[]::new));
-      Map<Class<?>, TypeNode> subinterfaces = Map.ofEntries(subtypes.stream()
-          .map(wtn -> entry(wtn.type, wtn.toTypeNode()))
-          .toArray(Entry[]::new));
-      return new TypeNode(type, value, subclasses, subinterfaces);
+    LinkedTypeNode toTypeNode() {
+      LinkedTypeNode[] children = new LinkedTypeNode[subtypes.size()];
+      WiredList<WritableTypeNode> classes =
+          subtypes.lchop(node -> node.type.isInterface()).reverse();
+      classes.toArray(children);
+
+      return new LinkedTypeNode(type, value, children);
     }
 
     void addChild(WritableTypeNode node) {
@@ -79,7 +74,7 @@ public final class TypeGraphMapBuilder<V> {
   private int size;
   private boolean autobox = true;
 
-  TypeGraphMapBuilder(Class<V> valueType) {
+  LinkedTypeGraphMapBuilder(Class<V> valueType) {
     this.valueType = valueType;
     this.root = new WritableTypeNode(Object.class, null);
   }
@@ -90,7 +85,7 @@ public final class TypeGraphMapBuilder<V> {
    *
    * @return This {@code Builder} instance
    */
-  public TypeGraphMapBuilder<V> autobox(boolean autobox) {
+  public LinkedTypeGraphMapBuilder<V> autobox(boolean autobox) {
     this.autobox = autobox;
     return this;
   }
@@ -102,7 +97,7 @@ public final class TypeGraphMapBuilder<V> {
    * @param value The value
    * @return This {@code Builder} instance
    */
-  public TypeGraphMapBuilder<V> add(Class<?> type, V value) {
+  public LinkedTypeGraphMapBuilder<V> add(Class<?> type, V value) {
     Check.notNull(type, "type");
     Check.notNull(value, "value").is(instanceOf(), valueType);
     if (type == Object.class) {
@@ -126,7 +121,7 @@ public final class TypeGraphMapBuilder<V> {
    * @param types The types to associate the value with
    * @return This {@code Builder} instance
    */
-  public TypeGraphMapBuilder<V> addMultiple(V value, Class<?>... types) {
+  public LinkedTypeGraphMapBuilder<V> addMultiple(V value, Class<?>... types) {
     Check.notNull(value, "value").is(instanceOf(), valueType);
     Check.that(types, "types").is(deepNotNull());
     Arrays.stream(types).forEach(t -> add(t, value));
@@ -139,8 +134,8 @@ public final class TypeGraphMapBuilder<V> {
    * @param <W> The type of the values in the returned {@code TypeMap}
    * @return S new {@code TypeMap} instance with the configured types and behaviour
    */
-  public <W> TypeGraphMap<W> freeze() {
-    return new TypeGraphMap<>(root.toTypeNode(), size, autobox);
+  public <W> LinkedTypeGraphMap<W> freeze() {
+    return new LinkedTypeGraphMap<>(root.toTypeNode(), size, autobox);
   }
 
 }

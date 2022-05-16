@@ -495,20 +495,35 @@ public class WiredList<E> implements List<E> {
   }
 
   /**
-   * Embeds the specified list in this list. This method is very efficient, but <b>the provided list
-   * will empty afterwards</b>. If you don't want this to happen, use {@link #insertAll(int,
-   * Collection) insertAll}.
+   * Embeds the specified list in this list. This method is very efficient, but the provided list
+   * will empty afterwards. If you don't want this to happen, use {@link #insertAll(int, Collection)
+   * insertAll}.
    *
    * @param index The index at which to embed the list
    * @param other The list to embed
+   * @return this {@code WiredList}
    */
-  public void embed(int index, WiredList<? extends E> other) {
+  public WiredList<E> embed(int index, WiredList<? extends E> other) {
     checkInclusive(index);
-    Check.notNull(other, "list");
+    Check.notNull(other, "list").isNot(sameAs(), this, ERR_AUTO_EMBED);
     if (!other.isEmpty()) {
       insert(index, new Chain(other.head, other.tail, other.sz));
       other.clear();
     }
+    return this;
+  }
+
+  /**
+   * Embeds this {@code WiredList} in the specified {@code WiredList}. This {@code WiredList} will
+   * be empty afterwards.
+   *
+   * @param index The index at which to embed this {@code WiredList}
+   * @param other The list in which to embed this list
+   * @return this {@code WiredList}
+   */
+  public WiredList<E> embedIn(int index, WiredList<? super E> other) {
+    Check.notNull(other, "list").then(list -> list.embed(index, this));
+    return this;
   }
 
   /**
@@ -521,7 +536,7 @@ public class WiredList<E> implements List<E> {
    */
   public void transfer(int index, WiredList<? extends E> other, int fromIndex, int toIndex) {
     checkInclusive(index);
-    Check.that(other, "list").isNot(sameAs(), this, ERR_AUTO_EMBED);
+    Check.notNull(other, "list").isNot(sameAs(), this, ERR_AUTO_EMBED);
     int length = Check.fromTo(other, fromIndex, toIndex);
     transfer0(index, other, fromIndex, length);
   }
@@ -582,29 +597,50 @@ public class WiredList<E> implements List<E> {
   }
 
   /**
-   * Removes and returns a segment consisting of all elements up to (and excluding) the first
-   * element that satisfies the specified condition. If the condition was never satisfied, the list
-   * remains unaltered and will itself be returned.
+   * Chops off a segment consisting of all elements up to (but excluding) the first element that
+   * satisfies the specified condition. In other words, none of the elements in the returned list
+   * satisfy the condition and you are left with a list whose first element does satisy the
+   * condition. If the condition was never satisfied, the list remains unaltered and will itself be
+   * returned.
    *
-   * @param condition The condition that the elements in the returned list will <i>not</i>
+   * @param condition The condition that the elements in the returned list must <i>not</i>
    *     satisfy
-   * @return A {@code WiredList} containing all elements of this instance up to (and excluding) the
+   * @return A {@code WiredList} containing all elements of this instance up to (but excluding) the
    *     first element that satisfies the specified condition
    */
-  public WiredList<E> removeUntil(Predicate<? super E> condition) {
-    if (sz > 0) {
-      var node = justBeforeHead();
-      int i = 0;
-      for (; !condition.test(node.next.val) && ++i != sz; node = node.next) {
-      }
-      if (i == sz) {
-        return this;
-      }
-      WiredList<E> wl = new WiredList<>(head, node, i);
-      delete(new Chain(head, node, i));
-      return wl;
+  public WiredList<E> lchop(Predicate<? super E> condition) {
+    return ltrim(condition, false);
+  }
+
+  /**
+   * Chops off a segment consisting of all elements up to (but excluding) the first or last element
+   * that satisfies the specified condition. In other words, none of the elements in the returned
+   * list satisfy the condition and you are left with a list whose first element does satisy the
+   * condition. If the condition was never satisfied, the list remains unaltered and will itself be
+   * returned.
+   *
+   * @param condition The condition that the elements in the returned list must <i>not</i>
+   *     satisfy
+   * @param lastOccurrence Whether to split on the first or the last element satisfying the
+   *     condition
+   * @return A {@code WiredList} containing all elements of this instance up to (but excluding) the
+   *     first element that satisfies the specified condition
+   */
+  public WiredList<E> ltrim(Predicate<? super E> condition, boolean lastOccurrence) {
+    Check.notNull(condition, "condition");
+    if (sz == 0) {
+      return this;
     }
-    return new WiredList<>();
+    Node<E> first = head;
+    Node<E> last = justBeforeHead();
+    int len = 0;
+    for (; !condition.test(last.next.val) && ++len != sz; last = last.next) ;
+    if (len == sz) {
+      return this;
+    }
+    WiredList<E> wl = new WiredList<>(first, last, len);
+    delete(new Chain(first, last, len));
+    return wl;
   }
 
   /**

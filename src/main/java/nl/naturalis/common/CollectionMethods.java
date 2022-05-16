@@ -1,7 +1,7 @@
 package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.collection.TypeHashMap;
+import nl.naturalis.common.collection.SimpleTypeMap;
 import nl.naturalis.common.function.ThrowingFunction;
 import nl.naturalis.common.x.invoke.InvokeUtils;
 
@@ -29,8 +29,8 @@ public class CollectionMethods {
   private static final List<?> LIST_OF_NULL = Collections.singletonList(null);
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private static final TypeHashMap<Function<Object, List>> LISTIFIERS =
-      TypeHashMap.build(Function.class)
+  private static final SimpleTypeMap<Function<Object, List>> LISTIFIERS =
+      SimpleTypeMap.build(Function.class)
           .autobox(false)
           .autoExpand(false)
           .add(List.class, List.class::cast)

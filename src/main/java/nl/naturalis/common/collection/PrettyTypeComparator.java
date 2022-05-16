@@ -4,24 +4,18 @@ import java.util.Comparator;
 
 import static nl.naturalis.common.ClassMethods.*;
 
-class PrettyTypeComparator implements Comparator<Class<?>> {
+public class PrettyTypeComparator implements Comparator<Class<?>> {
 
   @Override
   public int compare(Class<?> c1, Class<?> c2) {
     if (c1 == c2) {
       return 0;
     }
-    if (c1.isPrimitive() && c2.isPrimitive()) {
-      return c1.getSimpleName().compareTo(c2.getSimpleName());
-    }
     if (c1.isPrimitive()) {
       return -1;
     }
     if (c2.isPrimitive()) {
       return 1;
-    }
-    if (isWrapper(c1) && isWrapper(c2)) {
-      return c1.getSimpleName().compareTo(c2.getSimpleName());
     }
     if (isWrapper(c1)) {
       return -1;
@@ -79,6 +73,7 @@ class PrettyTypeComparator implements Comparator<Class<?>> {
     if (getAllInterfaces(c1).size() > getAllInterfaces(c2).size()) {
       return -1;
     }
-    return c1.getSimpleName().compareTo(c2.getSimpleName());
+    return c1.getName().compareTo(c2.getName());
   }
+
 }

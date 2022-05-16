@@ -8,8 +8,8 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
-import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.check.CommonGetters.type;
+import static nl.naturalis.common.check.CommonChecks.gte;
+import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
 /**
  * A fixed-size, mutable {@code List} implementation intended for situations where an array
@@ -35,6 +35,7 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
    * @param elems The elements
    * @return A new {@code ArrayCloakList} containing the specified elements
    */
+  @SafeVarargs
   public static <F> ArrayCloakList<F> create(Class<F> elementType, F... elems) {
     Check.notNull(elementType, "elementType");
     Check.notNull(elems, "elems");
@@ -67,6 +68,7 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
    *
    * @param array The array from which to create the {@code ArrayCloakList}
    */
+  @SuppressWarnings({"unchecked"})
   public ArrayCloakList(E[] array) {
     this.data = Check.notNull(array).ok();
     this.elementType = (Class<E>) array.getClass().getComponentType();
@@ -154,9 +156,8 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   @Override
   public E remove(int index) {
     if (elementType == Integer.class) {
-      String msg =
-          "Method remove(int) not supported for ArrayCloakList<Integer>. "
-              + "Auto-boxing makes it indistinguishable from remove(Object)";
+      String msg = "Method remove(int) not supported for ArrayCloakList<Integer>. "
+          + "Auto-boxing makes it indistinguishable from remove(Object)";
       throw new UnsupportedOperationException(msg);
     }
     if (size() == 0) {
@@ -174,9 +175,8 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   @Override
   public boolean remove(Object o) {
     if (elementType == Integer.class) {
-      String msg =
-          "Method remove(Object) not supported for ArrayCloakList<Integer>. "
-              + "Auto-unboxing makes it indistinguishable from remove(int)";
+      String msg = "Method remove(Object) not supported for ArrayCloakList<Integer>. "
+          + "Auto-unboxing makes it indistinguishable from remove(int)";
       throw new UnsupportedOperationException(msg);
     }
     if (size() == 0) {
@@ -227,7 +227,9 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
     return changed;
   }
 
-  /** Repurposed to nullify all elements in the list. */
+  /**
+   * Repurposed to nullify all elements in the list.
+   */
   @Override
   public void clear() {
     Arrays.fill(data, null);
@@ -291,8 +293,7 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
       return false;
     } else if (obj.getClass() == ArrayCloakList.class) {
       return Arrays.deepEquals(data, ((ArrayCloakList) obj).data);
-    } else if (obj instanceof List) {
-      List other = (List) obj;
+    } else if (obj instanceof List other) {
       if (size() == other.size()) {
         int i = 0;
         for (Object e : other) {
@@ -327,13 +328,18 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public <T> T[] toArray(T[] a) {
-    E[] data = this.data;
-    if (a.length < data.length) {
-      return (T[]) Arrays.copyOf(data, data.length, a.getClass());
+    Check.notNull(a, "array");
+    var data = this.data;
+    var sz = data.length;
+    if (a.length < sz) {
+      a = InvokeUtils.newArray(a.getClass(), sz);
     }
-    System.arraycopy(data, 0, a, 0, data.length);
+    Object[] result = a;
+    System.arraycopy(data, 0, result, 0, sz);
+    if (a.length > sz) {
+      a[sz] = null;
+    }
     return a;
   }
 
@@ -385,15 +391,20 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
     throw new UnsupportedOperationException();
   }
 
-  /** Throws an {@code UnsupportedOperationException}. */
+  /**
+   * Throws an {@code UnsupportedOperationException}.
+   */
   @Override
   public ListIterator<E> listIterator() {
     throw new UnsupportedOperationException();
   }
 
-  /** Throws an {@code UnsupportedOperationException}. */
+  /**
+   * Throws an {@code UnsupportedOperationException}.
+   */
   @Override
   public ListIterator<E> listIterator(int index) {
     throw new UnsupportedOperationException();
   }
+
 }

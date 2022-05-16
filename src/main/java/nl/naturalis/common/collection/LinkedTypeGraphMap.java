@@ -13,56 +13,54 @@ import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.ObjectMethods.ifNull;
 
 /**
- * A {@link TypeMap} extension that stores its entries in a data structure that reflects the Java
- * type hierarchy. The requested type and its supertypes, if present, will be found in a single
- * traversal of the data structure. While a {@link SimpleTypeMap} climbs the type's class and
- * interface hierarchy, a {@code TypeGraphMap} comes in from the top of the type hierarchy and works
- * its way down until it encounters the requested type. Consequently, it exhibits a pointed
- * lopsidedness in the performance of {@link #containsKey(Object)} and {@link #get(Object) get}.
- * {@code containsKey} can return ({@code true}) as soon as it encounters a supertype of the
- * requested type (which would be practically immediate if the map contains {@code Object.class}).
- * The {@code get} method, on the other hand, needs to descend into the type hierarchy until it
- * finds the requested type, or knows for sure it is absent.
+ * A {@link TypeMap} extension that stores its entries in a data structure that is similar to the
+ * one used by {@link TypeGraphMap}, but more sensitive to the insertion order of the entries. Thus,
+ * if you expect, for example, {@code String.class} to be requested very often, it pays to {@link
+ * LinkedTypeGraphMapBuilder#add(Class, Object) add} that type first to the map.
  *
- * @param <V> The type of the values in the  {@code Map}
+ * @param <V> The type of the values in the {@code Map}
  * @see TypeMap
- * @see TypeGraphMapBuilder
+ * @see TypeGraphMap
+ * @see LinkedTypeGraphMapBuilder
  * @see SimpleTypeMap
  */
-public final class TypeGraphMap<V> extends TypeMap<V> {
+public final class LinkedTypeGraphMap<V> extends TypeMap<V> {
 
   // ================================================================== //
-  // ========================== [ TypeNode ] ========================== //
+  // ======================= [ LinkedTypeNode ] ======================= //
   // ================================================================== //
 
-  static final class TypeNode {
+  static final class LinkedTypeNode {
 
     private final Class<?> type;
     private final Object value;
-    private final Map<Class<?>, TypeNode> subclasses;
-    private final Map<Class<?>, TypeNode> subinterfaces;
+    private final LinkedTypeNode[] subtypes;
 
-    TypeNode(Class<?> type,
-        Object value,
-        Map<Class<?>, TypeNode> subclasses,
-        Map<Class<?>, TypeNode> subinterfaces) {
+    LinkedTypeNode(Class<?> type, Object value, LinkedTypeNode[] subtypes) {
       this.type = type;
       this.value = value;
-      this.subclasses = subclasses;
-      this.subinterfaces = subinterfaces;
+      this.subtypes = subtypes;
     }
 
     Object find(Class<?> type, boolean autobox) {
       if (isA(type, this.type)) {
         if (type.isInterface()) {
           // interfaces can only be subtypes of other interfaces
-          return ifNull(find(type, subinterfaces), value);
+          for (int i = subtypes.length - 1; i >= 0 && subtypes[i].type.isInterface(); --i) {
+            Object val = subtypes[i].find(type, false);
+            if (val != null) {
+              return val;
+            }
+          }
+          return value;
+        } else {
+          for (LinkedTypeNode subtype : subtypes) {
+            Object val = subtype.find(type, false);
+            if (val != null) {
+              return val;
+            }
+          }
         }
-        Object val = find(type, subclasses);
-        if (val == null) {
-          val = find(type, subinterfaces);
-        }
-        return ifNull(val, value);
       } else if (type.isPrimitive()) {
         // this must be the root node b/c *everything*
         // is an Object except primitive types
@@ -71,38 +69,16 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
       return null;
     }
 
-    static Object find(Class<?> type, Map<Class<?>, TypeNode> typeNodes) {
-      TypeNode tn = typeNodes.get(type);
-      if (tn == null) {
-        for (TypeNode typeNode : typeNodes.values()) {
-          Object val = typeNode.find(type, false);
-          if (val != null) {
-            return val;
-          }
-        }
-        return null;
-      }
-      return tn.value;
-    }
-
     void collectTypes(Set<Class<?>> set) {
-      for (TypeNode tn : subclasses.values()) {
+      for (LinkedTypeNode tn : subtypes) {
         set.add(tn.type);
-        tn.collectTypes(set);
-      }
-      for (TypeNode tn : subinterfaces.values()) {
-        set.add((tn.type));
         tn.collectTypes(set);
       }
     }
 
     @SuppressWarnings({"unchecked"})
     <E> void collectValues(Set<E> set) {
-      for (TypeNode tn : subclasses.values()) {
-        set.add((E) tn.value);
-        tn.collectValues(set);
-      }
-      for (TypeNode tn : subinterfaces.values()) {
+      for (LinkedTypeNode tn : subtypes) {
         set.add((E) tn.value);
         tn.collectValues(set);
       }
@@ -110,11 +86,7 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
 
     @SuppressWarnings({"unchecked"})
     <E> void collectEntries(Set<Entry<Class<?>, E>> set) {
-      for (TypeNode tn : subclasses.values()) {
-        set.add(new SimpleImmutableEntry<>(tn.type, (E) tn.value));
-        tn.collectEntries(set);
-      }
-      for (TypeNode tn : subinterfaces.values()) {
+      for (LinkedTypeNode tn : subtypes) {
         set.add(new SimpleImmutableEntry<>(tn.type, (E) tn.value));
         tn.collectEntries(set);
       }
@@ -123,7 +95,7 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
   }
 
   // ================================================================== //
-  // ========================= [ TypeGraphMap ] ======================= //
+  // ===================== [ LinkedTypeGraphMap ] ===================== //
   // ================================================================== //
 
   /**
@@ -133,7 +105,7 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
    * @param src The {@code Map} to convert
    * @return A {@code TypeGraphMap}
    */
-  public static <U> TypeGraphMap<U> copyOf(Map<Class<?>, U> src) {
+  public static <U> LinkedTypeGraphMap<U> copyOf(Map<Class<?>, U> src) {
     return copyOf(src, true);
   }
 
@@ -146,9 +118,9 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
    * @return A {@code TypeGraphMap}
    */
   @SuppressWarnings({"unchecked"})
-  public static <U> TypeGraphMap<U> copyOf(Map<Class<?>, U> src, boolean autobox) {
+  public static <U> LinkedTypeGraphMap<U> copyOf(Map<Class<?>, U> src, boolean autobox) {
     Check.notNull(src, "source map");
-    TypeGraphMapBuilder<U> builder = (TypeGraphMapBuilder<U>) build(Object.class);
+    LinkedTypeGraphMapBuilder<U> builder = (LinkedTypeGraphMapBuilder<U>) build(Object.class);
     builder.autobox(autobox);
     src.forEach(builder::add);
     return builder.freeze();
@@ -161,18 +133,18 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
    * @param valueType The class of the values in the map
    * @return A builder for {@code TypeHashMap} instances
    */
-  public static <U> TypeGraphMapBuilder<U> build(Class<U> valueType) {
-    return Check.notNull(valueType).ok(TypeGraphMapBuilder::new);
+  public static <U> LinkedTypeGraphMapBuilder<U> build(Class<U> valueType) {
+    return Check.notNull(valueType).ok(LinkedTypeGraphMapBuilder::new);
   }
 
-  private final TypeNode root;
+  private final LinkedTypeNode root;
   private final int size;
 
   private Set<Class<?>> keys;
   private Collection<V> values;
   private Set<Entry<Class<?>, V>> entries;
 
-  TypeGraphMap(TypeNode root, int size, boolean autobox) {
+  LinkedTypeGraphMap(LinkedTypeNode root, int size, boolean autobox) {
     super(autobox);
     this.root = root;
     this.size = size;
@@ -196,21 +168,27 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
   @Override
   public boolean containsKey(Object key) {
     if (key instanceof Class type) {
-      if (root.value != null) {
-        return true;
-      }
-      if (!type.isInterface()) {
-        for (TypeNode tn : root.subclasses.values()) {
-          if (isA(type, tn.type)) {
-            return true;
+      LinkedTypeNode[] subtypes = root.subtypes;
+      if (root.value == null) {
+        if (type.isInterface()) {
+          for (int i = subtypes.length - 1; i >= 0 && subtypes[i].type.isInterface(); --i) {
+            if (isA(type, subtypes[i].type)) {
+              return true;
+            }
           }
+          return false;
+        } else if (autobox && type.isPrimitive()) {
+          return containsKey(box(type));
+        } else {
+          for (LinkedTypeNode subtype : subtypes) {
+            if (isA(type, subtype.type)) {
+              return true;
+            }
+          }
+          return false;
         }
       }
-      for (TypeNode tn : root.subinterfaces.values()) {
-        if (isA(type, tn.type)) {
-          return true;
-        }
-      }
+      return true;
     }
     return false;
   }

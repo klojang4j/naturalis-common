@@ -1,6 +1,6 @@
 package nl.naturalis.common;
 
-import nl.naturalis.common.collection.TypeHashMap;
+import nl.naturalis.common.collection.SimpleTypeMap;
 import org.junit.Test;
 
 import java.util.*;
@@ -95,7 +95,7 @@ public class MorphTable0Test {
   @Test(expected = TypeConversionException.class)
   public void test11() {
     // Missing no-arg constructor
-    MorphTable0.getInstance().morph("Hi there", TypeHashMap.class);
+    MorphTable0.getInstance().morph("Hi there", SimpleTypeMap.class);
   }
 
 }
