@@ -1,19 +1,19 @@
 package nl.naturalis.common.collection;
 
+import nl.naturalis.common.CollectionMethods;
 import org.junit.Test;
 
 import java.io.Closeable;
 import java.io.Serializable;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.*;
 
-public class TypeGraphMapTest {
+public class LinkedTypeGraphMapTest {
 
   @Test
   public void test00() {
-    TypeGraphMap<String> m = TypeGraphMap.build(String.class)
+    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
         .add(String.class, "String")
         .add(Number.class, "Number")
         .add(Short.class, "Short")
@@ -28,21 +28,24 @@ public class TypeGraphMapTest {
 
   @Test
   public void test01() {
-    TypeGraphMap<String> m = TypeGraphMap.build(String.class).add(Object.class, "Object").freeze();
+    LinkedTypeGraphMap<String> m =
+        LinkedTypeGraphMap.build(String.class).add(Object.class, "Object").freeze();
     assertEquals(1, m.size());
     assertTrue(m.containsKey(Integer.class));
   }
 
   @Test
   public void test02() {
-    TypeGraphMap<String> m = TypeGraphMap.build(String.class).add(Object.class, "Object").freeze();
+    LinkedTypeGraphMap<String> m =
+        LinkedTypeGraphMap.build(String.class).add(Object.class, "Object").freeze();
     assertEquals(1, m.size());
     assertTrue(m.containsKey(Collection.class));
   }
 
   @Test
   public void test03() {
-    TypeGraphMap<String> m = TypeGraphMap.build(String.class).add(Object.class, "Object").freeze();
+    LinkedTypeGraphMap<String> m =
+        LinkedTypeGraphMap.build(String.class).add(Object.class, "Object").freeze();
     assertEquals(1, m.size());
     assertTrue(m.containsKey(Collection.class));
   }
@@ -53,7 +56,7 @@ public class TypeGraphMapTest {
 
   @Test
   public void test04() {
-    TypeGraphMap<String> m = TypeGraphMap.build(String.class)
+    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
         .add(ArrayList.class, "ArrayList")
         .add(List.class, "List")
         .add(Collection.class, "Collection")
@@ -63,7 +66,7 @@ public class TypeGraphMapTest {
 
   @Test
   public void test05() {
-    TypeGraphMap<String> m = TypeGraphMap.build(String.class)
+    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
         .add(ArrayList.class, "ArrayList")
         .add(MyListInterface.class, "MyListInterface")
         .freeze();
@@ -72,7 +75,7 @@ public class TypeGraphMapTest {
 
   @Test
   public void test06() {
-    TypeGraphMap<String> m = TypeGraphMap.build(String.class)
+    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
         .add(List.class, "List")
         .add(Object.class, "Object")
         .freeze();
@@ -81,7 +84,7 @@ public class TypeGraphMapTest {
 
   @Test
   public void test07() {
-    TypeGraphMap<String> m = TypeGraphMap.build(String.class)
+    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
         .add(List[].class, "List[]")
         .add(Object.class, "Object")
         .freeze();
@@ -90,7 +93,7 @@ public class TypeGraphMapTest {
 
   @Test
   public void test08() {
-    TypeGraphMap<String> m = TypeGraphMap.build(String.class)
+    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
         .add(Object[].class, "Object[]")
         .add(Object.class, "Object")
         .freeze();
@@ -100,7 +103,7 @@ public class TypeGraphMapTest {
 
   @Test
   public void test09() {
-    TypeGraphMap<String> m = TypeGraphMap.build(String.class)
+    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
         .add(Object[].class, "Object[]")
         .add(Object.class, "Object")
         .freeze();
@@ -109,28 +112,28 @@ public class TypeGraphMapTest {
 
   @Test
   public void test10() {
-    TypeGraphMap<String> m =
-        TypeGraphMap.build(String.class).autobox(true).add(Object.class, "Object").freeze();
+    LinkedTypeGraphMap<String> m =
+        LinkedTypeGraphMap.build(String.class).autobox(true).add(Object.class, "Object").freeze();
     assertEquals("Object", m.get(int.class));
   }
 
   @Test
   public void test11() {
-    TypeGraphMap<String> m =
-        TypeGraphMap.build(String.class).autobox(false).add(Object.class, "Object").freeze();
+    LinkedTypeGraphMap<String> m =
+        LinkedTypeGraphMap.build(String.class).autobox(false).add(Object.class, "Object").freeze();
     assertEquals("Object", m.get(int.class));
   }
 
   @Test
   public void test12() {
-    TypeGraphMap<String> m =
-        TypeGraphMap.build(String.class).autobox(false).add(Object.class, "Object").freeze();
+    LinkedTypeGraphMap<String> m =
+        LinkedTypeGraphMap.build(String.class).autobox(false).add(Object.class, "Object").freeze();
     assertEquals("Object", m.get(int[].class));
   }
 
   @Test
   public void test13() {
-    TypeGraphMap<String> m = TypeGraphMap.build(String.class)
+    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
         .add(Iterable.class, "Iterable")
         .add(Collection.class, "Collection")
         .add(Set.class, "Set")
@@ -156,7 +159,7 @@ public class TypeGraphMapTest {
 
   @Test
   public void test14() {
-    TypeGraphMap<String> m = TypeGraphMap.build(String.class)
+    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
         .add(A0.class, "A0")
         .add(Serializable.class, "Serializable")
         .freeze();
@@ -167,7 +170,7 @@ public class TypeGraphMapTest {
 
   @Test
   public void test15() {
-    TypeGraphMap<String> m = TypeGraphMap.build(String.class)
+    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
         .add(A0.class, "A0")
         .add(A000.class, "A000")
         .add(Serializable.class, "Serializable")
@@ -179,7 +182,7 @@ public class TypeGraphMapTest {
 
   @Test
   public void test16() {
-    TypeGraphMap<String> m = TypeGraphMap.build(String.class)
+    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
         .add(A0.class, "A0")
         .add(A0000.class, "A0000")
         .add(Serializable.class, "Serializable")
@@ -191,7 +194,7 @@ public class TypeGraphMapTest {
 
   @Test(expected = DuplicateKeyException.class)
   public void test17() {
-    TypeGraphMap<String> m = TypeGraphMap.build(String.class)
+    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
         .add(A01.class, "A01")
         .add(A0.class, "A0")
         .add(A01.class, "FOO")
@@ -200,7 +203,7 @@ public class TypeGraphMapTest {
 
   @Test(expected = DuplicateKeyException.class)
   public void test18() {
-    TypeGraphMap<String> m = TypeGraphMap.build(String.class)
+    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
         .add(A0.class, "A0")
         .add(A01.class, "A01")
         .add(A01.class, "A01")
@@ -209,11 +212,63 @@ public class TypeGraphMapTest {
 
   @Test(expected = DuplicateKeyException.class)
   public void test19() {
-    TypeGraphMap<String> m = TypeGraphMap.build(String.class)
+    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
         .add(Object.class, "FOO")
         .add(A0.class, "A0")
         .add(Object.class, "BAR")
         .freeze();
+  }
+
+  @Test
+  public void test20() {
+    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+        .add(A0.class, "A0")
+        .add(A00.class, "A00")
+        .add(A01.class, "A01")
+        .add(A000.class, "A000")
+        .add(A0000.class, "A0000")
+        .add(A0001.class, "A0001")
+        .add(Serializable.class, "Serializable")
+        .add(Closeable.class, "Closeable")
+        .add(AutoCloseable.class, "AutoCloseable")
+        .freeze();
+    //System.out.println(m.simpleTypeNames());
+    List<Class<?>> keys = new ArrayList<>(m.keySet());
+    assertEquals(List.of(Serializable.class,
+        AutoCloseable.class,
+        Closeable.class,
+        A0.class,
+        A00.class,
+        A000.class,
+        A0000.class,
+        A0001.class,
+        A01.class), keys);
+  }
+
+  @Test
+  public void test21() {
+    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+        .add(A0.class, "A0")
+        .add(A00.class, "A00")
+        .add(A01.class, "A01")
+        .add(A000.class, "A000")
+        .add(A0000.class, "A0000")
+        .add(A0001.class, "A0001")
+        .add(Serializable.class, "Serializable")
+        .add(Closeable.class, "Closeable")
+        .add(AutoCloseable.class, "AutoCloseable")
+        .freeze();
+    List<Class<?>> keys = new ArrayList<>(m.breadthFirstKeySet());
+    System.out.println(CollectionMethods.implode(keys, Class::getSimpleName));
+    assertEquals(List.of(Serializable.class,
+        AutoCloseable.class,
+        A0.class,
+        Closeable.class,
+        A00.class,
+        A01.class,
+        A000.class,
+        A0000.class,
+        A0001.class), keys);
   }
 
 }

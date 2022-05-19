@@ -32,7 +32,7 @@ public final class TypeGraphMapBuilder<V> {
     }
 
     TypeNode toTypeNode() {
-      Map<Class<?>, TypeNode> subclasses = Map.ofEntries(subtypes.lchop(tn -> tn.type.isInterface())
+      Map<Class<?>, TypeNode> subclasses = Map.ofEntries(subtypes.split(tn -> tn.type.isInterface())
           .stream()
           .map(wtn -> entry(wtn.type, wtn.toTypeNode()))
           .toArray(Entry[]::new));

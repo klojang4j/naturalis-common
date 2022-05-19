@@ -594,49 +594,49 @@ public class WiredListTest {
   }
 
   @Test
-  public void ltrim00() {
+  public void split00() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.lchop(i -> i == 5);
+    var wl1 = wl0.split(i -> i == 5);
     assertEquals(List.of(5, 6, 7, 8, 9), wl0);
     assertEquals(List.of(0, 1, 2, 3, 4), wl1);
   }
 
   @Test
-  public void ltrim01() {
+  public void split01() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.lchop(i -> i == 0);
+    var wl1 = wl0.split(i -> i == 0);
     assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl0);
     assertEquals(List.of(), wl1);
   }
 
   @Test
-  public void ltrim02() {
+  public void split02() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.lchop(i -> i == 9);
+    var wl1 = wl0.split(i -> i == 9);
     assertEquals(List.of(9), wl0);
     assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8), wl1);
   }
 
   @Test
-  public void ltrim03() {
+  public void split03() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.lchop(i -> i == 8);
+    var wl1 = wl0.split(i -> i == 8);
     assertEquals(List.of(8, 9), wl0);
     assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7), wl1);
   }
 
   @Test
-  public void ltrim04() {
+  public void split04() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.lchop(i -> i == 6666);
+    var wl1 = wl0.split(i -> i == 6666);
     assertSame(wl0, wl1);
     assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl0);
   }
 
   @Test
-  public void ltrim05() {
+  public void split05() {
     WiredList<Integer> wl0 = new WiredList<>();
-    var wl1 = wl0.lchop(i -> i == 6666);
+    var wl1 = wl0.split(i -> i == 6666);
     assertEquals(List.of(), wl0);
     assertEquals(List.of(), wl1);
   }

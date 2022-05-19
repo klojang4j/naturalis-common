@@ -136,8 +136,8 @@ public class WiredList<E> implements List<E> {
     public void remove() {
       Node<E> tmp = curr;
       Check.that(sz).is(ne(), 0, NO_SUCH_ELEMENT);
-      if (tmp != tail) {
-        curr = curr.next;
+      if (tmp != head) {
+        curr = curr.prev;
       }
       deleteNode(tmp);
     }
@@ -597,10 +597,9 @@ public class WiredList<E> implements List<E> {
   }
 
   /**
-   * Chops off a segment consisting of all elements up to (but excluding) the first element that
-   * satisfies the specified condition. In other words, none of the elements in the returned list
-   * satisfy the condition and you are left with a list whose first element does satisy the
-   * condition. If the condition was never satisfied, the list remains unaltered and will itself be
+   * Splits the {@code WireList} on the first element satisfying the specified condition. The
+   * returned list will contain all elements up to (but excluding) the element satisfying the
+   * condition. If the condition is never satisfied, the list remains unaltered and will itself be
    * returned.
    *
    * @param condition The condition that the elements in the returned list must <i>not</i>
@@ -608,25 +607,7 @@ public class WiredList<E> implements List<E> {
    * @return A {@code WiredList} containing all elements of this instance up to (but excluding) the
    *     first element that satisfies the specified condition
    */
-  public WiredList<E> lchop(Predicate<? super E> condition) {
-    return ltrim(condition, false);
-  }
-
-  /**
-   * Chops off a segment consisting of all elements up to (but excluding) the first or last element
-   * that satisfies the specified condition. In other words, none of the elements in the returned
-   * list satisfy the condition and you are left with a list whose first element does satisy the
-   * condition. If the condition was never satisfied, the list remains unaltered and will itself be
-   * returned.
-   *
-   * @param condition The condition that the elements in the returned list must <i>not</i>
-   *     satisfy
-   * @param lastOccurrence Whether to split on the first or the last element satisfying the
-   *     condition
-   * @return A {@code WiredList} containing all elements of this instance up to (but excluding) the
-   *     first element that satisfies the specified condition
-   */
-  public WiredList<E> ltrim(Predicate<? super E> condition, boolean lastOccurrence) {
+  public WiredList<E> split(Predicate<? super E> condition) {
     Check.notNull(condition, "condition");
     if (sz == 0) {
       return this;
@@ -951,7 +932,7 @@ public class WiredList<E> implements List<E> {
    */
   @Override
   public <T> T[] toArray(T[] a) {
-    Check.notNull(a, "array");
+    Check.notNull(a);
     if (a.length < sz) {
       a = InvokeUtils.newArray(a.getClass(), sz);
     }

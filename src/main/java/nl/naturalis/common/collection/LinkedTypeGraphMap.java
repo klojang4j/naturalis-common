@@ -1,22 +1,24 @@
 package nl.naturalis.common.collection;
 
+import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.check.Check;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.AbstractMap.SimpleImmutableEntry;
 import static nl.naturalis.common.ClassMethods.box;
 import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.ObjectMethods.ifNull;
+import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
 /**
- * A {@link TypeMap} extension that stores its entries in a data structure that is similar to the
- * one used by {@link TypeGraphMap}, but more sensitive to the insertion order of the entries. Thus,
- * if you expect, for example, {@code String.class} to be requested very often, it pays to {@link
- * LinkedTypeGraphMapBuilder#add(Class, Object) add} that type first to the map.
+ * A {@link TypeMap} that stores its entries in a data structure similar to the one used by {@link
+ * TypeGraphMap}, but sensitive to the order in which the types are inserted into the map. Thus, if
+ * you expect, for example, {@code String.class} to be requested very often compared to the other
+ * types, it pays to {@link LinkedTypeGraphMapBuilder#add(Class, Object) add} that type first.
+ *
+ * <p>The key set of a {@code LinkedTypeGraphMap} consists of depth-first slices of the type
+ * hierarchy.
  *
  * @param <V> The type of the values in the {@code Map}
  * @see TypeMap
@@ -34,61 +36,100 @@ public final class LinkedTypeGraphMap<V> extends TypeMap<V> {
 
     private final Class<?> type;
     private final Object value;
-    private final LinkedTypeNode[] subtypes;
+    private final LinkedTypeNode[] subclasses;
+    private final LinkedTypeNode[] subinterfaces;
 
-    LinkedTypeNode(Class<?> type, Object value, LinkedTypeNode[] subtypes) {
+    LinkedTypeNode(Class<?> type,
+        Object value,
+        LinkedTypeNode[] subclasses,
+        LinkedTypeNode[] subinterfaces) {
       this.type = type;
       this.value = value;
-      this.subtypes = subtypes;
+      this.subclasses = subclasses;
+      this.subinterfaces = subinterfaces;
     }
 
-    Object find(Class<?> type, boolean autobox) {
+    Object findClass(Class<?> type, boolean autobox) {
       if (isA(type, this.type)) {
-        if (type.isInterface()) {
-          // interfaces can only be subtypes of other interfaces
-          for (int i = subtypes.length - 1; i >= 0 && subtypes[i].type.isInterface(); --i) {
-            Object val = subtypes[i].find(type, false);
-            if (val != null) {
-              return val;
-            }
-          }
-          return value;
-        } else {
-          for (LinkedTypeNode subtype : subtypes) {
-            Object val = subtype.find(type, false);
-            if (val != null) {
-              return val;
-            }
-          }
+        Object val = findClass(type, subclasses);
+        if (val == null) {
+          val = findClass(type, subinterfaces);
         }
+        return ifNull(val, value);
       } else if (type.isPrimitive()) {
         // this must be the root node b/c *everything*
         // is an Object except primitive types
-        return autobox ? find(box(type), false) : this.value;
+        return autobox ? findClass(box(type), false) : this.value;
       }
       return null;
     }
 
-    void collectTypes(Set<Class<?>> set) {
-      for (LinkedTypeNode tn : subtypes) {
-        set.add(tn.type);
-        tn.collectTypes(set);
+    Object findInterface(Class<?> type) {
+      if (isA(type, this.type)) {
+        return ifNull(findInterface(type, subinterfaces), this.value);
+      }
+      return null;
+    }
+
+    static Object findClass(Class<?> type, LinkedTypeNode[] nodes) {
+      for (var node : nodes) {
+        Object val = node.findClass(type, false);
+        if (val != null) {
+          return val;
+        }
+      }
+      return null;
+    }
+
+    static Object findInterface(Class<?> type, LinkedTypeNode[] nodes) {
+      for (var node : nodes) {
+        Object val = node.findClass(type, false);
+        if (val != null) {
+          return val;
+        }
+      }
+      return null;
+    }
+
+    void collectTypesDepthFirst(List<Class<?>> bucket) {
+      LinkedTypeNode[] subtypes = ArrayMethods.concat(subinterfaces, subclasses);
+      for (var node : subtypes) {
+        bucket.add(node.type);
+        node.collectTypesDepthFirst(bucket);
+      }
+    }
+
+    void collectTypesBreadthFirst(List<Class<?>> bucket) {
+      LinkedTypeNode[] subtypes = ArrayMethods.concat(subinterfaces, subclasses);
+      for (var node : subtypes) {
+        bucket.add(node.type);
+      }
+      for (var node : subtypes) {
+        node.collectTypesBreadthFirst(bucket);
       }
     }
 
     @SuppressWarnings({"unchecked"})
     <E> void collectValues(Set<E> set) {
-      for (LinkedTypeNode tn : subtypes) {
-        set.add((E) tn.value);
-        tn.collectValues(set);
+      for (var node : subclasses) {
+        set.add((E) node.value);
+        node.collectValues(set);
+      }
+      for (var node : subinterfaces) {
+        set.add((E) node.value);
+        node.collectValues(set);
       }
     }
 
     @SuppressWarnings({"unchecked"})
     <E> void collectEntries(Set<Entry<Class<?>, E>> set) {
-      for (LinkedTypeNode tn : subtypes) {
-        set.add(new SimpleImmutableEntry<>(tn.type, (E) tn.value));
-        tn.collectEntries(set);
+      for (var node : subclasses) {
+        set.add(new SimpleImmutableEntry<>(node.type, (E) node.value));
+        node.collectEntries(set);
+      }
+      for (var node : subinterfaces) {
+        set.add(new SimpleImmutableEntry<>(node.type, (E) node.value));
+        node.collectEntries(set);
       }
     }
 
@@ -97,6 +138,8 @@ public final class LinkedTypeGraphMap<V> extends TypeMap<V> {
   // ================================================================== //
   // ===================== [ LinkedTypeGraphMap ] ===================== //
   // ================================================================== //
+
+  static final LinkedTypeNode[] NO_SUBTYPES = new LinkedTypeNode[0];
 
   /**
    * Converts the specified {@code Map} to a {@code TypeGraphMap}. Autoboxing will be enabled.
@@ -140,7 +183,8 @@ public final class LinkedTypeGraphMap<V> extends TypeMap<V> {
   private final LinkedTypeNode root;
   private final int size;
 
-  private Set<Class<?>> keys;
+  private Set<Class<?>> keysDF; // depth-first sorted keys
+  private Set<Class<?>> keysBF; // breadth-first sorted keys
   private Collection<V> values;
   private Set<Entry<Class<?>, V>> entries;
 
@@ -156,10 +200,8 @@ public final class LinkedTypeGraphMap<V> extends TypeMap<V> {
   @Override
   @SuppressWarnings({"unchecked"})
   public V get(Object key) {
-    if (key instanceof Class type) {
-      return (V) root.find(type, autobox);
-    }
-    return null;
+    Class<?> type = Check.notNull(key).is(instanceOf(), Class.class).ok(Class.class::cast);
+    return (V) (type.isInterface() ? root.findInterface(type) : root.findClass(type, autobox));
   }
 
   /**
@@ -167,30 +209,23 @@ public final class LinkedTypeGraphMap<V> extends TypeMap<V> {
    */
   @Override
   public boolean containsKey(Object key) {
-    if (key instanceof Class type) {
-      LinkedTypeNode[] subtypes = root.subtypes;
-      if (root.value == null) {
-        if (type.isInterface()) {
-          for (int i = subtypes.length - 1; i >= 0 && subtypes[i].type.isInterface(); --i) {
-            if (isA(type, subtypes[i].type)) {
-              return true;
-            }
-          }
-          return false;
-        } else if (autobox && type.isPrimitive()) {
-          return containsKey(box(type));
-        } else {
-          for (LinkedTypeNode subtype : subtypes) {
-            if (isA(type, subtype.type)) {
-              return true;
-            }
-          }
-          return false;
-        }
+    Class<?> type = Check.notNull(key).is(instanceOf(), Class.class).ok(Class.class::cast);
+    if (root.value != null) {
+      return true;
+    }
+    if (!type.isInterface()) {
+      if (containsSuper(root.subclasses, type)) {
+        return true;
       }
+    }
+    if (containsSuper(root.subinterfaces, type)) {
       return true;
     }
     return false;
+  }
+
+  private static boolean containsSuper(LinkedTypeNode[] nodes, Class<?> type) {
+    return Arrays.stream(nodes).filter(node -> isA(type, node.type)).findAny().isPresent();
   }
 
   /**
@@ -202,19 +237,38 @@ public final class LinkedTypeGraphMap<V> extends TypeMap<V> {
   }
 
   /**
-   * {@inheritDoc}
+   * Returns a depth-first view of the types in the type hierarchy.
+   *
+   * @return A depth-first view of the types in the type hierarchy.
    */
   @Override
   public Set<Class<?>> keySet() {
-    if (keys == null) {
-      Set<Class<?>> set = new HashSet<>(1 + size * 4 / 3);
+    if (keysDF == null) {
+      List<Class<?>> keys = new ArrayList<>();
       if (root.value != null) { // map contains Object.class
-        set.add(Object.class);
+        keys.add(Object.class);
       }
-      root.collectTypes(set);
-      keys = Set.copyOf(set);
+      root.collectTypesDepthFirst(keys);
+      keysDF = Collections.unmodifiableSet(new LinkedHashSet<>(keys));
     }
-    return keys;
+    return keysDF;
+  }
+
+  /**
+   * Returns a breadth-first view of the types in the type hierarchy.
+   *
+   * @return A breadth-first view of the types in the type hierarchy.
+   */
+  public Set<Class<?>> breadthFirstKeySet() {
+    if (keysBF == null) {
+      List<Class<?>> keys = new ArrayList<>();
+      if (root.value != null) { // map contains Object.class
+        keys.add(Object.class);
+      }
+      root.collectTypesBreadthFirst(keys);
+      keysBF = Collections.unmodifiableSet(new LinkedHashSet<>(keys));
+    }
+    return keysBF;
   }
 
   /**

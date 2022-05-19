@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import static nl.naturalis.common.ClassMethods.isA;
-import static nl.naturalis.common.check.CommonChecks.deepNotNull;
-import static nl.naturalis.common.check.CommonChecks.instanceOf;
+import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.collection.LinkedTypeGraphMap.NO_SUBTYPES;
 
 public final class LinkedTypeGraphMapBuilder<V> {
 
@@ -18,10 +18,11 @@ public final class LinkedTypeGraphMapBuilder<V> {
 
   private static class WritableTypeNode {
 
-    private final WiredList<WritableTypeNode> subtypes = new WiredList<>();
     private final Class<?> type;
-
     private Object value;
+
+    private final WiredList<WritableTypeNode> subclasses = new WiredList<>();
+    private final WiredList<WritableTypeNode> subinterfaces = new WiredList<>();
 
     WritableTypeNode(Class<?> type, Object val) {
       this.type = type;
@@ -29,37 +30,66 @@ public final class LinkedTypeGraphMapBuilder<V> {
     }
 
     LinkedTypeNode toTypeNode() {
-      LinkedTypeNode[] children = new LinkedTypeNode[subtypes.size()];
-      WiredList<WritableTypeNode> classes =
-          subtypes.lchop(node -> node.type.isInterface()).reverse();
-      classes.toArray(children);
-
-      return new LinkedTypeNode(type, value, children);
+      var subclasses =
+          this.subclasses.stream().map(WritableTypeNode::toTypeNode).toArray(LinkedTypeNode[]::new);
+      if (subclasses.length == 0) {
+        subclasses = NO_SUBTYPES;
+      }
+      var subinterfaces = this.subinterfaces.stream()
+          .map(WritableTypeNode::toTypeNode)
+          .toArray(LinkedTypeNode[]::new);
+      if (subinterfaces.length == 0) {
+        subinterfaces = NO_SUBTYPES;
+      }
+      return new LinkedTypeNode(type, value, subclasses, subinterfaces);
     }
 
     void addChild(WritableTypeNode node) {
-      if (node.type == this.type) {
-        throw new DuplicateKeyException(node.type);
+      if (node.type.isInterface()) {
+        addSubinterface(node);
+      } else {
+        addSubclass(node);
       }
-      Iterator<WritableTypeNode> itr = subtypes.wiredIterator();
-      boolean inserted = false;
+    }
+
+    void addSubclass(WritableTypeNode node) {
+      Check.that(node.type).isNot(sameAs(), type, () -> new DuplicateKeyException(type));
+      WiredIterator<WritableTypeNode> itr = subclasses.wiredIterator();
       while (itr.hasNext()) {
-        var child = itr.next();
-        if (isA(child.type, node.type)) {
+        var subclass = itr.next();
+        if (isA(subclass.type, node.type)) {
           itr.remove();
-          node.addChild(child);
-        } else if (isA(node.type, child.type)) {
-          child.addChild(node);
-          inserted = true;
+          node.addSubclass(subclass);
+        } else if (isA(node.type, subclass.type)) {
+          subclass.addSubclass(node);
+          return;
         }
       }
-      if (!inserted) {
-        if (node.type.isInterface()) {
-          subtypes.append(node);
-        } else {
-          subtypes.prepend(node);
+      itr = subinterfaces.wiredIterator();
+      while (itr.hasNext()) {
+        var subinterface = itr.next();
+        if (isA(node.type, subinterface.type)) {
+          subinterface.addSubclass(node);
+          return;
         }
       }
+      subclasses.append(node);
+    }
+
+    void addSubinterface(WritableTypeNode node) {
+      Check.that(node.type).isNot(sameAs(), type, () -> new DuplicateKeyException(type));
+      WiredIterator<WritableTypeNode> itr = subinterfaces.wiredIterator();
+      while (itr.hasNext()) {
+        var subinterface = itr.next();
+        if (isA(subinterface.type, node.type)) {
+          itr.remove();
+          node.addSubinterface(subinterface);
+        } else if (isA(node.type, subinterface.type)) {
+          subinterface.addSubinterface(node);
+          return;
+        }
+      }
+      subinterfaces.append(node);
     }
 
   }
@@ -123,7 +153,7 @@ public final class LinkedTypeGraphMapBuilder<V> {
    */
   public LinkedTypeGraphMapBuilder<V> addMultiple(V value, Class<?>... types) {
     Check.notNull(value, "value").is(instanceOf(), valueType);
-    Check.that(types, "types").is(deepNotNull());
+    Check.notNull(types, "types");
     Arrays.stream(types).forEach(t -> add(t, value));
     return this;
   }

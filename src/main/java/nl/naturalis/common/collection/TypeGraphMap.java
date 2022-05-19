@@ -11,6 +11,7 @@ import static java.util.AbstractMap.SimpleImmutableEntry;
 import static nl.naturalis.common.ClassMethods.box;
 import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.ObjectMethods.ifNull;
+import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
 /**
  * A {@link TypeMap} extension that stores its entries in a data structure that reflects the Java
@@ -23,6 +24,8 @@ import static nl.naturalis.common.ObjectMethods.ifNull;
  * requested type (which would be practically immediate if the map contains {@code Object.class}).
  * The {@code get} method, on the other hand, needs to descend into the type hierarchy until it
  * finds the requested type, or knows for sure it is absent.
+ *
+ * <p>The key set of a {@code TypeGraphMap} consists of depth-first slices of the type hierarchy.
  *
  * @param <V> The type of the values in the  {@code Map}
  * @see TypeMap
@@ -52,71 +55,88 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
       this.subinterfaces = subinterfaces;
     }
 
-    Object find(Class<?> type, boolean autobox) {
+    Object findClass(Class<?> type, boolean autobox) {
       if (isA(type, this.type)) {
-        if (type.isInterface()) {
-          // interfaces can only be subtypes of other interfaces
-          return ifNull(find(type, subinterfaces), value);
-        }
-        Object val = find(type, subclasses);
+        Object val = findClass(type, subclasses);
         if (val == null) {
-          val = find(type, subinterfaces);
+          val = findClass(type, subinterfaces);
         }
         return ifNull(val, value);
       } else if (type.isPrimitive()) {
         // this must be the root node b/c *everything*
         // is an Object except primitive types
-        return autobox ? find(box(type), false) : this.value;
+        return autobox ? findClass(box(type), false) : this.value;
       }
       return null;
     }
 
-    static Object find(Class<?> type, Map<Class<?>, TypeNode> typeNodes) {
-      TypeNode tn = typeNodes.get(type);
-      if (tn == null) {
-        for (TypeNode typeNode : typeNodes.values()) {
-          Object val = typeNode.find(type, false);
+    Object findInterface(Class<?> type) {
+      if (isA(type, this.type)) {
+        return ifNull(findInterface(type, subinterfaces), this.value);
+      }
+      return null;
+    }
+
+    static Object findClass(Class<?> type, Map<Class<?>, TypeNode> typeNodes) {
+      var node = typeNodes.get(type);
+      if (node == null) {
+        for (TypeNode n : typeNodes.values()) {
+          Object val = n.findClass(type, false);
           if (val != null) {
             return val;
           }
         }
         return null;
       }
-      return tn.value;
+      return node.value;
+    }
+
+    static Object findInterface(Class<?> type, Map<Class<?>, TypeNode> typeNodes) {
+      var node = typeNodes.get(type);
+      if (node == null) {
+        for (TypeNode typeNode : typeNodes.values()) {
+          Object val = typeNode.findInterface(type);
+          if (val != null) {
+            return val;
+          }
+        }
+        return null;
+      }
+      return node.value;
     }
 
     void collectTypes(Set<Class<?>> set) {
-      for (TypeNode tn : subclasses.values()) {
-        set.add(tn.type);
-        tn.collectTypes(set);
+      for (var node : subclasses.values()) {
+        set.add(node.type);
+        node.collectTypes(set);
       }
-      for (TypeNode tn : subinterfaces.values()) {
-        set.add((tn.type));
-        tn.collectTypes(set);
+      for (var node : subinterfaces.values()) {
+        set.add((node.type));
+        node.collectTypes(set);
       }
     }
 
     @SuppressWarnings({"unchecked"})
     <E> void collectValues(Set<E> set) {
-      for (TypeNode tn : subclasses.values()) {
-        set.add((E) tn.value);
-        tn.collectValues(set);
+      for (var node : subclasses.values()) {
+        set.add((E) node.value);
+        node.collectValues(set);
       }
-      for (TypeNode tn : subinterfaces.values()) {
-        set.add((E) tn.value);
-        tn.collectValues(set);
+      for (var node : subinterfaces.values()) {
+        set.add((E) node.value);
+        node.collectValues(set);
       }
     }
 
     @SuppressWarnings({"unchecked"})
     <E> void collectEntries(Set<Entry<Class<?>, E>> set) {
-      for (TypeNode tn : subclasses.values()) {
-        set.add(new SimpleImmutableEntry<>(tn.type, (E) tn.value));
-        tn.collectEntries(set);
+      for (var node : subclasses.values()) {
+        set.add(new SimpleImmutableEntry<>(node.type, (E) node.value));
+        node.collectEntries(set);
       }
-      for (TypeNode tn : subinterfaces.values()) {
-        set.add(new SimpleImmutableEntry<>(tn.type, (E) tn.value));
-        tn.collectEntries(set);
+      for (var node : subinterfaces.values()) {
+        set.add(new SimpleImmutableEntry<>(node.type, (E) node.value));
+        node.collectEntries(set);
       }
     }
 
@@ -184,10 +204,11 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
   @Override
   @SuppressWarnings({"unchecked"})
   public V get(Object key) {
-    if (key instanceof Class type) {
-      return (V) root.find(type, autobox);
-    }
-    return null;
+    Class<?> type = Check.notNull(key).is(instanceOf(), Class.class).ok(Class.class::cast);
+    // interfaces can only be subtypes of other interfaced,
+    // so we  don't need to bother with the regular classes
+    // in the type tree
+    return (V) (type.isInterface() ? root.findInterface(type) : root.findClass(type, autobox));
   }
 
   /**
@@ -195,21 +216,20 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
    */
   @Override
   public boolean containsKey(Object key) {
-    if (key instanceof Class type) {
-      if (root.value != null) {
-        return true;
-      }
-      if (!type.isInterface()) {
-        for (TypeNode tn : root.subclasses.values()) {
-          if (isA(type, tn.type)) {
-            return true;
-          }
-        }
-      }
-      for (TypeNode tn : root.subinterfaces.values()) {
+    Class<?> type = Check.notNull(key).is(instanceOf(), Class.class).ok(Class.class::cast);
+    if (root.value != null) {
+      return true;
+    }
+    if (!type.isInterface()) {
+      for (TypeNode tn : root.subclasses.values()) {
         if (isA(type, tn.type)) {
           return true;
         }
+      }
+    }
+    for (TypeNode tn : root.subinterfaces.values()) {
+      if (isA(type, tn.type)) {
+        return true;
       }
     }
     return false;
