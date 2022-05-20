@@ -18,9 +18,9 @@ import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * A doubly-linked list, much like {@link LinkedList}, but more focused on list manipulation, and
- * less on queue-like behaviour. As with any doubly-linked list, it is relatively inefficient at
- * index-based retrieval, but very efficient at inserting, deleting and moving around large chunks
- * of list elements (the larger the chunks the bigger the gain, compared to {@link ArrayList}).
+ * less on queue-like behaviour. As with any doubly-linked list, index-based retrieval is relatively
+ * costly, compared to {@link ArrayList}. But it can be very efficient at inserting, deleting and
+ * moving around large list segments (the larger the segments the bigger the gain).
  *
  * @param <E> The type of the elements in the list
  */
@@ -54,7 +54,7 @@ public class WiredList<E> implements List<E> {
   // ====================== [ Chain ] ====================== //
   // ======================================================= //
 
-  @SuppressWarnings("unchecked,rawtypes")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private static class Chain {
 
     static <F> Chain ofSingle(F value) {
@@ -123,7 +123,7 @@ public class WiredList<E> implements List<E> {
       // but we must still check do a size check in case the same
       // thread has emptied the list from outside the iterator
       Check.that(sz).is(ne(), 0, NO_SUCH_ELEMENT);
-      Check.that(curr).isNot(sameAs(), tail, NO_SUCH_ELEMENT);
+      Check.that(curr == tail).is(no(), NO_SUCH_ELEMENT);
       return (curr = curr.next).val;
     }
 
@@ -134,12 +134,21 @@ public class WiredList<E> implements List<E> {
 
     @Override
     public void remove() {
-      Node<E> tmp = curr;
       Check.that(sz).is(ne(), 0, NO_SUCH_ELEMENT);
-      if (tmp != head) {
-        curr = curr.prev;
+      Node<E> curr = this.curr;
+      if (curr.next == head) {
+        throw new IllegalStateException("Iterator.next() must be called first");
       }
-      deleteNode(tmp);
+      if (sz == 1) {
+        deleteNode(curr);
+      } else if (curr == head) {
+        deleteNode(curr);
+        curr = justBeforeHead();
+      } else {
+        curr = curr.prev;
+        deleteNode(curr.next);
+      }
+      this.curr = curr;
     }
 
   }

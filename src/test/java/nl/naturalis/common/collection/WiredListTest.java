@@ -333,6 +333,50 @@ public class WiredListTest {
   }
 
   @Test
+  public void remove10() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4);
+    assertEquals(5, wl0.size());
+    wl0.remove(0);
+    assertEquals(List.of(1, 2, 3, 4), wl0);
+    wl0.remove(0);
+    assertEquals(List.of(2, 3, 4), wl0);
+    wl0.remove(0);
+    assertEquals(List.of(3, 4), wl0);
+    wl0.remove(0);
+    assertEquals(List.of(4), wl0);
+    wl0.remove(0);
+    assertEquals(List.of(), wl0);
+  }
+
+  @Test
+  public void remove11() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4);
+    assertEquals(5, wl0.size());
+    wl0.remove(4);
+    assertEquals(List.of(0, 1, 2, 3), wl0);
+    wl0.remove(3);
+    assertEquals(List.of(0, 1, 2), wl0);
+    wl0.remove(2);
+    assertEquals(List.of(0, 1), wl0);
+    wl0.remove(1);
+    assertEquals(List.of(0), wl0);
+    wl0.remove(0);
+    assertEquals(List.of(), wl0);
+  }
+
+  @Test
+  public void remove12() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4);
+    assertEquals(5, wl0.size());
+    wl0.remove(2);
+    assertEquals(List.of(0, 1, 3, 4), wl0);
+    wl0.remove(2);
+    assertEquals(List.of(0, 1, 4), wl0);
+    wl0.remove(1);
+    assertEquals(List.of(0, 4), wl0);
+  }
+
+  @Test
   public void embed00() {
     var wl0 = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
     var wl1 = WiredList.of("a", "b");
@@ -512,6 +556,15 @@ public class WiredListTest {
     assertEquals(10, wl0.size());
     assertEquals(0, wl1.size());
     assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl0);
+  }
+
+  @Test
+  public void exchange00() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = WiredList.of(10, 11, 12, 13, 14, 15, 16, 17, 18, 19);
+    wl0.exchange(0, 2, wl1, 0, 2);
+    //assertEquals(List.of(10, 11, 2, 3, 4, 5, 6, 7, 8, 9), wl0);
+    //assertEquals(List.of(0, 1, 12, 13, 14, 15, 16, 17, 18, 19), wl1);
   }
 
   @Test
