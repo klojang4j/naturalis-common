@@ -660,7 +660,9 @@ public class WiredList<E> implements List<E> {
 
   /**
    * Moves a list segment forward or backward in the list. Use a negative value for the {@code
-   * positions} argument to make the segment move towards the start of the list.
+   * positions} argument to make the segment move towards the start of the list. It is not allowed
+   * to specify a zero-length segment. Specifying a move by zero positions is allowed (but obviously
+   * would leave the list unchanged).
    *
    * @param fromIndex The start index of the segment (inclusive)
    * @param toIndex The end index of the segment (exclusive)
@@ -668,36 +670,37 @@ public class WiredList<E> implements List<E> {
    *     backwards (negative)
    */
   public void move(int fromIndex, int toIndex, int positions) {
-    int len = Check.fromTo(sz, fromIndex, toIndex);
-    if ((len | positions) == 0) {
-      // ...
-    } else if (positions > 0) {
+    Check.that(fromIndex, "fromIndex").is(gte(), 0);
+    Check.that(toIndex, "toIndex").is(gt(), fromIndex).is(lte(), sz);
+    int len = toIndex - fromIndex;
+    if (positions > 0) {
       Check.that(len + positions).is(lte(), sz, MOVE_BEYOND_BOUNDS);
-      moveToTail(fromIndex, len, positions);
+      moveToTail(fromIndex, toIndex, positions);
     } else {
       Check.that(fromIndex + positions).is(gte(), 0, MOVE_BEYOND_BOUNDS);
       moveToHead(fromIndex, len, positions);
     }
   }
 
-  private void moveToTail(int off, int len, int pos) {
-    // pos is the number of steps we must make, but we
-    // need a to-index *exclusive*:
-    pos += 1;
-    Node<E> oldFirst = node(off);
-    Node<E> oldLast = node(oldFirst, off, len);
-    Node<E> newLast = node(oldLast, off + len - 1, pos);
-    if (off == 0) { // oldFirst == head
-      makeHead(oldLast.next);
+  private void moveToTail(int fromIndex, int toIndex, int pos) {
+    Node<E> first = node(fromIndex);
+    Node<E> last = node(first, fromIndex, toIndex - fromIndex);
+    if (fromIndex == 0) {
+      makeHead(last.next);
     } else {
-      join(oldFirst.prev, oldLast.next);
+      join(first.prev, last.next);
     }
-    if (newLast == tail) {
-      join(newLast, oldFirst);
-      makeTail(oldLast);
+    Node<E> insertAfter = node(last, toIndex - 1, pos + 1);
+    // Connect the first node to the insert-after node and
+    // connect the last node to the node that came after the
+    // insert-after node. In  reverse order, though, or we
+    // would end up with loose ends.
+    if (insertAfter == tail) {
+      join(insertAfter, first);
+      makeTail(last);
     } else {
-      join(oldLast, newLast.next);
-      join(newLast, oldFirst);
+      join(last, insertAfter.next);
+      join(insertAfter, first);
     }
   }
 
