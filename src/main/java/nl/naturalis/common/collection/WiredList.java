@@ -12,19 +12,39 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static java.util.Collections.emptyIterator;
-import static java.util.Collections.emptyListIterator;
 import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * A doubly-linked list, much like {@link LinkedList}, but more focused on list manipulation, and
- * less on queue-like behaviour. As with any doubly-linked list, index-based retrieval is relatively
- * costly, compared to {@link ArrayList}. But it can be very efficient at inserting, deleting and
- * moving around large list segments (the larger the segments the bigger the gain).
+ * less on queue-like behaviour. As with any doubly-linked list, iteration and index-based retrieval
+ * is relatively costly compared to {@link ArrayList}. It can be very efficient, however, at
+ * applying structural changes to the list. That is: inserting, deleting and moving around large
+ * chunks of list elements. The larger the segments the bigger the gain compared to {@code
+ * ArrayList}.
+ *
+ * <p>This implementation of the {@link List} interface <b>does not support</b> the
+ * {@link List#subList(int, int) subList} and {@link List#listIterator() listIterator} methods.
+ *
+ * <h4>Iteration</h4>
+ *
+ * <p>You should always use an {@code Iterator} to iterate over the elements in the list, either
+ * explicitly or implicitly, via the {@code forEach} loop. Using an index/get loop is possible, but
+ * performs poorly. As mentioned, a {@code WiredList} does not support the {@code listIterator}
+ * method. However, besides the standard {@link Iterable#iterator() iterator} method, it also
+ * provides a {@link #reverseIterator()} and a {@link #wiredIterator()} method. The latter returns
+ * an instance of the {@link WiredIterator} interface. Unlike a {@link ListIterator} this is a
+ * one-way-only iterator, but, that aside, provides the same functionality (and some more).
+ *
+ * <p>None of the iterators is resistant against concurrent modifications of the list. The
+ * standard {@code Iterator} is not even designed to be resistant against modifications outside the
+ * {@code Iterator}, but by the same thread. (Everything happening in the iterator's rear mirror is
+ * fine though.) It is just there to iterate as quickly as possible over the elements, under the
+ * assumption
  *
  * @param <E> The type of the elements in the list
  */
-public class WiredList<E> implements List<E> {
+public final class WiredList<E> implements List<E> {
 
   // ======================================================= //
   // ======================= [ Node ] ====================== //
@@ -149,86 +169,6 @@ public class WiredList<E> implements List<E> {
         deleteNode(curr.next);
       }
       this.curr = curr;
-    }
-
-  }
-
-  // ======================================================= //
-  // ===================== [ ListItr ]  ==================== //
-  // ======================================================= //
-
-  private class ListItr implements ListIterator<E> {
-
-    int idx;
-    Node<E> curr;
-
-    ListItr() {
-      this(0);
-    }
-
-    ListItr(int index) {
-      this.idx = index;
-    }
-
-    @Override
-    public boolean hasNext() {
-      return idx != sz || curr == null;
-    }
-
-    @Override
-    public E next() {
-      if (curr == null) {
-        return (curr = node(idx)).val;
-      }
-      Check.that(idx).is(ne(), sz, NO_SUCH_ELEMENT);
-      ++idx;
-      return (curr = curr.next).val;
-    }
-
-    @Override
-    public boolean hasPrevious() {
-      return idx != 0 || curr == null;
-    }
-
-    @Override
-    public E previous() {
-      if (curr == null) {
-        return (curr = node(idx)).val;
-      }
-      Check.that(idx).is(ne(), 0, NO_SUCH_ELEMENT);
-      --idx;
-      return (curr = curr.prev).val;
-    }
-
-    @Override
-    public int nextIndex() {
-      return idx + 1;
-    }
-
-    @Override
-    public int previousIndex() {
-      return idx - 1;
-    }
-
-    @Override
-    public void remove() {
-      Node<E> tmp = curr;
-      Check.that(sz).is(ne(), 0, NO_SUCH_ELEMENT);
-      if (tmp != tail) {
-        curr = curr.next;
-      }
-      deleteNode(tmp);
-    }
-
-    @Override
-    public void set(E e) {
-      Check.on(illegalState(), curr).isNot(NULL(), "previous/next not called yet", null);
-      curr.val = e;
-    }
-
-    @Override
-    public void add(E e) {
-      append(e);
     }
 
   }
@@ -554,7 +494,7 @@ public class WiredList<E> implements List<E> {
   private void transfer0(int index, WiredList<? extends E> other, int offset, int length) {
     if (length > 0) {
       Node first = other.node(offset);
-      Node last = other.node(first, offset, length);
+      Node last = other.nodeAfter(first, offset, length);
       other.delete(new Chain(first, last, length));
       insert(index, new Chain(first, last, length));
     }
@@ -581,9 +521,9 @@ public class WiredList<E> implements List<E> {
       other.transfer0(itsFrom, this, myFrom, myLen);
     } else {
       Node<E> myStart = node(myFrom);
-      Node<E> myEnd = node(myStart, myFrom, myLen);
+      Node<E> myEnd = nodeAfter(myStart, myFrom, myLen);
       Node<E> itsStart = other.node(itsFrom);
-      Node<E> itsEnd = other.node(itsStart, itsFrom, itsLen);
+      Node<E> itsEnd = other.nodeAfter(itsStart, itsFrom, itsLen);
       Node<E> tmp = myStart.prev;
       myStart.prev = itsStart.prev;
       itsStart.prev = tmp;
@@ -684,13 +624,13 @@ public class WiredList<E> implements List<E> {
 
   private void moveToTail(int fromIndex, int toIndex, int pos) {
     Node<E> first = node(fromIndex);
-    Node<E> last = node(first, fromIndex, toIndex - fromIndex);
+    Node<E> last = nodeAfter(first, fromIndex, toIndex - fromIndex);
     if (fromIndex == 0) {
       makeHead(last.next);
     } else {
       join(first.prev, last.next);
     }
-    Node<E> insertAfter = node(last, toIndex - 1, pos + 1);
+    Node<E> insertAfter = nodeAfter(last, toIndex - 1, pos + 1);
     // Connect the first node to the insert-after node and
     // connect the last node to the node that came after the
     // insert-after node. In  reverse order, though, or we
@@ -708,9 +648,9 @@ public class WiredList<E> implements List<E> {
     int newFrom = fromIndex + pos;
     pos = 1 - pos;
     Node<E> newFirst = node(newFrom);
-    Node<E> newLast = node(newFirst, newFrom, len);
-    Node<E> oldFirst = (pos == len) ? newLast : node(newFirst, newFrom, pos);
-    Node<E> oldLast = node(oldFirst, fromIndex, len);
+    Node<E> newLast = nodeAfter(newFirst, newFrom, len);
+    Node<E> oldFirst = (pos == len) ? newLast : nodeAfter(newFirst, newFrom, pos);
+    Node<E> oldLast = nodeAfter(oldFirst, fromIndex, len);
     if (oldLast == tail) {
       makeTail(oldFirst.prev);
     } else {
@@ -1056,22 +996,6 @@ public class WiredList<E> implements List<E> {
    * {@inheritDoc}
    */
   @Override
-  public ListIterator<E> listIterator() {
-    return sz == 0 ? emptyListIterator() : new ListItr();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public ListIterator<E> listIterator(int index) {
-    return checkIndex(index).ok(ListItr::new);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;
@@ -1118,6 +1042,22 @@ public class WiredList<E> implements List<E> {
    * <b>Not supported by this implementation.</b>
    */
   @Override
+  public ListIterator<E> listIterator() {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * <b>Not supported by this implementation.</b>
+   */
+  @Override
+  public ListIterator<E> listIterator(int index) {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * <b>Not supported by this implementation.</b>
+   */
+  @Override
   public List<E> subList(int fromIndex, int toIndex) {
     throw new UnsupportedOperationException();
   }
@@ -1150,7 +1090,7 @@ public class WiredList<E> implements List<E> {
       return new WiredList<>();
     }
     var first = node(off);
-    var last = node(first, off, len);
+    var last = nodeAfter(first, off, len);
     delete(new Chain(first, last, len));
     return new WiredList<>(first, last, len);
   }
@@ -1198,18 +1138,22 @@ public class WiredList<E> implements List<E> {
     }
   }
 
-  private Node<E> node(Node<E> startNode, int startIndex, int len) {
+  private Node<E> nodeAfter(Node<E> startNode, int startIndex, int offset) {
     Node<E> node;
-    if (len < ((sz - startIndex) >> 1)) {
-      node = startNode;
-      for (int i = 1; i < len; ++i) {
-        node = node.next;
-      }
+    if (offset < ((sz + startIndex) >> 1)) {
+      for (node = startNode; --offset > 0; node = node.next) ;
     } else {
-      node = tail;
-      for (int i = sz; i > startIndex + len; --i) {
-        node = node.prev;
-      }
+      for (node = tail, offset = sz - startIndex - offset; offset-- > 0; node = node.prev) ;
+    }
+    return node;
+  }
+
+  private Node<E> nodeBefore(Node<E> startNode, int startIndex, int offset) {
+    Node<E> node;
+    if (offset < (startIndex >> 1)) {
+      for (node = startNode; --offset > 0; node = node.prev) ;
+    } else {
+      for (node = head, offset = startIndex - offset; offset-- > 0; node = node.next) ;
     }
     return node;
   }
