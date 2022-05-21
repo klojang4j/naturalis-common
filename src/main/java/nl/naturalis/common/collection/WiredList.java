@@ -676,7 +676,7 @@ public class WiredList<E> implements List<E> {
     if (positions > 0) {
       Check.that(len + positions).is(lte(), sz, MOVE_BEYOND_BOUNDS);
       moveToTail(fromIndex, toIndex, positions);
-    } else {
+    } else if (positions < 0) {
       Check.that(fromIndex + positions).is(gte(), 0, MOVE_BEYOND_BOUNDS);
       moveToHead(fromIndex, len, positions);
     }
@@ -704,13 +704,13 @@ public class WiredList<E> implements List<E> {
     }
   }
 
-  private void moveToHead(int off, int len, int pos) {
-    int newFrom = off + pos;
+  private void moveToHead(int fromIndex, int len, int pos) {
+    int newFrom = fromIndex + pos;
     pos = 1 - pos;
     Node<E> newFirst = node(newFrom);
     Node<E> newLast = node(newFirst, newFrom, len);
     Node<E> oldFirst = (pos == len) ? newLast : node(newFirst, newFrom, pos);
-    Node<E> oldLast = node(oldFirst, off, len);
+    Node<E> oldLast = node(oldFirst, fromIndex, len);
     if (oldLast == tail) {
       makeTail(oldFirst.prev);
     } else {
@@ -1183,13 +1183,9 @@ public class WiredList<E> implements List<E> {
   }
 
   private Node<E> node(int index) {
-    if (index == 0) {
-      return head;
-    } else if (index == sz) {
-      return tail;
-    } else if (index < (sz >> 1)) {
-      Node<E> n = head.next;
-      for (int i = 1; i < index; ++i) {
+    if (index < (sz >> 1)) {
+      Node<E> n = head;
+      for (int i = 0; i < index; ++i) {
         n = n.next;
       }
       return n;
@@ -1202,7 +1198,6 @@ public class WiredList<E> implements List<E> {
     }
   }
 
-  // Will only be called if len > 0
   private Node<E> node(Node<E> startNode, int startIndex, int len) {
     Node<E> node;
     if (len < ((sz - startIndex) >> 1)) {
