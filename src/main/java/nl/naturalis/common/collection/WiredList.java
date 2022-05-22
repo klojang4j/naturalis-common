@@ -618,7 +618,7 @@ public final class WiredList<E> implements List<E> {
       moveToTail(fromIndex, toIndex, positions);
     } else if (positions < 0) {
       Check.that(fromIndex + positions).is(gte(), 0, MOVE_BEYOND_BOUNDS);
-      moveToHead(fromIndex, len, positions);
+      moveToHead(fromIndex, toIndex, positions);
     }
   }
 
@@ -631,10 +631,9 @@ public final class WiredList<E> implements List<E> {
       join(first.prev, last.next);
     }
     Node<E> insertAfter = nodeAfter(last, toIndex - 1, pos + 1);
-    // Connect the first node to the insert-after node and
-    // connect the last node to the node that came after the
-    // insert-after node. In  reverse order, though, or we
-    // would end up with loose ends.
+    // Insert the segment between the insert-after node and the node
+    // after that node. In  reverse order, though, or we would end
+    // up with loose ends.
     if (insertAfter == tail) {
       join(insertAfter, first);
       makeTail(last);
@@ -644,24 +643,24 @@ public final class WiredList<E> implements List<E> {
     }
   }
 
-  private void moveToHead(int fromIndex, int len, int pos) {
+  private void moveToHead(int fromIndex, int toIndex, int pos) {
+    Node<E> first = node(fromIndex);
+    Node<E> last = nodeAfter(first, fromIndex, toIndex - fromIndex);
     int newFrom = fromIndex + pos;
     pos = 1 - pos;
     Node<E> newFirst = node(newFrom);
-    Node<E> newLast = nodeAfter(newFirst, newFrom, len);
-    Node<E> oldFirst = (pos == len) ? newLast : nodeAfter(newFirst, newFrom, pos);
-    Node<E> oldLast = nodeAfter(oldFirst, fromIndex, len);
-    if (oldLast == tail) {
-      makeTail(oldFirst.prev);
+    System.out.println(">>>>>>>> newFirst: " + newFirst);
+    if (last == tail) {
+      makeTail(first.prev);
     } else {
-      join(oldFirst.prev, oldLast.next);
+      join(first.prev, last.next);
     }
     if (newFrom == 0) {
-      join(oldLast, newFirst);
-      makeHead(oldFirst);
+      join(last, newFirst);
+      makeHead(first);
     } else {
-      join(newFirst.prev, oldFirst);
-      join(oldLast, newFirst);
+      join(newFirst.prev, first);
+      join(last, newFirst);
     }
   }
 
