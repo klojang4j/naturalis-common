@@ -4,7 +4,6 @@ import nl.naturalis.common.check.Check;
 import nl.naturalis.common.collection.LinkedTypeGraphMap.LinkedTypeNode;
 
 import java.util.Arrays;
-import java.util.Iterator;
 
 import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.check.CommonChecks.*;
@@ -73,7 +72,7 @@ public final class LinkedTypeGraphMapBuilder<V> {
           return;
         }
       }
-      subclasses.append(node);
+      subclasses.push(node);
     }
 
     void addSubinterface(WritableTypeNode node) {
@@ -89,7 +88,7 @@ public final class LinkedTypeGraphMapBuilder<V> {
           return;
         }
       }
-      subinterfaces.append(node);
+      subinterfaces.push(node);
     }
 
   }

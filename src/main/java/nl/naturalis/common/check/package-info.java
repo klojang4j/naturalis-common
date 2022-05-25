@@ -23,10 +23,18 @@
  * nl.naturalis.common.check.IntCheck IntCheck} or {@link nl.naturalis.common.check.ObjectCheck
  * ObjectCheck}, benchmarking their performance yield no difference with hand-coded argument checks.
  * If the argument passes the test, there is literally no difference outside the error margin of the
- * benchmark. If the argument fails the test and an exception needs to be thrown, the check
- * framework also performs equally well except when you provide your own error message (see below).
- * In this case the message needs to be scanned for message arguments, which turns out to be
- * relatively costly. You can view the results of the JMH benchmarks
+ * benchmark. If the argument fails the test, and an exception needs to be thrown, the check
+ * framework also performs equally well, except when you provide your own error message (see below).
+ * In this case the message needs to be scanned for message arguments, which is relatively
+ * expensive. Note, though, that in most cases you would not expect your precondition checks to be
+ * violated often enough to make this is issue. Nevertheless, if you find yourself in this situation
+ * and performance of the utmost importance, you can achieve it by specifying <i>exactly</i> one
+ * message argument: {@code '\0'} (the NULL character). This will cause the message not to be
+ * parsed, and simply be passed as-is to the exception. (Of course, the message cannot contain any
+ * message arguments then.)
+ *
+ *
+ * <p>You can view the results of the JMH benchmarks
  * <a href="https://github.com/klojang4j/naturalis-common-jmh">here</a>.
  *
  *
@@ -48,7 +56,7 @@
  * </blockquote>
  *
  * <h2>Custom error messages</h2>
- * <p>If you prefer to send out a custom error message, you van do so by specifying a message
+ * <p>If you prefer to send out a custom error message, you can do so by specifying a message
  * pattern and zero or more message arguments. The first message argument can be referenced as
  * <code>${0}</code>; the second as <code>${1}</code>, etc. For example:
  * <blockquote>
@@ -61,15 +69,12 @@
  * <p>The following message arguments are automatically available within the message pattern:
  * <ol>
  *   <li><b><code>${test}</code></b> The name of the check that was executed. E.g. "gt" or
- *   "notNull". If
- *   you
- *   provided your own lambda or method reference,
+ *   "notNull".
  *   <li><b><code>${arg}</code></b> The argument being validated.
  *   <li><b><code>${type}</code></b> The simple class name of the argument.
  *   <li><b><code>${name}</code></b> The name of the argument, if you provided one through the
  *   static factory methods of the {@code Check} class. Otherwise it will also be the simple
- *   class name of the
- *   argument.
+ *   class name of the argument.
  *   <li><b><code>${obj}</code></b> The object of the relationship, in case the check took the
  *   form of a {@link nl.naturalis.common.function.Relation Relation} or one of its sister
  *   interfaces. For example, for the {@link nl.naturalis.common.check.CommonChecks#instanceOf()
@@ -83,19 +88,9 @@
  * Check.that(word).is(keyIn(), dictionary, "Missing key: ${arg}");
  * }</pre>
  * </blockquote>
- * <p>Note that generating a custom error message is relatively slow, because the check framework
- * will always have to scan the message pattern for message arguments, even if you know there are
- * none. If time is of the essence and your message does not contain any message arguments, you can
- * explicitly specify {@code null} for the varargs array of message arguments. This will cause
- * the message to be passed on to the exception directly, without first being scanned for message
- * arguments.
- * <blockquote>
- * <pre>{@code
- * Check.that(word).is(keyIn(), dictionary, "Spelling error", null);
- * }</pre>
- * </blockquote>
+ *
  * <h2>Checking argument properties</h2>
- * <p>>A {@code Check} object lets you validate not just arguments but also argument properties:
+ * <p>Besides validating arguments, you can also validate argument <i>properties</i>:
  * <blockquote>
  * <pre>{@code
  * Check.notNull(name, "name").has(String::length, "length", gte(), 10);
@@ -103,12 +98,13 @@
  * Check.notNull(employees).has(Collection::size, "size", gte(), 100);
  * }</pre>
  * </blockquote>
- * <p>The {@link nl.naturalis.common.check.CommonGetters} is a grab bag of common getters which,
- * again, are already associated with the name of the getter they expose:
+ * <p>The {@link nl.naturalis.common.check.CommonGetters} class is a grab bag of common getters
+ * which, again, are already associated with the name of the getter they expose:
  * <blockquote>
  * <pre>{@code
- * // import static nl.naturalis.common.check.CommonChecks.gte;
- * // import static nl.naturalis.common.check.CommonGetters.size;
+ * import static nl.naturalis.common.check.CommonChecks.gte;
+ * import static nl.naturalis.common.check.CommonGetters.size;
+ * // ...
  * Check.notNull(employees, "employees").has(size(), gte(), 100);
  * // Auto-generated error message: "employees.size() must be >= 100 (was 42)"
  * }</pre>
@@ -118,6 +114,7 @@
  * to be validated. That could be a method reference like {@code Person::getFirstName}, but it could
  * just as well be a function that transforms the argument itself, like the square root of an {@code
  * int} argument or the uppercase version of a {@code String} argument.
+ *
  * <h2>Changing the Exception type</h2>
  * <p>By default, an {@code IllegalArgumentException} is thrown if the argument fails to pass a
  * test. This can be customized through the static factory methods. For example:
@@ -134,7 +131,8 @@
  * additionally contains some common exception factories. For example:
  * <blockquote>
  * <pre>{@code
- * // import static nl.naturalis.common.check.CommonChecks.*;
+ * import static nl.naturalis.common.check.CommonChecks.*;
+ * // ...
  * Check.on(illegalState(), inputstream).is(open());
  * }</pre>
  * </blockquote>

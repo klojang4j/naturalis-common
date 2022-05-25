@@ -104,7 +104,11 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param test The test
    * @param message The message pattern
-   * @param msgArgs The message arguments
+   * @param msgArgs The message arguments. If you expect the argument to fail the test very
+   *     often, and performance is of the utmost importance, specify <i>exactly</i> one message
+   *     argument: {@code '\0'} (the NULL character). This will cause the message not to be parsed,
+   *     and simply be passed as-is to the exception. (Of course, the message cannot contain any
+   *     message arguments then.)
    * @return This instance
    * @throws E If the argument is invalid
    */
@@ -122,7 +126,11 @@ public final class ObjectCheck<T, E extends Exception> {
    *
    * @param test The test
    * @param message The message pattern
-   * @param msgArgs The message arguments
+   * @param msgArgs The message arguments. If you expect the argument to fail the test very
+   *     often, and performance is of the utmost importance, specify <i>exactly</i> one message
+   *     argument: {@code '\0'} (the NULL character). This will cause the message not to be parsed,
+   *     and simply be passed as-is to the exception. (Of course, the message cannot contain any
+   *     message arguments then.)
    * @return This instance
    * @throws E If the argument is invalid
    */
@@ -216,7 +224,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * @param object The value that the argument is tested against (called "the object" of a
    *     relation)
    * @param message The message pattern
-   * @param msgArgs The message arguments
+   * @param msgArgs The message arguments. If you expect the argument to fail the test very
+   *     often, and performance is of the utmost importance, specify <i>exactly</i> one message
+   *     argument: {@code '\0'} (the NULL character). This will cause the message not to be parsed,
+   *     and simply be passed as-is to the exception. (Of course, the message cannot contain any
+   *     message arguments then.)
    * @param <O> The type of the value being tested against
    * @return This instance
    * @throws E If the argument is invalid
@@ -238,7 +250,11 @@ public final class ObjectCheck<T, E extends Exception> {
    * @param object The value that the argument is tested against (called "the object" of a
    *     relation)
    * @param message The message pattern
-   * @param msgArgs The message arguments
+   * @param msgArgs The message arguments. If you expect the argument to fail the test very
+   *     often, and performance is of the utmost importance, specify <i>exactly</i> one message
+   *     argument: {@code '\0'} (the NULL character). This will cause the message not to be parsed,
+   *     and simply be passed as-is to the exception. (Of course, the message cannot contain any
+   *     message arguments then.)
    * @param <O> The type of the value being tested against
    * @return This instance
    * @throws E If the argument is invalid
@@ -1681,4 +1697,5 @@ public final class ObjectCheck<T, E extends Exception> {
   String FQN(String propName) {
     return argName + "." + propName;
   }
+
 }

@@ -42,13 +42,13 @@ final class MsgUtil {
       Object obj) {
     PrefabMsgFormatter formatter = MESSAGE_PATTERNS.get(test);
     if (formatter == null) {
-      String s = argName == null
-          ? DEF_ARG_NAME
-          : argName;
+      String s = argName == null ? DEF_ARG_NAME : argName;
       return "Invalid value for " + s + ": " + toStr(argVal);
     }
     return formatter.apply(new MsgArgs(test, negated, argName, argVal, argType, obj));
   }
+
+  private static final Character DONT_PARSE_FLAG = '\0';
 
   static String getCustomMessage(String message,
       Object[] msgArgs,
@@ -59,8 +59,9 @@ final class MsgUtil {
       Object obj) {
     if (message == null) {
       throw new InvalidCheckException("message must not be null");
-    }
-    if (msgArgs == null) {
+    } else if (msgArgs == null) {
+      throw new InvalidCheckException("message arguments must not be null");
+    } else if (msgArgs.length == 1 && DONT_PARSE_FLAG.equals(msgArgs[0])) {
       return message;
     }
     Object[] all = new Object[msgArgs.length + 5];
@@ -105,9 +106,7 @@ final class MsgUtil {
     if (val == null) {
       return "null";
     } else if (val instanceof String s) {
-      return s.isBlank()
-          ? '"' + s + '"'
-          : ellipsis(s);
+      return s.isBlank() ? '"' + s + '"' : ellipsis(s);
     } else if (val instanceof Number) {
       return val.toString();
     } else if (val instanceof Collection c) {
@@ -123,9 +122,7 @@ final class MsgUtil {
   }
 
   static String className(Object obj) {
-    return obj.getClass() == Class.class
-        ? className((Class) obj)
-        : className(obj.getClass());
+    return obj.getClass() == Class.class ? className((Class) obj) : className(obj.getClass());
   }
 
   static String simpleClassName(Object obj) {
@@ -137,21 +134,15 @@ final class MsgUtil {
   static String className(Class c) {
     return c.isArray()
         ? arrayClassName(c)
-        : c.getPackageName().equalsIgnoreCase("java.lang")
-            ? c.getSimpleName()
-            : c.getName();
+        : c.getPackageName().equalsIgnoreCase("java.lang") ? c.getSimpleName() : c.getName();
   }
 
   static String simpleClassName(Class c) {
-    return c.isArray()
-        ? simpleArrayClassName(c)
-        : c.getSimpleName();
+    return c.isArray() ? simpleArrayClassName(c) : c.getSimpleName();
   }
 
   static String sysId(Object arg) {
-    return arg == null
-        ? "null"
-        : simpleClassName(arg) + '@' + identityHashCode(arg);
+    return arg == null ? "null" : simpleClassName(arg) + '@' + identityHashCode(arg);
   }
 
   private static String collectionToString(Collection c) {

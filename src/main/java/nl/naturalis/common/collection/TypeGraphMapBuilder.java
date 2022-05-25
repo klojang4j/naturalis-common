@@ -32,13 +32,14 @@ public final class TypeGraphMapBuilder<V> {
     }
 
     TypeNode toTypeNode() {
-      Map<Class<?>, TypeNode> subclasses = Map.ofEntries(subtypes.split(tn -> tn.type.isInterface())
+      Entry[] entries = subtypes.ltrim(node -> !node.type.isInterface())
           .stream()
-          .map(wtn -> entry(wtn.type, wtn.toTypeNode()))
-          .toArray(Entry[]::new));
-      Map<Class<?>, TypeNode> subinterfaces = Map.ofEntries(subtypes.stream()
-          .map(wtn -> entry(wtn.type, wtn.toTypeNode()))
-          .toArray(Entry[]::new));
+          .map(node -> entry(node.type, node.toTypeNode()))
+          .toArray(Entry[]::new);
+      Map<Class<?>, TypeNode> subclasses = Map.ofEntries(entries);
+      entries =
+          subtypes.stream().map(node -> entry(node.type, node.toTypeNode())).toArray(Entry[]::new);
+      Map<Class<?>, TypeNode> subinterfaces = Map.ofEntries(entries);
       return new TypeNode(type, value, subclasses, subinterfaces);
     }
 
@@ -60,9 +61,9 @@ public final class TypeGraphMapBuilder<V> {
       }
       if (!inserted) {
         if (node.type.isInterface()) {
-          subtypes.append(node);
+          subtypes.push(node);
         } else {
-          subtypes.prepend(node);
+          subtypes.unshift(node);
         }
       }
     }
