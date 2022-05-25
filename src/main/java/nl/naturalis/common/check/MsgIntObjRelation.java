@@ -16,21 +16,31 @@ final class MsgIntObjRelation {
   }
 
   static PrefabMsgFormatter msgIndexOf() {
-    return x -> indexOf(x, Array.getLength(x.obj()));
-  }
-
-  static PrefabMsgFormatter msgListIndexOf() {
-    return x -> indexOf(x, ((List) x.obj()).size());
-  }
-
-  static PrefabMsgFormatter msgStrIndexOf() {
-    return x -> indexOf(x, ((String) x.obj()).length());
+    return x -> x.obj().getClass().isArray()
+        ? indexOf(x, Array.getLength(x.obj()))
+        : x.obj() instanceof List
+            ? indexOf(x, ((List) x.obj()).size())
+            : indexOf(x, ((String) x.obj()).length());
   }
 
   private static String indexOf(MsgArgs x, int max) {
     return x.negated()
         ? x.name() + MUST_BE + "< 0 or >= " + max + was2(x)
         : x.name() + MUST_BE + ">= 0 and < " + max + was2(x);
+  }
+
+  static PrefabMsgFormatter msgIndexInclusiveOf() {
+    return x -> x.obj().getClass().isArray()
+        ? indexInclusiveOf(x, Array.getLength(x.obj()))
+        : x.obj() instanceof List
+            ? indexInclusiveOf(x, ((List) x.obj()).size())
+            : indexInclusiveOf(x, ((String) x.obj()).length());
+  }
+
+  private static String indexInclusiveOf(MsgArgs x, int max) {
+    return x.negated()
+        ? x.name() + MUST_BE + "< 0 or > " + max + was2(x)
+        : x.name() + MUST_BE + ">= 0 and <= " + max + was2(x);
   }
 
   static PrefabMsgFormatter msgInRange() {

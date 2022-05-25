@@ -232,9 +232,7 @@ public final class CommonChecks {
    * @return A function implementing the test described above
    */
   public static <T> Predicate<T> array() {
-    return x -> x.getClass() == Class.class
-        ? ((Class) x).isArray()
-        : x.getClass().isArray();
+    return x -> x.getClass() == Class.class ? ((Class) x).isArray() : x.getClass().isArray();
   }
 
   static {
@@ -1237,16 +1235,21 @@ public final class CommonChecks {
   //////////////////////////////////////////////////////////////////////////////////
 
   /**
-   * Verifies that the argument can be used as index into the specified array. No preliminary check
-   * is done to ascertain that the provided object actually is an array. Execute the {@link
-   * #array()} check first if there is any doubt about this.
+   * Verifies that the argument can be used as index into the specified array or array-like object.
+   * The object of this {@link ObjIntRelation relation} must be one of the following:
+   * <ul>
+   *   <li>an array</li>
+   *   <li>an instance of {@link List}</li>
+   *   <li>an instance of {@link String}</li>
+   * </ul>
+   * An {@link InvalidCheckException} is thrown if the argument has any other type.
    *
    * <blockquote>
    *
    * <pre>{@code
-   * Check.that(4).is(indexOf, new String[5]); // true
-   * Check.that(5).is(indexOf, new String[5]); // false
-   * Check.that(-1).is(indexOf, new String[5]); // false
+   * Check.that(4).is(indexOf(), "Hello world!"); // true
+   * Check.that(5).is(indexOf(), new File[5]); // false
+   * Check.that(-1).is(indexOf(), List.of("foo", "bar")); // false
    * }</pre>
    *
    * </blockquote>
@@ -1255,7 +1258,16 @@ public final class CommonChecks {
    * @return A function implementing the test described above
    */
   public static <T> IntObjRelation<T> indexOf() {
-    return (x, y) -> x >= 0 && x < Array.getLength(y);
+    return (x, y) -> {
+      int max = -1;
+      if (y instanceof List l && (max = l.size()) == max
+          || y instanceof Object[] o && (max = o.length) == max
+          || y instanceof String s && (max = s.length()) == max
+          || y.getClass().isArray() && (max = Array.getLength(y)) == max) {
+        return x >= 0 && x < max;
+      }
+      throw new InvalidCheckException("indexOf check not applicable to " + y);
+    };
   }
 
   static {
@@ -1263,43 +1275,46 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument can be used as index into the specified list.
+   * Verifies that the argument can be used as a "from" or "to" index in operations like {@link
+   * String#substring(int, int) substring} and {@link List#subList(int, int) subList}. In other
+   * words, that the argument is greater than, or equal to zero, and less than or equal to the
+   * length or the specified array or array-like object. The object of this {@link ObjIntRelation
+   * relation} must be one of the following:
+   * <ul>
+   *   <li>an array</li>
+   *   <li>an instance of {@link List}</li>
+   *   <li>an instance of {@link String}</li>
+   * </ul>
+   * An {@link InvalidCheckException} is thrown if the argument has any other type.
    *
+   * <blockquote>
+   *
+   * <pre>{@code
+   * Check.that(4).is(indexOf(), "Hello world!"); // true
+   * Check.that(5).is(indexOf(), new File[5]); // true
+   * Check.that(-1).is(indexOf(), List.of("foo", "bar")); // false
+   * }</pre>
+   *
+   * </blockquote>
+   *
+   * @param <T> The type of the array
    * @return A function implementing the test described above
    */
-  public static <E, L extends List<E>> IntObjRelation<L> listIndexOf() {
-    return (x, y) -> x >= 0 && x < y.size();
+  public static <T> IntObjRelation<T> indexInclusiveOf() {
+    return (x, y) -> {
+      int max = -1;
+      if (y instanceof List l && (max = l.size()) == max
+          || y instanceof Object[] o && (max = o.length) == max
+          || y instanceof String s && (max = s.length()) == max
+          || y.getClass().isArray() && (max = Array.getLength(y)) == max) {
+        return x >= 0 && x <= max;
+      }
+      throw new InvalidCheckException("indexInclusiveOf check not applicable to " + y);
+    };
   }
 
   static {
-    setMetadata(listIndexOf(), msgListIndexOf(), "listIndexOf");
-  }
-
-  /**
-   * Verifies that the argument can be safely passed to {@link String#charAt(int) String.charAt}.
-   *
-   * @return A function implementing the test described above
-   */
-  public static IntObjRelation<String> strIndexOf() {
-    return (x, y) -> x >= 0 && x < y.length();
-  }
-
-  static {
-    setMetadata(strIndexOf(), msgStrIndexOf(), "strIndexOf");
-  }
-
-  /**
-   * Verifies that the argument is present in the specified integer array. Equivalent to {@link
-   * ArrayMethods#isElementOf(int, int[]) ArrayMethods::isElementOf}.
-   *
-   * @return A function implementing the test described above
-   */
-  public static IntObjRelation<int[]> intElementOf() {
-    return ArrayMethods::isElementOf;
-  }
-
-  static {
-    setMetadata(intElementOf(), msgIn(), "intElementOf"); // Recycle message
+    setMetadata(indexInclusiveOf(), msgIndexOf(), "indexInclusiveOf");
   }
 
   /**
@@ -1330,6 +1345,22 @@ public final class CommonChecks {
     setMetadata(inRangeClosed(), msgInRangeClosed(), "inRangeClosed");
   }
 
+  /**
+   * Verifies that the argument is present in the specified {@code int} array. Equivalent to {@link
+   * ArrayMethods#isElementOf(int, int[]) ArrayMethods::isElementOf}.
+   *
+   * @return A function implementing the test described above
+   */
+  public static IntObjRelation<int[]> inIntArray() {
+    return ArrayMethods::isElementOf;
+  }
+
+  static {
+    setMetadata(inIntArray(), msgIn(), "inIntArray"); // Recycle message
+  }
+
+
+
   /* ++++++++++++++ Miscellaneous ++++++++++++++ */
 
   /**
@@ -1357,18 +1388,6 @@ public final class CommonChecks {
   }
 
   /**
-   * (Not a check) Shortcut for
-   * {@link UnsupportedOperationException#UnsupportedOperationException(String)
-   * UnsupportedOperationException::new}.
-   *
-   * @return A {@code Function} that takes a {@code String} (the exception message) and produces an
-   *     {@code UnsupportedOperationException}
-   */
-  public static Function<String, UnsupportedOperationException> unsupportedOperation() {
-    return UnsupportedOperationException::new;
-  }
-
-  /**
    * (Not a check) Shortcut for {@link IOException#IOException(String) IOException::new}.
    *
    * @return A {@code Function} that takes a {@code String} (the exception message) and produces an
@@ -1381,7 +1400,7 @@ public final class CommonChecks {
   /**
    * (Not a check) Shortcut for {@link NullPointerException#NullPointerException(String)
    * NullPointerException::new}. Could be used if you prefer illegal {@code null} values to cause a
-   * {@code NullPointerException} rather than an {@cod IllegalArgumentException} (as is the
+   * {@code NullPointerException} rather than an {@code IllegalArgumentException} (as is the
    * default).
    *
    * <blockquote>

@@ -58,10 +58,10 @@ public class MsgRelationTest {
     Check.that((Integer) 4).isNot(in(), List.of(1, 2, 3));
     Check.that(Set.of("1", "2", "3")).is(supersetOf(), List.of("1", "2"));
     Check.that(Set.of("1", "4", "5")).isNot(supersetOf(), List.of("1", "2"));
-    Check.that(Set.of(MONDAY, TUESDAY, WEDNESDAY)).is(subsetOf(),
-        List.of(MONDAY, TUESDAY, WEDNESDAY, THURSDAY));
-    Check.that(Set.of(MONDAY, TUESDAY, SATURDAY)).isNot(subsetOf(),
-        List.of(MONDAY, TUESDAY, WEDNESDAY, THURSDAY));
+    Check.that(Set.of(MONDAY, TUESDAY, WEDNESDAY))
+        .is(subsetOf(), List.of(MONDAY, TUESDAY, WEDNESDAY, THURSDAY));
+    Check.that(Set.of(MONDAY, TUESDAY, SATURDAY))
+        .isNot(subsetOf(), List.of(MONDAY, TUESDAY, WEDNESDAY, THURSDAY));
     Map<Integer, Integer> map = Map.of(1, 1, 2, 4, 3, 6, 4, 8, 5, 10);
     Check.that(map).is(hasKey(), 1);
     Check.that(map).isNot(hasKey(), 11);
@@ -411,8 +411,8 @@ public class MsgRelationTest {
           "harrison",
           "guess who",
           "huh?");
-      Check.on(unsupportedOperation(), map, "thor").is(hasKey(), "ringo");
-    } catch (UnsupportedOperationException e) {
+      Check.on(illegalState(), map, "thor").is(hasKey(), "ringo");
+    } catch (IllegalStateException e) {
       System.out.println(e.getMessage());
       assertEquals("thor must contain key ringo", e.getMessage());
       return;
@@ -434,8 +434,8 @@ public class MsgRelationTest {
           "harrison",
           "guess who",
           "huh?");
-      Check.on(unsupportedOperation(), map, "thor").isNot(hasKey(), "john");
-    } catch (UnsupportedOperationException e) {
+      Check.on(illegalState(), map, "thor").isNot(hasKey(), "john");
+    } catch (IllegalStateException e) {
       System.out.println(e.getMessage());
       assertEquals("thor must not contain key john", e.getMessage());
       return;
@@ -609,8 +609,8 @@ public class MsgRelationTest {
   @Test
   public void supersetOf00() {
     try {
-      Check.that(List.of("mccartney", "harrisson", "lennon"), "frodo").is(supersetOf(),
-          List.of("mccartney", "harrisson", "star"));
+      Check.that(List.of("mccartney", "harrisson", "lennon"), "frodo")
+          .is(supersetOf(), List.of("mccartney", "harrisson", "star"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("frodo must be superset of ListN[3] of [mccartney, harrisson, star] "
@@ -623,8 +623,8 @@ public class MsgRelationTest {
   @Test
   public void superset01() {
     try {
-      Check.that(List.of("lennon", "mccartney", "harrisson", "star"), "frodo").isNot(supersetOf(),
-          List.of("mccartney", "harrisson", "star"));
+      Check.that(List.of("lennon", "mccartney", "harrisson", "star"), "frodo")
+          .isNot(supersetOf(), List.of("mccartney", "harrisson", "star"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("frodo must not be superset of ListN[3] of [mccartney, harrisson, star] "
@@ -637,8 +637,8 @@ public class MsgRelationTest {
   @Test
   public void subsetOf00() {
     try {
-      Check.that(List.of("mccartney", "harrisson", "lennon"), "kremlin").is(subsetOf(),
-          List.of("mccartney", "harrisson", "star"));
+      Check.that(List.of("mccartney", "harrisson", "lennon"), "kremlin")
+          .is(subsetOf(), List.of("mccartney", "harrisson", "star"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("kremlin must be subset of ListN[3] of [mccartney, harrisson, star] "
@@ -651,8 +651,8 @@ public class MsgRelationTest {
   @Test
   public void subsetOf01() {
     try {
-      Check.that(List.of("lennon", "mccartney", "harrisson", "star"), "kremlin").isNot(subsetOf(),
-          List.of("lennon", "mccartney", "harrisson", "star"));
+      Check.that(List.of("lennon", "mccartney", "harrisson", "star"), "kremlin")
+          .isNot(subsetOf(), List.of("lennon", "mccartney", "harrisson", "star"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("kremlin must not be subset of ListN[4] of [lennon, mccartney, harrisson, star] "

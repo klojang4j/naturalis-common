@@ -22,9 +22,9 @@ public class IntCheckTest {
     Check.that(42).is(lt(), 43);
     Check.that(42).is(lt(), 43, "custom message");
     Check.that(42).is(lt(), 43, () -> new UnsupportedOperationException());
-    Check.that(42).is(intElementOf(), ints(40, 42, 44));
-    Check.that(42).is(intElementOf(), ints(40, 42, 44), "custom message");
-    Check.that(42).is(intElementOf(), ints(40, 42, 44), () -> new UnsupportedOperationException());
+    Check.that(42).is(inIntArray(), ints(40, 42, 44));
+    Check.that(42).is(inIntArray(), ints(40, 42, 44), "custom message");
+    Check.that(42).is(inIntArray(), ints(40, 42, 44), () -> new UnsupportedOperationException());
     Check.that(42).has(box(), deepNotEmpty());
     Check.that(42).has(box(), "box", deepNotEmpty());
     Check.that(42).has(box(), deepNotEmpty(), "custom message");
@@ -43,9 +43,9 @@ public class IntCheckTest {
     Check.that(42).isNot(gt(), 43);
     Check.that(42).isNot(gt(), 43, "custom message");
     Check.that(42).isNot(gt(), 43, () -> new UnsupportedOperationException());
-    Check.that(42).isNot(strIndexOf(), "42");
-    Check.that(42).isNot(strIndexOf(), "42", "custom message");
-    Check.that(42).isNot(strIndexOf(), "42", () -> new UnsupportedOperationException());
+    Check.that(42).isNot(indexOf(), "42");
+    Check.that(42).isNot(indexOf(), "42", "custom message");
+    Check.that(42).isNot(indexOf(), "42", () -> new UnsupportedOperationException());
     Check.that(42).notHas(box(), NULL());
     Check.that(42).notHas(box(), NULL(), "custom message");
     Check.that(42).notHas(box(), NULL(), () -> new UnsupportedOperationException());
@@ -175,7 +175,7 @@ public class IntCheckTest {
   @Test
   public void is_IntObjRelation00() {
     try {
-      Check.that(7, "cat").is(intElementOf(), ints(2, 4, 6, 8, 10));
+      Check.that(7, "cat").is(inIntArray(), ints(2, 4, 6, 8, 10));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("cat must be element of int[5] of [2, 4, 6, 8, 10] (was 7)", e.getMessage());
@@ -187,7 +187,7 @@ public class IntCheckTest {
   @Test
   public void isNot_IntObjRelation00() {
     try {
-      Check.that(2, "cat").isNot(strIndexOf(), "1234567");
+      Check.that(2, "cat").isNot(indexOf(), "1234567");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("cat must be < 0 or >= 7 (was 2)", e.getMessage());
@@ -199,10 +199,10 @@ public class IntCheckTest {
   @Test
   public void is_IntObjRelation_CustomMsg00() {
     try {
-      Check.that(7).is(intElementOf(), ints(2, 4, 6, 8, 10), "${test}");
+      Check.that(7).is(inIntArray(), ints(2, 4, 6, 8, 10), "${test}");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("intElementOf", e.getMessage());
+      assertEquals("inIntArray", e.getMessage());
       return;
     }
     fail();
@@ -211,7 +211,7 @@ public class IntCheckTest {
   @Test
   public void isNot_IntObjRelation_CustomMsg00() {
     try {
-      Check.that(2).isNot(strIndexOf(), "${0}", "BAR");
+      Check.that(2).isNot(indexOf(), "${0}", "BAR");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("BAR", e.getMessage());
@@ -222,12 +222,12 @@ public class IntCheckTest {
 
   @Test(expected = IndexOutOfBoundsException.class)
   public void is_IntObjRelation_CustomExc00() {
-    Check.that(7).is(intElementOf(), ints(2, 4, 6, 8, 10), () -> new IndexOutOfBoundsException());
+    Check.that(7).is(indexOf(), ints(2, 4, 6, 8, 10), () -> new IndexOutOfBoundsException());
   }
 
   @Test(expected = IndexOutOfBoundsException.class)
   public void isNot_IntObjRelation_CustomExc00() {
-    Check.that(2).isNot(strIndexOf(), "1234567", () -> new IndexOutOfBoundsException());
+    Check.that(2).isNot(indexOf(), "1234567", () -> new IndexOutOfBoundsException());
   }
 
   @Test
@@ -311,7 +311,9 @@ public class IntCheckTest {
   @Test(expected = IndexOutOfBoundsException.class)
   public void notHas_Predicate_CustomExc00() {
     Check.that(100)
-        .notHas(
-            box(), x -> x.getClass().equals(Integer.class), () -> new IndexOutOfBoundsException());
+        .notHas(box(),
+            x -> x.getClass().equals(Integer.class),
+            () -> new IndexOutOfBoundsException());
   }
+
 }

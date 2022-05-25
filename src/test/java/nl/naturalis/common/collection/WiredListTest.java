@@ -12,61 +12,66 @@ import static org.junit.Assert.*;
 
 public class WiredListTest {
 
-  @Test
-  public void nodeAfter00() {
-    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+  /*
+    Don't throw away; nodeAfter & nodeBefore are private
+    methods with a central role, so we may want to make
+    them package private once in a while for testing purposes.
 
-    var node1 = wl0.nodeAt(2);
-    assertEquals((Integer) 2, node1.val);
+    @Test
+    public void nodeAfter00() {
+      var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
 
-    var node2 = wl0.nodeAfter(node1, 2, 2);
-    assertEquals((Integer) 2, node2.val);
-    node2 = wl0.nodeAfter(node1, 2, 3);
-    assertEquals((Integer) 3, node2.val);
-    node2 = wl0.nodeAfter(node1, 2, 5);
-    assertEquals((Integer) 5, node2.val);
-    node2 = wl0.nodeAfter(node1, 2, 8);
-    assertEquals((Integer) 8, node2.val);
-    node2 = wl0.nodeAfter(node1, 2, 9);
-    assertEquals((Integer) 9, node2.val);
+      var node1 = wl0.nodeAt(2);
+      assertEquals((Integer) 2, node1.val);
 
-    node1 = wl0.nodeAt(7);
-    node2 = wl0.nodeAfter(node1, 7, 8);
-    assertEquals((Integer) 8, node2.val);
-    node2 = wl0.nodeAfter(node1, 7, 9);
-    assertEquals((Integer) 9, node2.val);
+      var node2 = wl0.nodeAfter(node1, 2, 2);
+      assertEquals((Integer) 2, node2.val);
+      node2 = wl0.nodeAfter(node1, 2, 3);
+      assertEquals((Integer) 3, node2.val);
+      node2 = wl0.nodeAfter(node1, 2, 5);
+      assertEquals((Integer) 5, node2.val);
+      node2 = wl0.nodeAfter(node1, 2, 8);
+      assertEquals((Integer) 8, node2.val);
+      node2 = wl0.nodeAfter(node1, 2, 9);
+      assertEquals((Integer) 9, node2.val);
 
-    node1 = wl0.nodeAt(0);
-    node2 = wl0.nodeAfter(node1, 0, 9);
-    assertEquals((Integer) 9, node2.val);
-  }
+      node1 = wl0.nodeAt(7);
+      node2 = wl0.nodeAfter(node1, 7, 8);
+      assertEquals((Integer) 8, node2.val);
+      node2 = wl0.nodeAfter(node1, 7, 9);
+      assertEquals((Integer) 9, node2.val);
 
-  @Test
-  public void nodeBefore00() {
-    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+      node1 = wl0.nodeAt(0);
+      node2 = wl0.nodeAfter(node1, 0, 9);
+      assertEquals((Integer) 9, node2.val);
+    }
 
-    var node1 = wl0.nodeAt(8);
-    assertEquals((Integer) 8, node1.val);
+    @Test
+    public void nodeBefore00() {
+      var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
 
-    var node2 = wl0.nodeBefore(node1, 8, 7);
-    assertEquals((Integer) 7, node2.val);
-    node2 = wl0.nodeBefore(node1, 8, 3);
-    assertEquals((Integer) 3, node2.val);
-    node2 = wl0.nodeBefore(node1, 8, 0);
-    assertEquals((Integer) 0, node2.val);
+      var node1 = wl0.nodeAt(8);
+      assertEquals((Integer) 8, node1.val);
 
-    node1 = wl0.nodeAt(1);
-    assertEquals((Integer) 1, node1.val);
-    node2 = wl0.nodeBefore(node1, 1, 0);
-    assertEquals((Integer) 0, node2.val);
+      var node2 = wl0.nodeBefore(node1, 8, 7);
+      assertEquals((Integer) 7, node2.val);
+      node2 = wl0.nodeBefore(node1, 8, 3);
+      assertEquals((Integer) 3, node2.val);
+      node2 = wl0.nodeBefore(node1, 8, 0);
+      assertEquals((Integer) 0, node2.val);
 
-    node1 = wl0.nodeAt(9);
-    assertEquals((Integer) 9, node1.val);
-    node2 = wl0.nodeBefore(node1, 9, 0);
-    assertEquals((Integer) 0, node2.val);
+      node1 = wl0.nodeAt(1);
+      assertEquals((Integer) 1, node1.val);
+      node2 = wl0.nodeBefore(node1, 1, 0);
+      assertEquals((Integer) 0, node2.val);
 
-  }
+      node1 = wl0.nodeAt(9);
+      assertEquals((Integer) 9, node1.val);
+      node2 = wl0.nodeBefore(node1, 9, 0);
+      assertEquals((Integer) 0, node2.val);
 
+    }
+  */
   @Test
   public void append00() {
     var wl = new WiredList<String>();
@@ -678,7 +683,7 @@ public class WiredListTest {
   @Test
   public void ltrim04() {
     var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var wl1 = wl0.ltrim(i -> i == 6666);
+    var wl1 = wl0.ltrim(i -> i == 666);
     assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl0);
     assertTrue(wl1.isEmpty());
   }
@@ -686,9 +691,63 @@ public class WiredListTest {
   @Test
   public void ltrim05() {
     WiredList<Integer> wl0 = new WiredList<>();
-    var wl1 = wl0.ltrim(i -> i == 6666);
+    var wl1 = wl0.ltrim(i -> i == 666);
     assertTrue(wl0.isEmpty());
     assertTrue(wl1.isEmpty());
+  }
+
+  @Test
+  public void ltrim06() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = wl0.ltrim(i -> i != 666);
+    assertSame(wl0, wl1);
+  }
+
+  @Test
+  public void rtrim00() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = wl0.rtrim(i -> i != 5);
+    assertEquals(List.of(0, 1, 2, 3, 4, 5), wl0);
+    assertEquals(List.of(6, 7, 8, 9), wl1);
+  }
+
+  @Test
+  public void rtrim01() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = wl0.rtrim(i -> i != 9);
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl0);
+    assertEquals(List.of(), wl1);
+  }
+
+  @Test
+  public void rtrim02() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = wl0.rtrim(i -> i != 0);
+    assertEquals(List.of(0), wl0);
+    assertEquals(List.of(1, 2, 3, 4, 5, 6, 7, 8, 9), wl1);
+  }
+
+  @Test
+  public void rtrim03() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = wl0.rtrim(i -> i == 666);
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl0);
+    assertTrue(wl1.isEmpty());
+  }
+
+  @Test
+  public void rtrim04() {
+    WiredList<Integer> wl0 = new WiredList<>();
+    var wl1 = wl0.rtrim(i -> i == 666);
+    assertTrue(wl0.isEmpty());
+    assertTrue(wl1.isEmpty());
+  }
+
+  @Test
+  public void rtrim06() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = wl0.rtrim(i -> i != 666);
+    assertSame(wl0, wl1);
   }
 
   @Test
@@ -999,6 +1058,17 @@ public class WiredListTest {
       }
     }
     assertEquals(List.of(0, 3, 6, 9), wl0);
+  }
+
+  @Test
+  public void equals00() {
+    var wl = WiredList.of(0, 1, 2, 3, 4, 5);
+    assertTrue(wl.equals(List.of(0, 1, 2, 3, 4, 5)));
+    assertFalse(wl.equals(List.of(0, 1, 2, 3, 4)));
+    assertFalse(wl.equals(List.of(0, 1, 2, 3, 4, 5, 6)));
+    assertFalse(wl.equals(List.of()));
+    assertFalse(wl.equals(null));
+    assertTrue(WiredList.of().equals(List.of()));
   }
 
 }

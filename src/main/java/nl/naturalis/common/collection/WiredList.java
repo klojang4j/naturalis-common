@@ -1,10 +1,11 @@
 package nl.naturalis.common.collection;
 
+import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.CollectionMethods;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.check.CommonChecks;
 import nl.naturalis.common.check.IntCheck;
 import nl.naturalis.common.function.Relation;
-import nl.naturalis.common.internal.VisibleForTesting;
 import nl.naturalis.common.x.invoke.InvokeUtils;
 
 import java.util.*;
@@ -49,17 +50,17 @@ public final class WiredList<E> implements List<E> {
   private static final String LIST = "list";
   private static final String TEST = "test";
 
-  private static final Supplier<IllegalStateException> ERR_EMPTY_LIST =
-      () -> new IllegalStateException("empty list");
+  private static Supplier<IllegalStateException> cannotDeleteFromEmptyList() {
+    return () -> new IllegalStateException("empty list");
+  }
 
-  private static final Supplier<IllegalArgumentException> ERR_EMPTY_SEGMENT =
-      () -> new IllegalArgumentException("zero-length segments not allowed");
+  private static Supplier<IllegalArgumentException> emptySegmentNotAllowed() {
+    return () -> new IllegalArgumentException("zero-length segments not allowed");
+  }
 
-  private static final Supplier<IllegalArgumentException> ERR_AUTO_EMBED =
-      () -> new IllegalArgumentException("list cannot be embedded within itself");
-
-  private static final Supplier<IllegalStateException> ERR_ITERATOR_NEXT =
-      () -> new IllegalStateException("Iterator.next() must be called first");
+  private static Supplier<IllegalArgumentException> autoEmbedNotAllowed() {
+    return () -> new IllegalArgumentException("list cannot be embedded within itself");
+  }
 
   private static Supplier<IllegalStateException> callNextFirst() {
     return () -> new IllegalStateException("Iterator.next() must be called first");
@@ -69,8 +70,8 @@ public final class WiredList<E> implements List<E> {
   // ======================= [ Node ] ====================== //
   // ======================================================= //
 
-  @VisibleForTesting
-  static class Node<F> {
+  // @VisibleForTesting
+  private static class Node<F> {
 
     F val;
     Node<F> prev;
@@ -157,7 +158,7 @@ public final class WiredList<E> implements List<E> {
     private static final Supplier<ConcurrentModificationException> CME =
         ConcurrentModificationException::new;
 
-    private Node<E> curr = justBeforeHead();
+    private Node<E> curr;
 
     private ForwardWiredIterator() {
       curr = justBeforeHead();
@@ -214,7 +215,7 @@ public final class WiredList<E> implements List<E> {
     private static final Supplier<ConcurrentModificationException> CME =
         ConcurrentModificationException::new;
 
-    private Node<E> curr = justAfterTail();
+    private Node<E> curr;
 
     private ReverseWiredIterator() {
       curr = justAfterTail();
@@ -362,7 +363,7 @@ public final class WiredList<E> implements List<E> {
    */
   @Override
   public E get(int index) {
-    return checkIndex(index).ok(this::nodeAt).val;
+    return checkExclusive(index).ok(this::nodeAt).val;
   }
 
   /**
@@ -370,7 +371,7 @@ public final class WiredList<E> implements List<E> {
    */
   @Override
   public E set(int index, E value) {
-    var node = checkIndex(index).ok(this::nodeAt);
+    var node = checkExclusive(index).ok(this::nodeAt);
     E old = node.val;
     node.val = value;
     return old;
@@ -389,7 +390,7 @@ public final class WiredList<E> implements List<E> {
    */
   public E setIf(int index, Predicate<? super E> test, E value) {
     Check.notNull(test, TEST);
-    var node = checkIndex(index).ok(this::nodeAt);
+    var node = checkExclusive(index).ok(this::nodeAt);
     E old = node.val;
     if (test.test(old)) {
       node.val = value;
@@ -421,7 +422,6 @@ public final class WiredList<E> implements List<E> {
         ++i;
       }
     } else {
-      System.out.println("Here!");
       for (var x = head; x != null; x = x.next) {
         if (o.equals(x.val)) {
           return i;
@@ -472,8 +472,8 @@ public final class WiredList<E> implements List<E> {
    * @return The value of the removed element
    */
   public E pop() {
-    Check.that(sz).is(ne(), 0, ERR_EMPTY_LIST);
-    return delete0(sz, 1).head.val;
+    Check.that(sz).is(ne(), 0, cannotDeleteFromEmptyList());
+    return delete(sz, 1).head.val;
   }
 
   /**
@@ -482,8 +482,8 @@ public final class WiredList<E> implements List<E> {
    * @return The value of the removed element
    */
   public E shift() {
-    Check.that(sz).is(ne(), 0, ERR_EMPTY_LIST);
-    return delete0(0, 1).head.val;
+    Check.that(sz).is(ne(), 0, cannotDeleteFromEmptyList());
+    return delete(0, 1).head.val;
   }
 
   /**
@@ -531,17 +531,17 @@ public final class WiredList<E> implements List<E> {
    * will empty afterwards. If you don't want this to happen, use {@link #insertAll(int, Collection)
    * insertAll}.
    *
-   * @param index The index at which to embed the list
+   * @param myIndex The index at which to embed the list
    * @param other The list to embed
    * @return this {@code WiredList}
    */
-  public WiredList<E> embed(int index, WiredList<? extends E> other) {
-    checkIndexInclusive(index);
-    Check.notNull(other, LIST).isNot(sameAs(), this, ERR_AUTO_EMBED);
+  public WiredList<E> embed(int myIndex, WiredList<? extends E> other) {
+    checkInclusive(myIndex);
+    Check.notNull(other, LIST).isNot(sameAs(), this, autoEmbedNotAllowed());
     if (!other.isEmpty()) {
-      insert(index, new Chain(other.head, other.tail, other.sz));
-      // Disable, but don't clear the embedded list, because that would
-      // nullify the nodes we just embedded in this list
+      insert(myIndex, new Chain(other.head, other.tail, other.sz));
+      // Reset but don't clear the embedded list, because that
+      // would nullify the nodes we just embedded in this list
       other.head = null;
       other.tail = null;
       other.sz = 0;
@@ -550,15 +550,67 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Embeds this {@code WiredList} in the specified {@code WiredList}. This {@code WiredList} will
-   * be empty afterwards.
+   * Embeds this list into another list. This list will be empty afterwards.
    *
-   * @param index The index at which to embed this {@code WiredList}
    * @param other The list in which to embed this list
+   * @param itsIndex The index at which to embed this {@code WiredList}
    * @return this {@code WiredList}
    */
-  public WiredList<E> embedIn(int index, WiredList<? super E> other) {
-    Check.notNull(other, LIST).then(list -> list.embed(index, this));
+  public WiredList<E> embedIn(WiredList<? super E> other, int itsIndex) {
+    Check.notNull(other, LIST).then(list -> list.embed(itsIndex, this));
+    return this;
+  }
+
+  /**
+   * Removes an element from the specified list and appends it to this list.
+   *
+   * @param myIndex The index of the element to remove
+   * @param other The list from which to remove the element
+   * @return this {@code WiredList}
+   */
+  public WiredList<E> jumpFrom(int myIndex, WiredList<? super E> other) {
+    return jumpFrom(myIndex, other, other.sz);
+  }
+
+  /**
+   * Removes an element from this list and appends it to another list.
+   *
+   * @param myIndex The index of the element to remove
+   * @param other The list into which to insert the element
+   * @return this {@code WiredList}
+   */
+  public WiredList<E> jump(int myIndex, WiredList<? super E> other) {
+    return jump(myIndex, other, other.sz);
+  }
+
+  /**
+   * Removes an element from the specified list and inserts it into this list.
+   *
+   * @param myIndex The index at which to insert the element
+   * @param other The list to remove the element from
+   * @param itsIndex The index of the element to be removed
+   * @return this {@code WiredList}
+   */
+  public WiredList<E> jumpFrom(int myIndex, WiredList<? super E> other, int itsIndex) {
+    Check.notNull(other, LIST).then(list -> jump(itsIndex, this, myIndex));
+    return this;
+  }
+
+  /**
+   * Removes an element from this list and inserts it into another list.
+   *
+   * @param myIndex The index of the element to remove
+   * @param other The list into which to insert the element
+   * @param itsIndex The index at which to insert the element
+   * @return this {@code WiredList}
+   */
+  public WiredList<E> jump(int myIndex, WiredList<? super E> other, int itsIndex) {
+    checkExclusive(myIndex);
+    Check.notNull(other, LIST);
+    other.checkInclusive(itsIndex);
+    Node<E> x = nodeAt(myIndex);
+    other.insert(itsIndex, x.val);
+    deleteNode(x);
     return this;
   }
 
@@ -566,27 +618,24 @@ public final class WiredList<E> implements List<E> {
    * Removes a segment from the specified list and embeds it in this list. The provided list will be
    * empty afterwards. The segment must contain at least one element.
    *
-   * @param index The index at which to insert segment
+   * @param myIndex The index at which to insert segment
    * @param other The list to remove the segment from
-   * @param fromIndex The start index of the segment (inclusive)
-   * @param toIndex The end index of the segment (exclusive)
+   * @param itsFromIndex The start index of the segment (inclusive)
+   * @param itsToIndex The end index of the segment (exclusive)
    * @return This {@code WiredList}
    */
-  public WiredList<E> transfer(int index,
+  public WiredList<E> transfer(int myIndex,
       WiredList<? extends E> other,
-      int fromIndex,
-      int toIndex) {
-    checkIndexInclusive(index);
-    Check.notNull(other, LIST).isNot(sameAs(), this, ERR_AUTO_EMBED);
-    Check.on(indexOutOfBounds(), fromIndex, "fromIndex")
-        .is(gte(), 0)
-        .is(lt(), toIndex, ERR_EMPTY_SEGMENT);
-    Check.on(indexOutOfBounds(), toIndex, "toIndex").is(lte(), other.sz);
-    Node first = other.nodeAt(fromIndex);
-    Node last = other.nodeAfter(first, fromIndex, toIndex - 1);
-    Chain chain = new Chain(first, last, toIndex - fromIndex);
+      int itsFromIndex,
+      int itsToIndex) {
+    checkInclusive(myIndex);
+    Check.notNull(other, LIST).isNot(sameAs(), this, autoEmbedNotAllowed());
+    other.checkSegment(itsFromIndex, itsToIndex);
+    Node first = other.nodeAt(itsFromIndex);
+    Node last = other.nodeAfter(first, itsFromIndex, itsToIndex - 1);
+    Chain chain = new Chain(first, last, itsToIndex - itsFromIndex);
     other.delete(chain);
-    insert(index, chain);
+    insert(myIndex, chain);
     return this;
   }
 
@@ -594,25 +643,33 @@ public final class WiredList<E> implements List<E> {
    * Removes a segment from this list and embeds it in the specified list. This list will be empty
    * afterwards.
    *
-   * @param fromIndex The start index of the segment (inclusive)
-   * @param toIndex The end index of the segment (exclusive)
+   * @param myFromIndex The start index of the segment (inclusive)
+   * @param myToIndex The end index of the segment (exclusive)
    * @param other The list into which to insert the segment
-   * @param index The index at which to insert segment
+   * @param itsIndex The index at which to insert segment
    * @return This {@code WiredList}
    */
-  public WiredList<E> transferTo(int fromIndex,
-      int toIndex,
+  public WiredList<E> transferTo(int myFromIndex,
+      int myToIndex,
       WiredList<? super E> other,
-      int index) {
-    Check.notNull(other, LIST).then(list -> list.transfer(index, this, fromIndex, toIndex));
+      int itsIndex) {
+    Check.notNull(other, LIST).then(list -> list.transfer(itsIndex, this, myFromIndex, myToIndex));
     return this;
+  }
+
+  public WiredList<E> defragment(Predicate<? super E> condition,
+      Predicate<? super E>... moreConditions) {
+    Predicate[] conditions = ArrayMethods.prefix(moreConditions, condition);
+    List<WiredList<E>> partitions = new ArrayList<>(conditions.length);
+    return null;
   }
 
   /**
    * Trims off all elements from the start of the list that satisfy the specified condition. The
    * returned list will contain all elements preceding the first element that does not satisfy the
-   * condition. If the condition is never satisfied, an empty list is returned and this list remains
-   * unchanged.
+   * condition. If the condition is never satisfied, this list remains unchanged and an empty list
+   * is returned. If <i>all</i> elements satisfy the condition, the list remains unchanged and is
+   * itself returned.
    *
    * @param condition The test that the elements must pass in order to be trimmed off
    * @return A {@code WiredList} containing all elements preceding the first element that does not
@@ -628,7 +685,7 @@ public final class WiredList<E> implements List<E> {
     int len = 0;
     for (; condition.test(last.next.val) && ++len != sz; last = last.next) ;
     if (len == sz) {
-      return new WiredList<>();
+      return this;
     }
     WiredList<E> wl = new WiredList<>(first, last, len);
     delete(new Chain(first, last, len));
@@ -638,8 +695,9 @@ public final class WiredList<E> implements List<E> {
   /**
    * Trims off all elements from the end of the list that satisfy the specified condition. The
    * returned list will contain all elements after the last element that does not satisfy the
-   * condition. If the condition is never satisfied, an empty list is returned and this list remains
-   * unchanged.
+   * condition. If the condition is never satisfied, this list remains unchanged and an empty list
+   * is returned. If <i>all</i> elements satisfy the condition, the list remains unchanged and is
+   * itself returned.
    *
    * @param condition The test that the elements must pass in order to be trimmed off
    * @return A {@code WiredList} containing all elements after the last element that does not
@@ -655,7 +713,7 @@ public final class WiredList<E> implements List<E> {
     int len = 0;
     for (; condition.test(first.prev.val) && ++len != sz; first = first.prev) ;
     if (len == sz) {
-      return new WiredList<>();
+      return this;
     }
     WiredList<E> wl = new WiredList<>(first, last, len);
     delete(new Chain(first, last, len));
@@ -702,7 +760,7 @@ public final class WiredList<E> implements List<E> {
     Check.on(indexOutOfBounds(), fromIndex, "fromIndex").is(gte(), 0);
     Check.on(indexOutOfBounds(), toIndex, "toIndex")
         .is(lte(), sz)
-        .is(gt(), fromIndex, ERR_EMPTY_SEGMENT);
+        .is(gt(), fromIndex, emptySegmentNotAllowed());
     Check.on(indexOutOfBounds(), newFromIndex, "newFromIndex").is(gte(), 0).is(lte(), sz);
     if (newFromIndex > fromIndex) {
       moveToTail(fromIndex, toIndex, newFromIndex);
@@ -754,8 +812,8 @@ public final class WiredList<E> implements List<E> {
    */
   @Override
   public E remove(int index) {
-    Check.on(indexOutOfBounds(), index, INDEX).is(listIndexOf(), this);
-    return delete0(index, index + 1).head.val;
+    checkExclusive(index);
+    return delete(index, index + 1).head.val;
   }
 
   /**
@@ -822,11 +880,8 @@ public final class WiredList<E> implements List<E> {
    * @return The deleted segment
    */
   public WiredList<E> cut(int fromIndex, int toIndex) {
-    Check.on(indexOutOfBounds(), fromIndex, "fromIndex").is(gte(), 0);
-    Check.on(indexOutOfBounds(), toIndex, "toIndex")
-        .is(lte(), sz)
-        .is(gt(), fromIndex, ERR_EMPTY_SEGMENT);
-    return delete0(fromIndex, toIndex);
+    checkSegment(fromIndex, toIndex);
+    return delete(fromIndex, toIndex);
   }
 
   private <O> boolean removeIf0(int fromIndex, int length, Relation<E, O> test, O testValue) {
@@ -965,7 +1020,14 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * {@inheritDoc}
+   * Returns an {@code Iterator} that traverses the list from the first element to the last. It is a
+   * no-frills {@code Iterator} designed to make the traversal als quickly as possible, under the
+   * assumption that the list is not (structurally) modified while the elements are being iterated
+   * over. It is not resistant against concurrent modifications to the list, and not even
+   * necessarily against same-thread modifications happening outside the iterator. Everything
+   * happening in the iterator's "rear-mirror" is fine though.
+   *
+   * @return An {@code Iterator} that traverses the list's elements from first to the last
    */
   @Override
   public Iterator<E> iterator() {
@@ -989,9 +1051,10 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Returns an {@code Iterator} that traverses the list's elements from last to first.
+   * Returns an {@code Iterator} that traverses the list from the last element to the first. See
+   * also {@link #iterator()}.
    *
-   * @return An {@code Iterator} that traverses the list's elements from last to first
+   * @return An {@code Iterator} that traverses the list from the last element to the first
    */
   public Iterator<E> reverseIterator() {
     return sz == 0 ? emptyIterator() : new Iterator<>() {
@@ -1021,32 +1084,20 @@ public final class WiredList<E> implements List<E> {
     if (this == o) {
       return true;
     } else if (o instanceof List l) {
-      Iterator<?> itr = l.iterator();
-      var node = head;
-      while (itr.hasNext()) {
-        if (!Objects.equals(node.val, itr.next())) {
-          return false;
-        } else if (node == tail) {
-          break;
+      if (sz == 0) {
+        return l.size() == 0;
+      } else if (sz == l.size()) {
+        var x = head;
+        for (Object obj : l) {
+          if (!Objects.equals(obj, x.val)) {
+            return false;
+          }
+          x = x.next;
         }
-        node = node.next;
+        return true;
       }
-      return node == tail && !itr.hasNext();
     }
     return false;
-  }
-
-  /**
-   * Returns a {@link WiredIterator} that traverses the list from the first element to the last
-   *
-   * @return
-   */
-  public WiredIterator<E> wiredIterator() {
-    return new ForwardWiredIterator();
-  }
-
-  public WiredIterator<E> wiredIterator(boolean reverse) {
-    return reverse ? new ReverseWiredIterator() : new ForwardWiredIterator();
   }
 
   /**
@@ -1066,6 +1117,26 @@ public final class WiredList<E> implements List<E> {
    */
   public String toString() {
     return '[' + CollectionMethods.implode(this) + ']';
+  }
+
+  /**
+   * Returns a {@link WiredIterator} that traverses the list from the first element to the last.
+   *
+   * @return A {@code WiredIterator} that traverses the list from the first element to the last
+   */
+  public WiredIterator<E> wiredIterator() {
+    return new ForwardWiredIterator();
+  }
+
+  /**
+   * Returns a {@link WiredIterator} that traverses the list from the first element to the last, or
+   * the other way round, depending on the value of the argument
+   *
+   * @return A {@code WiredIterator} that traverses the list from the first element to the last, or
+   *     the other way round
+   */
+  public WiredIterator<E> wiredIterator(boolean reverse) {
+    return reverse ? new ReverseWiredIterator() : new ForwardWiredIterator();
   }
 
   /**
@@ -1104,7 +1175,7 @@ public final class WiredList<E> implements List<E> {
       join(tail, chain.head);
       makeTail(chain.tail);
     } else {
-      var node = checkIndexInclusive(index).ok(this::nodeAt);
+      var node = checkInclusive(index).ok(this::nodeAt);
       join(node.prev, chain.head);
       if (chain.length == 1) {
         join(chain.head, node);
@@ -1113,14 +1184,6 @@ public final class WiredList<E> implements List<E> {
       }
     }
     sz += chain.length;
-  }
-
-  private WiredList<E> delete0(int from, int to) {
-    var first = nodeAt(from);
-    var last = nodeAfter(first, from, to - 1);
-    int len = to - from;
-    delete(new Chain(first, last, len));
-    return new WiredList<>(first, last, len);
   }
 
   private void deleteNode(Node<E> node) {
@@ -1136,7 +1199,16 @@ public final class WiredList<E> implements List<E> {
     --sz;
   }
 
-  // NB this method does not touch the chain
+  private WiredList<E> delete(int from, int to) {
+    var first = nodeAt(from);
+    var last = nodeAfter(first, from, to - 1);
+    int len = to - from;
+    delete(new Chain(first, last, len));
+    return new WiredList<>(first, last, len);
+  }
+
+  // This method only inspects the chain to see which nodes
+  // to delete. It doesn't change anything about it
   @SuppressWarnings("unchecked")
   private void delete(Chain chain) {
     if (chain.length == sz) {
@@ -1151,8 +1223,8 @@ public final class WiredList<E> implements List<E> {
     sz -= chain.length;
   }
 
-  @VisibleForTesting
-  Node<E> nodeAt(int index) {
+  // @VisibleForTesting
+  private Node<E> nodeAt(int index) {
     if (index < (sz >> 1)) {
       Node<E> node = head;
       for (int i = 0; i < index; ++i) {
@@ -1173,8 +1245,8 @@ public final class WiredList<E> implements List<E> {
    * we've already gotten hold of another node. The index argument is the
    * index of the node we are interested in.
    */
-  @VisibleForTesting
-  Node<E> nodeAfter(Node<E> startNode, int startIndex, int index) {
+  // @VisibleForTesting
+  private Node<E> nodeAfter(Node<E> startNode, int startIndex, int index) {
     Node<E> x;
     if (index < ((sz + startIndex) >> 1)) {
       x = startNode;
@@ -1190,8 +1262,8 @@ public final class WiredList<E> implements List<E> {
     return x;
   }
 
-  @VisibleForTesting
-  Node<E> nodeBefore(Node<E> startNode, int startIndex, int index) {
+  // @VisibleForTesting
+  private Node<E> nodeBefore(Node<E> startNode, int startIndex, int index) {
     Node<E> x;
     if (index < (startIndex >> 1)) {
       x = head;
@@ -1234,12 +1306,19 @@ public final class WiredList<E> implements List<E> {
     return x;
   }
 
-  private IntCheck<IndexOutOfBoundsException> checkIndex(int index) {
-    return Check.on(indexOutOfBounds(), index, INDEX).is(listIndexOf(), this);
+  private IntCheck<IndexOutOfBoundsException> checkExclusive(int index) {
+    return Check.on(indexOutOfBounds(), index, INDEX).is(CommonChecks.indexOf(), this);
   }
 
-  private IntCheck<IndexOutOfBoundsException> checkIndexInclusive(int index) {
-    return Check.on(indexOutOfBounds(), index, INDEX).is(gte(), 0).is(lte(), sz);
+  private IntCheck<IndexOutOfBoundsException> checkInclusive(int index) {
+    return Check.on(indexOutOfBounds(), index, INDEX).is(indexInclusiveOf(), this);
+  }
+
+  private void checkSegment(int fromIndex, int toIndex) {
+    Check.on(indexOutOfBounds(), fromIndex, "fromIndex").is(gte(), 0);
+    Check.on(indexOutOfBounds(), toIndex, "toIndex")
+        .is(lte(), sz)
+        .is(gt(), fromIndex, emptySegmentNotAllowed());
   }
 
 }
