@@ -180,9 +180,22 @@ public class WiredListTest {
     wl.add(1, "Josh");
     assertEquals(List.of("Mark", "Josh", "Simon", "John", "James", "Michael"), wl);
     wl.add(4, "Mary");
-    assertEquals(List.of("Mark", "Josh", "Simon", "John", "Mary", "James", "Michael"), wl);
+    assertEquals(List.of("Mark",
+        "Josh",
+        "Simon",
+        "John",
+        "Mary",
+        "James",
+        "Michael"), wl);
     wl.add(3, "Jill");
-    assertEquals(List.of("Mark", "Josh", "Simon", "Jill", "John", "Mary", "James", "Michael"), wl);
+    assertEquals(List.of("Mark",
+        "Josh",
+        "Simon",
+        "Jill",
+        "John",
+        "Mary",
+        "James",
+        "Michael"), wl);
     wl.add(4, "Ana");
     assertEquals(List.of("Mark",
         "Josh",
@@ -521,7 +534,8 @@ public class WiredListTest {
     wl0.acquire(4, wl1, 3, 9);
     assertEquals(16, wl0.size());
     assertEquals(4, wl1.size());
-    assertEquals(List.of(0, 1, 2, 3, 'd', 'e', 'f', 'g', 'h', 'i', 4, 5, 6, 7, 8, 9), wl0);
+    assertEquals(List.of(0, 1, 2, 3, 'd', 'e', 'f', 'g', 'h', 'i', 4, 5, 6, 7, 8, 9),
+        wl0);
     assertEquals(List.of('a', 'b', 'c', 'j'), wl1);
   }
 
@@ -663,7 +677,16 @@ public class WiredListTest {
 
   @Test
   public void indexOf00() {
-    var wl = WiredList.of("00", "11", "22", "33", "44", "55", "66", "77", "33", "88");
+    var wl = WiredList.of("00",
+        "11",
+        "22",
+        "33",
+        "44",
+        "55",
+        "66",
+        "77",
+        "33",
+        "88");
     assertEquals(0, wl.indexOf("00"));
     assertEquals(3, wl.indexOf("33"));
     assertEquals(5, wl.indexOf("55"));
@@ -673,7 +696,16 @@ public class WiredListTest {
 
   @Test
   public void lastIndexOf00() {
-    var wl = WiredList.of("00", "11", "22", "33", "44", "55", "66", "77", "33", "88");
+    var wl = WiredList.of("00",
+        "11",
+        "22",
+        "33",
+        "44",
+        "55",
+        "66",
+        "77",
+        "33",
+        "88");
     assertEquals(0, wl.lastIndexOf("00"));
     assertEquals(8, wl.lastIndexOf("33"));
     assertEquals(5, wl.lastIndexOf("55"));
@@ -1091,6 +1123,79 @@ public class WiredListTest {
       }
     }
     assertEquals(List.of(0, 3, 6, 9), wl0);
+  }
+
+  @Test
+  public void wiredIterator08() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var itr = wl0.wiredIterator();
+    assertEquals(0, (int) itr.next());
+    assertEquals(1, (int) itr.peek());
+    assertEquals(1, (int) itr.next());
+    assertEquals(2, (int) itr.peek());
+    assertEquals(2, (int) itr.next());
+    assertEquals(3, (int) itr.peek());
+    itr = itr.reverse();
+    assertEquals(1, (int) itr.peek());
+    assertEquals(1, (int) itr.next());
+    assertEquals(0, (int) itr.peek());
+    assertEquals(0, (int) itr.next());
+    assertFalse(itr.hasNext());
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void wiredIterator09() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var itr = wl0.wiredIterator();
+    itr.reverse();
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void wiredIterator10() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var itr = wl0.wiredIterator(true);
+    itr.reverse();
+  }
+
+  @Test
+  public void wiredIterator11() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var itr = wl0.wiredIterator(true);
+    assertEquals(9, (int) itr.peek());
+    assertEquals(9, (int) itr.next());
+    assertEquals(8, (int) itr.peek());
+    assertEquals(8, (int) itr.next());
+    itr = itr.reverse();
+    assertEquals(9, (int) itr.peek());
+    assertEquals(9, (int) itr.next());
+    assertFalse(itr.hasNext());
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void wiredIterator12() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var itr = wl0.wiredIterator(true);
+    itr.set(666);
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void wiredIterator13() {
+    var wl0 = WiredList.of(0);
+    var itr = wl0.wiredIterator();
+    itr.next();
+    itr.remove();
+    itr.reverse();
+  }
+
+  @Test
+  public void wiredIterator14() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var itr = wl0.wiredIterator();
+    itr.next();
+    itr.set(100);
+    itr.next();
+    itr.set(200);
+    assertEquals(WiredList.of(100, 200, 2, 3, 4, 5, 6, 7, 8, 9), wl0);
   }
 
   @Test
