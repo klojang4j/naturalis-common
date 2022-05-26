@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import static nl.naturalis.common.ArrayMethods.pack;
@@ -1433,6 +1434,55 @@ public class WiredListTest {
     var wl = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
     wl.removeIf(Objects::nonNull);
     assertEquals(List.of(), wl);
+  }
+
+  @Test
+  public void removeAll00() {
+    var wl = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    assertTrue(wl.removeAll(Set.of(3, 5, 7)));
+    assertEquals(List.of(0, 1, 2, 4, 6, 8, 9), wl);
+  }
+
+  @Test
+  public void removeAll01() {
+    var wl = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    assertFalse(wl.removeAll(Set.of(13, 17, 23)));
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl);
+  }
+
+  @Test
+  public void retainAll00() {
+    var wl = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    assertTrue(wl.retainAll(Set.of(3, 5, 7)));
+    assertEquals(List.of(3, 5, 7), wl);
+  }
+
+  @Test
+  public void retainAll01() {
+    var wl = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    assertTrue(wl.retainAll(Set.of(13, 17, 23)));
+    assertEquals(List.of(), wl);
+  }
+
+  @Test
+  public void retainAll02() {
+    var wl = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    assertFalse(wl.retainAll(Set.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)));
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl);
+  }
+
+  @Test
+  public void contains00() {
+    var wl = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    assertFalse(wl.contains(47));
+    //assertTrue(wl.contains(6));
+  }
+
+  @Test
+  public void containsAll00() {
+    var wl = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    assertFalse(wl.containsAll(Set.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)));
+    assertTrue(wl.containsAll(Set.of(3, 4, 5, 6, 7, 8, 9)));
   }
 
 }
