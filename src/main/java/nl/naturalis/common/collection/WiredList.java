@@ -1,6 +1,5 @@
 package nl.naturalis.common.collection;
 
-import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.CollectionMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.check.CommonChecks;
@@ -56,30 +55,30 @@ public final class WiredList<E> implements List<E> {
   private static final String LIST = "list";
   private static final String TEST = "test";
 
-  private static final Supplier<IllegalStateException> emptyList() {
+  private static Supplier<IllegalStateException> emptyList() {
     return () -> new IllegalStateException("operation not allowed on empty list");
   }
 
-  private static final Supplier<IllegalArgumentException> emptySegmentNotAllowed() {
+  private static Supplier<IllegalArgumentException> emptySegmentNotAllowed() {
     return () -> new IllegalArgumentException("zero-length segments not allowed");
   }
 
-  private static final Supplier<IllegalArgumentException> autoEmbedNotAllowed() {
+  private static Supplier<IllegalArgumentException> autoEmbedNotAllowed() {
     return () -> new IllegalArgumentException(
         "list cannot be embedded within itself");
   }
 
-  private static final Supplier<IllegalStateException> callNextFirst() {
+  private static Supplier<IllegalStateException> callNextFirst() {
     return () -> new IllegalStateException(
         "Iterator.next() must be called first");
   }
 
-  private static final Supplier<ConcurrentModificationException> concurrentModification() {
-    return () -> new ConcurrentModificationException();
+  private static Supplier<ConcurrentModificationException> concurrentModification() {
+    return ConcurrentModificationException::new;
   }
 
-  private static final Supplier<NoSuchElementException> noSuchElement() {
-    return () -> new NoSuchElementException();
+  private static Supplier<NoSuchElementException> noSuchElement() {
+    return NoSuchElementException::new;
   }
 
   // ======================================================= //
@@ -746,13 +745,98 @@ public final class WiredList<E> implements List<E> {
     return this;
   }
 
-  @SafeVarargs
-  public final WiredList<E> defragment(Predicate<? super E> condition,
-      Predicate<? super E>... moreConditions) {
-    Predicate<? super E>[] conditions =
-        ArrayMethods.prefix(moreConditions, condition);
-    List<WiredList<E>> partitions = new ArrayList<>(conditions.length);
-    return null;
+  /**
+   * Groups the elements in the list according to the specified criteria. Once the
+   * operation is complete, the elements satisfying the first criterion (if any) will
+   * come first, the elements satisfying the second criterion (if any) will come
+   * second, etc. The elements that do not satisfy any of the specified criteria will
+   * come last. When an element matches a criterion, the remaining criteria are
+   * skipped, and the operation proceeds with the next element.
+   *
+   * @param criteria The criteria used to group the elements
+   * @return This {@code WiredList}
+   */
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public WiredList<E> defragment(List<Predicate<? super E>> criteria) {
+    Check.that(criteria).isNot(empty());
+    Predicate[] predicates = criteria.toArray(Predicate[]::new);
+    WiredList[] partitions = createPartitions(predicates);
+    Chain rest = new Chain(head, tail, sz);
+    sz = 0;
+    for (WiredList wl : partitions) {
+      if (!wl.isEmpty()) {
+        insertChain(sz, new Chain(wl.head, wl.tail, wl.sz));
+      }
+    }
+    if (rest.length != 0) {
+      insertChain(sz, rest);
+    }
+    return this;
+  }
+
+  /**
+   * Returns, for each of the specified criteria, a list of elements satisfying the
+   * criterion. The list might be empty (if there were no elements satisfying the
+   * criterion). The last element in the list-of-lists will be <i>this</i> list, and
+   * it will contain all elements that did not satisfy any of the specified criteria.
+   * This list, too, may now be empty (if all elements satisfied at least one
+   * criterion). In other words, the size of the returned list-of-lists is the number
+   * of criteria plus one.
+   *
+   * @param criteria The criteria used to group the elements
+   * @return The elements grouped according to the specified criteria, packaged as an
+   *     unmodifiable list-of-lists
+   */
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public List<WiredList<E>> group(List<Predicate<? super E>> criteria) {
+    Check.that(criteria).isNot(empty());
+    Predicate[] predicates = criteria.toArray(Predicate[]::new);
+    WiredList[] partitions = createPartitions(predicates);
+    List<WiredList<E>> result = new ArrayList(partitions.length + 1);
+    for (WiredList wl : partitions) {
+      result.add((WiredList<E>) wl);
+    }
+    result.add(this);
+    return List.copyOf(result);
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private WiredList[] createPartitions(Predicate[] predicates) {
+    WiredList[] partitions = new WiredList[predicates.length];
+    for (int i = 0; i < predicates.length; ++i) {
+      partitions[i] = new WiredList();
+    }
+    for (Node x = head; x != null; ) {
+      var next = x.next;
+      for (int i = 0; i < predicates.length; ++i) {
+        if (predicates[i].test(x.val)) {
+          deleteNode(x);
+          partitions[i].insertNode(partitions[i].sz, x);
+          break;
+        }
+      }
+      x = next;
+    }
+    return partitions;
+  }
+
+  /**
+   * Creates a single {@code WiredList} from the specified {@code WiredList}
+   * instances. This is a destructive operation for the {@code WiredList} instances;
+   * they will be empty afterwards.
+   *
+   * @param lists A {@code List} of {@code WiredList} instances
+   * @return A single {@code WiredList} containing all elements of the provided
+   *     {@code WiredList} instances
+   */
+  public WiredList<E> concat(List<WiredList<E>> lists) {
+    WiredList<E> result = new WiredList<>();
+    for (var wl : lists) {
+      result.insertChain(result.sz, new Chain(wl.head, wl.tail, wl.sz));
+      wl.head = wl.tail = null;
+      wl.sz = 0;
+    }
+    return result;
   }
 
   /**
@@ -823,19 +907,19 @@ public final class WiredList<E> implements List<E> {
   public WiredList<E> reverse() {
     if (sz > 1) {
       Node<E> node = head;
-      Node<E> temp = node.next;
+      Node<E> next = node.next;
       do {
         node.next = node.prev;
-        node.prev = temp;
+        node.prev = next;
         if (node == tail) {
           break;
         }
-        node = temp;
-        temp = temp.next;
+        node = next;
+        next = next.next;
       } while (true);
-      temp = head;
+      next = head;
       head = tail;
-      tail = temp;
+      tail = next;
     }
     return this;
   }
@@ -958,7 +1042,6 @@ public final class WiredList<E> implements List<E> {
    * {@inheritDoc}
    */
   @Override
-  @SuppressWarnings({"rawtypes", "unchecked"})
   public boolean removeAll(Collection<?> c) {
     Check.notNull(c);
     int size = this.sz;
@@ -970,7 +1053,6 @@ public final class WiredList<E> implements List<E> {
    * {@inheritDoc}
    */
   @Override
-  @SuppressWarnings({"rawtypes", "unchecked"})
   public boolean retainAll(Collection<?> c) {
     Check.notNull(c);
     int sz = this.sz;
@@ -1267,7 +1349,7 @@ public final class WiredList<E> implements List<E> {
   // and then insert it.
   ////////////////////////////////////////////////////////////////
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private void insertNode(int index, Node node) {
     if (sz == 0) {
       makeHead(node);
