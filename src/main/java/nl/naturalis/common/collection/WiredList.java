@@ -4,7 +4,6 @@ import nl.naturalis.common.CollectionMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.check.CommonChecks;
 import nl.naturalis.common.check.IntCheck;
-import nl.naturalis.common.function.Relation;
 import nl.naturalis.common.x.invoke.InvokeUtils;
 
 import java.util.*;
@@ -388,7 +387,7 @@ public final class WiredList<E> implements List<E> {
    * @param c The collection whose elements to copy to this {@code WiredList}
    */
   public WiredList(Collection<? extends E> c) {
-    insertAll(0, c);
+    addAll(0, c);
   }
 
   private WiredList(Node<E> head, Node<E> tail, int sz) {
@@ -547,40 +546,38 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Inserts the specified values at the start of the list.
-   *
-   * @param values The values to insert
+   * {@inheritDoc}
    */
-  public void prependAll(Collection<? extends E> values) {
-    insertAll(0, values);
+  @Override
+  public boolean addAll(Collection<? extends E> values) {
+    return addAll(sz, values);
   }
 
   /**
-   * Inserts the specified values at the end of the list.
-   *
-   * @param values The values to insert
+   * {@inheritDoc}
    */
-  public void appendAll(Collection<? extends E> values) {
-    insertAll(sz, values);
-  }
-
-  /**
-   * Inserts the specified values at the specified location, right-shifting the
-   * elements at, and following the index..
-   *
-   * @param values The values to insert
-   */
-  public void insertAll(int index, Collection<? extends E> values) {
+  public boolean addAll(int index, Collection<? extends E> values) {
+    checkInclusive(index);
     Check.notNull(values, "values");
     if (!values.isEmpty()) {
       insertChain(index, Chain.of(values));
     }
+    return !values.isEmpty();
   }
 
   /**
-   * Embeds the specified list in this list. This method is very efficient, but the
-   * provided list will empty afterwards. If you don't want this to happen, use
-   * {@link #insertAll(int, Collection) insertAll}.
+   * Inserts the specified values at the start of the list.
+   *
+   * @param values The values to insert
+   */
+  public boolean prependAll(Collection<? extends E> values) {
+    return addAll(0, values);
+  }
+
+  /**
+   * Embeds the specified list in this list. This method is very efficient, but it is
+   * a destructive operation for the provided list - it will be empty afterwards. If
+   * you don't want this to happen, use {@link #addAll(int, Collection) addAll}.
    *
    * @param myIndex The index at which to embed the list
    * @param other The list to embed
@@ -601,114 +598,15 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Embeds this list into another list. This list will be empty afterwards.
+   * Appends the specified list to this list. This method is very efficient, but it
+   * is a destructive operation for the provided list - it will be empty afterwards.
+   * If you don't want this to happen, use {@link #addAll(Collection) addAll}.
    *
-   * @param other The list in which to embed this list
-   * @param itsIndex The index at which to embed this {@code WiredList}
+   * @param other The list to embed
    * @return this {@code WiredList}
    */
-  public WiredList<E> embedIn(WiredList<? super E> other, int itsIndex) {
-    Check.notNull(other, LIST);
-    other.embed(itsIndex, this);
-    return this;
-  }
-
-  /**
-   * Removes an element from this list and appends it to another list.
-   *
-   * @param myIndex The index of the element to remove
-   * @param other The list to which to append the element
-   * @return this {@code WiredList}
-   */
-  public WiredList<E> emit(int myIndex, WiredList<? super E> other) {
-    return emit(myIndex, other, other.sz);
-  }
-
-  /**
-   * Removes an element from this list and inserts it into another list.
-   *
-   * @param myIndex The index of the element to remove
-   * @param other The list into which to insert the element
-   * @param itsIndex The index at which to insert the element
-   * @return this {@code WiredList}
-   */
-  public WiredList<E> emit(int myIndex,
-      WiredList<? super E> other,
-      int itsIndex) {
-    checkExclusive(myIndex);
-    Check.notNull(other, LIST);
-    other.checkInclusive(itsIndex);
-    Node<E> x = nodeAt(myIndex);
-    // deleteNode MUST precede insertNode
-    deleteNode(x);
-    other.insertNode(itsIndex, x);
-    return this;
-  }
-
-  /**
-   * Removes a segment from this list and appends it to another list.
-   *
-   * @param myFromIndex The start index of the segment (inclusive)
-   * @param myToIndex The end index of the segment (exclusive)
-   * @param other The list into which to insert the segment
-   * @return This {@code WiredList}
-   */
-  public WiredList<E> emit(int myFromIndex,
-      int myToIndex,
-      WiredList<? super E> other) {
-    return emit(myFromIndex, myToIndex, other, other.sz);
-  }
-
-  /**
-   * Removes a segment from this list and inserts it into another list.
-   *
-   * @param myFromIndex The start index of the segment (inclusive)
-   * @param myToIndex The end index of the segment (exclusive)
-   * @param other The list into which to insert the segment
-   * @param itsIndex The index at which to insert segment
-   * @return This {@code WiredList}
-   */
-  public WiredList<E> emit(int myFromIndex,
-      int myToIndex,
-      WiredList<? super E> other,
-      int itsIndex) {
-    checkSegment(myFromIndex, myToIndex);
-    Check.notNull(other, LIST);
-    other.checkInclusive(itsIndex);
-    Node<E> first = nodeAt(myFromIndex);
-    Node<E> last = nodeAfter(first, myFromIndex, myToIndex - 1);
-    Chain chain = new Chain(first, last, myToIndex - myFromIndex);
-    // deleteNode MUST precede insertNode
-    deleteChain(chain);
-    other.insertChain(itsIndex, chain);
-    return this;
-  }
-
-  /**
-   * Removes an element from the specified list and appends it to this list.
-   *
-   * @param other The list from which to remove the element
-   * @param itsIndex The index of the element to be removed
-   * @return this {@code WiredList}
-   */
-  public WiredList<E> acquire(WiredList<? extends E> other, int itsIndex) {
-    return acquire(sz, other, itsIndex);
-  }
-
-  /**
-   * Removes an element from the specified list and inserts it into this list.
-   *
-   * @param myIndex The index at which to insert the element
-   * @param other The list to remove the element from
-   * @param itsIndex The index of the element to be removed
-   * @return this {@code WiredList}
-   */
-  public WiredList<E> acquire(int myIndex,
-      WiredList<? extends E> other,
-      int itsIndex) {
-    Check.notNull(other, LIST);
-    other.emit(itsIndex, this, myIndex);
-    return this;
+  public WiredList<E> stitch(WiredList<? extends E> other) {
+    return embed(sz, other);
   }
 
   /**
@@ -720,10 +618,10 @@ public final class WiredList<E> implements List<E> {
    * @param itsToIndex The end index of the segment (exclusive)
    * @return This {@code WiredList}
    */
-  public WiredList<E> acquire(WiredList<? extends E> other,
+  public WiredList<E> transfer(WiredList<? extends E> other,
       int itsFromIndex,
       int itsToIndex) {
-    return acquire(sz, other, itsFromIndex, itsToIndex);
+    return transfer(sz, other, itsFromIndex, itsToIndex);
   }
 
   /**
@@ -736,12 +634,20 @@ public final class WiredList<E> implements List<E> {
    * @param itsToIndex The end index of the segment (exclusive)
    * @return This {@code WiredList}
    */
-  public WiredList<E> acquire(int myIndex,
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public WiredList<E> transfer(int myIndex,
       WiredList<? extends E> other,
       int itsFromIndex,
       int itsToIndex) {
+    checkInclusive(myIndex);
     Check.notNull(other, LIST);
-    other.emit(itsFromIndex, itsToIndex, this, myIndex);
+    other.checkSegment(itsFromIndex, itsToIndex);
+    Node first = other.nodeAt(itsFromIndex);
+    Node last = other.nodeAfter(first, itsFromIndex, itsToIndex - 1);
+    Chain chain = new Chain(first, last, itsToIndex - itsFromIndex);
+    // deleteNode MUST precede insertNode
+    other.deleteChain(chain);
+    insertChain(myIndex, chain);
     return this;
   }
 
@@ -756,7 +662,7 @@ public final class WiredList<E> implements List<E> {
    * @param criteria The criteria used to group the elements
    * @return This {@code WiredList}
    */
-  @SuppressWarnings({"rawtypes", "unchecked"})
+  @SuppressWarnings({"rawtypes"})
   public WiredList<E> defragment(List<Predicate<? super E>> criteria) {
     Check.that(criteria).isNot(empty());
     Predicate[] predicates = criteria.toArray(Predicate[]::new);
@@ -821,46 +727,27 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Creates a single {@code WiredList} from the specified {@code WiredList}
-   * instances. This is a destructive operation for the {@code WiredList} instances;
-   * they will be empty afterwards.
-   *
-   * @param lists A {@code List} of {@code WiredList} instances
-   * @return A single {@code WiredList} containing all elements of the provided
-   *     {@code WiredList} instances
-   */
-  public WiredList<E> concat(List<WiredList<E>> lists) {
-    WiredList<E> result = new WiredList<>();
-    for (var wl : lists) {
-      result.insertChain(result.sz, new Chain(wl.head, wl.tail, wl.sz));
-      wl.head = wl.tail = null;
-      wl.sz = 0;
-    }
-    return result;
-  }
-
-  /**
    * Trims off all elements from the start of the list that satisfy the specified
-   * condition. The returned list will contain all elements preceding the first
+   * criterion. The returned list will contain all elements preceding the first
    * element that does not satisfy the condition. If the condition is never
    * satisfied, this list remains unchanged and an empty list is returned. If
    * <i>all</i> elements satisfy the condition, the list remains unchanged and is
    * itself returned.
    *
-   * @param condition The test that the elements must pass in order to be trimmed
+   * @param criterion The test that the elements must pass in order to be trimmed
    *     off
    * @return A {@code WiredList} containing all elements preceding the first element
    *     that does not satisfy the condition
    */
-  public WiredList<E> ltrim(Predicate<? super E> condition) {
-    Check.notNull(condition, "condition");
+  public WiredList<E> ltrim(Predicate<? super E> criterion) {
+    Check.notNull(criterion);
     if (sz == 0) {
       return this;
     }
     Node<E> first = head;
     Node<E> last = justBeforeHead();
     int len = 0;
-    for (; condition.test(last.next.val) && ++len != sz; last = last.next) ;
+    for (; criterion.test(last.next.val) && ++len != sz; last = last.next) ;
     if (len == sz) {
       return this;
     }
@@ -871,26 +758,26 @@ public final class WiredList<E> implements List<E> {
 
   /**
    * Trims off all elements from the end of the list that satisfy the specified
-   * condition. The returned list will contain all elements after the last element
-   * that does not satisfy the condition. If the condition is never satisfied, this
+   * criterion. The returned list will contain all elements after the last element
+   * that does not satisfy the criterion. If the criterion is never satisfied, this
    * list remains unchanged and an empty list is returned. If
    * <i>all</i> elements satisfy the condition, the list remains unchanged and
    * is itself returned.
    *
-   * @param condition The test that the elements must pass in order to be trimmed
+   * @param criterion The test that the elements must pass in order to be trimmed
    *     off
    * @return A {@code WiredList} containing all elements after the last element that
    *     does not satisfy the condition
    */
-  public WiredList<E> rtrim(Predicate<? super E> condition) {
-    Check.notNull(condition, "condition");
+  public WiredList<E> rtrim(Predicate<? super E> criterion) {
+    Check.notNull(criterion);
     if (sz == 0) {
       return this;
     }
     Node<E> last = tail;
     Node<E> first = justAfterTail();
     int len = 0;
-    for (; condition.test(first.prev.val) && ++len != sz; first = first.prev) ;
+    for (; criterion.test(first.prev.val) && ++len != sz; first = first.prev) ;
     if (len == sz) {
       return this;
     }
@@ -1050,6 +937,18 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
+   * Removes a segment from this list.
+   *
+   * @param fromIndex The left boundary (inclusive) of the segment to delete
+   * @param toIndex The right boundary (exclusive) of the segment to delete
+   * @return The deleted segment
+   */
+  public WiredList<E> remove(int fromIndex, int toIndex) {
+    checkSegment(fromIndex, toIndex);
+    return delete(fromIndex, toIndex);
+  }
+
+  /**
    * {@inheritDoc}
    */
   @Override
@@ -1058,38 +957,6 @@ public final class WiredList<E> implements List<E> {
     int sz = this.sz;
     removeIf(e -> !c.contains(e));
     return sz != this.sz;
-  }
-
-  /**
-   * Removes the elements between the {@code fromIndex} (inclusive) and {@code
-   * toIndex} (exclusive).
-   *
-   * @param fromIndex The left boundary (inclusive) of the segment to delete
-   * @param toIndex The right boundary (exclusive) of the segment to delete
-   * @return The deleted segment
-   */
-  public WiredList<E> cut(int fromIndex, int toIndex) {
-    checkSegment(fromIndex, toIndex);
-    return delete(fromIndex, toIndex);
-  }
-
-  private <O> boolean removeIf0(int fromIndex,
-      int length,
-      Relation<E, O> test,
-      O testValue) {
-    if (length > 0) {
-      int sz = this.sz;
-      Node<E> node = nodeAt(fromIndex);
-      for (int i = 0; i < length; ++i) {
-        if (test.exists(node.val, testValue)) {
-          deleteNode(node);
-        } else {
-          node = node.next;
-        }
-      }
-      return sz != this.sz;
-    }
-    return false;
   }
 
   /**
@@ -1164,24 +1031,6 @@ public final class WiredList<E> implements List<E> {
    * {@inheritDoc}
    */
   @Override
-  public boolean addAll(Collection<? extends E> c) {
-    insertAll(sz, c);
-    return !c.isEmpty();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public boolean addAll(int index, Collection<? extends E> c) {
-    insertAll(index, c);
-    return !c.isEmpty();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
   public void clear() {
     for (var x = head; x != null; ) {
       var next = x.next;
@@ -1196,8 +1045,8 @@ public final class WiredList<E> implements List<E> {
 
   /**
    * Returns an {@code Iterator} that traverses the list from the first element to
-   * the last. It is a no-frills {@code Iterator} designed to make the traversal als
-   * quickly as possible, under the assumption that the list is not (structurally)
+   * the last. It is a no-frills {@code Iterator} designed to make the traversal go
+   * as quickly as possible, under the assumption that the list is not (structurally)
    * modified while the elements are being iterated over. It is not resistant against
    * concurrent modifications to the list, and not even necessarily against
    * same-thread modifications happening outside the iterator. Everything happening
