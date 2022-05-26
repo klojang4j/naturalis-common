@@ -443,7 +443,7 @@ public final class WiredList<E> implements List<E> {
    */
   @Override
   public boolean add(E value) {
-    insertNode(sz, new Node<>(value));
+    push(value);
     return true;
   }
 
@@ -512,7 +512,7 @@ public final class WiredList<E> implements List<E> {
    * @param value The value to append to the list
    */
   public void push(E value) {
-    add(value);
+    insertNode(sz, new Node<>(value));
   }
 
   /**
@@ -916,12 +916,6 @@ public final class WiredList<E> implements List<E> {
         x = x.next;
       }
     }
-    //    WiredIterator<E> itr = wiredIterator();
-    //    while (itr.hasNext()) {
-    //      if (test.test(itr.next())) {
-    //        itr.remove();
-    //      }
-    //    }
     return size != this.sz;
   }
 
