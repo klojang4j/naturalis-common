@@ -650,6 +650,7 @@ public final class WiredList<E> implements List<E> {
   /**
    * {@inheritDoc}
    */
+  @Override
   public boolean addAll(int index, Collection<? extends E> values) {
     checkInclusive(index);
     Check.notNull(values, "values");
@@ -901,10 +902,8 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Moves a list segment forward or backward in the list. It is not allowed to
-   * specify a zero-length segment ({@code fromIndex == toIndex}). The {@code
-   * newFromIndex} is allowed to be equal to {@code fromIndex}, causing the segment
-   * to stay where it is.
+   * Moves a list segment forward or backward in the list. The segment must contain
+   * at least one element.
    *
    * @param fromIndex The start index of the segment (inclusive)
    * @param toIndex The end index of the segment (exclusive)
@@ -1030,7 +1029,8 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Removes a segment from this list.
+   * Removes a segment from this list. The segment must contain at least one
+   * element.
    *
    * @param fromIndex The left boundary (inclusive) of the segment to delete
    * @param toIndex The right boundary (exclusive) of the segment to delete
