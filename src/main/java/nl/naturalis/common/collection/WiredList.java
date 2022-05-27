@@ -10,40 +10,40 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.util.Collections.emptyIterator;
+import static java.util.Collections.emptyListIterator;
 import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * A doubly-linked list, much like {@link LinkedList}, but focused on list
  * manipulation rather than queue-like behaviour. As with any doubly-linked list,
- * iteration and index-based retrieval is relatively costly compared to {@link
- * ArrayList}. It can be very efficient, however, at applying structural changes to
- * the list. That is: inserting, deleting and moving around large chunks of list
- * elements. The larger the segments the bigger the gain compared to {@code
- * ArrayList}.
+ * iteration and (especially) index-based retrieval are relatively costly compared
+ * to, for example, {@link ArrayList}. Linked lists can be very efficient, however,
+ * at applying structural changes to the list: inserting, deleting and moving around
+ * large chunks of list elements. The larger the segments the bigger the gain
+ * compared to {@code ArrayList}. Thus, {@code WiredList} especially focuses on these
+ * types of operations.
  *
  * <p>This implementation of the {@link List} interface <b>does not support</b>
- * the {@link List#subList(int, int) subList} and {@link List#listIterator()
- * listIterator} methods.
+ * the {@link List#subList(int, int) subList} method.
  *
  * <h4>Iteration</h4>
  *
- * <p>You should always use an {@code Iterator} to iterate over the elements in
- * the list, either explicitly or implicitly, via the {@code forEach} loop. Using an
- * index/get loop is possible, but performs poorly. As mentioned, a {@code WiredList}
- * does not support the {@code listIterator} method. However, besides the standard
- * {@link Iterable#iterator() iterator} method, it also provides a {@link
- * #reverseIterator()} and a {@link #wiredIterator(boolean) wiredIterator} method.
- * The latter returns an instance of the {@link WiredIterator} interface. Unlike a
- * {@link ListIterator} this is a one-way-only iterator, but still provides the same
- * functionality,
- *
- * <p>None of the provided iterators is resistant against concurrent
- * modifications of the list. The standard {@code Iterator} is not even designed to
- * be resistant against same-thread modifications happening outside the iterator.
- * (Everything happening in the iterator's rear mirror is fine though.) It is just
- * there to iterate as quickly as possible over the elements.
+ * <p>Always use an iterator to iterate over the elements in the list (which you
+ * implicitly would when executing a {@code forEach} loop). Using an index/get loop
+ * is possible, but a bad idea from a performance perspective. The {@link Iterator}
+ * and {@link ListIterator} implementations prescribed by the {@code List} interface
+ * are no-frills iterators that throw an {@code UnsupportedOperationException} from
+ * all methods designated as optional by the specification. Besides these iterators,
+ * you can also request a {@link #reverseIterator() reverse iterator} and a
+ * "{@linkplain #wiredIterator(boolean) WiredIterator}". The latter returns an
+ * instance of the {@link WiredIterator} interface. Unlike a {@link ListIterator}
+ * this is a one-way-only iterator, but it still provides the same functionality, and
+ * it <i>does</i> implement the methods that are optional in the {@code ListIterator}
+ * interface.
  *
  * @param <E> The type of the elements in the list
  */
@@ -300,6 +300,100 @@ public final class WiredList<E> implements List<E> {
       return Check.that(curr)
           .isNot(sameAs(), afterTail, callNextFirst())
           .ok(ForwardWiredIterator::new);
+    }
+
+  }
+
+  private class ListItr implements ListIterator<E> {
+
+    Node<E> curr;
+    Boolean forward;
+    int idx;
+
+    ListItr() {
+      curr = justBeforeHead();
+      idx = -1;
+    }
+
+    ListItr(int index) {
+      curr = nodeAt(idx = index);
+    }
+
+    @Override
+    public boolean hasNext() {
+      // Since clients get a Collections.emptyListIterator() if
+      // the list is empty, and since this Iterator does not
+      // support the remove method, if the list now is empty,
+      // that must be definitely be because the list was changed
+      // while we were iterating over it.
+      Check.that(sz).is(ne(), 0, concurrentModification());
+      return idx < sz - 1 && curr.next != null;
+    }
+
+    // See specification of ListIterator.next() for why it is
+    // implemented this way.
+    @Override
+    public E next() {
+      // All checks here would ordinarily test the same thing
+      // (have we reached the end of the list?), but this is our
+      // feather-weight attempt at detecting (concurrent)
+      // modifications to the list.
+      Check.that(sz).is(ne(), 0, concurrentModification());
+      if (forward != FALSE) {
+        Check.that(++idx).is(lt(), sz, noSuchElement());
+        return Check.that(curr = curr.next)
+            .is(notNull(), noSuchElement()) // we are in deep space
+            .ok(Node::value);
+      }
+      forward = TRUE;
+      return curr.val;
+    }
+
+    @Override
+    public boolean hasPrevious() {
+      Check.that(sz).is(ne(), 0, concurrentModification());
+      return idx > 0 && curr.prev != null;
+    }
+
+    @Override
+    public E previous() {
+      Check.that(sz).is(ne(), 0, concurrentModification());
+      Check.that(forward).is(notNull(), noSuchElement());
+      if (forward == FALSE) {
+        Check.that(--idx).is(gte(), 0, noSuchElement());
+        return Check.that(curr = curr.prev)
+            .is(notNull(), noSuchElement())
+            .ok(Node::value);
+      }
+      forward = FALSE;
+      return curr.val;
+    }
+
+    @Override
+    public int nextIndex() {
+      return idx + 1;
+    }
+
+    @Override
+    public int previousIndex() {
+      return Math.min(-1, idx - 1);
+    }
+
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    @SuppressWarnings({"unused"})
+    public void set(E value) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    @SuppressWarnings({"unused"})
+    public void add(E value) {
+      throw new UnsupportedOperationException();
     }
 
   }
@@ -618,10 +712,10 @@ public final class WiredList<E> implements List<E> {
    * @param itsToIndex The end index of the segment (exclusive)
    * @return This {@code WiredList}
    */
-  public WiredList<E> transfer(WiredList<? extends E> other,
+  public WiredList<E> excise(WiredList<? extends E> other,
       int itsFromIndex,
       int itsToIndex) {
-    return transfer(sz, other, itsFromIndex, itsToIndex);
+    return excise(sz, other, itsFromIndex, itsToIndex);
   }
 
   /**
@@ -635,7 +729,7 @@ public final class WiredList<E> implements List<E> {
    * @return This {@code WiredList}
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
-  public WiredList<E> transfer(int myIndex,
+  public WiredList<E> excise(int myIndex,
       WiredList<? extends E> other,
       int itsFromIndex,
       int itsToIndex) {
@@ -652,12 +746,11 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Groups the elements in the list according to the specified criteria. Once the
+   * Groups the elements in the list according to the provided criteria. Once the
    * operation is complete, the elements satisfying the first criterion (if any) will
-   * come first, the elements satisfying the second criterion (if any) will come
-   * second, etc. The elements that do not satisfy any of the specified criteria will
-   * come last. When an element matches a criterion, the remaining criteria are
-   * skipped, and the operation proceeds with the next element.
+   * come first in the list, the elements satisfying the second criterion (if any)
+   * will come second, etc. The elements that do not satisfy any of the specified
+   * criteria will come last.
    *
    * @param criteria The criteria used to group the elements
    * @return This {@code WiredList}
@@ -666,10 +759,10 @@ public final class WiredList<E> implements List<E> {
   public WiredList<E> defragment(List<Predicate<? super E>> criteria) {
     Check.that(criteria).isNot(empty());
     Predicate[] predicates = criteria.toArray(Predicate[]::new);
-    WiredList[] partitions = createPartitions(predicates);
+    WiredList[] groups = createGroups(predicates);
     Chain rest = new Chain(head, tail, sz);
     sz = 0;
-    for (WiredList wl : partitions) {
+    for (WiredList wl : groups) {
       if (!wl.isEmpty()) {
         insertChain(sz, new Chain(wl.head, wl.tail, wl.sz));
       }
@@ -681,25 +774,23 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Returns, for each of the specified criteria, a list of elements satisfying the
-   * criterion. The list might be empty (if there were no elements satisfying the
-   * criterion). The last element in the list-of-lists will be <i>this</i> list, and
-   * it will contain all elements that did not satisfy any of the specified criteria.
-   * This list, too, may now be empty (if all elements satisfied at least one
-   * criterion). In other words, the size of the returned list-of-lists is the number
-   * of criteria plus one.
+   * Groups the elements according to the provided criteria. For each criterion a
+   * separate {@code WiredList} is created that will contain the elements meeting the
+   * criterion. This {@code WiredList} is left with all elements that did not satisfy
+   * any criterion, and it will be the last element in the returned list-of-lists.
+   * Thus, the size of the returned list-of-lists is the number of criteria plus one.
+   * Elements will never be placed in more than one group.
    *
    * @param criteria The criteria used to group the elements
-   * @return The elements grouped according to the specified criteria, packaged as an
-   *     unmodifiable list-of-lists
+   * @return An unmodifiable list of element groups
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   public List<WiredList<E>> group(List<Predicate<? super E>> criteria) {
     Check.that(criteria).isNot(empty());
     Predicate[] predicates = criteria.toArray(Predicate[]::new);
-    WiredList[] partitions = createPartitions(predicates);
-    List<WiredList<E>> result = new ArrayList(partitions.length + 1);
-    for (WiredList wl : partitions) {
+    WiredList[] groups = createGroups(predicates);
+    List<WiredList<E>> result = new ArrayList(groups.length + 1);
+    for (WiredList wl : groups) {
       result.add((WiredList<E>) wl);
     }
     result.add(this);
@@ -707,7 +798,7 @@ public final class WiredList<E> implements List<E> {
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private WiredList[] createPartitions(Predicate[] predicates) {
+  private WiredList[] createGroups(Predicate[] predicates) {
     WiredList[] partitions = new WiredList[predicates.length];
     for (int i = 0; i < predicates.length; ++i) {
       partitions[i] = new WiredList();
@@ -728,26 +819,26 @@ public final class WiredList<E> implements List<E> {
 
   /**
    * Trims off all elements from the start of the list that satisfy the specified
-   * criterion. The returned list will contain all elements preceding the first
+   * condition. The returned list will contain all elements preceding the first
    * element that does not satisfy the condition. If the condition is never
    * satisfied, this list remains unchanged and an empty list is returned. If
    * <i>all</i> elements satisfy the condition, the list remains unchanged and is
    * itself returned.
    *
-   * @param criterion The test that the elements must pass in order to be trimmed
+   * @param condition The test that the elements must pass in order to be trimmed
    *     off
    * @return A {@code WiredList} containing all elements preceding the first element
    *     that does not satisfy the condition
    */
-  public WiredList<E> ltrim(Predicate<? super E> criterion) {
-    Check.notNull(criterion);
+  public WiredList<E> ltrim(Predicate<? super E> condition) {
+    Check.notNull(condition);
     if (sz == 0) {
       return this;
     }
     Node<E> first = head;
     Node<E> last = justBeforeHead();
     int len = 0;
-    for (; criterion.test(last.next.val) && ++len != sz; last = last.next) ;
+    for (; condition.test(last.next.val) && ++len != sz; last = last.next) ;
     if (len == sz) {
       return this;
     }
@@ -758,26 +849,26 @@ public final class WiredList<E> implements List<E> {
 
   /**
    * Trims off all elements from the end of the list that satisfy the specified
-   * criterion. The returned list will contain all elements after the last element
-   * that does not satisfy the criterion. If the criterion is never satisfied, this
+   * condition. The returned list will contain all elements after the last element
+   * that does not satisfy the condition. If the condition is never satisfied, this
    * list remains unchanged and an empty list is returned. If
    * <i>all</i> elements satisfy the condition, the list remains unchanged and
    * is itself returned.
    *
-   * @param criterion The test that the elements must pass in order to be trimmed
+   * @param condition The test that the elements must pass in order to be trimmed
    *     off
    * @return A {@code WiredList} containing all elements after the last element that
    *     does not satisfy the condition
    */
-  public WiredList<E> rtrim(Predicate<? super E> criterion) {
-    Check.notNull(criterion);
+  public WiredList<E> rtrim(Predicate<? super E> condition) {
+    Check.notNull(condition);
     if (sz == 0) {
       return this;
     }
     Node<E> last = tail;
     Node<E> first = justAfterTail();
     int len = 0;
-    for (; criterion.test(first.prev.val) && ++len != sz; first = first.prev) ;
+    for (; condition.test(first.prev.val) && ++len != sz; first = first.prev) ;
     if (len == sz) {
       return this;
     }
@@ -793,17 +884,15 @@ public final class WiredList<E> implements List<E> {
    */
   public WiredList<E> reverse() {
     if (sz > 1) {
-      Node<E> node = head;
-      Node<E> next = node.next;
-      do {
-        node.next = node.prev;
-        node.prev = next;
-        if (node == tail) {
+      Node<E> next;
+      for (var x = head; ; ) {
+        next = x.next;
+        x.next = x.prev;
+        if ((x.prev = next) == null) {
           break;
         }
-        node = next;
-        next = next.next;
-      } while (true);
+        x = next;
+      }
       next = head;
       head = tail;
       tail = next;
@@ -890,11 +979,21 @@ public final class WiredList<E> implements List<E> {
    */
   @Override
   public boolean remove(Object o) {
-    Iterator<E> itr = iterator();
-    while (itr.hasNext()) {
-      if (Objects.equals(o, itr.next())) {
-        itr.remove();
-        return true;
+    if (o == null) {
+      for (var x = head; x != null; ) {
+        if (x.val == null) {
+          deleteNode(x);
+          return true;
+        }
+        x = x.next;
+      }
+    } else {
+      for (var x = head; x != null; ) {
+        if (o.equals(x.val)) {
+          deleteNode(x);
+          return true;
+        }
+        x = x.next;
       }
     }
     return false;
@@ -1041,10 +1140,7 @@ public final class WiredList<E> implements List<E> {
    * Returns an {@code Iterator} that traverses the list from the first element to
    * the last. It is a no-frills {@code Iterator} designed to make the traversal go
    * as quickly as possible, under the assumption that the list is not (structurally)
-   * modified while the elements are being iterated over. It is not resistant against
-   * concurrent modifications to the list, and not even necessarily against
-   * same-thread modifications happening outside the iterator. Everything happening
-   * in the iterator's "rear-mirror" is fine though.
+   * modified while the elements are being iterated over.
    *
    * @return An {@code Iterator} that traverses the list's elements from first to the
    *     last
@@ -1062,10 +1158,11 @@ public final class WiredList<E> implements List<E> {
 
       @Override
       public E next() {
-        if (curr != tail) {
-          return (curr = curr.next).val;
-        }
-        throw new NoSuchElementException();
+        Check.that(sz).is(ne(), 0, concurrentModification());
+        Check.that(curr == tail).is(no(), noSuchElement());
+        return Check.that(curr = curr.next)
+            .is(notNull(), noSuchElement()) // we are in deep space
+            .ok(Node::value);
       }
     };
   }
@@ -1089,12 +1186,51 @@ public final class WiredList<E> implements List<E> {
 
       @Override
       public E next() {
-        if (curr != head) {
-          return (curr = curr.next).val;
-        }
-        throw new NoSuchElementException();
+        Check.that(sz).is(ne(), 0, concurrentModification());
+        Check.that(curr == head).is(no(), noSuchElement());
+        return Check.that(curr = curr.prev)
+            .is(notNull(), noSuchElement())
+            .ok(Node::value);
       }
     };
+  }
+
+  /**
+   * Returns a {@link WiredIterator} that traverses the list from the first element
+   * to the last.
+   *
+   * @return A {@code WiredIterator} that traverses the list from the first element
+   *     to the last
+   */
+  public WiredIterator<E> wiredIterator() {
+    return new ForwardWiredIterator();
+  }
+
+  /**
+   * Returns a {@link WiredIterator} that traverses the list from the first element
+   * to the last, or the other way round, depending on the value of the argument
+   *
+   * @return A {@code WiredIterator} that traverses the list from the first element
+   *     to the last, or the other way round
+   */
+  public WiredIterator<E> wiredIterator(boolean reverse) {
+    return reverse ? new ReverseWiredIterator() : new ForwardWiredIterator();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public ListIterator<E> listIterator() {
+    return isEmpty() ? emptyListIterator() : new ListItr();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public ListIterator<E> listIterator(int index) {
+    return checkExclusive(index).ok(ListItr::new);
   }
 
   /**
@@ -1141,47 +1277,10 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Returns a {@link WiredIterator} that traverses the list from the first element
-   * to the last.
-   *
-   * @return A {@code WiredIterator} that traverses the list from the first element
-   *     to the last
-   */
-  public WiredIterator<E> wiredIterator() {
-    return new ForwardWiredIterator();
-  }
-
-  /**
-   * Returns a {@link WiredIterator} that traverses the list from the first element
-   * to the last, or the other way round, depending on the value of the argument
-   *
-   * @return A {@code WiredIterator} that traverses the list from the first element
-   *     to the last, or the other way round
-   */
-  public WiredIterator<E> wiredIterator(boolean reverse) {
-    return reverse ? new ReverseWiredIterator() : new ForwardWiredIterator();
-  }
-
-  /**
    * <b>Not supported by this implementation.</b>
    */
   @Override
-  public ListIterator<E> listIterator() {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * <b>Not supported by this implementation.</b>
-   */
-  @Override
-  public ListIterator<E> listIterator(int index) {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * <b>Not supported by this implementation.</b>
-   */
-  @Override
+  @SuppressWarnings({"unused"})
   public List<E> subList(int fromIndex, int toIndex) {
     throw new UnsupportedOperationException();
   }
