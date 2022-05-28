@@ -15,6 +15,7 @@ import static java.lang.Boolean.TRUE;
 import static java.util.Collections.emptyIterator;
 import static java.util.Collections.emptyListIterator;
 import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
+import static nl.naturalis.common.MathMethods.divUp;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
@@ -52,6 +53,7 @@ public final class WiredList<E> implements List<E> {
   // Ubiquitous parameter names within this class
   private static final String INDEX = "index";
   private static final String LIST = "list";
+  private static final String WIRED_LIST = "WiredList";
   private static final String TEST = "test";
 
   private static Supplier<IllegalStateException> emptyList() {
@@ -212,14 +214,14 @@ public final class WiredList<E> implements List<E> {
       Node<E> node = this.curr;
       Check.that(node).isNot(sameAs(), beforeHead, callNextFirst());
       if (sz == 1) {
-        deleteNode(node);
+        delete(node);
       } else if (node == head) {
-        deleteNode(node);
+        delete(node);
         node = beforeHead = justBeforeHead();
       } else {
         Check.that(node = node.prev)
             .is(notNull(), concurrentModification())
-            .then(x -> deleteNode(x.next));
+            .then(x -> delete(x.next));
       }
       this.curr = node;
     }
@@ -282,14 +284,14 @@ public final class WiredList<E> implements List<E> {
       Node<E> node = this.curr;
       Check.that(node).isNot(sameAs(), afterTail, callNextFirst());
       if (sz == 1) {
-        deleteNode(node);
+        delete(node);
       } else if (node == tail) {
-        deleteNode(node);
+        delete(node);
         node = afterTail = justAfterTail();
       } else {
         Check.that(node = node.next)
             .is(notNull(), concurrentModification())
-            .then(x -> deleteNode(x.prev));
+            .then(x -> delete(x.prev));
       }
       this.curr = node;
     }
@@ -460,8 +462,40 @@ public final class WiredList<E> implements List<E> {
     wl.push(e1);
     wl.push(e2);
     if (moreElems.length != 0) {
-      wl.insertChain(3, Chain.of(moreElems));
+      wl.insert(3, Chain.of(moreElems));
     }
+    return wl;
+  }
+
+  /**
+   * Returns a new {@code WiredList} containing the specified elements.
+   *
+   * @param elements The elements to add to the list
+   * @param <E> The type of the elements in the list
+   * @return A new {@code WiredList} containing the specified elements
+   */
+  public static <E> WiredList<E> ofElements(E[] elements) {
+    Check.notNull(elements);
+    WiredList<E> wl = new WiredList<>();
+    if (elements.length > 0) {
+      wl.insert(0, Chain.of(elements));
+    }
+    return wl;
+  }
+
+  /**
+   * Concatenates the provided {@code WiredList} instances. This is a destructive
+   * operation for the argument; the instances will be empty when the method returns.
+   * See {@link #stitch(WiredList)}.
+   *
+   * @param lists The {@code WiredList} instances to concatenate
+   * @param <E> The type of the elements in the list
+   * @return A new {@code WiredList} containing the elements in the individual {@code
+   *     WiredList} instances
+   */
+  public static <E> WiredList<E> stitch(List<WiredList<E>> lists) {
+    WiredList<E> wl = new WiredList<>();
+    Check.notNull(lists).ok().forEach(wl::stitch);
     return wl;
   }
 
@@ -484,10 +518,10 @@ public final class WiredList<E> implements List<E> {
     addAll(0, c);
   }
 
-  private WiredList(Node<E> head, Node<E> tail, int sz) {
-    this.head = head;
-    this.tail = tail;
-    this.sz = sz;
+  private WiredList(Chain chain) {
+    head = chain.head;
+    tail = chain.tail;
+    sz = chain.length;
   }
 
   /**
@@ -547,7 +581,7 @@ public final class WiredList<E> implements List<E> {
   @Override
   public void add(int index, E value) {
     checkInclusive(index);
-    insertNode(index, new Node<>(value));
+    insert(index, new Node<>(value));
   }
 
   /**
@@ -606,7 +640,7 @@ public final class WiredList<E> implements List<E> {
    * @param value The value to append to the list
    */
   public void push(E value) {
-    insertNode(sz, new Node<>(value));
+    insert(sz, new Node<>(value));
   }
 
   /**
@@ -653,9 +687,9 @@ public final class WiredList<E> implements List<E> {
   @Override
   public boolean addAll(int index, Collection<? extends E> values) {
     checkInclusive(index);
-    Check.notNull(values, "values");
+    Check.notNull(values, "collection");
     if (!values.isEmpty()) {
-      insertChain(index, Chain.of(values));
+      insert(index, Chain.of(values));
     }
     return !values.isEmpty();
   }
@@ -680,9 +714,9 @@ public final class WiredList<E> implements List<E> {
    */
   public WiredList<E> embed(int myIndex, WiredList<? extends E> other) {
     checkInclusive(myIndex);
-    Check.notNull(other, LIST).isNot(sameAs(), this, autoEmbedNotAllowed());
+    Check.notNull(other, WIRED_LIST).isNot(sameAs(), this, autoEmbedNotAllowed());
     if (!other.isEmpty()) {
-      insertChain(myIndex, new Chain(other.head, other.tail, other.sz));
+      insert(myIndex, new Chain(other.head, other.tail, other.sz));
       // Reset but don't clear the embedded list, because that
       // would nullify the nodes we just embedded in this list
       other.head = null;
@@ -735,14 +769,14 @@ public final class WiredList<E> implements List<E> {
       int itsFromIndex,
       int itsToIndex) {
     checkInclusive(myIndex);
-    Check.notNull(other, LIST);
+    Check.notNull(other, WIRED_LIST);
     other.checkSegment(itsFromIndex, itsToIndex);
     Node first = other.nodeAt(itsFromIndex);
     Node last = other.nodeAfter(first, itsFromIndex, itsToIndex - 1);
     Chain chain = new Chain(first, last, itsToIndex - itsFromIndex);
     // deleteNode MUST precede insertNode
     other.deleteChain(chain);
-    insertChain(myIndex, chain);
+    insert(myIndex, chain);
     return this;
   }
 
@@ -750,8 +784,8 @@ public final class WiredList<E> implements List<E> {
    * Groups the elements in the list according to the provided criteria. Once the
    * operation is complete, the elements satisfying the first criterion (if any) will
    * come first in the list, the elements satisfying the second criterion (if any)
-   * will come second, etc. The elements that do not satisfy any of the specified
-   * criteria will come last.
+   * will come second, etc. The elements that did not satisfy any criterion will come
+   * last.
    *
    * @param criteria The criteria used to group the elements
    * @return This {@code WiredList}
@@ -765,57 +799,95 @@ public final class WiredList<E> implements List<E> {
     sz = 0;
     for (WiredList wl : groups) {
       if (!wl.isEmpty()) {
-        insertChain(sz, new Chain(wl.head, wl.tail, wl.sz));
+        insert(sz, new Chain(wl.head, wl.tail, wl.sz));
       }
     }
     if (rest.length != 0) {
-      insertChain(sz, rest);
+      insert(sz, rest);
     }
     return this;
   }
 
   /**
    * Groups the elements according to the provided criteria. For each criterion a
-   * separate {@code WiredList} is created that will contain the elements meeting the
-   * criterion. This {@code WiredList} is left with all elements that did not satisfy
-   * any criterion, and it will be the last element in the returned list-of-lists.
-   * Thus, the size of the returned list-of-lists is the number of criteria plus one.
-   * Elements will never be placed in more than one group.
+   * separate {@code WiredList} is created that will contain the elements satisfying
+   * the criterion. This {@code WiredList} is left with all elements that did not
+   * satisfy any criterion, and it will be the last element in the returned
+   * list-of-lists. In other words, the size of the returned list-of-lists is the
+   * number of criteria plus one. You can use the {@link #stitch(List)} method to
+   * create a single "defragmented" list again. Elements will never be placed in more
+   * than one group. As soon as an element is found to satisfy a criterion it is
+   * placed in the corresponding group and the remaining criteria are skipped.
    *
    * @param criteria The criteria used to group the elements
-   * @return An unmodifiable list of element groups
+   * @return A list of element groups
+   * @see #stitch(WiredList)
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
-  public List<WiredList<E>> group(List<Predicate<? super E>> criteria) {
+  public WiredList<WiredList<E>> group(List<Predicate<? super E>> criteria) {
     Check.that(criteria).isNot(empty());
     Predicate[] predicates = criteria.toArray(Predicate[]::new);
-    WiredList[] groups = createGroups(predicates);
-    List<WiredList<E>> result = new ArrayList(groups.length + 1);
-    for (WiredList wl : groups) {
-      result.add((WiredList<E>) wl);
-    }
+    WiredList<E>[] groups = createGroups(predicates);
+    WiredList<WiredList<E>> result = WiredList.ofElements(groups);
     result.add(this);
-    return List.copyOf(result);
+    return result;
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private WiredList[] createGroups(Predicate[] predicates) {
-    WiredList[] partitions = new WiredList[predicates.length];
+  private WiredList<E>[] createGroups(Predicate[] predicates) {
+    WiredList[] groups = new WiredList[predicates.length];
     for (int i = 0; i < predicates.length; ++i) {
-      partitions[i] = new WiredList();
+      groups[i] = new WiredList();
     }
-    for (Node x = head; x != null; ) {
-      var next = x.next;
+    for (Node node = head; node != null; ) {
+      var next = node.next;
       for (int i = 0; i < predicates.length; ++i) {
-        if (predicates[i].test(x.val)) {
-          deleteNode(x);
-          partitions[i].insertNode(partitions[i].sz, x);
+        if (predicates[i].test(node.val)) {
+          delete(node);
+          WiredList wl = groups[i];
+          wl.insert(wl.size(), node);
           break;
         }
       }
-      x = next;
+      node = next;
     }
+    return groups;
+  }
+
+  /**
+   * Splits this {@code WiredList} into multiple {@code WiredList} instances of the
+   * specified size. This method is destructive for the {@code WiredList} it operates
+   * on. The partitions are chopped off from the {@code WiredList} and then placed in
+   * a separate {@code WiredList}. The last element in the returned list-of-lists is
+   * the {@code WiredList} itself, and it may (now) contain less than {@code size}
+   * elements.
+   *
+   * @param size The desired size of the partitions
+   * @return A list of {@code WiredList} instances of the specified size
+   */
+  public WiredList<WiredList<E>> partition(int size) {
+    Check.that(size, "size of partitions").is(gt(), 0);
+    WiredList<WiredList<E>> partitions = new WiredList<>();
+    while (sz > size) {
+      Chain chain = new Chain(head, nodeAt(size - 1), size);
+      deleteChain(chain);
+      partitions.push(new WiredList<>(chain));
+    }
+    partitions.push(this);
     return partitions;
+  }
+
+  /**
+   * Splits this {@code WiredList} into the specified number of {@code WiredList}
+   * instances. See {@link #partition(int)}.
+   *
+   * @param count The number of {@code WiredList} instances to split this {@code
+   *     WiredList} into
+   * @return A list containing the specified number of {@code WiredList} instances
+   */
+  public WiredList<WiredList<E>> split(int count) {
+    Check.that(count).is(gt(), 0);
+    return partition(divUp(sz, count));
   }
 
   /**
@@ -843,8 +915,9 @@ public final class WiredList<E> implements List<E> {
     if (len == sz) {
       return this;
     }
-    WiredList<E> wl = new WiredList<>(first, last, len);
-    deleteChain(new Chain(first, last, len));
+    Chain chain = new Chain(first, last, len);
+    deleteChain(chain);
+    WiredList<E> wl = new WiredList<>(chain);
     return wl;
   }
 
@@ -873,8 +946,9 @@ public final class WiredList<E> implements List<E> {
     if (len == sz) {
       return this;
     }
-    WiredList<E> wl = new WiredList<>(first, last, len);
-    deleteChain(new Chain(first, last, len));
+    Chain chain = new Chain(first, last, len);
+    deleteChain(chain);
+    WiredList<E> wl = new WiredList<>(chain);
     return wl;
   }
 
@@ -981,7 +1055,7 @@ public final class WiredList<E> implements List<E> {
     if (o == null) {
       for (var x = head; x != null; ) {
         if (x.val == null) {
-          deleteNode(x);
+          delete(x);
           return true;
         }
         x = x.next;
@@ -989,7 +1063,7 @@ public final class WiredList<E> implements List<E> {
     } else {
       for (var x = head; x != null; ) {
         if (o.equals(x.val)) {
-          deleteNode(x);
+          delete(x);
           return true;
         }
         x = x.next;
@@ -1008,7 +1082,7 @@ public final class WiredList<E> implements List<E> {
     for (var x = head; x != null; ) {
       if (test.test(x.val)) {
         var y = x.next;
-        deleteNode(x);
+        delete(x);
         x = y;
       } else {
         x = x.next;
@@ -1292,7 +1366,7 @@ public final class WiredList<E> implements List<E> {
   ////////////////////////////////////////////////////////////////
 
   @SuppressWarnings({"unchecked", "rawtypes"})
-  private void insertNode(int index, Node node) {
+  private void insert(int index, Node node) {
     if (sz == 0) {
       makeHead(node);
       makeTail(node);
@@ -1311,7 +1385,7 @@ public final class WiredList<E> implements List<E> {
   }
 
   @SuppressWarnings("unchecked")
-  private void insertChain(int index, Chain chain) {
+  private void insert(int index, Chain chain) {
     if (sz == 0) {
       makeHead(chain.head);
       makeTail(chain.tail);
@@ -1337,11 +1411,12 @@ public final class WiredList<E> implements List<E> {
     var first = nodeAt(from);
     var last = nodeAfter(first, from, to - 1);
     int len = to - from;
-    deleteChain(new Chain(first, last, len));
-    return new WiredList<>(first, last, len);
+    Chain chain = new Chain(first, last, len);
+    deleteChain(chain);
+    return new WiredList<>(chain);
   }
 
-  private void deleteNode(Node<E> node) {
+  private void delete(Node<E> node) {
     if (sz == 1) {
       head = tail = null;
     } else if (node == head) {
@@ -1366,6 +1441,20 @@ public final class WiredList<E> implements List<E> {
       join(chain.head.prev, chain.tail.next);
     }
     sz -= chain.length;
+  }
+
+  // Give the garbage collector a break;
+  private static void dispose(Chain chain) {
+    for (var x = chain.head; ; ) {
+      var next = x.next;
+      x.val = null;
+      x.prev = null;
+      x.next = null;
+      if (x == chain.tail) {
+        break;
+      }
+      x = next;
+    }
   }
 
   // @VisibleForTesting
