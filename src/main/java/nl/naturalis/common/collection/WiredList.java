@@ -866,7 +866,7 @@ public final class WiredList<E> implements List<E> {
    * @return A list of {@code WiredList} instances of the specified size
    */
   public WiredList<WiredList<E>> partition(int size) {
-    Check.that(size, "size of partitions").is(gt(), 0);
+    Check.that(size, "partition size").is(gt(), 0);
     WiredList<WiredList<E>> partitions = new WiredList<>();
     while (sz > size) {
       Chain chain = new Chain(head, nodeAt(size - 1), size);

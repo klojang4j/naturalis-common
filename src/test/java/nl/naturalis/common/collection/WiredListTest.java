@@ -1569,4 +1569,84 @@ public class WiredListTest {
     assertTrue(wl.containsAll(Set.of(3, 4, 5, 6, 7, 8, 9)));
   }
 
+  @Test
+  public void partition00() {
+    var wl = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    List<WiredList<Integer>> wls = wl.partition(5);
+    assertEquals(2, wls.size());
+    assertEquals(List.of(0, 1, 2, 3, 4), wls.get(0));
+    assertEquals(List.of(5, 6, 7, 8, 9), wls.get(1));
+    assertSame(wl, wls.get(1));
+  }
+
+  @Test
+  public void partition01() {
+    var wl = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    List<WiredList<Integer>> wls = wl.partition(3);
+    assertEquals(4, wls.size());
+    assertEquals(List.of(0, 1, 2), wls.get(0));
+    assertEquals(List.of(3, 4, 5), wls.get(1));
+    assertEquals(List.of(6, 7, 8), wls.get(2));
+    assertEquals(List.of(9), wls.get(3));
+    assertSame(wl, wls.get(3));
+  }
+
+  @Test
+  public void partition02() {
+    var wl = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    List<WiredList<Integer>> wls = wl.partition(1); // odd, but allowed
+    assertEquals(10, wls.size());
+    assertEquals(List.of(0), wls.get(0));
+    assertEquals(List.of(4), wls.get(4));
+    assertEquals(List.of(8), wls.get(8));
+    assertEquals(List.of(9), wls.get(9));
+    assertSame(wl, wls.get(9));
+  }
+
+  @Test
+  public void partition03() {
+    var wl = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    List<WiredList<Integer>> wls = wl.partition(100);
+    assertEquals(1, wls.size());
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wls.get(0));
+    assertSame(wl, wls.get(0));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void partition04() {
+    var wl = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    wl.partition(0);
+  }
+
+  @Test
+  public void split00() {
+    var wl = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    List<WiredList<Integer>> wls = wl.split(2);
+    assertEquals(2, wls.size());
+    assertEquals(List.of(0, 1, 2, 3, 4), wls.get(0));
+    assertEquals(List.of(5, 6, 7, 8, 9), wls.get(1));
+    assertSame(wl, wls.get(1));
+  }
+
+  @Test
+  public void split01() {
+    var wl = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    List<WiredList<Integer>> wls = wl.split(1000);
+    assertEquals(10, wls.size());
+    assertEquals(List.of(0), wls.get(0));
+    assertEquals(List.of(4), wls.get(4));
+    assertEquals(List.of(8), wls.get(8));
+    assertEquals(List.of(9), wls.get(9));
+    assertSame(wl, wls.get(9));
+  }
+
+  @Test
+  public void split02() {
+    var wl = WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    List<WiredList<Integer>> wls = wl.split(1);
+    assertEquals(1, wls.size());
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wls.get(0));
+    assertSame(wl, wls.get(0));
+  }
+
 }
