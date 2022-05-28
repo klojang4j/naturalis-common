@@ -1649,4 +1649,42 @@ public class WiredListTest {
     assertSame(wl, wls.get(0));
   }
 
+  @Test
+  public void copy00() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4);
+    var wl1 = wl0.copy();
+    assertEquals(wl0, wl1);
+    wl1.set(2, 88);
+    assertNotEquals(wl0, wl1);
+  }
+
+  @Test
+  public void copy01() {
+    var wl0 = WiredList.of(0);
+    var wl1 = wl0.copy();
+    assertEquals(wl0, wl1);
+  }
+
+  @Test
+  public void copy02() {
+    var wl0 = WiredList.of(0, 1, 2, 3, 4);
+    var wl1 = wl0.copy(1, wl0.size());
+    assertEquals(WiredList.of(1, 2, 3, 4), wl1);
+    wl1 = wl0.copy(1, 1);
+    assertEquals(WiredList.of(), wl1);
+    wl1 = wl0.copy(5, 5);
+    assertEquals(WiredList.of(), wl1);
+    wl1 = wl0.copy(0, 5);
+    assertEquals(wl0, wl1);
+    wl1 = wl0.copy(0, 3);
+    assertEquals(WiredList.of(0, 1, 2), wl1);
+  }
+
+  @Test
+  public void copy03() {
+    var wl0 = WiredList.of();
+    var wl1 = wl0.copy(0, 0);
+    assertEquals(wl0, wl1);
+  }
+
 }

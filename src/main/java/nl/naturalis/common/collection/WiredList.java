@@ -704,6 +704,31 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
+   * Returns a deep copy of this {@code WiredList}. Changes made to the copy will not
+   * propagate to this instance, and vice versa.
+   *
+   * @return A deep copy of this {@code WiredList}
+   */
+  public WiredList<E> copy() {
+    return sz > 0 ? new WiredList<>(Chain.copyOf(head, sz)) : WiredList.of();
+  }
+
+  /**
+   * Returns a deep copy of the specified segment. Changes made to the copy will not
+   * propagate to this instance, and vice versa.
+   *
+   * @param fromIndex The start index (inclusive) of the segment
+   * @param toIndex The end index (exclusive) of the segment
+   * @return A deep copy of the specified segment
+   */
+  public WiredList<E> copy(int fromIndex, int toIndex) {
+    int len = Check.fromTo(this, fromIndex, toIndex);
+    return len > 0
+        ? new WiredList<>(Chain.copyOf(nodeAt(fromIndex), len))
+        : WiredList.of();
+  }
+
+  /**
    * Embeds the specified list in this list. This method is very efficient, but it is
    * a destructive operation for the provided list - it will be empty afterwards. If
    * you don't want this to happen, use {@link #addAll(int, Collection) addAll}.
@@ -1103,11 +1128,11 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Removes a segment from this list. The segment must contain at least one
-   * element.
+   * Removes and returns a segment from the list. The segment must contain at least
+   * one element.
    *
-   * @param fromIndex The left boundary (inclusive) of the segment to delete
-   * @param toIndex The right boundary (exclusive) of the segment to delete
+   * @param fromIndex The start index (inclusive) of the segment to delete
+   * @param toIndex The end index (exclusive) of the segment to delete
    * @return The deleted segment
    */
   public WiredList<E> remove(int fromIndex, int toIndex) {
