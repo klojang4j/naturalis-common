@@ -21,12 +21,11 @@ import static nl.naturalis.common.check.CommonChecks.*;
 /**
  * A doubly-linked list, much like {@link LinkedList}, but focused on list
  * manipulation rather than queue-like behaviour. As with any doubly-linked list,
- * iteration and (especially) index-based retrieval are relatively costly compared
- * to, for example, {@link ArrayList}. Linked lists can be very efficient, however,
- * at applying structural changes to the list: inserting, deleting and moving around
- * large chunks of list elements. The larger the segments the bigger the gain
- * compared to {@code ArrayList}. Thus, {@code WiredList} especially focuses on these
- * types of operations.
+ * index-based retrieval is relatively costly compared to {@link ArrayList}. It is
+ * very efficient, however, at applying structural changes to the list: inserting,
+ * deleting and moving around chunks of list elements. The larger the chunks the
+ * bigger the gain compared to {@code ArrayList}. Thus, {@code WiredList} especially
+ * focuses on these types of operations.
  *
  * <p>This implementation of the {@link List} interface <b>does not support</b>
  * the {@link List#subList(int, int) subList} method.
@@ -35,15 +34,15 @@ import static nl.naturalis.common.check.CommonChecks.*;
  *
  * <p>Always use an iterator to iterate over the elements in the list (which you
  * implicitly would when executing a {@code forEach} loop). Using an index/get loop
- * is possible, but a bad idea from a performance perspective. The {@link Iterator}
- * and {@link ListIterator} implementations prescribed by the {@code List} interface
- * are no-frills iterators that throw an {@code UnsupportedOperationException} from
- * all methods designated as optional by the specification. Besides these iterators,
- * you can also request a {@link #reverseIterator() reverse iterator} and a
- * "{@linkplain #wiredIterator(boolean) WiredIterator}". The latter returns an
- * instance of the {@link WiredIterator} interface. Unlike a {@link ListIterator}
- * this is a one-way-only iterator, but it still provides the same functionality, and
- * it <i>does</i> implement the methods that are optional in the {@code ListIterator}
+ * is possible, but performs poorly. The {@link Iterator} and {@link ListIterator}
+ * implementations prescribed by the {@code List} interface are no-frills iterators
+ * that throw an {@code UnsupportedOperationException} from all methods designated as
+ * optional by the specification. Besides these iterators, you can also request a
+ * {@link #reverseIterator() reverse iterator} and a "{@linkplain
+ * #wiredIterator(boolean) WiredIterator}". The latter returns an instance of the
+ * {@link WiredIterator} interface. Unlike a {@link ListIterator} this is a
+ * one-way-only iterator, but it still provides the same functionality, and it
+ * <i>does</i> implement the methods that are optional in the {@code ListIterator}
  * interface.
  *
  * @param <E> The type of the elements in the list
@@ -52,7 +51,6 @@ public final class WiredList<E> implements List<E> {
 
   // Ubiquitous parameter names within this class
   private static final String INDEX = "index";
-  private static final String LIST = "list";
   private static final String WIRED_LIST = "WiredList";
   private static final String TEST = "test";
 
@@ -518,6 +516,7 @@ public final class WiredList<E> implements List<E> {
     addAll(0, c);
   }
 
+  @SuppressWarnings({"unchecked"})
   private WiredList(Chain chain) {
     head = chain.head;
     tail = chain.tail;
@@ -650,7 +649,7 @@ public final class WiredList<E> implements List<E> {
    */
   public E pop() {
     Check.that(sz).is(ne(), 0, emptyList());
-    return delete(sz, 1).head.val;
+    return destroy(tail);
   }
 
   /**
@@ -660,7 +659,7 @@ public final class WiredList<E> implements List<E> {
    */
   public E shift() {
     Check.that(sz).is(ne(), 0, emptyList());
-    return delete(0, 1).head.val;
+    return destroy(head);
   }
 
   /**
@@ -758,6 +757,7 @@ public final class WiredList<E> implements List<E> {
    *
    * @param other The list to embed
    * @return this {@code WiredList}
+   * @see #stitch(WiredList)
    */
   public WiredList<E> stitch(WiredList<? extends E> other) {
     return embed(sz, other);
@@ -800,7 +800,7 @@ public final class WiredList<E> implements List<E> {
     Node last = other.nodeAfter(first, itsFromIndex, itsToIndex - 1);
     Chain chain = new Chain(first, last, itsToIndex - itsFromIndex);
     // deleteNode MUST precede insertNode
-    other.deleteChain(chain);
+    other.delete(chain);
     insert(myIndex, chain);
     return this;
   }
@@ -848,7 +848,7 @@ public final class WiredList<E> implements List<E> {
    * @return A list of element groups
    * @see #stitch(WiredList)
    */
-  @SuppressWarnings({"rawtypes", "unchecked"})
+  @SuppressWarnings({"rawtypes"})
   public WiredList<WiredList<E>> group(List<Predicate<? super E>> criteria) {
     Check.that(criteria).isNot(empty());
     Predicate[] predicates = criteria.toArray(Predicate[]::new);
@@ -895,7 +895,7 @@ public final class WiredList<E> implements List<E> {
     WiredList<WiredList<E>> partitions = new WiredList<>();
     while (sz > size) {
       Chain chain = new Chain(head, nodeAt(size - 1), size);
-      deleteChain(chain);
+      delete(chain);
       partitions.push(new WiredList<>(chain));
     }
     partitions.push(this);
@@ -941,9 +941,8 @@ public final class WiredList<E> implements List<E> {
       return this;
     }
     Chain chain = new Chain(first, last, len);
-    deleteChain(chain);
-    WiredList<E> wl = new WiredList<>(chain);
-    return wl;
+    delete(chain);
+    return new WiredList<>(chain);
   }
 
   /**
@@ -972,9 +971,8 @@ public final class WiredList<E> implements List<E> {
       return this;
     }
     Chain chain = new Chain(first, last, len);
-    deleteChain(chain);
-    WiredList<E> wl = new WiredList<>(chain);
-    return wl;
+    delete(chain);
+    return new WiredList<>(chain);
   }
 
   /**
@@ -1001,8 +999,8 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Moves a list segment forward or backward in the list. The segment must contain
-   * at least one element.
+   * Moves a list segment forward or backward through the list. The segment must
+   * contain at least one element.
    *
    * @param fromIndex The start index of the segment (inclusive)
    * @param toIndex The end index of the segment (exclusive)
@@ -1068,8 +1066,8 @@ public final class WiredList<E> implements List<E> {
    */
   @Override
   public E remove(int index) {
-    checkExclusive(index);
-    return delete(index, index + 1).head.val;
+    Node<E> node = checkExclusive(index).ok(this::nodeAt);
+    return destroy(node);
   }
 
   /**
@@ -1088,7 +1086,7 @@ public final class WiredList<E> implements List<E> {
     } else {
       for (var x = head; x != null; ) {
         if (o.equals(x.val)) {
-          delete(x);
+          destroy(x);
           return true;
         }
         x = x.next;
@@ -1106,9 +1104,9 @@ public final class WiredList<E> implements List<E> {
     int size = sz;
     for (var x = head; x != null; ) {
       if (test.test(x.val)) {
-        var y = x.next;
-        delete(x);
-        x = y;
+        var next = x.next;
+        destroy(x);
+        x = next;
       } else {
         x = x.next;
       }
@@ -1437,8 +1435,15 @@ public final class WiredList<E> implements List<E> {
     var last = nodeAfter(first, from, to - 1);
     int len = to - from;
     Chain chain = new Chain(first, last, len);
-    deleteChain(chain);
+    delete(chain);
     return new WiredList<>(chain);
+  }
+
+  private E destroy(Node<E> node) {
+    E val = node.val;
+    node.val = null; // help garbage collector
+    delete(node);
+    return val;
   }
 
   private void delete(Node<E> node) {
@@ -1455,7 +1460,7 @@ public final class WiredList<E> implements List<E> {
   }
 
   @SuppressWarnings("unchecked")
-  private void deleteChain(Chain chain) {
+  private void delete(Chain chain) {
     if (chain.length == sz) {
       head = tail = null;
     } else if (chain.head == head) {
@@ -1466,20 +1471,6 @@ public final class WiredList<E> implements List<E> {
       join(chain.head.prev, chain.tail.next);
     }
     sz -= chain.length;
-  }
-
-  // Give the garbage collector a break;
-  private static void dispose(Chain chain) {
-    for (var x = chain.head; ; ) {
-      var next = x.next;
-      x.val = null;
-      x.prev = null;
-      x.next = null;
-      if (x == chain.tail) {
-        break;
-      }
-      x = next;
-    }
   }
 
   // @VisibleForTesting
