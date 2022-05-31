@@ -17,7 +17,7 @@ import java.util.ListIterator;
  * @param <E> The type of the elements being iterated over
  */
 public sealed interface WiredIterator<E> extends Iterator<E> permits
-    WiredList.ForwardWiredIterator,
+    SynchronizedWiredList.CloseableWiredIterator, WiredList.ForwardWiredIterator,
     WiredList.ReverseWiredIterator {
 
   /**

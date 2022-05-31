@@ -32,13 +32,14 @@ public final class TypeGraphMapBuilder<V> {
     }
 
     TypeNode toTypeNode() {
-      Entry[] entries = subtypes.ltrim(node -> !node.type.isInterface())
+      Entry[] entries = subtypes.lchop(node -> !node.type.isInterface())
           .stream()
           .map(node -> entry(node.type, node.toTypeNode()))
           .toArray(Entry[]::new);
       Map<Class<?>, TypeNode> subclasses = Map.ofEntries(entries);
       entries =
-          subtypes.stream().map(node -> entry(node.type, node.toTypeNode())).toArray(Entry[]::new);
+          subtypes.stream().map(node -> entry(node.type, node.toTypeNode())).toArray(
+              Entry[]::new);
       Map<Class<?>, TypeNode> subinterfaces = Map.ofEntries(entries);
       return new TypeNode(type, value, subclasses, subinterfaces);
     }
@@ -61,9 +62,9 @@ public final class TypeGraphMapBuilder<V> {
       }
       if (!inserted) {
         if (node.type.isInterface()) {
-          subtypes.push(node);
+          subtypes.append(node);
         } else {
-          subtypes.unshift(node);
+          subtypes.prepend(node);
         }
       }
     }
@@ -86,8 +87,8 @@ public final class TypeGraphMapBuilder<V> {
   }
 
   /**
-   * Whether to enable the "autoboxing" feature. See {@link TypeMap for an explanation of this
-   * feature. By default, autoboxing is enabled.
+   * Whether to enable the "autoboxing" feature. See {@link TypeMap for an
+   * explanation of this feature. By default, autoboxing is enabled.
    *
    * @return This {@code Builder} instance
    */
@@ -135,7 +136,8 @@ public final class TypeGraphMapBuilder<V> {
   }
 
   /**
-   * Returns an unmodifiable {@code TypeMap} with the configured types and behaviour.
+   * Returns an unmodifiable {@code TypeMap} with the configured types and
+   * behaviour.
    *
    * @param <W> The type of the values in the returned {@code TypeMap}
    * @return S new {@code TypeMap} instance with the configured types and behaviour

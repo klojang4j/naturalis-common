@@ -30,7 +30,8 @@ public final class LinkedTypeGraphMapBuilder<V> {
 
     LinkedTypeNode toTypeNode() {
       var subclasses =
-          this.subclasses.stream().map(WritableTypeNode::toTypeNode).toArray(LinkedTypeNode[]::new);
+          this.subclasses.stream().map(WritableTypeNode::toTypeNode).toArray(
+              LinkedTypeNode[]::new);
       if (subclasses.length == 0) {
         subclasses = NO_SUBTYPES;
       }
@@ -52,7 +53,9 @@ public final class LinkedTypeGraphMapBuilder<V> {
     }
 
     void addSubclass(WritableTypeNode node) {
-      Check.that(node.type).isNot(sameAs(), type, () -> new DuplicateKeyException(type));
+      Check.that(node.type).isNot(sameAs(),
+          type,
+          () -> new DuplicateKeyException(type));
       WiredIterator<WritableTypeNode> itr = subclasses.wiredIterator();
       while (itr.hasNext()) {
         var subclass = itr.next();
@@ -72,11 +75,13 @@ public final class LinkedTypeGraphMapBuilder<V> {
           return;
         }
       }
-      subclasses.push(node);
+      subclasses.append(node);
     }
 
     void addSubinterface(WritableTypeNode node) {
-      Check.that(node.type).isNot(sameAs(), type, () -> new DuplicateKeyException(type));
+      Check.that(node.type).isNot(sameAs(),
+          type,
+          () -> new DuplicateKeyException(type));
       WiredIterator<WritableTypeNode> itr = subinterfaces.wiredIterator();
       while (itr.hasNext()) {
         var subinterface = itr.next();
@@ -88,7 +93,7 @@ public final class LinkedTypeGraphMapBuilder<V> {
           return;
         }
       }
-      subinterfaces.push(node);
+      subinterfaces.append(node);
     }
 
   }
@@ -109,8 +114,8 @@ public final class LinkedTypeGraphMapBuilder<V> {
   }
 
   /**
-   * Whether to enable the "autoboxing" feature. See {@link TypeMap for an explanation of this
-   * feature. By default, autoboxing is enabled.
+   * Whether to enable the "autoboxing" feature. See {@link TypeMap for an
+   * explanation of this feature. By default, autoboxing is enabled.
    *
    * @return This {@code Builder} instance
    */
@@ -158,7 +163,8 @@ public final class LinkedTypeGraphMapBuilder<V> {
   }
 
   /**
-   * Returns an unmodifiable {@code TypeMap} with the configured types and behaviour.
+   * Returns an unmodifiable {@code TypeMap} with the configured types and
+   * behaviour.
    *
    * @param <W> The type of the values in the returned {@code TypeMap}
    * @return S new {@code TypeMap} instance with the configured types and behaviour
