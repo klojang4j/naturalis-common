@@ -48,6 +48,12 @@ public sealed interface WiredIterator<E> extends Iterator<E>, AutoCloseable perm
    */
   WiredIterator<E> reverse();
 
+  /**
+   * Provides a hook for implementations returned by {@link SynchronizedWiredList} to
+   * release the {@link java.util.concurrent.locks.Lock} acquired at the start of the
+   * iteration. When retrieving a {@code SynchronizedWiredList} you <b>SHOULD</b> use
+   * a try-with-resources block
+   */
   default void close() {}
 
 }

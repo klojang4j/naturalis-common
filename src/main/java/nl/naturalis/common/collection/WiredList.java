@@ -19,29 +19,24 @@ import static nl.naturalis.common.MathMethods.divUp;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
- * A doubly-linked list, much like {@link LinkedList}, but focused on list
- * manipulation rather than queue-like behaviour. As with any doubly-linked list,
- * index-based retrieval is relatively costly compared to {@link ArrayList}. It is
- * very efficient, however, at applying structural changes to the list: inserting,
- * deleting and moving around chunks of list elements. The larger the chunks the
- * bigger the gain compared to {@code ArrayList}. Thus, {@code WiredList} especially
- * focuses on these types of operations.
+ * A doubly-linked list, much like {@link LinkedList}, but exclusively focused on
+ * list manipulation while disregarding its queue-like capabilities. As with any
+ * doubly-linked list, index-based retrieval is relatively costly compared to {@link
+ * ArrayList}. It is very efficient, however, at inserting, deleting and moving
+ * around chunks of list elements (i.e. structural changes). The larger the chunks
+ * the bigger the gain compared to {@code ArrayList}.
  *
- * <p>This implementation of the {@link List} interface <b>does not support</b>
- * the {@link List#subList(int, int) subList} method.
+ * <p>This implementation of {@link List} <b>does not support</b> the
+ * {@link List#subList(int, int) subList} method.
  *
  * <h4>Use in multi-threaded context</h4>
  *
- * <p>Because methods that manipulate the list are nearly always do so in a
- * destructive manner, careless use of them in a multi-threaded context can leave the
- * list in a seriously corrupted state. Apart from trying to ensure that operations
- * at least don't stumble over dangling links within the list (i.e. null pointers),
- * the {@code WiredList} makes no attempt to protect itself against this. You should
- * use a {@link SynchronizedWiredList} if it is likely that multiple threads
- * accessing the same list concurrently will cause the list to get corrupted. Note
- * that the {@code WiredList} class provides a fluent API over quite a few of its
- * methods. If you intend to use it extensively, it's probably more efficient to
- * manually synchronize around to entire call chain.
+ * <p>Since list manipulation nearly always happens in a destructive manner for
+ * the underlying data structure, careless use of a {@code WiredList} in a
+ * multi-threaded context can leave it in a seriously compromised state. {@code
+ * WiredList} itself makes no attempt to protect itself against this. You should use
+ * a {@link SynchronizedWiredList} if it is likely that multiple threads accessing
+ * the same list concurrently will cause the list to get corrupted.
  *
  * <h4>Iteration</h4>
  *
@@ -193,19 +188,18 @@ public final class WiredList<E> implements List<E> {
 
     @Override
     public E peek() {
-      Check.that(sz).is(ne(), 0, emptyListNotAllowed());
+      Check.that(sz).is(ne(), 0, noSuchElement());
       Check.that(curr).isNot(sameAs(), tail, noSuchElement());
-      return Check.that(curr.next)
-          .is(notNull(), concurrentModification())
-          .ok(Node::value);
+      return Check.that(curr.next).is(notNull(), noSuchElement()).ok(Node::value);
     }
 
     @Override
     public E next() {
-      Check.that(sz).is(ne(), 0, emptyListNotAllowed());
+      Check.that(sz).is(ne(), 0, noSuchElement());
       Check.that(curr).isNot(sameAs(), tail, noSuchElement());
-      return Check.that(curr = curr.next).is(notNull(), concurrentModification()).ok(
-          Node::value);
+      return Check.that(curr = curr.next)
+          .is(notNull(), noSuchElement())
+          .ok(Node::value);
     }
 
     @Override
@@ -226,7 +220,7 @@ public final class WiredList<E> implements List<E> {
         destroy(node);
         node = beforeHead = justBeforeHead();
       } else {
-        Check.that(node = node.prev).is(notNull(), concurrentModification());
+        Check.that(node = node.prev).is(notNull(), noSuchElement());
         destroy(node.next);
       }
       this.curr = node;
@@ -261,25 +255,25 @@ public final class WiredList<E> implements List<E> {
 
     @Override
     public E peek() {
-      Check.that(sz).is(ne(), 0, emptyListNotAllowed());
+      Check.that(sz).is(ne(), 0, noSuchElement());
       Check.that(curr).isNot(sameAs(), head, noSuchElement());
-      return Check.that(curr.prev)
-          .is(notNull(), concurrentModification())
-          .ok(Node::value);
+      return Check.that(curr.prev).is(notNull(), noSuchElement()).ok(Node::value);
     }
 
     @Override
     public E next() {
       Check.that(sz).is(ne(), 0, emptyListNotAllowed());
       Check.that(curr).isNot(sameAs(), head, noSuchElement());
-      return Check.that(curr = curr.prev).is(notNull(), concurrentModification()).ok(
-          Node::value);
+      return Check.that(curr = curr.prev)
+          .is(notNull(), noSuchElement())
+          .ok(Node::value);
     }
 
     @Override
     public void set(E newVal) {
       Check.that(sz).is(ne(), 0, emptyListNotAllowed());
-      Check.that(curr).isNot(sameAs(), afterTail, callNextFirst()).ok().val = newVal;
+      Check.that(curr).isNot(sameAs(), afterTail, callNextFirst());
+      curr.val = newVal;
     }
 
     @Override
