@@ -52,6 +52,15 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * iterator, but it still provides the same functionality, and it <i>does</i>
  * implement the methods that are optional in the {@code ListIterator} interface.
  *
+ * <h4>Fluent API</h4>
+ *
+ * Many of the methods that go beyond those prescribed by the {@code List} interface
+ * form part of a fluent API. This causes some overlap in functionality between
+ * {@code List} methods and methods taking part in the fluent API. For example:
+ * {@link #add(int, Object)} (returning {@code void}) vs. {@link #insert(int,
+ * Object)} (returning <i>this</i>). They are implemented exactly alike, so there is
+ * intrinsic reason to prefer one over the other.
+ *
  * @param <E> The type of the elements in the list
  */
 public final class WiredList<E> implements List<E> {
@@ -227,7 +236,7 @@ public final class WiredList<E> implements List<E> {
     }
 
     @Override
-    public WiredIterator<E> reverse() {
+    public WiredIterator<E> turnAround() {
       Check.that(sz).is(ne(), 0, emptyListNotAllowed());
       return Check.that(curr).isNot(sameAs(), beforeHead, callNextFirst()).ok(
           ReverseWiredIterator::new);
@@ -295,7 +304,7 @@ public final class WiredList<E> implements List<E> {
     }
 
     @Override
-    public WiredIterator<E> reverse() {
+    public WiredIterator<E> turnAround() {
       Check.that(sz).is(ne(), 0, emptyListNotAllowed());
       return Check.that(curr).isNot(sameAs(), afterTail, callNextFirst()).ok(
           ForwardWiredIterator::new);

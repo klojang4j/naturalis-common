@@ -129,8 +129,8 @@ public final class SynchronizedWiredList<E> implements List<E> {
     }
 
     @Override
-    public WiredIterator<E> reverse() {
-      return itr.reverse();
+    public WiredIterator<E> turnAround() {
+      return itr.turnAround();
     }
 
   }
@@ -658,6 +658,20 @@ public final class SynchronizedWiredList<E> implements List<E> {
     (l = getWriteLock()).lock();
     try {
       wl.append(value);
+      return this;
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#insert(int, Object)}.
+   */
+  public SynchronizedWiredList<E> insert(int index, E value) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      wl.insert(index, value);
       return this;
     } finally {
       l.unlock();

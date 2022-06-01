@@ -8,10 +8,9 @@ import java.util.ListIterator;
  * as a {@link ListIterator}. It is resistant against same-thread list modifications
  * outside the iterator, and it makes some light-weight attempts to protect itself
  * against the consequences concurrent modifications of the list. A {@code
- * WiredIterator} lets you reverse the direction of the iteration midway. Its {@code
- * next} and {@code hasNext} methods are always relative to the direction of the
- * traversal. (Thus, {@code next()} may move the {@code Iterator} closer to the start
- * of the list.) You obtain a {@code WiredIterator} by calling {@link
+ * WiredIterator} lets you reverse the direction of the iteration midway. The {@code
+ * next()} and {@code hasNext()} methods are always relative to the direction of the
+ * traversal. You obtain a {@code WiredIterator} by calling {@link
  * WiredList#wiredIterator(boolean) WiredList.wiredIterator}.
  *
  * @param <E> The type of the elements being iterated over
@@ -46,13 +45,14 @@ public sealed interface WiredIterator<E> extends Iterator<E>, AutoCloseable perm
    * @return A {@code WiredIterator} that the traverses the list in the opposite
    *     direction.
    */
-  WiredIterator<E> reverse();
+  WiredIterator<E> turnAround();
 
   /**
    * Provides a hook for implementations returned by {@link SynchronizedWiredList} to
-   * release the {@link java.util.concurrent.locks.Lock} acquired at the start of the
-   * iteration. When retrieving a {@code SynchronizedWiredList} you <b>SHOULD</b> use
-   * a try-with-resources block
+   * release the {@link java.util.concurrent.locks.Lock Lock} acquired at the start
+   * of the iteration. You <b>SHOULD ALWAYS</b> use a try-with-resources block to
+   * obtain a {@code WiredIterator} from a {@code SynchronizedWiredList}. This is
+   * unnecessary for a regular {@code WiredList}.
    */
   default void close() {}
 
