@@ -246,6 +246,15 @@ public final class SynchronizedWiredList<E> implements List<E> {
     Lock l;
     (l = getReadLock()).lock();
     try {
+      if (c instanceof SynchronizedWiredList swl) {
+        Lock l2;
+        (l2 = swl.getReadLock()).lock();
+        try {
+          return wl.containsAll(swl.wl);
+        } finally {
+          l2.unlock();
+        }
+      }
       return wl.containsAll(c);
     } finally {
       l.unlock();
@@ -383,10 +392,22 @@ public final class SynchronizedWiredList<E> implements List<E> {
     if (this == o) {
       return true;
     }
-    if (o instanceof SynchronizedWiredList<?> swl) {
-      wl.equals(swl.wl);
+    Lock l;
+    (l = getReadLock()).lock();
+    try {
+      if (o instanceof SynchronizedWiredList swl) {
+        Lock l2;
+        (l2 = swl.getReadLock()).lock();
+        try {
+          return wl.equals(swl.wl);
+        } finally {
+          l2.unlock();
+        }
+      }
+      return wl.equals(o);
+    } finally {
+      l.unlock();
     }
-    return wl.equals(o);
   }
 
   /**
@@ -478,6 +499,15 @@ public final class SynchronizedWiredList<E> implements List<E> {
     Lock l;
     (l = getWriteLock()).lock();
     try {
+      if (values instanceof SynchronizedWiredList swl) {
+        Lock l2;
+        (l2 = swl.getReadLock()).lock();
+        try {
+          return wl.addAll(swl.wl);
+        } finally {
+          l2.unlock();
+        }
+      }
       return wl.addAll(values);
     } finally {
       l.unlock();
@@ -492,6 +522,15 @@ public final class SynchronizedWiredList<E> implements List<E> {
     Lock l;
     (l = getWriteLock()).lock();
     try {
+      if (values instanceof SynchronizedWiredList swl) {
+        Lock l2;
+        (l2 = swl.getReadLock()).lock();
+        try {
+          return wl.addAll(index, swl.wl);
+        } finally {
+          l2.unlock();
+        }
+      }
       return wl.addAll(index, values);
     } finally {
       l.unlock();
@@ -635,8 +674,8 @@ public final class SynchronizedWiredList<E> implements List<E> {
   /**
    * Forwards to {@link WiredList#insertAll(int, Collection)}.
    */
-  public SynchronizedWiredList<E> insertAll(int index, Collection<?
-      extends E> values) {
+  public SynchronizedWiredList<E> insertAll(int index,
+      Collection<? extends E> values) {
     Lock l;
     (l = getWriteLock()).lock();
     try {
@@ -740,8 +779,7 @@ public final class SynchronizedWiredList<E> implements List<E> {
     (l = getWriteLock()).lock();
     try {
       WiredList<WiredList<E>> wls = wl.group(criteria);
-      SynchronizedWiredList<SynchronizedWiredList<E>> groups =
-          new SynchronizedWiredList<>();
+      SynchronizedWiredList<SynchronizedWiredList<E>> groups = new SynchronizedWiredList<>();
       Iterator<WiredList<E>> itr = wls.iterator();
       for (int i = 0; i < wls.size() - 1; ++i) {
         groups.add(new SynchronizedWiredList<>(lock, itr.next()));
@@ -761,8 +799,7 @@ public final class SynchronizedWiredList<E> implements List<E> {
     (l = getWriteLock()).lock();
     try {
       WiredList<WiredList<E>> wls = wl.partition(size);
-      SynchronizedWiredList<SynchronizedWiredList<E>> partitions =
-          new SynchronizedWiredList<>();
+      SynchronizedWiredList<SynchronizedWiredList<E>> partitions = new SynchronizedWiredList<>();
       Iterator<WiredList<E>> itr = wls.iterator();
       for (int i = 0; i < wls.size() - 1; ++i) {
         partitions.add(new SynchronizedWiredList<>(lock, itr.next()));
@@ -782,8 +819,7 @@ public final class SynchronizedWiredList<E> implements List<E> {
     (l = getWriteLock()).lock();
     try {
       WiredList<WiredList<E>> wls = wl.split(count);
-      SynchronizedWiredList<SynchronizedWiredList<E>> partitions =
-          new SynchronizedWiredList<>();
+      SynchronizedWiredList<SynchronizedWiredList<E>> partitions = new SynchronizedWiredList<>();
       Iterator<WiredList<E>> itr = wls.iterator();
       for (int i = 0; i < wls.size() - 1; ++i) {
         partitions.add(new SynchronizedWiredList<>(lock, itr.next()));
