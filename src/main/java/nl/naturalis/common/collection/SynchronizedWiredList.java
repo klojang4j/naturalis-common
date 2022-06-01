@@ -1,6 +1,5 @@
 package nl.naturalis.common.collection;
 
-import nl.naturalis.common.ExceptionMethods;
 import nl.naturalis.common.check.Check;
 
 import java.lang.ref.Cleaner;
@@ -8,7 +7,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -51,19 +49,20 @@ public final class SynchronizedWiredList<E> implements List<E> {
 
   private static final Cleaner CLEANER = Cleaner.create();
 
-  final class CloseableWiredIterator implements WiredIterator<E>, AutoCloseable {
+  final class CloseableWiredIterator implements WiredIterator<E> {
 
     private final WiredIterator<E> itr;
+    private final boolean readOnly;
 
-    CloseableWiredIterator(WiredIterator<E> itr) {
-      getWriteLock(lock).lock();
-      CLEANER.register(this, () -> getWriteLock(lock).unlock());
+    CloseableWiredIterator(WiredIterator<E> itr, boolean readOnly) {
       this.itr = itr;
+      this.readOnly = readOnly;
     }
 
     @Override
     public void close() {
-      getWriteLock(lock).unlock();
+      Lock l;
+      (l = readOnly ? getReadLock() : getWriteLock()).unlock();
     }
 
     @Override
@@ -99,54 +98,43 @@ public final class SynchronizedWiredList<E> implements List<E> {
   }
 
   /**
-   * Forwards to {@link WiredList#of()}. Access to the underlying {@code WiredList}
-   * is synchronized using a {@link ReentrantLock}. See {@link
-   * #SynchronizedWiredList(boolean)}.
+   * Forwards to {@link WiredList#of()}.
    */
   public static <E> SynchronizedWiredList<E> of() {
     return new SynchronizedWiredList<>();
   }
 
   /**
-   * Forwards to {@link WiredList#of(Object)}. Access to the underlying {@code
-   * WiredList} is synchronized using a {@link ReentrantLock}. See {@link
-   * #SynchronizedWiredList(boolean)}.
+   * Forwards to {@link WiredList#of(Object)}.
    */
   public static <E> SynchronizedWiredList<E> of(E e) {
     return new SynchronizedWiredList<>(WiredList.of(e));
   }
 
   /**
-   * Forwards to {@link WiredList#of(Object, Object)}. Access to the underlying
-   * {@code WiredList} is synchronized using a {@link ReentrantLock}. See {@link
-   * #SynchronizedWiredList(boolean)}.
+   * Forwards to {@link WiredList#of(Object, Object)}.
    */
   public static <E> SynchronizedWiredList<E> of(E e0, E e1) {
     return new SynchronizedWiredList<>(WiredList.of(e0, e1));
   }
 
   /**
-   * Forwards to {@link WiredList#of(Object, Object, Object, Object[])}. Access to
-   * the underlying {@code WiredList} is synchronized using a {@link ReentrantLock}.
-   * See {@link #SynchronizedWiredList(boolean)}.
+   * Forwards to {@link WiredList#of(Object, Object, Object, Object[])}.
    */
+  @SafeVarargs
   public static <E> SynchronizedWiredList<E> of(E e0, E e1, E e2, E... moreElems) {
     return new SynchronizedWiredList<>(WiredList.of(e0, e1, e2, moreElems));
   }
 
   /**
-   * Forwards to {@link WiredList#ofElements(Object[])}. Access to the underlying
-   * {@code WiredList} is synchronized using a {@link ReentrantLock}. See {@link
-   * #SynchronizedWiredList(boolean)}.
+   * Forwards to {@link WiredList#ofElements(Object[])}.
    */
   public static <E> SynchronizedWiredList<E> ofElements(E[] elements) {
     return new SynchronizedWiredList<>(WiredList.ofElements(elements));
   }
 
   /**
-   * Forwards to {@link WiredList#stitch(List)}. Access to the underlying {@code
-   * WiredList} is synchronized using a {@link ReentrantLock}. See {@link
-   * #SynchronizedWiredList(boolean)}.
+   * Forwards to {@link WiredList#stitch(List)}.
    */
   public static <E> SynchronizedWiredList<E> stitch(List<SynchronizedWiredList<E>> lists) {
     SynchronizedWiredList<E> wl = new SynchronizedWiredList<>();
@@ -213,7 +201,13 @@ public final class SynchronizedWiredList<E> implements List<E> {
    */
   @Override
   public int size() {
-    return callReader(() -> wl.size());
+    Lock l;
+    (l = getReadLock()).lock();
+    try {
+      return wl.size();
+    } finally {
+      l.unlock();
+    }
   }
 
   /**
@@ -221,7 +215,13 @@ public final class SynchronizedWiredList<E> implements List<E> {
    */
   @Override
   public boolean isEmpty() {
-    return callReader(() -> wl.isEmpty());
+    Lock l;
+    (l = getReadLock()).lock();
+    try {
+      return wl.isEmpty();
+    } finally {
+      l.unlock();
+    }
   }
 
   /**
@@ -229,7 +229,13 @@ public final class SynchronizedWiredList<E> implements List<E> {
    */
   @Override
   public boolean contains(Object o) {
-    return callReader(() -> wl.contains(o));
+    Lock l;
+    (l = getReadLock()).lock();
+    try {
+      return wl.contains(o);
+    } finally {
+      l.unlock();
+    }
   }
 
   /**
@@ -237,7 +243,13 @@ public final class SynchronizedWiredList<E> implements List<E> {
    */
   @Override
   public boolean containsAll(Collection<?> c) {
-    return callReader(() -> wl.containsAll(c));
+    Lock l;
+    (l = getReadLock()).lock();
+    try {
+      return wl.containsAll(c);
+    } finally {
+      l.unlock();
+    }
   }
 
   /**
@@ -245,38 +257,13 @@ public final class SynchronizedWiredList<E> implements List<E> {
    */
   @Override
   public E get(int index) {
-    return callReader(() -> wl.get(index));
-  }
-
-  /**
-   * Forwards to {@link WiredList#set(int, Object)}.
-   */
-  @Override
-  public E set(int index, E value) {
-    return callWriter(() -> wl.set(index, value));
-  }
-
-  /**
-   * Forwards to {@link WiredList#setIf(int, Predicate, Object)}.
-   */
-  public E setIf(int index, Predicate<? super E> test, E value) {
-    return callWriter(() -> wl.setIf(index, test, value));
-  }
-
-  /**
-   * Forwards to {@link WiredList#add(Object)}.
-   */
-  @Override
-  public boolean add(E value) {
-    return callWriter(() -> wl.add(value));
-  }
-
-  /**
-   * Forwards to {@link WiredList#add(int, Object)}.
-   */
-  @Override
-  public void add(int index, E value) {
-    runWriter(() -> wl.add(index, value));
+    Lock l;
+    (l = getReadLock()).lock();
+    try {
+      return wl.get(index);
+    } finally {
+      l.unlock();
+    }
   }
 
   /**
@@ -284,7 +271,13 @@ public final class SynchronizedWiredList<E> implements List<E> {
    */
   @Override
   public int indexOf(Object o) {
-    return callReader(() -> wl.indexOf(o));
+    Lock l;
+    (l = getReadLock()).lock();
+    try {
+      return wl.indexOf(o);
+    } finally {
+      l.unlock();
+    }
   }
 
   /**
@@ -292,337 +285,91 @@ public final class SynchronizedWiredList<E> implements List<E> {
    */
   @Override
   public int lastIndexOf(Object o) {
-    return callReader(() -> wl.lastIndexOf(o));
-  }
-
-  /**
-   * Forwards to {@link WiredList#addAll(Collection)}.
-   */
-  @Override
-  public boolean addAll(Collection<? extends E> values) {
-    return callWriter(() -> wl.addAll(values));
-  }
-
-  /**
-   * Forwards to {@link WiredList#addAll(int, Collection)}.
-   */
-  @Override
-  public boolean addAll(int index, Collection<? extends E> values) {
-    return callWriter(() -> wl.addAll(index, values));
-  }
-
-  /**
-   * Forwards to {@link WiredList#remove(int)}.
-   */
-  @Override
-  public E remove(int index) {
-    return callWriter(() -> wl.remove(index));
-  }
-
-  /**
-   * Forwards to {@link WiredList#remove(Object)}.
-   */
-  @Override
-  public boolean remove(Object o) {
-    return callWriter(() -> wl.remove(o));
-  }
-
-  /**
-   * Forwards to {@link WiredList#removeIf(Predicate)}.
-   */
-  @Override
-  public boolean removeIf(Predicate<? super E> test) {
-    return callWriter(() -> wl.removeIf(test));
-  }
-
-  /**
-   * Forwards to {@link WiredList#removeAll(Collection)}.
-   */
-  @Override
-  public boolean removeAll(Collection<?> c) {
-    return callWriter(() -> wl.removeAll(c));
-  }
-
-  /**
-   * Forwards to {@link WiredList#prepend(Object)}.
-   */
-  public SynchronizedWiredList<E> prepend(E value) {
-    return callFluentWriter(() -> wl.prepend(value));
-  }
-
-  /**
-   * Forwards to {@link WiredList#append(Object)}.
-   */
-  public SynchronizedWiredList<E> append(E value) {
-    return callFluentWriter(() -> wl.append(value));
-  }
-
-  /**
-   * Forwards to {@link WiredList#deleteFirst()}.
-   */
-  public SynchronizedWiredList<E> deleteFirst() {
-    return callFluentWriter(() -> wl.deleteFirst());
-  }
-
-  /**
-   * Forwards to {@link WiredList#deleteLast()}.
-   */
-  public SynchronizedWiredList<E> deleteLast() {
-    return callFluentWriter(() -> wl.deleteLast());
-  }
-
-  /**
-   * Forwards to {@link WiredList#prependAll(Collection)}.
-   */
-  public SynchronizedWiredList<E> prependAll(Collection<? extends E> values) {
-    return callFluentWriter(() -> wl.prependAll(values));
-  }
-
-  /**
-   * Forwards to {@link WiredList#appendAll(Collection)}.
-   */
-  public SynchronizedWiredList<E> appendAll(Collection<? extends E> values) {
-    return callFluentWriter(() -> wl.appendAll(values));
-  }
-
-  /**
-   * Forwards to {@link WiredList#insertAll(int, Collection)}.
-   */
-  public SynchronizedWiredList<E> insertAll(int index, Collection<?
-      extends E> values) {
-    return callFluentWriter(() -> wl.insertAll(index, values));
+    Lock l;
+    (l = getReadLock()).lock();
+    try {
+      return wl.lastIndexOf(o);
+    } finally {
+      l.unlock();
+    }
   }
 
   /**
    * Forwards to {@link WiredList#copy()}.
    */
   public SynchronizedWiredList<E> copy() {
-    return callReader(() -> new SynchronizedWiredList<>(lock, wl.copy()));
+    Lock l;
+    (l = getReadLock()).lock();
+    try {
+      return new SynchronizedWiredList<>(wl.copy());
+    } finally {
+      l.unlock();
+    }
   }
 
   /**
    * Forwards to {@link WiredList#copySegment(int, int)}.
    */
   public SynchronizedWiredList<E> copySegment(int fromIndex, int toIndex) {
-    return callReader(
-        () -> new SynchronizedWiredList<>(lock, wl.copySegment(fromIndex, toIndex)));
-  }
-
-  /**
-   * Forwards to {@link WiredList#deleteSegment(int, int)}.
-   */
-  public SynchronizedWiredList<E> deleteSegment(int fromIndex, int toIndex) {
-    return callFluentWriter(() -> wl.deleteSegment(fromIndex, toIndex));
-  }
-
-  /**
-   * Forwards to {@link WiredList#embed(int, WiredList)}.
-   */
-  public SynchronizedWiredList<E> embed(int myIndex,
-      SynchronizedWiredList<? extends E> other) {
-    return callFluentWriter(() -> wl.embed(myIndex, other.wl));
-  }
-
-  /**
-   * Forwards to {@link WiredList#stitch(WiredList)}.
-   */
-  public SynchronizedWiredList<E> stitch(SynchronizedWiredList<? extends E> other) {
-    return embed(size(), other);
-  }
-
-  /**
-   * Forwards to {@link WiredList#excise(int, WiredList, int, int)}.
-   */
-  public SynchronizedWiredList<E> excise(SynchronizedWiredList<? extends E> other,
-      int itsFromIndex,
-      int itsToIndex) {
-    return callFluentWriter(() -> excise(size(),
-        other,
-        itsFromIndex,
-        itsToIndex));
-  }
-
-  /**
-   * Forwards to {@link WiredList#excise(int, WiredList, int, int)}.
-   */
-  public SynchronizedWiredList<E> excise(int myIndex,
-      SynchronizedWiredList<? extends E> other,
-      int itsFromIndex,
-      int itsToIndex) {
-    return callFluentWriter(() -> wl.excise(myIndex,
-        other.wl,
-        itsFromIndex,
-        itsToIndex));
-  }
-
-  /**
-   * Forwards to {@link WiredList#defragment(List)}.
-   */
-  public SynchronizedWiredList<E> defragment(List<Predicate<? super E>> criteria) {
-    return callFluentWriter(() -> wl.defragment(criteria));
-  }
-
-  /**
-   * Forwards to {@link WiredList#group(List)}.
-   */
-  public SynchronizedWiredList<SynchronizedWiredList<E>> group(List<Predicate<? super E>> criteria) {
-    final Object lock = this.lock;
-    final Lock writeLock = getWriteLock(lock);
+    Lock l;
+    (l = getReadLock()).lock();
     try {
-      WiredList<WiredList<E>> wls = wl.group(criteria);
-      SynchronizedWiredList<SynchronizedWiredList<E>> groups =
-          new SynchronizedWiredList<>();
-      Iterator<WiredList<E>> itr = wls.iterator();
-      for (int i = 0; i < wls.size() - 1; ++i) {
-        groups.add(new SynchronizedWiredList<>(lock, itr.next()));
-      }
-      groups.add(this);
-      return groups;
+      return new SynchronizedWiredList<>(wl.copySegment(fromIndex, toIndex));
     } finally {
-      writeLock.unlock();
+      l.unlock();
     }
-  }
-
-  /**
-   * Forwards to {@link WiredList#partition(int)}.
-   */
-  public SynchronizedWiredList<SynchronizedWiredList<E>> partition(int size) {
-    final Object lock = this.lock;
-    final Lock writeLock = getWriteLock(lock);
-    try {
-      WiredList<WiredList<E>> wls = wl.partition(size);
-      SynchronizedWiredList<SynchronizedWiredList<E>> partitions =
-          new SynchronizedWiredList<>();
-      Iterator<WiredList<E>> itr = wls.iterator();
-      for (int i = 0; i < wls.size() - 1; ++i) {
-        partitions.add(new SynchronizedWiredList<>(lock, itr.next()));
-      }
-      partitions.add(this);
-      return partitions;
-    } finally {
-      writeLock.unlock();
-    }
-  }
-
-  /**
-   * Forwards to {@link WiredList#split(int)}.
-   */
-  public SynchronizedWiredList<SynchronizedWiredList<E>> split(int count) {
-    final Object lock = this.lock;
-    final Lock writeLock = getWriteLock(lock);
-    try {
-      WiredList<WiredList<E>> wls = wl.split(count);
-      SynchronizedWiredList<SynchronizedWiredList<E>> partitions =
-          new SynchronizedWiredList<>();
-      Iterator<WiredList<E>> itr = wls.iterator();
-      for (int i = 0; i < wls.size() - 1; ++i) {
-        partitions.add(new SynchronizedWiredList<>(lock, itr.next()));
-      }
-      partitions.add(this);
-      return partitions;
-    } finally {
-      writeLock.unlock();
-    }
-  }
-
-  /**
-   * Forwards to {@link WiredList#lchop(Predicate)}.
-   */
-  public SynchronizedWiredList<E> lchop(Predicate<? super E> condition) {
-    return callFluentWriter(() -> wl.lchop(condition));
-  }
-
-  /**
-   * Forwards to {@link WiredList#rchop(Predicate)}.
-   */
-  public SynchronizedWiredList<E> rchop(Predicate<? super E> condition) {
-    return callFluentWriter(() -> wl.rchop(condition));
-  }
-
-  /**
-   * Forwards to {@link WiredList#reverse()}.
-   */
-  public SynchronizedWiredList<E> reverse() {
-    return callFluentWriter(() -> wl.reverse());
-  }
-
-  /**
-   * Forwards to {@link WiredList#move(int, int, int)}.
-   */
-  public SynchronizedWiredList<E> move(int fromIndex,
-      int toIndex,
-      int newFromIndex) {
-    return callFluentWriter(() -> wl.move(fromIndex, toIndex, newFromIndex));
-  }
-
-  /**
-   * Forwards to {@link WiredList#retainAll(Collection)}.
-   */
-  public boolean retainAll(Collection<?> c) {
-    return callWriter(() -> wl.retainAll(c));
-  }
-
-  /**
-   * Forwards to {@link WiredList#toArray()}.
-   */
-  public Object[] toArray() {
-    return callReader(() -> wl.toArray());
-  }
-
-  /**
-   * Forwards to {@link WiredList#toArray(Object[])}.
-   */
-  public <T> T[] toArray(T[] a) {
-    return callReader(() -> wl.toArray(a));
-  }
-
-  /**
-   * Forwards to {@link WiredList#clear()}.
-   */
-  public void clear() {
-    runWriter(() -> wl.clear());
   }
 
   /**
    * Forwards to {@link WiredList#iterator()}.
    */
   public Iterator<E> iterator() {
-    return callReader(() -> wl.copy().iterator());
+    Lock l;
+    (l = getReadLock()).lock();
+    try {
+      return wl.copy().iterator();
+    } finally {
+      l.unlock();
+    }
   }
 
   /**
    * Forwards to {@link WiredList#set(int, Object)}.
    */
   public Iterator<E> reverseIterator() {
-    return callReader(() -> wl.copy().reverseIterator());
-  }
-
-  /**
-   * Forwards to {@link WiredList#wiredIterator()}.
-   */
-  public WiredIterator<E> wiredIterator() {
-    return new CloseableWiredIterator(wl.wiredIterator());
-  }
-
-  /**
-   * Forwards to {@link WiredList#wiredIterator(boolean)}.
-   */
-  public WiredIterator<E> wiredIterator(boolean reverse) {
-    return new CloseableWiredIterator(wl.wiredIterator(reverse));
+    Lock l;
+    (l = getReadLock()).lock();
+    try {
+      return wl.copy().reverseIterator();
+    } finally {
+      l.unlock();
+    }
   }
 
   /**
    * Forwards to {@link WiredList#listIterator(int)}.
    */
   public ListIterator<E> listIterator() {
-    return callReader(() -> wl.copy().listIterator());
+    Lock l;
+    (l = getReadLock()).lock();
+    try {
+      return wl.copy().listIterator();
+    } finally {
+      l.unlock();
+    }
   }
 
   /**
    * Forwards to {@link WiredList#listIterator(int)}.
    */
   public ListIterator<E> listIterator(int index) {
-    return callReader(() -> wl.copy().listIterator(index));
+    Lock l;
+    (l = getReadLock()).lock();
+    try {
+      return wl.copy().listIterator(index);
+    } finally {
+      l.unlock();
+    }
   }
 
   /**
@@ -637,104 +384,576 @@ public final class SynchronizedWiredList<E> implements List<E> {
       return true;
     }
     if (o instanceof SynchronizedWiredList<?> swl) {
-      Lock l0 = getReadLock(lock);
-      try {
-        Lock l1 = getReadLock(swl.lock);
-        try {
-          return wl.equals(swl.wl);
-        } finally {
-          l1.unlock();
-        }
-      } finally {
-        l0.unlock();
-      }
+      wl.equals(swl.wl);
     }
-    return false;
+    return wl.equals(o);
   }
 
   /**
    * Forwards to {@link WiredList#hashCode()}.
    */
   public int hashCode() {
-    return callReader(() -> wl.hashCode());
+    Lock l;
+    (l = getReadLock()).lock();
+    try {
+      return wl.hashCode();
+    } finally {
+      l.unlock();
+    }
   }
 
   /**
    * Forwards to {@link WiredList#toString()}.
    */
   public String toString() {
-    return callReader(() -> wl.toString());
+    Lock l;
+    (l = getReadLock()).lock();
+    try {
+      return wl.toString();
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#set(int, Object)}.
+   */
+  @Override
+  public E set(int index, E value) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return wl.set(index, value);
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#setIf(int, Predicate, Object)}.
+   */
+  public E setIf(int index, Predicate<? super E> test, E value) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return wl.setIf(index, test, value);
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#add(Object)}.
+   */
+  @Override
+  public boolean add(E value) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return wl.add(value);
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#add(int, Object)}.
+   */
+  @Override
+  public void add(int index, E value) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      wl.add(index, value);
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#addAll(Collection)}.
+   */
+  @Override
+  public boolean addAll(Collection<? extends E> values) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return wl.addAll(values);
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#addAll(int, Collection)}.
+   */
+  @Override
+  public boolean addAll(int index, Collection<? extends E> values) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return wl.addAll(index, values);
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#remove(int)}.
+   */
+  @Override
+  public E remove(int index) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return wl.remove(index);
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#remove(Object)}.
+   */
+  @Override
+  public boolean remove(Object o) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return wl.remove(o);
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#removeIf(Predicate)}.
+   */
+  @Override
+  public boolean removeIf(Predicate<? super E> test) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return wl.removeIf(test);
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#removeAll(Collection)}.
+   */
+  @Override
+  public boolean removeAll(Collection<?> c) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return wl.removeAll(c);
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#prepend(Object)}.
+   */
+  public SynchronizedWiredList<E> prepend(E value) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return new SynchronizedWiredList<>(lock, wl.prepend(value));
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#append(Object)}.
+   */
+  public SynchronizedWiredList<E> append(E value) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return new SynchronizedWiredList<>(lock, wl.append(value));
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#deleteFirst()}.
+   */
+  public E deleteFirst() {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return wl.deleteFirst();
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#deleteLast()}.
+   */
+  public E deleteLast() {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return wl.deleteLast();
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#prependAll(Collection)}.
+   */
+  public SynchronizedWiredList<E> prependAll(Collection<? extends E> values) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return new SynchronizedWiredList<>(lock, wl.prependAll(values));
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#appendAll(Collection)}.
+   */
+  public SynchronizedWiredList<E> appendAll(Collection<? extends E> values) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return new SynchronizedWiredList<>(lock, wl.appendAll(values));
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#insertAll(int, Collection)}.
+   */
+  public SynchronizedWiredList<E> insertAll(int index, Collection<?
+      extends E> values) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return new SynchronizedWiredList<>(lock, wl.insertAll(index, values));
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#deleteSegment(int, int)}.
+   */
+  public SynchronizedWiredList<E> deleteSegment(int fromIndex, int toIndex) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return new SynchronizedWiredList<>(lock, wl.deleteSegment(fromIndex, toIndex));
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#embed(int, WiredList)}.
+   */
+  public SynchronizedWiredList<E> embed(int myIndex,
+      SynchronizedWiredList<? extends E> other) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return new SynchronizedWiredList<>(lock, wl.embed(myIndex, other.wl));
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#stitch(WiredList)}.
+   */
+  public SynchronizedWiredList<E> stitch(SynchronizedWiredList<? extends E> other) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return new SynchronizedWiredList<>(lock, wl.stitch(other.wl));
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#excise(int, WiredList, int, int)}.
+   */
+  public SynchronizedWiredList<E> excise(SynchronizedWiredList<? extends E> other,
+      int itsFromIndex,
+      int itsToIndex) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return new SynchronizedWiredList<>(lock,
+          wl.excise(other.wl, itsFromIndex, itsToIndex));
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#excise(int, WiredList, int, int)}.
+   */
+  public SynchronizedWiredList<E> excise(int myIndex,
+      SynchronizedWiredList<? extends E> other,
+      int itsFromIndex,
+      int itsToIndex) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return new SynchronizedWiredList<>(lock,
+          wl.excise(myIndex, other.wl, itsFromIndex, itsToIndex));
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#defragment(List)}.
+   */
+  public SynchronizedWiredList<E> defragment(List<Predicate<? super E>> criteria) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return new SynchronizedWiredList<>(lock, wl.defragment(criteria));
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#group(List)}.
+   */
+  public SynchronizedWiredList<SynchronizedWiredList<E>> group(List<Predicate<? super E>> criteria) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      WiredList<WiredList<E>> wls = wl.group(criteria);
+      SynchronizedWiredList<SynchronizedWiredList<E>> groups =
+          new SynchronizedWiredList<>();
+      Iterator<WiredList<E>> itr = wls.iterator();
+      for (int i = 0; i < wls.size() - 1; ++i) {
+        groups.add(new SynchronizedWiredList<>(lock, itr.next()));
+      }
+      groups.add(this);
+      return groups;
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#partition(int)}.
+   */
+  public SynchronizedWiredList<SynchronizedWiredList<E>> partition(int size) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      WiredList<WiredList<E>> wls = wl.partition(size);
+      SynchronizedWiredList<SynchronizedWiredList<E>> partitions =
+          new SynchronizedWiredList<>();
+      Iterator<WiredList<E>> itr = wls.iterator();
+      for (int i = 0; i < wls.size() - 1; ++i) {
+        partitions.add(new SynchronizedWiredList<>(lock, itr.next()));
+      }
+      partitions.add(this);
+      return partitions;
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#split(int)}.
+   */
+  public SynchronizedWiredList<SynchronizedWiredList<E>> split(int count) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      WiredList<WiredList<E>> wls = wl.split(count);
+      SynchronizedWiredList<SynchronizedWiredList<E>> partitions =
+          new SynchronizedWiredList<>();
+      Iterator<WiredList<E>> itr = wls.iterator();
+      for (int i = 0; i < wls.size() - 1; ++i) {
+        partitions.add(new SynchronizedWiredList<>(lock, itr.next()));
+      }
+      partitions.add(this);
+      return partitions;
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#lchop(Predicate)}.
+   */
+  public SynchronizedWiredList<E> lchop(Predicate<? super E> condition) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      WiredList<E> result = wl.lchop(condition);
+      if (result == wl) {
+        return this;
+      }
+      return new SynchronizedWiredList<>(lock, result);
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#rchop(Predicate)}.
+   */
+  public SynchronizedWiredList<E> rchop(Predicate<? super E> condition) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      WiredList<E> result = wl.rchop(condition);
+      if (result == wl) {
+        return this;
+      }
+      return new SynchronizedWiredList<>(lock, result);
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#reverse()}.
+   */
+  public SynchronizedWiredList<E> reverse() {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return new SynchronizedWiredList<>(lock, wl.reverse());
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#move(int, int, int)}.
+   */
+  public SynchronizedWiredList<E> move(int fromIndex,
+      int toIndex,
+      int newFromIndex) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return new SynchronizedWiredList<>(lock,
+          wl.move(fromIndex, toIndex, newFromIndex));
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#retainAll(Collection)}.
+   */
+  public boolean retainAll(Collection<?> c) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return wl.retainAll(c);
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#toArray()}.
+   */
+  public Object[] toArray() {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return wl.toArray();
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#toArray(Object[])}.
+   */
+  public <T> T[] toArray(T[] a) {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      return wl.toArray(a);
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#clear()}.
+   */
+  public void clear() {
+    Lock l;
+    (l = getWriteLock()).lock();
+    try {
+      wl.clear();
+    } finally {
+      l.unlock();
+    }
+  }
+
+  /**
+   * Forwards to {@link WiredList#wiredIterator()}.
+   */
+  public WiredIterator<E> wiredIterator(boolean readOnly) {
+    Lock l;
+    (l = readOnly ? getReadLock() : getWriteLock()).lock();
+    WiredIterator<E> itr = wl.wiredIterator();
+    WiredIterator<E> wrapper = new CloseableWiredIterator(itr, readOnly);
+    CLEANER.register(wrapper, () -> l.unlock());
+    return wrapper;
+  }
+
+  /**
+   * Forwards to {@link WiredList#wiredIterator(boolean)}.
+   */
+  public WiredIterator<E> wiredIterator(boolean readOnly, boolean reverse) {
+    Lock l;
+    (l = readOnly ? getReadLock() : getWriteLock()).lock();
+    WiredIterator<E> itr = wl.wiredIterator(reverse);
+    WiredIterator<E> wrapper = new CloseableWiredIterator(itr, readOnly);
+    CLEANER.register(wrapper, () -> l.unlock());
+    return wrapper;
   }
 
   /**
    * Forwards to {@link WiredList#subList(int, int)} .
    */
   public List<E> subList(int fromIndex, int toIndex) {
-    return wl.subList(fromIndex, toIndex);
-  }
-
-  private void runReader(Runnable method) {
     Lock l;
-    (l = getReadLock(lock)).lock();
+    (l = getWriteLock()).lock();
     try {
-      method.run();
+      return wl.subList(fromIndex, toIndex);
     } finally {
       l.unlock();
     }
   }
 
-  private void runWriter(Runnable method) {
-    Lock l;
-    (l = getWriteLock(lock)).lock();
-    try {
-      method.run();
-    } finally {
-      l.unlock();
-    }
-  }
-
-  private <R> R callReader(Callable<R> method) {
-    Lock l;
-    (l = getReadLock(lock)).lock();
-    try {
-      return method.call();
-    } catch (Exception e) {
-      throw ExceptionMethods.uncheck(e);
-    } finally {
-      l.unlock();
-    }
-  }
-
-  private <R> R callWriter(Callable<R> method) {
-    Lock l;
-    (l = getWriteLock(lock)).lock();
-    try {
-      return method.call();
-    } catch (Exception e) {
-      throw ExceptionMethods.uncheck(e);
-    } finally {
-      l.unlock();
-    }
-  }
-
-  private SynchronizedWiredList<E> callFluentWriter(Runnable method) {
-    Lock l;
-    (l = getWriteLock(lock)).lock();
-    try {
-      method.run();
-      return this;
-    } finally {
-      l.unlock();
-    }
-  }
-
-  private static Lock getReadLock(Object lock) {
+  private Lock getReadLock() {
     return lock instanceof ReentrantReadWriteLock x
         ? x.readLock()
         : (ReentrantLock) lock;
   }
 
-  private static Lock getWriteLock(Object lock) {
+  private Lock getWriteLock() {
     return lock instanceof ReentrantReadWriteLock x
         ? x.writeLock()
         : (ReentrantLock) lock;

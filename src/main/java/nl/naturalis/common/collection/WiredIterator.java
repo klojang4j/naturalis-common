@@ -16,7 +16,7 @@ import java.util.ListIterator;
  *
  * @param <E> The type of the elements being iterated over
  */
-public sealed interface WiredIterator<E> extends Iterator<E> permits
+public sealed interface WiredIterator<E> extends Iterator<E>, AutoCloseable permits
     SynchronizedWiredList.CloseableWiredIterator, WiredList.ForwardWiredIterator,
     WiredList.ReverseWiredIterator {
 
@@ -47,5 +47,7 @@ public sealed interface WiredIterator<E> extends Iterator<E> permits
    *     direction.
    */
   WiredIterator<E> reverse();
+
+  default void close() {}
 
 }
