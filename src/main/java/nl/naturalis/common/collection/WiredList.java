@@ -76,13 +76,11 @@ public final class WiredList<E> implements List<E> {
   }
 
   private static Supplier<IllegalArgumentException> autoEmbedNotAllowed() {
-    return () -> new IllegalArgumentException(
-        "list cannot be embedded within itself");
+    return () -> new IllegalArgumentException("list cannot be embedded within itself");
   }
 
   private static Supplier<IllegalStateException> callNextFirst() {
-    return () -> new IllegalStateException(
-        "Iterator.next() must be called first");
+    return () -> new IllegalStateException("Iterator.next() must be called first");
   }
 
   private static Supplier<ConcurrentModificationException> concurrentModification() {
@@ -206,9 +204,8 @@ public final class WiredList<E> implements List<E> {
     public E next() {
       Check.that(sz).is(ne(), 0, emptyListNotAllowed());
       Check.that(curr).isNot(sameAs(), tail, noSuchElement());
-      return Check.that(curr = curr.next)
-          .is(notNull(), concurrentModification())
-          .ok(Node::value);
+      return Check.that(curr = curr.next).is(notNull(), concurrentModification()).ok(
+          Node::value);
     }
 
     @Override
@@ -238,9 +235,8 @@ public final class WiredList<E> implements List<E> {
     @Override
     public WiredIterator<E> reverse() {
       Check.that(sz).is(ne(), 0, emptyListNotAllowed());
-      return Check.that(curr)
-          .isNot(sameAs(), beforeHead, callNextFirst())
-          .ok(ReverseWiredIterator::new);
+      return Check.that(curr).isNot(sameAs(), beforeHead, callNextFirst()).ok(
+          ReverseWiredIterator::new);
     }
 
   }
@@ -276,9 +272,8 @@ public final class WiredList<E> implements List<E> {
     public E next() {
       Check.that(sz).is(ne(), 0, emptyListNotAllowed());
       Check.that(curr).isNot(sameAs(), head, noSuchElement());
-      return Check.that(curr = curr.prev)
-          .is(notNull(), concurrentModification())
-          .ok(Node::value);
+      return Check.that(curr = curr.prev).is(notNull(), concurrentModification()).ok(
+          Node::value);
     }
 
     @Override
@@ -308,9 +303,8 @@ public final class WiredList<E> implements List<E> {
     @Override
     public WiredIterator<E> reverse() {
       Check.that(sz).is(ne(), 0, emptyListNotAllowed());
-      return Check.that(curr)
-          .isNot(sameAs(), afterTail, callNextFirst())
-          .ok(ForwardWiredIterator::new);
+      return Check.that(curr).isNot(sameAs(), afterTail, callNextFirst()).ok(
+          ForwardWiredIterator::new);
     }
 
   }
@@ -339,8 +333,8 @@ public final class WiredList<E> implements List<E> {
     public E next() {
       if (forward != FALSE) {
         Check.that(++idx).is(lt(), sz, noSuchElement());
-        return Check.that(curr = curr.next)
-            .is(notNull(), noSuchElement()) // we are in deep space
+        return Check.that(curr = curr.next).is(notNull(),
+                noSuchElement()) // we are in deep space
             .ok(Node::value);
       }
       forward = TRUE;
@@ -879,15 +873,15 @@ public final class WiredList<E> implements List<E> {
    * a destructive operation for the provided list - it will be empty afterwards. If
    * you don't want this to happen, use {@link #addAll(int, Collection) addAll}.
    *
-   * @param myIndex The index at which to embed the list
+   * @param index The index at which to embed the list
    * @param other The list to embed
    * @return this {@code WiredList}
    */
-  public WiredList<E> embed(int myIndex, WiredList<? extends E> other) {
-    checkInclusive(myIndex);
+  public WiredList<E> embed(int index, WiredList<? extends E> other) {
+    checkInclusive(index);
     Check.notNull(other, WIRED_LIST).isNot(sameAs(), this, autoEmbedNotAllowed());
     if (!other.isEmpty()) {
-      insert(myIndex, new Chain(other.head, other.tail, other.sz));
+      insert(index, new Chain(other.head, other.tail, other.sz));
       // Reset but don't clear the embedded list, because that
       // would nullify the nodes we just embedded in this list
       other.head = null;
@@ -1082,7 +1076,8 @@ public final class WiredList<E> implements List<E> {
     Node<E> first = head;
     Node<E> last = justBeforeHead();
     int len = 0;
-    for (; condition.test(last.next.val) && ++len != sz; last = last.next) ;
+    for (; condition.test(last.next.val) && ++len != sz; last = last.next)
+      ;
     if (len == sz) {
       return this;
     }
@@ -1112,7 +1107,8 @@ public final class WiredList<E> implements List<E> {
     Node<E> last = tail;
     Node<E> first = justAfterTail();
     int len = 0;
-    for (; condition.test(first.prev.val) && ++len != sz; first = first.prev) ;
+    for (; condition.test(first.prev.val) && ++len != sz; first = first.prev)
+      ;
     if (len == sz) {
       return this;
     }
@@ -1156,12 +1152,11 @@ public final class WiredList<E> implements List<E> {
    */
   public WiredList<E> move(int fromIndex, int toIndex, int newFromIndex) {
     Check.on(indexOutOfBounds(), fromIndex, "fromIndex").is(gte(), 0);
-    Check.on(indexOutOfBounds(), toIndex, "toIndex")
-        .is(lte(), sz)
-        .is(gt(), fromIndex, emptySegmentNotAllowed());
-    Check.on(indexOutOfBounds(), newFromIndex, "newFromIndex")
-        .is(gte(), 0)
-        .is(lte(), sz);
+    Check.on(indexOutOfBounds(), toIndex, "toIndex").is(lte(), sz).is(gt(),
+        fromIndex,
+        emptySegmentNotAllowed());
+    Check.on(indexOutOfBounds(), newFromIndex, "newFromIndex").is(gte(), 0).is(lte(),
+        sz);
     if (newFromIndex > fromIndex) {
       moveToTail(fromIndex, toIndex, newFromIndex);
     } else if (newFromIndex < fromIndex) {
@@ -1282,8 +1277,8 @@ public final class WiredList<E> implements List<E> {
 
       @Override
       public E next() {
-        return Check.that(curr = curr.next)
-            .is(notNull(), noSuchElement()) // we are in deep space
+        return Check.that(curr = curr.next).is(notNull(),
+                noSuchElement()) // we are in deep space
             .ok(Node::value);
       }
     };
@@ -1580,20 +1575,19 @@ public final class WiredList<E> implements List<E> {
   }
 
   private IntCheck<IndexOutOfBoundsException> checkExclusive(int index) {
-    return Check.on(indexOutOfBounds(), index, INDEX)
-        .is(CommonChecks.indexOf(), this);
+    return Check.on(indexOutOfBounds(), index, INDEX).is(CommonChecks.indexOf(),
+        this);
   }
 
   private IntCheck<IndexOutOfBoundsException> checkInclusive(int index) {
-    return Check.on(indexOutOfBounds(), index, INDEX)
-        .is(indexInclusiveOf(), this);
+    return Check.on(indexOutOfBounds(), index, INDEX).is(indexInclusiveOf(), this);
   }
 
   private void checkSegment(int fromIndex, int toIndex) {
     Check.on(indexOutOfBounds(), fromIndex, "fromIndex").is(gte(), 0);
-    Check.on(indexOutOfBounds(), toIndex, "toIndex")
-        .is(lte(), sz)
-        .is(gt(), fromIndex, emptySegmentNotAllowed());
+    Check.on(indexOutOfBounds(), toIndex, "toIndex").is(lte(), sz).is(gt(),
+        fromIndex,
+        emptySegmentNotAllowed());
   }
 
 }
