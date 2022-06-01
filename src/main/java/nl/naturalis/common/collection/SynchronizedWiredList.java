@@ -751,7 +751,7 @@ public final class SynchronizedWiredList<E> implements List<E> {
     (l = getWriteLock()).lock();
     try {
       Lock l2;
-      (l2 = other.getReadLock()).lock();
+      (l2 = other.getWriteLock()).lock();
       try {
         wl.embed(index, other.wl);
         return this;
@@ -771,7 +771,7 @@ public final class SynchronizedWiredList<E> implements List<E> {
     (l = getWriteLock()).lock();
     try {
       Lock l2;
-      (l2 = other.getReadLock()).lock();
+      (l2 = other.getWriteLock()).lock();
       try {
         wl.stitch(other.wl);
         return this;
@@ -792,8 +792,14 @@ public final class SynchronizedWiredList<E> implements List<E> {
     Lock l;
     (l = getWriteLock()).lock();
     try {
-      return new SynchronizedWiredList<>(lock,
-          wl.excise(other.wl, itsFromIndex, itsToIndex));
+      Lock l2;
+      (l2 = other.getWriteLock()).lock();
+      try {
+        wl.excise(other.wl, itsFromIndex, itsToIndex);
+        return this;
+      } finally {
+        l2.unlock();
+      }
     } finally {
       l.unlock();
     }
@@ -809,8 +815,14 @@ public final class SynchronizedWiredList<E> implements List<E> {
     Lock l;
     (l = getWriteLock()).lock();
     try {
-      return new SynchronizedWiredList<>(lock,
-          wl.excise(myIndex, other.wl, itsFromIndex, itsToIndex));
+      Lock l2;
+      (l2 = other.getWriteLock()).lock();
+      try {
+        wl.excise(myIndex, other.wl, itsFromIndex, itsToIndex);
+        return this;
+      } finally {
+        l2.unlock();
+      }
     } finally {
       l.unlock();
     }
@@ -930,7 +942,8 @@ public final class SynchronizedWiredList<E> implements List<E> {
     Lock l;
     (l = getWriteLock()).lock();
     try {
-      return new SynchronizedWiredList<>(lock, wl.reverse());
+      wl.reverse();
+      return this;
     } finally {
       l.unlock();
     }
@@ -945,8 +958,8 @@ public final class SynchronizedWiredList<E> implements List<E> {
     Lock l;
     (l = getWriteLock()).lock();
     try {
-      return new SynchronizedWiredList<>(lock,
-          wl.move(fromIndex, toIndex, newFromIndex));
+      wl.move(fromIndex, toIndex, newFromIndex);
+      return this;
     } finally {
       l.unlock();
     }
@@ -959,6 +972,15 @@ public final class SynchronizedWiredList<E> implements List<E> {
     Lock l;
     (l = getWriteLock()).lock();
     try {
+      if (c instanceof SynchronizedWiredList swl) {
+        Lock l2;
+        (l2 = swl.getReadLock()).lock();
+        try {
+          return wl.retainAll(swl.wl);
+        } finally {
+          l2.unlock();
+        }
+      }
       return wl.retainAll(c);
     } finally {
       l.unlock();
@@ -1029,7 +1051,7 @@ public final class SynchronizedWiredList<E> implements List<E> {
   }
 
   /**
-   * Forwards to {@link WiredList#subList(int, int)} .
+   * Forwards to {@link WiredList#subList(int, int)}.
    */
   public List<E> subList(int fromIndex, int toIndex) {
     Lock l;
