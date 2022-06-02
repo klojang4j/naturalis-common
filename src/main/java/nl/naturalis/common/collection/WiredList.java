@@ -19,24 +19,27 @@ import static nl.naturalis.common.MathMethods.divUp;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
- * A doubly-linked list, much like {@link LinkedList}, but exclusively focused on
- * list manipulation while disregarding its queue-like capabilities. As with any
+ * A doubly-linked list, much like {@link LinkedList}, but much more focused on list
+ * manipulation while disregarding its queue-like potential. As with any
  * doubly-linked list, index-based retrieval is relatively costly compared to {@link
  * ArrayList}. It is very efficient, however, at inserting, deleting and moving
  * around chunks of list elements (i.e. structural changes). The larger the chunks
- * the bigger the gain compared to {@code ArrayList}.
+ * the bigger the gain, compared to {@code ArrayList}.
  *
  * <p>This implementation of {@link List} <b>does not support</b> the
  * {@link List#subList(int, int) subList} method.
  *
  * <h4>Use in multi-threaded context</h4>
  *
- * <p>Since list manipulation nearly always happens in a destructive manner for
- * the underlying data structure, careless use of a {@code WiredList} in a
- * multi-threaded context can leave it in a seriously compromised state. {@code
- * WiredList} itself makes no attempt to protect itself against this. You should use
- * a {@link SynchronizedWiredList} if it is likely that multiple threads accessing
- * the same list concurrently will cause the list to get corrupted.
+ * <p>List edits are always destructive. In fact, they nearly always don't just
+ * change the values in the list, but the underlying data structure itself.
+ * Therefore, careless use of a {@code WiredList} in a multi-threaded context can
+ * leave it in a seriously compromised state. {@code WiredList} itself makes no
+ * attempt to protect itself against this. You should use a {@link
+ * SynchronizedWiredList} if it is likely that multiple threads accessing the same
+ * list concurrently will cause the list to get corrupted. Note, however, that if you
+ * intend to create long call chains using the fluent API (see below), you are
+ * probably better off manually synchronizing around the entire call chain.
  *
  * <h4>Iteration</h4>
  *
@@ -174,7 +177,7 @@ public final class WiredList<E> implements List<E> {
 
   }
   // ======================================================= //
-  // ================== [ WiredIterator ]  ================= //
+  // ================ [ Iterator classes ]  ================ //
   // ======================================================= //
 
   final class ForwardWiredIterator implements WiredIterator<E> {
@@ -236,7 +239,7 @@ public final class WiredList<E> implements List<E> {
     }
 
     @Override
-    public WiredIterator<E> turnAround() {
+    public WiredIterator<E> turn() {
       Check.that(sz).is(ne(), 0, emptyListNotAllowed());
       return Check.that(curr).isNot(sameAs(), beforeHead, callNextFirst()).ok(
           ReverseWiredIterator::new);
@@ -304,7 +307,7 @@ public final class WiredList<E> implements List<E> {
     }
 
     @Override
-    public WiredIterator<E> turnAround() {
+    public WiredIterator<E> turn() {
       Check.that(sz).is(ne(), 0, emptyListNotAllowed());
       return Check.that(curr).isNot(sameAs(), afterTail, callNextFirst()).ok(
           ForwardWiredIterator::new);
@@ -329,15 +332,15 @@ public final class WiredList<E> implements List<E> {
 
     @Override
     public boolean hasNext() {
-      return idx < sz - 1 && curr.next != null;
+      return idx < sz - 1 && curr != tail && curr.next != null;
     }
 
     @Override
     public E next() {
       if (forward != FALSE) {
         Check.that(++idx).is(lt(), sz, noSuchElement());
-        return Check.that(curr = curr.next).is(notNull(),
-                noSuchElement()) // we are in deep space
+        return Check.that(curr = curr.next)
+            .is(notNull(), noSuchElement())
             .ok(Node::value);
       }
       forward = TRUE;
@@ -346,7 +349,7 @@ public final class WiredList<E> implements List<E> {
 
     @Override
     public boolean hasPrevious() {
-      return idx > 0 && curr.prev != null;
+      return idx > 0 && curr != head && curr.prev != null;
     }
 
     @Override
@@ -469,16 +472,16 @@ public final class WiredList<E> implements List<E> {
   /**
    * Concatenates the provided {@code WiredList} instances. This is a destructive
    * operation for the argument; the instances will be empty when the method returns.
-   * See {@link #stitch(WiredList)}.
+   * See {@link #concat(WiredList)}.
    *
    * @param lists The {@code WiredList} instances to concatenate
    * @param <E> The type of the elements in the list
    * @return A new {@code WiredList} containing the elements in the individual {@code
    *     WiredList} instances
    */
-  public static <E> WiredList<E> stitch(List<WiredList<E>> lists) {
+  public static <E> WiredList<E> concat(List<WiredList<E>> lists) {
     WiredList<E> wl = new WiredList<>();
-    Check.notNull(lists).ok().forEach(wl::stitch);
+    Check.notNull(lists).ok().forEach(wl::concat);
     return wl;
   }
 
@@ -610,10 +613,10 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Sets the element at the specified index to the specified value if the original
-   * value passes the specified test. This method mitigates the relatively large cost
-   * of index-based retrieval with linked lists, which would double if you had to
-   * execute a get-compare-set sequence.
+   * Sets the element at the specified index to the specified value <i>if</i> the
+   * original value passes the specified test. This method mitigates the relatively
+   * large cost of index-based retrieval with linked lists, which would double if you
+   * had to execute a get-compare-set sequence.
    *
    * @param index The index of the element to set
    * @param test The test that the original value has to pass in order to be
@@ -803,6 +806,9 @@ public final class WiredList<E> implements List<E> {
   /**
    * Inserts the specified collection at the start of this {@code WiredList},
    * right-shifting the original elements.
+   *
+   * @param values The values to prepend to the list
+   * @return This {@code WiredList}
    */
   public WiredList<E> prependAll(Collection<? extends E> values) {
     Check.notNull(values, COLLECTION);
@@ -812,6 +818,13 @@ public final class WiredList<E> implements List<E> {
     return this;
   }
 
+  /**
+   * Appends the specified collection to this {@code WiredList}, right-shifting the
+   * original elements.
+   *
+   * @param values The values to append to the list
+   * @return This {@code WiredList}
+   */
   public WiredList<E> appendAll(Collection<? extends E> values) {
     Check.notNull(values, COLLECTION);
     if (!values.isEmpty()) {
@@ -823,12 +836,38 @@ public final class WiredList<E> implements List<E> {
   /**
    * Inserts the specified collection at the specified index, right-shifting the
    * elements at and following the index.
+   *
+   * @param index The index at which to insert the collection
+   * @param values The collection to insert into the list
+   * @return This {@code WiredList}
    */
   public WiredList<E> insertAll(int index, Collection<? extends E> values) {
     checkInclusive(index);
     Check.notNull(values, COLLECTION);
     if (!values.isEmpty()) {
       insert(index, Chain.of(values));
+    }
+    return this;
+  }
+
+  /**
+   * Replaces the segment identified by {@code fromIndex} and {@code toIndex} with
+   * the values from the specified collection. The segment must contain at least one
+   * element.
+   *
+   * @param fromIndex The start index (inclusive) of the segment to replace
+   * @param toIndex The end index (exclusive) of
+   * @param values The values to replace the segment with
+   * @return This {@code WiredList}
+   */
+  public WiredList<E> replaceAll(int fromIndex,
+      int toIndex,
+      Collection<? extends E> values) {
+    checkSegment(fromIndex, toIndex);
+    Check.notNull(values, COLLECTION);
+    if (!values.isEmpty()) {
+      deleteSegment(fromIndex, toIndex).destroyInside();
+      insert(fromIndex, Chain.of(values));
     }
     return this;
   }
@@ -872,9 +911,32 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
+   * Replaces the segment identified by {@code fromIndex} and {@code toIndex} with
+   * the values from the specified list. The segment must contain at least one
+   * element. This method is very efficient, but it is a destructive operation for
+   * the provided list - it will be empty afterwards. If you don't want this to
+   * happen, use {@link #replaceAll(int, int, Collection)}.
+   *
+   * @param fromIndex The start index (inclusive) of the segment to replace
+   * @param toIndex The end index (exclusive) of
+   * @param other The values to replace the segment with
+   * @return This {@code WiredList}
+   */
+  public WiredList<E> replaceSegment(int fromIndex,
+      int toIndex,
+      WiredList<? extends E> other) {
+    Check.notNull(other, WIRED_LIST);
+    if (!other.isEmpty()) {
+      deleteSegment(fromIndex, toIndex).destroyInside();
+      embed(fromIndex, other);
+    }
+    return this;
+  }
+
+  /**
    * Embeds the specified list in this list. This method is very efficient, but it is
    * a destructive operation for the provided list - it will be empty afterwards. If
-   * you don't want this to happen, use {@link #addAll(int, Collection) addAll}.
+   * you don't want this to happen, use {@link #insertAll(int, Collection) addAll}.
    *
    * @param index The index at which to embed the list
    * @param other The list to embed
@@ -897,13 +959,14 @@ public final class WiredList<E> implements List<E> {
   /**
    * Appends the specified list to this list. This method is very efficient, but it
    * is a destructive operation for the provided list - it will be empty afterwards.
-   * If you don't want this to happen, use {@link #addAll(Collection) addAll}.
+   * If you don't want this to happen, use {@link #appendAll(Collection) appendAll}
+   * or {@link #addAll(Collection) addAll}.
    *
    * @param other The list to embed
    * @return this {@code WiredList}
-   * @see #stitch(WiredList)
+   * @see #concat(WiredList)
    */
-  public WiredList<E> stitch(WiredList<? extends E> other) {
+  public WiredList<E> concat(WiredList<? extends E> other) {
     return embed(sz, other);
   }
 
@@ -983,14 +1046,14 @@ public final class WiredList<E> implements List<E> {
    * the criterion. This {@code WiredList} is left with all elements that did not
    * satisfy any criterion, and it will be the last element in the returned
    * list-of-lists. In other words, the size of the returned list-of-lists is the
-   * number of criteria plus one. You can use the {@link #stitch(List)} method to
+   * number of criteria plus one. You can use the {@link #concat(List)} method to
    * create a single "defragmented" list again. Elements will never be placed in more
    * than one group. As soon as an element is found to satisfy a criterion it is
    * placed in the corresponding group and the remaining criteria are skipped.
    *
    * @param criteria The criteria used to group the elements
    * @return A list of element groups
-   * @see #stitch(WiredList)
+   * @see #concat(WiredList)
    */
   @SuppressWarnings({"rawtypes"})
   public WiredList<WiredList<E>> group(List<Predicate<? super E>> criteria) {
@@ -1275,13 +1338,18 @@ public final class WiredList<E> implements List<E> {
 
       @Override
       public boolean hasNext() {
-        return curr != tail;
+        // Under normal circumstances these two conditions test exactly
+        // the same thing. But this iterator is so essential (as it is
+        // implicitly used in forEach loops), that here we compromise on
+        // our documented refusal to check for concurrent modifications
+        // in WiredList itself.
+        return curr != tail && curr.next != null;
       }
 
       @Override
       public E next() {
-        return Check.that(curr = curr.next).is(notNull(),
-                noSuchElement()) // we are in deep space
+        return Check.that(curr = curr.next)
+            .is(notNull(), noSuchElement())
             .ok(Node::value);
       }
     };
@@ -1328,6 +1396,8 @@ public final class WiredList<E> implements List<E> {
    * Returns a {@link WiredIterator} that traverses the list from the first element
    * to the last, or the other way round, depending on the value of the argument
    *
+   * @param reverse Whether to iterate from the first to the last ({@code
+   *     false}), or from the last to the first ({@code true})
    * @return A {@code WiredIterator} that traverses the list from the first element
    *     to the last, or the other way round
    */
@@ -1492,6 +1562,19 @@ public final class WiredList<E> implements List<E> {
       join(chain.head.prev, chain.tail.next);
     }
     sz -= chain.length;
+  }
+
+  // Make garbage collector happy
+  private void destroyInside() {
+    if (sz > 2) {
+      for (var x = head.next; x != tail; ) {
+        var next = x.next;
+        x.val = null;
+        x.prev = null;
+        x.next = null;
+        x = next;
+      }
+    }
   }
 
   // @VisibleForTesting
