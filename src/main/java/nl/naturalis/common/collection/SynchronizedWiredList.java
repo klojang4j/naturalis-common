@@ -794,7 +794,6 @@ public final class SynchronizedWiredList<E> implements List<E> {
   /**
    * Forwards to {@link WiredList#replaceSegment(int, int, WiredList)}.
    */
-  @SuppressWarnings({"unchecked"})
   public SynchronizedWiredList<E> replaceSegment(int fromIndex,
       int toIndex,
       SynchronizedWiredList<? extends E> other) {

@@ -241,8 +241,9 @@ public final class WiredList<E> implements List<E> {
     @Override
     public WiredIterator<E> turn() {
       Check.that(sz).is(ne(), 0, emptyListNotAllowed());
-      return Check.that(curr).isNot(sameAs(), beforeHead, callNextFirst()).ok(
-          ReverseWiredIterator::new);
+      return Check.that(curr)
+          .isNot(sameAs(), beforeHead, callNextFirst())
+          .ok(ReverseWiredIterator::new);
     }
 
   }
@@ -309,8 +310,9 @@ public final class WiredList<E> implements List<E> {
     @Override
     public WiredIterator<E> turn() {
       Check.that(sz).is(ne(), 0, emptyListNotAllowed());
-      return Check.that(curr).isNot(sameAs(), afterTail, callNextFirst()).ok(
-          ForwardWiredIterator::new);
+      return Check.that(curr)
+          .isNot(sameAs(), afterTail, callNextFirst())
+          .ok(ForwardWiredIterator::new);
     }
 
   }
@@ -1207,8 +1209,11 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Moves a list segment forward or backwards through the list. The segment must
-   * contain at least one element.
+   * Moves a list segment forwards or backwards through the list. The segment must
+   * contain at least one element. When moving the segment forwards, the elements
+   * immediately ahead of the segment pop up behind the segment; when moving the
+   * segment backwards, the elements immediate before the segment pop up after
+   * segment. Thus, the size of the list remains the same.
    *
    * @param fromIndex The start index of the segment (inclusive)
    * @param toIndex The end index of the segment (exclusive)
@@ -1218,11 +1223,12 @@ public final class WiredList<E> implements List<E> {
    */
   public WiredList<E> move(int fromIndex, int toIndex, int newFromIndex) {
     Check.on(indexOutOfBounds(), fromIndex, "fromIndex").is(gte(), 0);
-    Check.on(indexOutOfBounds(), toIndex, "toIndex").is(lte(), sz).is(gt(),
-        fromIndex,
-        emptySegmentNotAllowed());
-    Check.on(indexOutOfBounds(), newFromIndex, "newFromIndex").is(gte(), 0).is(lte(),
-        sz);
+    Check.on(indexOutOfBounds(), toIndex, "toIndex")
+        .is(lte(), sz)
+        .is(gt(), fromIndex, emptySegmentNotAllowed());
+    Check.on(indexOutOfBounds(), newFromIndex, "newFromIndex")
+        .is(gte(), 0)
+        .is(lte(), sz);
     if (newFromIndex > fromIndex) {
       moveToTail(fromIndex, toIndex, newFromIndex);
     } else if (newFromIndex < fromIndex) {
@@ -1661,8 +1667,8 @@ public final class WiredList<E> implements List<E> {
   }
 
   private IntCheck<IndexOutOfBoundsException> checkExclusive(int index) {
-    return Check.on(indexOutOfBounds(), index, INDEX).is(CommonChecks.indexOf(),
-        this);
+    return Check.on(indexOutOfBounds(), index, INDEX)
+        .is(CommonChecks.indexOf(), this);
   }
 
   private IntCheck<IndexOutOfBoundsException> checkInclusive(int index) {
@@ -1671,9 +1677,9 @@ public final class WiredList<E> implements List<E> {
 
   private void checkSegment(int fromIndex, int toIndex) {
     Check.on(indexOutOfBounds(), fromIndex, "fromIndex").is(gte(), 0);
-    Check.on(indexOutOfBounds(), toIndex, "toIndex").is(lte(), sz).is(gt(),
-        fromIndex,
-        emptySegmentNotAllowed());
+    Check.on(indexOutOfBounds(), toIndex, "toIndex")
+        .is(lte(), sz)
+        .is(gt(), fromIndex, emptySegmentNotAllowed());
   }
 
 }
