@@ -2,9 +2,10 @@ package nl.naturalis.common.collection;
 
 import org.junit.Test;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 
 import static java.util.Collections.emptyIterator;
@@ -13,6 +14,22 @@ import static nl.naturalis.common.ArrayMethods.pack;
 import static org.junit.Assert.*;
 
 public class SynchronizedWiredListTest {
+
+  /*
+   * Tests whether the SynchronizedWiredList holds up against the onslaught,
+   * and that the underlying WiredList remains in a consistent state, without
+   * broken links between the nodes (i.e. no NPEs please)
+   */
+  @Test
+  public void test00() throws InterruptedException {
+    SynchronizedWiredList<Integer> swl = new SynchronizedWiredList<>();
+    ExecutorService pool = Executors.newCachedThreadPool();
+    //Collections.shuffle(callables);
+    //pool.invokeAll(callables);
+    pool.shutdownNow();
+    System.out.println("***** " + swl + " *****");
+
+  }
 
   /*
     Don't throw away; nodeAfter & nodeBefore are private

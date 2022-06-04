@@ -19,27 +19,23 @@ import static nl.naturalis.common.MathMethods.divUp;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
- * A doubly-linked list, much like {@link LinkedList}, but much more focused on list
- * manipulation while disregarding its queue-like potential. As with any
- * doubly-linked list, index-based retrieval is relatively costly compared to {@link
- * ArrayList}. It is very efficient, however, at inserting, deleting and moving
- * around chunks of list elements (i.e. structural changes). The larger the chunks
- * the bigger the gain, compared to {@code ArrayList}.
- *
- * <p>This implementation of {@link List} <b>does not support</b> the
- * {@link List#subList(int, int) subList} method.
+ * A doubly-linked list, much like {@link LinkedList}, but exclusively focused on
+ * list manipulation. As with any doubly-linked list, index-based retrieval is
+ * relatively costly compared to {@link ArrayList}. It is very efficient, however, at
+ * inserting, deleting and moving around chunks of list elements (i.e. structural
+ * changes). The larger the chunks the bigger the gain, again compared to {@code
+ * ArrayList}. This implementation of {@link List} <b>does not support</b> the {@link
+ * List#subList(int, int) subList} method.
  *
  * <h4>Use in multi-threaded context</h4>
  *
- * <p>List edits are always destructive. In fact, they nearly always don't just
+ * <p>List edits are always destructive, and they nearly always don't just
  * change the values in the list, but the underlying data structure itself.
  * Therefore, careless use of a {@code WiredList} in a multi-threaded context can
  * leave it in a seriously compromised state. {@code WiredList} itself makes no
  * attempt to protect itself against this. You should use a {@link
  * SynchronizedWiredList} if it is likely that multiple threads accessing the same
- * list concurrently will cause the list to get corrupted. Note, however, that if you
- * intend to create long call chains using the fluent API (see below), you are
- * probably better off manually synchronizing around the entire call chain.
+ * list concurrently will cause the list to get corrupted.
  *
  * <h4>Iteration</h4>
  *
@@ -59,10 +55,9 @@ import static nl.naturalis.common.check.CommonChecks.*;
  *
  * Many of the methods that go beyond those prescribed by the {@code List} interface
  * form part of a fluent API. This causes some overlap in functionality between
- * {@code List} methods and methods taking part in the fluent API. For example:
- * {@link #add(int, Object)} (returning {@code void}) vs. {@link #insert(int,
- * Object)} (returning <i>this</i>). They are implemented exactly alike, so there is
- * intrinsic reason to prefer one over the other.
+ * {@code List} methods and methods taking part in the fluent API. They are
+ * implemented exactly alike, so there is intrinsic reason to prefer one over the
+ * other.
  *
  * @param <E> The type of the elements in the list
  */
@@ -1210,10 +1205,7 @@ public final class WiredList<E> implements List<E> {
 
   /**
    * Moves a list segment forwards or backwards through the list. The segment must
-   * contain at least one element. When moving the segment forwards, the elements
-   * immediately ahead of the segment pop up behind the segment; when moving the
-   * segment backwards, the elements immediate before the segment pop up after
-   * segment. Thus, the size of the list remains the same.
+   * contain at least one element.
    *
    * @param fromIndex The start index of the segment (inclusive)
    * @param toIndex The end index of the segment (exclusive)
