@@ -5,13 +5,14 @@ import java.util.ListIterator;
 
 /**
  * A one-way-only iterator that, in practice, still provides the same functionality
- * as a {@link ListIterator}. A {@code WiredIterator} lets you reverse the direction
- * of the iteration through the {@link #turn()} method. <i>The</i> {@code next()}
+ * as a {@link ListIterator}. A {@code WiredIterator} lets you flip the direction of
+ * the iteration through the {@link #turn()} method. <i>The</i> {@code next()}
  * <i>and</i> {@code hasNext()} <i>methods are always relative to the
  * direction of the traversal.</i>
  *
  * @param <E> The type of the elements being iterated over
- * @see
+ * @see WiredList#wiredIterator(boolean)
+ * @see SynchronizedWiredList#wiredIterator(boolean)
  */
 public sealed interface WiredIterator<E> extends Iterator<E>, AutoCloseable permits
     SynchronizedWiredList.CloseableWiredIterator, WiredList.ForwardWiredIterator,

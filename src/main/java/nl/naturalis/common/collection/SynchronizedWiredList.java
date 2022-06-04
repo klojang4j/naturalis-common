@@ -1,7 +1,6 @@
 package nl.naturalis.common.collection;
 
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.function.IntRelation;
 
 import java.lang.ref.Cleaner;
 import java.util.Collection;
@@ -11,22 +10,36 @@ import java.util.ListIterator;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
  * <p>A decorator for the {@link WiredList} class that you can use when
  * multiple threads will be updating a {@code WiredList} concurrently. A {@code
- * SynchronizedWiredList} ensures proper synchronization and then simply forwards to
- * an internally managed {@link WiredList}. An exception to this are the methods
- * returning an {@code Iterator}, so be sure to read their description.
+ * SynchronizedWiredList} ensures proper synchronization and then forwards to an
+ * internally managed {@link WiredList}.
+ *
+ * <h4>Read-intensive vs. Write-intensive Usage</h4>
+ *
+ * <p>When instantiating a {@code SynchronizedWiredList}, you can choose whether
+ * it is for read-intensive use or for write-intensive use. Write-intensive use means
+ * you expect the number of writes (or writer threads) to be comparable to the number
+ * of reads (or reader threads). Read-intensive use means you expect the number of
+ * reads to be substantially higher than the number of writes, <b>and</b> you expect
+ * the list to become large. If not both conditions are met, opt for write-intensive
+ * usage, as the locking strategy used for read-intensive usage is itself relatively
+ * costly.
+ *
+ * <h4>Fluent API</h4>
  *
  * <p>{@code SynchronizedWiredList} preserves the fluent API of {@code WiredList}.
- * However, if you intend to create long call chains using the fluent API, you are
+ * However, if you repeatedly compose long call chains using the fluent API, you are
  * probably better off using {@code WiredList} itself and manually synchronize around
  * the entire call chain.
  *
  * @param <E> The type of the elements in the list
+ * @author Ayco Holleman
+ * @see ReentrantLock
+ * @see ReentrantReadWriteLock
  */
 public final class SynchronizedWiredList<E> implements List<E> {
 
@@ -35,17 +48,15 @@ public final class SynchronizedWiredList<E> implements List<E> {
   final class CloseableWiredIterator implements WiredIterator<E> {
 
     private final WiredIterator<E> itr;
-    private final boolean readOnly;
 
-    CloseableWiredIterator(WiredIterator<E> itr, boolean readOnly) {
+    CloseableWiredIterator(WiredIterator<E> itr) {
       this.itr = itr;
-      this.readOnly = readOnly;
     }
 
     @Override
     @SuppressWarnings({"unused"})
     public void close() {
-      (readOnly ? getReadLock() : getWriteLock()).unlock();
+      getWriteLock().unlock();
     }
 
     @Override
@@ -129,10 +140,8 @@ public final class SynchronizedWiredList<E> implements List<E> {
   private final WiredList<E> wl;
 
   /**
-   * Creates a new {@code SynchronizedWiredList} with a locking strategy that is
-   * optimized for write-intensive use. Write-intensive usage means that you expect
-   * the number of writes (or writer threads) to be comparable to the number of reads
-   * (or reader threads).
+   * Creates a new {@code SynchronizedWiredList} optimized for write-intensive use
+   * (see class comments).
    *
    * @see #SynchronizedWiredList(boolean)
    */
@@ -141,16 +150,10 @@ public final class SynchronizedWiredList<E> implements List<E> {
   }
 
   /**
-   * Creates a new {@code SynchronizedWiredList} with a locking strategy based on the
-   * {@code readIntensive} parameter. Read-intensive usage means that you expect the
-   * number of reads (or reader threads) to be substantially higher than the number
-   * of writes (or writer threads), <b>and</b> that you expect the list to become
-   * large. If not both conditions are met, opt for write-intensive usage.
+   * Creates a new {@code SynchronizedWiredList} with the specified usage pattern.
    *
    * @param readIntensive Whether usage of the list will be read-intensive or
    *     write-intensive
-   * @see ReentrantLock
-   * @see ReentrantReadWriteLock
    */
   public SynchronizedWiredList(boolean readIntensive) {
     this.lock = readIntensive ? new ReentrantReadWriteLock() : new ReentrantLock();
@@ -159,8 +162,8 @@ public final class SynchronizedWiredList<E> implements List<E> {
 
   /**
    * Creates a new {@code SynchronizedWiredList} initialized with the values from the
-   * specified {@code Collection}. The locking strategy will be optimized from
-   * write-intensive use.
+   * specified {@code Collection}. The list will be optimized from write-intensive
+   * use.
    *
    * @param c The collection to initialize this instance with
    * @see #SynchronizedWiredList(boolean)
@@ -316,132 +319,87 @@ public final class SynchronizedWiredList<E> implements List<E> {
   }
 
   /**
-   * Returns an {@code Iterator} that operates on a copy of the internally managed
-   * {@code WiredList}. This is reasonable since this iterator does not support
-   * updates (all list-altering methods throw an {@code UnsupportedOperationException}).
-   * Since the copy is only accessible to the iterator, no synchronization is needed
-   * while the iteration is in progress. The downside is that, for large lists,
-   * getting hold of one of these iterators in the first place is rather expensive.
-   *
-   * @return An {@code Iterator} that operates on a copy of the internally managed
-   *     {@code WiredList}
+   * Forwards to {@link WiredList#iterator()}. <b>This method is not
+   * synchronized!</b> You must manually synchronize the iteration and decide whether
+   * to lock the list for the entire duration of the iteration, or to lock it only
+   * before invoking a method in the {@code Iterator}.
    */
   public Iterator<E> iterator() {
-    Lock l;
-    (l = getReadLock()).lock();
-    try {
-      return wl.copy().iterator();
-    } finally {
-      l.unlock();
-    }
+    return wl.iterator();
   }
 
   /**
-   * Returns a backwards traversing {@code Iterator} that operates on a copy of the
-   * internally managed {@code WiredList}. This is reasonable since this iterator
-   * does not support updates (all list-altering methods throw an {@code
-   * UnsupportedOperationException}). Since the copy is only accessible to the
-   * iterator, no synchronization is needed while the iteration is in progress. The
-   * downside is that, for large lists, getting hold of one of these iterators in the
-   * first place is rather expensive.
-   *
-   * @return A backwards traversing {@code Iterator} that operates on a copy of the
-   *     internally managed {@code WiredList}
+   * Forwards to {@link WiredList#reverseIterator()}. <b>This method is not
+   * synchronized!</b> You must manually synchronize the iteration and decide whether
+   * to lock the list for the entire duration of the iteration, or to lock it only
+   * before invoking a method in the {@code Iterator}.
    */
   public Iterator<E> reverseIterator() {
-    Lock l;
-    (l = getReadLock()).lock();
-    try {
-      return wl.copy().reverseIterator();
-    } finally {
-      l.unlock();
-    }
+    return wl.reverseIterator();
   }
 
   /**
-   * Returns a {@code ListIterator} that operates on a copy of the internally managed
-   * {@code WiredList}. This is reasonable since this iterator does not support
-   * updates (all list-altering methods throw an {@code UnsupportedOperationException}).
-   * Since the copy is only accessible to the iterator, no synchronization is needed
-   * while the iteration is in progress. The downside is that, for large lists,
-   * getting hold of one of these iterators in the first place is rather expensive.
-   *
-   * @return A {@code ListIterator} that operates on a copy of the internally managed
-   *     {@code WiredList}
+   * Forwards to {@link WiredList#listIterator()}. <b>This method is not
+   * synchronized!</b> You must manually synchronize the iteration and decide whether
+   * to lock the list for the entire duration of the iteration, or to lock it only
+   * before invoking a method in the {@code Iterator}.
    */
   public ListIterator<E> listIterator() {
-    Lock l;
-    (l = getReadLock()).lock();
-    try {
-      return wl.copy().listIterator();
-    } finally {
-      l.unlock();
-    }
+    return wl.listIterator();
   }
 
   /**
-   * Returns a {@code ListIterator} that operates on a copy of the internally managed
-   * {@code WiredList}. This is reasonable since this iterator does not support
-   * updates (all list-altering methods throw an {@code UnsupportedOperationException}).
-   * Since the copy is only accessible to the iterator, no synchronization is needed
-   * while the iteration is in progress. The downside is that, for large lists,
-   * getting hold of one of these iterators in the first place is rather expensive.
-   *
-   * @param index Index of the first element to be returned from the list
-   *     iterator (by a call to next)
-   * @return A {@code ListIterator} that operates on a copy of the internally managed
-   *     {@code WiredList}
+   * Forwards to {@link WiredList#listIterator(int)}. <b>This method is not
+   * synchronized!</b> You must manually synchronize the iteration and decide whether
+   * to lock the list for the entire duration of the iteration, or to lock it only
+   * before invoking a method in the {@code Iterator}.
    */
   public ListIterator<E> listIterator(int index) {
-    Lock l;
-    (l = getReadLock()).lock();
-    try {
-      return wl.copy().listIterator(index);
-    } finally {
-      l.unlock();
-    }
+    return wl.listIterator(index);
   }
 
   /**
-   * Forwards to {@link WiredList#wiredIterator()}. The returned iterator will assume
-   * that you are going to use it to update the list.
+   * Forwards to {@link WiredList#wiredIterator()}. <b>This method is not
+   * synchronized!</b> You must manually synchronize the iteration and decide whether
+   * to lock the list for the entire duration of the iteration, or to lock it only
+   * before invoking a method in the {@code Iterator}.
    */
   public WiredIterator<E> wiredIterator() {
-    return wiredIterator(false);
+    return wl.wiredIterator();
   }
 
   /**
-   * Forwards to {@link WiredList#wiredIterator()}. The returned iterator will assume
-   * that you are going to use it to update the list.
+   * Forwards to {@link WiredList#wiredIterator(boolean)}. <b>This method is not
+   * synchronized!</b> You must manually synchronize the iteration and decide whether
+   * to lock the list for the entire duration of the iteration, or to lock it only
+   * before invoking a method in the {@code Iterator}.
    */
   public WiredIterator<E> wiredIterator(boolean reverse) {
-    return wiredIterator(reverse, false);
+    return wl.wiredIterator(reverse);
   }
 
   /**
-   * <p>Returns a {@code WiredIterator} that directly operates on the list itself.
-   * <i>This iterator locks the list while the iteration is in progress</i>. When
-   * you instantiated the list as a read-intensive list, you can specify that the
-   * iterator is only going to read from the list. If so, other threads can keep
-   * reading from the list. Only writing to it will be prohibited. For
-   * write-intensive lists, instantiated via the no-arg constructor, the {@code
-   * readOnly} parameter has no effect. The list will be locked both for reading and
-   * for writing.
+   * <p>Returns a {@code WiredIterator} that will prevent other threads from
+   * updating the list while the iteration is in progress. This method has an
+   * advantage over manual synchronization when the list was created for
+   * read-intensive use (see class comments). In that case other threads can keep
+   * reading from the list while the iteration is in progress.
    *
-   * <p>Note that the {@link WiredIterator} interface not only extends
-   * {@link Iterator} but also {@link AutoCloseable}. You <b>SHOULD ALWAYS</b> use a
-   * try-with-resources block to obtain a {@code WiredIterator} from a {@code
-   * SynchronizedWiredList}. The {@code close} method will release lock acquired at
-   * the start of the iteration. If you don't call the {@code close} method, the lock
-   * will still be released eventually, but this will only happen when the iterator
-   * gets garbage-collected. (NB for a regular {@link WiredList} there is no need to
-   * start a try-with-resources block.)
+   * <p>Note that the {@code WiredIterator} interface not only extends
+   * {@link Iterator} but also {@link AutoCloseable}. When obtaining a {@code
+   * WiredIterator} through this method, you <b>SHOULD ALWAYS</b> do so using a
+   * try-with-resources block. The {@code close} method will release the {@link Lock}
+   * acquired at the start of the iteration. If you don't call the {@code close}
+   * method, the lock will still be properly released, but this will only happen once
+   * the iterator gets garbage-collected. (NB it is unnecessary to start a
+   * try-with-resources block when obtaining a {@code WiredIterator} in any other
+   * way.)
    *
    * <blockquote>
    * <pre>{@code
    * SynchronizedWiredList<String> swl = new SynchronizedWiredList<>();
    * // add some elements ...
-   * try(WiredIterator<E> itr = swl.wiredIterator()) {
+   * try(WiredIterator<E> itr = swl.wiredIterator(false)) {
    *  while(itr.hasNext()) {
    *    // do stuff ...
    *  }
@@ -450,16 +408,14 @@ public final class SynchronizedWiredList<E> implements List<E> {
    * </blockquote>
    *
    * @param reverse Whether to traverse the list backwards
-   * @param readOnly Whether you intend to use the iterator to read from the list
-   *     only
    * @return A {@code WiredIterator} that traverses the list from the first element
    *     to the last, or the other way round
    */
-  public WiredIterator<E> wiredIterator(boolean reverse, boolean readOnly) {
+  public WiredIterator<E> exclusiveWiredIterator(boolean reverse) {
     Lock l;
-    (l = readOnly ? getReadLock() : getWriteLock()).lock();
+    (l = getWriteLock()).lock();
     WiredIterator<E> itr = wl.wiredIterator(reverse);
-    WiredIterator<E> wrapper = new CloseableWiredIterator(itr, readOnly);
+    WiredIterator<E> wrapper = new CloseableWiredIterator(itr);
     CLEANER.register(wrapper, l::unlock);
     return wrapper;
   }

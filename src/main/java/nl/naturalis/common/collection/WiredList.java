@@ -60,6 +60,7 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * other.
  *
  * @param <E> The type of the elements in the list
+ * @author Ayco Holleman
  */
 public final class WiredList<E> implements List<E> {
 

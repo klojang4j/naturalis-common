@@ -1366,7 +1366,7 @@ public class SynchronizedWiredListTest {
   @Test
   public void wiredIterator04() {
     var wl0 = SynchronizedWiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var itr = wl0.wiredIterator(true);
+    var itr = wl0.wiredIterator();
     while (itr.hasNext()) {
       itr.next();
       itr.remove();
@@ -1377,7 +1377,7 @@ public class SynchronizedWiredListTest {
   @Test
   public void wiredIterator05() {
     var wl0 = SynchronizedWiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var itr = wl0.wiredIterator(true);
+    var itr = wl0.wiredIterator();
     while (itr.hasNext()) {
       int i = itr.next();
       if (i % 2 == 0) {
@@ -1390,7 +1390,7 @@ public class SynchronizedWiredListTest {
   @Test
   public void wiredIterator06() {
     var wl0 = SynchronizedWiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var itr = wl0.wiredIterator(true);
+    var itr = wl0.wiredIterator();
     while (itr.hasNext()) {
       int i = itr.next();
       if (i % 2 != 0) {
@@ -1403,7 +1403,7 @@ public class SynchronizedWiredListTest {
   @Test
   public void wiredIterator07() {
     var wl0 = SynchronizedWiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var itr = wl0.wiredIterator(true);
+    var itr = wl0.wiredIterator();
     while (itr.hasNext()) {
       int i = itr.next();
       if (i++ % 3 != 0) {
@@ -1434,7 +1434,7 @@ public class SynchronizedWiredListTest {
   @Test(expected = IllegalStateException.class)
   public void wiredIterator09() {
     var wl0 = SynchronizedWiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var itr = wl0.wiredIterator(true);
+    var itr = wl0.wiredIterator();
     itr.turn();
   }
 
@@ -1448,7 +1448,7 @@ public class SynchronizedWiredListTest {
   @Test
   public void wiredIterator11() {
     var wl0 = SynchronizedWiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var itr = wl0.wiredIterator(true, true);
+    var itr = wl0.exclusiveWiredIterator(true);
     assertEquals(9, (int) itr.peek());
     assertEquals(9, (int) itr.next());
     assertEquals(8, (int) itr.peek());
@@ -1462,7 +1462,7 @@ public class SynchronizedWiredListTest {
   @Test(expected = IllegalStateException.class)
   public void wiredIterator12() {
     var wl0 = SynchronizedWiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-    var itr = wl0.wiredIterator(true);
+    var itr = wl0.wiredIterator();
     itr.set(666);
   }
 

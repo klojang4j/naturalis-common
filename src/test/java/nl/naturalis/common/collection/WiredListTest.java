@@ -2,6 +2,7 @@ package nl.naturalis.common.collection;
 
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
