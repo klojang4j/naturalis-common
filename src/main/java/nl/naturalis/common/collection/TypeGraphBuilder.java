@@ -1,7 +1,7 @@
 package nl.naturalis.common.collection;
 
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.collection.TypeGraphMap.TypeNode;
+import nl.naturalis.common.collection.TypeGraph.TypeNode;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -13,7 +13,13 @@ import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.check.CommonChecks.deepNotNull;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
-public final class TypeGraphMapBuilder<V> {
+/**
+ * A builder class for {@link TypeGraph} instances.
+ *
+ * @param <V> The type of the values in the {@code TypeGraph}
+ * @author Ayco Holleman
+ */
+public final class TypeGraphBuilder<V> {
 
   // ================================================================== //
   // ======================= [ WritableTypeNode ] ===================== //
@@ -34,14 +40,16 @@ public final class TypeGraphMapBuilder<V> {
     TypeNode toTypeNode() {
       Entry[] entries = subtypes.lchop(node -> !node.type.isInterface())
           .stream()
-          .map(node -> entry(node.type, node.toTypeNode()))
+          .map(this::toEntry)
           .toArray(Entry[]::new);
-      Map<Class<?>, TypeNode> subclasses = Map.ofEntries(entries);
-      entries =
-          subtypes.stream().map(node -> entry(node.type, node.toTypeNode())).toArray(
-              Entry[]::new);
-      Map<Class<?>, TypeNode> subinterfaces = Map.ofEntries(entries);
+      var subclasses = Map.ofEntries(entries);
+      entries = subtypes.stream().map(this::toEntry).toArray(Entry[]::new);
+      var subinterfaces = Map.ofEntries(entries);
       return new TypeNode(type, value, subclasses, subinterfaces);
+    }
+
+    private Entry<? extends Class<?>, TypeNode> toEntry(WritableTypeNode node) {
+      return entry(node.type, node.toTypeNode());
     }
 
     void addChild(WritableTypeNode node) {
@@ -81,18 +89,18 @@ public final class TypeGraphMapBuilder<V> {
   private int size;
   private boolean autobox = true;
 
-  TypeGraphMapBuilder(Class<V> valueType) {
+  TypeGraphBuilder(Class<V> valueType) {
     this.valueType = valueType;
     this.root = new WritableTypeNode(Object.class, null);
   }
 
   /**
-   * Whether to enable the "autoboxing" feature. See {@link TypeMap for an
+   * Whether to enable the "autoboxing" feature. See {@link TypeMap} for an
    * explanation of this feature. By default, autoboxing is enabled.
    *
    * @return This {@code Builder} instance
    */
-  public TypeGraphMapBuilder<V> autobox(boolean autobox) {
+  public TypeGraphBuilder<V> autobox(boolean autobox) {
     this.autobox = autobox;
     return this;
   }
@@ -104,7 +112,7 @@ public final class TypeGraphMapBuilder<V> {
    * @param value The value
    * @return This {@code Builder} instance
    */
-  public TypeGraphMapBuilder<V> add(Class<?> type, V value) {
+  public TypeGraphBuilder<V> add(Class<?> type, V value) {
     Check.notNull(type, "type");
     Check.notNull(value, "value").is(instanceOf(), valueType);
     if (type == Object.class) {
@@ -128,7 +136,7 @@ public final class TypeGraphMapBuilder<V> {
    * @param types The types to associate the value with
    * @return This {@code Builder} instance
    */
-  public TypeGraphMapBuilder<V> addMultiple(V value, Class<?>... types) {
+  public TypeGraphBuilder<V> addMultiple(V value, Class<?>... types) {
     Check.notNull(value, "value").is(instanceOf(), valueType);
     Check.that(types, "types").is(deepNotNull());
     Arrays.stream(types).forEach(t -> add(t, value));
@@ -136,14 +144,13 @@ public final class TypeGraphMapBuilder<V> {
   }
 
   /**
-   * Returns an unmodifiable {@code TypeMap} with the configured types and
+   * Returns a new {@code TypeGraph} instance with the configured types and
    * behaviour.
    *
-   * @param <W> The type of the values in the returned {@code TypeMap}
-   * @return S new {@code TypeMap} instance with the configured types and behaviour
+   * @return A new {@code TypeGraph} instance with the configured types and behaviour
    */
-  public <W> TypeGraphMap<W> freeze() {
-    return new TypeGraphMap<>(root.toTypeNode(), size, autobox);
+  public TypeGraph<V> freeze() {
+    return new TypeGraph<>(root.toTypeNode(), size, autobox);
   }
 
 }

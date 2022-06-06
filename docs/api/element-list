@@ -7,6 +7,8 @@ nl.naturalis.common.function
 nl.naturalis.common.internal
 nl.naturalis.common.invoke
 nl.naturalis.common.path
-nl.naturalis.common.unsafe
+nl.naturalis.common.io
 nl.naturalis.common.util
+nl.naturalis.common.x.collection
 nl.naturalis.common.x.invoke
+nl.naturalis.common.x.util

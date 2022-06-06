@@ -1,10 +1,10 @@
-package nl.naturalis.common.collection;
+package nl.naturalis.common.x.collection;
 
 import java.util.Comparator;
 
 import static nl.naturalis.common.ClassMethods.*;
 
-public class PrettyTypeComparator implements Comparator<Class<?>> {
+public final class PrettyTypeComparator implements Comparator<Class<?>> {
 
   @Override
   public int compare(Class<?> c1, Class<?> c2) {
@@ -64,9 +64,9 @@ public class PrettyTypeComparator implements Comparator<Class<?>> {
     if (countAncestors(c1) > countAncestors(c2)) {
       return -1;
     }
-    // Compare the number of directly or directly implemented interfaces
-    // for regular classes. Thus, classes not implementing any interface
-    // are regarded as more primitive and should come first
+    // Compare the number of implemented interfaces for regular
+    // classes. Thus, classes not implementing any interface are
+    // regarded as more primitive and should come first
     if (getAllInterfaces(c1).size() < getAllInterfaces(c2).size()) {
       return 1;
     }

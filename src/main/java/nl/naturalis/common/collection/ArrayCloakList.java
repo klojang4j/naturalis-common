@@ -12,16 +12,17 @@ import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
 /**
- * A fixed-size, mutable {@code List} implementation intended for situations where an array
- * temporarily needs to take on the guise of a {@code List} before being processed as an array
- * again. This {@code List} implementation is much like the one you get from {@link
- * Arrays#asList(Object[]) Arrays.asList} in that it swallows rather than copies the array. However,
- * it also <i>exposes</i> the original array through the {@link #uncloak()} method, thus saving you
- * one array copy when continuing with the array again. The {@code set} and {@code get} methods
- * don't perform bounds-checking and all {@code add}-like methods throw an {@link
- * UnsupportedOperationException}. The {@code remove} methods have been repurposed to nullify list
- * elements, making them attractive candidates for a method references. This {@code List}
- * implementation accepts and may return {@code null} values.
+ * A fixed-size, mutable {@code List} implementation intended for situations where an
+ * array temporarily needs to take on the guise of a {@code List} before being
+ * processed as an array again. This {@code List} implementation is much like the one
+ * you get from {@link Arrays#asList(Object[]) Arrays.asList} in that it swallows
+ * rather than copies the array. However, it also <i>exposes</i> the original array
+ * through the {@link #uncloak()} method, thus saving you one array copy when
+ * continuing with the array again. The {@code set} and {@code get} methods don't
+ * perform bounds-checking and all {@code add}-like methods throw an {@link
+ * UnsupportedOperationException}. The {@code remove} methods have been repurposed to
+ * nullify list elements, making them attractive candidates for a method references.
+ * This {@code List} implementation accepts and may return {@code null} values.
  *
  * @param <E> The type of the list elements
  * @author Ayco Holleman
@@ -29,14 +30,26 @@ import static nl.naturalis.common.check.CommonChecks.instanceOf;
 public class ArrayCloakList<E> implements List<E>, RandomAccess {
 
   /**
+   * Returns an {@code ArrayCloakList} wrapping the specified array.
+   *
+   * @param array The array to wrap
+   * @param <F> The type of the array elements
+   * @return An {@code ArrayCloakList} wrapping the specified array
+   */
+  public static <F> ArrayCloakList<F> cloak(F[] array) {
+    return new ArrayCloakList<>(array);
+  }
+
+  /**
    * Creates a new {@code ArrayCloakList} from the specified elements
    *
    * @param elementType The class of the elements
    * @param elems The elements
+   * @param <F> The type of the array elements
    * @return A new {@code ArrayCloakList} containing the specified elements
    */
   @SafeVarargs
-  public static <F> ArrayCloakList<F> create(Class<F> elementType, F... elems) {
+  public static <F> ArrayCloakList<F> of(Class<F> elementType, F... elems) {
     Check.notNull(elementType, "elementType");
     Check.notNull(elems, "elems");
     for (F f : elems) {
@@ -47,19 +60,19 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
     return new ArrayCloakList<>(elems);
   }
 
-  private final Class<E> elementType;
+  private final Class<E> type;
   private final E[] data;
 
   /**
-   * Creates a new {@code ArrayCloakList} for the specified element type and with the specified size
-   * (and capacity).
+   * Creates a new {@code ArrayCloakList} for the specified element type and with the
+   * specified size (and capacity).
    *
    * @param elementType The class of the list elements
    * @param size The desired size of the list
    */
   public ArrayCloakList(Class<E> elementType, int size) {
     Check.that(size, "size").is(gte(), 0);
-    this.elementType = Check.notNull(elementType, "elementType").ok();
+    this.type = Check.notNull(elementType, "elementType").ok();
     this.data = InvokeUtils.newArray(elementType.arrayType(), size);
   }
 
@@ -71,7 +84,7 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   @SuppressWarnings({"unchecked"})
   public ArrayCloakList(E[] array) {
     this.data = Check.notNull(array).ok();
-    this.elementType = (Class<E>) array.getClass().getComponentType();
+    this.type = (Class<E>) array.getClass().getComponentType();
   }
 
   /**
@@ -95,7 +108,7 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   @Override
   public E set(int index, E element) {
     if (element != null) {
-      Check.that(element, "element").is(instanceOf(), elementType);
+      Check.that(element, "element").is(instanceOf(), type);
     }
     E e = data[index];
     data[index] = element;
@@ -148,14 +161,15 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   }
 
   /**
-   * Repurposed to nullify the element at the specified index. Note, however, that this method will
-   * throw an {@link UnsupportedOperationException} if the type parameter for this {@code
-   * ArrayCloakList} is {@code Integer}, because Java's auto-boxing/auto-unboxing feature would make
-   * the method indistinguishable from {@code remove(Object o)}.
+   * Repurposed to nullify the element at the specified index. Note, however, that
+   * this method will throw an {@link UnsupportedOperationException} if the type
+   * parameter for this {@code ArrayCloakList} is {@code Integer}, because Java's
+   * auto-boxing/auto-unboxing feature would make the method indistinguishable from
+   * {@code remove(Object o)}.
    */
   @Override
   public E remove(int index) {
-    if (elementType == Integer.class) {
+    if (type == Integer.class) {
       String msg = "Method remove(int) not supported for ArrayCloakList<Integer>. "
           + "Auto-boxing makes it indistinguishable from remove(Object)";
       throw new UnsupportedOperationException(msg);
@@ -167,16 +181,18 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   }
 
   /**
-   * Repurposed to nullify the first list element that equals specified object. Note, however, that
-   * this method will throw an {@link UnsupportedOperationException} if the type parameter for this
-   * {@code ArrayCloakList} is {@code Integer}, because Java's auto-boxing/auto-unboxing feature
-   * would make the method indistinguishable from {@code remove(int index)}.
+   * Repurposed to nullify the first list element that equals specified object. Note,
+   * however, that this method will throw an {@link UnsupportedOperationException} if
+   * the type parameter for this {@code ArrayCloakList} is {@code Integer}, because
+   * Java's auto-boxing/auto-unboxing feature would make the method indistinguishable
+   * from {@code remove(int index)}.
    */
   @Override
   public boolean remove(Object o) {
-    if (elementType == Integer.class) {
-      String msg = "Method remove(Object) not supported for ArrayCloakList<Integer>. "
-          + "Auto-unboxing makes it indistinguishable from remove(int)";
+    if (type == Integer.class) {
+      String msg =
+          "Method remove(Object) not supported for ArrayCloakList<Integer>. "
+              + "Auto-unboxing makes it indistinguishable from remove(int)";
       throw new UnsupportedOperationException(msg);
     }
     if (size() == 0) {
@@ -193,8 +209,8 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   }
 
   /**
-   * Repurposed to nullify all list elements whose value is present in the specified {@code
-   * Collection}.
+   * Repurposed to nullify all list elements whose value is present in the specified
+   * {@code Collection}.
    */
   @Override
   public boolean removeAll(Collection<?> c) {
@@ -207,8 +223,8 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   }
 
   /**
-   * Repurposed to nullify all list elements whose value is <i>not</i> present in the specified
-   * {@code Collection}.
+   * Repurposed to nullify all list elements whose value is <i>not</i> present in the
+   * specified {@code Collection}.
    */
   @Override
   public boolean retainAll(Collection<?> c) {
@@ -356,8 +372,8 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   }
 
   /**
-   * Throws an {@code UnsupportedOperationException}. List manipulation must be done through the
-   * {@link #set(int, Object) set} method only.
+   * Throws an {@code UnsupportedOperationException}. List manipulation must be done
+   * through the {@link #set(int, Object) set} method only.
    */
   @Override
   public boolean add(E e) {
@@ -365,8 +381,8 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   }
 
   /**
-   * Throws an {@code UnsupportedOperationException}. List manipulation must be done through the
-   * {@link #set(int, Object) set} method only.
+   * Throws an {@code UnsupportedOperationException}. List manipulation must be done
+   * through the {@link #set(int, Object) set} method only.
    */
   @Override
   public void add(int index, E element) {
@@ -374,8 +390,8 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   }
 
   /**
-   * Throws an {@code UnsupportedOperationException}. List manipulation must be done through the
-   * {@link #set(int, Object) set} method only.
+   * Throws an {@code UnsupportedOperationException}. List manipulation must be done
+   * through the {@link #set(int, Object) set} method only.
    */
   @Override
   public boolean addAll(Collection<? extends E> c) {
@@ -383,8 +399,8 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   }
 
   /**
-   * Throws an {@code UnsupportedOperationException}. List manipulation must be done through the
-   * {@link #set(int, Object) set} method only.
+   * Throws an {@code UnsupportedOperationException}. List manipulation must be done
+   * through the {@link #set(int, Object) set} method only.
    */
   @Override
   public boolean addAll(int index, Collection<? extends E> c) {

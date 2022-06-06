@@ -12,21 +12,20 @@ import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
 /**
- * A {@link TypeMap} that stores its entries in a data structure similar to the one used by {@link
- * TypeGraphMap}, but sensitive to the order in which the types are inserted into the map. Thus, if
- * you expect, for example, {@code String.class} to be requested very often compared to the other
- * types, it pays to {@link LinkedTypeGraphMapBuilder#add(Class, Object) add} that type first.
+ * A {@link TypeMap} that stores its entries in a data structure similar to the one
+ * used by {@link TypeGraph}, but is sensitive to the order in which the types are
+ * inserted into the map. Thus, if you expect, for example, {@code String.class} to
+ * be requested often compared to the other types, it pays to {@link
+ * LinkedTypeGraphBuilder#add(Class, Object) add} that type first.
  *
- * <p>The key set of a {@code LinkedTypeGraphMap} consists of depth-first slices of the type
- * hierarchy.
+ * <p>The key set provides a depth-first view of the type hierarchy.
  *
  * @param <V> The type of the values in the {@code Map}
- * @see TypeMap
- * @see TypeGraphMap
- * @see LinkedTypeGraphMapBuilder
- * @see SimpleTypeMap
+ * @see TypeGraph
+ * @see LinkedTypeGraphBuilder
+ * @see TypeHashMap
  */
-public final class LinkedTypeGraphMap<V> extends TypeMap<V> {
+public final class LinkedTypeGraph<V> extends AbstractTypeMap<V> {
 
   // ================================================================== //
   // ======================= [ LinkedTypeNode ] ======================= //
@@ -135,20 +134,21 @@ public final class LinkedTypeGraphMap<V> extends TypeMap<V> {
 
   }
 
-  // ================================================================== //
-  // ===================== [ LinkedTypeGraphMap ] ===================== //
-  // ================================================================== //
+  // ============================================================== //
+  // ==================== [ LinkedTypeGraph ] ===================== //
+  // ============================================================== //
 
   static final LinkedTypeNode[] NO_SUBTYPES = new LinkedTypeNode[0];
 
   /**
-   * Converts the specified {@code Map} to a {@code TypeGraphMap}. Autoboxing will be enabled.
+   * Converts the specified {@code Map} to a {@code TypeGraphMap}. Autoboxing will be
+   * enabled.
    *
    * @param <U> The type of the values in the {@code Map}
    * @param src The {@code Map} to convert
    * @return A {@code TypeGraphMap}
    */
-  public static <U> LinkedTypeGraphMap<U> copyOf(Map<Class<?>, U> src) {
+  public static <U> LinkedTypeGraph<U> copyOf(Map<Class<?>, U> src) {
     return copyOf(src, true);
   }
 
@@ -157,13 +157,14 @@ public final class LinkedTypeGraphMap<V> extends TypeMap<V> {
    *
    * @param <U> The type of the values in the {@code Map}
    * @param src The {@code Map} to convert
-   * @param autobox Whether to enable "autoboxing" (see {@link TypeMap})
+   * @param autobox Whether to enable "autoboxing" (see {@link AbstractTypeMap})
    * @return A {@code TypeGraphMap}
    */
   @SuppressWarnings({"unchecked"})
-  public static <U> LinkedTypeGraphMap<U> copyOf(Map<Class<?>, U> src, boolean autobox) {
+  public static <U> LinkedTypeGraph<U> copyOf(Map<Class<?>, U> src,
+      boolean autobox) {
     Check.notNull(src, "source map");
-    LinkedTypeGraphMapBuilder<U> builder = (LinkedTypeGraphMapBuilder<U>) build(Object.class);
+    LinkedTypeGraphBuilder<U> builder = (LinkedTypeGraphBuilder<U>) build(Object.class);
     builder.autobox(autobox);
     src.forEach(builder::add);
     return builder.freeze();
@@ -176,8 +177,8 @@ public final class LinkedTypeGraphMap<V> extends TypeMap<V> {
    * @param valueType The class of the values in the map
    * @return A builder for {@code TypeHashMap} instances
    */
-  public static <U> LinkedTypeGraphMapBuilder<U> build(Class<U> valueType) {
-    return Check.notNull(valueType).ok(LinkedTypeGraphMapBuilder::new);
+  public static <U> LinkedTypeGraphBuilder<U> build(Class<U> valueType) {
+    return Check.notNull(valueType).ok(LinkedTypeGraphBuilder::new);
   }
 
   private final LinkedTypeNode root;
@@ -188,7 +189,7 @@ public final class LinkedTypeGraphMap<V> extends TypeMap<V> {
   private Collection<V> values;
   private Set<Entry<Class<?>, V>> entries;
 
-  LinkedTypeGraphMap(LinkedTypeNode root, int size, boolean autobox) {
+  LinkedTypeGraph(LinkedTypeNode root, int size, boolean autobox) {
     super(autobox);
     this.root = root;
     this.size = size;
@@ -200,8 +201,12 @@ public final class LinkedTypeGraphMap<V> extends TypeMap<V> {
   @Override
   @SuppressWarnings({"unchecked"})
   public V get(Object key) {
-    Class<?> type = Check.notNull(key).is(instanceOf(), Class.class).ok(Class.class::cast);
-    return (V) (type.isInterface() ? root.findInterface(type) : root.findClass(type, autobox));
+    Class<?> type = Check.notNull(key)
+        .is(instanceOf(), Class.class)
+        .ok(Class.class::cast);
+    return type.isInterface()
+        ? (V) root.findInterface(type)
+        : (V) root.findClass(type, autobox);
   }
 
   /**
@@ -209,7 +214,9 @@ public final class LinkedTypeGraphMap<V> extends TypeMap<V> {
    */
   @Override
   public boolean containsKey(Object key) {
-    Class<?> type = Check.notNull(key).is(instanceOf(), Class.class).ok(Class.class::cast);
+    Class<?> type = Check.notNull(key)
+        .is(instanceOf(), Class.class)
+        .ok(Class.class::cast);
     if (root.value != null) {
       return true;
     }
@@ -225,7 +232,10 @@ public final class LinkedTypeGraphMap<V> extends TypeMap<V> {
   }
 
   private static boolean containsSuper(LinkedTypeNode[] nodes, Class<?> type) {
-    return Arrays.stream(nodes).filter(node -> isA(type, node.type)).findAny().isPresent();
+    return Arrays.stream(nodes)
+        .filter(node -> isA(type, node.type))
+        .findAny()
+        .isPresent();
   }
 
   /**
@@ -237,9 +247,9 @@ public final class LinkedTypeGraphMap<V> extends TypeMap<V> {
   }
 
   /**
-   * Returns a depth-first view of the types in the type hierarchy.
+   * Returns a depth-first view of the type hierarchy.
    *
-   * @return A depth-first view of the types in the type hierarchy.
+   * @return A depth-first view of the type hierarchy
    */
   @Override
   public Set<Class<?>> keySet() {
@@ -255,9 +265,9 @@ public final class LinkedTypeGraphMap<V> extends TypeMap<V> {
   }
 
   /**
-   * Returns a breadth-first view of the types in the type hierarchy.
+   * Returns a breadth-first view of the type hierarchy.
    *
-   * @return A breadth-first view of the types in the type hierarchy.
+   * @return A breadth-first view of the type hierarchy
    */
   public Set<Class<?>> breadthFirstKeySet() {
     if (keysBF == null) {

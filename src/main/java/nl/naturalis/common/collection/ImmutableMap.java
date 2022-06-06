@@ -1,9 +1,12 @@
 package nl.naturalis.common.collection;
 
+import nl.naturalis.common.x.Generated;
+
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+@Generated
 abstract class ImmutableMap<K, V> implements Map<K, V> {
 
   @Override
@@ -63,12 +66,15 @@ abstract class ImmutableMap<K, V> implements Map<K, V> {
   }
 
   @Override
-  public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+  public V compute(K key,
+      BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+  public V merge(K key,
+      V value,
+      BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
     throw new UnsupportedOperationException();
   }
 

@@ -1,4 +1,4 @@
-package nl.naturalis.common.internal;
+package nl.naturalis.common.x;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.SOURCE;

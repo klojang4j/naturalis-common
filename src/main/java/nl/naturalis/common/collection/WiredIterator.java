@@ -5,7 +5,7 @@ import java.util.ListIterator;
 
 /**
  * A one-way-only iterator that, in practice, still provides the same functionality
- * as a {@link ListIterator}. A {@code WiredIterator} lets you flip the direction of
+ * as {@link ListIterator}. A {@code WiredIterator} lets you flip the direction of
  * the iteration through the {@link #turn()} method. <i>The</i> {@code next()}
  * <i>and</i> {@code hasNext()} <i>methods are always relative to the
  * direction of the traversal.</i>

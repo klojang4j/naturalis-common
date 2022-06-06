@@ -14,25 +14,25 @@ import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
 /**
- * A {@link TypeMap} extension that stores its entries in a data structure that reflects the Java
- * type hierarchy. The requested type and its supertypes, if present, will be found in a single
- * traversal of the data structure. While a {@link SimpleTypeMap} climbs the type's class and
- * interface hierarchy, a {@code TypeGraphMap} comes in from the top of the type hierarchy and works
- * its way down until it encounters the requested type. Consequently, it exhibits a pointed
- * lopsidedness in the performance of {@link #containsKey(Object)} and {@link #get(Object) get}.
- * {@code containsKey} can return ({@code true}) as soon as it encounters a supertype of the
- * requested type (which would be practically immediate if the map contains {@code Object.class}).
- * The {@code get} method, on the other hand, needs to descend into the type hierarchy until it
- * finds the requested type, or knows for sure it is absent.
+ * A {@link TypeMap} that stores its entries in a data structure that reflects the
+ * Java type hierarchy. While {@link TypeHashMap} climbs the requested type's class
+ * and interface hierarchy, a {@code TypeGraph} comes in from the top of the type
+ * hierarchy and works its way down until it encounters the requested type.
+ * Consequently, it exhibits a pointed lopsidedness in the performance of {@link
+ * #containsKey(Object)} and {@link #get(Object) get}. {@code containsKey} can return
+ * ({@code true}) as soon as it encounters a supertype of the requested type (which
+ * would be practically immediate if the map contains {@code Object.class}). The
+ * {@code get} method, on the other hand, needs to descend into the type hierarchy
+ * until it finds the requested type, or knows for sure it is absent.
  *
- * <p>The key set of a {@code TypeGraphMap} consists of depth-first slices of the type hierarchy.
+ * <p>The key set provides a depth-first view of the type hierarchy.
  *
  * @param <V> The type of the values in the  {@code Map}
- * @see TypeMap
- * @see TypeGraphMapBuilder
- * @see SimpleTypeMap
+ * @see TypeGraphBuilder
+ * @see LinkedTypeGraph
+ * @see TypeHashMap
  */
-public final class TypeGraphMap<V> extends TypeMap<V> {
+public final class TypeGraph<V> extends AbstractTypeMap<V> {
 
   // ================================================================== //
   // ========================== [ TypeNode ] ========================== //
@@ -143,46 +143,47 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
   }
 
   // ================================================================== //
-  // ========================= [ TypeGraphMap ] ======================= //
+  // ========================= [ TypeGraph ] ======================= //
   // ================================================================== //
 
   /**
-   * Converts the specified {@code Map} to a {@code TypeGraphMap}. Autoboxing will be enabled.
+   * Converts the specified {@code Map} to a {@code TypeGraph} with "autoboxing"
+   * enabled.
    *
    * @param <U> The type of the values in the {@code Map}
    * @param src The {@code Map} to convert
-   * @return A {@code TypeGraphMap}
+   * @return A {@code TypeGraph}
    */
-  public static <U> TypeGraphMap<U> copyOf(Map<Class<?>, U> src) {
+  public static <U> TypeGraph<U> copyOf(Map<Class<?>, U> src) {
     return copyOf(src, true);
   }
 
   /**
-   * Converts the specified {@code Map} to a {@code TypeGraphMap}.
+   * Converts the specified {@code Map} to a {@code TypeGraph}.
    *
    * @param <U> The type of the values in the {@code Map}
    * @param src The {@code Map} to convert
-   * @param autobox Whether to enable "autoboxing" (see {@link TypeMap})
-   * @return A {@code TypeGraphMap}
+   * @param autobox Whether to enable "autoboxing" (see {@link AbstractTypeMap})
+   * @return A {@code TypeGraph}
    */
   @SuppressWarnings({"unchecked"})
-  public static <U> TypeGraphMap<U> copyOf(Map<Class<?>, U> src, boolean autobox) {
+  public static <U> TypeGraph<U> copyOf(Map<Class<?>, U> src, boolean autobox) {
     Check.notNull(src, "source map");
-    TypeGraphMapBuilder<U> builder = (TypeGraphMapBuilder<U>) build(Object.class);
+    TypeGraphBuilder<U> builder = (TypeGraphBuilder<U>) build(Object.class);
     builder.autobox(autobox);
     src.forEach(builder::add);
     return builder.freeze();
   }
 
   /**
-   * Returns a builder for {@code TypeHashMap} instances.
+   * Returns a builder for {@code TypeGraph} instances.
    *
    * @param <U> The type of the values in the map
    * @param valueType The class of the values in the map
    * @return A builder for {@code TypeHashMap} instances
    */
-  public static <U> TypeGraphMapBuilder<U> build(Class<U> valueType) {
-    return Check.notNull(valueType).ok(TypeGraphMapBuilder::new);
+  public static <U> TypeGraphBuilder<U> build(Class<U> valueType) {
+    return Check.notNull(valueType).ok(TypeGraphBuilder::new);
   }
 
   private final TypeNode root;
@@ -192,7 +193,7 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
   private Collection<V> values;
   private Set<Entry<Class<?>, V>> entries;
 
-  TypeGraphMap(TypeNode root, int size, boolean autobox) {
+  TypeGraph(TypeNode root, int size, boolean autobox) {
     super(autobox);
     this.root = root;
     this.size = size;
@@ -204,11 +205,15 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
   @Override
   @SuppressWarnings({"unchecked"})
   public V get(Object key) {
-    Class<?> type = Check.notNull(key).is(instanceOf(), Class.class).ok(Class.class::cast);
+    Class<?> type = Check.notNull(key)
+        .is(instanceOf(), Class.class)
+        .ok(Class.class::cast);
     // interfaces can only be subtypes of other interfaced,
     // so we  don't need to bother with the regular classes
     // in the type tree
-    return (V) (type.isInterface() ? root.findInterface(type) : root.findClass(type, autobox));
+    return (V) (type.isInterface()
+                    ? root.findInterface(type)
+                    : root.findClass(type, autobox));
   }
 
   /**
@@ -216,7 +221,9 @@ public final class TypeGraphMap<V> extends TypeMap<V> {
    */
   @Override
   public boolean containsKey(Object key) {
-    Class<?> type = Check.notNull(key).is(instanceOf(), Class.class).ok(Class.class::cast);
+    Class<?> type = Check.notNull(key)
+        .is(instanceOf(), Class.class)
+        .ok(Class.class::cast);
     if (root.value != null) {
       return true;
     }

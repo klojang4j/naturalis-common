@@ -1,6 +1,7 @@
 package nl.naturalis.common.collection;
 
 import nl.naturalis.common.ClassMethods;
+import nl.naturalis.common.x.collection.PrettyTypeComparator;
 import org.junit.Ignore;
 import org.junit.Test;
 

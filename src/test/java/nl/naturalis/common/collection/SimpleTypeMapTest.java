@@ -12,7 +12,7 @@ public class SimpleTypeMapTest {
 
   @Test
   public void test00() {
-    SimpleTypeMap<String> m = SimpleTypeMap.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(String.class, "String")
         .add(Number.class, "Number")
         .add(Short.class, "Short")
@@ -27,8 +27,10 @@ public class SimpleTypeMapTest {
 
   @Test
   public void test01() {
-    SimpleTypeMap<String> m =
-        SimpleTypeMap.build(String.class).add(Object.class, "Object").autoExpand(true).freeze();
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
+        .add(Object.class, "Object")
+        .autoExpand(true)
+        .freeze();
     assertEquals(1, m.size());
     assertTrue(m.containsKey(Integer.class));
     assertEquals(2, m.size());
@@ -36,8 +38,10 @@ public class SimpleTypeMapTest {
 
   @Test
   public void test02() {
-    SimpleTypeMap<String> m =
-        SimpleTypeMap.build(String.class).autoExpand(2).add(Object.class, "Object").freeze();
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
+        .autoExpand(2)
+        .add(Object.class, "Object")
+        .freeze();
     assertEquals(1, m.size());
     assertTrue(m.containsKey(Collection.class));
     assertEquals(2, m.size());
@@ -45,8 +49,10 @@ public class SimpleTypeMapTest {
 
   @Test
   public void test03() {
-    SimpleTypeMap<String> m =
-        SimpleTypeMap.build(String.class).autoExpand(false).add(Object.class, "Object").freeze();
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
+        .autoExpand(false)
+        .add(Object.class, "Object")
+        .freeze();
     assertEquals(1, m.size());
     assertTrue(m.containsKey(Collection.class));
     assertEquals(1, m.size());
@@ -58,7 +64,7 @@ public class SimpleTypeMapTest {
 
   @Test
   public void test04() {
-    SimpleTypeMap<String> m = SimpleTypeMap.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(ArrayList.class, "ArrayList")
         .add(List.class, "List")
         .add(Collection.class, "Collection")
@@ -68,7 +74,7 @@ public class SimpleTypeMapTest {
 
   @Test
   public void test05() {
-    SimpleTypeMap<String> m = SimpleTypeMap.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(ArrayList.class, "ArrayList")
         .add(MyListInterface.class, "MyListInterface")
         .freeze();
@@ -77,7 +83,7 @@ public class SimpleTypeMapTest {
 
   @Test
   public void test06() {
-    SimpleTypeMap<String> m = SimpleTypeMap.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(List.class, "List")
         .add(Object.class, "Object")
         .freeze();
@@ -86,7 +92,7 @@ public class SimpleTypeMapTest {
 
   @Test
   public void test07() {
-    SimpleTypeMap<String> m = SimpleTypeMap.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(List[].class, "List[]")
         .add(Object.class, "Object")
         .freeze();
@@ -95,7 +101,7 @@ public class SimpleTypeMapTest {
 
   @Test
   public void test08() {
-    SimpleTypeMap<String> m = SimpleTypeMap.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(Object[].class, "Object[]")
         .add(Object.class, "Object")
         .freeze();
@@ -105,7 +111,7 @@ public class SimpleTypeMapTest {
 
   @Test
   public void test09() {
-    SimpleTypeMap<String> m = SimpleTypeMap.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(Object[].class, "Object[]")
         .add(Object.class, "Object")
         .freeze();
@@ -114,22 +120,28 @@ public class SimpleTypeMapTest {
 
   @Test
   public void test10() {
-    SimpleTypeMap<String> m =
-        SimpleTypeMap.build(String.class).autobox(true).add(Object.class, "Object").freeze();
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
+        .autobox(true)
+        .add(Object.class, "Object")
+        .freeze();
     assertEquals("Object", m.get(int.class));
   }
 
   @Test
   public void test11() {
-    SimpleTypeMap<String> m =
-        SimpleTypeMap.build(String.class).autobox(false).add(Object.class, "Object").freeze();
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
+        .autobox(false)
+        .add(Object.class, "Object")
+        .freeze();
     assertEquals("Object", m.get(int.class));
   }
 
   @Test
   public void test12() {
-    SimpleTypeMap<String> m =
-        SimpleTypeMap.build(String.class).autobox(false).add(Object.class, "Object").freeze();
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
+        .autobox(false)
+        .add(Object.class, "Object")
+        .freeze();
     assertEquals("Object", m.get(int[].class));
   }
 

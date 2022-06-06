@@ -1,9 +1,12 @@
 package nl.naturalis.common.collection;
 
+import nl.naturalis.common.x.Generated;
+
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.Predicate;
 
+@Generated
 abstract class ImmutableSet<E> implements Set<E> {
 
   @Override

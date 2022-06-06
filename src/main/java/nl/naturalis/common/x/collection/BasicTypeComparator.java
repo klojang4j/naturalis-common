@@ -1,11 +1,11 @@
-package nl.naturalis.common.collection;
+package nl.naturalis.common.x.collection;
 
 import java.util.Comparator;
 
 import static nl.naturalis.common.ClassMethods.countAncestors;
 import static nl.naturalis.common.ClassMethods.getAllInterfaces;
 
-class BasicTypeComparator implements Comparator<Class<?>> {
+public final class BasicTypeComparator implements Comparator<Class<?>> {
 
   @Override
   public int compare(Class<?> c1, Class<?> c2) {

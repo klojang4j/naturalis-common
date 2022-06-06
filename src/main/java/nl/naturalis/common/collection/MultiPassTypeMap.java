@@ -10,7 +10,12 @@ import static nl.naturalis.common.ClassMethods.box;
 import static nl.naturalis.common.check.CommonChecks.sameAs;
 import static nl.naturalis.common.check.CommonGetters.type;
 
-abstract sealed class MultiPassTypeMap<V> extends TypeMap<V> permits SimpleTypeMap {
+/*
+ * Currently only extended by TypeHashMap, but could be base class for any TypeMap
+ * that relies on a regular map to do the lookups.
+ */
+abstract sealed class MultiPassTypeMap<V> extends AbstractTypeMap<V> permits
+    TypeHashMap {
 
   final boolean autoExpand;
 
@@ -23,7 +28,7 @@ abstract sealed class MultiPassTypeMap<V> extends TypeMap<V> permits SimpleTypeM
 
   @Override
   public V get(Object key) {
-    Check.notNull(key, "key").has(type(), sameAs(), Class.class);
+    Check.notNull(key).has(type(), sameAs(), Class.class);
     Class<?> type = (Class<?>) key;
     Tuple2<Class<?>, V> tuple = find(type);
     if (tuple == null) {
@@ -37,7 +42,7 @@ abstract sealed class MultiPassTypeMap<V> extends TypeMap<V> permits SimpleTypeM
 
   @Override
   public boolean containsKey(Object key) {
-    Check.notNull(key, "key").has(type(), sameAs(), Class.class);
+    Check.notNull(key).has(type(), sameAs(), Class.class);
     Class<?> type = (Class<?>) key;
     Tuple2<Class<?>, V> entry = find(type);
     if (entry == null) {
@@ -51,7 +56,9 @@ abstract sealed class MultiPassTypeMap<V> extends TypeMap<V> permits SimpleTypeM
 
   private Tuple2<Class<?>, V> find(Class<?> k) {
     V v = backend().get(k);
-    return v == null ? k.isArray() ? findArrayType(k) : findSimpleType(k) : Tuple2.of(k, v);
+    return v == null
+        ? k.isArray() ? findArrayType(k) : findSimpleType(k)
+        : Tuple2.of(k, v);
   }
 
   private Tuple2<Class<?>, V> findSimpleType(Class<?> k) {
@@ -60,7 +67,9 @@ abstract sealed class MultiPassTypeMap<V> extends TypeMap<V> permits SimpleTypeM
       return t == null ? defaultValue() : t;
     }
     // We don't want to search for Object.class just yet.
-    for (Class<?> c = k.getSuperclass(); c != null && c != Object.class; c = c.getSuperclass()) {
+    for (Class<?> c = k.getSuperclass();
+        c != null && c != Object.class;
+        c = c.getSuperclass()) {
       V v = backend().get(c);
       if (v != null) {
         return Tuple2.of(c, v);
@@ -84,7 +93,9 @@ abstract sealed class MultiPassTypeMap<V> extends TypeMap<V> permits SimpleTypeM
       Tuple2<Class<?>, V> t = climbInterfaces(elementType, true);
       return t == null ? defaultValue() : t;
     }
-    for (Class<?> c = elementType.getSuperclass(); c != null; c = c.getSuperclass()) {
+    for (Class<?> c = elementType.getSuperclass();
+        c != null;
+        c = c.getSuperclass()) {
       Class<?> arrayType = c.arrayType();
       V v = backend().get(arrayType);
       if (v != null) {
@@ -108,7 +119,9 @@ abstract sealed class MultiPassTypeMap<V> extends TypeMap<V> permits SimpleTypeM
   private Tuple2<Class<?>, V> defaultValue() {
     if (defVal == null) {
       V val = backend().get(Object.class);
-      Tuple2<Class<?>, V> tuple = val == null ? null : Tuple2.of(Object.class, val);
+      Tuple2<Class<?>, V> tuple = (val == null)
+          ? null
+          : Tuple2.of(Object.class, val);
       defVal = new AtomicReference<>(tuple);
     }
     return defVal.getPlain();

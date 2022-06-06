@@ -38,9 +38,11 @@ public class MsgPredicateTest {
     Check.that(List.of(1, 2, 3)).isNot(empty());
     Check.that(List.of(1, 2, 3)).is(deepNotNull());
     Check.that(List.of(1, 2, 3)).is(deepNotEmpty());
-    Check.that(ArrayCloakList.create(String.class, null, null, null)).isNot(empty());
-    Check.that(ArrayCloakList.create(String.class, null, null, null)).isNot(deepNotNull());
-    Check.that(ArrayCloakList.create(String.class, null, null, null)).isNot(deepNotEmpty());
+    Check.that(ArrayCloakList.of(String.class, null, null, null)).isNot(empty());
+    Check.that(ArrayCloakList.of(String.class, null, null, null))
+        .isNot(deepNotNull());
+    Check.that(ArrayCloakList.of(String.class, null, null, null))
+        .isNot(deepNotEmpty());
     Check.that("foo").isNot(blank());
     Check.that("   ").is(blank());
     Check.that(List.of().isEmpty()).is(yes());
@@ -159,7 +161,8 @@ public class MsgPredicateTest {
       Check.that(List.of(1F), "iron").is(empty());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("iron must be null or empty (was List12[1] of [1.0])", e.getMessage());
+      assertEquals("iron must be null or empty (was List12[1] of [1.0])",
+          e.getMessage());
       return;
     }
     fail();
@@ -197,7 +200,8 @@ public class MsgPredicateTest {
       Check.that(pack("foo", "bar"), "gold").isNot(deepNotNull());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("gold must be null or contain null values (was String[2] of [foo, bar])",
+      assertEquals(
+          "gold must be null or contain null values (was String[2] of [foo, bar])",
           e.getMessage());
       return;
     }
@@ -224,7 +228,8 @@ public class MsgPredicateTest {
       Check.that(pack("foo", "bar"), "silver").isNot(deepNotEmpty());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("silver must be empty or contain empty values (was String[2] of [foo, bar])",
+      assertEquals(
+          "silver must be empty or contain empty values (was String[2] of [foo, bar])",
           e.getMessage());
       return;
     }
@@ -249,7 +254,8 @@ public class MsgPredicateTest {
       Check.that("  ", "nitrogen").isNot(blank());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("nitrogen must not be null or blank (was \"  \")", e.getMessage());
+      assertEquals("nitrogen must not be null or blank (was \"  \")",
+          e.getMessage());
       return;
     }
     fail();
@@ -273,7 +279,8 @@ public class MsgPredicateTest {
       Check.that("42", "calcium").isNot(integer());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("calcium must not be parsable as integer (was 42)", e.getMessage());
+      assertEquals("calcium must not be parsable as integer (was 42)",
+          e.getMessage());
       return;
     }
     fail();
@@ -310,7 +317,8 @@ public class MsgPredicateTest {
       Check.that(f, "lithium").is(file());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("lithium must not be a directory (was " + f + ")", e.getMessage());
+      assertEquals("lithium must not be a directory (was " + f + ")",
+          e.getMessage());
       return;
     } finally {
       f.delete();
@@ -346,7 +354,8 @@ public class MsgPredicateTest {
       Check.that(f, "thorium").is(directory());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("thorium must not be a directory (was " + f + ")", e.getMessage());
+      assertEquals("thorium must not be a directory (was " + f + ")",
+          e.getMessage());
       return;
     } finally {
       f.delete();

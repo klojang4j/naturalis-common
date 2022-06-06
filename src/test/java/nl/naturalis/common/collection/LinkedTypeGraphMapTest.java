@@ -13,7 +13,7 @@ public class LinkedTypeGraphMapTest {
 
   @Test
   public void test00() {
-    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(String.class, "String")
         .add(Number.class, "Number")
         .add(Short.class, "Short")
@@ -28,24 +28,27 @@ public class LinkedTypeGraphMapTest {
 
   @Test
   public void test01() {
-    LinkedTypeGraphMap<String> m =
-        LinkedTypeGraphMap.build(String.class).add(Object.class, "Object").freeze();
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
+        .add(Object.class, "Object")
+        .freeze();
     assertEquals(1, m.size());
     assertTrue(m.containsKey(Integer.class));
   }
 
   @Test
   public void test02() {
-    LinkedTypeGraphMap<String> m =
-        LinkedTypeGraphMap.build(String.class).add(Object.class, "Object").freeze();
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
+        .add(Object.class, "Object")
+        .freeze();
     assertEquals(1, m.size());
     assertTrue(m.containsKey(Collection.class));
   }
 
   @Test
   public void test03() {
-    LinkedTypeGraphMap<String> m =
-        LinkedTypeGraphMap.build(String.class).add(Object.class, "Object").freeze();
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
+        .add(Object.class, "Object")
+        .freeze();
     assertEquals(1, m.size());
     assertTrue(m.containsKey(Collection.class));
   }
@@ -56,7 +59,7 @@ public class LinkedTypeGraphMapTest {
 
   @Test
   public void test04() {
-    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(ArrayList.class, "ArrayList")
         .add(List.class, "List")
         .add(Collection.class, "Collection")
@@ -66,7 +69,7 @@ public class LinkedTypeGraphMapTest {
 
   @Test
   public void test05() {
-    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(ArrayList.class, "ArrayList")
         .add(MyListInterface.class, "MyListInterface")
         .freeze();
@@ -75,7 +78,7 @@ public class LinkedTypeGraphMapTest {
 
   @Test
   public void test06() {
-    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(List.class, "List")
         .add(Object.class, "Object")
         .freeze();
@@ -84,7 +87,7 @@ public class LinkedTypeGraphMapTest {
 
   @Test
   public void test07() {
-    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(List[].class, "List[]")
         .add(Object.class, "Object")
         .freeze();
@@ -93,7 +96,7 @@ public class LinkedTypeGraphMapTest {
 
   @Test
   public void test08() {
-    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(Object[].class, "Object[]")
         .add(Object.class, "Object")
         .freeze();
@@ -103,7 +106,7 @@ public class LinkedTypeGraphMapTest {
 
   @Test
   public void test09() {
-    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(Object[].class, "Object[]")
         .add(Object.class, "Object")
         .freeze();
@@ -112,28 +115,34 @@ public class LinkedTypeGraphMapTest {
 
   @Test
   public void test10() {
-    LinkedTypeGraphMap<String> m =
-        LinkedTypeGraphMap.build(String.class).autobox(true).add(Object.class, "Object").freeze();
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
+        .autobox(true)
+        .add(Object.class, "Object")
+        .freeze();
     assertEquals("Object", m.get(int.class));
   }
 
   @Test
   public void test11() {
-    LinkedTypeGraphMap<String> m =
-        LinkedTypeGraphMap.build(String.class).autobox(false).add(Object.class, "Object").freeze();
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
+        .autobox(false)
+        .add(Object.class, "Object")
+        .freeze();
     assertEquals("Object", m.get(int.class));
   }
 
   @Test
   public void test12() {
-    LinkedTypeGraphMap<String> m =
-        LinkedTypeGraphMap.build(String.class).autobox(false).add(Object.class, "Object").freeze();
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
+        .autobox(false)
+        .add(Object.class, "Object")
+        .freeze();
     assertEquals("Object", m.get(int[].class));
   }
 
   @Test
   public void test13() {
-    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(Iterable.class, "Iterable")
         .add(Collection.class, "Collection")
         .add(Set.class, "Set")
@@ -159,7 +168,7 @@ public class LinkedTypeGraphMapTest {
 
   @Test
   public void test14() {
-    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(A0.class, "A0")
         .add(Serializable.class, "Serializable")
         .freeze();
@@ -170,7 +179,7 @@ public class LinkedTypeGraphMapTest {
 
   @Test
   public void test15() {
-    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(A0.class, "A0")
         .add(A000.class, "A000")
         .add(Serializable.class, "Serializable")
@@ -182,7 +191,7 @@ public class LinkedTypeGraphMapTest {
 
   @Test
   public void test16() {
-    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(A0.class, "A0")
         .add(A0000.class, "A0000")
         .add(Serializable.class, "Serializable")
@@ -194,7 +203,7 @@ public class LinkedTypeGraphMapTest {
 
   @Test(expected = DuplicateKeyException.class)
   public void test17() {
-    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(A01.class, "A01")
         .add(A0.class, "A0")
         .add(A01.class, "FOO")
@@ -203,7 +212,7 @@ public class LinkedTypeGraphMapTest {
 
   @Test(expected = DuplicateKeyException.class)
   public void test18() {
-    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(A0.class, "A0")
         .add(A01.class, "A01")
         .add(A01.class, "A01")
@@ -212,7 +221,7 @@ public class LinkedTypeGraphMapTest {
 
   @Test(expected = DuplicateKeyException.class)
   public void test19() {
-    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(Object.class, "FOO")
         .add(A0.class, "A0")
         .add(Object.class, "BAR")
@@ -221,7 +230,7 @@ public class LinkedTypeGraphMapTest {
 
   @Test
   public void test20() {
-    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(A0.class, "A0")
         .add(A00.class, "A00")
         .add(A01.class, "A01")
@@ -247,7 +256,7 @@ public class LinkedTypeGraphMapTest {
 
   @Test
   public void test21() {
-    LinkedTypeGraphMap<String> m = LinkedTypeGraphMap.build(String.class)
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(A0.class, "A0")
         .add(A00.class, "A00")
         .add(A01.class, "A01")

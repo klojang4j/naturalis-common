@@ -7,7 +7,8 @@ import java.util.*;
 import static nl.naturalis.common.check.CommonChecks.sameAs;
 import static nl.naturalis.common.check.CommonGetters.type;
 
-abstract class TypeSet<M extends TypeMap<Object>> implements Set<Class<?>> {
+abstract class TypeSet<M extends AbstractTypeMap<Object>> extends
+    ImmutableSet<Class<?>> {
 
   static final Object FOO = new Object();
 
@@ -56,39 +57,9 @@ abstract class TypeSet<M extends TypeMap<Object>> implements Set<Class<?>> {
   }
 
   @Override
-  public boolean add(Class<?> e) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public boolean remove(Object o) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public boolean containsAll(Collection<?> c) {
     Check.notNull(c);
     return c.stream().filter(map::containsKey).count() == c.size();
-  }
-
-  @Override
-  public boolean addAll(Collection<? extends Class<?>> c) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public boolean retainAll(Collection<?> c) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public boolean removeAll(Collection<?> c) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public void clear() {
-    throw new UnsupportedOperationException();
   }
 
   @Override

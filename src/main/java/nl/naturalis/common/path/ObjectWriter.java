@@ -1,6 +1,6 @@
 package nl.naturalis.common.path;
 
-import nl.naturalis.common.collection.SimpleTypeSet;
+import nl.naturalis.common.collection.TypeHashSet;
 import nl.naturalis.common.path.PathWalker.OnError;
 
 import java.util.List;
@@ -19,8 +19,9 @@ final class ObjectWriter {
    * to set the property would fail graciously. But error reporting is clearer if we do. We only
    * include the most obvious class though. An exhaustive list would be impossible anyhow.
    */
-  private static final SimpleTypeSet NOT_WRITABLE =
-      SimpleTypeSet.of(String.class, Number.class, Set.class);
+  private static final TypeHashSet NOT_WRITABLE = TypeHashSet.of(String.class,
+      Number.class,
+      Set.class);
 
   private final OnError oe;
   private final Function<Path, Object> kd;
