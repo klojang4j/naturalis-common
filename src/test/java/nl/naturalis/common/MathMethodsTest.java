@@ -363,7 +363,7 @@ public class MathMethodsTest {
   @Test // 3 x 1 matrix CM
   public void rasterizeIntsCM06() {
     int[] values = ints(0);
-    int[][][] pages = rasterize(values, 3, 1, -1);
+    int[][][] pages = rasterizeCM(values, 3, 1, -1);
     assertEquals(1, pages.length);
     //System.out.println(IntList.of(pages[0][0]));
     assertArrayEquals(ints(0), pages[0][0]);
@@ -372,7 +372,7 @@ public class MathMethodsTest {
   @Test // 3 x 1 matrix CM
   public void rasterizeIntsCM07() {
     int[] values = ints(0, 1);
-    int[][][] pages = rasterize(values, 3, 1, -1);
+    int[][][] pages = rasterizeCM(values, 3, 1, -1);
     assertEquals(1, pages.length);
     //System.out.println(IntList.of(pages[0][0]));
     assertArrayEquals(ints(0), pages[0][0]);
@@ -382,7 +382,7 @@ public class MathMethodsTest {
   @Test // 3 x 1 matrix CM
   public void rasterizeIntsCM08() {
     int[] values = ints(0, 1, 2);
-    int[][][] pages = rasterize(values, 3, 1, -1);
+    int[][][] pages = rasterizeCM(values, 3, 1, -1);
     assertEquals(1, pages.length);
     //System.out.println(IntList.of(pages[0][0]));
     assertArrayEquals(ints(0), pages[0][0]);
@@ -393,7 +393,7 @@ public class MathMethodsTest {
   @Test // 3 x 1 matrix CM
   public void rasterizeIntsCM09() {
     int[] values = ints(0, 1, 2, 3);
-    int[][][] pages = rasterize(values, 3, 1, -1);
+    int[][][] pages = rasterizeCM(values, 3, 1, -1);
     assertEquals(2, pages.length);
     //System.out.println(IntList.of(pages[0][0]));
     assertArrayEquals(ints(0), pages[0][0]);
@@ -405,7 +405,7 @@ public class MathMethodsTest {
   @Test // 1 x 3 matrix CM
   public void rasterizeIntsCM10() {
     int[] values = ints(0, 1);
-    int[][][] pages = rasterize(values, 1, 3, -1);
+    int[][][] pages = rasterizeCM(values, 1, 3, -1);
     assertEquals(1, pages.length);
     //System.out.println(IntList.of(pages[0][0]));
     assertArrayEquals(ints(0, 1, -1), pages[0][0]);
@@ -414,7 +414,7 @@ public class MathMethodsTest {
   @Test // 1 x 3 matrix CM
   public void rasterizeIntsCM11() {
     int[] values = ints(0, 1, 2, 3);
-    int[][][] pages = rasterize(values, 1, 3, -1);
+    int[][][] pages = rasterizeCM(values, 1, 3, -1);
     assertEquals(2, pages.length);
     //System.out.println(IntList.of(pages[0][0]));
     //System.out.println(IntList.of(pages[1][0]));
