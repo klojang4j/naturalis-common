@@ -9,24 +9,26 @@ import java.util.Collection;
 import static nl.naturalis.common.ArrayMethods.pack;
 import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.ClassMethods.isAutoUnboxedAs;
-import static nl.naturalis.common.ObjectMethods.getDefaultValue;
+import static nl.naturalis.common.ObjectMethods.getTypeDefault;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
- * Performs a wide variety of type conversions. The conversions try to strike a balance between
- * being lenient without becoming outlandish or contrived.This class is optionally used by the
- * {@link BeanWriter} class to perform type conversions on the values passed to its {@link
- * BeanWriter#set(Object, String, Object) set} method.
+ * Performs a wide variety of type conversions. The conversions try to strike a
+ * balance between being lenient without becoming outlandish or contrived.This class
+ * is optionally used by the {@link BeanWriter} class to perform type conversions on
+ * the values passed to its {@link BeanWriter#set(Object, String, Object) set}
+ * method.
  *
- * <p>The list of conversions performed by this class it too large to enumerate. Generally, however,
+ * <p>The list of conversions performed by this class it too large to enumerate.
+ * Generally, however,
  * the following applies:
  *
+ * @param <T> The type to which incoming values will be converted
+ * @author Ayco Holleman
  * @see NumberMethods#convert(Number, Class)
  * @see NumberMethods#parse(String, Class)
  * @see Bool
  * @see nl.naturalis.common.util.EnumParser
- * @author Ayco Holleman
- * @param <T> The type to which incoming values will be converted
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class Morph<T> {
@@ -47,7 +49,8 @@ public class Morph<T> {
   private final Class<T> targetType;
 
   /**
-   * Creates a new {@code Morph} instance that will convert values to the specified type.
+   * Creates a new {@code Morph} instance that will convert values to the specified
+   * type.
    *
    * @param targetType The type to which to convert values
    */
@@ -56,7 +59,8 @@ public class Morph<T> {
   }
 
   /**
-   * Converts the specified object into an instance of the type specified through the constructor.
+   * Converts the specified object into an instance of the type specified through the
+   * constructor.
    *
    * @param obj The value to convert
    * @return An instance of the target type
@@ -65,7 +69,7 @@ public class Morph<T> {
   public T convert(Object obj) throws TypeConversionException {
     Class<T> toType = this.targetType;
     if (obj == null) {
-      return getDefaultValue(toType);
+      return getTypeDefault(toType);
     } else if (toType.isInstance(obj)) {
       return (T) obj;
     } else if (isAutoUnboxedAs(obj.getClass(), toType)) {
@@ -80,11 +84,13 @@ public class Morph<T> {
     Class myType = obj.getClass();
     if (myType.isArray()) {
       boolean empty = Array.getLength(obj) == 0;
-      return empty ? getDefaultValue(toType) : convert(Array.get(obj, 0), toType);
+      return empty ? getTypeDefault(toType) : convert(Array.get(obj, 0), toType);
     } else if (isA(myType, Collection.class)) {
       Collection coll = (Collection) obj;
       boolean empty = coll.size() == 0;
-      return empty ? getDefaultValue(toType) : convert(coll.iterator().next(), toType);
+      return empty
+          ? getTypeDefault(toType)
+          : convert(coll.iterator().next(), toType);
     }
     Object out = MorphTable1.getInstance().morph(obj, toType);
     if (out != null) {
@@ -128,6 +134,9 @@ public class Morph<T> {
   }
 
   static String stringify(Object obj) {
-    return Check.that(obj.toString()).is(notNull(), "obj.toString() must not return null").ok();
+    return Check.that(obj.toString())
+        .is(notNull(), "obj.toString() must not return null")
+        .ok();
   }
+
 }

@@ -2,26 +2,25 @@ package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.check.CommonChecks;
-import nl.naturalis.common.function.IntRelation;
-import nl.naturalis.common.function.Relation;
 import nl.naturalis.common.function.ThrowingSupplier;
 
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 import static java.util.stream.Collectors.toSet;
+import static nl.naturalis.common.ArrayMethods.isElementOf;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonChecks.empty;
+import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
  * General methods applicable to objects of any type.
  *
  * <h3>Container objects</h3>
  *
- * <p>Some methods in this class apply special logic (documented on the method itself) when passed a
+ * <p>Some methods in this class apply special logic (documented on the method
+ * itself) when passed a
  * <i>container object</i>. A container object is one of the following
  *
  * <p>
@@ -38,56 +37,35 @@ import static nl.naturalis.common.check.CommonChecks.*;
  *
  * @author Ayco Holleman
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ObjectMethods {
 
   private static final String ERR_NULL_OPTIONAL = "Optional must not be null";
 
-  /** Zero as Integer */
-  public static final Integer ZERO_INT = 0;
-
-  /** Zero as Double */
-  public static final Double ZERO_DOUBLE = 0D;
-
-  /** Zero as Long */
-  public static final Long ZERO_LONG = 0L;
-
-  /** Zero as Float */
-  public static final Float ZERO_FLOAT = 0F;
-
-  /** Zero as Short */
-  public static final Short ZERO_SHORT = (short) 0;
-
-  /** Zero as Byte */
-  public static final Byte ZERO_BYTE = (byte) 0;
-
-  /** Zero as Character */
-  public static final Character ZERO_CHAR = (char) 0;
-
   /**
-   * A {@code Map} mapping the primitive types ({@code int.class}, {@code boolean.class}, etc&#46;)
-   * to their default values.
+   * A {@code Map} mapping the primitive types ({@code int.class}, {@code
+   * boolean.class}, etc&#46;) to their default values.
    */
-  private static final Map<Class<?>, Object> PRIMITIVE_DEFAULTS =
-      Map.of(
-          int.class,
-          ZERO_INT,
-          boolean.class,
-          Boolean.FALSE,
-          double.class,
-          ZERO_DOUBLE,
-          long.class,
-          ZERO_LONG,
-          float.class,
-          ZERO_FLOAT,
-          short.class,
-          ZERO_SHORT,
-          byte.class,
-          ZERO_BYTE,
-          char.class,
-          ZERO_CHAR);
+  private static final Map<Class<?>, Object> PRIMITIVE_DEFAULTS = Map.of(int.class,
+      0,
+      boolean.class,
+      Boolean.FALSE,
+      double.class,
+      0D,
+      long.class,
+      0L,
+      float.class,
+      0F,
+      short.class,
+      (short) 0,
+      byte.class,
+      (byte) 0,
+      char.class,
+      '\0');
 
-  private ObjectMethods() {}
+  private ObjectMethods() {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Whether the specified {@code String} is null or empty.
@@ -120,14 +98,15 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns whether the specified {@code Optional} is empty or contains an empty object. This is
-   * the only {@code isNotEmpty} method that will actually throw an {@code IllegalArgumentException}
-   * if the argument is null as {@code Optional} objects should never be null.
+   * Returns whether the specified {@code Optional} is empty or contains an empty
+   * object. This is the only {@code isNotEmpty} method that will actually throw an
+   * {@code IllegalArgumentException} if the argument is null as {@code Optional}
+   * objects should never be null.
    *
    * @param arg The {@code Optional} to check
    * @return Whether it is empty or contains an empty object
    */
-  public static boolean isEmpty(Optional arg) {
+  public static <T> boolean isEmpty(Optional<T> arg) {
     Check.that(arg).is(notNull(), ERR_NULL_OPTIONAL);
     return arg.isEmpty() || isEmpty(arg.get());
   }
@@ -143,9 +122,10 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns whether the specified argument is null or empty. This method is (and can be) used for
-   * broad-stroke methods like {@link #ifEmpty(Object, Object)} and {@link CommonChecks#empty()}.
-   * Returns {@code true} if <i>any</i> of the following applies:
+   * Returns whether the specified argument is null or empty. This method is (and can
+   * be) used for broad-stroke methods like {@link #ifEmpty(Object, Object)} and
+   * {@link CommonChecks#empty()}. Returns {@code true} if <i>any</i> of the
+   * following applies:
    *
    * <p>
    *
@@ -173,8 +153,8 @@ public class ObjectMethods {
         || arg instanceof Map && ((Map) arg).isEmpty()
         || arg instanceof Object[] && ((Object[]) arg).length == 0
         || isPrimitiveArray(arg) && Array.getLength(arg) == 0
-        || arg instanceof Optional
-            && (((Optional) arg).isEmpty() || isEmpty(((Optional) arg).get()))
+        || arg instanceof Optional && (((Optional) arg).isEmpty()
+                                           || isEmpty(((Optional) arg).get()))
         || arg instanceof Sizeable && ((Sizeable) arg).size() == 0
         || arg instanceof Emptyable && ((Emptyable) arg).isEmpty();
   }
@@ -210,10 +190,10 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns whether the specified {@code Optional} neither empty nor contains an empty object. This
-   * is the only {@code isNotEmpty} method that will actually throw an {@code
-   * IllegalArgumentException} if the argument is null as {@code Optional} objects should never be
-   * null.
+   * Returns whether the specified {@code Optional} neither empty nor contains an
+   * empty object. This is the only {@code isNotEmpty} method that will actually
+   * throw an {@code IllegalArgumentException} if the argument is null as {@code
+   * Optional} objects should never be null.
    *
    * @param arg The {@code Optional} to check
    * @return Whether it is neither empty nor contains an empty object
@@ -232,9 +212,10 @@ public class ObjectMethods {
   public static boolean isNotEmpty(Object[] arg) {
     return !isEmpty(arg);
   }
+
   /**
-   * Verifies that the argument is neither null nor empty. Returns {@code true} if <i>any</i> of the
-   * following applies:
+   * Verifies that the argument is neither null nor empty. Returns {@code true} if
+   * <i>any</i> of the following applies:
    *
    * <p>
    *
@@ -257,8 +238,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Verifies that the argument is recursively non-empty. Returns {@code true} if <i>any</i> of the
-   * following applies:
+   * Verifies that the argument is recursively non-empty. Returns {@code true} if
+   * <i>any</i> of the following applies:
    *
    * <p>
    *
@@ -277,13 +258,14 @@ public class ObjectMethods {
    *   <li>{@code obj} is a non-null object of any other type
    * </ul>
    *
-   * @see CommonChecks#deepNotEmpty()
    * @param obj The object to be tested
    * @return Whether it is recursively non-empty
+   * @see CommonChecks#deepNotEmpty()
    */
   public static boolean isDeepNotEmpty(Object obj) {
     return obj != null
-        && (!(obj instanceof CharSequence) || ((CharSequence) obj).length() > 0)
+        && (!(obj instanceof CharSequence)
+                || ((CharSequence) obj).length() > 0)
         && (!(obj instanceof Collection) || dne((Collection) obj))
         && (!(obj instanceof Map) || dne((Map) obj))
         && (!(obj instanceof Object[]) || dne((Object[]) obj))
@@ -298,7 +280,9 @@ public class ObjectMethods {
   }
 
   private static boolean dne(Map map) {
-    return !map.isEmpty() && map.entrySet().stream().allMatch(ObjectMethods::entryDeepNotEmpty);
+    return !map.isEmpty() && map.entrySet()
+        .stream()
+        .allMatch(ObjectMethods::entryDeepNotEmpty);
   }
 
   private static boolean entryDeepNotEmpty(Object obj) {
@@ -307,7 +291,8 @@ public class ObjectMethods {
   }
 
   private static boolean dne(Object[] arr) {
-    return arr.length > 0 && Arrays.stream(arr).allMatch(ObjectMethods::isDeepNotEmpty);
+    return arr.length > 0 && Arrays.stream(arr)
+        .allMatch(ObjectMethods::isDeepNotEmpty);
   }
 
   private static boolean dne(Optional opt) {
@@ -315,9 +300,10 @@ public class ObjectMethods {
   }
 
   /**
-   * Verifies that the argument is not null and, in case of an array, {@link Collection} or {@link
-   * Map}, does not contain any null values. It may still be an empty array, {@code Collection} or
-   * {@code Map}.
+   * Verifies that the argument is not null and, if it is array, {@link Collection}
+   * or {@link Map}, does not contain any null values. It may still be an empty
+   * array, {@code Collection} or {@code Map}. NB for maps, both keys and values are
+   * tested for {@code null}.
    *
    * @param arg The object to be tested
    * @return Whether it is not null and does not contain any null values
@@ -341,8 +327,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Empty-to-null: returns {@code null} if the argument is {@link #isEmpty(Object) empty}, else the
-   * argument itself.
+   * Empty-to-null: returns {@code null} if the argument is {@link #isEmpty(Object)
+   * empty}, else the argument itself.
    *
    * @param <T> The type of the argument
    * @param arg The argument
@@ -353,12 +339,13 @@ public class ObjectMethods {
   }
 
   /**
-   * Tests the provided arguments for equality using <i>empty-equals-null</i> semantics. This is
-   * roughly equivalent to {@code Objects.equals(e2n(arg0), e2n(arg1))}, except that {@code
-   * e2nEquals} <i>does</i> take the type of the two arguments into account. So an empty {@code
-   * String} is not equal to an empty {@code ArrayList} and an empty {@code ArrayList} is not equal
-   * to an empty {@code HashSet}. (An empty {@code HashSet} <i>is</i> equal to an empty {@code
-   * TreeSet}, but that's just common Collection Framework behaviour.)
+   * Tests the provided arguments for equality using <i>empty-equals-null</i>
+   * semantics. This is roughly equivalent to {@code Objects.equals(e2n(arg0),
+   * e2n(arg1))}, except that {@code e2nEquals} <i>does</i> take the type of the two
+   * arguments into account. So an empty {@code String} is not equal to an empty
+   * {@code ArrayList} and an empty {@code ArrayList} is not equal to an empty {@code
+   * HashSet}. (An empty {@code HashSet} <i>is</i> equal to an empty {@code TreeSet},
+   * but that's just common Collection Framework behaviour.)
    *
    * <p>
    *
@@ -377,27 +364,34 @@ public class ObjectMethods {
    *
    * @param arg0 The 1st of the pair of objects to compare
    * @param arg1 The 2nd of the pair of objects to compare
-   * @return Whether the provided arguments are equal using empty-equals-null semantics
+   * @return Whether the provided arguments are equal using empty-equals-null
+   *     semantics
    */
   public static boolean e2nEquals(Object arg0, Object arg1) {
-    return arg0 == null ? isEmpty(arg1) : arg1 == null ? isEmpty(arg0) : Objects.equals(arg0, arg1);
+    return arg0 == null
+        ? isEmpty(arg1)
+        : arg1 == null ? isEmpty(arg0) : Objects.equals(arg0, arg1);
   }
 
   /**
-   * Recursively tests the arguments for equality using <i>empty-equals-null</i> semantics.
+   * Recursively tests the arguments for equality using <i>empty-equals-null</i>
+   * semantics.
    *
    * @param arg0 The 1st of the pair of objects to compare
    * @param arg1 The 2nd of the pair of objects to compare
-   * @return Whether the provided arguments are deeply equal using empty-equals-null semantics
+   * @return Whether the provided arguments are deeply equal using empty-equals-null
+   *     semantics
    */
   public static boolean e2nDeepEquals(Object arg0, Object arg1) {
-    return arg0 == null ? isEmpty(arg1) : arg1 == null ? isEmpty(arg0) : eq(arg0, arg1);
+    return arg0 == null
+        ? isEmpty(arg1)
+        : arg1 == null ? isEmpty(arg0) : eq(arg0, arg1);
   }
 
   /**
-   * Generates a hash code for the provided object using <i>empty-equals-null</i> semantics. {@link
-   * #isEmpty(Object) empty} objects (whatever their type and including {@code null}) all have the
-   * same hash code: 0 (zero)!
+   * Generates a hash code for the provided object using <i>empty-equals-null</i>
+   * semantics. {@link #isEmpty(Object) empty} objects (whatever their type and
+   * including {@code null}) all have the same hash code: 0 (zero)!
    *
    * @param obj The object to generate a hash code for
    * @return The hash code
@@ -407,8 +401,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Generates a hash code for the provided arguments using using <i>empty-equals-null</i>
-   * semantics. See {@link #hashCode()}.
+   * Generates a hash code for the provided arguments using using
+   * <i>empty-equals-null</i> semantics. See {@link #hashCode()}.
    *
    * @param objs The objects to generate a hash code for
    * @return The hash code
@@ -425,237 +419,108 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the first argument if it is not null, else the second argument. This method will throw
-   * an {@link IllegalArgumentException} if the second argument is null, so it is guaranteed to
-   * return a non-null value.
+   * Returns the first argument if it is not null, else the second argument. An
+   * {@link IllegalArgumentException} if the second argument is {@code null}.
    *
-   * @param <T> The input and return type
    * @param value The value to return if not null
-   * @param dfault The value to return if the first argument is null
+   * @param defVal The value to return if the first argument is {@code null}
    * @return A non-null value
    */
-  public static <T> T ifNull(T value, T dfault) {
-    return value == null ? Check.notNull(dfault, "dfault").ok() : value;
+  public static <T> T ifNull(T value, T defVal) {
+    return value == null ? Check.notNull(defVal, "defVal").ok() : value;
   }
 
   /**
-   * Returns the first argument if it is not null, else the value supplied by the specified {@code
-   * Supplier}. The value supplied by the {@code Supplier} is guaranteed to be non-null, or else an
-   * {@link IllegalArgumentException} is thrown.
+   * Returns the first argument if it is not {@code null}, else a value retrieved
+   * from the specified {@code Supplier}. An {@link IllegalArgumentException} if the
+   * {@code Supplier} supplies {@code null}.
    *
-   * @param <T> The input and return type
-   * @param <E> The exception potentially being thrown by the supplier as it produces a default
-   *     value
-   * @param value The value to return if not null
-   * @param supplier The supplier of a default value if {@code value} is null
+   * @param <T> The type of the arguments and the return value
+   * @param <E> The type of the exception that can potentially be thrown by the
+   *     {@code Supplier}
+   * @param value The value to return if it is not {@code null}
+   * @param supplier The supplier of a default value
    * @return a non-null value
    */
-  public static <T, E extends Exception> T ifNull(T value, ThrowingSupplier<T, E> supplier)
-      throws E {
+  public static <T, E extends Exception> T ifNull(T value,
+      ThrowingSupplier<? extends T, E> supplier) throws E {
     Check.notNull(supplier, "supplier");
     if (value == null) {
-      return Check.that(supplier.get()).is(notNull(), "Supplier must not supply null").ok();
+      T val = supplier.get();
+      return Check.notNull(val, "supplied value").ok();
     }
     return value;
   }
 
   /**
-   * Returns {@code dfault} if {@code value} is {@link #isEmpty(Object) empty}, else {@code value}.
-   * This method will throw an {@link IllegalArgumentException} if the second argument is empty, so
-   * it is guaranteed to return a non-empty value.
+   * Returns the first argument if it is not empty (as per {@link #isEmpty(Object)}),
+   * else the second argument. An {@link IllegalArgumentException} if the {@code
+   * Supplier} supplies an empty value.
    *
-   * @param <T> The input and return type
-   * @param value The value to test
-   * @param dfault The value to return if {@code value} is null
+   * @param <T> The type of the arguments and the return value
+   * @param value The value to return if it is not empty
+   * @param defVal The value to return if the first argument is empty
    * @return a non-empty value
    */
-  public static <T> T ifEmpty(T value, T dfault) {
-    return isEmpty(value) ? Check.that(dfault, "dfault").isNot(empty()).ok() : value;
+  public static <T> T ifEmpty(T value, T defVal) {
+    if (isEmpty(value)) {
+      return Check.that(defVal, "defVal").isNot(empty()).ok();
+    }
+    return value;
   }
 
   /**
-   * Returns the value supplied by {@code supplier} if {@code value} is {@link #isEmpty(Object)
-   * empty}, else {@code value}. The value supplied by the {@code Supplier} is guaranteed to be
-   * non-empty, or else an {@link IllegalArgumentException} is thrown.
+   * Returns the first argument if it is not empty (as per {@link #isEmpty(Object)}),
+   * else a value retrieved from the specified {@code Supplier}. An {@link
+   * IllegalArgumentException} if the {@code Supplier} supplies an empty value.
    *
-   * @param <T> The input and return type
-   * @param <E> The exception potentially being thrown by the supplier as it produces a default
-   *     value
    * @param value The value to return if not empty
    * @param supplier The supplier of a default value if {@code value} is null
+   * @param <T> The input and return type
+   * @param <E> The exception potentially being thrown by the supplier as it
    * @return a non-empty value
    */
-  public static <T, E extends Exception> T ifEmpty(T value, ThrowingSupplier<T, E> supplier)
-      throws E {
+  public static <T, E extends Exception> T ifEmpty(T value,
+      ThrowingSupplier<? extends T, E> supplier) throws E {
     Check.notNull(supplier, "supplier");
     if (isEmpty(value)) {
-      return Check.that(supplier.get()).isNot(empty(), "Supplier must not supply empty value").ok();
+      T val = supplier.get();
+      return Check.notNull(val, "supplied value").ok();
     }
     return value;
   }
 
   /**
-   * Returns the result of the specified operation on {@code value} if the condition evaluates to
-   * {@code true}, else {@code value} itself. For example:
+   * Returns this first argument if it equals any of the allowed values, else {@code
+   * null}.
    *
-   * <pre>
-   * String s = ifTrue(ignoreCase, name, String::toLowerCase);
-   * </pre>
-   *
-   * @param <T> The input and return type
-   * @param condition The condition to evaluate
-   * @param value The value to return or to apply the transformation to
-   * @param then The operation to apply if the condition evaluates to {@code true}
-   * @return {@code value}, possibly transformed by the unary operator
-   */
-  public static <T> T ifTrue(boolean condition, T value, UnaryOperator<T> then) {
-    return condition ? then.apply(value) : value;
-  }
-
-  /**
-   * Returns {@code alternative} if the specified relation exists between {@code subject} and {@code
-   * object}, else {@code subject}.
-   *
-   * @param <T> The type of the objects involved
-   * @param subject The value to test and possibly return
-   * @param relation The test
-   * @param object The value to test against
-   * @param alternative The value to return if the
-   * @return either {@code subject} or {@code alternative}
-   */
-  public static <T> T ifTrue(T subject, Relation<T, T> relation, T object, T alternative) {
-    return relation.exists(subject, object) ? alternative : subject;
-  }
-
-  /**
-   * Returns {@code alternative} if the specified relation exists between {@code subject} and {@code
-   * object}, else {@code subject}.
-   *
-   * @param subject The value to test and possibly return
-   * @param relation The test
-   * @param object The value to to test against
-   * @param alternative The value to return if the
-   * @return either {@code subject} or {@code alternative}
-   */
-  public static int ifTrue(int subject, IntRelation relation, int object, int alternative) {
-    return relation.exists(subject, object) ? alternative : subject;
-  }
-
-  /**
-   * Returns {@code alternative} if the specified relation does <i>not</i> between {@code subject}
-   * and {@code object}, else {@code subject}.
-   *
-   * @param <T> The type of the objects involved
-   * @param subject The value to test and possibly return
-   * @param relation The test
-   * @param object The value to test against
-   * @param alternative The value to return if the
-   * @return either {@code subject} or {@code alternative}
-   */
-  public static <T> T ifFalse(T subject, Relation<T, T> relation, T object, T alternative) {
-    return !relation.exists(subject, object) ? alternative : subject;
-  }
-
-  /**
-   * Returns {@code alternative} if the specified relation exists between {@code subject} and {@code
-   * object}, else {@code subject}.
-   *
-   * @param subject The value to test and possibly return
-   * @param relation The test
-   * @param object The value to test against
-   * @param alternative The value to return if the
-   * @return either {@code subject} or {@code alternative}
-   */
-  public static int ifFalse(int subject, IntRelation relation, int object, int alternative) {
-    return !relation.exists(subject, object) ? alternative : subject;
-  }
-
-  /**
-   * Returns the result of the specified operation on {@code value} if the condition evaluates to
-   * {@code false}, else {@code value} itself. For example:
-   *
-   * @param <T> The return type
-   * @param condition The condition to evaluate
-   * @param value The value to return or to apply the transformation to
-   * @param then The operation to apply if the condition evaluates to {@code false}
-   * @return {@code value}, possibly transformed by the unary operator
-   */
-  public static <T> T ifFalse(boolean condition, T value, UnaryOperator<T> then) {
-    return !condition ? then.apply(value) : value;
-  }
-
-  /**
-   * Returns null if {@code arg0} is equal to any of the specified values, else {@code arg0}. For
-   * example:
-   *
-   * <p>
-   *
-   * <pre>
-   *  this.operator = nullIf(operator, Operator.AND);
-   * </pre>
-   *
-   * @param <T> The input and return type
-   * @param arg0 The value to test
-   * @param values The value it must not have in order to be returned
-   * @return {@code value} or null
+   * @param value The value to test
+   * @param allowedValues The values it is allowed to have
+   * @param <T> The type of the involved values
+   * @return The first argument or {@code null}
    */
   @SuppressWarnings("unchecked")
-  public static <T> T nullIf(T arg0, T... values) {
-    return nullIf(arg0, elementOf(), values);
+  public static <T> T nullUnless(T value, T... allowedValues) {
+    return isElementOf(value, allowedValues) ? value : null;
   }
 
   /**
-   * Returns null unless {@code arg0} equals one of the specified values. For example:
+   * Returns {@code null} if the first argument equals any of the forbidden values,
+   * else the first argument itself.
    *
-   * <p>
-   *
-   * <pre>
-   *  this.operator = nullUnless(operator, Operator.OR);
-   * </pre>
-   *
-   * @param <T> The input and return type
-   * @param arg0 The value to test
-   * @param values The values {@code arg0} may have in order to be returned
-   * @return {@code arg0} or null
+   * @param <T> The type of the involved values
+   * @param value The value to test
+   * @param forbiddenValues The values it must <i>not</i> have
+   * @return The first argument or {@code null}
    */
   @SuppressWarnings("unchecked")
-  public static <T> T nullUnless(T arg0, T... values) {
-    return (T) nullUnless(arg0, elementOf().negate(), values);
+  public static <T> T nullIf(T value, T... forbiddenValues) {
+    return isElementOf(value, forbiddenValues) ? null : value;
   }
 
   /**
-   * Returns null if {@code arg0} has the specified {@link Relation} to {@code arg1}, else {@code
-   * arg0}.
-   *
-   * @param <T> The input and return type
-   * @param <U> The type of target of the relation
-   * @param arg0 The value to test and return
-   * @param relation The required {@code Relation} between {@code arg 0} and {@code arg1}
-   * @param arg1 The value to test {@code arg0} against
-   * @return {@code arg0} or null
-   */
-  public static <T, U> T nullIf(T arg0, Relation<T, U> relation, U arg1) {
-    return relation.exists(arg0, arg1) ? null : arg0;
-  }
-
-  /**
-   * Returns null unless {@code arg0} has the specified {@link Relation} to {@code arg1} {@code
-   * arg1}, else {@code arg0}.
-   *
-   * @param arg0 The value to test and return
-   * @param relation The required {@code Relation} between {@code arg 0} and {@code arg1}
-   * @param arg1 The target of the relationship
-   * @param <T> The input and return type
-   * @param <U> The type of target of the relation
-   * @return {@code value} or null
-   */
-  public static <T, U> T nullUnless(T arg0, Relation<T, U> relation, U arg1) {
-    return relation.exists(arg0, arg1) ? arg0 : null;
-  }
-
-  /**
-   * Returns the result of passing the specified argument to the specified {@code Funtion} if the
-   * argument is not null, else returns null. For example:
+   * Returns the result of passing the specified argument to the specified {@code
+   * Funtion} if the argument is not null, else returns null. For example:
    *
    * <pre>
    * String[] strs = ifNotNull("Hello World", s -> s.split(" "));
@@ -672,8 +537,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the result of passing the specified argument to the specified {@code Funtion} if the
-   * argument is not null, else a default value. For example:
+   * Returns the result of passing the specified argument to the specified {@code
+   * Funtion} if the argument is not null, else a default value. For example:
    *
    * <pre>
    * String[] strs = ifNotNull("Hello World", s -> s.split(" "), new String[0]);
@@ -691,8 +556,9 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the result of passing the specified argument to the specified {@code Funtion} if the
-   * argument is not {@link #isEmpty(Object) empty}, else returns null.
+   * Returns the result of passing the specified argument to the specified {@code
+   * Funtion} if the argument is not {@link #isEmpty(Object) empty}, else returns
+   * null.
    *
    * @param <T> The type of the value to transform
    * @param <U> The return type
@@ -705,8 +571,9 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the result of passing the specified argument to the specified {@code Funtion} if the
-   * argument is not {@link #isEmpty(Object) empty}, else a default value.
+   * Returns the result of passing the specified argument to the specified {@code
+   * Funtion} if the argument is not {@link #isEmpty(Object) empty}, else a default
+   * value.
    *
    * @param <T> The type of the value to transform
    * @param <U> The return type
@@ -720,20 +587,23 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the primitive default for primitive types; {@code null} for any other type.
+   * Returns the primitive default for primitive types; {@code null} for any other
+   * type.
    *
    * @param <T> The type of the class
    * @param type The class for which to retrieve the default value
    * @return The default value
    */
   @SuppressWarnings("unchecked")
-  public static <T> T getDefaultValue(Class<T> type) {
-    return (T) (Check.notNull(type).ok().isPrimitive() ? PRIMITIVE_DEFAULTS.get(type) : null);
+  public static <T> T getTypeDefault(Class<T> type) {
+    return (T) (Check.notNull(type).ok().isPrimitive()
+                    ? PRIMITIVE_DEFAULTS.get(type)
+                    : null);
   }
 
   /**
-   * Null-to-empty: returns an empty {@code String} if the argument is null, else the argument
-   * itself.
+   * Null-to-empty: returns an empty {@code String} if the argument is null, else the
+   * argument itself.
    *
    * @param arg An argument of type {@code String}
    * @return The argument or the default value of the corresponding primitive type
@@ -743,8 +613,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Null-to-empty: returns {@link Collections#emptyList()} if the argument is null, else the
-   * argument itself.
+   * Null-to-empty: returns {@link Collections#emptyList()} if the argument is null,
+   * else the argument itself.
    *
    * @param arg An argument of type {@code List}
    * @return The argument or the default value of the corresponding primitive type
@@ -754,8 +624,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Null-to-empty: returns {@link Collections#emptySet()} if the argument is null, else the
-   * argument itself.
+   * Null-to-empty: returns {@link Collections#emptySet()} if the argument is null,
+   * else the argument itself.
    *
    * @param arg An argument of type {@code List}
    * @return The argument or the default value of the corresponding primitive type
@@ -765,8 +635,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Null-to-empty: returns {@link Collections#emptyMap()} if the argument is null, else the
-   * argument itself.
+   * Null-to-empty: returns {@link Collections#emptyMap()} if the argument is null,
+   * else the argument itself.
    *
    * @param arg An argument of type {@code List}
    * @return The argument or the default value of the corresponding primitive type
@@ -776,89 +646,84 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns {@link ObjectMethods#ZERO_INT} if the argument is null, else the argument itself.
+   * Returns zero if the argument is null, else the argument itself.
    *
    * @param arg An argument of type {@code Integer}
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Integer n2e(Integer arg) {
-    return ifNull(arg, ObjectMethods.ZERO_INT);
+    return ifNull(arg, 0);
   }
 
   /**
-   * Returns {@link ObjectMethods#ZERO_DOUBLE} the argument is null, else the argument itself.
+   * Returns zero the argument is null, else the argument itself.
    *
    * @param arg An argument of type {@code Double}
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Double n2e(Double arg) {
-    return ifNull(arg, ObjectMethods.ZERO_DOUBLE);
+    return ifNull(arg, 0D);
   }
 
   /**
-   * Returns {@link ObjectMethods#ZERO_LONG} if the argument is null, else the argument itself.
+   * Returns zero if the argument is null, else the argument itself.
    *
    * @param arg An argument of type {@code Long}
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Long n2e(Long arg) {
-    return ifNull(arg, ObjectMethods.ZERO_LONG);
+    return ifNull(arg, 0L);
   }
 
   /**
-   * Returns {@link ObjectMethods#ZERO_FLOAT} if the argument is null, else the argument itself.
+   * Returns zero if the argument is null, else the argument itself.
    *
    * @param arg An argument of type {@code Float}
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Float n2e(Float arg) {
-    return ifNull(arg, ObjectMethods.ZERO_FLOAT);
+    return ifNull(arg, 0F);
   }
 
   /**
-   * Returns {@link ObjectMethods#ZERO_SHORT} if the argument is null, else the argument itself.
+   * Returns zero if the argument is null, else the argument itself.
    *
    * @param arg An argument of type {@code Short}
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Short n2e(Short arg) {
-    return ifNull(arg, ObjectMethods.ZERO_SHORT);
+    return ifNull(arg, (short) 0);
   }
 
   /**
-   * Returns {@link ObjectMethods#ZERO_BYTE} if the argument is null, else the argument itself.
+   * Returns zero if the argument is null, else the argument itself.
    *
    * @param arg An argument of type {@code Byte}
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Byte n2e(Byte arg) {
-    return ifNull(arg, ObjectMethods.ZERO_BYTE);
+    return ifNull(arg, (byte) 0);
   }
 
   /**
-   * Returns {@link Boolean#FALSE} if the argument is null, else the argument itself.
+   * Returns zero if the argument is null, else the argument itself.
+   *
+   * @param arg An argument of type {@code Byte}
+   * @return The argument or the default value of the corresponding primitive type
+   */
+  public static Character n2e(Character arg) {
+    return ifNull(arg, '\0');
+  }
+
+  /**
+   * Returns {@link Boolean#FALSE} if the argument is null, else the argument
+   * itself.
    *
    * @param arg An argument of type {@code Byte}
    * @return The argument or the default value of the corresponding primitive type
    */
   public static Boolean n2e(Boolean arg) {
     return ifNull(arg, Boolean.FALSE);
-  }
-
-  /**
-   * Throws the exception supplied by the specified {@code Supplier} if the specified condition
-   * evaluates to {@code true}.
-   *
-   * @param condition The condition
-   * @param exception The supplier of the exception
-   * @param <E> The type of the exception thrown
-   * @throws E If the condition evaluates to {@code true}
-   */
-  public static <E extends Exception> void throwIf(boolean condition, Supplier<E> exception)
-      throws E {
-    if (condition) {
-      throw exception.get();
-    }
   }
 
   private static boolean eq(Object arg0, Object arg1) {
@@ -935,4 +800,5 @@ public class ObjectMethods {
     }
     return false;
   }
+
 }

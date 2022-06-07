@@ -2,7 +2,9 @@ package nl.naturalis.common;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
 import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -40,7 +42,8 @@ public class ObjectMethodsTest {
   public void isDeepNotEmpty01() {
     assertTrue("01", isDeepNotEmpty(List.of("Hi", new String[] {"Hi", "There"})));
     assertFalse("02", isDeepNotEmpty(List.of("Hi", new String[0])));
-    assertTrue("03", isDeepNotEmpty(List.of("Hi", Collections.singletonMap("a", "b"))));
+    assertTrue("03",
+        isDeepNotEmpty(List.of("Hi", Collections.singletonMap("a", "b"))));
     assertFalse("04", isDeepNotEmpty(List.of("Hi", Collections.emptyMap())));
     Map map0 = Collections.emptyMap();
     Map map1 = Collections.singletonMap("b", map0);
@@ -63,7 +66,9 @@ public class ObjectMethodsTest {
     assertEquals("02", "Hi There", ifEmpty("", () -> "Hi There"));
     assertEquals("03", "World", ifEmpty("World", () -> "Hi There"));
     List list0 = List.of("Hi There");
-    assertEquals("04", list0, ifEmpty(Collections.emptyList(), () -> Arrays.asList("Hi There")));
+    assertEquals("04",
+        list0,
+        ifEmpty(Collections.emptyList(), () -> Arrays.asList("Hi There")));
   }
 
   @Test
@@ -76,7 +81,8 @@ public class ObjectMethodsTest {
     assertNull("02", i);
     i = ifNotNull(s, Integer::valueOf, 8);
     assertEquals("03", 8, i.intValue());
-    String[] strs = ifNotNull("This sentence contains five words", x -> x.split(" "));
+    String[] strs = ifNotNull("This sentence contains five words",
+        x -> x.split(" "));
     assertEquals("04", 5, strs.length);
   }
 
@@ -91,24 +97,6 @@ public class ObjectMethodsTest {
   }
 
   @Test
-  public void ifTrue01() {
-    boolean ignoreCase = true;
-    assertEquals("01", "hello, world!", ifTrue(ignoreCase, "Hello, World!", String::toLowerCase));
-    ignoreCase = false;
-    assertEquals("02", "Hello, World!", ifTrue(ignoreCase, "Hello, World!", String::toLowerCase));
-  }
-
-  @Test
-  public void ifFalse01() {
-    boolean keepCapitals = true;
-    assertEquals(
-        "01", "Hello, World!", ifFalse(keepCapitals, "Hello, World!", String::toLowerCase));
-    keepCapitals = false;
-    assertEquals(
-        "02", "hello, world!", ifFalse(keepCapitals, "Hello, World!", String::toLowerCase));
-  }
-
-  @Test
   public void e2nDeepEquals01() {
     assertTrue("01", e2nDeepEquals(null, ""));
     assertTrue("02", e2nDeepEquals(null, null));
@@ -117,15 +105,17 @@ public class ObjectMethodsTest {
     assertTrue("05", e2nDeepEquals(new String[0], null));
     assertFalse("06", e2nDeepEquals(new String[] {""}, null));
     assertFalse("07", e2nDeepEquals(new String[] {"", null, ""}, null));
-    assertFalse(
-        "08", e2nDeepEquals(new String[] {"", null, ""}, new String[] {"", null, "", "", ""}));
+    assertFalse("08",
+        e2nDeepEquals(new String[] {"", null, ""},
+            new String[] {"", null, "", "", ""}));
     assertTrue("09", e2nDeepEquals(Collections.emptyList(), null));
     assertTrue("10", e2nDeepEquals(null, new HashSet<>()));
     assertTrue("11", e2nDeepEquals(null, null));
     assertTrue("12", e2nDeepEquals("", ""));
     assertTrue("13", e2nDeepEquals(List.of(1, 2, 3, 4), List.of(1, 2, 3, 4)));
-    assertTrue(
-        "14", e2nDeepEquals(new String[] {"To", "be", "or"}, new String[] {"To", "be", "or"}));
+    assertTrue("14",
+        e2nDeepEquals(new String[] {"To", "be", "or"},
+            new String[] {"To", "be", "or"}));
     assertTrue("15", e2nDeepEquals(new int[] {1, 2, 3, 4}, new int[] {1, 2, 3, 4}));
     assertFalse("16", e2nDeepEquals(new int[0], new HashSet<>()));
     assertFalse("17", e2nDeepEquals("", new HashSet<>()));
@@ -145,7 +135,11 @@ public class ObjectMethodsTest {
 
     Set subset1 = setOf("Mary", subsubset1, subsubset2, subsubset4);
     Set subset2 = setOf("Mary", subsubset2, subsubset3, subsubset4);
-    Set subset3 = setOf("Mary", subsubset2, subsubset3, subsubset4, Collections.emptySet());
+    Set subset3 = setOf("Mary",
+        subsubset2,
+        subsubset3,
+        subsubset4,
+        Collections.emptySet());
     Set subset4 = setOf("Mary", subsubset3, subsubset4, subsubset5, new short[0]);
     Set subset5 = setOf("Mary", subsubset4, subsubset5, new short[] {1, 2});
     Set subset6 = setOf(subsubset4);
@@ -170,12 +164,12 @@ public class ObjectMethodsTest {
 
   @Test
   public void n2e01() {
-    assertTrue(ObjectMethods.n2e((Integer) null) == ObjectMethods.ZERO_INT);
-    assertTrue(ObjectMethods.n2e((Double) null) == ObjectMethods.ZERO_DOUBLE);
-    assertTrue(ObjectMethods.n2e((Long) null) == ObjectMethods.ZERO_LONG);
-    assertTrue(ObjectMethods.n2e((Float) null) == ObjectMethods.ZERO_FLOAT);
-    assertTrue(ObjectMethods.n2e((Short) null) == ObjectMethods.ZERO_SHORT);
-    assertTrue(ObjectMethods.n2e((Byte) null) == ObjectMethods.ZERO_BYTE);
+    assertTrue(ObjectMethods.n2e((Integer) null) == 0);
+    assertTrue(ObjectMethods.n2e((Double) null) == 0D);
+    assertTrue(ObjectMethods.n2e((Long) null) == 0L);
+    assertTrue(ObjectMethods.n2e((Float) null) == 0F);
+    assertTrue(ObjectMethods.n2e((Short) null) == (short) 0);
+    assertTrue(ObjectMethods.n2e((Byte) null) == (byte) 0);
     assertTrue(ObjectMethods.n2e(2) == 2);
     assertTrue(ObjectMethods.n2e(2.0) == 2D);
     assertTrue(ObjectMethods.n2e(2L) == 2L);
@@ -183,4 +177,5 @@ public class ObjectMethodsTest {
     assertTrue(ObjectMethods.n2e((short) 2) == (short) 2);
     assertTrue(ObjectMethods.n2e((byte) 2) == (byte) 2);
   }
+
 }
