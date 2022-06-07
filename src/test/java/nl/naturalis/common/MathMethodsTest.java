@@ -3,6 +3,7 @@ package nl.naturalis.common;
 import org.junit.Test;
 
 import static nl.naturalis.common.ArrayMethods.ints;
+import static nl.naturalis.common.ArrayMethods.pack;
 import static nl.naturalis.common.MathMethods.rasterize;
 import static nl.naturalis.common.MathMethods.rasterizeCM;
 import static org.junit.Assert.assertArrayEquals;
@@ -711,6 +712,596 @@ public class MathMethodsTest {
     //System.out.println(IntList.of(pages[1][0]));
     assertArrayEquals(ints(0, 1, 2), pages[0][0]);
     assertArrayEquals(ints(3, 0, 0), pages[1][0]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeObjs00() {
+    Integer[] values = pack();
+    Integer[][][] pages = rasterize(values, 2, 2, -1);
+    assertEquals(0, pages.length);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeObjs01() {
+    Integer[] values = pack(0);
+    Integer[][][] pages = rasterize(values, 2, 2, -1);
+    assertEquals(1, pages.length);
+    assertArrayEquals(pack(0, -1), pages[0][0]);
+    assertArrayEquals(pack(-1, -1), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeObjs02() {
+    Integer[] values = pack(0, 1);
+    Integer[][][] pages = rasterize(values, 2, 2, -1);
+    assertEquals(1, pages.length);
+    assertArrayEquals(pack(0, 1), pages[0][0]);
+    assertArrayEquals(pack(-1, -1), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeObjs03() {
+    Integer[] values = pack(0, 1, 2);
+    Integer[][][] pages = rasterize(values, 2, 2, -1);
+    assertEquals(1, pages.length);
+    assertArrayEquals(pack(0, 1), pages[0][0]);
+    assertArrayEquals(pack(2, -1), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeObjs04() {
+    Integer[] values = pack(0, 1, 2, 3);
+    Integer[][][] pages = rasterize(values, 2, 2, -1);
+    assertEquals(1, pages.length);
+    assertArrayEquals(pack(0, 1), pages[0][0]);
+    assertArrayEquals(pack(2, 3), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeObjs05() {
+    Integer[] values = pack(0, 1, 2, 3, 4);
+    Integer[][][] pages = rasterize(values, 2, 2, -1);
+    assertEquals(2, pages.length);
+    assertArrayEquals(pack(0, 1), pages[0][0]);
+    assertArrayEquals(pack(2, 3), pages[0][1]);
+    assertArrayEquals(pack(4, -1), pages[1][0]);
+    assertArrayEquals(pack(-1, -1), pages[1][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeObjs06() {
+    Integer[] values = pack(0, 1, 2, 3, 4, 5);
+    Integer[][][] pages = rasterize(values, 2, 2, -1);
+    assertEquals(2, pages.length);
+    assertArrayEquals(pack(0, 1), pages[0][0]);
+    assertArrayEquals(pack(2, 3), pages[0][1]);
+    assertArrayEquals(pack(4, 5), pages[1][0]);
+    assertArrayEquals(pack(-1, -1), pages[1][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeObjs07() {
+    Integer[] values = pack(0, 1, 2, 3, 4, 5, 6);
+    Integer[][][] pages = rasterize(values, 2, 2, -1);
+    assertEquals(2, pages.length);
+    assertArrayEquals(pack(0, 1), pages[0][0]);
+    assertArrayEquals(pack(2, 3), pages[0][1]);
+    assertArrayEquals(pack(4, 5), pages[1][0]);
+    assertArrayEquals(pack(6, -1), pages[1][1]);
+  }
+
+  @Test // 1 x 3 matrix
+  public void rasterizeObjs08() {
+    Integer[] values = pack(0);
+    Integer[][][] pages = rasterize(values, 1, 3, -1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0, -1, -1), pages[0][0]);
+  }
+
+  @Test // 1 x 3 matrix
+  public void rasterizeObjs09() {
+    Integer[] values = pack(0, 1);
+    Integer[][][] pages = rasterize(values, 1, 3, -1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0, 1, -1), pages[0][0]);
+  }
+
+  @Test // 1 x 3 matrix
+  public void rasterizeObjs10() {
+    Integer[] values = pack(0, 1, 2);
+    Integer[][][] pages = rasterize(values, 1, 3, -1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0, 1, 2), pages[0][0]);
+  }
+
+  @Test // 1 x 3 matrix
+  public void rasterizeObjs11() {
+    Integer[] values = pack(0, 1, 2, 3);
+    Integer[][][] pages = rasterize(values, 1, 3, -1);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0, 1, 2), pages[0][0]);
+    assertArrayEquals(pack(3, -1, -1), pages[1][0]);
+  }
+
+  @Test // 1 x 3 matrix
+  public void rasterizeObjs12() {
+    Integer[] values = pack(0, 1, 2, 3, 4);
+    Integer[][][] pages = rasterize(values, 1, 3, -1);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0, 1, 2), pages[0][0]);
+    assertArrayEquals(pack(3, 4, -1), pages[1][0]);
+  }
+
+  @Test // 3 x 1 matrix
+  public void rasterizeObjs13() {
+    Integer[] values = pack(0);
+    Integer[][][] pages = rasterize(values, 3, 1, -1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+  }
+
+  @Test // 3 x 1 matrix
+  public void rasterizeObjs14() {
+    Integer[] values = pack(0, 1);
+    Integer[][][] pages = rasterize(values, 3, 1, -1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+    assertArrayEquals(pack(1), pages[0][1]);
+  }
+
+  @Test // 3 x 1 matrix
+  public void rasterizeObjs15() {
+    Integer[] values = pack(0, 1, 2);
+    Integer[][][] pages = rasterize(values, 3, 1, -1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+    assertArrayEquals(pack(1), pages[0][1]);
+    assertArrayEquals(pack(2), pages[0][2]);
+  }
+
+  @Test // 3 x 1 matrix
+  public void rasterizeObjs16() {
+    Integer[] values = pack(0, 1, 2, 3);
+    Integer[][][] pages = rasterize(values, 3, 1, -1);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+    assertArrayEquals(pack(1), pages[0][1]);
+    assertArrayEquals(pack(2), pages[0][2]);
+    assertArrayEquals(pack(3), pages[1][0]);
+    assertArrayEquals(pack(-1), pages[1][1]);
+    assertArrayEquals(pack(-1), pages[1][2]);
+  }
+
+  @Test // 1 x 1 matrix
+  public void rasterizeObjs17() {
+    Integer[] values = pack(0, 1, 2, 3);
+    Integer[][][] pages = rasterize(values, 1, 1, -1);
+    assertEquals(4, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+    assertArrayEquals(pack(1), pages[1][0]);
+    assertArrayEquals(pack(2), pages[2][0]);
+    assertArrayEquals(pack(3), pages[3][0]);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeObjsCM00() {
+    Integer[] values = pack();
+    Integer[][][] pages = rasterizeCM(values, 2, 2, -1);
+    assertEquals(0, pages.length);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeObjsCM01() {
+    Integer[] values = pack(0);
+    Integer[][][] pages = rasterizeCM(values, 2, 2, -1);
+    assertEquals(1, pages.length);
+    assertArrayEquals(pack(0, -1), pages[0][0]);
+    assertArrayEquals(pack(-1, -1), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeObjsCM02() {
+    Integer[] values = pack(0, 1);
+    Integer[][][] pages = rasterizeCM(values, 2, 2, -1);
+    assertEquals(1, pages.length);
+    assertArrayEquals(pack(0, -1), pages[0][0]);
+    assertArrayEquals(pack(1, -1), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeObjsCM03() {
+    Integer[] values = pack(0, 1, 2);
+    Integer[][][] pages = rasterizeCM(values, 2, 2, -1);
+    assertEquals(1, pages.length);
+    assertArrayEquals(pack(0, 2), pages[0][0]);
+    assertArrayEquals(pack(1, -1), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeObjsCM04() {
+    Integer[] values = pack(0, 1, 2, 3);
+    Integer[][][] pages = rasterizeCM(values, 2, 2, -1);
+    assertEquals(1, pages.length);
+    assertArrayEquals(pack(0, 2), pages[0][0]);
+    assertArrayEquals(pack(1, 3), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeObjsCM05() {
+    Integer[] values = pack(0, 1, 2, 3, 4);
+    Integer[][][] pages = rasterizeCM(values, 2, 2, -1);
+    assertEquals(2, pages.length);
+    assertArrayEquals(pack(0, 2), pages[0][0]);
+    assertArrayEquals(pack(1, 3), pages[0][1]);
+    assertArrayEquals(pack(4, -1), pages[1][0]);
+    assertArrayEquals(pack(-1, -1), pages[1][1]);
+  }
+
+  @Test // 3 x 1 matrix CM
+  public void rasterizeObjsCM06() {
+    Integer[] values = pack(0);
+    Integer[][][] pages = rasterizeCM(values, 3, 1, -1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+  }
+
+  @Test // 3 x 1 matrix CM
+  public void rasterizeObjsCM07() {
+    Integer[] values = pack(0, 1);
+    Integer[][][] pages = rasterizeCM(values, 3, 1, -1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+    assertArrayEquals(pack(1), pages[0][1]);
+  }
+
+  @Test // 3 x 1 matrix CM
+  public void rasterizeObjsCM08() {
+    Integer[] values = pack(0, 1, 2);
+    Integer[][][] pages = rasterizeCM(values, 3, 1, -1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+    assertArrayEquals(pack(1), pages[0][1]);
+    assertArrayEquals(pack(2), pages[0][2]);
+  }
+
+  @Test // 3 x 1 matrix CM
+  public void rasterizeObjsCM09() {
+    Integer[] values = pack(0, 1, 2, 3);
+    Integer[][][] pages = rasterizeCM(values, 3, 1, -1);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+    assertArrayEquals(pack(1), pages[0][1]);
+    assertArrayEquals(pack(2), pages[0][2]);
+    assertArrayEquals(pack(3), pages[1][0]);
+  }
+
+  @Test // 1 x 3 matrix CM
+  public void rasterizeObjsCM10() {
+    Integer[] values = pack(0, 1);
+    Integer[][][] pages = rasterizeCM(values, 1, 3, -1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0, 1, -1), pages[0][0]);
+  }
+
+  @Test // 1 x 3 matrix CM
+  public void rasterizeObjsCM11() {
+    Integer[] values = pack(0, 1, 2, 3);
+    Integer[][][] pages = rasterizeCM(values, 1, 3, -1);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    //System.out.println(IntList.of(pages[1][0]));
+    assertArrayEquals(pack(0, 1, 2), pages[0][0]);
+    assertArrayEquals(pack(3, -1, -1), pages[1][0]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeObjsNoPadding00() {
+    Integer[] values = pack();
+    Integer[][][] pages = rasterize(values, 2, 2);
+    assertEquals(0, pages.length);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeObjsNoPadding01() {
+    Integer[] values = pack(0);
+    Integer[][][] pages = rasterize(values, 2, 2);
+    assertEquals(1, pages.length);
+    assertArrayEquals(pack(0, null), pages[0][0]);
+    assertArrayEquals(pack(null, null), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeObjsNoPadding02() {
+    Integer[] values = pack(0, 1);
+    Integer[][][] pages = rasterize(values, 2, 2);
+    assertEquals(1, pages.length);
+    assertArrayEquals(pack(0, 1), pages[0][0]);
+    assertArrayEquals(pack(null, null), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeObjsNoPadding03() {
+    Integer[] values = pack(0, 1, 2);
+    Integer[][][] pages = rasterize(values, 2, 2);
+    assertEquals(1, pages.length);
+    assertArrayEquals(pack(0, 1), pages[0][0]);
+    assertArrayEquals(pack(2, null), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeObjsNoPadding04() {
+    Integer[] values = pack(0, 1, 2, 3);
+    Integer[][][] pages = rasterize(values, 2, 2);
+    assertEquals(1, pages.length);
+    assertArrayEquals(pack(0, 1), pages[0][0]);
+    assertArrayEquals(pack(2, 3), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeObjsNoPadding05() {
+    Integer[] values = pack(0, 1, 2, 3, 4);
+    Integer[][][] pages = rasterize(values, 2, 2);
+    assertEquals(2, pages.length);
+    assertArrayEquals(pack(0, 1), pages[0][0]);
+    assertArrayEquals(pack(2, 3), pages[0][1]);
+    assertArrayEquals(pack(4, null), pages[1][0]);
+    assertArrayEquals(pack(null, null), pages[1][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeObjsNoPadding06() {
+    Integer[] values = pack(0, 1, 2, 3, 4, 5);
+    Integer[][][] pages = rasterize(values, 2, 2);
+    assertEquals(2, pages.length);
+    assertArrayEquals(pack(0, 1), pages[0][0]);
+    assertArrayEquals(pack(2, 3), pages[0][1]);
+    assertArrayEquals(pack(4, 5), pages[1][0]);
+    assertArrayEquals(pack(null, null), pages[1][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeObjsNoPadding07() {
+    Integer[] values = pack(0, 1, 2, 3, 4, 5, 6);
+    Integer[][][] pages = rasterize(values, 2, 2);
+    assertEquals(2, pages.length);
+    assertArrayEquals(pack(0, 1), pages[0][0]);
+    assertArrayEquals(pack(2, 3), pages[0][1]);
+    assertArrayEquals(pack(4, 5), pages[1][0]);
+    assertArrayEquals(pack(6, null), pages[1][1]);
+  }
+
+  @Test // 1 x 3 matrix
+  public void rasterizeObjsNoPadding08() {
+    Integer[] values = pack(0);
+    Integer[][][] pages = rasterize(values, 1, 3);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0, null, null), pages[0][0]);
+  }
+
+  @Test // 1 x 3 matrix
+  public void rasterizeObjsNoPadding09() {
+    Integer[] values = pack(0, 1);
+    Integer[][][] pages = rasterize(values, 1, 3);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0, 1, null), pages[0][0]);
+  }
+
+  @Test // 1 x 3 matrix
+  public void rasterizeObjsNoPadding10() {
+    Integer[] values = pack(0, 1, 2);
+    Integer[][][] pages = rasterize(values, 1, 3);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0, 1, 2), pages[0][0]);
+  }
+
+  @Test // 1 x 3 matrix
+  public void rasterizeObjsNoPadding11() {
+    Integer[] values = pack(0, 1, 2, 3);
+    Integer[][][] pages = rasterize(values, 1, 3);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0, 1, 2), pages[0][0]);
+    assertArrayEquals(pack(3, null, null), pages[1][0]);
+  }
+
+  @Test // 1 x 3 matrix
+  public void rasterizeObjsNoPadding12() {
+    Integer[] values = pack(0, 1, 2, 3, 4);
+    Integer[][][] pages = rasterize(values, 1, 3);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0, 1, 2), pages[0][0]);
+    assertArrayEquals(pack(3, 4, null), pages[1][0]);
+  }
+
+  @Test // 3 x 1 matrix
+  public void rasterizeObjsNoPadding13() {
+    Integer[] values = pack(0);
+    Integer[][][] pages = rasterize(values, 3, 1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+  }
+
+  @Test // 3 x 1 matrix
+  public void rasterizeObjsNoPadding14() {
+    Integer[] values = pack(0, 1);
+    Integer[][][] pages = rasterize(values, 3, 1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+    assertArrayEquals(pack(1), pages[0][1]);
+  }
+
+  @Test // 3 x 1 matrix
+  public void rasterizeObjsNoPadding15() {
+    Integer[] values = pack(0, 1, 2);
+    Integer[][][] pages = rasterize(values, 3, 1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+    assertArrayEquals(pack(1), pages[0][1]);
+    assertArrayEquals(pack(2), pages[0][2]);
+  }
+
+  @Test // 3 x 1 matrix
+  public void rasterizeObjsNoPadding16() {
+    Integer[] values = pack(0, 1, 2, 3);
+    Integer[][][] pages = rasterize(values, 3, 1);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+    assertArrayEquals(pack(1), pages[0][1]);
+    assertArrayEquals(pack(2), pages[0][2]);
+    assertArrayEquals(pack(3), pages[1][0]);
+    assertArrayEquals(pack((Integer) null), pages[1][1]);
+    assertArrayEquals(pack((Integer) null), pages[1][2]);
+  }
+
+  @Test // 1 x 1 matrix
+  public void rasterizeObjsNoPadding17() {
+    Integer[] values = pack(0, 1, 2, 3);
+    Integer[][][] pages = rasterize(values, 1, 1);
+    assertEquals(4, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+    assertArrayEquals(pack(1), pages[1][0]);
+    assertArrayEquals(pack(2), pages[2][0]);
+    assertArrayEquals(pack(3), pages[3][0]);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeObjsNoPaddingCM00() {
+    Integer[] values = pack();
+    Integer[][][] pages = rasterizeCM(values, 2, 2);
+    assertEquals(0, pages.length);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeObjsNoPaddingCM01() {
+    Integer[] values = pack(0);
+    Integer[][][] pages = rasterizeCM(values, 2, 2);
+    assertEquals(1, pages.length);
+    assertArrayEquals(pack(0, null), pages[0][0]);
+    assertArrayEquals(pack(null, null), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeObjsNoPaddingCM02() {
+    Integer[] values = pack(0, 1);
+    Integer[][][] pages = rasterizeCM(values, 2, 2);
+    assertEquals(1, pages.length);
+    assertArrayEquals(pack(0, null), pages[0][0]);
+    assertArrayEquals(pack(1, null), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeObjsNoPaddingCM03() {
+    Integer[] values = pack(0, 1, 2);
+    Integer[][][] pages = rasterizeCM(values, 2, 2);
+    assertEquals(1, pages.length);
+    assertArrayEquals(pack(0, 2), pages[0][0]);
+    assertArrayEquals(pack(1, null), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeObjsNoPaddingCM04() {
+    Integer[] values = pack(0, 1, 2, 3);
+    Integer[][][] pages = rasterizeCM(values, 2, 2);
+    assertEquals(1, pages.length);
+    assertArrayEquals(pack(0, 2), pages[0][0]);
+    assertArrayEquals(pack(1, 3), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeObjsNoPaddingCM05() {
+    Integer[] values = pack(0, 1, 2, 3, 4);
+    Integer[][][] pages = rasterizeCM(values, 2, 2);
+    assertEquals(2, pages.length);
+    assertArrayEquals(pack(0, 2), pages[0][0]);
+    assertArrayEquals(pack(1, 3), pages[0][1]);
+    assertArrayEquals(pack(4, null), pages[1][0]);
+    assertArrayEquals(pack(null, null), pages[1][1]);
+  }
+
+  @Test // 3 x 1 matrix CM
+  public void rasterizeObjsNoPaddingCM06() {
+    Integer[] values = pack(0);
+    Integer[][][] pages = rasterizeCM(values, 3, 1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+  }
+
+  @Test // 3 x 1 matrix CM
+  public void rasterizeObjsNoPaddingCM07() {
+    Integer[] values = pack(0, 1);
+    Integer[][][] pages = rasterizeCM(values, 3, 1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+    assertArrayEquals(pack(1), pages[0][1]);
+  }
+
+  @Test // 3 x 1 matrix CM
+  public void rasterizeObjsNoPaddingCM08() {
+    Integer[] values = pack(0, 1, 2);
+    Integer[][][] pages = rasterizeCM(values, 3, 1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+    assertArrayEquals(pack(1), pages[0][1]);
+    assertArrayEquals(pack(2), pages[0][2]);
+  }
+
+  @Test // 3 x 1 matrix CM
+  public void rasterizeObjsNoPaddingCM09() {
+    Integer[] values = pack(0, 1, 2, 3);
+    Integer[][][] pages = rasterizeCM(values, 3, 1);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0), pages[0][0]);
+    assertArrayEquals(pack(1), pages[0][1]);
+    assertArrayEquals(pack(2), pages[0][2]);
+    assertArrayEquals(pack(3), pages[1][0]);
+  }
+
+  @Test // 1 x 3 matrix CM
+  public void rasterizeObjsNoPaddingCM10() {
+    Integer[] values = pack(0, 1);
+    Integer[][][] pages = rasterizeCM(values, 1, 3);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(pack(0, 1, null), pages[0][0]);
+  }
+
+  @Test // 1 x 3 matrix CM
+  public void rasterizeObjsNoPaddingCM11() {
+    Integer[] values = pack(0, 1, 2, 3);
+    Integer[][][] pages = rasterizeCM(values, 1, 3);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    //System.out.println(IntList.of(pages[1][0]));
+    assertArrayEquals(pack(0, 1, 2), pages[0][0]);
+    assertArrayEquals(pack(3, null, null), pages[1][0]);
   }
 
 }
