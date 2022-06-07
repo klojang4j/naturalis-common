@@ -1,16 +1,12 @@
 package nl.naturalis.common;
 
+import org.junit.Test;
+
 import static nl.naturalis.common.ArrayMethods.ints;
 import static nl.naturalis.common.MathMethods.rasterize;
 import static nl.naturalis.common.MathMethods.rasterizeCM;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import nl.naturalis.common.collection.ArraySet;
-import nl.naturalis.common.collection.IntList;
-import org.junit.Test;
 
 @SuppressWarnings("unused")
 public class MathMethodsTest {
@@ -422,4 +418,301 @@ public class MathMethodsTest {
     assertArrayEquals(ints(3, -1, -1), pages[1][0]);
   }
 
+  @Test // 2 x 2 matrix
+  public void rasterizeIntsNoPadding00() {
+    int[] values = ints();
+    int[][][] pages = rasterize(values, 2, 2);
+    assertEquals(0, pages.length);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeIntsNoPadding01() {
+    int[] values = ints(0);
+    int[][][] pages = rasterize(values, 2, 2);
+    assertEquals(1, pages.length);
+    assertArrayEquals(ints(0, 0), pages[0][0]);
+    assertArrayEquals(ints(0, 0), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeIntsNoPadding02() {
+    int[] values = ints(0, 1);
+    int[][][] pages = rasterize(values, 2, 2);
+    assertEquals(1, pages.length);
+    assertArrayEquals(ints(0, 1), pages[0][0]);
+    assertArrayEquals(ints(0, 0), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeIntsNoPadding03() {
+    int[] values = ints(0, 1, 2);
+    int[][][] pages = rasterize(values, 2, 2);
+    assertEquals(1, pages.length);
+    assertArrayEquals(ints(0, 1), pages[0][0]);
+    assertArrayEquals(ints(2, 0), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeIntsNoPadding04() {
+    int[] values = ints(0, 1, 2, 3);
+    int[][][] pages = rasterize(values, 2, 2);
+    assertEquals(1, pages.length);
+    assertArrayEquals(ints(0, 1), pages[0][0]);
+    assertArrayEquals(ints(2, 3), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeIntsNoPadding05() {
+    int[] values = ints(0, 1, 2, 3, 4);
+    int[][][] pages = rasterize(values, 2, 2);
+    assertEquals(2, pages.length);
+    assertArrayEquals(ints(0, 1), pages[0][0]);
+    assertArrayEquals(ints(2, 3), pages[0][1]);
+    assertArrayEquals(ints(4, 0), pages[1][0]);
+    assertArrayEquals(ints(0, 0), pages[1][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeIntsNoPadding06() {
+    int[] values = ints(0, 1, 2, 3, 4, 5);
+    int[][][] pages = rasterize(values, 2, 2);
+    assertEquals(2, pages.length);
+    assertArrayEquals(ints(0, 1), pages[0][0]);
+    assertArrayEquals(ints(2, 3), pages[0][1]);
+    assertArrayEquals(ints(4, 5), pages[1][0]);
+    assertArrayEquals(ints(0, 0), pages[1][1]);
+  }
+
+  @Test // 2 x 2 matrix
+  public void rasterizeIntsNoPadding07() {
+    int[] values = ints(0, 1, 2, 3, 4, 5, 6);
+    int[][][] pages = rasterize(values, 2, 2);
+    assertEquals(2, pages.length);
+    assertArrayEquals(ints(0, 1), pages[0][0]);
+    assertArrayEquals(ints(2, 3), pages[0][1]);
+    assertArrayEquals(ints(4, 5), pages[1][0]);
+    assertArrayEquals(ints(6, 0), pages[1][1]);
+  }
+
+  @Test // 1 x 3 matrix
+  public void rasterizeIntsNoPadding08() {
+    int[] values = ints(0);
+    int[][][] pages = rasterize(values, 1, 3);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0, 0, 0), pages[0][0]);
+  }
+
+  @Test // 1 x 3 matrix
+  public void rasterizeIntsNoPadding09() {
+    int[] values = ints(0, 1);
+    int[][][] pages = rasterize(values, 1, 3);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0, 1, 0), pages[0][0]);
+  }
+
+  @Test // 1 x 3 matrix
+  public void rasterizeIntsNoPadding10() {
+    int[] values = ints(0, 1, 2);
+    int[][][] pages = rasterize(values, 1, 3);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0, 1, 2), pages[0][0]);
+  }
+
+  @Test // 1 x 3 matrix
+  public void rasterizeIntsNoPadding11() {
+    int[] values = ints(0, 1, 2, 3);
+    int[][][] pages = rasterize(values, 1, 3);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0, 1, 2), pages[0][0]);
+    assertArrayEquals(ints(3, 0, 0), pages[1][0]);
+  }
+
+  @Test // 1 x 3 matrix
+  public void rasterizeIntsNoPadding12() {
+    int[] values = ints(0, 1, 2, 3, 4);
+    int[][][] pages = rasterize(values, 1, 3);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0, 1, 2), pages[0][0]);
+    assertArrayEquals(ints(3, 4, 0), pages[1][0]);
+  }
+
+  @Test // 3 x 1 matrix
+  public void rasterizeIntsNoPadding13() {
+    int[] values = ints(0);
+    int[][][] pages = rasterize(values, 3, 1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0), pages[0][0]);
+  }
+
+  @Test // 3 x 1 matrix
+  public void rasterizeIntsNoPadding14() {
+    int[] values = ints(0, 1);
+    int[][][] pages = rasterize(values, 3, 1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0), pages[0][0]);
+    assertArrayEquals(ints(1), pages[0][1]);
+  }
+
+  @Test // 3 x 1 matrix
+  public void rasterizeIntsNoPadding15() {
+    int[] values = ints(0, 1, 2);
+    int[][][] pages = rasterize(values, 3, 1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0), pages[0][0]);
+    assertArrayEquals(ints(1), pages[0][1]);
+    assertArrayEquals(ints(2), pages[0][2]);
+  }
+
+  @Test // 3 x 1 matrix
+  public void rasterizeIntsNoPadding16() {
+    int[] values = ints(0, 1, 2, 3);
+    int[][][] pages = rasterize(values, 3, 1);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0), pages[0][0]);
+    assertArrayEquals(ints(1), pages[0][1]);
+    assertArrayEquals(ints(2), pages[0][2]);
+    assertArrayEquals(ints(3), pages[1][0]);
+    assertArrayEquals(ints(0), pages[1][1]);
+    assertArrayEquals(ints(0), pages[1][2]);
+  }
+
+  @Test // 1 x 1 matrix
+  public void rasterizeIntsNoPadding17() {
+    int[] values = ints(0, 1, 2, 3);
+    int[][][] pages = rasterize(values, 1, 1);
+    assertEquals(4, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0), pages[0][0]);
+    assertArrayEquals(ints(1), pages[1][0]);
+    assertArrayEquals(ints(2), pages[2][0]);
+    assertArrayEquals(ints(3), pages[3][0]);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeIntsNoPaddingCM00() {
+    int[] values = ints();
+    int[][][] pages = rasterizeCM(values, 2, 2);
+    assertEquals(0, pages.length);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeIntsNoPaddingCM01() {
+    int[] values = ints(0);
+    int[][][] pages = rasterizeCM(values, 2, 2);
+    assertEquals(1, pages.length);
+    assertArrayEquals(ints(0, 0), pages[0][0]);
+    assertArrayEquals(ints(0, 0), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeIntsNoPaddingCM02() {
+    int[] values = ints(0, 1);
+    int[][][] pages = rasterizeCM(values, 2, 2);
+    assertEquals(1, pages.length);
+    assertArrayEquals(ints(0, 0), pages[0][0]);
+    assertArrayEquals(ints(1, 0), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeIntsNoPaddingCM03() {
+    int[] values = ints(0, 1, 2);
+    int[][][] pages = rasterizeCM(values, 2, 2);
+    assertEquals(1, pages.length);
+    assertArrayEquals(ints(0, 2), pages[0][0]);
+    assertArrayEquals(ints(1, 0), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeIntsNoPaddingCM04() {
+    int[] values = ints(0, 1, 2, 3);
+    int[][][] pages = rasterizeCM(values, 2, 2);
+    assertEquals(1, pages.length);
+    assertArrayEquals(ints(0, 2), pages[0][0]);
+    assertArrayEquals(ints(1, 3), pages[0][1]);
+  }
+
+  @Test // 2 x 2 matrix CM
+  public void rasterizeIntsNoPaddingCM05() {
+    int[] values = ints(0, 1, 2, 3, 4);
+    int[][][] pages = rasterizeCM(values, 2, 2);
+    assertEquals(2, pages.length);
+    assertArrayEquals(ints(0, 2), pages[0][0]);
+    assertArrayEquals(ints(1, 3), pages[0][1]);
+    assertArrayEquals(ints(4, 0), pages[1][0]);
+    assertArrayEquals(ints(0, 0), pages[1][1]);
+  }
+
+  @Test // 3 x 1 matrix CM
+  public void rasterizeIntsNoPaddingCM06() {
+    int[] values = ints(0);
+    int[][][] pages = rasterizeCM(values, 3, 1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0), pages[0][0]);
+  }
+
+  @Test // 3 x 1 matrix CM
+  public void rasterizeIntsNoPaddingCM07() {
+    int[] values = ints(0, 1);
+    int[][][] pages = rasterizeCM(values, 3, 1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0), pages[0][0]);
+    assertArrayEquals(ints(1), pages[0][1]);
+  }
+
+  @Test // 3 x 1 matrix CM
+  public void rasterizeIntsNoPaddingCM08() {
+    int[] values = ints(0, 1, 2);
+    int[][][] pages = rasterizeCM(values, 3, 1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0), pages[0][0]);
+    assertArrayEquals(ints(1), pages[0][1]);
+    assertArrayEquals(ints(2), pages[0][2]);
+  }
+
+  @Test // 3 x 1 matrix CM
+  public void rasterizeIntsNoPaddingCM09() {
+    int[] values = ints(0, 1, 2, 3);
+    int[][][] pages = rasterizeCM(values, 3, 1);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0), pages[0][0]);
+    assertArrayEquals(ints(1), pages[0][1]);
+    assertArrayEquals(ints(2), pages[0][2]);
+    assertArrayEquals(ints(3), pages[1][0]);
+  }
+
+  @Test // 1 x 3 matrix CM
+  public void rasterizeIntsNoPaddingCM10() {
+    int[] values = ints(0, 1);
+    int[][][] pages = rasterizeCM(values, 1, 3);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0, 1, 0), pages[0][0]);
+  }
+
+  @Test // 1 x 3 matrix CM
+  public void rasterizeIntsNoPaddingCM11() {
+    int[] values = ints(0, 1, 2, 3);
+    int[][][] pages = rasterizeCM(values, 1, 3);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    //System.out.println(IntList.of(pages[1][0]));
+    assertArrayEquals(ints(0, 1, 2), pages[0][0]);
+    assertArrayEquals(ints(3, 0, 0), pages[1][0]);
+  }
+
 }
+ 
+
