@@ -202,9 +202,8 @@ public final class MathMethods {
   }
 
   /**
-   * Distributes a one-dimensional array of values across zero or more
-   * two-dimensional arrays (a&#46;k&#46;a&#46; tables, a&#46;k&#46;a&#46; matrices).
-   * See {@link #rasterize(int[], int, int, int)}. The empty remainder of the last
+   * Performs a row-major rasterization of a one-dimensional array of values. See
+   * {@link #rasterize(int[], int, int, int)}. The empty remainder of the last
    * two-dimensional array will be padded with zeros.
    *
    * @param values The values to rasterize
@@ -237,13 +236,13 @@ public final class MathMethods {
   }
 
   /**
-   * Distributes a one-dimensional array of values across zero or more
-   * two-dimensional arrays (a&#46;k&#46;a&#46; tables, a&#46;k&#46;a&#46; matrices).
-   * This has a practical, commonplace application when generating or populating an
-   * HTML table from a {@code List} or array of values. Each two-dimensional array in
-   * the returned three-dimensional array would correspond to an HTML page containing
-   * a single HTML table, while the third dimension corresponds to the number of
-   * pages required to display all values.
+   * Performs a row-major rasterization of a one-dimensional array of values. In
+   * other words, this method distributes a one-dimensional array of values across
+   * zero or more two-dimensional arrays (a.k.a. tables, a.k.a. matrices). This has a
+   * practical, commonplace application when generating or populating an HTML table
+   * from a {@code List} or array of values. Each element of the returned
+   * three-dimensional array corresponds to an HTML page, while each two-dimensional
+   * array corresponds to the HTML table on that page.
    *
    * @param values The values to rasterize
    * @param rowCount The number of rows per raster (or table, or matrix)
@@ -314,6 +313,17 @@ public final class MathMethods {
     return pages;
   }
 
+  /**
+   * Performs a row-major rasterization of a one-dimensional array of values. See
+   * {@link #rasterize(int[], int, int, int)}.
+   *
+   * @param values The values to rasterize
+   * @param rowCount The number of rows per raster (or table, or matrix)
+   * @param colCount The number of columns per raster (or table, or matrix)
+   * @param padValue The value to pad the empty remainder of the last raster
+   *     with
+   * @return Zero or more rasters containing the rasterized values
+   */
   public static <T> T[][][] rasterize(T[] values,
       int rowCount,
       int colCount,
@@ -452,7 +462,7 @@ public final class MathMethods {
   }
 
   /**
-   * Performs a row-major rasterization of a one-dimensional array of values. See
+   * Performs a column-major rasterization of a one-dimensional array of values. See
    * {@link #rasterize(int[], int, int, int)}. The empty remainder of the last
    * two-dimensional array will be padded with {@code null}.
    *
