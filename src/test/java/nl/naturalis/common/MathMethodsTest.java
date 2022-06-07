@@ -7,6 +7,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import nl.naturalis.common.collection.ArraySet;
+import nl.naturalis.common.collection.IntList;
 import org.junit.Test;
 
 @SuppressWarnings("unused")
@@ -198,6 +200,97 @@ public class MathMethodsTest {
     assertArrayEquals(ints(2, 3), pages[0][1]);
     assertArrayEquals(ints(4, 5), pages[1][0]);
     assertArrayEquals(ints(6, -1), pages[1][1]);
+  }
+
+  @Test
+  public void rasterize08() {
+    int[] values = ints(0);
+    int[][][] pages = rasterize(values, 1, 3, -1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0, -1, -1), pages[0][0]);
+  }
+
+  @Test
+  public void rasterize09() {
+    int[] values = ints(0, 1);
+    int[][][] pages = rasterize(values, 1, 3, -1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0, 1, -1), pages[0][0]);
+  }
+
+  @Test
+  public void rasterize10() {
+    int[] values = ints(0, 1, 2);
+    int[][][] pages = rasterize(values, 1, 3, -1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0, 1, 2), pages[0][0]);
+  }
+
+  @Test
+  public void rasterize11() {
+    int[] values = ints(0, 1, 2, 3);
+    int[][][] pages = rasterize(values, 1, 3, -1);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0, 1, 2), pages[0][0]);
+    assertArrayEquals(ints(3, -1, -1), pages[1][0]);
+  }
+
+  @Test
+  public void rasterize12() {
+    int[] values = ints(0, 1, 2, 3, 4);
+    int[][][] pages = rasterize(values, 1, 3, -1);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0, 1, 2), pages[0][0]);
+    assertArrayEquals(ints(3, 4, -1), pages[1][0]);
+  }
+
+  @Test
+  public void rasterize13() {
+    int[] values = ints(0);
+    int[][][] pages = rasterize(values, 3, 1, -1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0), pages[0][0]);
+  }
+
+  @Test
+  public void rasterize14() {
+    int[] values = ints(0, 1);
+    int[][][] pages = rasterize(values, 3, 1, -1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0), pages[0][0]);
+    assertArrayEquals(ints(1), pages[0][1]);
+  }
+
+  @Test
+  public void rasterize15() {
+    int[] values = ints(0, 1, 2);
+    int[][][] pages = rasterize(values, 3, 1, -1);
+    assertEquals(1, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0), pages[0][0]);
+    assertArrayEquals(ints(1), pages[0][1]);
+    assertArrayEquals(ints(2), pages[0][2]);
+  }
+
+  @Test
+  public void rasterize16() {
+    int[] values = ints(0, 1, 2, 3);
+    int[][][] pages = rasterize(values, 3, 1, -1);
+    assertEquals(2, pages.length);
+    //System.out.println(IntList.of(pages[0][0]));
+    assertArrayEquals(ints(0), pages[0][0]);
+    assertArrayEquals(ints(1), pages[0][1]);
+    assertArrayEquals(ints(2), pages[0][2]);
+    assertArrayEquals(ints(3), pages[1][0]);
+    assertArrayEquals(ints(-1), pages[1][1]);
+    assertArrayEquals(ints(-1), pages[1][2]);
   }
 
 }

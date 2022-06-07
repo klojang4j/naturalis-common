@@ -13,9 +13,11 @@ import static nl.naturalis.common.check.CommonChecks.negative;
  *
  * @author Ayco Holleman
  */
-public class MathMethods {
+public final class MathMethods {
 
-  private MathMethods() {}
+  private MathMethods() {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Converts to arguments to {@code double}, then divides the first argument by the
@@ -32,8 +34,7 @@ public class MathMethods {
   }
 
   /**
-   * Equivalent to {@code value / dividedBy}, but still useful as method reference
-   * for an {@link IntBinaryOperator}.
+   * Equivalent to {@code value / dividedBy}. Usable a method reference.
    *
    * @param value The integer to divide
    * @param divideBy The integer to divide it by
@@ -76,99 +77,128 @@ public class MathMethods {
   }
 
   /**
-   * Returns the number of pages (or tables or matrices) needed to contain the
-   * specified number of items, given a {@code rowCount x columnCount} raster.
+   * Returns the number of pages needed to contain the specified number of items.
    *
-   * @param itemCount The total number of elements to layout across one or more
-   *     matrices.
-   * @param rowCount The number of rows
-   * @param colCount The number of columns
-   * @return
+   * @param itemCount The total number of items
+   * @param rowCount The number of rows per page (or table, or matrix, or
+   *     raster)
+   * @param colCount The number of columns per page (or table, or matrix, or
+   *     raster)
+   * @return The number of pages needed to contain the specified number of items
    */
   public static int getPageCount(int itemCount, int rowCount, int colCount) {
+    Check.that(itemCount, "itemCount").isNot(negative());
+    checkRowCount(rowCount);
+    checkColCount(colCount);
     return divUp(itemCount, rowCount * colCount);
   }
 
   /**
-   * Returns the index of the matrix (or table or page) hosting the element with the
-   * specified absolute index, given a {@code rowCount x columnCount} matrix. The
-   * absolute index is the item's array index of the element if all elements were
-   * coalesced into a single array.
+   * Returns the page number of an item.
    *
-   * @param itemIndex
-   * @param rowCount
-   * @param colCount
-   * @return
+   * @param itemIndex The array index of the item
+   * @param rowCount The number of rows per page (or table, or matrix, or
+   *     raster)
+   * @param colCount The number of columns per page (or table, or matrix, or
+   *     raster)
+   * @return The page number of an item
    */
   public static int getPageIndex(int itemIndex, int rowCount, int colCount) {
-    Check.that(itemIndex, "itemIndex").isNot(negative());
-    Check.that(rowCount, "rowCount").is(gt(), 0);
-    Check.that(colCount, "colCount").is(gt(), 0);
+    checkItemRowCol(itemIndex, rowCount, colCount);
     return itemIndex / (rowCount * colCount);
   }
 
   /**
-   * Returns the row index of the element with the specified absolute index, given a
-   * {@code rowCount x columnCount} matrix. The absolute index is the element's array
-   * index of the item if all elements were coalesced into a single array. The
-   * returned index is relative to the top of the matrix containing the element
+   * Returns the row number of an item, modulo the page that it finds itself on.
    *
-   * @param itemIndex
-   * @param rowCount
-   * @param colCount
-   * @return
+   * @param itemIndex The array index of the item
+   * @param rowCount The number of rows per page (or table, or matrix, or
+   *     raster)
+   * @param colCount The number of columns per page (or table, or matrix, or
+   *     raster)
+   * @return The row number of an item
    */
   public static int getRowIndex(int itemIndex, int rowCount, int colCount) {
+    checkItemRowCol(itemIndex, rowCount, colCount);
     return (itemIndex / colCount) % rowCount;
   }
 
   /**
-   * Returns the column index of the specified element, given a row-major layout of
-   * any matrix with the specified number of columns.
+   * Returns the column number of an item.
    *
-   * @param itemIndex
-   * @param colCount
-   * @return
+   * @param itemIndex The array index of the item
+   * @param colCount The number of columns per page (or table, or matrix, or
+   *     raster)
+   * @return The column number of an item
    */
   public static int getColumnIndex(int itemIndex, int colCount) {
+    checkItemIndex(itemIndex);
+    checkColCount(colCount);
     return itemIndex % colCount;
   }
 
   /**
-   * Returns the row index of the specified element, given a column-major layout of
-   * any matrix with the specified number of rows.
+   * Returns the row number of an item in a column-major layout. That is: items are
+   * laid out top-to-bottom first, left-to-right second.
    *
-   * @param itemIndex
-   * @param rowCount
-   * @return
+   * @param itemIndex The array index of the item
+   * @param rowCount The number of rows per page (or table, or matrix, or
+   *     raster)
+   * @return The row number of an item in a column-major layout
    */
   public static int getRowIndexCM(int itemIndex, int rowCount) {
+    checkItemIndex(itemIndex);
+    checkRowCount(rowCount);
     return itemIndex % rowCount;
   }
 
   /**
-   * Returns the column offset from the left of the page (or matrix), given a
-   * column-major layout of a {@code rowCount x columnCount} matrix.
+   * Returns the column number of an item in a column-major layout
    *
-   * @param itemIndex
-   * @param rowCount
-   * @param colCount
-   * @return
+   * @param itemIndex The array index of the item
+   * @param rowCount The number of rows per page (or table, or matrix, or
+   *     raster)
+   * @param colCount The number of columns per page (or table, or matrix, or
+   *     raster)
+   * @return The column number of an item in a column-major layout
    */
   public static int getColumnIndexCM(int itemIndex, int rowCount, int colCount) {
+    checkItemRowCol(itemIndex, rowCount, colCount);
     return (itemIndex / rowCount) % colCount;
   }
 
+  /**
+   * Returns the page, row, and column number of an item in a row-major layout.
+   *
+   * @param itemIndex The array index of the item
+   * @param rowCount The number of rows per page (or table, or matrix, or
+   *     raster)
+   * @param colCount The number of columns per page (or table, or matrix, or
+   *     raster)
+   * @return The page, row, and column number of an item in a row-major layout
+   */
   public static int[] getPageRowColumn(int itemIndex, int rowCount, int colCount) {
-    return new int[] {getPageIndex(itemIndex, rowCount, colCount),
-        getRowIndex(itemIndex, rowCount, colCount),
-        getColumnIndex(itemIndex, colCount)};
+    checkItemRowCol(itemIndex, rowCount, colCount);
+    return new int[] {itemIndex / (rowCount * colCount),
+        (itemIndex / colCount) % rowCount,
+        itemIndex % colCount};
   }
 
+  /**
+   * Returns the page, row, and column number of an item in a column-major layout.
+   *
+   * @param itemIndex The array index of the item
+   * @param rowCount The number of rows per page (or table, or matrix, or
+   *     raster)
+   * @param colCount The number of columns per page (or table, or matrix, or
+   *     raster)
+   * @return The page, row, and column number of an item in a column-major layout
+   */
   public static int[] getPageRowColumnCM(int itemIndex, int rowCount, int colCount) {
-    return new int[] {getPageIndex(itemIndex, rowCount, colCount),
-        getRowIndexCM(itemIndex, rowCount),
-        getColumnIndexCM(itemIndex, rowCount, colCount)};
+    checkItemRowCol(itemIndex, rowCount, colCount);
+    return new int[] {itemIndex / (rowCount * colCount),
+        itemIndex % rowCount,
+        (itemIndex / rowCount) % colCount};
   }
 
   /**
@@ -183,12 +213,9 @@ public class MathMethods {
    * @return Zero or more rasters containing the rasterized values
    */
   public static int[][][] rasterize(int[] values, int rowCount, int colCount) {
-    Check.notNull(values, "array");
-    Check.that(rowCount, "rowCount").is(gt(), 0);
-    Check.that(colCount, "colCount").is(gt(), 0);
-    if (values.length == 0) {
-      return new int[0][0][0];
-    }
+    checkArray(values);
+    checkRowCount(rowCount);
+    checkColCount(colCount);
     int cellsPerPage = rowCount * colCount;
     int numPages = getPageCount(values.length, rowCount, colCount);
     int[][][] pages = new int[numPages][rowCount][colCount];
@@ -229,9 +256,9 @@ public class MathMethods {
       int rowCount,
       int colCount,
       int padValue) {
-    Check.notNull(values, "array");
-    Check.that(rowCount, "rowCount").is(gt(), 0);
-    Check.that(colCount, "colCount").is(gt(), 0);
+    checkArray(values);
+    checkRowCount(rowCount);
+    checkColCount(colCount);
     int cellsPerPage = rowCount * colCount;
     int numPages = getPageCount(values.length, rowCount, colCount);
     int[][][] pages = new int[numPages][rowCount][colCount];
@@ -253,7 +280,7 @@ public class MathMethods {
   }
 
   /**
-   * Performs a row-major rasterization of the values in the specified array. See
+   * Performs a row-major rasterization of a one-dimensional array of values. See
    * {@link #rasterize(int[], int, int, int)}. The empty remainder of the last
    * two-dimensional array will be padded with {@code null}.
    *
@@ -263,17 +290,13 @@ public class MathMethods {
    * @param <T> The type of the values to be rasterized
    * @return Zero or more rasters containing the rasterized values
    */
-  @SuppressWarnings("unchecked")
   public static <T> T[][][] rasterize(T[] values, int rowCount, int colCount) {
-    Check.notNull(values, "array");
-    Check.that(rowCount, "rowCount").is(gt(), 0);
-    Check.that(colCount, "colCount").is(gt(), 0);
+    checkArray(values);
+    checkRowCount(rowCount);
+    checkColCount(colCount);
     int cellsPerPage = rowCount * colCount;
     int numPages = getPageCount(values.length, rowCount, colCount);
-    T[][][] pages = (T[][][]) Array.newInstance(values.getClass().getComponentType(),
-        numPages,
-        rowCount,
-        colCount);
+    T[][][] pages = createEmptyPages(values, numPages, rowCount, colCount);
     MAIN_LOOP:
     for (int page = 0; page < numPages; ++page) {
       int pageOffset = page * cellsPerPage;
@@ -295,15 +318,12 @@ public class MathMethods {
       int rowCount,
       int colCount,
       T padValue) {
-    Check.notNull(values, "array");
-    Check.that(rowCount, "rowCount").is(gt(), 0);
-    Check.that(colCount, "colCount").is(gt(), 0);
+    checkArray(values);
+    checkRowCount(rowCount);
+    checkColCount(colCount);
     int cellsPerPage = rowCount * colCount;
     int numPages = getPageCount(values.length, rowCount, colCount);
-    T[][][] pages = (T[][][]) Array.newInstance(values.getClass().getComponentType(),
-        numPages,
-        rowCount,
-        colCount);
+    T[][][] pages = createEmptyPages(values, numPages, rowCount, colCount);
     for (int page = 0; page < numPages; ++page) {
       int pageOffset = page * cellsPerPage;
       for (int row = 0; row < rowCount; ++row) {
@@ -322,7 +342,7 @@ public class MathMethods {
   }
 
   /**
-   * Performs a column-major rasterization of the values in the specified array. See
+   * Performs a column-major rasterization of a one-dimensional array of values. See
    * {@link #rasterize(int[], int, int, int)}. The empty remainder of the last
    * two-dimensional array will be padded with zeros.
    *
@@ -332,9 +352,9 @@ public class MathMethods {
    * @return Zero or more rasters containing the rasterized values
    */
   public static int[][][] rasterizeCM(int[] values, int rowCount, int colCount) {
-    Check.notNull(values, "array");
-    Check.that(rowCount, "rowCount").is(gt(), 0);
-    Check.that(colCount, "colCount").is(gt(), 0);
+    checkArray(values);
+    checkRowCount(rowCount);
+    checkColCount(colCount);
     int cellsPerPage = rowCount * colCount;
     int numPages = getPageCount(values.length, rowCount, colCount);
     int[][][] pages = new int[numPages][rowCount][colCount];
@@ -356,7 +376,7 @@ public class MathMethods {
   }
 
   /**
-   * Performs a column-major rasterization of the values in the specified array. See
+   * Performs a column-major rasterization of a one-dimensional array of values. See
    * {@link #rasterize(int[], int, int, int)}.
    *
    * @param values The values to rasterize
@@ -370,9 +390,9 @@ public class MathMethods {
       int rowCount,
       int colCount,
       int padValue) {
-    Check.notNull(values, "array");
-    Check.that(rowCount, "rowCount").is(gt(), 0);
-    Check.that(colCount, "colCount").is(gt(), 0);
+    checkArray(values);
+    checkRowCount(rowCount);
+    checkColCount(colCount);
     int cellsPerPage = rowCount * colCount;
     int numPages = getPageCount(values.length, rowCount, colCount);
     int[][][] pages = new int[numPages][rowCount][colCount];
@@ -394,7 +414,7 @@ public class MathMethods {
   }
 
   /**
-   * Performs a column-major rasterization of the values in the specified array. See
+   * Performs a column-major rasterization of a one-dimensional array of values. See
    * {@link #rasterize(int[], int, int, int)}.
    *
    * @param values The values to rasterize
@@ -408,15 +428,12 @@ public class MathMethods {
       int rowCount,
       int colCount,
       T padValue) {
-    Check.notNull(values, "array");
-    Check.that(rowCount, "rowCount").is(gt(), 0);
-    Check.that(colCount, "colCount").is(gt(), 0);
+    checkArray(values);
+    checkRowCount(rowCount);
+    checkColCount(colCount);
     int cellsPerPage = rowCount * colCount;
     int numPages = getPageCount(values.length, rowCount, colCount);
-    T[][][] pages = (T[][][]) Array.newInstance(values.getClass().getComponentType(),
-        numPages,
-        rowCount,
-        colCount);
+    T[][][] pages = createEmptyPages(values, numPages, rowCount, colCount);
     for (int page = 0; page < numPages; ++page) {
       int pageOffset = page * cellsPerPage;
       for (int col = 0; col < colCount; ++col) {
@@ -435,7 +452,7 @@ public class MathMethods {
   }
 
   /**
-   * Performs a column-major rasterization of the values in the specified array. See
+   * Performs a row-major rasterization of a one-dimensional array of values. See
    * {@link #rasterize(int[], int, int, int)}. The empty remainder of the last
    * two-dimensional array will be padded with {@code null}.
    *
@@ -445,17 +462,13 @@ public class MathMethods {
    * @param <T> The type of the values to be rasterized
    * @return Zero or more rasters containing the rasterized values
    */
-  @SuppressWarnings("unchecked")
   public static <T> T[][][] rasterizeCM(T[] values, int rowCount, int colCount) {
-    Check.notNull(values, "array");
-    Check.that(rowCount, "rowCount").is(gt(), 0);
-    Check.that(colCount, "colCount").is(gt(), 0);
+    checkArray(values);
+    checkRowCount(rowCount);
+    checkColCount(colCount);
     int cellsPerPage = rowCount * colCount;
     int numPages = getPageCount(values.length, rowCount, colCount);
-    T[][][] pages = (T[][][]) Array.newInstance(values[0].getClass(),
-        numPages,
-        rowCount,
-        colCount);
+    T[][][] pages = createEmptyPages(values, numPages, rowCount, colCount);
     MAIN_LOOP:
     for (int page = 0; page < numPages; ++page) {
       int pageOffset = page * cellsPerPage;
@@ -471,6 +484,39 @@ public class MathMethods {
       }
     }
     return pages;
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <T> T[][][] createEmptyPages(T[] values,
+      int numPages,
+      int rowCount,
+      int colCount) {
+    return (T[][][]) Array.newInstance(values.getClass().getComponentType(),
+        numPages,
+        rowCount,
+        colCount);
+  }
+
+  private static void checkItemRowCol(int itemIndex, int rowCount, int colCount) {
+    checkItemIndex(itemIndex);
+    checkRowCount(rowCount);
+    checkColCount(colCount);
+  }
+
+  private static void checkArray(Object array) {
+    Check.notNull(array, "array");
+  }
+
+  private static void checkItemIndex(int itemIndex) {
+    Check.that(itemIndex, "item index").isNot(negative());
+  }
+
+  private static void checkRowCount(int rowCount) {
+    Check.that(rowCount, "row count").is(gt(), 0);
+  }
+
+  private static void checkColCount(int colCount) {
+    Check.that(colCount, "column count").is(gt(), 0);
   }
 
 }
