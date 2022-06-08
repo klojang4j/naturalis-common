@@ -19,7 +19,7 @@ public class MsgIntObjRelationTest {
   @Test
   public void intObjRelation00() {
     Check.that(7).is(indexOf(), new float[10]);
-    Check.that(7).is(indexOf(), initializeList("foo", 10));
+    Check.that(7).is(indexOf(), initializeList(10, "foo"));
     Check.that(7).is(indexOf(), "Hello, Sam");
     Check.that(7).is(inIntArray(), ints(3, 5, 7, 9));
     Check.that(7).is(inRange(), IntPair.of(7, 8));
@@ -55,7 +55,7 @@ public class MsgIntObjRelationTest {
   @Test
   public void listIndexOf00() {
     try {
-      Check.that(7, "cola").is(indexOf(), initializeList("foo", 5));
+      Check.that(7, "cola").is(indexOf(), initializeList(5, "foo"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("cola must be >= 0 and < 5 (was 7)", e.getMessage());
@@ -67,7 +67,7 @@ public class MsgIntObjRelationTest {
   @Test
   public void listIndexOf01() {
     try {
-      Check.that(7, "cola").isNot(indexOf(), initializeList("foo", 10));
+      Check.that(7, "cola").isNot(indexOf(), initializeList(10, "foo"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("cola must be < 0 or >= 10 (was 7)", e.getMessage());
@@ -106,7 +106,9 @@ public class MsgIntObjRelationTest {
       Check.that(7, "tapioka").is(inIntArray(), ints(3, 5, 9));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("tapioka must be element of int[3] of [3, 5, 9] (was 7)", e.getMessage());
+      assertEquals(
+          "tapioka must be element of int[3] of [3, 5, 9] (was 7)",
+          e.getMessage());
       return;
     }
     fail();
@@ -118,7 +120,9 @@ public class MsgIntObjRelationTest {
       Check.that(7, "tapioka").isNot(inIntArray(), ints(3, 5, 7));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("tapioka must not be element of int[3] of [3, 5, 7] (was 7)", e.getMessage());
+      assertEquals(
+          "tapioka must not be element of int[3] of [3, 5, 7] (was 7)",
+          e.getMessage());
       return;
     }
     fail();

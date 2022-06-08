@@ -3,7 +3,6 @@ package nl.naturalis.common.collection;
 import org.junit.Test;
 
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
@@ -27,70 +26,47 @@ public class SynchronizedWiredListTest {
     //Collections.shuffle(callables);
     //pool.invokeAll(callables);
     pool.shutdownNow();
-    System.out.println("***** " + swl + " *****");
-
   }
 
-  /*
-    Don't throw away; nodeAfter & nodeBefore are private
-    methods with a central role, so we may want to make
-    them package private once in a while for testing purposes.
+  @Test
+  public void join00() {
+    var wl0 = SynchronizedWiredList.of(0, 1, 2);
+    var wl1 = SynchronizedWiredList.of(3, 4, 5);
+    var wl2 = SynchronizedWiredList.<Integer>of();
+    var wl3 = SynchronizedWiredList.of(6);
+    var wl4 = SynchronizedWiredList.of(7, 8, 9);
+    var wl5 = SynchronizedWiredList.join(List.of(wl0, wl1, wl2, wl3, wl4));
+    assertEquals(WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl5);
+  }
 
-    @Test
-    public void nodeAfter00() {
-      var wl0 = SynchronizedWiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+  @Test
+  public void constructor00() {
+    var wl = new SynchronizedWiredList<>(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+    assertEquals(WiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), wl);
+  }
 
-      var node1 = wl0.nodeAt(2);
-      assertEquals((Integer) 2, node1.val);
+  @Test
+  public void readIntensive00() {
+    var wl = new SynchronizedWiredList<Object>(true);
+    wl.insertAll(0, List.of(0, 1, 2, 3, 4, 5));
+    wl.embed(0, SynchronizedWiredList.of('a', 'b', 'c'));
+    assertEquals(WiredList.of('a', 'b', 'c', 0, 1, 2, 3, 4, 5), wl);
+    var segment0 = wl.deleteSegment(1, wl.size() - 1);
+    assertEquals(WiredList.of('a', 5), wl);
+    assertEquals(WiredList.of('b', 'c', 0, 1, 2, 3, 4), segment0);
+    segment0.move(0, 2, 0);
+    assertEquals(WiredList.of('b', 'c', 0, 1, 2, 3, 4), segment0);
+    segment0.move(0, 2, 3);
+    assertEquals(WiredList.of(0, 1, 2, 'b', 'c', 3, 4), segment0);
+    SynchronizedWiredList<SynchronizedWiredList<Object>> groups =
+        segment0.group(List.of(x -> x instanceof Character,
+        x -> ((Integer) x) >= 3));
+    assertEquals(3, groups.size());
+    assertEquals(List.of('b', 'c'), groups.get(0));
+    assertEquals(List.of(3, 4), groups.get(1));
+    assertEquals(List.of(0, 1, 2), groups.get(2));
+  }
 
-      var node2 = wl0.nodeAfter(node1, 2, 2);
-      assertEquals((Integer) 2, node2.val);
-      node2 = wl0.nodeAfter(node1, 2, 3);
-      assertEquals((Integer) 3, node2.val);
-      node2 = wl0.nodeAfter(node1, 2, 5);
-      assertEquals((Integer) 5, node2.val);
-      node2 = wl0.nodeAfter(node1, 2, 8);
-      assertEquals((Integer) 8, node2.val);
-      node2 = wl0.nodeAfter(node1, 2, 9);
-      assertEquals((Integer) 9, node2.val);
-
-      node1 = wl0.nodeAt(7);
-      node2 = wl0.nodeAfter(node1, 7, 8);
-      assertEquals((Integer) 8, node2.val);
-      node2 = wl0.nodeAfter(node1, 7, 9);
-      assertEquals((Integer) 9, node2.val);
-
-      node1 = wl0.nodeAt(0);
-      node2 = wl0.nodeAfter(node1, 0, 9);
-      assertEquals((Integer) 9, node2.val);
-    }
-
-    @Test
-    public void nodeBefore00() {
-      var wl0 = SynchronizedWiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-
-      var node1 = wl0.nodeAt(8);
-      assertEquals((Integer) 8, node1.val);
-
-      var node2 = wl0.nodeBefore(node1, 8, 7);
-      assertEquals((Integer) 7, node2.val);
-      node2 = wl0.nodeBefore(node1, 8, 3);
-      assertEquals((Integer) 3, node2.val);
-      node2 = wl0.nodeBefore(node1, 8, 0);
-      assertEquals((Integer) 0, node2.val);
-
-      node1 = wl0.nodeAt(1);
-      assertEquals((Integer) 1, node1.val);
-      node2 = wl0.nodeBefore(node1, 1, 0);
-      assertEquals((Integer) 0, node2.val);
-
-      node1 = wl0.nodeAt(9);
-      assertEquals((Integer) 9, node1.val);
-      node2 = wl0.nodeBefore(node1, 9, 0);
-      assertEquals((Integer) 0, node2.val);
-
-    }
-  */
   @Test
   public void append00() {
     var wl = new SynchronizedWiredList<String>();
@@ -338,6 +314,15 @@ public class SynchronizedWiredListTest {
   }
 
   @Test
+  public void addAll12() {
+    var wl = SynchronizedWiredList.<Object>of(0, 1, 2, 3, 4, 5, 6);
+    wl.addAll(List.of("a", "b", "c", "d"));
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, "a", "b", "c", "d"), wl);
+    wl.addAll(SynchronizedWiredList.of('e', 'f'));
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, "a", "b", "c", "d", 'e', 'f'), wl);
+  }
+
+  @Test
   public void insert00() {
     var wl = SynchronizedWiredList.<Object>of(0, 1, 2, 3, 4, 5, 6);
     var wl2 = wl.insert(2, "a");
@@ -408,6 +393,16 @@ public class SynchronizedWiredListTest {
   }
 
   @Test
+  public void insertAll06() {
+    var wl0 = SynchronizedWiredList.<Object>of();
+    var wl1 = SynchronizedWiredList.of(1, 2, 3);
+    var wl2 = wl0.insertAll(0, wl1);
+    assertSame(wl0, wl2);
+    assertEquals(List.of(1, 2, 3), wl0);
+    assertEquals(List.of(1, 2, 3), wl1); // argument is read only
+  }
+
+  @Test
   public void prependAll00() {
     var wl = SynchronizedWiredList.ofElements(new Object[] {0, 1, 2, 3, 4, 5, 6});
     var wl2 = wl.prependAll(List.of("a"));
@@ -424,6 +419,14 @@ public class SynchronizedWiredListTest {
   }
 
   @Test
+  public void prependAll02() {
+    var wl0 = SynchronizedWiredList.of(3, 4, 5);
+    var wl1 = wl0.prependAll(SynchronizedWiredList.of(0, 1, 2));
+    assertSame(wl0, wl1);
+    assertEquals(List.of(0, 1, 2, 3, 4, 5), wl0);
+  }
+
+  @Test
   public void appendAll00() {
     var wl = SynchronizedWiredList.ofElements(new Object[] {0, 1, 2, 3, 4, 5, 6});
     var wl2 = wl.appendAll(List.of("a", "b"));
@@ -436,6 +439,13 @@ public class SynchronizedWiredListTest {
     var wl = SynchronizedWiredList.ofElements(new Object[] {0, 1, 2, 3, 4, 5, 6});
     var wl2 = wl.appendAll(List.of());
     assertSame(wl, wl2);
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6), wl);
+  }
+
+  @Test
+  public void appendAll02() {
+    var wl = SynchronizedWiredList.<Object>of(0, 1, 2, 3);
+    var wl2 = wl.appendAll(SynchronizedWiredList.of(4, 5, 6));
     assertEquals(List.of(0, 1, 2, 3, 4, 5, 6), wl);
   }
 
@@ -670,7 +680,7 @@ public class SynchronizedWiredListTest {
   public void stitch00() {
     var wl0 = SynchronizedWiredList.<Object>of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
     var wl1 = SynchronizedWiredList.of("a", "b");
-    wl0.stitch(wl1);
+    wl0.join(wl1);
     assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "a", "b"), wl0);
   }
 
@@ -1764,7 +1774,8 @@ public class SynchronizedWiredListTest {
         false,
         .86F,
         'c');
-    List<SynchronizedWiredList<Object>> groups = wl.group(List.of(e -> e instanceof Float));
+    List<SynchronizedWiredList<Object>> groups =
+        wl.group(List.of(e -> e instanceof Float));
     assertEquals(2, groups.size());
     assertEquals(List.of(9.5F, 77.23F, 10.2F, .86F), groups.get(0));
     assertEquals(List.of(0,
@@ -1857,6 +1868,13 @@ public class SynchronizedWiredListTest {
   }
 
   @Test
+  public void removeAll02() {
+    var wl = SynchronizedWiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    assertTrue(wl.removeAll(SynchronizedWiredList.of(1, 3, 5, 7, 9)));
+    assertEquals(List.of(0, 2, 4, 6, 8), wl);
+  }
+
+  @Test
   public void retainAll00() {
     var wl = SynchronizedWiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
     assertTrue(wl.retainAll(Set.of(3, 5, 7)));
@@ -1878,6 +1896,15 @@ public class SynchronizedWiredListTest {
   }
 
   @Test
+  public void retainAll03() {
+    var wl0 = SynchronizedWiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    var wl1 = SynchronizedWiredList.of(3, 4, 5);
+    assertTrue(wl0.retainAll(wl1));
+    assertEquals(List.of(3, 4, 5), wl0);
+    assertEquals(List.of(3, 4, 5), wl1); // argument is read only
+  }
+
+  @Test
   public void contains00() {
     var wl = SynchronizedWiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
     assertFalse(wl.contains(47));
@@ -1889,6 +1916,13 @@ public class SynchronizedWiredListTest {
     var wl = SynchronizedWiredList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
     assertFalse(wl.containsAll(Set.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)));
     assertTrue(wl.containsAll(Set.of(3, 4, 5, 6, 7, 8, 9)));
+  }
+
+  @Test
+  public void containsAll01() {
+    var wl = SynchronizedWiredList.of(0, 1, 2, 3, 4);
+    assertFalse(wl.containsAll(SynchronizedWiredList.of(0, 1, 2, 3, 4, 5)));
+    assertTrue(wl.containsAll(SynchronizedWiredList.of(1, 3)));
   }
 
   @Test
@@ -2035,6 +2069,13 @@ public class SynchronizedWiredListTest {
     var wl0 = SynchronizedWiredList.<Object>of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
     wl0.replaceAll(4, 8, List.of("a", "b", "c"));
     assertEquals(List.of(0, 1, 2, 3, "a", "b", "c", 8, 9), wl0);
+  }
+
+  @Test
+  public void replaceAll05() {
+    var wl0 = SynchronizedWiredList.<Object>of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    wl0.replaceAll(4, 8, SynchronizedWiredList.of("a", "b", "c", "d", "e", "f"));
+    assertEquals(List.of(0, 1, 2, 3, "a", "b", "c", "d", "e", "f", 8, 9), wl0);
   }
 
   @Test

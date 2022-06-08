@@ -79,7 +79,8 @@ public final class WiredList<E> implements List<E> {
   }
 
   private static Supplier<IllegalArgumentException> autoEmbedNotAllowed() {
-    return () -> new IllegalArgumentException("list cannot be embedded within itself");
+    return () -> new IllegalArgumentException("list cannot be embedded within "
+        + "itself");
   }
 
   private static Supplier<IllegalStateException> callNextFirst() {
@@ -469,17 +470,18 @@ public final class WiredList<E> implements List<E> {
 
   /**
    * Concatenates the provided {@code WiredList} instances. This is a destructive
-   * operation for the argument; the instances will be empty when the method returns.
-   * See {@link #concat(WiredList)}.
+   * operation for the argument for the {@code WiredList} instances within the
+   * provided {@code List}. They will be empty when the method returns. See {@link
+   * #join(WiredList)}.
    *
    * @param lists The {@code WiredList} instances to concatenate
    * @param <E> The type of the elements in the list
    * @return A new {@code WiredList} containing the elements in the individual {@code
    *     WiredList} instances
    */
-  public static <E> WiredList<E> concat(List<WiredList<E>> lists) {
+  public static <E> WiredList<E> join(List<WiredList<E>> lists) {
     WiredList<E> wl = new WiredList<>();
-    Check.notNull(lists).ok().forEach(wl::concat);
+    Check.notNull(lists).ok().forEach(wl::join);
     return wl;
   }
 
@@ -504,8 +506,8 @@ public final class WiredList<E> implements List<E> {
 
   @SuppressWarnings({"unchecked"})
   private WiredList(Chain chain) {
-    head = chain.head;
-    tail = chain.tail;
+    makeHead(chain.head);
+    makeTail(chain.tail);
     sz = chain.length;
   }
 
@@ -962,9 +964,9 @@ public final class WiredList<E> implements List<E> {
    *
    * @param other The list to embed
    * @return this {@code WiredList}
-   * @see #concat(WiredList)
+   * @see #join(WiredList)
    */
-  public WiredList<E> concat(WiredList<? extends E> other) {
+  public WiredList<E> join(WiredList<? extends E> other) {
     return embed(sz, other);
   }
 
@@ -1023,8 +1025,7 @@ public final class WiredList<E> implements List<E> {
   @SuppressWarnings({"rawtypes"})
   public WiredList<E> defragment(List<Predicate<? super E>> criteria) {
     Check.that(criteria).isNot(empty());
-    Predicate[] predicates = criteria.toArray(Predicate[]::new);
-    WiredList[] groups = createGroups(predicates);
+    List<WiredList<E>> groups = createGroups(criteria);
     Chain rest = new Chain(head, tail, sz);
     sz = 0;
     for (WiredList wl : groups) {
@@ -1044,37 +1045,35 @@ public final class WiredList<E> implements List<E> {
    * the criterion. This {@code WiredList} is left with all elements that did not
    * satisfy any criterion, and it will be the last element in the returned
    * list-of-lists. In other words, the size of the returned list-of-lists is the
-   * number of criteria plus one. You can use the {@link #concat(List)} method to
+   * number of criteria plus one. You can use the {@link #join(List)} method to
    * create a single "defragmented" list again. Elements will never be placed in more
    * than one group. As soon as an element is found to satisfy a criterion it is
    * placed in the corresponding group and the remaining criteria are skipped.
    *
    * @param criteria The criteria used to group the elements
    * @return A list of element groups
-   * @see #concat(WiredList)
+   * @see #join(WiredList)
    */
-  @SuppressWarnings({"rawtypes"})
   public WiredList<WiredList<E>> group(List<Predicate<? super E>> criteria) {
     Check.that(criteria).isNot(empty());
-    Predicate[] predicates = criteria.toArray(Predicate[]::new);
-    WiredList<E>[] groups = createGroups(predicates);
-    WiredList<WiredList<E>> result = WiredList.ofElements(groups);
+    List<WiredList<E>> groups = createGroups(criteria);
+    WiredList<WiredList<E>> result = new WiredList<>(groups);
     result.add(this);
     return result;
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  private WiredList<E>[] createGroups(Predicate[] predicates) {
-    WiredList[] groups = new WiredList[predicates.length];
-    for (int i = 0; i < predicates.length; ++i) {
-      groups[i] = new WiredList();
+  @SuppressWarnings({"rawtypes"})
+  private List<WiredList<E>> createGroups(List<Predicate<? super E>> criteria) {
+    List<WiredList<E>> groups = new ArrayList<>(criteria.size() + 1);
+    for (int i = 0; i < criteria.size(); ++i) {
+      groups.add(new WiredList<>());
     }
-    for (Node node = head; node != null; ) {
+    for (Node<E> node = head; node != null; ) {
       var next = node.next;
-      for (int i = 0; i < predicates.length; ++i) {
-        if (predicates[i].test(node.val)) {
+      for (int i = 0; i < criteria.size(); ++i) {
+        if (criteria.get(i).test(node.val)) {
           delete(node);
-          WiredList wl = groups[i];
+          WiredList wl = groups.get(i);
           wl.insert(wl.size(), node);
           break;
         }
@@ -1546,6 +1545,7 @@ public final class WiredList<E> implements List<E> {
     } else {
       join(node.prev, node.next);
     }
+    node.prev = node.next = null;
     --sz;
   }
 

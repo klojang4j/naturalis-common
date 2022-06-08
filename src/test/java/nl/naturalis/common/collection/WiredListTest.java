@@ -2,7 +2,7 @@ package nl.naturalis.common.collection;
 
 import org.junit.Test;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -75,6 +75,18 @@ public class WiredListTest {
 
     }
   */
+
+  @Test
+  public void join() {
+    var wl0 = WiredList.of("a");
+    var wl1 = WiredList.<String>of(null);
+    var wl2 = WiredList.<String>of(null);
+    var wl3 = WiredList.of("b", "c");
+    var wl4 = WiredList.<String>of();
+    var wl5 = WiredList.join(List.of(wl0, wl1, wl2, wl3, wl4));
+    assertEquals(Arrays.asList("a", null, null, "b", "c"), wl5);
+  }
+
   @Test
   public void append00() {
     var wl = new WiredList<String>();
@@ -341,6 +353,13 @@ public class WiredListTest {
     var wl = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6);
     wl.addAll(2, new WiredList<>());
     assertEquals(List.of(0, 1, 2, 3, 4, 5, 6), wl);
+  }
+
+  @Test
+  public void addAll12() {
+    var wl = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6);
+    wl.addAll(List.of("a", "b", "c", "d"));
+    assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, "a", "b", "c", "d"), wl);
   }
 
   @Test
@@ -653,7 +672,7 @@ public class WiredListTest {
   public void stitch00() {
     var wl0 = WiredList.<Object>of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
     var wl1 = WiredList.of("a", "b");
-    wl0.concat(wl1);
+    wl0.join(wl1);
     assertEquals(List.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "a", "b"), wl0);
   }
 

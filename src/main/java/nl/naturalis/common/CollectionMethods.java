@@ -1,11 +1,10 @@
 package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.x.Constants;
-import nl.naturalis.common.x.collection.PrettyTypeComparator;
 import nl.naturalis.common.collection.TypeHashMap;
 import nl.naturalis.common.function.ThrowingFunction;
-import nl.naturalis.common.x.invoke.InvokeUtils;
+import nl.naturalis.common.x.Constants;
+import nl.naturalis.common.x.collection.PrettyTypeComparator;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -16,7 +15,8 @@ import java.util.stream.Stream;
 
 import static java.util.Map.Entry;
 import static java.util.stream.Collectors.*;
-import static nl.naturalis.common.ArrayMethods.*;
+import static nl.naturalis.common.ArrayMethods.END_INDEX;
+import static nl.naturalis.common.ArrayMethods.START_INDEX;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.*;
 
@@ -31,7 +31,8 @@ public class CollectionMethods {
   private static final List<?> LIST_OF_NULL = Collections.singletonList(null);
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private static final TypeHashMap<Function> LISTIFIERS = TypeHashMap.build(Function.class)
+  private static final TypeHashMap<Function> LISTIFIERS =
+      TypeHashMap.build(Function.class)
       .autobox(false)
       .autoExpand(false)
       .add(List.class, List.class::cast)
@@ -62,6 +63,7 @@ public class CollectionMethods {
    * @see ArrayMethods#asWrapperArray(int[])
    * @see ArrayMethods#asList(int[])
    */
+  @SuppressWarnings({"unchecked"})
   public static List<?> asList(Object val) {
     return val == null
         ? LIST_OF_NULL
@@ -69,21 +71,44 @@ public class CollectionMethods {
   }
 
   /**
-   * Creates a fixed-size, but modifiable {@code List} of the specified size with all
-   * elements initialized to specified value (must not be null).
+   * Returns a fixed-size, mutable {@code List} with all elements initialized to the
+   * specified value. The initialization value must not be {@code null}.
    *
-   * @param <E> The type of the elements
-   * @param initVal The initial value of the elements (must not be null)
    * @param size The desired size of the {@code List}
-   * @return A new, modifiable {@code List} of the specified size with all elements
-   *     initialized to the specified value
+   * @param initVal The initial value of the list elements (must not be {@code
+   *     null})
+   * @param <E> The type of the elements
+   * @return A fixed-size, mutable, initialized {@code List}
    */
-  public static <E> List<E> initializeList(E initVal, int size) {
-    Check.notNull(initVal, "initVal");
+  @SuppressWarnings({"unchecked"})
+  public static <E> List<E> initializeList(int size, E initVal) {
     Check.that(size, "size").is(gte(), 0);
-    E[] array = InvokeUtils.newArray(initVal.getClass().arrayType(), size);
-    Arrays.fill(array, 0, size, initVal);
-    return Arrays.asList(array);
+    Check.notNull(initVal, "initialization value");
+    Object[] array = new Object[size];
+    for (int i = 0; i < size; ++i) {
+      array[i] = initVal;
+    }
+    return (List<E>) Arrays.asList(array);
+  }
+
+  /**
+   * Returns a fixed-size, mutable {@code List} with all elements initialized to
+   * values provided by a {@code Supplier}.
+   *
+   * @param size The desired size of the {@code List}
+   * @param initValSupplier The supplier of the initial values
+   * @param <E> The type of the elements
+   * @return a fixed-size, mutable, initialized {@code List}
+   */
+  @SuppressWarnings({"unchecked"})
+  public static <E> List<E> initializeList(int size, Supplier<E> initValSupplier) {
+    Check.that(size, "size").is(gte(), 0);
+    Check.notNull(initValSupplier, "supplier");
+    Object[] array = new Object[size];
+    for (int i = 0; i < size; ++i) {
+      array[i] = initValSupplier.get();
+    }
+    return (List<E>) Arrays.asList(array);
   }
 
   /**
@@ -97,6 +122,7 @@ public class CollectionMethods {
    * @param <E> The type of the list elements
    * @return A new {@link ArrayList} initialized with the specified values.
    */
+  @SafeVarargs
   public static <E> List<E> newArrayList(int capacity, E... initVals) {
     Check.that(capacity, "capacity").is(gte(), 0);
     Check.notNull(initVals, "initVals");
@@ -197,8 +223,10 @@ public class CollectionMethods {
    *
    * <ol>
    *   <li>If {@code from} is negative, it is taken relative to the end of the list.
-   *   <li>If {@code length} is negative, the sublist is taken in the opposite direction, with the
-   *       element at {@code from} now becoming the <i>last</i> element of the sublist
+   *   <li>If {@code length} is negative, the sublist is taken in the opposite
+   *   direction, with the
+   *       element at {@code from} now becoming the <i>last</i> element of the
+   *       sublist
    * </ol>
    *
    * @param list The {@code List} to extract a sublist from
@@ -253,7 +281,8 @@ public class CollectionMethods {
    *   <li>primitive types first</li>
    *   <li>primitive wrapper types</li>
    *   <li>enums (excluding {@code Enum.class} itself)</li>
-   *   <li>other non-array types, according to their distance from {@code Object.class}</li>
+   *   <li>other non-array types, according to their distance from {@code Object
+   *   .class}</li>
    *   <li>array types (recursively according to component type)</li>
    *   <li>interfaces according to the number of other interfaces they extend</li>
    *   <li>{@code Object.class}</li>
