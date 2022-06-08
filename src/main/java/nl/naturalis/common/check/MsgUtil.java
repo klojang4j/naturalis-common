@@ -6,7 +6,7 @@ import java.util.Map;
 
 import static java.lang.String.format;
 import static java.lang.System.identityHashCode;
-import static nl.naturalis.common.ArrayMethods.DEFAULT_IMPLODE_SEPARATOR;
+import static nl.naturalis.common.x.Constants.DEFAULT_IMPLODE_SEPARATOR;
 import static nl.naturalis.common.ArrayMethods.implodeAny;
 import static nl.naturalis.common.CollectionMethods.implode;
 import static nl.naturalis.common.check.Check.DEF_ARG_NAME;
@@ -45,7 +45,12 @@ final class MsgUtil {
       String s = argName == null ? DEF_ARG_NAME : argName;
       return "Invalid value for " + s + ": " + toStr(argVal);
     }
-    return formatter.apply(new MsgArgs(test, negated, argName, argVal, argType, obj));
+    return formatter.apply(new MsgArgs(test,
+        negated,
+        argName,
+        argVal,
+        argType,
+        obj));
   }
 
   private static final Character DONT_PARSE_FLAG = '\0';
@@ -122,7 +127,9 @@ final class MsgUtil {
   }
 
   static String className(Object obj) {
-    return obj.getClass() == Class.class ? className((Class) obj) : className(obj.getClass());
+    return obj.getClass() == Class.class
+        ? className((Class) obj)
+        : className(obj.getClass());
   }
 
   static String simpleClassName(Object obj) {
@@ -134,7 +141,9 @@ final class MsgUtil {
   static String className(Class c) {
     return c.isArray()
         ? arrayClassName(c)
-        : c.getPackageName().equalsIgnoreCase("java.lang") ? c.getSimpleName() : c.getName();
+        : c.getPackageName().equalsIgnoreCase("java.lang")
+            ? c.getSimpleName()
+            : c.getName();
   }
 
   static String simpleClassName(Class c) {
@@ -159,7 +168,11 @@ final class MsgUtil {
     if (m.size() == 0) {
       return scn;
     }
-    String s = implode(m.entrySet(), MsgUtil::entryToString, DEFAULT_IMPLODE_SEPARATOR, 0, 10);
+    String s = implode(m.entrySet(),
+        MsgUtil::entryToString,
+        DEFAULT_IMPLODE_SEPARATOR,
+        0,
+        10);
     return scn + " of {" + trim(s, m.size()) + '}';
   }
 

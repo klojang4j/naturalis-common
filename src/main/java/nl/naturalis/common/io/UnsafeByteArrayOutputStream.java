@@ -21,12 +21,11 @@ import static nl.naturalis.common.util.ExpansionType.MULTIPLY;
  * "live" bytes - e.g {@code new String(out.toArray(), 0, out.count())}.
  *
  * <p>This class also lets you specify how to increase the size of the byte array
- * once it reaches
- * full capacity.
+ * once it reaches full capacity.
  *
  * <p>Closing a {@code ByteArrayOutputStream} has no effect. The methods in this
- * class can be called
- * after the stream has been closed without generating an {@code IOException}.
+ * class can be called after the stream has been closed without generating an {@code
+ * IOException}.
  *
  * @author Ayco Holleman
  */
@@ -49,7 +48,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
 
   /**
    * Creates a new {@code UnsafeByteArrayOutputStream}. The buffer initially has the
-   * specified number of bytes. When it reaches full capacity its replaced with a
+   * specified number of bytes. When it reaches full capacity it is replaced with a
    * buffer twice its size.
    *
    * @param capacity The initial buffer capacity
@@ -60,7 +59,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
 
   /**
    * Creates a new {@code UnsafeByteArrayOutputStream} that wraps around the
-   * specified byte array. When it reaches full capacity its replaced with a buffer
+   * specified byte array. When it reaches full capacity it is replaced with a buffer
    * twice its size.
    *
    * @param buf The initial byte array to write to
@@ -146,6 +145,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    * @param len the number of bytes to write
    */
   public void write(byte[] b, int off, int len) {
+    Check.offsetLength(b, off, len);
     if (cnt + len > buf.length) {
       increaseCapacity(cnt + len - buf.length);
     }
@@ -166,11 +166,11 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
   }
 
   /**
-   * Returns the backing array for this instance (not a copy of it). Note that you
-   * must use this method <i>in combination with</i>the {@link #size()} method to
-   * retrieve the bytes that were actually written to this instance.
+   * Returns the backing array for this instance. Note that you must use this method
+   * <i>in combination with</i>the {@link #size()} method to retrieve the
+   * "live" bytes in the backing array.
    *
-   * @return
+   * @return The backing array
    */
   public byte[] getBackingArray() {
     return buf;
@@ -179,7 +179,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
   /**
    * Returns the bytes that were written to this instance in a new byte array.
    *
-   * @return
+   * @return The bytes that were written to this instance in a new byte array
    */
   public byte[] toByteArray() {
     byte[] copy = new byte[cnt];
@@ -190,7 +190,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
   /**
    * Returns the number of bytes written to this instance.
    *
-   * @return
+   * @return The number of bytes written to this instance.
    */
   public int size() {
     return cnt;

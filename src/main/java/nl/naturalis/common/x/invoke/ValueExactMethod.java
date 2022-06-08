@@ -1,4 +1,6 @@
-package nl.naturalis.common;
+package nl.naturalis.common.x.invoke;
+
+import nl.naturalis.common.ExceptionMethods;
 
 import static java.lang.invoke.MethodHandles.lookup;
 
@@ -9,22 +11,26 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
-class ValueExact {
+/*
+ * Provides MethodHandle instances for the xxxExact() methods in subclasses of
+ * Number.
+ */
+public class ValueExactMethod {
 
-  static final ValueExact INSTANCE = new ValueExact();
+  public static final ValueExactMethod INSTANCE = new ValueExactMethod();
 
   private final Map<Class<? extends Number>, MethodHandle> mhs;
 
-  private ValueExact() {
+  private ValueExactMethod() {
     this.mhs = getMethodHandles();
   }
 
-  MethodHandle forType(Class<?> type) {
+  public MethodHandle getMethodHandle(Class<?> type) {
     return mhs.get(type);
   }
 
   private static Map<Class<? extends Number>, MethodHandle> getMethodHandles() {
-    HashMap<Class<? extends Number>, MethodHandle> tmp = new HashMap<>(8);
+    HashMap<Class<? extends Number>, MethodHandle> tmp = new HashMap<>();
     try {
 
       MethodType mt = MethodType.methodType(int.class);
@@ -56,4 +62,5 @@ class ValueExact {
     }
     return Map.copyOf(tmp);
   }
+
 }

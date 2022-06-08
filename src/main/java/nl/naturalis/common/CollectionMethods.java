@@ -1,6 +1,7 @@
 package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.x.Constants;
 import nl.naturalis.common.x.collection.PrettyTypeComparator;
 import nl.naturalis.common.collection.TypeHashMap;
 import nl.naturalis.common.function.ThrowingFunction;
@@ -550,7 +551,7 @@ public class CollectionMethods {
    * @see ArrayMethods#implode(Object[])
    */
   public static <T> String implode(Collection<T> collection) {
-    return implode(collection, DEFAULT_IMPLODE_SEPARATOR);
+    return implode(collection, Constants.DEFAULT_IMPLODE_SEPARATOR);
   }
 
   /**
@@ -579,7 +580,7 @@ public class CollectionMethods {
    * @see ArrayMethods#implode(Object[], int)
    */
   public static <T> String implode(Collection<T> collection, int limit) {
-    return implode(collection, DEFAULT_IMPLODE_SEPARATOR, limit);
+    return implode(collection, Constants.DEFAULT_IMPLODE_SEPARATOR, limit);
   }
 
   /**
@@ -594,7 +595,11 @@ public class CollectionMethods {
    */
   public static <T> String implode(Collection<T> collection,
       Function<T, String> stringifier) {
-    return implode(collection, stringifier, DEFAULT_IMPLODE_SEPARATOR, 0, -1);
+    return implode(collection,
+        stringifier,
+        Constants.DEFAULT_IMPLODE_SEPARATOR,
+        0,
+        -1);
   }
 
   /**

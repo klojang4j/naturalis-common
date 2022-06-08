@@ -34,10 +34,10 @@ abstract sealed class MultiPassTypeMap<V> extends AbstractTypeMap<V> permits
     if (tuple == null) {
       return null;
     }
-    if (autoExpand && type != tuple.one()) {
-      backend().put(type, tuple.two());
+    if (autoExpand && type != tuple.first()) {
+      backend().put(type, tuple.second());
     }
-    return tuple.two();
+    return tuple.second();
   }
 
   @Override
@@ -48,8 +48,8 @@ abstract sealed class MultiPassTypeMap<V> extends AbstractTypeMap<V> permits
     if (entry == null) {
       return false;
     }
-    if (autoExpand && type != entry.one()) {
-      backend().put(type, entry.two());
+    if (autoExpand && type != entry.first()) {
+      backend().put(type, entry.second());
     }
     return true;
   }
