@@ -5,7 +5,17 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import java.util.List;
+
 public class IntArrayListTest {
+
+  @Test
+  public void constructor00() {
+    IntList il = IntList.of(0, 1, 2, 3, 4);
+    IntArrayList ial = new IntArrayList(il);
+    assertEquals(il, ial);
+    assertEquals(List.of(0, 1, 2, 3, 4), ial.toGenericList());
+  }
 
   @Test
   public void test00() {
@@ -30,4 +40,5 @@ public class IntArrayListTest {
     assertEquals("05", 13, list.get(4));
     assertEquals("06", 12, list.get(5));
   }
+
 }

@@ -1,20 +1,18 @@
 package nl.naturalis.common.util;
 
-import static nl.naturalis.common.check.CommonChecks.empty;
-import static nl.naturalis.common.check.CommonChecks.instanceOf;
-import static nl.naturalis.common.check.CommonChecks.notNull;
-import static nl.naturalis.common.path.Path.EMPTY_PATH;
+import nl.naturalis.common.check.Check;
+import nl.naturalis.common.path.Path;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import nl.naturalis.common.check.Check;
-import nl.naturalis.common.path.Path;
+import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.path.Path.EMPTY_PATH;
 
 /**
- * Provides a convenient way of writing <i>maps-within-maps</i> ({@code Map<String, Object>}
- * objects). It lets you write deeply nested values without having to create the intermediate maps
- * first. If they are missing, they will be tacitly created.
+ * Provides a convenient way of writing <i>maps-within-maps</i> ({@code Map<String,
+ * Object>} objects). It lets you write deeply nested values without having to create
+ * the intermediate maps first. If they are missing, they will be tacitly created.
  *
  * <h4>Example 1:</h4>
  *
@@ -56,19 +54,23 @@ import nl.naturalis.common.path.Path;
  */
 public final class MapWriter {
 
-  private static final String ERR_NULL_KEY = "Illegal null key in map at path \"${0}\"";
-  private static final String ERR_BAD_KEY = "Illegal key type in map at path \"${0}\": ${type}";
+  private static final String ERR_NULL_KEY = "Illegal null key in map at path "
+      + "\"${0}\"";
+  private static final String ERR_BAD_KEY = "Illegal key type in map at path "
+      + "\"${0}\": ${type}";
 
   /**
-   * Thrown if you try to write to a path that extends beyond a path that is set to a terminal value
-   * (a non-Map value).
+   * Thrown if you try to write to a path that extends beyond a path that is set to a
+   * terminal value (a non-Map value).
    *
    * @author Ayco Holleman
    */
   public static class PathBlockedException extends IllegalArgumentException {
+
     private PathBlockedException(Path path, Object value) {
       super(String.format("Key %s already written: %s", path, value));
     }
+
   }
 
   private final Path root;
@@ -82,8 +84,8 @@ public final class MapWriter {
   }
 
   /**
-   * Creates a {@code MapWriter} that lets you start with the entries in the specified map. The map
-   * is read, but not modified.
+   * Creates a {@code MapWriter} that lets you start with the entries in the
+   * specified map. The map is read, but not modified.
    *
    * @param map The initial {@code Map}
    */
@@ -95,9 +97,9 @@ public final class MapWriter {
   }
 
   /**
-   * Creates a {@code MapWriter} that lets you start with a clean slate. All paths passed to the
-   * {@link #in(String) in} and {@link #set(String, Object)} methods are taken relative to specified
-   * root path.
+   * Creates a {@code MapWriter} that lets you start with a clean slate. All paths
+   * passed to the {@link #in(String) in} and {@link #set(String, Object)} methods
+   * are taken relative to specified root path.
    *
    * @param root The root path
    */
@@ -106,9 +108,10 @@ public final class MapWriter {
   }
 
   /**
-   * Creates a {@code MapWriter} that lets you start with the entries in the specified map. The map
-   * is read, but not modified. All paths passed to the {@link #in(String) in} and {@link
-   * #set(String, Object)} methods are taken relative to specified root path.
+   * Creates a {@code MapWriter} that lets you start with the entries in the
+   * specified map. The map is read, but not modified. All paths passed to the {@link
+   * #in(String) in} and {@link #set(String, Object)} methods are taken relative to
+   * specified root path.
    *
    * @param map The initial map
    * @param root The root path
@@ -119,10 +122,12 @@ public final class MapWriter {
   }
 
   /**
-   * Starts a new (nested) map at the specified path, relative to the root path specified through
-   * the constructor. Intermediate maps will be created as and when necessary.
+   * Starts a new (nested) map at the specified path, relative to the root path
+   * specified through the constructor. Intermediate maps will be created as and when
+   * necessary.
    *
-   * @param path A path relative to the root path specified through the constructor
+   * @param path A path relative to the root path specified through the
+   *     constructor
    * @return This {@code MapWriter}
    */
   public MapWriter in(String path) {
@@ -131,10 +136,10 @@ public final class MapWriter {
   }
 
   /**
-   * Sets the key corresponding to the specified path to the specified value. Intermediate maps will
-   * be created as and when necessary. It is not allowed to pass values of type {@link Map} or
-   * {@code MapWriter}. Use the {@link #in(String) in} method to start a new {@code Map}. Null
-   * values are allowed.
+   * Sets the key corresponding to the specified path to the specified value.
+   * Intermediate maps will be created as and when necessary. It is not allowed to
+   * pass values of type {@link Map} or {@code MapWriter}. Use the {@link #in(String)
+   * in} method to start a new {@code Map}. Null values are allowed.
    *
    * @param path The path at which to write the value
    * @param value The value
@@ -145,10 +150,10 @@ public final class MapWriter {
   }
 
   /**
-   * Sets the key corresponding to the specified path to the specified value. Intermediate maps will
-   * be created as and when necessary. Values must not be instances of {@link Map} or {@code
-   * MapWriter}. Use the {@link #in(String) in} method to start a new {@code Map}. Null values are
-   * allowed.
+   * Sets the key corresponding to the specified path to the specified value.
+   * Intermediate maps will be created as and when necessary. Values must not be
+   * instances of {@link Map} or {@code MapWriter}. Use the {@link #in(String) in}
+   * method to start a new {@code Map}. Null values are allowed.
    *
    * @param path The path at which to write the value
    * @param value The value
@@ -161,7 +166,8 @@ public final class MapWriter {
   }
 
   /**
-   * Returns whether the specified path is set to a terminal value (and hence cannot be extended).
+   * Returns whether the specified path is set to a terminal value (and hence cannot
+   * be extended).
    *
    * @param path The path
    * @return Whether it is set to a terminal value
@@ -171,8 +177,8 @@ public final class MapWriter {
   }
 
   /**
-   * Returns the {@code Map} resulting from the write actions. You can continue to use the {@code
-   * MapWriter} after a call to this method.
+   * Returns the {@code Map} resulting from the write actions. You can continue to
+   * use the {@code MapWriter} after a call to this method.
    *
    * @return The {@code Map} resulting from the write actions
    */
@@ -182,22 +188,21 @@ public final class MapWriter {
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   private static void init(MapWriter writer, Map map) {
-    map.forEach(
-        (k, v) -> {
-          Check.that(k)
-              .is(notNull(), ERR_NULL_KEY, writer.root)
-              .is(instanceOf(), String.class, ERR_BAD_KEY, writer.root);
-          String key = (String) k;
-          if (v instanceof Map) {
-            Map map0 = (Map) v;
-            Path root = writer.root.append(key);
-            MapWriter mw = new MapWriter(new LinkedHashMap(map0.size()), root);
-            writer.map0.put(key, mw);
-            init(mw, map0);
-          } else {
-            writer.map0.put(key, v);
-          }
-        });
+    map.forEach((k, v) -> {
+      Check.that(k)
+          .is(notNull(), ERR_NULL_KEY, writer.root)
+          .is(instanceOf(), String.class, ERR_BAD_KEY, writer.root);
+      String key = (String) k;
+      if (v instanceof Map) {
+        Map map0 = (Map) v;
+        Path root = writer.root.append(key);
+        MapWriter mw = new MapWriter(new LinkedHashMap(map0.size()), root);
+        writer.map0.put(key, mw);
+        init(mw, map0);
+      } else {
+        writer.map0.put(key, v);
+      }
+    });
   }
 
   private static void set(MapWriter writer, Path relPath, Object value) {
@@ -246,14 +251,14 @@ public final class MapWriter {
 
   private static Map<String, Object> getMap(MapWriter writer) {
     Map<String, Object> map = new LinkedHashMap<>(writer.map0.size());
-    writer.map0.forEach(
-        (k, v) -> {
-          if (v instanceof MapWriter) {
-            map.put(k, getMap((MapWriter) v));
-          } else {
-            map.put(k, v);
-          }
-        });
+    writer.map0.forEach((k, v) -> {
+      if (v instanceof MapWriter) {
+        map.put(k, getMap((MapWriter) v));
+      } else {
+        map.put(k, v);
+      }
+    });
     return map;
   }
+
 }

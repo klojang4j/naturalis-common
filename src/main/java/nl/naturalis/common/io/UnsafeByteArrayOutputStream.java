@@ -1,27 +1,22 @@
 package nl.naturalis.common.io;
 
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.util.ExpansionType;
+import nl.naturalis.common.util.ResizeMethod;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.BufferOverflowException;
 
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.length;
-import static nl.naturalis.common.util.ExpansionType.MULTIPLY;
+import static nl.naturalis.common.util.ResizeMethod.MULTIPLY;
 
 /**
  * An output stream in which the data is written into a byte array. The buffer
  * automatically grows as data is written to it. Contrary to Java's own {@link
  * ByteArrayOutputStream}, the internal byte array is exposed to the client via
- * {@link #getBackingArray()}. Note, however, that you must therefore use {@code
- * getBackingArray()} in combination with the {@link #size()} method to extract the
- * "live" bytes - e.g {@code new String(out.toArray(), 0, out.count())}.
- *
- * <p>This class also lets you specify how to increase the size of the byte array
- * once it reaches full capacity.
+ * {@link #getBackingArray()}. To extract the "live" bytes from the backing array,
+ * use the {@link #size()} method.
  *
  * <p>Closing a {@code ByteArrayOutputStream} has no effect. The methods in this
  * class can be called after the stream has been closed without generating an {@code
@@ -31,11 +26,11 @@ import static nl.naturalis.common.util.ExpansionType.MULTIPLY;
  */
 public class UnsafeByteArrayOutputStream extends OutputStream {
 
-  private final float expandBy;
-  private final ExpansionType expansionType;
+  private final ResizeMethod resizeMethod;
+  private final float resizeAmount;
 
   private byte[] buf;
-  private int cnt;
+  private int sz;
 
   /**
    * Creates a new {@code UnsafeByteArrayOutputStream}. The buffer capacity is
@@ -68,24 +63,24 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    *     already in the array) but not greater.
    */
   public UnsafeByteArrayOutputStream(byte[] buf, int offset) {
-    this(buf, offset, 2F, MULTIPLY);
+    this(buf, offset, MULTIPLY, 2F);
   }
 
   /**
    * Creates a new {@code UnsafeByteArrayOutputStream}. The buffer capacity is
    * initially {@code size} bytes, though its size increases if necessary.
    *
-   * @param size The initial length of the byte array
-   * @param expandBy The amount by which the increase the size of the byte array
-   *     when it reach full capacity
-   * @param expansionType The type of expansion. Whichever {@code expandBy} value
-   *     and {@code ExpansionType} you choose, the buffer capacity will always be
-   *     increased enough to sustain the next {@code write} action.
+   * @param capacity The initial length of the byte array
+   * @param resizeMethod The type of expansion. Whichever {@code resizeAmount}
+   *     value and {@code ResizeMethod} you choose, the buffer capacity will always
+   *     be increased enough to sustain the next {@code write} action.
+   * @param resizeAmount The amount by which the increase the size of the byte
+   *     array when it reaches full capacity
    */
-  public UnsafeByteArrayOutputStream(int size,
-      float expandBy,
-      ExpansionType expansionType) {
-    this(new byte[size], 0, expandBy, expansionType);
+  public UnsafeByteArrayOutputStream(int capacity,
+      ResizeMethod resizeMethod,
+      float resizeAmount) {
+    this(new byte[capacity], 0, resizeMethod, resizeAmount);
   }
 
   /**
@@ -96,20 +91,20 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    * @param offset The offset of the first byte to write. The offset may be equal
    *     to the byte array's length (causing write actions to append to what is
    *     already in the array) but not greater.
-   * @param expandBy The amount by which the increase the size of the byte array
-   *     when it reaches full capacity
-   * @param expansionType The type of expansion. Whichever {@code expandBy} value
-   *     and {@code ExpansionType} you choose, the buffer capacity will always be
-   *     increased enough to sustain the next {@code write} action.
+   * @param resizeMethod The type of expansion. Whichever {@code resizeAmount}
+   *     value and {@code ResizeMethod} you choose, the buffer capacity will always
+   *     be increased enough to sustain the next {@code write} action.
+   * @param resizeAmount The amount by which the increase the size of the byte
+   *     array when it reaches full capacity
    */
   public UnsafeByteArrayOutputStream(byte[] buf,
       int offset,
-      float expandBy,
-      ExpansionType expansionType) {
+      ResizeMethod resizeMethod,
+      float resizeAmount) {
     this.buf = Check.notNull(buf, "buf").has(length(), gt(), 0).ok();
-    this.cnt = Check.that(offset, "offset").is(lte(), buf.length).ok();
-    this.expandBy = Check.that(expandBy, "expandBy").is(GT(), 0F).ok();
-    this.expansionType = Check.notNull(expansionType, "expansionType").ok();
+    this.sz = Check.that(offset, "offset").is(lte(), buf.length).ok();
+    this.resizeAmount = Check.that(resizeAmount, "resizeAmount").is(GT(), 0F).ok();
+    this.resizeMethod = Check.notNull(resizeMethod, "resizeMethod").ok();
   }
 
   /**
@@ -119,10 +114,10 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    */
   @Override
   public void write(int b) {
-    if (cnt == buf.length) {
+    if (sz == buf.length) {
       increaseCapacity(1);
     }
-    buf[cnt++] = (byte) b;
+    buf[sz++] = (byte) b;
   }
 
   /**
@@ -132,7 +127,8 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    * @param b the data
    */
   @Override
-  public void write(byte b[]) {
+  public void write(byte[] b) {
+    Check.notNull(b);
     write(b, 0, b.length);
   }
 
@@ -146,11 +142,11 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    */
   public void write(byte[] b, int off, int len) {
     Check.offsetLength(b, off, len);
-    if (cnt + len > buf.length) {
-      increaseCapacity(cnt + len - buf.length);
+    if (sz + len > buf.length) {
+      increaseCapacity(sz + len - buf.length);
     }
-    System.arraycopy(b, off, buf, cnt, len);
-    cnt += len;
+    System.arraycopy(b, off, buf, sz, len);
+    sz += len;
   }
 
   /**
@@ -162,13 +158,12 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    * @throws IOException if an I/O error occurs.
    */
   public synchronized void writeTo(OutputStream out) throws IOException {
-    Check.notNull(out).ok().write(buf, 0, cnt);
+    Check.notNull(out).ok().write(buf, 0, sz);
   }
 
   /**
-   * Returns the backing array for this instance. Note that you must use this method
-   * <i>in combination with</i>the {@link #size()} method to retrieve the
-   * "live" bytes in the backing array.
+   * Returns the backing array for this instance. Use the {@link #size()} method to
+   * extract the "live" bytes from the backing array.
    *
    * @return The backing array
    */
@@ -182,8 +177,8 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    * @return The bytes that were written to this instance in a new byte array
    */
   public byte[] toByteArray() {
-    byte[] copy = new byte[cnt];
-    System.arraycopy(buf, 0, copy, 0, cnt);
+    byte[] copy = new byte[sz];
+    System.arraycopy(buf, 0, copy, 0, sz);
     return copy;
   }
 
@@ -193,7 +188,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    * @return The number of bytes written to this instance.
    */
   public int size() {
-    return cnt;
+    return sz;
   }
 
   /**
@@ -202,35 +197,19 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    * already allocated buffer space.
    */
   public synchronized void reset() {
-    cnt = 0;
+    sz = 0;
   }
 
   /**
-   * Closing a {@code ByteArrayOutputStream} has no effect. The methods in this class
-   * can be called after the stream has been closed without generating an {@code
-   * IOException}.
+   * Does nothing. You can keep using the instance after {@close()} has been called
+   * on it.
    */
   public void close() {}
 
   private void increaseCapacity(int minIncrease) {
-    long newSize;
-    switch (expansionType) {
-      case ADD:
-        newSize = buf.length + Math.max(minIncrease, (int) expandBy);
-        break;
-      case MULTIPLY:
-        newSize = Math.max(buf.length + minIncrease, buf.length * (int) expandBy);
-        break;
-      case PERCENTAGE:
-      default:
-        newSize = Math.max(buf.length + minIncrease,
-            buf.length * ((100 + (int) expandBy) / 100));
-        break;
-    }
-    Check.that(newSize)
-        .is(LTE(), (long) Integer.MAX_VALUE, () -> new BufferOverflowException());
-    byte[] newBuf = new byte[(int) newSize];
-    System.arraycopy(buf, 0, newBuf, 0, cnt);
+    int newSize = resizeMethod.resize(buf.length, resizeAmount, minIncrease);
+    byte[] newBuf = new byte[newSize];
+    System.arraycopy(buf, 0, newBuf, 0, sz);
     buf = newBuf;
   }
 

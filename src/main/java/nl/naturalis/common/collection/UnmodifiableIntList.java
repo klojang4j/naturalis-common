@@ -36,7 +36,9 @@ final class UnmodifiableIntList implements IntList {
 
   @Override
   public int get(int index) {
-    Check.on(ArrayIndexOutOfBoundsException::new, index).is(gte(), 0).is(lt(), buf.length);
+    Check.on(ArrayIndexOutOfBoundsException::new, index)
+        .is(gte(), 0)
+        .is(lt(), buf.length);
     return buf[index];
   }
 
@@ -78,7 +80,8 @@ final class UnmodifiableIntList implements IntList {
   }
 
   @Override
-  public <E extends Throwable> void forEachThrowing(ThrowingIntConsumer<E> action) throws E {
+  public <E extends Throwable> void forEachThrowing(ThrowingIntConsumer<E> action)
+      throws E {
     for (int i : buf) {
       action.accept(i);
     }
@@ -92,7 +95,8 @@ final class UnmodifiableIntList implements IntList {
       return this == obj || Arrays.equals(buf, ((UnmodifiableIntList) obj).buf);
     } else if (obj.getClass() == IntArrayList.class) {
       IntArrayList that = ((IntArrayList) obj);
-      return size() == that.size() && Arrays.equals(buf, 0, buf.length, that.buf, 0, buf.length);
+      return size() == that.size()
+          && Arrays.equals(buf, 0, buf.length, that.buf, 0, buf.length);
     } else if (obj instanceof IntList) {
       IntList that = (IntList) obj;
       return size() == that.size() && Arrays.equals(buf, that.toArray());
@@ -113,6 +117,8 @@ final class UnmodifiableIntList implements IntList {
   }
 
   public String toString() {
-    return stream().mapToObj(String::valueOf).collect(Collectors.joining(", ", "[", "]"));
+    return stream().mapToObj(String::valueOf)
+        .collect(Collectors.joining(", ", "[", "]"));
   }
+
 }

@@ -1,6 +1,5 @@
 package nl.naturalis.common.check;
 
-import nl.naturalis.common.util.ExpansionType;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -13,7 +12,6 @@ import java.util.function.IntUnaryOperator;
 import java.util.function.ToIntFunction;
 
 import static nl.naturalis.common.ArrayMethods.ints;
-import static nl.naturalis.common.check.CommonChecks.notNull;
 import static nl.naturalis.common.check.CommonGetters.*;
 import static org.junit.Assert.*;
 
@@ -72,7 +70,8 @@ public class CommonGettersTest {
   @Test
   public void box01() {
     assertTrue(935781 == unbox().applyAsInt(935781));
-    String propName = formatProperty((Integer) 42, "fox", unbox(), ToIntFunction.class);
+    String propName = formatProperty((Integer) 42, "fox", unbox(),
+        ToIntFunction.class);
     System.out.println(propName);
     assertEquals("fox", propName);
     propName = formatProperty((Integer) 42, null, unbox(), ToIntFunction.class);
@@ -95,7 +94,8 @@ public class CommonGettersTest {
   @Test
   public void strlen00() {
     assertEquals(4, strlen().applyAsInt("abcd"));
-    String propName = formatProperty("abcd", "sombrero", strlen(), ToIntFunction.class);
+    String propName = formatProperty("abcd", "sombrero", strlen(),
+        ToIntFunction.class);
     System.out.println(propName);
     assertEquals("sombrero.length()", propName);
     propName = formatProperty("abcd", null, strlen(), ToIntFunction.class);
@@ -106,7 +106,8 @@ public class CommonGettersTest {
   @Test
   public void toUpperCase00() {
     assertEquals("ABCD", toUpperCase().apply("abcd"));
-    String propName = formatProperty("abcd", "mozart", toUpperCase(), Function.class);
+    String propName = formatProperty("abcd", "mozart", toUpperCase(),
+        Function.class);
     System.out.println(propName);
     assertEquals("mozart.toUpperCase()", propName);
     propName = formatProperty("abcd", null, toUpperCase(), Function.class);
@@ -141,7 +142,8 @@ public class CommonGettersTest {
   public <T> void constants00() {
     DayOfWeek[] days = (DayOfWeek[]) constants().apply((Class) DayOfWeek.class);
     assertArrayEquals(DayOfWeek.class.getEnumConstants(), days);
-    String propName = formatProperty(DayOfWeek.class, "gamma", constants(), Function.class);
+    String propName = formatProperty(DayOfWeek.class, "gamma", constants(),
+        Function.class);
     System.out.println(propName);
     assertEquals("gamma.getEnumConstants()", propName);
     propName = formatProperty(DayOfWeek.class, null, constants(), Function.class);
@@ -152,7 +154,8 @@ public class CommonGettersTest {
   @Test
   public <T> void name00() {
     assertEquals("MONDAY", name().apply(DayOfWeek.MONDAY));
-    String propName = formatProperty(DayOfWeek.MONDAY, "mercedes", name(), Function.class);
+    String propName = formatProperty(DayOfWeek.MONDAY, "mercedes", name(),
+        Function.class);
     System.out.println(propName);
     assertEquals("mercedes.name()", propName);
     propName = formatProperty(DayOfWeek.MONDAY, null, name(), Function.class);
@@ -163,10 +166,12 @@ public class CommonGettersTest {
   @Test
   public <T> void ordinal00() {
     assertEquals(0, ordinal().applyAsInt(DayOfWeek.MONDAY));
-    String propName = formatProperty(DayOfWeek.MONDAY, "laptop", ordinal(), ToIntFunction.class);
+    String propName = formatProperty(DayOfWeek.MONDAY, "laptop", ordinal(),
+        ToIntFunction.class);
     System.out.println(propName);
     assertEquals("laptop.ordinal()", propName);
-    propName = formatProperty(DayOfWeek.MONDAY, null, ordinal(), ToIntFunction.class);
+    propName = formatProperty(DayOfWeek.MONDAY, null, ordinal(),
+        ToIntFunction.class);
     System.out.println(propName);
     assertEquals("DayOfWeek.ordinal()", propName);
   }
@@ -174,7 +179,8 @@ public class CommonGettersTest {
   @Test
   public void length00() {
     assertEquals(3, length().applyAsInt(ints(3, 7, 9)));
-    String propName = formatProperty(ints(3, 7, 9), "pharao", length(), ToIntFunction.class);
+    String propName = formatProperty(ints(3, 7, 9), "pharao", length(),
+        ToIntFunction.class);
     System.out.println(propName);
     assertEquals("pharao.length", propName);
     propName = formatProperty(ints(3, 7, 9), null, length(), ToIntFunction.class);
@@ -185,11 +191,12 @@ public class CommonGettersTest {
   @Test
   public void mapSize00() {
     assertEquals(3, mapSize().applyAsInt(Map.of(3, 6, 7, 14, 9, 18)));
-    String propName =
-        formatProperty(Map.of(3, 6, 7, 14, 9, 18), "jordan", mapSize(), ToIntFunction.class);
+    String propName = formatProperty(Map.of(3, 6, 7, 14, 9, 18), "jordan",
+        mapSize(), ToIntFunction.class);
     System.out.println(propName);
     assertEquals("jordan.size()", propName);
-    propName = formatProperty(Map.of(3, 6, 7, 14, 9, 18), null, mapSize(), ToIntFunction.class);
+    propName = formatProperty(Map.of(3, 6, 7, 14, 9, 18), null, mapSize(),
+        ToIntFunction.class);
     System.out.println(propName);
     assertEquals("MapN.size()", propName);
   }
@@ -197,11 +204,12 @@ public class CommonGettersTest {
   @Test
   public void size00() {
     assertEquals(6, size().applyAsInt(List.of(3, 6, 7, 14, 9, 18)));
-    String propName =
-        formatProperty(List.of(3, 6, 7, 14, 9, 18), "matthew", size(), ToIntFunction.class);
+    String propName = formatProperty(List.of(3, 6, 7, 14, 9, 18), "matthew",
+        size(), ToIntFunction.class);
     System.out.println(propName);
     assertEquals("matthew.size()", propName);
-    propName = formatProperty(List.of(3, 6, 7, 14, 9, 18), null, size(), ToIntFunction.class);
+    propName = formatProperty(List.of(3, 6, 7, 14, 9, 18), null, size(),
+        ToIntFunction.class);
     System.out.println(propName);
     assertEquals("ListN.size()", propName);
   }
@@ -290,4 +298,5 @@ public class CommonGettersTest {
     System.out.println(propName);
     assertEquals("entry.getValue()", propName);
   }
+
 }

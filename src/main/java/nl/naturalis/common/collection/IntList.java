@@ -4,16 +4,18 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
+import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.ThrowingIntConsumer;
 
 /**
  * Yes, we have one, too, while we await Valhalla.
  */
-public interface IntList {
+public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
 
   /**
    * Returns an unmodifiable {@code IntList} containing the integers in the specified
@@ -26,10 +28,9 @@ public interface IntList {
     Check.notNull(c);
     int[] buf = new int[c.size()];
     int idx = 0;
-    for (Integer val : c) {
-      buf[idx++] = Check.that(val)
-          .is(notNull(), "Illegal null value at index %d", idx - 1)
-          .ok();
+    for (Integer i : c) {
+      Check.that(i).is(notNull(), "collection must not contain null values", '\0');
+      buf[idx++] = i;
     }
     return new UnmodifiableIntList(buf);
   }
@@ -55,8 +56,7 @@ public interface IntList {
   }
 
   /**
-   * Returns an unmodifiable {@code IntList} wrapping the specified {@code int}
-   * array.
+   * Returns an unmodifiable {@code IntList} for the specified integers.
    *
    * @param ints The integer array to wrap
    * @return An unmodifiable {@code IntList} wrapping the specified {@code int} array
@@ -122,6 +122,15 @@ public interface IntList {
    * Clears the list.
    */
   void clear();
+
+  /**
+   * Converts this {@code IntList} to a regular {@link List} of {@code Integer}.
+   *
+   * @return A regular {@link List} of {@code Integer}
+   */
+  default List<Integer> toGenericList() {
+    return ArrayMethods.asList(toArray());
+  }
 
   /**
    * Converts the list to an {@code int[]} array

@@ -45,15 +45,14 @@ final class MsgUtil {
       String s = argName == null ? DEF_ARG_NAME : argName;
       return "Invalid value for " + s + ": " + toStr(argVal);
     }
-    return formatter.apply(new MsgArgs(test,
-        negated,
-        argName,
-        argVal,
-        argType,
-        obj));
+    return formatter.apply(new MsgArgs(test, negated, argName, argVal, argType, obj));
   }
 
   private static final Character DONT_PARSE_FLAG = '\0';
+
+  static boolean dontParseMessage(Object[] msgArgs) {
+    return msgArgs.length == 1 && DONT_PARSE_FLAG.equals(msgArgs[0]);
+  }
 
   static String getCustomMessage(String message,
       Object[] msgArgs,
@@ -66,7 +65,7 @@ final class MsgUtil {
       throw new InvalidCheckException("message must not be null");
     } else if (msgArgs == null) {
       throw new InvalidCheckException("message arguments must not be null");
-    } else if (msgArgs.length == 1 && DONT_PARSE_FLAG.equals(msgArgs[0])) {
+    } else if (dontParseMessage(msgArgs)) {
       return message;
     }
     Object[] all = new Object[msgArgs.length + 5];
@@ -168,11 +167,7 @@ final class MsgUtil {
     if (m.size() == 0) {
       return scn;
     }
-    String s = implode(m.entrySet(),
-        MsgUtil::entryToString,
-        DEFAULT_IMPLODE_SEPARATOR,
-        0,
-        10);
+    String s = implode(m.entrySet(), MsgUtil::entryToString, DEFAULT_IMPLODE_SEPARATOR, 0, 10);
     return scn + " of {" + trim(s, m.size()) + '}';
   }
 
