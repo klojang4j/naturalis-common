@@ -89,17 +89,15 @@ final class UnmodifiableIntList implements IntList {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj == null) {
+    if (this == obj) {
+      return true;
+    } else if (obj == null) {
       return false;
-    } else if (obj.getClass() == UnmodifiableIntList.class) {
-      return this == obj || Arrays.equals(buf, ((UnmodifiableIntList) obj).buf);
-    } else if (obj.getClass() == IntArrayList.class) {
-      IntArrayList that = ((IntArrayList) obj);
-      return size() == that.size()
-          && Arrays.equals(buf, 0, buf.length, that.buf, 0, buf.length);
-    } else if (obj instanceof IntList) {
-      IntList that = (IntList) obj;
-      return size() == that.size() && Arrays.equals(buf, that.toArray());
+    } else if (obj instanceof UnmodifiableIntList uil) {
+      return Arrays.equals(buf, uil.buf);
+    } else if (obj instanceof IntArrayList ial) {
+      return size() == ial.size()
+          && Arrays.equals(buf, 0, size(), ial.buf, 0, ial.size);
     }
     return false;
   }
