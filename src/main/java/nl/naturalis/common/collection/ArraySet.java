@@ -10,7 +10,6 @@ import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
 import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.CommonChecks.deepNotNull;
 import static nl.naturalis.common.check.CommonChecks.lt;
-import static nl.naturalis.common.collection.ArrayCloakList.cloak;
 
 public final class ArraySet<E> extends ImmutableSet<E> {
 
@@ -24,7 +23,7 @@ public final class ArraySet<E> extends ImmutableSet<E> {
     if (Check.notNull(elements, "array").ok().length == 0) {
       return EMPTY;
     }
-    if (verify && new HashSet<>(cloak(elements)).size() != elements.length) {
+    if (verify && new HashSet<>(Arrays.asList(elements)).size() != elements.length) {
       return fail("Array must not contain duplicate values");
     }
     return new ArraySet<>(elements);
