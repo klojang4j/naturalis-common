@@ -1,6 +1,7 @@
 package nl.naturalis.common.check;
 
 import nl.naturalis.common.*;
+import nl.naturalis.common.collection.IntList;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
@@ -13,6 +14,7 @@ import java.nio.BufferOverflowException;
 import java.util.*;
 import java.util.function.*;
 
+import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.MsgIntObjRelation.*;
 import static nl.naturalis.common.check.MsgIntPredicate.*;
 import static nl.naturalis.common.check.MsgIntRelation.*;
@@ -917,8 +919,7 @@ public final class CommonChecks {
   /**
    * Verifies that the length of a {@code String} argument is greater than the
    * specified value. Although you can use this check with the {@link
-   * ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation,
+   * ObjectCheck#is(ObjIntRelation, int) is()} and {@link ObjectCheck#isNot(ObjIntRelation,
    * int) isNot()} method, it is specifically meant to be used with the {@link
    * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is
@@ -952,8 +953,7 @@ public final class CommonChecks {
   /**
    * Verifies that the length of a {@code String} argument is greater than or equal
    * to the specified value. Although you can use this check with the {@link
-   * ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation,
+   * ObjectCheck#is(ObjIntRelation, int) is()} and {@link ObjectCheck#isNot(ObjIntRelation,
    * int) isNot()} method, it is specifically meant to be used with the {@link
    * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is
@@ -973,8 +973,7 @@ public final class CommonChecks {
   /**
    * Verifies that the length of a {@code String} argument is less than the specified
    * value. Although you can use this check with the {@link
-   * ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation,
+   * ObjectCheck#is(ObjIntRelation, int) is()} and {@link ObjectCheck#isNot(ObjIntRelation,
    * int) isNot()} method, it is specifically meant to be used with the {@link
    * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is
@@ -994,8 +993,7 @@ public final class CommonChecks {
   /**
    * Verifies that the length of a {@code String} argument is less than or equal to
    * the specified value. Although you can use this check with the {@link
-   * ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation,
+   * ObjectCheck#is(ObjIntRelation, int) is()} and {@link ObjectCheck#isNot(ObjIntRelation,
    * int) isNot()} method, it is specifically meant to be used with the {@link
    * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is
@@ -1049,8 +1047,7 @@ public final class CommonChecks {
   /**
    * Verifies that the size of a {@code Collection} argument is greater than the
    * specified value. Although you can use this check with the {@link
-   * ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation,
+   * ObjectCheck#is(ObjIntRelation, int) is()} and {@link ObjectCheck#isNot(ObjIntRelation,
    * int) isNot()} method, it is specifically meant to be used with the {@link
    * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is
@@ -1084,8 +1081,7 @@ public final class CommonChecks {
   /**
    * Verifies that the size of a {@code Collection} argument is greater than or equal
    * to the specified value. Although you can use this check with the {@link
-   * ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation,
+   * ObjectCheck#is(ObjIntRelation, int) is()} and {@link ObjectCheck#isNot(ObjIntRelation,
    * int) isNot()} method, it is specifically meant to be used with the {@link
    * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is
@@ -1105,8 +1101,7 @@ public final class CommonChecks {
   /**
    * Verifies that the size of a {@code Collection} argument is less than the
    * specified value. Although you can use this check with the {@link
-   * ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation,
+   * ObjectCheck#is(ObjIntRelation, int) is()} and {@link ObjectCheck#isNot(ObjIntRelation,
    * int) isNot()} method, it is specifically meant to be used with the {@link
    * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is
@@ -1126,8 +1121,7 @@ public final class CommonChecks {
   /**
    * Verifies that the size of a {@code Collection} argument is less than or equal to
    * the specified value. Although you can use this check with the {@link
-   * ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation,
+   * ObjectCheck#is(ObjIntRelation, int) is()} and {@link ObjectCheck#isNot(ObjIntRelation,
    * int) isNot()} method, it is specifically meant to be used with the {@link
    * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is
@@ -1148,8 +1142,7 @@ public final class CommonChecks {
    * Verifies that the size of an array argument is equal to the specified value. No
    * preliminary check is done to determine if the argument actually <i>is</i> an
    * array. Execute the {@link #array()} check first if there is any doubt about
-   * this. Although you can use this check with the
-   * {@link ObjectCheck#is(ObjIntRelation,
+   * this. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation,
    * int) is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it
    * is specifically meant to be used with the {@link ObjectCheck#has(Function,
    * ObjIntRelation, int) has()} and {@link ObjectCheck#notHas(Function,
@@ -1186,8 +1179,7 @@ public final class CommonChecks {
    * Verifies that the size of an array argument is greater than the specified value.
    * No preliminary check is done to determine if the argument actually <i>is</i> an
    * array. Execute the {@link #array()} check first if there is any doubt about
-   * this. Although you can use this check with the
-   * {@link ObjectCheck#is(ObjIntRelation,
+   * this. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation,
    * int) is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it
    * is specifically meant to be used with the {@link ObjectCheck#has(Function,
    * ObjIntRelation, int) has()} and {@link ObjectCheck#notHas(Function,
@@ -1209,8 +1201,7 @@ public final class CommonChecks {
    * specified value. No preliminary check is done to determine if the argument
    * actually <i>is</i> an array. Execute the {@link #array()} check first if there
    * is any doubt about this. Although you can use this check with the {@link
-   * ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation,
+   * ObjectCheck#is(ObjIntRelation, int) is()} and {@link ObjectCheck#isNot(ObjIntRelation,
    * int) isNot()} method, it is specifically meant to be used with the {@link
    * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is
@@ -1230,8 +1221,7 @@ public final class CommonChecks {
    * Verifies that the size of an array argument is less than the specified value. No
    * preliminary check is done to determine if the argument actually <i>is</i> an
    * array. Execute the {@link #array()} check first if there is any doubt about
-   * this. Although you can use this check with the
-   * {@link ObjectCheck#is(ObjIntRelation,
+   * this. Although you can use this check with the {@link ObjectCheck#is(ObjIntRelation,
    * int) is()} and {@link ObjectCheck#isNot(ObjIntRelation, int) isNot()} method, it
    * is specifically meant to be used with the {@link ObjectCheck#has(Function,
    * ObjIntRelation, int) has()} and {@link ObjectCheck#notHas(Function,
@@ -1253,8 +1243,7 @@ public final class CommonChecks {
    * specified value. No preliminary check is done to determine if the argument
    * actually <i>is</i> an array. Execute the {@link #array()} check first if there
    * is any doubt about this. Although you can use this check with the {@link
-   * ObjectCheck#is(ObjIntRelation, int) is()} and
-   * {@link ObjectCheck#isNot(ObjIntRelation,
+   * ObjectCheck#is(ObjIntRelation, int) is()} and {@link ObjectCheck#isNot(ObjIntRelation,
    * int) isNot()} method, it is specifically meant to be used with the {@link
    * ObjectCheck#has(Function, ObjIntRelation, int) has()} and {@link
    * ObjectCheck#notHas(Function, ObjIntRelation, int) notHas()} methods as there is
@@ -1275,12 +1264,15 @@ public final class CommonChecks {
   //////////////////////////////////////////////////////////////////////////////////
 
   /**
-   * Verifies that the argument can be used as index into the specified array or
-   * array-like object. The object of this {@link ObjIntRelation relation} must be
-   * one of the following:
+   * <p>Verifies that the argument can be used as index into the specified array or
+   * array-like object.
+   *
+   * <p>Note that there is no upper bound on type parameter {@code <T>}, but the
+   * object of this {@link IntObjRelation} <b>must</b> be one of the following:
    * <ul>
    *   <li>an array</li>
    *   <li>an instance of {@link List}</li>
+   *   <li>an instance of {@link IntList}</li>
    *   <li>an instance of {@link String}</li>
    * </ul>
    * An {@link InvalidCheckException} is thrown if the argument has any other type.
@@ -1295,19 +1287,20 @@ public final class CommonChecks {
    *
    * </blockquote>
    *
-   * @param <T> The type of the array
+   * @param <T> The type of the array or array-like object
    * @return A function implementing the test described above
    */
   public static <T> IntObjRelation<T> indexOf() {
     return (x, y) -> {
-      int max = -1;
-      if (y instanceof List l && (max = l.size()) == max
-          || y instanceof Object[] o && (max = o.length) == max
-          || y instanceof String s && (max = s.length()) == max
-          || y.getClass().isArray() && (max = Array.getLength(y)) == max) {
-        return x >= 0 && x < max;
-      }
-      throw new InvalidCheckException("indexOf check not applicable to " + y);
+      return y instanceof List l
+          ? x >= 0 && x < l.size()
+          : y instanceof String s
+              ? x >= 0 && x < s.length()
+              : y.getClass().isArray()
+                  ? x >= 0 && x < Array.getLength(y)
+                  : y instanceof IntList il
+                      ? x >= 0 && x < il.size()
+                      : notApplicable("indexOf", y);
     };
   }
 
@@ -1316,15 +1309,18 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument can be used as a "from" or "to" index in operations
-   * like {@link String#substring(int, int) substring} and {@link List#subList(int,
-   * int) subList}. In other words, that the argument is greater than, or equal to
-   * zero, and less than or equal to the length or the specified array or array-like
-   * object. The object of this {@link ObjIntRelation relation} must be one of the
-   * following:
+   * <p>Verifies that the argument can be used as a "from" or "to" index in
+   * operations like {@link String#substring(int, int) substring} and {@link
+   * List#subList(int, int) subList}. These operations allow both the "from" index
+   * and the "to" index to be just past the last element of the list. In other words,
+   * they allow them to be equal to the size of the list.
+   *
+   * <p>Note that there is no upper bound on type parameter {@code <T>}, but the
+   * object of this {@link IntObjRelation} <b>must</b> be one of the following:
    * <ul>
    *   <li>an array</li>
    *   <li>an instance of {@link List}</li>
+   *   <li>an instance of {@link IntList}</li>
    *   <li>an instance of {@link String}</li>
    * </ul>
    * An {@link InvalidCheckException} is thrown if the argument has any other type.
@@ -1339,25 +1335,25 @@ public final class CommonChecks {
    *
    * </blockquote>
    *
-   * @param <T> The type of the array
+   * @param <T> The type of the array or array-like object
    * @return A function implementing the test described above
    */
   public static <T> IntObjRelation<T> indexInclusiveOf() {
     return (x, y) -> {
-      int max = -1;
-      if (y instanceof List l && (max = l.size()) == max
-          || y instanceof Object[] o && (max = o.length) == max
-          || y instanceof String s && (max = s.length()) == max
-          || y.getClass().isArray() && (max = Array.getLength(y)) == max) {
-        return x >= 0 && x <= max;
-      }
-      throw new InvalidCheckException("indexInclusiveOf check not applicable to "
-          + y);
+      return y instanceof List l
+          ? x >= 0 && x <= l.size()
+          : y instanceof String s
+              ? x >= 0 && x <= s.length()
+              : y.getClass().isArray()
+                  ? x >= 0 && x <= Array.getLength(y)
+                  : y instanceof IntList il
+                      ? x >= 0 && x <= il.size()
+                      : notApplicable("indexInclusiveOf", y);
     };
   }
 
   static {
-    setMetadata(indexInclusiveOf(), msgIndexOf(), "indexInclusiveOf");
+    setMetadata(indexInclusiveOf(), msgIndexInclusiveOf(), "indexInclusiveOf");
   }
 
   /**
@@ -1408,8 +1404,7 @@ public final class CommonChecks {
   /* ++++++++++++++ Miscellaneous ++++++++++++++ */
 
   /**
-   * (Not a check) Shortcut for
-   * {@link IllegalStateException#IllegalStateException(String)
+   * (Not a check) Shortcut for {@link IllegalStateException#IllegalStateException(String)
    * IllegalStateException::new}. Can be used in combination with the {@link
    * Check#on(Function, Object) Check.on()} static factory method. For example:
    * <code>Check.on(illegalState(), out.isClosed()).is(no())</code>.
@@ -1422,8 +1417,7 @@ public final class CommonChecks {
   }
 
   /**
-   * (Not a check) Shortcut for
-   * {@link IndexOutOfBoundsException#IndexOutOfBoundsException(String)
+   * (Not a check) Shortcut for {@link IndexOutOfBoundsException#IndexOutOfBoundsException(String)
    * IndexOutOfBoundsException::new}.
    *
    * @return A {@code Function} that takes a {@code String} (the exception message)
@@ -1446,8 +1440,7 @@ public final class CommonChecks {
   }
 
   /**
-   * (Not a check) Shortcut for
-   * {@link NullPointerException#NullPointerException(String)
+   * (Not a check) Shortcut for {@link NullPointerException#NullPointerException(String)
    * NullPointerException::new}. Can be used if you prefer illegal {@code null}
    * values to cause a {@code NullPointerException} rather than an {@code
    * IllegalArgumentException} (as is the default).
@@ -1466,8 +1459,7 @@ public final class CommonChecks {
   }
 
   /**
-   * (Not a check) Shortcut for
-   * {@link BufferOverflowException#BufferOverflowException()}.
+   * (Not a check) Shortcut for {@link BufferOverflowException#BufferOverflowException()}.
    * Note that {@code BufferOverflowException} does not have a constructor that takes
    * a {@code String} argument (the exception message). So the returned {@code
    * Function} is one that ignores its {@code String} argument and invokes the no-arg
@@ -1702,6 +1694,11 @@ public final class CommonChecks {
       String name) {
     tmp0.put(test, message);
     tmp1.put(test, name);
+  }
+
+  private static <T> T notApplicable(String check, Object arg) {
+    String msg = String.format("\"%s\" not applicable to %s", check, arg.getClass());
+    throw new InvalidCheckException(msg);
   }
 
 }

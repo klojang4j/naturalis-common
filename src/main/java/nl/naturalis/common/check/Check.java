@@ -317,9 +317,8 @@ public final class Check {
    * @see String#substring(int, int)
    */
   public static int fromTo(String string, int fromIndex, int toIndex) {
-    Check.that(string).isNot(NULL(), () -> new IllegalArgumentException(
-        "string must not be "
-            + "null"));
+    Check.that(string)
+        .isNot(NULL(), () -> new IllegalArgumentException("string must not be null"));
     return Check.fromTo(string.length(), fromIndex, toIndex);
   }
 
@@ -371,7 +370,7 @@ public final class Check {
    *     {@code return} statement
    * @throws X The exception that is thrown
    */
-  public static <U, X extends Exception> U fail(Function<String, X> excFactory)
+  public static <U, X extends Throwable> U fail(Function<String, X> excFactory)
       throws X {
     return fail(excFactory, StringMethods.EMPTY);
   }
@@ -389,7 +388,7 @@ public final class Check {
    *     {@code return} statement
    * @throws X The exception that is thrown
    */
-  public static <U, X extends Exception> U fail(Function<String, X> excFactory,
+  public static <U, X extends Throwable> U fail(Function<String, X> excFactory,
       String msg,
       Object... msgArgs) throws X {
     String s = getCustomMessage(msg, msgArgs, null, null, null, null, null);

@@ -13,12 +13,16 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * Defines ways to increase the capacity of backing arrays and other types of
  * internally managed buffers and caches. Can be used if you want to leave it to
  * clients of your class to decide upon a proper resizing strategy. If you use the
- * {@link #resize(int, double, int) resize} methods to calculate the new size The
- * increase in size will max out at {@link #MAX_INCREASE} for the {@link #MULTIPLY}
- * and {@link #PERCENTAGE} resize methods. After that, they will behave like the
- * {@code ADD} method, adding {@code MAX_INCREASE} to the backing array's current
- * capacity each time it needs to be resized. The following example illustrates how
- * you can use {@code ResizeMethod}:
+ * {@link #resize(int, double, int) resize} methods to calculate a new size for the
+ * cache, buffer or backing array, the increase in size will max out at {@link
+ * #MAX_INCREASE} for the {@link #MULTIPLY} and {@link #PERCENTAGE} resize methods.
+ * After that, they will behave like the {@code ADD} method, adding {@code
+ * MAX_INCREASE} to the backing array's current capacity each time it needs to be
+ * resized. In addition, the {@code resize} method will also take care of trapping
+ * buffer overflows (the backing array's length reaching or exceeding {@link
+ * Integer#MAX_VALUE}).
+ *
+ * <p>The following example illustrates how to use {@code ResizeMethod}:
  *
  * <blockquote><pre>{@code
  * public class DIYArrayList<E> extends AbstractList<E> {
@@ -26,17 +30,18 @@ import static nl.naturalis.common.check.CommonChecks.*;
  *  private final ResizeMethod resizeMethod;
  *  private final double resizeAmount;
  *
- *  private Object[] data;
+ *  private Object[] buf;
  *  private int size;
  *
  *  public DIYArrayList(int initialCapacity, ResizeMethod resizeMethod, double resizeAmount) {
- *    this.data = new Object[initialCapacity];
+ *    this.buf = new Object[initialCapacity];
  *    this.resizeMethod = resizeMethod;
  *    this.resizeAmount = resizeAmount;
  *  }
  *
+ *  @Override
  *  public boolean addAll(Collection<?> c) {
- *    int minIncrease = ResizeMethod.getMinIncrease(data.length, size, c.size());
+ *    int minIncrease = ResizeMethod.getMinIncrease(buf.length, size, c.size());
  *    if(minIncrease > 0) {
  *      increaseCapacity(minIncrease);
  *    }
@@ -44,10 +49,10 @@ import static nl.naturalis.common.check.CommonChecks.*;
  *  }
  *
  *  private void increaseCapacity(int minIncrease) {
- *    int capacity = resizeMethod.resize(data.length, resizeAmount, minIncrease);
- *    Object[] newData = new Object[capacity];
- *    System.arraycopy(data, 0, newData, 0, size);
- *    data = newData;
+ *    int newCap = resizeMethod.resize(buf.length, resizeAmount, minIncrease);
+ *    Object[] newBuf = new Object[newCap];
+ *    System.arraycopy(buf, 0, newBuf, 0, size);
+ *    buf = newBuf;
  *  }
  *
  * }
@@ -75,8 +80,8 @@ public enum ResizeMethod {
   PERCENTAGE;
 
   /**
-   * The maximum increase in size allowed by the {@link #resize(int, double, int)
-   * methods}: {@code 8 * 1024 * 1024} (so about 8 million).
+   * The maximum increase in size allowed by the {@link #MULTIPLY} and {@link
+   * #PERCENTAGE} resize methods: {@code 8 * 1024 * 1024}.
    */
   public static final int MAX_INCREASE = 8 * 1024 * 1024;
 
@@ -91,8 +96,8 @@ public enum ResizeMethod {
    *
    * @param curCapacity The current capacity of the backing array
    * @param curSize The current size of the backing array
-   * @param dataSize The size of a block of data that needs to be inserted into
-   *     the backing array
+   * @param dataSize The size of the data that needs to be inserted into the
+   *     backing array.
    * @return The required extra capacity
    */
   public static int getMinIncrease(int curCapacity, int curSize, int dataSize) {
@@ -120,7 +125,7 @@ public enum ResizeMethod {
 
   /**
    * Calculates the new capacity for a buffer, cache or backing array using this
-   * {@code ResizeMethod}. The capacity will increase at least by {@code
+   * {@code ResizeMethod}. The capacity will increase by at least {@code
    * minIncrease}. A {@link BufferOverflowException} is thrown if the current
    * capacity is {@link Integer#MAX_VALUE}, or if {@code curCapacity + minIncrease}
    * is greater than {@code Integer.MAX_VALUE}.

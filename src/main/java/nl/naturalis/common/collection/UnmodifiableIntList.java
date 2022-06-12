@@ -20,31 +20,11 @@ final class UnmodifiableIntList implements IntList {
   }
 
   @Override
-  public void add(int i) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public void addAll(IntList other) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public void addAll(int... ints) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public int get(int index) {
     Check.on(ArrayIndexOutOfBoundsException::new, index)
         .is(gte(), 0)
         .is(lt(), buf.length);
     return buf[index];
-  }
-
-  @Override
-  public void set(int index, int value) {
-    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -55,11 +35,6 @@ final class UnmodifiableIntList implements IntList {
   @Override
   public boolean isEmpty() {
     return buf.length == 0;
-  }
-
-  @Override
-  public void clear() {
-    throw new UnsupportedOperationException();
   }
 
   @Override
