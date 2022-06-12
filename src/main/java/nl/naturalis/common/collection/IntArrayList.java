@@ -2,22 +2,22 @@ package nl.naturalis.common.collection;
 
 import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.check.CommonChecks;
 import nl.naturalis.common.function.ThrowingIntConsumer;
 import nl.naturalis.common.util.ResizeMethod;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
 import static java.lang.System.arraycopy;
-import static nl.naturalis.common.ArrayMethods.implodeInts;
+import static nl.naturalis.common.ArrayMethods.*;
 import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.util.ResizeMethod.*;
 
 /**
- * A mutable {@code List} of {@code int} values.
+ * A mutable list of {@code int} values.
  *
  * @author Ayco Holleman
  */
@@ -71,7 +71,7 @@ public final class IntArrayList implements IntList {
   public IntArrayList(int initialCapacity,
       ResizeMethod resizeMethod,
       float resizeAmount) {
-    Check.that(initialCapacity, "initialCapacity").is(gt(), 0);
+    Check.that(initialCapacity, "initialCapacity").is(gte(), 0);
     Check.notNull(resizeMethod, "resizeMethod");
     this.buf = new int[initialCapacity];
     this.resizeMethod = resizeMethod;
@@ -92,7 +92,7 @@ public final class IntArrayList implements IntList {
       this.resizeAmount = ial.resizeAmount;
       this.buf = new int[Math.min(Integer.MAX_VALUE, size + 10)];
       arraycopy(ial.buf, 0, this.buf, 0, size);
-    } else { // UnmodifiableIntList (IntList is sealed)
+    } else { // UnmodifiableIntList
       this.buf = other.toArray();
       this.size = other.size();
       this.resizeMethod = MULTIPLY;
@@ -100,12 +100,46 @@ public final class IntArrayList implements IntList {
     }
   }
 
+  @Override
+  public int get(int index) {
+    checkIndex(index);
+    return buf[index];
+  }
+
+  @Override
+  public void set(int index, int value) {
+    checkIndex(index);
+    buf[index] = value;
+  }
+
+  @Override
+  public OptionalInt indexOf(int value) {
+    for (int x = 0; x < size; ++x) {
+      if (buf[x] == value) {
+        return OptionalInt.of(x);
+      }
+    }
+    return OptionalInt.empty();
+  }
+
+  @Override
+  public OptionalInt lastIndexOf(int value) {
+    for (int x = size - 1; x >= 0; --x) {
+      if (buf[x] == value) {
+        return OptionalInt.of(x);
+      }
+    }
+    return OptionalInt.empty();
+  }
+
+  @Override
   public void add(int value) {
     add(size, value);
   }
 
+  @Override
   public void add(int index, int value) {
-    Check.that(index).is(indexInclusiveOf(), this);
+    checkIndexInclusive(index);
     if (size == buf.length) {
       increaseCapacity(1);
     }
@@ -116,16 +150,19 @@ public final class IntArrayList implements IntList {
     ++size;
   }
 
+  @Override
   public void addAll(IntList other) {
     addAll(size, other);
   }
 
+  @Override
   public void addAll(int[] values) {
     addAll(size, values);
   }
 
+  @Override
   public void addAll(int index, IntList other) {
-    Check.on(indexOutOfBounds(), index, "index").is(indexInclusiveOf(), this);
+    checkIndexInclusive(index);
     Check.notNull(other);
     int minIncrease = getMinIncrease(buf.length, size, other.size());
     if (minIncrease > 0) {
@@ -138,8 +175,9 @@ public final class IntArrayList implements IntList {
     size += other.size();
   }
 
+  @Override
   public void addAll(int index, int[] values) {
-    Check.on(indexOutOfBounds(), index, "index").is(indexInclusiveOf(), this);
+    checkIndexInclusive(index);
     Check.notNull(values);
     int minIncrease = getMinIncrease(buf.length, size, values.length);
     if (minIncrease > 0) {
@@ -153,14 +191,70 @@ public final class IntArrayList implements IntList {
   }
 
   @Override
-  public int get(int index) {
-    Check.that(index, "index").is(indexOf(), this);
-    return buf[index];
+  public void removeByIndex(int index) {
+    checkIndex(index);
+    if (index != size - 1) {
+      System.arraycopy(buf, index + 1, buf, index, size - 1 - index);
+    }
+    --size;
   }
 
-  public void set(int index, int value) {
-    Check.that(index, "index").is(indexOf(), this);
-    buf[index] = value;
+  @Override
+  public boolean removeByValue(int value) {
+    OptionalInt index = indexOf(value);
+    if (index.isPresent()) {
+      removeByIndex(index.getAsInt());
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public boolean removeAll(IntList list) {
+    Check.notNull(list);
+    return removeAll(list.toGenericList());
+  }
+
+  @Override
+  public boolean removeAll(int... values) {
+    Check.notNull(values);
+    return removeAll(ArrayMethods.asList(values));
+  }
+
+  @Override
+  public boolean removeAll(Collection<?> c) {
+    Check.notNull(c);
+    Set<Integer> set = new LinkedHashSet<>(toGenericList());
+    if (set.removeAll(c)) {
+      buf = asPrimitiveArray(set.toArray(Integer[]::new));
+      size = set.size();
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public boolean retainAll(IntList list) {
+    Check.notNull(list);
+    return retainAll(list.toGenericList());
+  }
+
+  @Override
+  public boolean retainAll(int... values) {
+    Check.notNull(values);
+    return retainAll(ArrayMethods.asList(values));
+  }
+
+  @Override
+  public boolean retainAll(Collection<?> c) {
+    Check.notNull(c);
+    Set<Integer> set = new LinkedHashSet<>(toGenericList());
+    if (set.retainAll(c)) {
+      buf = asPrimitiveArray(set.toArray(Integer[]::new));
+      size = set.size();
+      return true;
+    }
+    return false;
   }
 
   @Override
@@ -168,25 +262,13 @@ public final class IntArrayList implements IntList {
     return size;
   }
 
-  /**
-   * Returns the current capacity of the list (the length of the backing array).
-   *
-   * @return The current capacity of the list
-   */
+  @Override
   public int capacity() {
     return buf.length;
   }
 
-  /**
-   * Allows you to manually resize the backing array. The new capacity is allowed to
-   * be less than the current capacity, and even less than the size of the list. So
-   * this method can also be used as a truncate or a trim-to-size method.
-   *
-   * @param newCapacity The desired length of the backing array (may be less than
-   *     its current length)
-   * @see #trim(int)
-   */
-  public void resize(int newCapacity) {
+  @Override
+  public void setCapacity(int newCapacity) {
     if (newCapacity != buf.length) {
       Check.that(newCapacity, "new capacity")
           .is(gte(), 0)
@@ -203,22 +285,12 @@ public final class IntArrayList implements IntList {
     return size == 0;
   }
 
-  /**
-   * Clears the list. Note that this leaves the backing array untouched. It just
-   * resets the internal cursor.
-   */
+  @Override
   public void clear() {
     size = 0;
   }
 
-  /**
-   * Trims the list to the specified size. Note that this leaves the backing array
-   * untouched. It just moves the internal cursor backwards.
-   *
-   * @param newSize The desired new size of the list (must be less than or equal
-   *     to its current size)
-   * @see #resize(int)
-   */
+  @Override
   public void trim(int newSize) {
     size = Check.that(newSize, "new size").is(gte(), 0).is(lte(), size).ok();
   }
@@ -230,8 +302,9 @@ public final class IntArrayList implements IntList {
     return b;
   }
 
+  @Override
   public List<Integer> toGenericList() {
-    return ArrayMethods.asList(buf);
+    return List.of(asWrapperArray(buf));
   }
 
   @Override
@@ -258,14 +331,14 @@ public final class IntArrayList implements IntList {
       return true;
     } else if (obj == null) {
       return false;
-    } else if (obj instanceof UnmodifiableIntList uil) {
-      return size == uil.size() && Arrays.equals(buf, 0, size, uil.buf, 0, size);
-    } else if (obj instanceof IntArrayList ial) {
-      return size == ial.size && Arrays.equals(buf, 0, size, ial.buf, 0, size);
+    } else if (obj instanceof IntList il) {
+      return size == il.size()
+          && Arrays.equals(buf, 0, size, getBuffer(il), 0, size);
     }
     return false;
   }
 
+  @Override
   public int hashCode() {
     int hash = buf[0];
     for (int i = 1; i < size; ++i) {
@@ -274,6 +347,7 @@ public final class IntArrayList implements IntList {
     return hash;
   }
 
+  @Override
   public String toString() {
     return '[' + implodeInts(buf, size) + ']';
   }
@@ -293,6 +367,14 @@ public final class IntArrayList implements IntList {
         : other instanceof UnmodifiableIntList uil
             ? uil.buf
             : fail(AssertionError::new);
+  }
+
+  private void checkIndex(int index) {
+    Check.on(indexOutOfBounds(), index, "index").is(CommonChecks.indexOf(), this);
+  }
+
+  private void checkIndexInclusive(int index) {
+    Check.on(indexOutOfBounds(), index, "index").is(indexInclusiveOf(), this);
   }
 
 }

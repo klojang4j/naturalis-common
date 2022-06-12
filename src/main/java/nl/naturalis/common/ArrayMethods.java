@@ -2,14 +2,10 @@ package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.collection.ArrayCloakList;
-import nl.naturalis.common.x.Constants;
 import nl.naturalis.common.x.invoke.InvokeUtils;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.IntStream;
@@ -143,7 +139,7 @@ public final class ArrayMethods {
    * @return Whether the array contains the value
    */
   public static boolean isElementOf(int value, int[] array) {
-    return indexOf(array, value) != -1;
+    return indexOf(array, value).isPresent();
   }
 
   /**
@@ -162,7 +158,7 @@ public final class ArrayMethods {
    * Returns {@code true} if the specified array contains the specified value, {@code
    * false} otherwise.
    *
-   * @param value The value to search for (may be null)
+   * @param value The value to search for
    * @param array The array to search
    * @return Whether the array contains the value
    */
@@ -181,7 +177,119 @@ public final class ArrayMethods {
    */
   @SafeVarargs
   public static <T> boolean isPresent(T ref, T... array) {
-    return find(array, ref) != -1;
+    return findReference(array, ref) != -1;
+  }
+
+  /**
+   * Returns an {@link OptionalInt} containing the array index of the first
+   * occurrence of the specified value within the specified array. Returns an empty
+   * {@link OptionalInt} if the array does not contain the value.
+   *
+   * @param array The array to search
+   * @param value The value to search for
+   * @return An {@link OptionalInt} containing the array index of the value
+   */
+  public static OptionalInt indexOf(int[] array, int value) {
+    Check.notNull(array, "array");
+    for (int x = 0; x < array.length; ++x) {
+      if (array[x] == value) {
+        return OptionalInt.of(x);
+      }
+    }
+    return OptionalInt.empty();
+  }
+
+  /**
+   * Returns an {@link OptionalInt} containing the array index of the last occurrence
+   * of the specified value within the specified array. Returns an empty {@link
+   * OptionalInt} if the array does not contain the value.
+   *
+   * @param array The array to search
+   * @param value The value to search for
+   * @return An {@link OptionalInt} containing the array index of the value
+   */
+  public static OptionalInt lastIndexOf(int[] array, int value) {
+    Check.notNull(array, "array");
+    for (int x = array.length - 1; x >= 0; --x) {
+      if (array[x] == value) {
+        return OptionalInt.of(x);
+      }
+    }
+    return OptionalInt.empty();
+  }
+
+  /**
+   * Returns the array index of the first occurrence of the specified value within
+   * the specified array. Returns -1 if the array does not contain the value.
+   * Searching for null is allowed.
+   *
+   * @param <T> The type of the elements within the array
+   * @param array The array to search
+   * @param value The value to search for (may be null)
+   * @return The array index of the value
+   */
+  public static <T> int indexOf(T[] array, T value) {
+    Check.notNull(array, "array");
+    if (value == null) {
+      for (int x = 0; x < array.length; ++x) {
+        if (array[x] == null) {
+          return x;
+        }
+      }
+    } else {
+      for (int x = 0; x < array.length; ++x) {
+        if (value.equals(array[x])) {
+          return x;
+        }
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * Returns the array index of the last occurrence of the specified value within the
+   * specified array. Returns -1 if the array does not contain the value. Searching
+   * for null is allowed.
+   *
+   * @param <T> The type of the elements within the array
+   * @param array The array to search
+   * @param value The value to search for (may be null)
+   * @return The array index of the value
+   */
+  public static <T> int lastIndexOf(T[] array, T value) {
+    Check.notNull(array, "array");
+    if (value == null) {
+      for (int x = array.length - 1; x >= 0; --x) {
+        if (array[x] == null) {
+          return x;
+        }
+      }
+    } else {
+      for (int x = array.length - 1; x >= 0; --x) {
+        if (value.equals(array[x])) {
+          return x;
+        }
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * Returns the array index of the first occurrence of the specified object within
+   * the specified array, using reference comparisons to identify the object. Returns
+   * -1 if the array does not contain the specified reference. Searching for null is
+   * <i>not</i> allowed.
+   *
+   * @param array The array to search
+   * @param reference The reference to search for (must not be null)
+   * @return The array index of the reference
+   */
+  public static int findReference(Object[] array, Object reference) {
+    Check.notNull(array, "array");
+    Check.notNull(reference, "reference");
+    return streamIndices(array).filter(i -> array[i] == reference)
+        .findFirst()
+        .orElse(-1);
   }
 
   /**
@@ -535,58 +643,6 @@ public final class ArrayMethods {
   }
 
   /**
-   * Returns the array index of the first occurrence of the specified value within
-   * the specified array. Returns -1 if the array does not contain the value.
-   *
-   * @param array The array to search
-   * @param value The value to search for
-   * @return The array index of the value
-   */
-  public static int indexOf(int[] array, int value) {
-    Check.notNull(array, "array");
-    return IntStream.range(0, array.length)
-        .filter(i -> array[i] == value)
-        .findFirst()
-        .orElse(-1);
-  }
-
-  /**
-   * Returns the array index of the first occurrence of the specified value within
-   * the specified array, using {@link Objects#deepEquals(Object, Object)
-   * Objects.deepEquals} to identify the occurrence. Returns -1 if the array does not
-   * contain the value. Searching for null is allowed.
-   *
-   * @param <T> The type of the elements within the array
-   * @param array The array to search
-   * @param value The value to search for (may be null)
-   * @return The array index of the value
-   */
-  public static <T> int indexOf(T[] array, T value) {
-    Check.notNull(array, "array");
-    return streamIndices(array).filter(i -> Objects.deepEquals(array[i], value))
-        .findFirst()
-        .orElse(-1);
-  }
-
-  /**
-   * Returns the array index of the first occurrence of the specified value within
-   * the specified array, using reference comparison to identify the occurrence.
-   * Returns -1 if the array does not contain the value. Searching for null is
-   * <i>not</i> allowed.
-   *
-   * @param array The array to search
-   * @param reference The reference to search for (must not be null)
-   * @return The array index of the reference
-   */
-  public static int find(Object[] array, Object reference) {
-    Check.notNull(array, "array");
-    Check.notNull(reference, "reference");
-    return streamIndices(array).filter(i -> array[i] == reference)
-        .findFirst()
-        .orElse(-1);
-  }
-
-  /**
    * Returns an {@code IntStream} of the indices of the specified array.
    *
    * @param <T> The component type of the array
@@ -710,19 +766,19 @@ public final class ArrayMethods {
   }
 
   /**
-   * Converts the specified {@code int} array into an unmodifiable {@code
-   * List<Integer>}.
+   * Converts a primitive {@code int} array into a
+   * <code>{@code List&lt;Integer&gt;}</code>.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Integer> asList(int[] values) {
-    return List.of(asWrapperArray(values));
+    return Arrays.asList(asWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code float} array into an unmodifiable {@code
-   * List<Float>}.
+   * Converts a primitive {@code float} array into a
+   * <code>{@code List&lt;Float&gt;}</code>.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
@@ -732,8 +788,8 @@ public final class ArrayMethods {
   }
 
   /**
-   * Converts the specified {@code double} array into an unmodifiable {@code
-   * List<Double>}.
+   * Converts a primitive {@code double} array into a
+   * <code>{@code List&lt;Double&gt;}</code>.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
@@ -743,8 +799,8 @@ public final class ArrayMethods {
   }
 
   /**
-   * Converts the specified {@code long} array into an unmodifiable {@code
-   * List<Long>}.
+   * Converts a primitive {@code long} array into a
+   * <code>{@code List&lt;Long&gt;}</code>.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
@@ -754,8 +810,8 @@ public final class ArrayMethods {
   }
 
   /**
-   * Converts the specified {@code short} array into an unmodifiable {@code
-   * List<Short>}.
+   * Converts a primitive {@code short} array into a
+   * <code>{@code List&lt;Short&gt;}</code>.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
@@ -765,8 +821,8 @@ public final class ArrayMethods {
   }
 
   /**
-   * Converts the specified {@code byte} array into an unmodifiable {@code
-   * List<Byte>}.
+   * Converts a primitive {@code byte} array into a
+   * <code>{@code List&lt;Byte&gt;}</code>.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
@@ -776,8 +832,8 @@ public final class ArrayMethods {
   }
 
   /**
-   * Converts the specified{@code char} array into an unmodifiable {@code
-   * List<Character>}.
+   * Converts a primitive {@code char} array into a
+   * <code>{@code List&lt;Character&gt;}</code>.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
@@ -787,8 +843,8 @@ public final class ArrayMethods {
   }
 
   /**
-   * Converts the specified {@code char} array into an unmodifiable {@code
-   * List<Character>}.
+   * Converts a primitive {@code boolean} array into a
+   * <code>{@code List&lt;Boolean&gt;}</code>.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order

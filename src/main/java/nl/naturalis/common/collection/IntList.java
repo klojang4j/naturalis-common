@@ -6,27 +6,23 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
-import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.function.ThrowingIntConsumer;
 
 /**
  * Yes, we have one, too, while we await Valhalla. Note that {@code IntList} is a
- * sealed interface with two implementations: one ({@link IntArrayList}) allows
- * mutations on the list and the other is immutable. Since these are the only
- * available flavours, it doesn't make much sense to exactly mirror the entire {@link
- * List} interface. {@code IntList} only contains methods that do not mutate the
- * list. If you want a modifiable {@code IntList}, you mist explicitly declare its
- * type to be {@code IntArrayList}. (NB the immutable variant is not visible to
- * clients. Instances of it can only be obtained through the static factory methods
- * on the {@code IntList} interface.)
+ * sealed interface with just two implementations: one ({@link IntArrayList}) allows
+ * mutations on the list and the other is immutable. Instance of the immutable
+ * variant can only be obtained through the static factory methods on this
+ * interface.
  */
 public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
 
-  static final IntList EMPTY = new UnmodifiableIntList(new int[0]);
+  IntList EMPTY = new UnmodifiableIntList(new int[0]);
 
   /**
    * Returns an unmodifiable {@code IntList} containing the integers in the specified
@@ -39,9 +35,6 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
     Check.notNull(c);
     if (c.isEmpty()) {
       return EMPTY;
-    } else if (c instanceof List<Integer> l) {
-      int[] buf = asPrimitiveArray(l.toArray(Integer[]::new));
-      return new UnmodifiableIntList(buf);
     }
     int[] buf = new int[c.size()];
     int idx = 0;
@@ -157,49 +150,14 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
    *     IntList}
    * @return An unmodifiable {@code IntList} containing the specified values
    */
-  static IntList ofElements(int[] values) {
+  static IntList of(int[] values) {
     Check.notNull(values, "array");
+    if (values.length == 0) {
+      return EMPTY;
+    }
     int[] buf = Arrays.copyOf(values, values.length);
     return new UnmodifiableIntList(buf);
   }
-
-  //  /**
-  //   * Appends the specified integer to this list.
-  //   *
-  //   * @param value The integer to append
-  //   */
-  //  void add(int value);
-  //
-  //  /**
-  //   * Inserts the specified integer into this list.
-  //   *
-  //   * @param index The index at which to insert the integer
-  //   * @param value The integer to insert
-  //   */
-  //  void add(int index, int value);
-  //
-  //  /**
-  //   * Appends the integers in the specified list to this list.
-  //   *
-  //   * @param other An {@code IntList} containing the integers to append
-  //   */
-  //  void addAll(IntList other);
-  //
-  //  /**
-  //   * Appends the specified integers to this list.
-  //   *
-  //   * @param values The integers to append
-  //   */
-  //  void addAll(int[] values);
-  //
-  //  /**
-  //   * Insert the integers in the specified list into this list.
-  //   *
-  //   * @param index The index at which to insert the integers
-  //   * @param other The integers to insert
-  //   */
-  //  void addAll(int index, IntList other);
-  //
 
   /**
    * Returns the value at the specified index.
@@ -209,13 +167,137 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
    */
   int get(int index);
 
-  //  /**
-  //   * Sets the value at the specified index.
-  //   *
-  //   * @param index The list index
-  //   * @param value The value
-  //   */
-  //  void set(int index, int value);
+  /**
+   * Sets the value at the specified index.
+   *
+   * @param index The list index
+   * @param value The value
+   */
+  void set(int index, int value);
+
+  /**
+   * Returns an {@link OptionalInt} containing the array index of the first
+   * occurrence of the specified value, or an empty {@link OptionalInt} if the value
+   * is not present.
+   *
+   * @param value The value to search for
+   * @return An {@link OptionalInt} containing the array index of the first
+   *     occurrence of the specified value, or an empty {@link OptionalInt} if the
+   *     value is not present
+   */
+  OptionalInt indexOf(int value);
+
+  OptionalInt lastIndexOf(int value);
+
+  /**
+   * Appends the specified integer.
+   *
+   * @param value The integer to append
+   */
+  void add(int value);
+
+  /**
+   * Inserts the specified integer.
+   *
+   * @param index The index at which to insert the integer
+   * @param value The integer to insert
+   */
+  void add(int index, int value);
+
+  /**
+   * Appends the integers in the specified list to this list.
+   *
+   * @param other An {@code IntList} containing the integers to append
+   */
+  void addAll(IntList other);
+
+  /**
+   * Appends the specified integer array.
+   *
+   * @param values The integers to append
+   */
+  void addAll(int[] values);
+
+  /**
+   * Inserts the integers in the specified list into this list.
+   *
+   * @param index The index at which to insert the integers
+   * @param other The integers to insert
+   */
+  void addAll(int index, IntList other);
+
+  /**
+   * Inserts the specified integer array.
+   *
+   * @param index The index at which to insert the integers
+   * @param values The integers to insert
+   */
+  void addAll(int index, int[] values);
+
+  /**
+   * Removes the element at the specified index
+   *
+   * @param index The index of the element to remove
+   */
+  void removeByIndex(int index);
+
+  /**
+   * Removes the first occurrence of the specified value in this {@code IntList}.
+   *
+   * @param value The value to remove
+   * @return {@code true} if the value was present; {@code false} otherwise
+   */
+  boolean removeByValue(int value);
+
+  /**
+   * Removes the values contained in the specified {@code IntList} from this {@code
+   * IntList}
+   *
+   * @param list The {@code IntList} containing the values to remove
+   * @return Whether the list changed
+   */
+  boolean removeAll(IntList list);
+
+  /**
+   * Removes the specified values from this {@code IntList}.
+   *
+   * @param values The values to remove
+   * @return Whether the list changed
+   */
+  boolean removeAll(int... values);
+
+  /**
+   * Removes the values contained in the specified {@code Collection} from this
+   * {@code IntList}.
+   *
+   * @param c The {@Collection IntList} containing the values to remove
+   * @return Whether the list changed
+   */
+  boolean removeAll(Collection<?> c);
+
+  /**
+   * Removes all values that are not in the specified {@code IntList}.
+   *
+   * @param list An {@code IntList} containing the values to keep
+   * @return Whether the list changed
+   */
+  boolean retainAll(IntList list);
+
+  /**
+   * Removes all values that are not in the specified {@code IntList}.
+   *
+   * @param values An array containing the values to keep
+   * @return Whether the list changed
+   */
+  boolean retainAll(int... values);
+
+  /**
+   * Removes all values that are not in the specified {@code IntList}.
+   *
+   * @param c A {@code Collection} containing the values to keep
+   * @return Whether the list changed
+   */
+  boolean retainAll(Collection<?> c);
 
   /**
    * Returns the current size of the list.
@@ -231,19 +313,46 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
    */
   boolean isEmpty();
 
-  //  /**
-  //   * Clears the list.
-  //   */
-  //  void clear();
+  /**
+   * Clears the list. Note that this leaves the backing array untouched. It just
+   * resets the internal cursor.
+   */
+  void clear();
 
   /**
-   * Converts this {@code IntList} to a regular {@link List} of {@code Integer}.
+   * Trims the list to the specified size. Note that this leaves the backing array
+   * untouched. It just moves the internal cursor backwards.
    *
-   * @return A regular {@link List} of {@code Integer}
+   * @param newSize The desired new size of the list (must be less than or equal
+   *     to its current size)
+   * @see #setCapacity(int)
    */
-  default List<Integer> toGenericList() {
-    return ArrayMethods.asList(toArray());
-  }
+  void trim(int newSize);
+
+  /**
+   * Returns the current capacity of the list (the length of the backing array).
+   *
+   * @return The current capacity of the list
+   */
+  int capacity();
+
+  /**
+   * Resizes the backing array. The new capacity is allowed to be less than the
+   * current capacity, and even less than the size of the list. So this method can
+   * also be used as a truncate or a trim-to-size method.
+   *
+   * @param newCapacity The desired length of the backing array
+   * @see #trim(int)
+   */
+  void setCapacity(int newCapacity);
+
+  /**
+   * Converts this {@code IntList} to an unmodifiable
+   * <code>{@code List&lt;Integer&gt;}</code>.
+   *
+   * @return An unmodifiable <code>{@code List&lt;Integer&gt;}</code>
+   */
+  List<Integer> toGenericList();
 
   /**
    * Converts the list to an {@code int[]} array

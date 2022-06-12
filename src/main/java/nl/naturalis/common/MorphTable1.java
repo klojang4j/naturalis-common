@@ -1,8 +1,6 @@
 package nl.naturalis.common;
 
-import nl.naturalis.common.check.Check;
-
-import static nl.naturalis.common.ArrayMethods.find;
+import static nl.naturalis.common.ArrayMethods.findReference;
 import static nl.naturalis.common.ClassMethods.box;
 import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.Morph.stringify;
@@ -43,7 +41,7 @@ class MorphTable1 {
     if (isA(myType, Number.class)) {
       return new NumberConverter(toType).convert((Number) obj);
     } else if (myType.isEnum()) {
-      return find(myType.getEnumConstants(), obj);
+      return findReference(myType.getEnumConstants(), obj);
     } else if (myType == Character.class) {
       return charToNumber(obj, box(toType));
     }
@@ -68,4 +66,5 @@ class MorphTable1 {
     }
     throw new TypeConversionException(obj, targetType);
   }
+
 }

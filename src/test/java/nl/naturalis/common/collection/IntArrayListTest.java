@@ -6,10 +6,11 @@ import static nl.naturalis.common.util.ResizeMethod.PERCENTAGE;
 import static org.junit.Assert.*;
 
 import nl.naturalis.common.util.MutableInt;
-import nl.naturalis.common.util.ResizeMethod;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.OptionalInt;
+import java.util.Set;
 
 public class IntArrayListTest {
 
@@ -221,7 +222,7 @@ public class IntArrayListTest {
   @Test
   public void trimAndResize00() {
     IntArrayList list = new IntArrayList();
-    list.addAll(IntList.ofElements(ints(0, 1, 2, 3, 4, 5)));
+    list.addAll(IntList.of(ints(0, 1, 2, 3, 4, 5)));
     assertEquals(6, list.size());
     list.trim(2);
     assertEquals(2, list.size());
@@ -229,19 +230,105 @@ public class IntArrayListTest {
     assertEquals(IntList.of(0, 1, 7), list);
     list.add(0, 3);
     assertEquals(IntList.of(3, 0, 1, 7), list);
-    list.resize(100);
+    list.setCapacity(100);
     assertEquals(IntList.of(3, 0, 1, 7), list);
-    list.resize(2);
+    list.setCapacity(2);
     assertEquals(2, list.capacity());
     assertEquals(IntList.of(3, 0), list);
-    list.resize(0);
+    list.setCapacity(0);
     assertEquals(0, list.capacity());
     assertEquals(IntList.of(), list);
-    list.addAll(IntList.ofElements(ints(0, 1, 2, 3, 4, 5)));
+    list.addAll(IntList.of(ints(0, 1, 2, 3, 4, 5)));
     assertEquals(IntList.of(0, 1, 2, 3, 4, 5), list);
     int cap = list.capacity();
-    list.resize(list.capacity());
+    list.setCapacity(list.capacity());
     assertEquals(cap, list.capacity());
+  }
+
+  @Test
+  public void removeByIndex00() {
+    IntList list = new IntArrayList();
+    list.addAll(ints(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+    list.removeByIndex(9);
+    assertEquals(IntList.of(0, 1, 2, 3, 4, 5, 6, 7, 8), list);
+    list.removeByIndex(8);
+    assertEquals(IntList.of(0, 1, 2, 3, 4, 5, 6, 7), list);
+    list.removeByIndex(0);
+    assertEquals(IntList.of(1, 2, 3, 4, 5, 6, 7), list);
+    list.removeByIndex(2);
+    assertEquals(IntList.of(1, 2, 4, 5, 6, 7), list);
+    list.removeByIndex(4);
+    assertEquals(IntList.of(1, 2, 4, 5, 7), list);
+    list.removeByIndex(1);
+    assertEquals(IntList.of(1, 4, 5, 7), list);
+    list.removeByIndex(0);
+    assertEquals(IntList.of(4, 5, 7), list);
+    list.removeByIndex(0);
+    assertEquals(IntList.of(5, 7), list);
+    list.removeByIndex(0);
+    assertEquals(IntList.of(7), list);
+    list.removeByIndex(0);
+    assertEquals(IntList.of(), list);
+  }
+
+  @Test
+  public void removeByValue00() {
+    IntList list = new IntArrayList();
+    list.addAll(ints(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+    assertTrue(list.removeByValue(1));
+    assertTrue(list.removeByValue(9));
+    assertTrue(list.removeByValue(0));
+    assertTrue(list.removeByValue(5));
+    assertTrue(list.removeByValue(8));
+    assertFalse(list.removeByValue(8));
+    assertTrue(list.removeByValue(7));
+    assertTrue(list.removeByValue(2));
+    assertEquals(IntList.of(3, 4, 6), list);
+  }
+
+  @Test
+  public void indexOf00() {
+    IntList list = new IntArrayList(IntList.of(0, 0, 2, 2, 4, 4));
+    assertEquals(OptionalInt.of(0), list.indexOf(0));
+    assertEquals(OptionalInt.of(1), list.lastIndexOf(0));
+    assertEquals(OptionalInt.of(2), list.indexOf(2));
+    assertEquals(OptionalInt.of(3), list.lastIndexOf(2));
+    assertEquals(OptionalInt.of(4), list.indexOf(4));
+    assertEquals(OptionalInt.of(5), list.lastIndexOf(4));
+    assertEquals(OptionalInt.empty(), list.indexOf(1000));
+    assertEquals(OptionalInt.empty(), list.lastIndexOf(1000));
+  }
+
+  @Test
+  public void removeAll00() {
+    IntList list = new IntArrayList();
+    list.addAll(ints(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+    assertTrue(list.removeAll(1, 3, 5, 7, 9, 1000));
+    assertEquals(IntList.of(0, 2, 4, 6, 8), list);
+    assertFalse(list.removeAll(1000, 1001, 1002));
+    assertEquals(IntList.of(0, 2, 4, 6, 8), list);
+    assertTrue(list.removeAll(IntList.of(0)));
+    assertEquals(IntList.of(2, 4, 6, 8), list);
+    assertFalse(list.removeAll(IntList.of()));
+    assertFalse(list.removeAll(List.of()));
+    assertTrue(list.removeAll(List.of(2, 6, 1000)));
+    assertEquals(IntList.of(4, 8), list);
+    assertTrue(list.removeAll(Set.of(4, 8, 1000)));
+    assertEquals(IntList.of(), list);
+  }
+
+  @Test
+  public void retainAll00() {
+    IntList list = new IntArrayList();
+    list.addAll(ints(0, 1, 2, 3, 4, 5, 6, 7, 8, 9));
+    assertTrue(list.retainAll(1, 3, 5, 7, 9, 1000));
+    assertEquals(IntList.of(1, 3, 5, 7, 9), list);
+    assertFalse(list.retainAll(1, 3, 5, 7, 9, 1000, 2000));
+    assertTrue(list.retainAll(IntList.of(1, 9)));
+    assertEquals(IntList.of(1, 9), list);
+    assertFalse(list.retainAll(Set.of(1, 9)));
+    assertTrue(list.retainAll(Set.of(1000, 2000)));
+    assertTrue(list.isEmpty());
   }
 
 }
