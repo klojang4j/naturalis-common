@@ -21,20 +21,20 @@ public final class MathMethods {
 
   /**
    * Converts to arguments to {@code double}, then divides the first argument by the
-   * second, and then applies {@link Math#ceil(double) Math.ceil}.
+   * second, and then applies {@link Math#ceil(double) Math.ceil}. Since this is a
+   * very low-level operation, no argument-checking is performed.
    *
    * @param value The integer to divide
    * @param divideBy The integer to divide it by
    * @return The result of the division, rounded to the next integer
-   * @implNote Since this is a very low-level operation, no argument-checking is
-   *     done
    */
   public static int divUp(int value, int divideBy) {
     return (int) Math.ceil((double) value / (double) divideBy);
   }
 
   /**
-   * Equivalent to {@code value / dividedBy}. Usable a method reference.
+   * Equivalent to {@code value / dividedBy}. Usable a method reference. Since this
+   * is a very low-level operation, no argument-checking is performed.
    *
    * @param value The integer to divide
    * @param divideBy The integer to divide it by
@@ -48,14 +48,13 @@ public final class MathMethods {
 
   /**
    * Divides the specified value by the specified denominator, rounding up if the
-   * remainder is exactly {@code 0.5} (given double-precision calculation).
+   * remainder is exactly {@code 0.5} (given double-precision calculation). Since
+   * this is a very low-level operation, no argument-checking is performed.
    *
    * @param value The integer to divide
    * @param divideBy The integer to divide it by
    * @return The result of the division, rounded up if the remainder is exactly
    *     {@code 0.5}
-   * @implNote Since this is a very low-level operation, no argument-checking is
-   *     done
    */
   public static int divHalfUp(int value, int divideBy) {
     return (int) Math.floor(0.5D + (double) value / (double) divideBy);
@@ -63,14 +62,13 @@ public final class MathMethods {
 
   /**
    * Divides the specified value by the specified denominator, rounding down if the
-   * remainder is exactly {@code 0.5} (given double-precision calculation).
+   * remainder is exactly {@code 0.5} (given double-precision calculation). Since
+   * this is a very low-level operation, no argument-checking is performed.
    *
    * @param value The integer to divide
    * @param divideBy The integer to divide it by
    * @return The result of the division, rounded down if the remainder is exactly
    *     {@code 0.5}
-   * @implNote Since this is a very low-level operation, no argument-checking is
-   *     done
    */
   public static int divHalfDown(int value, int divideBy) {
     return (int) Math.ceil(-0.5D + (double) value / (double) divideBy);
@@ -501,10 +499,8 @@ public final class MathMethods {
       int numPages,
       int rowCount,
       int colCount) {
-    return (T[][][]) Array.newInstance(values.getClass().getComponentType(),
-        numPages,
-        rowCount,
-        colCount);
+    return (T[][][]) Array.newInstance(values.getClass()
+        .getComponentType(), numPages, rowCount, colCount);
   }
 
   private static void checkItemRowCol(int itemIndex, int rowCount, int colCount) {

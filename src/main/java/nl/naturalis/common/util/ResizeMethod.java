@@ -45,7 +45,7 @@ import static nl.naturalis.common.check.CommonChecks.*;
  *    if(minIncrease > 0) {
  *      increaseCapacity(minIncrease);
  *    }
- *    // append collection ...
+ *    // append the collection ...
  *  }
  *
  *  private void increaseCapacity(int minIncrease) {
@@ -88,20 +88,23 @@ public enum ResizeMethod {
   private static final int MAX_INT = Integer.MAX_VALUE;
 
   /**
-   * Calculates the <i>extra</i> capacity required to fit {@code dataSize} elements
-   * into a backing array with the specified capacity, filled already with {@code
-   * size} elements. If the result is zero or negative, no resizing is necessary. The
-   * return value of this method can be used as the {@code minIncrease} argument for
-   * the {@link #resize(int, double, int) resize} method.
+   * Calculates the <i>extra</i> capacity required to add {@code itemCount} items to
+   * an internally managed buffer, cache or backing array. If the result is zero or
+   * negative, no resizing is necessary. The return value of this method can be used
+   * as the {@code minIncrease} argument for the {@link #resize(int, double, int)
+   * resize} method.
    *
-   * @param curCapacity The current capacity of the backing array
-   * @param curSize The current size of the backing array
-   * @param dataSize The size of the data that needs to be inserted into the
-   *     backing array.
-   * @return The required extra capacity
+   * @param curCapacity The current length or size of the buffer, cache or
+   *     backing array
+   * @param curSize The number of items already in the buffer, cache or backing
+   *     array
+   * @param itemCount The number of items to be added to the buffer, cache or
+   *     backing array
+   * @return If positive, the <i>extra capacity</i> required for the new items, else
+   *     the remaining capacity once the new items have been added
    */
-  public static int getMinIncrease(int curCapacity, int curSize, int dataSize) {
-    long required = (long) curSize + dataSize;
+  public static int getMinIncrease(int curCapacity, int curSize, int itemCount) {
+    long required = (long) curSize + itemCount;
     if (required > (long) MAX_INT) {
       throw new BufferOverflowException();
     }
@@ -110,14 +113,15 @@ public enum ResizeMethod {
 
   /**
    * Calculates the new capacity for a buffer, cache or backing array using this
-   * {@code ResizeMethod}. The capacity will increase at least by 1.
+   * {@code ResizeMethod} and the specified resize amount (c&#46;q&#46; factor
+   * c&#46;q&#46; percentage) The capacity will increase by at least 1.
    *
    * @param curCapacity The current capacity
-   * @param amount The amount by which to increase the current capacity. This
-   *     would typically be the value of a (final) instance variable in the class
-   *     managing the backing array, and it would typically be passed in through the
-   *     constructor, along with the resize method.
-   * @return The value to used for the new capacity.
+   * @param amount The amount, factor or percentage by which to increase the
+   *     current capacity. This would typically be the value of a (final) instance
+   *     variable in the class managing the backing array, and it would typically be
+   *     passed in through the constructor, along with the resize method.
+   * @return The value to be used as the length for the new backing array
    */
   public int resize(int curCapacity, double amount) {
     return resize(curCapacity, amount, 1);
@@ -141,8 +145,8 @@ public enum ResizeMethod {
    * @param minIncrease The minimum amount by which to increase current capacity.
    *     This would typically be the size of an incoming block of data that
    *     necessitated the resizing of the backing array. The provided value will
-   *     override {@link #MAX_INCREASE} and must be at least 1.
-   * @return The value to used for the new capacity
+   *     override {@link #MAX_INCREASE} and it must be at least 1.
+   * @return The value to be used as the length for the new backing array
    */
   public int resize(int curCapacity, double amount, int minIncrease) {
     Check.that(curCapacity, "current capacity").is(gte(), 0);

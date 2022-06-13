@@ -8,10 +8,11 @@ import static nl.naturalis.common.check.MsgUtil.getCustomMessage;
 import static nl.naturalis.common.check.MsgUtil.getPrefabMessage;
 
 /**
- * Facilitates the validation of {@code int} values. See the {@link nl.naturalis.common.check
- * package description} for a detailed explanation.
+ * Facilitates the validation of {@code int} values. See the {@link
+ * nl.naturalis.common.check package description} for a detailed explanation.
  *
- * @param <E> The type of the exception throw if the value does not pass the test
+ * @param <E> The type of the exception throw if the value does not pass the
+ *     test
  */
 public final class IntCheck<E extends Exception> {
 
@@ -35,8 +36,8 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Passes the argument to the specified {@code Function} and returns the value it computes. To be
-   * used as the last call after a chain of checks. For example:
+   * Passes the argument to the specified {@code Function} and returns the value it
+   * computes. To be used as the last call after a chain of checks. For example:
    *
    * <blockquote>
    *
@@ -46,18 +47,21 @@ public final class IntCheck<E extends Exception> {
    *
    * </blockquote>
    *
-   * @param <P> The type of the returned value
-   * @param transformer A {@code Function} that transforms the argument into some other value
+   * @param <R> The type of the returned value
+   * @param <X> The type of the exception thrown by the transformer function
+   * @param transformer A {@code Function} that transforms the argument into some
+   *     other value
    * @return The value computed by the {@code Function}
-   * @throws F The exception potentially thrown by the {@code Function}
+   * @throws X The exception thrown if the transformer function fails
    */
-  public <P, F extends Throwable> P ok(ThrowingIntFunction<P, F> transformer) throws F {
+  public <R, X extends Throwable> R ok(ThrowingIntFunction<R, X> transformer)
+      throws X {
     return transformer.apply(arg);
   }
 
   /**
-   * Passes the argument to the specified {@code Consumer}. To be used as the last call after a
-   * chain of checks.
+   * Passes the argument to the specified {@code Consumer}. To be used as the last
+   * call after a chain of checks.
    *
    * @param consumer The {@code Consumer}
    */
@@ -66,9 +70,10 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates the argument using the specified test. While not strictly required, this method is
-   * meant to be used with a check from the {@link CommonChecks} class so that an informative error
-   * message is generated if the argument turns out to be invalid.
+   * Validates the argument using the specified test. While not strictly required,
+   * this method is meant to be used with a check from the {@link CommonChecks} class
+   * so that an informative error message is generated if the argument turns out to
+   * be invalid.
    *
    * @param test The test
    * @return This instance
@@ -82,9 +87,10 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates the argument using the specified test. While not strictly required, this method is
-   * meant to be used with a check from the {@link CommonChecks} class so that an informative error
-   * message is generated if the argument turns out to be invalid.
+   * Validates the argument using the specified test. While not strictly required,
+   * this method is meant to be used with a check from the {@link CommonChecks} class
+   * so that an informative error message is generated if the argument turns out to
+   * be invalid.
    *
    * @param test The test
    * @return This instance
@@ -98,21 +104,23 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates the argument using the specified test. Allows you to provide a custom error message.
-   * See the {@link nl.naturalis.common.check package description} for how to specify a custom error
-   * message.
+   * Validates the argument using the specified test. Allows you to provide a custom
+   * error message. See the {@link nl.naturalis.common.check package description} for
+   * how to specify a custom error message.
    *
    * @param test The test
    * @param message The message pattern
-   * @param msgArgs The message arguments. If you expect the argument to fail the test very
-   *     often, and performance is of the utmost importance, specify <i>exactly</i> one message
-   *     argument: {@code '\0'} (the NULL character). This will cause the message not to be parsed,
-   *     and simply be passed as-is to the exception. (Of course, the message cannot contain any
-   *     message arguments then.)
+   * @param msgArgs The message arguments. If you expect the argument to fail the
+   *     test very often, and performance is of the utmost importance, specify
+   *     <i>exactly</i> one message argument: {@code '\0'} (the NULL character).
+   *     This will cause the message not to be parsed, and simply be passed as-is to
+   *     the exception. (Of course, the message cannot contain any message arguments
+   *     then.)
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public IntCheck<E> is(IntPredicate test, String message, Object... msgArgs) throws E {
+  public IntCheck<E> is(IntPredicate test, String message, Object... msgArgs)
+      throws E {
     if (test.test(arg)) {
       return this;
     }
@@ -120,21 +128,23 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates the argument using the specified test. Allows you to provide a custom error message.
-   * See the {@link nl.naturalis.common.check package description} for how to specify a custom error
-   * message.
+   * Validates the argument using the specified test. Allows you to provide a custom
+   * error message. See the {@link nl.naturalis.common.check package description} for
+   * how to specify a custom error message.
    *
    * @param test The test
    * @param message The message pattern
-   * @param msgArgs The message arguments. If you expect the argument to fail the test very
-   *     often, and performance is of the utmost importance, specify <i>exactly</i> one message
-   *     argument: {@code '\0'} (the NULL character). This will cause the message not to be parsed,
-   *     and simply be passed as-is to the exception. (Of course, the message cannot contain any
-   *     message arguments then.)
+   * @param msgArgs The message arguments. If you expect the argument to fail the
+   *     test very often, and performance is of the utmost importance, specify
+   *     <i>exactly</i> one message argument: {@code '\0'} (the NULL character).
+   *     This will cause the message not to be parsed, and simply be passed as-is to
+   *     the exception. (Of course, the message cannot contain any message arguments
+   *     then.)
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public IntCheck<E> isNot(IntPredicate test, String message, Object... msgArgs) throws E {
+  public IntCheck<E> isNot(IntPredicate test, String message, Object... msgArgs)
+      throws E {
     // WATCH OUT. Don't call: is(test.negate(), message, msgArgs)
     // If the test came from the CommonChecks class it must preserve its identity
     // in order to be looked up in the CommonChecks.NAMES map
@@ -145,17 +155,19 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates the argument using the specified test. Allows you to throw a different type of
-   * exception for this particular test.
+   * Validates the argument using the specified test. Allows you to throw a different
+   * type of exception for this particular test.
    *
    * @param test The test
-   * @param exception The supplier of the exception to be thrown if the argument is invalid The
-   *     {@code Supplier} of the exception to be thrown if the argument is invalid
+   * @param exception The supplier of the exception to be thrown if the argument
+   *     is invalid The {@code Supplier} of the exception to be thrown if the
+   *     argument is invalid
    * @param <X> The type of the exception
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <X extends Exception> IntCheck<E> is(IntPredicate test, Supplier<X> exception) throws X {
+  public <X extends Exception> IntCheck<E> is(IntPredicate test,
+      Supplier<X> exception) throws X {
     if (test.test(arg)) {
       return this;
     }
@@ -163,25 +175,27 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates the argument using the specified test. Allows you to throw a different type of
-   * exception for this particular test.
+   * Validates the argument using the specified test. Allows you to throw a different
+   * type of exception for this particular test.
    *
    * @param test The test
-   * @param exception The supplier of the exception to be thrown if the argument is invalid The
-   *     {@code Supplier} of the exception to be thrown if the argument is invalid
+   * @param exception The supplier of the exception to be thrown if the argument
+   *     is invalid The {@code Supplier} of the exception to be thrown if the
+   *     argument is invalid
    * @param <X> The type of the exception
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <X extends Exception> IntCheck<E> isNot(IntPredicate test, Supplier<X> exception)
-      throws X {
+  public <X extends Exception> IntCheck<E> isNot(IntPredicate test,
+      Supplier<X> exception) throws X {
     return is(test.negate(), exception);
   }
 
   /**
-   * Validates the argument using the specified test. While not strictly required, this method is
-   * meant to be used in combination with a check from the {@link CommonChecks} class so that an
-   * informative error message is generated if the argument turns out to be invalid.
+   * Validates the argument using the specified test. While not strictly required,
+   * this method is meant to be used in combination with a check from the {@link
+   * CommonChecks} class so that an informative error message is generated if the
+   * argument turns out to be invalid.
    *
    * @param test The test
    * @param object The object of the {@code Relation}
@@ -196,9 +210,10 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates the argument using the specified test. While not strictly required, this method is
-   * meant to be used in combination with a check from the {@link CommonChecks} class so that an
-   * informative error message is generated if the argument turns out to be invalid.
+   * Validates the argument using the specified test. While not strictly required,
+   * this method is meant to be used in combination with a check from the {@link
+   * CommonChecks} class so that an informative error message is generated if the
+   * argument turns out to be invalid.
    *
    * @param test The test
    * @param object The object of the {@code Relation}
@@ -213,22 +228,26 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates the argument using the specified test. Allows you to provide a custom error message.
-   * See the {@link nl.naturalis.common.check package description} for how to specify a custom error
-   * message.
+   * Validates the argument using the specified test. Allows you to provide a custom
+   * error message. See the {@link nl.naturalis.common.check package description} for
+   * how to specify a custom error message.
    *
    * @param test The test
    * @param object The object of the {@code IntObjRelation}
    * @param message The message pattern
-   * @param msgArgs The message arguments. If you expect the argument to fail the test very
-   *     often, and performance is of the utmost importance, specify <i>exactly</i> one message
-   *     argument: {@code '\0'} (the NULL character). This will cause the message not to be parsed,
-   *     and simply be passed as-is to the exception. (Of course, the message cannot contain any
-   *     message arguments then.)
+   * @param msgArgs The message arguments. If you expect the argument to fail the
+   *     test very often, and performance is of the utmost importance, specify
+   *     <i>exactly</i> one message argument: {@code '\0'} (the NULL character).
+   *     This will cause the message not to be parsed, and simply be passed as-is to
+   *     the exception. (Of course, the message cannot contain any message arguments
+   *     then.)
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public IntCheck<E> is(IntRelation test, int object, String message, Object... msgArgs) throws E {
+  public IntCheck<E> is(IntRelation test,
+      int object,
+      String message,
+      Object... msgArgs) throws E {
     if (test.exists(arg, object)) {
       return this;
     }
@@ -236,23 +255,26 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates the argument using the specified test. Allows you to provide a custom error message.
-   * See the {@link nl.naturalis.common.check package description} for how to specify a custom error
-   * message.
+   * Validates the argument using the specified test. Allows you to provide a custom
+   * error message. See the {@link nl.naturalis.common.check package description} for
+   * how to specify a custom error message.
    *
    * @param test The test
    * @param object The object of the {@code IntObjRelation}
    * @param message The message pattern
-   * @param msgArgs The message arguments. If you expect the argument to fail the test very
-   *     often, and performance is of the utmost importance, specify <i>exactly</i> one message
-   *     argument: {@code '\0'} (the NULL character). This will cause the message not to be parsed,
-   *     and simply be passed as-is to the exception. (Of course, the message cannot contain any
-   *     message arguments then.)
+   * @param msgArgs The message arguments. If you expect the argument to fail the
+   *     test very often, and performance is of the utmost importance, specify
+   *     <i>exactly</i> one message argument: {@code '\0'} (the NULL character).
+   *     This will cause the message not to be parsed, and simply be passed as-is to
+   *     the exception. (Of course, the message cannot contain any message arguments
+   *     then.)
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public IntCheck<E> isNot(IntRelation test, int object, String message, Object... msgArgs)
-      throws E {
+  public IntCheck<E> isNot(IntRelation test,
+      int object,
+      String message,
+      Object... msgArgs) throws E {
     if (!test.exists(arg, object)) {
       return this;
     }
@@ -260,17 +282,18 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates the argument using the specified test. Allows you to throw a different type of
-   * exception for this particular test.
+   * Validates the argument using the specified test. Allows you to throw a different
+   * type of exception for this particular test.
    *
    * @param test The test
    * @param object The object of the {@code IntObjRelation}
-   * @param exception The supplier of the exception to be thrown if the argument is invalid The
-   *     {@code Supplier} of the exception to be thrown if the argument is invalid
+   * @param exception The supplier of the exception to be thrown if the argument
+   *     is invalid The {@code Supplier} of the exception to be thrown if the
+   *     argument is invalid
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <P, X extends Exception> IntCheck<E> is(IntRelation test,
+  public <X extends Exception> IntCheck<E> is(IntRelation test,
       int object,
       Supplier<X> exception) throws X {
     if (test.exists(arg, object)) {
@@ -280,26 +303,29 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates the argument using the specified test. Allows you to throw a different type of
-   * exception for this particular test.
+   * Validates the argument using the specified test. Allows you to throw a different
+   * type of exception for this particular test.
    *
    * @param test The test
    * @param object The object of the {@code IntObjRelation}
-   * @param exception The supplier of the exception to be thrown if the argument is invalid The
-   *     {@code Supplier} of the exception to be thrown if the argument is invalid
+   * @param exception The supplier of the exception to be thrown if the argument
+   *     is invalid The {@code Supplier} of the exception to be thrown if the
+   *     argument is invalid
+   * @param <X> The type of exception thrown if the argument fails the test
    * @return This instance
    * @throws X If the argument is invalid
    */
-  public <P, X extends Exception> IntCheck<E> isNot(IntRelation test,
+  public <X extends Exception> IntCheck<E> isNot(IntRelation test,
       int object,
       Supplier<X> exception) throws X {
     return is(test.negate(), object, exception);
   }
 
   /**
-   * Validates the argument using the specified test. While not strictly required, this method is
-   * meant to be used in combination with a check from the {@link CommonChecks} class so that an
-   * informative error message is generated if the argument turns out to be invalid.
+   * Validates the argument using the specified test. While not strictly required,
+   * this method is meant to be used in combination with a check from the {@link
+   * CommonChecks} class so that an informative error message is generated if the
+   * argument turns out to be invalid.
    *
    * @param test The test
    * @param object The object of the {@code IntObjRelation}
@@ -315,9 +341,10 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates the argument using the specified test. While not strictly required, this method is
-   * meant to be used in combination with a check from the {@link CommonChecks} class so that an
-   * informative error message is generated if the argument turns out to be invalid.
+   * Validates the argument using the specified test. While not strictly required,
+   * this method is meant to be used in combination with a check from the {@link
+   * CommonChecks} class so that an informative error message is generated if the
+   * argument turns out to be invalid.
    *
    * @param test The test
    * @param object The object of the {@code IntObjRelation}
@@ -332,9 +359,9 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates the argument using the specified test. Allows you to provide a custom error message.
-   * See the {@link nl.naturalis.common.check package description} for how to specify a custom error
-   * message.
+   * Validates the argument using the specified test. Allows you to provide a custom
+   * error message. See the {@link nl.naturalis.common.check package description} for
+   * how to specify a custom error message.
    *
    * @param test The test
    * @param object The object of the {@code IntObjRelation}
@@ -343,8 +370,10 @@ public final class IntCheck<E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <O> IntCheck<E> is(IntObjRelation<O> test, O object, String message, Object... msgArgs)
-      throws E {
+  public <O> IntCheck<E> is(IntObjRelation<O> test,
+      O object,
+      String message,
+      Object... msgArgs) throws E {
     if (test.exists(arg, object)) {
       return this;
     }
@@ -352,9 +381,9 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates the argument using the specified test. Allows you to provide a custom error message.
-   * See the {@link nl.naturalis.common.check package description} for how to specify a custom error
-   * message.
+   * Validates the argument using the specified test. Allows you to provide a custom
+   * error message. See the {@link nl.naturalis.common.check package description} for
+   * how to specify a custom error message.
    *
    * @param test The test
    * @param object The object of the {@code IntObjRelation}
@@ -363,8 +392,10 @@ public final class IntCheck<E extends Exception> {
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <O> IntCheck<E> isNot(IntObjRelation<O> test, O object, String message, Object... msgArgs)
-      throws E {
+  public <O> IntCheck<E> isNot(IntObjRelation<O> test,
+      O object,
+      String message,
+      Object... msgArgs) throws E {
     if (!test.exists(arg, object)) {
       return this;
     }
@@ -372,13 +403,14 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates the argument using the specified test. Allows you to throw a different type of
-   * exception for this particular test.
+   * Validates the argument using the specified test. Allows you to throw a different
+   * type of exception for this particular test.
    *
    * @param test The test
    * @param object The object of the {@code IntObjRelation}
-   * @param exception The supplier of the exception to be thrown if the argument is invalid The
-   *     {@code Supplier} of the exception to be thrown if the argument is invalid
+   * @param exception The supplier of the exception to be thrown if the argument
+   *     is invalid The {@code Supplier} of the exception to be thrown if the
+   *     argument is invalid
    * @return This instance
    * @throws X If the argument is invalid
    */
@@ -392,13 +424,14 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates the argument using the specified test. Allows you to throw a different type of
-   * exception for this particular test.
+   * Validates the argument using the specified test. Allows you to throw a different
+   * type of exception for this particular test.
    *
    * @param test The test
    * @param object The object of the {@code IntObjRelation}
-   * @param exception The supplier of the exception to be thrown if the argument is invalid The
-   *     {@code Supplier} of the exception to be thrown if the argument is invalid
+   * @param exception The supplier of the exception to be thrown if the argument
+   *     is invalid The {@code Supplier} of the exception to be thrown if the
+   *     argument is invalid
    * @return This instance
    * @throws X If the argument is invalid
    */
@@ -409,13 +442,14 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. While not strictly required, this method is meant to be used in combination
-   * with a check from the {@link CommonChecks} class <i>and</i> a "getter" from the {@link
-   * CommonGetters} class so that an informative error message is generated if the argument turns
-   * out to be invalid.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. While not strictly required, this method is meant to
+   * be used in combination with a check from the {@link CommonChecks} class
+   * <i>and</i> a "getter" from the {@link CommonGetters} class so that an
+   * informative error message is generated if the argument turns out to be invalid.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
    * @param <P> The type of the extracted value
    * @return This instance
@@ -426,64 +460,77 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. While not strictly required, this method is meant to be used in combination
-   * with a check from the {@link CommonChecks} class <i>and</i> a "getter" from the {@link
-   * CommonGetters} class so that an informative error message is generated if the argument turns
-   * out to be invalid.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. While not strictly required, this method is meant to
+   * be used in combination with a check from the {@link CommonChecks} class
+   * <i>and</i> a "getter" from the {@link CommonGetters} class so that an
+   * informative error message is generated if the argument turns out to be invalid.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
    * @param <P> The type of the extracted value
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <P> IntCheck<E> notHas(IntFunction<P> property, Predicate<P> test) throws E {
+  public <P> IntCheck<E> notHas(IntFunction<P> property, Predicate<P> test)
+      throws E {
     return IntHasObj.get(this).notHas(property, test);
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. While not strictly required, this method is meant to be used in combination
-   * with a check from the {@link CommonChecks} class so that an informative error message is
-   * generated if the argument turns out to be invalid.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. While not strictly required, this method is meant to
+   * be used in combination with a check from the {@link CommonChecks} class so that
+   * an informative error message is generated if the argument turns out to be
+   * invalid.
    *
-   * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified
-   *     name will be used and constructed using {@code argName + "." + name}.
+   * @param property A function that extracts the value to be tested from the
+   *     argument
+   * @param name The name of the property being tested. In error messages the
+   *     fully-qualified name will be used and constructed using {@code argName + "."
+   *     + name}.
    * @param test The test
    * @param <P> The type of the extracted value
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <P> IntCheck<E> has(IntFunction<P> property, String name, Predicate<P> test) throws E {
+  public <P> IntCheck<E> has(IntFunction<P> property, String name, Predicate<P> test)
+      throws E {
     return IntHasObj.get(this).has(property, name, test);
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. While not strictly required, this method is meant to be used in combination
-   * with a check from the {@link CommonChecks} class so that an informative error message is
-   * generated if the argument turns out to be invalid.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. While not strictly required, this method is meant to
+   * be used in combination with a check from the {@link CommonChecks} class so that
+   * an informative error message is generated if the argument turns out to be
+   * invalid.
    *
-   * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified
-   *     name will be used and constructed using {@code argName + "." + name}.
+   * @param property A function that extracts the value to be tested from the
+   *     argument
+   * @param name The name of the property being tested. In error messages the
+   *     fully-qualified name will be used and constructed using {@code argName + "."
+   *     + name}.
    * @param test The test
    * @param <P> The type of the extracted value
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public <P> IntCheck<E> notHas(IntFunction<P> property, String name, Predicate<P> test) throws E {
+  public <P> IntCheck<E> notHas(IntFunction<P> property,
+      String name,
+      Predicate<P> test) throws E {
     return IntHasObj.get(this).notHas(property, name, test);
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. Allows you to provide a custom error message. See the {@link
-   * nl.naturalis.common.check package description} for how to specify a custom error message.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. Allows you to provide a custom error message. See the
+   * {@link nl.naturalis.common.check package description} for how to specify a
+   * custom error message.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
    * @param message The message pattern
    * @param msgArgs The message arguments
@@ -499,11 +546,13 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. Allows you to provide a custom error message. See the {@link
-   * nl.naturalis.common.check package description} for how to specify a custom error message.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. Allows you to provide a custom error message. See the
+   * {@link nl.naturalis.common.check package description} for how to specify a
+   * custom error message.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
    * @param message The message pattern
    * @param msgArgs The message arguments
@@ -519,12 +568,15 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. Allows you to throw a different type of exception for this particular test.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. Allows you to throw a different type of exception for
+   * this particular test.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
-   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param exception The supplier of the exception to be thrown if the argument
+   *     is invalid
    * @param <P> The type of the extracted value
    * @param <X> The type of the exception thrown if the argument is invalid
    * @return This instance
@@ -537,12 +589,15 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. Allows you to throw a different type of exception for this particular test.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. Allows you to throw a different type of exception for
+   * this particular test.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
-   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param exception The supplier of the exception to be thrown if the argument
+   *     is invalid
    * @param <P> The type of the extracted value
    * @param <X> The type of the exception thrown if the argument is invalid
    * @return This instance
@@ -555,13 +610,14 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. While not strictly required, this method is meant to be used in combination
-   * with a check from the {@link CommonChecks} class <i>and</i> a "getter" from the {@link
-   * CommonGetters} class so that an informative error message is generated if the argument turns
-   * out to be invalid.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. While not strictly required, this method is meant to
+   * be used in combination with a check from the {@link CommonChecks} class
+   * <i>and</i> a "getter" from the {@link CommonGetters} class so that an
+   * informative error message is generated if the argument turns out to be invalid.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
    * @return This instance
    * @throws E If the argument is invalid
@@ -571,13 +627,14 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. While not strictly required, this method is meant to be used in combination
-   * with a check from the {@link CommonChecks} class <i>and</i> a "getter" from the {@link
-   * CommonGetters} class so that an informative error message is generated if the argument turns
-   * out to be invalid.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. While not strictly required, this method is meant to
+   * be used in combination with a check from the {@link CommonChecks} class
+   * <i>and</i> a "getter" from the {@link CommonGetters} class so that an
+   * informative error message is generated if the argument turns out to be invalid.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
    * @return This instance
    * @throws E If the argument is invalid
@@ -587,45 +644,56 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. While not strictly required, this method is meant to be used in combination
-   * with a check from the {@link CommonChecks} class so that an informative error message is
-   * generated if the argument turns out to be invalid.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. While not strictly required, this method is meant to
+   * be used in combination with a check from the {@link CommonChecks} class so that
+   * an informative error message is generated if the argument turns out to be
+   * invalid.
    *
-   * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified
-   *     name will be used and constructed using {@code argName + "." + name}.
+   * @param property A function that extracts the value to be tested from the
+   *     argument
+   * @param name The name of the property being tested. In error messages the
+   *     fully-qualified name will be used and constructed using {@code argName + "."
+   *     + name}.
    * @param test The test
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public IntCheck<E> has(IntUnaryOperator property, String name, IntPredicate test) throws E {
+  public IntCheck<E> has(IntUnaryOperator property, String name, IntPredicate test)
+      throws E {
     return IntHasInt.get(this).has(property, name, test);
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. While not strictly required, this method is meant to be used in combination
-   * with a check from the {@link CommonChecks} class so that an informative error message is
-   * generated if the argument turns out to be invalid.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. While not strictly required, this method is meant to
+   * be used in combination with a check from the {@link CommonChecks} class so that
+   * an informative error message is generated if the argument turns out to be
+   * invalid.
    *
-   * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified
-   *     name will be used and constructed using {@code argName + "." + name}.
+   * @param property A function that extracts the value to be tested from the
+   *     argument
+   * @param name The name of the property being tested. In error messages the
+   *     fully-qualified name will be used and constructed using {@code argName + "."
+   *     + name}.
    * @param test The test
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public IntCheck<E> notHas(IntUnaryOperator property, String name, IntPredicate test) throws E {
+  public IntCheck<E> notHas(IntUnaryOperator property,
+      String name,
+      IntPredicate test) throws E {
     return IntHasInt.get(this).notHas(property, name, test);
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. Allows you to provide a custom error message. See the {@link
-   * nl.naturalis.common.check package description} for how to specify a custom error message.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. Allows you to provide a custom error message. See the
+   * {@link nl.naturalis.common.check package description} for how to specify a
+   * custom error message.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
    * @param message The message pattern
    * @param msgArgs The message arguments
@@ -640,11 +708,13 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. Allows you to provide a custom error message. See the {@link
-   * nl.naturalis.common.check package description} for how to specify a custom error message.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. Allows you to provide a custom error message. See the
+   * {@link nl.naturalis.common.check package description} for how to specify a
+   * custom error message.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
    * @param message The message pattern
    * @param msgArgs The message arguments
@@ -659,12 +729,15 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. Allows you to throw a different type of exception for this particular test.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. Allows you to throw a different type of exception for
+   * this particular test.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
-   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param exception The supplier of the exception to be thrown if the argument
+   *     is invalid
    * @param <X> The type of the exception thrown if the argument is invalid
    * @return This instance
    * @throws X If the argument is invalid
@@ -676,12 +749,15 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. Allows you to throw a different type of exception for this particular test.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. Allows you to throw a different type of exception for
+   * this particular test.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
-   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param exception The supplier of the exception to be thrown if the argument
+   *     is invalid
    * @param <X> The type of the exception thrown if the argument is invalid
    * @return This instance
    * @throws X If the argument is invalid
@@ -693,90 +769,106 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. While not strictly required, this method is meant to be used in combination
-   * with a check from the {@link CommonChecks} class <i>and</i> a "getter" from the {@link
-   * CommonGetters} class so that an informative error message is generated if the argument turns
-   * out to be invalid.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. While not strictly required, this method is meant to
+   * be used in combination with a check from the {@link CommonChecks} class
+   * <i>and</i> a "getter" from the {@link CommonGetters} class so that an
+   * informative error message is generated if the argument turns out to be invalid.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a
-   *     relation)
+   * @param object The value that the argument is tested against (called "the
+   *     object" of a relation)
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public IntCheck<E> has(IntUnaryOperator property, IntRelation test, int object) throws E {
+  public IntCheck<E> has(IntUnaryOperator property, IntRelation test, int object)
+      throws E {
     return IntHasInt.get(this).has(property, test, object);
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. While not strictly required, this method is meant to be used in combination
-   * with a check from the {@link CommonChecks} class <i>and</i> a "getter" from the {@link
-   * CommonGetters} class so that an informative error message is generated if the argument turns
-   * out to be invalid.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. While not strictly required, this method is meant to
+   * be used in combination with a check from the {@link CommonChecks} class
+   * <i>and</i> a "getter" from the {@link CommonGetters} class so that an
+   * informative error message is generated if the argument turns out to be invalid.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a
-   *     relation)
+   * @param object The value that the argument is tested against (called "the
+   *     object" of a relation)
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public IntCheck<E> notHas(IntUnaryOperator property, IntRelation test, int object) throws E {
+  public IntCheck<E> notHas(IntUnaryOperator property, IntRelation test, int object)
+      throws E {
     return IntHasInt.get(this).notHas(property, test, object);
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. While not strictly required, this method is meant to be used in combination
-   * with a check from the {@link CommonChecks} class so that an informative error message is
-   * generated if the argument turns out to be invalid.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. While not strictly required, this method is meant to
+   * be used in combination with a check from the {@link CommonChecks} class so that
+   * an informative error message is generated if the argument turns out to be
+   * invalid.
    *
-   * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified
-   *     name will be used and constructed using {@code argName + "." + name}.
+   * @param property A function that extracts the value to be tested from the
+   *     argument
+   * @param name The name of the property being tested. In error messages the
+   *     fully-qualified name will be used and constructed using {@code argName + "."
+   *     + name}.
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a
-   *     relation)
+   * @param object The value that the argument is tested against (called "the
+   *     object" of a relation)
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public IntCheck<E> has(IntUnaryOperator property, String name, IntRelation test, int object)
-      throws E {
+  public IntCheck<E> has(IntUnaryOperator property,
+      String name,
+      IntRelation test,
+      int object) throws E {
     return IntHasInt.get(this).has(property, name, test, object);
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. While not strictly required, this method is meant to be used in combination
-   * with a check from the {@link CommonChecks} class so that an informative error message is
-   * generated if the argument turns out to be invalid.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. While not strictly required, this method is meant to
+   * be used in combination with a check from the {@link CommonChecks} class so that
+   * an informative error message is generated if the argument turns out to be
+   * invalid.
    *
-   * @param property A function that extracts the value to be tested from the argument
-   * @param name The name of the property being tested. In error messages the fully-qualified
-   *     name will be used and constructed using {@code argName + "." + name}.
+   * @param property A function that extracts the value to be tested from the
+   *     argument
+   * @param name The name of the property being tested. In error messages the
+   *     fully-qualified name will be used and constructed using {@code argName + "."
+   *     + name}.
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a
-   *     relation)
+   * @param object The value that the argument is tested against (called "the
+   *     object" of a relation)
    * @return This instance
    * @throws E If the argument is invalid
    */
-  public IntCheck<E> notHas(IntUnaryOperator property, String name, IntRelation test, int object)
-      throws E {
+  public IntCheck<E> notHas(IntUnaryOperator property,
+      String name,
+      IntRelation test,
+      int object) throws E {
     return IntHasInt.get(this).notHas(property, name, test, object);
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. Allows you to provide a custom error message. See the {@link
-   * nl.naturalis.common.check package description} for how to specify a custom error message.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. Allows you to provide a custom error message. See the
+   * {@link nl.naturalis.common.check package description} for how to specify a
+   * custom error message.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a
-   *     relation)
+   * @param object The value that the argument is tested against (called "the
+   *     object" of a relation)
    * @param message The message pattern
    * @param msgArgs The message arguments
    * @return This instance
@@ -791,14 +883,16 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. Allows you to provide a custom error message. See the {@link
-   * nl.naturalis.common.check package description} for how to specify a custom error message.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. Allows you to provide a custom error message. See the
+   * {@link nl.naturalis.common.check package description} for how to specify a
+   * custom error message.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a
-   *     relation)
+   * @param object The value that the argument is tested against (called "the
+   *     object" of a relation)
    * @param message The message pattern
    * @param msgArgs The message arguments
    * @return This instance
@@ -813,14 +907,17 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. Allows you to throw a different type of exception for this particular test.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. Allows you to throw a different type of exception for
+   * this particular test.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a
-   *     relation)
-   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param object The value that the argument is tested against (called "the
+   *     object" of a relation)
+   * @param exception The supplier of the exception to be thrown if the argument
+   *     is invalid
    * @param <X> The type of the exception thrown if the argument is invalid
    * @return This instance
    * @throws X If the argument is invalid
@@ -833,14 +930,17 @@ public final class IntCheck<E extends Exception> {
   }
 
   /**
-   * Validates a property of the argument, retrieved through the specified function, using the
-   * specified test. Allows you to throw a different type of exception for this particular test.
+   * Validates a property of the argument, retrieved through the specified function,
+   * using the specified test. Allows you to throw a different type of exception for
+   * this particular test.
    *
-   * @param property A function that extracts the value to be tested from the argument
+   * @param property A function that extracts the value to be tested from the
+   *     argument
    * @param test The test
-   * @param object The value that the argument is tested against (called "the object" of a
-   *     relation)
-   * @param exception The supplier of the exception to be thrown if the argument is invalid
+   * @param object The value that the argument is tested against (called "the
+   *     object" of a relation)
+   * @param exception The supplier of the exception to be thrown if the argument
+   *     is invalid
    * @param <X> The type of the exception thrown if the argument is invalid
    * @return This instance
    * @throws X If the argument is invalid

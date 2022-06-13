@@ -46,7 +46,7 @@ public class TypeHashSet extends TypeSet<TypeHashMap<Object>> {
    * Converts the specified {@code Collection} to a {@code SimpleTypeSet}.
    *
    * @param src The {@code Collection} to convert
-   * @Return a {@code SimpleTypeSet}.
+   * @return a {@code SimpleTypeSet}.
    */
   public static TypeHashSet copyOf(Collection<Class<?>> src) {
     return copyOf(src, false, true);

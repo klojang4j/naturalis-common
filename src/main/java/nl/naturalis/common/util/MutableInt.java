@@ -1,7 +1,7 @@
 package nl.naturalis.common.util;
 
 /**
- * The Mutable Integer class.
+ * The ubiquitous mutable-integer class.
  */
 public final class MutableInt {
 
@@ -41,28 +41,25 @@ public final class MutableInt {
   }
 
   /**
-   * Increments the value by 1 and returns the original value. Corresponds to the
-   * {@code ++} postfix operator ({@code i++}).
+   * Corresponds to the {@code ++} postfix operator ({@code i++}).
    *
-   * @return The original value
+   * @return The original value (before incrementation)
    */
   public int pp() {
     return i++;
   }
 
   /**
-   * Increments the value by 1 and returns the new value. Corresponds to the {@code
-   * ++} prefix operator ({@code ++i}).
+   * Corresponds to the {@code ++} prefix operator ({@code ++i}).
    *
-   * @return The incremented value
+   * @return The incremented value (after incrementation)
    */
   public int ppi() {
     return ++i;
   }
 
   /**
-   * Decrements the value by 1 and returns the original value. Corresponds to the
-   * {@code --} postfix operator ({@code i--}).
+   * Corresponds to the {@code --} postfix operator ({@code i--}).
    *
    * @return The original value
    */
@@ -71,10 +68,9 @@ public final class MutableInt {
   }
 
   /**
-   * Decrements the value by 1 and returns the new value. Corresponds to the {@code
-   * --} prefix operator ({@code --i}).
+   * Corresponds to the {@code --} prefix operator ({@code --i}).
    *
-   * @return The incremented value
+   * @return The decremented value
    */
   public int mmi() {
     return --i;
@@ -101,7 +97,7 @@ public final class MutableInt {
   }
 
   /**
-   * Corresponds to the {@code -=} operation.
+   * Corresponds to the {@code -=} (minus-is) operation.
    *
    * @param j The value to subtract
    * @return The new value
@@ -111,7 +107,7 @@ public final class MutableInt {
   }
 
   /**
-   * Corresponds to the {@code -=} operation.
+   * Corresponds to the {@code -=} (minus-is) operation.
    *
    * @param other The value to subtract
    * @return The new value
@@ -277,9 +273,6 @@ public final class MutableInt {
     return i = 0;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public int hashCode() {
     return i;
@@ -301,19 +294,16 @@ public final class MutableInt {
       return false;
     } else if (obj instanceof MutableInt other) {
       return i == other.i;
-    } else if (obj instanceof Integer i) {
-      return i == ((Integer) obj);
-    } else if (obj instanceof Short s) {
-      return s == ((Short) obj);
-    } else if (obj instanceof Byte b) {
-      return b == ((Byte) obj);
+    } else if (obj instanceof Integer x) {
+      return i == x;
+    } else if (obj instanceof Short x) {
+      return i == x;
+    } else if (obj instanceof Byte x) {
+      return i == x;
     }
     return false;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public String toString() {
     return String.valueOf(i);

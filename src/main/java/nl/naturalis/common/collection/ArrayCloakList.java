@@ -92,12 +92,6 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
     this.type = (Class<E>) array.getClass().getComponentType();
   }
 
-  /**
-   * Returns the element at the specified index.
-   *
-   * @param index The array index
-   * @return The element at the specified index
-   */
   @Override
   public E get(int index) {
     checkIndex(index);
@@ -168,11 +162,7 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   }
 
   /**
-   * Repurposed to nullify the element at the specified index. Note, however, that
-   * this method will throw an {@link UnsupportedOperationException} if the type
-   * parameter for this {@code ArrayCloakList} is {@code Integer}, because Java's
-   * auto-boxing/auto-unboxing feature would make the method indistinguishable from
-   * {@code remove(Object o)}.
+   * Repurposed to nullify the element at the specified index.
    */
   @Override
   public E remove(int index) {
@@ -180,11 +170,7 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   }
 
   /**
-   * Repurposed to nullify the first list element that equals specified object. Note,
-   * however, that this method will throw an {@link UnsupportedOperationException} if
-   * the type parameter for this {@code ArrayCloakList} is {@code Integer}, because
-   * Java's auto-boxing/auto-unboxing feature would make the method indistinguishable
-   * from {@code remove(int index)}.
+   * Repurposed to nullify the first list element that equals specified object.
    */
   @Override
   public boolean remove(Object o) {
@@ -249,6 +235,15 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
     return (o == null || isA(o, type)) ? ArrayMethods.lastIndexOf(data, o) : -1;
   }
 
+  /**
+   * Returns the segment identified by the specified {@code from} and {@code to}
+   * index. <i>The returned {@code List} is not backed by the original list.</i>
+   *
+   * @param fromIndex The start index of the segment (inclusive)
+   * @param toIndex The end index of the segment (exclusive)
+   * @return The segment identified by the specified {@code from} and {@code to}
+   *     index
+   */
   @Override
   public List<E> subList(int fromIndex, int toIndex) {
     E[] elems = ArrayMethods.fromTemplate(data, toIndex - fromIndex);

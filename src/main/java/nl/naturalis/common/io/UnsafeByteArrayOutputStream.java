@@ -201,8 +201,8 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
   }
 
   /**
-   * Does nothing. You can keep using the instance after {@close()} has been called
-   * on it.
+   * Does nothing. You can keep using the instance after {@code close()} has been
+   * called on it.
    */
   public void close() {}
 

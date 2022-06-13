@@ -270,7 +270,7 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
    * Removes the values contained in the specified {@code Collection} from this
    * {@code IntList}.
    *
-   * @param c The {@Collection IntList} containing the values to remove
+   * @param c The {@code Collection IntList} containing the values to remove
    * @return Whether the list changed
    */
   boolean removeAll(Collection<?> c);
@@ -347,10 +347,9 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
   void setCapacity(int newCapacity);
 
   /**
-   * Converts this {@code IntList} to an unmodifiable
-   * <code>{@code List&lt;Integer&gt;}</code>.
+   * Converts this {@code IntList} to an unmodifiable {@code List<Integer>}.
    *
-   * @return An unmodifiable <code>{@code List&lt;Integer&gt;}</code>
+   * @return An unmodifiable {@code List&lt;Integer&gt;}
    */
   List<Integer> toGenericList();
 
