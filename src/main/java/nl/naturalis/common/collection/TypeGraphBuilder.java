@@ -137,7 +137,6 @@ public final class TypeGraphBuilder<V> {
    * @return This {@code Builder} instance
    */
   public TypeGraphBuilder<V> addMultiple(V value, Class<?>... types) {
-    Check.notNull(value, "value").is(instanceOf(), valueType);
     Check.that(types, "types").is(deepNotNull());
     Arrays.stream(types).forEach(t -> add(t, value));
     return this;

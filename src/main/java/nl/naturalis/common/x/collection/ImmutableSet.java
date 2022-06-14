@@ -1,4 +1,4 @@
-package nl.naturalis.common.collection;
+package nl.naturalis.common.x.collection;
 
 import nl.naturalis.common.x.Generated;
 
@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 @Generated
-abstract class ImmutableSet<E> implements Set<E> {
+public abstract class ImmutableSet<E> implements Set<E> {
 
   @Override
   public boolean add(E e) {

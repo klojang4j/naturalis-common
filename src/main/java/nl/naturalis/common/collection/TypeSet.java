@@ -1,6 +1,7 @@
 package nl.naturalis.common.collection;
 
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.x.collection.ImmutableSet;
 
 import java.util.*;
 

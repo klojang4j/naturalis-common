@@ -2,6 +2,7 @@ package nl.naturalis.common.collection;
 
 import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.x.collection.ArraySet;
 
 import java.util.*;
 
@@ -121,14 +122,14 @@ public final class LinkedTypeGraph<V> extends AbstractTypeMap<V> {
     }
 
     @SuppressWarnings({"unchecked"})
-    <E> void collectEntries(Set<Entry<Class<?>, E>> set) {
+    <E> void collectEntries(List<Entry<Class<?>, E>> bucket) {
       for (var node : subclasses) {
-        set.add(new SimpleImmutableEntry<>(node.type, (E) node.value));
-        node.collectEntries(set);
+        bucket.add(new SimpleImmutableEntry<>(node.type, (E) node.value));
+        node.collectEntries(bucket);
       }
       for (var node : subinterfaces) {
-        set.add(new SimpleImmutableEntry<>(node.type, (E) node.value));
-        node.collectEntries(set);
+        bucket.add(new SimpleImmutableEntry<>(node.type, (E) node.value));
+        node.collectEntries(bucket);
       }
     }
 
@@ -238,9 +239,6 @@ public final class LinkedTypeGraph<V> extends AbstractTypeMap<V> {
         .isPresent();
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean containsValue(Object value) {
     return values().contains(value);
@@ -254,12 +252,12 @@ public final class LinkedTypeGraph<V> extends AbstractTypeMap<V> {
   @Override
   public Set<Class<?>> keySet() {
     if (keysDF == null) {
-      List<Class<?>> keys = new ArrayList<>();
+      List<Class<?>> keys = new ArrayList<>(size);
       if (root.value != null) { // map contains Object.class
         keys.add(Object.class);
       }
       root.collectTypesDepthFirst(keys);
-      keysDF = Collections.unmodifiableSet(new LinkedHashSet<>(keys));
+      keysDF = ArraySet.copyOf(keys, true);
     }
     return keysDF;
   }
@@ -271,19 +269,16 @@ public final class LinkedTypeGraph<V> extends AbstractTypeMap<V> {
    */
   public Set<Class<?>> breadthFirstKeySet() {
     if (keysBF == null) {
-      List<Class<?>> keys = new ArrayList<>();
+      List<Class<?>> keys = new ArrayList<>(size);
       if (root.value != null) { // map contains Object.class
         keys.add(Object.class);
       }
       root.collectTypesBreadthFirst(keys);
-      keysBF = Collections.unmodifiableSet(new LinkedHashSet<>(keys));
+      keysBF = ArraySet.copyOf(keys, true);
     }
     return keysBF;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   @SuppressWarnings({"unchecked"})
   public Collection<V> values() {
@@ -298,34 +293,25 @@ public final class LinkedTypeGraph<V> extends AbstractTypeMap<V> {
     return values;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   @SuppressWarnings({"unchecked"})
   public Set<Entry<Class<?>, V>> entrySet() {
     if (entries == null) {
-      Set<Entry<Class<?>, V>> set = new HashSet<>(1 + size() * 4 / 3);
+      List<Entry<Class<?>, V>> list = new ArrayList<>(size);
       if (root.value != null) {
-        set.add(new SimpleImmutableEntry<>(Object.class, (V) root.value));
+        list.add(new SimpleImmutableEntry<>(Object.class, (V) root.value));
       }
-      root.collectEntries(set);
-      entries = Set.copyOf(set);
+      root.collectEntries(list);
+      entries = ArraySet.copyOf(list, true);
     }
     return entries;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public int size() {
     return size;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean isEmpty() {
     return size != 0;

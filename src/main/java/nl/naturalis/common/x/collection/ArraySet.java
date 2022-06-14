@@ -1,46 +1,64 @@
-package nl.naturalis.common.collection;
+package nl.naturalis.common.x.collection;
 
 import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.collection.DuplicateKeyException;
 import nl.naturalis.common.x.invoke.InvokeUtils;
 
 import java.util.*;
 
 import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
-import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.CommonChecks.deepNotNull;
 import static nl.naturalis.common.check.CommonChecks.lt;
 
 public final class ArraySet<E> extends ImmutableSet<E> {
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private static final ArraySet EMPTY = new ArraySet(EMPTY_OBJECT_ARRAY);
 
-  public static <F> ArraySet<F> of(F[] elements) {
-    return Check.that(elements).is(deepNotNull()).ok(ArraySet::new);
+  @SuppressWarnings({"unchecked"})
+  private static <E> ArraySet<E> empty() {
+    return (ArraySet<E>) EMPTY;
   }
 
-  public static <F> ArraySet<F> of(boolean verify, F[] elements) {
-    if (Check.notNull(elements, "array").ok().length == 0) {
-      return EMPTY;
+  public static <E> ArraySet<E> of(E[] values, boolean internal) {
+    if (internal) {
+      return values.length == 0 ? empty() : new ArraySet<>(values);
     }
-    if (verify && new HashSet<>(Arrays.asList(elements)).size() != elements.length) {
-      return fail("Array must not contain duplicate values");
+    Check.that(values, "array").is(deepNotNull());
+    if (new HashSet<>(Arrays.asList(values)).size() != values.length) {
+      throw new DuplicateKeyException();
     }
-    return new ArraySet<>(elements);
+    return values.length == 0 ? empty() : new ArraySet<>(values);
   }
 
-  public static <F> ArraySet<F> copyOf(Set<F> c) {
-    return Check.that(c).is(deepNotNull()).ok(ArraySet::new);
+  public static <E> ArraySet<E> copyOf(List<E> list, boolean internal) {
+    if (internal) {
+      return list.isEmpty() ? empty() : new ArraySet<>(list);
+    }
+    Check.that(list, "list").is(deepNotNull());
+    if (new HashSet<>(list).size() != list.size()) {
+      throw new DuplicateKeyException();
+    }
+    return list.isEmpty() ? empty() : new ArraySet<>(list);
+  }
+
+  public static <E> ArraySet<E> copyOf(Set<E> set, boolean internal) {
+    if (internal) {
+      return set instanceof ArraySet<E> arraySet
+          ? arraySet
+          : set.isEmpty() ? empty() : new ArraySet<>(set);
+    }
+    Check.that(set, "set").is(deepNotNull());
+    return set instanceof ArraySet<E> arraySet
+        ? arraySet
+        : set.isEmpty() ? empty() : new ArraySet<>(set);
   }
 
   private final Object[] elems;
 
-  private ArraySet(Collection<? extends E> c) {
-    if (c.isEmpty()) {
-      elems = EMPTY_OBJECT_ARRAY;
-    } else {
-      elems = c.toArray();
-    }
+  private ArraySet(Collection<E> c) {
+    elems = c.toArray();
   }
 
   private ArraySet(E[] elems) {
@@ -78,6 +96,7 @@ public final class ArraySet<E> extends ImmutableSet<E> {
       }
 
       @Override
+      @SuppressWarnings({"unchecked"})
       public E next() {
         Check.that(i).is(lt(), size(), NoSuchElementException::new);
         return (E) elems[i++];
@@ -87,7 +106,7 @@ public final class ArraySet<E> extends ImmutableSet<E> {
 
   @Override
   public Object[] toArray() {
-    if (isEmpty()) {
+    if (this == EMPTY) {
       return EMPTY_OBJECT_ARRAY;
     }
     Object[] objs = new Object[elems.length];
@@ -97,8 +116,8 @@ public final class ArraySet<E> extends ImmutableSet<E> {
 
   @Override
   public <T> T[] toArray(T[] a) {
-    int sz = elems.length;
     Check.notNull(a);
+    int sz = elems.length;
     if (a.length < sz) {
       a = InvokeUtils.newArray(a.getClass(), sz);
     }

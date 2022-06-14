@@ -17,22 +17,7 @@ import static nl.naturalis.common.check.CommonChecks.asObj;
 public class ClassMethods {
 
   // primitive-to-wrapper
-  private static final Map<Class<?>, Class<?>> P2W = Map.of(double.class,
-      Double.class,
-      float.class,
-      Float.class,
-      long.class,
-      Long.class,
-      int.class,
-      Integer.class,
-      char.class,
-      Character.class,
-      short.class,
-      Short.class,
-      byte.class,
-      Byte.class,
-      boolean.class,
-      Boolean.class);
+  private static final Map<Class<?>, Class<?>> P2W = Map.of(double.class, Double.class, float.class, Float.class, long.class, Long.class, int.class, Integer.class, char.class, Character.class, short.class, Short.class, byte.class, Byte.class, boolean.class, Boolean.class);
 
   // wrapper-to-primitive
   private static final Map<Class<?>, Class<?>> W2P = swapAndFreeze(P2W);
@@ -41,8 +26,8 @@ public class ClassMethods {
   }
 
   /**
-   * Performs a brute-force cast to {@code <R>} of the specified object. Mainly meant to be used as
-   * a method reference. The argument is allowed to be {@code null}.
+   * Performs a brute-force cast to {@code <R>} of the specified object. Mainly meant
+   * to be used as a method reference. The argument is allowed to be {@code null}.
    *
    * @param obj The object whose type to cast
    * @param <T> The type of the object
@@ -55,10 +40,11 @@ public class ClassMethods {
   }
 
   /**
-   * Tests whether the 1st argument is an instance of the specified class or interface. Equivalent
-   * to <code>superOrInterface.isInstance(instance)</code>. Since this method is overloaded with
-   * {@code Class} as the type of the first parameter, you cannot and should not use this method to
-   * test whether a {@code Class} object itself is an instance of something (even though it
+   * Tests whether the 1st argument is an instance of the specified class or
+   * interface. Equivalent to <code>superOrInterface.isInstance(instance)</code>.
+   * Since this method is overloaded with {@code Class} as the type of the first
+   * parameter, you cannot and should not use this method to test whether a {@code
+   * Class} object itself is an instance of something (even though it
    * <i>is</i>, for example, an instance of {@link java.io.Serializable}).
    *
    * @param instance The object to test
@@ -75,8 +61,8 @@ public class ClassMethods {
   }
 
   /**
-   * Tests whether the first class extends or implements the second class. In case you keep
-   * forgetting what "assignable from" even means. Equivalent to <code>
+   * Tests whether the first class extends or implements the second class. In case
+   * you keep forgetting what "assignable from" even means. Equivalent to <code>
    * superOrInterface.isAssignableFrom(classToTest)</code>.
    *
    * @param clazz The class to test
@@ -90,8 +76,9 @@ public class ClassMethods {
   }
 
   /**
-   * Returns whether the specified class is one of the primitive number classes. Note that this does
-   * not include {@code char.class}, just like {@link Character} does not extend {@link Number}.
+   * Returns whether the specified class is one of the primitive number classes. Note
+   * that this does not include {@code char.class}, just like {@link Character} does
+   * not extend {@link Number}.
    *
    * @param clazz The class to test
    * @return Whether the specified class is one of the primitive number classes
@@ -102,12 +89,12 @@ public class ClassMethods {
   }
 
   /**
-   * Returns whether the specified class is a {@link #isPrimitiveNumber primitive number} or extends
-   * {@link Number} (including {@code Number} itself).
+   * Returns whether the specified class is a {@link #isPrimitiveNumber primitive
+   * number} or extends {@link Number} (including {@code Number} itself).
    *
    * @param clazz The class to test
-   * @return Whether the specified class is a {@link #isPrimitiveNumber primitive number} or extends
-   *     {@code Number}
+   * @return Whether the specified class is a {@link #isPrimitiveNumber primitive
+   *     number} or extends {@code Number}
    */
   public static boolean isNumerical(Class<?> clazz) {
     Check.notNull(clazz);
@@ -117,9 +104,9 @@ public class ClassMethods {
   }
 
   /**
-   * Returns whether the specified object is a primitive array or a {@code Class} object
-   * representing a primitive array. Defers to {@link #isPrimitiveArray(Class)} if the specified
-   * object is a {@code Class} object.
+   * Returns whether the specified object is a primitive array or a {@code Class}
+   * object representing a primitive array. Defers to {@link
+   * #isPrimitiveArray(Class)} if the specified object is a {@code Class} object.
    *
    * @param obj The object to test
    * @return Whether it is a primitive array class
@@ -143,9 +130,10 @@ public class ClassMethods {
   }
 
   /**
-   * Returns whether the specified object is a primitive number array or a {@code Class} object
-   * representing a primitive number array. Defers to {@link #isPrimitiveNumberArray(Class)} if the
-   * specified object is a {@code Class} object.
+   * Returns whether the specified object is a primitive number array or a {@code
+   * Class} object representing a primitive number array. Defers to {@link
+   * #isPrimitiveNumberArray(Class)} if the specified object is a {@code Class}
+   * object.
    *
    * @param obj The object to test
    * @return Whether it is a primitive array class
@@ -173,12 +161,13 @@ public class ClassMethods {
   }
 
   /**
-   * Returns whether the specified object is an array of a {@link #isNumerical numerical type} or a
-   * {@code Class} object representing an array of a numerical type.
+   * Returns whether the specified object is an array of a {@link #isNumerical
+   * numerical type} or a {@code Class} object representing an array of a numerical
+   * type.
    *
    * @param obj The object to test
-   * @return Whether it is an array of a {@code #isNumerical numerical type} or a {@code Class}
-   *     object representing an array of a numerical type
+   * @return Whether it is an array of a {@code #isNumerical numerical type} or a
+   *     {@code Class} object representing an array of a numerical type
    */
   public static boolean isNumericalArray(Object obj) {
     Check.notNull(obj);
@@ -189,8 +178,8 @@ public class ClassMethods {
   }
 
   /**
-   * Returns whether the specified class represents an array of a {@link #isNumerical numerical
-   * type}.
+   * Returns whether the specified class represents an array of a {@link #isNumerical
+   * numerical type}.
    *
    * @param clazz The class to test
    * @return whether it represents an array of a numerical type
@@ -198,8 +187,9 @@ public class ClassMethods {
   public static boolean isNumericalArray(Class<?> clazz) {
     Check.notNull(clazz);
     Class<?> c;
-    return clazz.isArray() && (Number.class.isAssignableFrom(c = clazz.getComponentType())
-                                   || (c.isPrimitive() && c != boolean.class && c != char.class));
+    return clazz.isArray()
+        && (Number.class.isAssignableFrom(c = clazz.getComponentType())
+                || (c.isPrimitive() && c != boolean.class && c != char.class));
   }
 
   /**
@@ -213,30 +203,33 @@ public class ClassMethods {
   }
 
   /**
-   * Returns whether instances of the first class will be auto-unboxed into instances of the second
-   * class. This method does not check whether the first class actually is a wrapper class and the
-   * second a primitive class. If either is not true, the method will return {@code false}.
+   * Returns whether instances of the first class will be auto-unboxed into instances
+   * of the second class. This method does not check whether the first class actually
+   * is a wrapper class and the second a primitive class. If either is not true, the
+   * method will return {@code false}.
    *
    * @param classToTest The class to test
    * @param primitiveClass Supposedly a primitively class
-   * @return Whether instances of the first class will be auto-unboxed into instances of the second
-   *     class
+   * @return Whether instances of the first class will be auto-unboxed into instances
+   *     of the second class
    */
-  public static boolean isAutoUnboxedAs(Class<?> classToTest, Class<?> primitiveClass) {
+  public static boolean isAutoUnboxedAs(Class<?> classToTest,
+      Class<?> primitiveClass) {
     Check.notNull(classToTest);
     Check.notNull(primitiveClass);
     return P2W.get(primitiveClass) == classToTest;
   }
 
   /**
-   * Returns whether instances of the first class will be auto-unboxed into instances of the second
-   * class. This method does not check whether the first class actually is a wrapper class and the
-   * second a primitive class. If either is not true, the method will return {@code false}.
+   * Returns whether instances of the first class will be auto-unboxed into instances
+   * of the second class. This method does not check whether the first class actually
+   * is a wrapper class and the second a primitive class. If either is not true, the
+   * method will return {@code false}.
    *
    * @param classToTest The class to test
    * @param wrapperClass Supposedly a wrapper class
-   * @return Whether instances of the first class will be auto-unboxed into instances of the second
-   *     class
+   * @return Whether instances of the first class will be auto-unboxed into instances
+   *     of the second class
    */
   public static boolean isAutoBoxedAs(Class<?> classToTest, Class<?> wrapperClass) {
     Check.notNull(classToTest);
@@ -245,8 +238,8 @@ public class ClassMethods {
   }
 
   /**
-   * If the specified class is a primitive type, returns the corresponding primitive wrapper class,
-   * else the specified class itself.
+   * If the specified class is a primitive type, returns the corresponding primitive
+   * wrapper class, else the specified class itself.
    *
    * @param clazz The (primitive) class
    * @return The corresponding wrapper class
@@ -257,8 +250,8 @@ public class ClassMethods {
   }
 
   /**
-   * If the specified class is a primitive wrapper class, returns the corresponding primitive type,
-   * else the specified class itself.
+   * If the specified class is a primitive wrapper class, returns the corresponding
+   * primitive type, else the specified class itself.
    *
    * @param clazz The (wrapper) class
    * @return The corresponding primitive class
@@ -269,7 +262,8 @@ public class ClassMethods {
   }
 
   /**
-   * Returns the superclasses of the specified class up to, and including {@code Object.class}.
+   * Returns the superclasses of the specified class up to, and including {@code
+   * Object.class}.
    *
    * @param clazz The class for which to get the superclasses
    * @return The superclasses of the specified class.
@@ -295,12 +289,14 @@ public class ClassMethods {
   }
 
   /**
-   * Returns the entire interface hierarchy, both "horizontal" amd "vertical", associated with
-   * specified class or interface. Returns an empty set if the argument is a top-level interface, or
-   * if the class is a regular class that does not implement any interface (either directly, or
-   * indirectly)and neither directly nor indirectly through its superclasses).
+   * Returns the entire interface hierarchy, both "horizontal" amd "vertical",
+   * associated with specified class or interface. Returns an empty set if the
+   * argument is a top-level interface, or if the class is a regular class that does
+   * not implement any interface (either directly, or indirectly)and neither directly
+   * nor indirectly through its superclasses).
    *
-   * @param clazz The {@code Class} object for which to retrieve the interface hierarchy
+   * @param clazz The {@code Class} object for which to retrieve the interface
+   *     hierarchy
    * @return The interface hierarchy for the specified {@code Class} object
    */
   public static Set<Class<?>> getAllInterfaces(Class<?> clazz) {
@@ -322,8 +318,9 @@ public class ClassMethods {
   }
 
   /**
-   * Returns a prettified version of the fully-qualified class name. If the argument is an array,
-   * {@link #arrayClassName(Object)} is returned, else {@code obj.getClass().getName()}.
+   * Returns a prettified version of the fully-qualified class name. If the argument
+   * is an array, {@link #arrayClassName(Object)} is returned, else {@code
+   * obj.getClass().getName()}.
    *
    * @param obj The object whose class name to return
    * @return The class name
@@ -337,8 +334,9 @@ public class ClassMethods {
   }
 
   /**
-   * Returns a prettified version of the fully-qualified class name. If the argument is an array
-   * class, {@link #arrayClassName(Object)} is returned, else {@code obj.getClass().getName()}.
+   * Returns a prettified version of the fully-qualified class name. If the argument
+   * is an array class, {@link #arrayClassName(Object)} is returned, else {@code
+   * obj.getClass().getName()}.
    *
    * @param clazz The class whose name to return
    * @return The class name
@@ -349,8 +347,9 @@ public class ClassMethods {
   }
 
   /**
-   * Returns a prettified version of the simple class name. If the argument is an array, {@link
-   * #arrayClassSimpleName(Object)} is returned, else {@code obj.getClass().getSimpleName()}.
+   * Returns a prettified version of the simple class name. If the argument is an
+   * array, {@link #arrayClassSimpleName(Object)} is returned, else {@code
+   * obj.getClass().getSimpleName()}.
    *
    * @param obj The object whose class name to return
    * @return The class name
@@ -364,8 +363,9 @@ public class ClassMethods {
   }
 
   /**
-   * Returns a prettified version of the simple class name. If the argument is an array class,
-   * {@link #arrayClassSimpleName(Class)} is returned, else {@code obj.getClass().getSimpleName()}.
+   * Returns a prettified version of the simple class name. If the argument is an
+   * array class, {@link #arrayClassSimpleName(Class)} is returned, else {@code
+   * obj.getClass().getSimpleName()}.
    *
    * @param clazz The class whose ame to return
    * @return The class name
@@ -376,9 +376,9 @@ public class ClassMethods {
   }
 
   /**
-   * Returns a description for the specified array that is a bit easier on they eye than what you
-   * get from {@link Class#getName()}. For example {@code arrayClassName(new String[0][0])} will
-   * return {@code java.lang.String[][]}.
+   * Returns a description for the specified array that is a bit easier on they eye
+   * than what you get from {@link Class#getName()}. For example {@code
+   * arrayClassName(new String[0][0])} will return {@code java.lang.String[][]}.
    *
    * @param array The array
    * @return A more intuitive description of the array's type
@@ -389,8 +389,8 @@ public class ClassMethods {
   }
 
   /**
-   * Returns a description for the specified array class that is a bit easier on they eye than what
-   * you get from {@link Class#getName()}.
+   * Returns a description for the specified array class that is a bit easier on they
+   * eye than what you get from {@link Class#getName()}.
    *
    * @param arrayClass The array type
    * @return A more intuitive description of the array type
@@ -409,9 +409,9 @@ public class ClassMethods {
   }
 
   /**
-   * Returns a short description for the specified array that is a bit easier on they eye than what
-   * you get from {@link Class#getSimpleName()}. For example {@code arrayClassName(new
-   * String[0][0])} will return {@code String[][]}.
+   * Returns a short description for the specified array that is a bit easier on they
+   * eye than what you get from {@link Class#getSimpleName()}. For example {@code
+   * arrayClassName(new String[0][0])} will return {@code String[][]}.
    *
    * @param array The array
    * @return The simple name of the array type
@@ -422,8 +422,8 @@ public class ClassMethods {
   }
 
   /**
-   * Returns a short description for the specified array class that is a bit easier on they eye than
-   * what you get from {@link Class#getSimpleName()}.
+   * Returns a short description for the specified array class that is a bit easier
+   * on they eye than what you get from {@link Class#getSimpleName()}.
    *
    * @param arrayClass The array type
    * @return An intuitive description of the array type

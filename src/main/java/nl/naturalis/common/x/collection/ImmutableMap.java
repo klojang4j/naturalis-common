@@ -1,4 +1,4 @@
-package nl.naturalis.common.collection;
+package nl.naturalis.common.x.collection;
 
 import nl.naturalis.common.x.Generated;
 
@@ -7,7 +7,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @Generated
-abstract class ImmutableMap<K, V> implements Map<K, V> {
+public abstract class ImmutableMap<K, V> implements Map<K, V> {
 
   @Override
   public V put(K key, V value) {

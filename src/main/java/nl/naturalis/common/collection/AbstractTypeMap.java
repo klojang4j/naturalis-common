@@ -1,11 +1,6 @@
 package nl.naturalis.common.collection;
 
-import nl.naturalis.common.ClassMethods;
-
-import java.util.List;
-import java.util.Map;
-
-import static java.util.stream.Collectors.toUnmodifiableList;
+import nl.naturalis.common.x.collection.ImmutableMap;
 
 abstract sealed class AbstractTypeMap<V> extends ImmutableMap<Class<?>, V> implements
     TypeMap<V> permits MultiPassTypeMap, TypeGraph, LinkedTypeGraph {

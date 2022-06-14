@@ -14,4 +14,5 @@ module nl.naturalis.common {
   exports nl.naturalis.common.path;
   exports nl.naturalis.common.io;
   exports nl.naturalis.common.util;
+  exports nl.naturalis.common.x.collection;
 }
