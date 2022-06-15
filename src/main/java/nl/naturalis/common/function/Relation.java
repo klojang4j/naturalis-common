@@ -1,20 +1,29 @@
 package nl.naturalis.common.function;
 
 /**
- * Defines a relationship between two objects. For example, if object x is a {@code Collection} and
- * object y is an element of it, then the relation <b>X contains Y</b> exists between x and y.
+ * The {@code Relation} interface and its sister interfaces let you implement
+ * well-defined relationships between two objects. The objects may or may not have
+ * the same type. The object that you want to assert something about is called the
+ * <i>subject</i> of the relationship, and the object that it is compared against is
+ * called the <i>object</i> of the relationship. If the subject does indeed have the
+ * specified relation to the object, the relation is said to <i>exist</i>. For
+ * example, if object x is a {@code Collection} and object y is an element of it,
+ * then the <i>contains</i> relation ({@code Collection::contains}) exists between x
+ * and y. The {@link nl.naturalis.common.check.CommonChecks} class defines a lot of
+ * small {@code Relation} implementations (like {@code Collection::contains}) that
+ * you can use for argument validation.
  *
- * @author Ayco Holleman
  * @param <T> The type of the subject of the relation
  * @param <U> The type of the object of the relation
+ * @author Ayco Holleman
  */
 @FunctionalInterface
 public interface Relation<T, U> {
 
   /**
-   * Returns the converse of this relation, swapping subject and object in the relationship. For
-   * example, the converse of <b>X contains Y</b> is <b>Y contains X</b> (or <b>X is-element-of
-   * Y</b>).
+   * Returns the converse of this relation, swapping subject and object in the
+   * relationship. For example, the converse of <b>X contains Y</b> is <b>Y contains
+   * X</b> (or <b>X is-element-of Y</b>).
    *
    * @return The converse of this {@code Relation}
    */
@@ -32,7 +41,8 @@ public interface Relation<T, U> {
   }
 
   default Relation<T, U> or(U alternative) {
-    return (x, y) -> Relation.this.exists(x, y) || Relation.this.exists(x, alternative);
+    return (x, y) -> Relation.this.exists(x, y)
+        || Relation.this.exists(x, alternative);
   }
 
   /**
@@ -43,4 +53,5 @@ public interface Relation<T, U> {
    * @return {@code true} if the relation exists, {@code false} otherwise.
    */
   boolean exists(T subject, U object);
+
 }

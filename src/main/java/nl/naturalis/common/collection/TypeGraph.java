@@ -1,11 +1,9 @@
 package nl.naturalis.common.collection;
 
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.x.collection.ArraySet;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.AbstractMap.SimpleImmutableEntry;
 import static nl.naturalis.common.ClassMethods.box;
@@ -105,14 +103,14 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
       return node.value;
     }
 
-    void collectTypes(Set<Class<?>> set) {
+    void collectTypes(List<Class<?>> bucket) {
       for (var node : subclasses.values()) {
-        set.add(node.type);
-        node.collectTypes(set);
+        bucket.add(node.type);
+        node.collectTypes(bucket);
       }
       for (var node : subinterfaces.values()) {
-        set.add((node.type));
-        node.collectTypes(set);
+        bucket.add((node.type));
+        node.collectTypes(bucket);
       }
     }
 
@@ -199,9 +197,6 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
     this.size = size;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   @SuppressWarnings({"unchecked"})
   public V get(Object key) {
@@ -216,9 +211,6 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
                     : root.findClass(type, autobox));
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean containsKey(Object key) {
     Class<?> type = Check.notNull(key)
@@ -242,33 +234,24 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
     return false;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean containsValue(Object value) {
     return values().contains(value);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public Set<Class<?>> keySet() {
     if (keys == null) {
-      Set<Class<?>> set = new HashSet<>(1 + size * 4 / 3);
+      List<Class<?>> bucket = new ArrayList<>(size);
       if (root.value != null) { // map contains Object.class
-        set.add(Object.class);
+        bucket.add(Object.class);
       }
-      root.collectTypes(set);
-      keys = Set.copyOf(set);
+      root.collectTypes(bucket);
+      keys = ArraySet.copyOf(bucket, true);
     }
     return keys;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   @SuppressWarnings({"unchecked"})
   public Collection<V> values() {
@@ -283,9 +266,6 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
     return values;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   @SuppressWarnings({"unchecked"})
   public Set<Entry<Class<?>, V>> entrySet() {
@@ -300,17 +280,11 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
     return entries;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public int size() {
     return size;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean isEmpty() {
     return size != 0;

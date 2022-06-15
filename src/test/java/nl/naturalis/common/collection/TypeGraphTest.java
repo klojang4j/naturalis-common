@@ -8,7 +8,28 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.*;
 
-public class TypeGraphMapTest {
+public class TypeGraphTest {
+
+  @Test
+  public void keySet00() {
+    TypeGraph<String> m = TypeGraph.build(String.class)
+        .add(Object.class, "Object")
+        .add(Number.class, "Number")
+        .add(Integer.class, "Integer")
+        .add(Double.class, "Double")
+        .add(Short.class, "Short")
+        .add(Iterable.class, "Iterable")
+        .add(Collection.class, "Collection")
+        .add(List.class, "List")
+        .add(ArrayList.class, "ArrayList")
+        .add(LinkedList.class, "LinkedList")
+        .add(Set.class, "Set")
+        .add(HashSet.class, "HashSet")
+        .add(LinkedHashSet.class, "LinkedHashSet")
+        .freeze();
+    List<Class<?>> keys = new ArrayList<>(m.keySet());
+    System.out.println(keys);
+  }
 
   @Test
   public void test00() {
@@ -18,6 +39,10 @@ public class TypeGraphMapTest {
         .add(Short.class, "Short")
         .freeze();
     assertEquals(3, m.size());
+    assertTrue(m.containsValue("String"));
+    assertTrue(m.containsValue("Number"));
+    assertTrue(m.containsValue("Short"));
+    assertFalse(m.containsValue("Integer"));
     String s = m.get(Short.class);
     assertEquals("Short", s);
     s = m.get(Integer.class);
@@ -149,6 +174,10 @@ public class TypeGraphMapTest {
         .add(String.class, "String") // for good measure, add some normal classes
         .add(Integer.class, "integer")
         .freeze();
+    assertTrue(m.containsValue("Set"));
+    assertFalse(m.containsValue("HashSet"));
+    assertTrue(m.containsKey(HashSet.class));
+    assertEquals("Set", m.get(HashSet.class));
     assertEquals("SortedSet", m.get(NavigableSet.class));
     assertEquals("Set", m.get(Set.class));
   }
