@@ -1,6 +1,7 @@
 package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.check.CommonChecks;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -61,18 +62,38 @@ public class ClassMethods {
   }
 
   /**
-   * Tests whether the first class extends or implements the second class. In case
-   * you keep forgetting what "assignable from" even means. Equivalent to <code>
-   * superOrInterface.isAssignableFrom(classToTest)</code>.
+   * Tests whether the first class extends or implements of the second class. In
+   * other words, whether it extends or implements the second class. In case you keep
+   * forgetting what "assignable from" even means. Equivalent to
+   * <code>class1.isAssignableFrom(class0)</code>.
    *
-   * @param clazz The class to test
-   * @param superOrInterface The class or interface to test the class against
-   * @return Whether the 1st argument extends or implements the 2nd argument
+   * @param class0 The class or interface you are interested in
+   * @param class1 The class or interface to compare it against
+   * @return {@code true} if the first class is a subtype of the second class; {@code
+   *     false} otherwise
+   * @see CommonChecks#subtypeOf()
    */
-  public static boolean isSubtype(Class<?> clazz, Class<?> superOrInterface) {
-    Check.notNull(clazz, "classToTest");
-    Check.notNull(superOrInterface, "superOrInterface");
-    return superOrInterface.isAssignableFrom(clazz);
+  public static boolean isSubtype(Class<?> class0, Class<?> class1) {
+    Check.notNull(class0, "class0");
+    Check.notNull(class1, "class1");
+    return class1.isAssignableFrom(class0);
+  }
+
+  /**
+   * Tests whether the first class is a supertype of the second class. In other
+   * words, whether it is extended or implemented by the second class. Equivalent to
+   * <code>class0.isAssignableFrom(class1)</code>.
+   *
+   * @param class0 The class or interface you are interested in
+   * @param class1 The class or interface to compare it against
+   * @return {@code true} if the first class is a supertype of the second class;
+   *     {@code false} otherwise
+   * @see CommonChecks#subtypeOf()
+   */
+  public static boolean isSupertype(Class<?> class0, Class<?> class1) {
+    Check.notNull(class0, "class0");
+    Check.notNull(class1, "class1");
+    return class0.isAssignableFrom(class1);
   }
 
   /**
