@@ -14,15 +14,15 @@ public class ClassMethodsTest {
 
   @Test
   public void isA00() {
-    assertTrue(ClassMethods.isA(String.class, String.class));
-    assertTrue(ClassMethods.isA(String.class, Object.class));
-    assertTrue(ClassMethods.isA(String.class, CharSequence.class));
-    assertFalse(ClassMethods.isA(Object.class, String.class));
-    assertFalse(ClassMethods.isA(CharSequence.class, String.class));
-    assertTrue(ClassMethods.isA(String.class, String.class));
-    assertFalse(ClassMethods.isA(short.class, int.class));
-    assertTrue(ClassMethods.isA(Serializable.class, Object.class));
-    assertTrue(ClassMethods.isA(Function.class, Object.class));
+    assertTrue(ClassMethods.isSubtype(String.class, String.class));
+    assertTrue(ClassMethods.isSubtype(String.class, Object.class));
+    assertTrue(ClassMethods.isSubtype(String.class, CharSequence.class));
+    assertFalse(ClassMethods.isSubtype(Object.class, String.class));
+    assertFalse(ClassMethods.isSubtype(CharSequence.class, String.class));
+    assertTrue(ClassMethods.isSubtype(String.class, String.class));
+    assertFalse(ClassMethods.isSubtype(short.class, int.class));
+    assertTrue(ClassMethods.isSubtype(Serializable.class, Object.class));
+    assertTrue(ClassMethods.isSubtype(Function.class, Object.class));
   }
 
   public void isA01() {
@@ -46,18 +46,12 @@ public class ClassMethodsTest {
   @Test // Interesting: Enum.class returns false for Class::isEnum
   public void isEnum01() {
     assertFalse(Enum.class.isEnum());
-    assertTrue(ClassMethods.isA(Enum.class, Enum.class));
+    assertTrue(ClassMethods.isSubtype(Enum.class, Enum.class));
   }
 
   @Test
   public void getAllInterfaces00() {
-    Set<Class<?>> expected = Set.of(NavigableSet.class,
-        Cloneable.class,
-        Serializable.class,
-        SortedSet.class,
-        Set.class,
-        Collection.class,
-        Iterable.class);
+    Set<Class<?>> expected = Set.of(NavigableSet.class, Cloneable.class, Serializable.class, SortedSet.class, Set.class, Collection.class, Iterable.class);
     Set<Class<?>> actual = ClassMethods.getAllInterfaces(TreeSet.class);
     // System.out.println(implode(actual.toArray(), "\n"));
     assertEquals(expected, actual);

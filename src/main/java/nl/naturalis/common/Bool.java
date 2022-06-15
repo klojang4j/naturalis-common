@@ -7,28 +7,29 @@ import static java.lang.Boolean.TRUE;
 import static nl.naturalis.common.ClassMethods.*;
 
 /**
- * Converts values from various non-boolean types to boolean values. Where applicable, {@code null}
- * is accepted as an argument and evaluates to {@code false}. Values evaluating to {@code true} and
- * values evaluating to {@code false} will both be tightly defined, rather than (for example) 1
- * counting as {@code true} and anything else as {@code false}. If an argument is neither a {@code
- * true} value nor a {@code false} value, an {@link IllegalArgumentException} is thrown. The static
- * method use the {@link #TRUE_STRINGS} and {@link #FALSE_STRINGS} sets to determine if a {@code
- * String} is true-ish or falsy. You can also instantiate the {@code Bool} class with your own
- * {@code true} strings and {@code false} strings.
+ * Converts values from various non-boolean types to boolean values. Where
+ * applicable, {@code null} is accepted as an argument and evaluates to {@code
+ * false}. Values evaluating to {@code true} and values evaluating to {@code false}
+ * will both be tightly defined, rather than (for example) 1 counting as {@code true}
+ * and anything else as {@code false}. If an argument is neither a {@code true} value
+ * nor a {@code false} value, an {@link IllegalArgumentException} is thrown. The
+ * static method use the {@link #TRUE_STRINGS} and {@link #FALSE_STRINGS} sets to
+ * determine if a {@code String} is true-ish or falsy. You can also instantiate the
+ * {@code Bool} class with your own {@code true} strings and {@code false} strings.
  *
  * @author Ayco Holleman
  */
 public class Bool {
 
   /**
-   * The default set of strings that count as {@code true} values (ignoring case): "true", "1",
-   * "yes", "on", "enabled".
+   * The default set of strings that count as {@code true} values (ignoring case):
+   * "true", "1", "yes", "on", "enabled".
    */
   public static final Set<String> TRUE_STRINGS = Set.of("true", "1", "yes", "on", "enabled");
 
   /**
-   * The default set of strings that count as {@code false} values (ignoring case): "false", "0",
-   * "false", "off", "disabled".
+   * The default set of strings that count as {@code false} values (ignoring case):
+   * "false", "0", "false", "off", "disabled".
    */
   public static final Set<String> FALSE_STRINGS = Set.of("false", "0", "no", "off", "disabled");
 
@@ -38,7 +39,7 @@ public class Bool {
       return (T) Boolean.valueOf(b);
     } else if (targetType == String.class) {
       return (T) Boolean.valueOf(b).toString();
-    } else if (isA(targetType, Number.class)) {
+    } else if (isSubtype(targetType, Number.class)) {
       return b
           ? (T) new NumberConverter(targetType).convert(1)
           : (T) new NumberConverter(targetType).convert(0);
@@ -53,10 +54,10 @@ public class Bool {
   }
 
   /**
-   * Attempts to convert the specified object to a {@code Boolean}. This is done by delegating to
-   * one of the more specific {@code from} methods, according to the type of the argument. If the
-   * object's type is not covered by any of the other {@code from} methods an {@link
-   * IllegalArgumentException} is thrown.
+   * Attempts to convert the specified object to a {@code Boolean}. This is done by
+   * delegating to one of the more specific {@code from} methods, according to the
+   * type of the argument. If the object's type is not covered by any of the other
+   * {@code from} methods an {@link IllegalArgumentException} is thrown.
    *
    * @param obj The object to convert
    * @return The corresponding {@code Boolean} value
@@ -66,9 +67,9 @@ public class Bool {
   }
 
   /**
-   * Converts the specified {@code String} to a {@code Boolean} value. This method checks whether
-   * the argument is either one of {@link #TRUE_STRINGS} or one of {@link #FALSE_STRINGS} (ignoring
-   * case).
+   * Converts the specified {@code String} to a {@code Boolean} value. This method
+   * checks whether the argument is either one of {@link #TRUE_STRINGS} or one of
+   * {@link #FALSE_STRINGS} (ignoring case).
    *
    * @param s The argument
    * @return The corresponding {@code Boolean} value
@@ -161,8 +162,8 @@ public class Bool {
   }
 
   /**
-   * Creates a new {@code Bool} instance that will use the provided {@code true} strings and {@code
-   * false} strings to evaluate {@code String} arguments.
+   * Creates a new {@code Bool} instance that will use the provided {@code true}
+   * strings and {@code false} strings to evaluate {@code String} arguments.
    *
    * @param trueStrings The string values that must count as {@code true}
    * @param falseStrings The string values that must count as {@code false}
@@ -173,10 +174,10 @@ public class Bool {
   }
 
   /**
-   * Attempts to convert the specified object to a {@code Boolean}. This is done by delegating to
-   * one of the more specific {@code getBoolean} methods, according to the type of the argument. If
-   * the object's type is not covered by any of the other {@code getBoolean} methods an {@link
-   * IllegalArgumentException} is thrown.
+   * Attempts to convert the specified object to a {@code Boolean}. This is done by
+   * delegating to one of the more specific {@code getBoolean} methods, according to
+   * the type of the argument. If the object's type is not covered by any of the
+   * other {@code getBoolean} methods an {@link IllegalArgumentException} is thrown.
    *
    * @param obj The object to convert
    * @return The corresponding {@code Boolean} value
@@ -196,8 +197,8 @@ public class Bool {
   }
 
   /**
-   * Converts the specified {@code String} to a {@code Boolean} value. Null values are allowed and
-   * will result in {@code Boolean.FALSE} being returns.
+   * Converts the specified {@code String} to a {@code Boolean} value. Null values
+   * are allowed and will result in {@code Boolean.FALSE} being returns.
    *
    * @param s The argument
    * @return The corresponding {@code Boolean} value
@@ -293,9 +294,9 @@ public class Bool {
   }
 
   /**
-   * Converts the specified {@code char} to a {@code Boolean} value. Returns {@code true} if the
-   * argument equals '1'; {@code false} if the argument equals '0'; otherwise throws a {@link
-   * TypeConversionException}.
+   * Converts the specified {@code char} to a {@code Boolean} value. Returns {@code
+   * true} if the argument equals '1'; {@code false} if the argument equals '0';
+   * otherwise throws a {@link TypeConversionException}.
    *
    * @param c The argument
    * @return The corresponding {@code Boolean} value
@@ -307,4 +308,5 @@ public class Bool {
   private static Boolean noCanDo(Object obj) {
     throw new TypeConversionException(obj, Boolean.class);
   }
+
 }

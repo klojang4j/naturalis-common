@@ -7,7 +7,6 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 
 import static nl.naturalis.common.ArrayMethods.pack;
-import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.ClassMethods.isAutoUnboxedAs;
 import static nl.naturalis.common.ObjectMethods.getTypeDefault;
 import static nl.naturalis.common.check.CommonChecks.notNull;
@@ -20,8 +19,7 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  * method.
  *
  * <p>The list of conversions performed by this class it too large to enumerate.
- * Generally, however,
- * the following applies:
+ * Generally, however, the following applies:
  *
  * @param <T> The type to which incoming values will be converted
  * @author Ayco Holleman
@@ -78,19 +76,18 @@ public class Morph<T> {
       return (T) obj.toString();
     } else if (toType.isArray()) {
       return toArray(obj);
-    } else if (isA(toType, Collection.class)) {
+    } else if (ClassMethods.isSubtype(toType, Collection.class)) {
       return MorphTable0.getInstance().morph(obj, toType);
     }
     Class myType = obj.getClass();
     if (myType.isArray()) {
       boolean empty = Array.getLength(obj) == 0;
       return empty ? getTypeDefault(toType) : convert(Array.get(obj, 0), toType);
-    } else if (isA(myType, Collection.class)) {
+    } else if (ClassMethods.isSubtype(myType, Collection.class)) {
       Collection coll = (Collection) obj;
       boolean empty = coll.size() == 0;
-      return empty
-          ? getTypeDefault(toType)
-          : convert(coll.iterator().next(), toType);
+      return empty ? getTypeDefault(toType) : convert(coll.iterator()
+          .next(), toType);
     }
     Object out = MorphTable1.getInstance().morph(obj, toType);
     if (out != null) {
@@ -104,7 +101,7 @@ public class Morph<T> {
   private T toArray(Object obj) {
     if (obj.getClass().isArray()) {
       return arrayToArray(obj);
-    } else if (isA(obj.getClass(), Collection.class)) {
+    } else if (ClassMethods.isSubtype(obj.getClass(), Collection.class)) {
       return collectionToArray((Collection) obj);
     }
     return (T) pack(convert(obj, targetType.getComponentType()));

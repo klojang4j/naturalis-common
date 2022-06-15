@@ -1,11 +1,11 @@
 package nl.naturalis.common.collection;
 
+import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.collection.LinkedTypeGraph.LinkedTypeNode;
 
 import java.util.Arrays;
 
-import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.collection.LinkedTypeGraph.NO_SUBTYPES;
 
@@ -64,10 +64,10 @@ public final class LinkedTypeGraphBuilder<V> {
       WiredIterator<WritableTypeNode> itr = subclasses.wiredIterator();
       while (itr.hasNext()) {
         var subclass = itr.next();
-        if (isA(subclass.type, node.type)) {
+        if (ClassMethods.isSubtype(subclass.type, node.type)) {
           itr.remove();
           node.addSubclass(subclass);
-        } else if (isA(node.type, subclass.type)) {
+        } else if (ClassMethods.isSubtype(node.type, subclass.type)) {
           subclass.addSubclass(node);
           return;
         }
@@ -75,7 +75,7 @@ public final class LinkedTypeGraphBuilder<V> {
       itr = subinterfaces.wiredIterator();
       while (itr.hasNext()) {
         var subinterface = itr.next();
-        if (isA(node.type, subinterface.type)) {
+        if (ClassMethods.isSubtype(node.type, subinterface.type)) {
           subinterface.addSubclass(node);
           return;
         }
@@ -89,10 +89,10 @@ public final class LinkedTypeGraphBuilder<V> {
       WiredIterator<WritableTypeNode> itr = subinterfaces.wiredIterator();
       while (itr.hasNext()) {
         var subinterface = itr.next();
-        if (isA(subinterface.type, node.type)) {
+        if (ClassMethods.isSubtype(subinterface.type, node.type)) {
           itr.remove();
           node.addSubinterface(subinterface);
-        } else if (isA(node.type, subinterface.type)) {
+        } else if (ClassMethods.isSubtype(node.type, subinterface.type)) {
           subinterface.addSubinterface(node);
           return;
         }

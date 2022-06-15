@@ -24,12 +24,12 @@ public class ObjectMethodsTest {
     long[] longs = new long[] {1L, 2L, 3L, 4L, 5L};
     Integer[] integers = new Integer[] {1, 2, 3, 4, 5};
     Object[] objects = new Object[] {1, 2, 3, 4, 5};
-    assertFalse("01", ClassMethods.isA(ints.getClass(), longs.getClass()));
-    assertFalse("02", ClassMethods.isA(longs.getClass(), ints.getClass()));
-    assertFalse("03", ClassMethods.isA(ints.getClass(), integers.getClass()));
-    assertFalse("04", ClassMethods.isA(integers.getClass(), ints.getClass()));
-    assertTrue("05", ClassMethods.isA(integers.getClass(), objects.getClass()));
-    assertFalse("06", ClassMethods.isA(objects.getClass(), integers.getClass()));
+    assertFalse("01", ClassMethods.isSubtype(ints.getClass(), longs.getClass()));
+    assertFalse("02", ClassMethods.isSubtype(longs.getClass(), ints.getClass()));
+    assertFalse("03", ClassMethods.isSubtype(ints.getClass(), integers.getClass()));
+    assertFalse("04", ClassMethods.isSubtype(integers.getClass(), ints.getClass()));
+    assertTrue("05", ClassMethods.isSubtype(integers.getClass(), objects.getClass()));
+    assertFalse("06", ClassMethods.isSubtype(objects.getClass(), integers.getClass()));
     assertFalse("07", ints.equals(longs));
     assertFalse("08", longs.equals(ints));
     assertFalse("09", ints.equals(integers));
@@ -42,8 +42,7 @@ public class ObjectMethodsTest {
   public void isDeepNotEmpty01() {
     assertTrue("01", isDeepNotEmpty(List.of("Hi", new String[] {"Hi", "There"})));
     assertFalse("02", isDeepNotEmpty(List.of("Hi", new String[0])));
-    assertTrue("03",
-        isDeepNotEmpty(List.of("Hi", Collections.singletonMap("a", "b"))));
+    assertTrue("03", isDeepNotEmpty(List.of("Hi", Collections.singletonMap("a", "b"))));
     assertFalse("04", isDeepNotEmpty(List.of("Hi", Collections.emptyMap())));
     Map map0 = Collections.emptyMap();
     Map map1 = Collections.singletonMap("b", map0);
@@ -66,9 +65,7 @@ public class ObjectMethodsTest {
     assertEquals("02", "Hi There", ifEmpty("", () -> "Hi There"));
     assertEquals("03", "World", ifEmpty("World", () -> "Hi There"));
     List list0 = List.of("Hi There");
-    assertEquals("04",
-        list0,
-        ifEmpty(Collections.emptyList(), () -> Arrays.asList("Hi There")));
+    assertEquals("04", list0, ifEmpty(Collections.emptyList(), () -> Arrays.asList("Hi There")));
   }
 
   @Test
@@ -81,8 +78,7 @@ public class ObjectMethodsTest {
     assertNull("02", i);
     i = ifNotNull(s, Integer::valueOf, 8);
     assertEquals("03", 8, i.intValue());
-    String[] strs = ifNotNull("This sentence contains five words",
-        x -> x.split(" "));
+    String[] strs = ifNotNull("This sentence contains five words", x -> x.split(" "));
     assertEquals("04", 5, strs.length);
   }
 
@@ -105,17 +101,19 @@ public class ObjectMethodsTest {
     assertTrue("05", e2nDeepEquals(new String[0], null));
     assertFalse("06", e2nDeepEquals(new String[] {""}, null));
     assertFalse("07", e2nDeepEquals(new String[] {"", null, ""}, null));
-    assertFalse("08",
-        e2nDeepEquals(new String[] {"", null, ""},
-            new String[] {"", null, "", "", ""}));
+    assertFalse("08", e2nDeepEquals(new String[] {"", null, ""}, new String[] {"",
+        null,
+        "",
+        "",
+        ""}));
     assertTrue("09", e2nDeepEquals(Collections.emptyList(), null));
     assertTrue("10", e2nDeepEquals(null, new HashSet<>()));
     assertTrue("11", e2nDeepEquals(null, null));
     assertTrue("12", e2nDeepEquals("", ""));
     assertTrue("13", e2nDeepEquals(List.of(1, 2, 3, 4), List.of(1, 2, 3, 4)));
-    assertTrue("14",
-        e2nDeepEquals(new String[] {"To", "be", "or"},
-            new String[] {"To", "be", "or"}));
+    assertTrue("14", e2nDeepEquals(new String[] {"To", "be", "or"}, new String[] {"To",
+        "be",
+        "or"}));
     assertTrue("15", e2nDeepEquals(new int[] {1, 2, 3, 4}, new int[] {1, 2, 3, 4}));
     assertFalse("16", e2nDeepEquals(new int[0], new HashSet<>()));
     assertFalse("17", e2nDeepEquals("", new HashSet<>()));
@@ -135,11 +133,7 @@ public class ObjectMethodsTest {
 
     Set subset1 = setOf("Mary", subsubset1, subsubset2, subsubset4);
     Set subset2 = setOf("Mary", subsubset2, subsubset3, subsubset4);
-    Set subset3 = setOf("Mary",
-        subsubset2,
-        subsubset3,
-        subsubset4,
-        Collections.emptySet());
+    Set subset3 = setOf("Mary", subsubset2, subsubset3, subsubset4, Collections.emptySet());
     Set subset4 = setOf("Mary", subsubset3, subsubset4, subsubset5, new short[0]);
     Set subset5 = setOf("Mary", subsubset4, subsubset5, new short[] {1, 2});
     Set subset6 = setOf(subsubset4);

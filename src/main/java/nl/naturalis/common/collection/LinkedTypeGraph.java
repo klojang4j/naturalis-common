@@ -1,6 +1,7 @@
 package nl.naturalis.common.collection;
 
 import nl.naturalis.common.ArrayMethods;
+import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.x.collection.ArraySet;
 
@@ -8,7 +9,6 @@ import java.util.*;
 
 import static java.util.AbstractMap.SimpleImmutableEntry;
 import static nl.naturalis.common.ClassMethods.box;
-import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
@@ -50,7 +50,7 @@ public final class LinkedTypeGraph<V> extends AbstractTypeMap<V> {
     }
 
     Object findClass(Class<?> type, boolean autobox) {
-      if (isA(type, this.type)) {
+      if (ClassMethods.isSubtype(type, this.type)) {
         Object val = findClass(type, subclasses);
         if (val == null) {
           val = findClass(type, subinterfaces);
@@ -65,7 +65,7 @@ public final class LinkedTypeGraph<V> extends AbstractTypeMap<V> {
     }
 
     Object findInterface(Class<?> type) {
-      if (isA(type, this.type)) {
+      if (ClassMethods.isSubtype(type, this.type)) {
         return ifNull(findInterface(type, subinterfaces), this.value);
       }
       return null;
@@ -234,7 +234,7 @@ public final class LinkedTypeGraph<V> extends AbstractTypeMap<V> {
 
   private static boolean containsSuper(LinkedTypeNode[] nodes, Class<?> type) {
     return Arrays.stream(nodes)
-        .filter(node -> isA(type, node.type))
+        .filter(node -> ClassMethods.isSubtype(type, node.type))
         .findAny()
         .isPresent();
   }

@@ -1,5 +1,6 @@
 package nl.naturalis.common.collection;
 
+import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.collection.TypeGraph.TypeNode;
 
@@ -9,7 +10,6 @@ import java.util.Map;
 
 import static java.util.Map.Entry;
 import static java.util.Map.entry;
-import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.check.CommonChecks.deepNotNull;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
@@ -60,10 +60,10 @@ public final class TypeGraphBuilder<V> {
       boolean inserted = false;
       while (itr.hasNext()) {
         var child = itr.next();
-        if (isA(child.type, node.type)) {
+        if (ClassMethods.isSubtype(child.type, node.type)) {
           itr.remove();
           node.addChild(child);
-        } else if (isA(node.type, child.type)) {
+        } else if (ClassMethods.isSubtype(node.type, child.type)) {
           child.addChild(node);
           inserted = true;
         }

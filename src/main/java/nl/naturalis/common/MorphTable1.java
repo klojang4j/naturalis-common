@@ -2,7 +2,6 @@ package nl.naturalis.common;
 
 import static nl.naturalis.common.ArrayMethods.findReference;
 import static nl.naturalis.common.ClassMethods.box;
-import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.Morph.stringify;
 
 /*
@@ -30,7 +29,7 @@ class MorphTable1 {
       return Bool.from(obj);
     } else if (type == Character.class) {
       return toChar(obj, toType);
-    } else if (isA(type, Number.class)) {
+    } else if (ClassMethods.isSubtype(type, Number.class)) {
       return toNumber(obj, type);
     }
     return null;
@@ -38,7 +37,7 @@ class MorphTable1 {
 
   private static Number toNumber(Object obj, Class toType) {
     Class myType = obj.getClass();
-    if (isA(myType, Number.class)) {
+    if (ClassMethods.isSubtype(myType, Number.class)) {
       return new NumberConverter(toType).convert((Number) obj);
     } else if (myType.isEnum()) {
       return findReference(myType.getEnumConstants(), obj);

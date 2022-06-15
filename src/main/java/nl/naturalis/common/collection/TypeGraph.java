@@ -1,5 +1,6 @@
 package nl.naturalis.common.collection;
 
+import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.x.collection.ArraySet;
 
@@ -7,7 +8,6 @@ import java.util.*;
 
 import static java.util.AbstractMap.SimpleImmutableEntry;
 import static nl.naturalis.common.ClassMethods.box;
-import static nl.naturalis.common.ClassMethods.isA;
 import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
@@ -54,7 +54,7 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
     }
 
     Object findClass(Class<?> type, boolean autobox) {
-      if (isA(type, this.type)) {
+      if (ClassMethods.isSubtype(type, this.type)) {
         Object val = findClass(type, subclasses);
         if (val == null) {
           val = findClass(type, subinterfaces);
@@ -69,7 +69,7 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
     }
 
     Object findInterface(Class<?> type) {
-      if (isA(type, this.type)) {
+      if (ClassMethods.isSubtype(type, this.type)) {
         return ifNull(findInterface(type, subinterfaces), this.value);
       }
       return null;
@@ -221,13 +221,13 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
     }
     if (!type.isInterface()) {
       for (TypeNode tn : root.subclasses.values()) {
-        if (isA(type, tn.type)) {
+        if (ClassMethods.isSubtype(type, tn.type)) {
           return true;
         }
       }
     }
     for (TypeNode tn : root.subinterfaces.values()) {
-      if (isA(type, tn.type)) {
+      if (ClassMethods.isSubtype(type, tn.type)) {
         return true;
       }
     }

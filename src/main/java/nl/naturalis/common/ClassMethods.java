@@ -54,7 +54,7 @@ public class ClassMethods {
   public static boolean isA(Object instance, Class<?> superOrInterface) {
     Check.notNull(instance, "instance");
     if (instance.getClass() == Class.class) {
-      return isA((Class<?>) instance, superOrInterface);
+      return isSubtype((Class<?>) instance, superOrInterface);
     }
     Check.notNull(superOrInterface, "superOrInterface");
     return superOrInterface.isInstance(instance);
@@ -69,7 +69,7 @@ public class ClassMethods {
    * @param superOrInterface The class or interface to test the class against
    * @return Whether the 1st argument extends or implements the 2nd argument
    */
-  public static boolean isA(Class<?> clazz, Class<?> superOrInterface) {
+  public static boolean isSubtype(Class<?> clazz, Class<?> superOrInterface) {
     Check.notNull(clazz, "classToTest");
     Check.notNull(superOrInterface, "superOrInterface");
     return superOrInterface.isAssignableFrom(clazz);
