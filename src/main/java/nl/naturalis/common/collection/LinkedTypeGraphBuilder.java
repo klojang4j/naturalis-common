@@ -1,11 +1,13 @@
 package nl.naturalis.common.collection;
 
-import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.collection.LinkedTypeGraph.LinkedTypeNode;
 
 import java.util.Arrays;
+import java.util.Iterator;
 
+import static nl.naturalis.common.ClassMethods.isSubtype;
+import static nl.naturalis.common.ClassMethods.isSupertype;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.collection.LinkedTypeGraph.NO_SUBTYPES;
 
@@ -59,45 +61,47 @@ public final class LinkedTypeGraphBuilder<V> {
     }
 
     void addSubclass(WritableTypeNode node) {
-      Check.that(node.type)
-          .isNot(sameAs(), type, () -> new DuplicateKeyException(type));
-      WiredIterator<WritableTypeNode> itr = subclasses.wiredIterator();
+      if (node.type == this.type) {
+        throw new DuplicateKeyException(node.type);
+      }
+      Iterator<WritableTypeNode> itr = subclasses.wiredIterator();
       while (itr.hasNext()) {
-        var subclass = itr.next();
-        if (ClassMethods.isSubtype(subclass.type, node.type)) {
+        var child = itr.next();
+        if (isSupertype(node.type, child.type)) {
           itr.remove();
-          node.addSubclass(subclass);
-        } else if (ClassMethods.isSubtype(node.type, subclass.type)) {
-          subclass.addSubclass(node);
+          node.addSubclass(child);
+        } else if (isSubtype(node.type, child.type)) {
+          child.addSubclass(node);
           return;
         }
       }
       itr = subinterfaces.wiredIterator();
       while (itr.hasNext()) {
-        var subinterface = itr.next();
-        if (ClassMethods.isSubtype(node.type, subinterface.type)) {
-          subinterface.addSubclass(node);
+        var child = itr.next();
+        if (isSubtype(node.type, child.type)) {
+          child.addSubclass(node);
           return;
         }
       }
-      subclasses.append(node);
+      subclasses.add(node);
     }
 
     void addSubinterface(WritableTypeNode node) {
-      Check.that(node.type)
-          .isNot(sameAs(), type, () -> new DuplicateKeyException(type));
+      if (node.type == this.type) {
+        throw new DuplicateKeyException(node.type);
+      }
       WiredIterator<WritableTypeNode> itr = subinterfaces.wiredIterator();
       while (itr.hasNext()) {
-        var subinterface = itr.next();
-        if (ClassMethods.isSubtype(subinterface.type, node.type)) {
+        var child = itr.next();
+        if (isSupertype(node.type, child.type)) {
           itr.remove();
-          node.addSubinterface(subinterface);
-        } else if (ClassMethods.isSubtype(node.type, subinterface.type)) {
-          subinterface.addSubinterface(node);
+          node.addSubinterface(child);
+        } else if (isSubtype(node.type, child.type)) {
+          child.addSubinterface(node);
           return;
         }
       }
-      subinterfaces.append(node);
+      subinterfaces.add(node);
     }
 
   }

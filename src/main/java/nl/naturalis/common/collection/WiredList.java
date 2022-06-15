@@ -238,9 +238,8 @@ public final class WiredList<E> implements List<E> {
     @Override
     public WiredIterator<E> turn() {
       Check.that(sz).is(ne(), 0, emptyListNotAllowed());
-      return Check.that(curr)
-          .isNot(sameAs(), beforeHead, callNextFirst())
-          .ok(ReverseWiredIterator::new);
+      return Check.that(curr).isNot(sameAs(), beforeHead, callNextFirst()).ok(
+          ReverseWiredIterator::new);
     }
 
   }
@@ -307,9 +306,8 @@ public final class WiredList<E> implements List<E> {
     @Override
     public WiredIterator<E> turn() {
       Check.that(sz).is(ne(), 0, emptyListNotAllowed());
-      return Check.that(curr)
-          .isNot(sameAs(), afterTail, callNextFirst())
-          .ok(ForwardWiredIterator::new);
+      return Check.that(curr).isNot(sameAs(), afterTail, callNextFirst()).ok(
+          ForwardWiredIterator::new);
     }
 
   }
@@ -1040,26 +1038,54 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Groups the elements according to the provided criteria. For each criterion a
+   * Groups the elements according to the specified criterion. Elements in the first
+   * group satisfy the specified criterion; elements in the second group don't. The
+   * second list in the returned list-of-lists is <i>this</i> list, and it now only
+   * contains the elements <i>not</i> satisfying the criterion.
+   *
+   * @param criterion The test to submit the list elements to
+   * @return A list containing two lists representing the two groups
+   * @see #group(List)
+   */
+  public <L0 extends List<E>, L1 extends List<L0>> L1 group(Predicate<? super E> criterion) {
+    return group(Arrays.asList(criterion));
+  }
+
+  /**
+   * <p>Groups the elements according to the provided criteria. For each criterion a
    * separate {@code WiredList} is created that will contain the elements satisfying
    * the criterion. This {@code WiredList} is left with all elements that did not
    * satisfy any criterion, and it will be the last element in the returned
    * list-of-lists. In other words, the size of the returned list-of-lists is the
    * number of criteria plus one. You can use the {@link #join(List)} method to
-   * create a single "defragmented" list again. Elements will never be placed in more
-   * than one group. As soon as an element is found to satisfy a criterion it is
-   * placed in the corresponding group and the remaining criteria are skipped.
+   * create a single "defragmented" list again.
+   *
+   * <p>Elements will never be placed in more than one group. As soon as an
+   * element is found to satisfy a criterion it is placed in the corresponding group
+   * and the remaining criteria are skipped.
+   *
+   * <p>NB The actual type of the return value is <code>WiredList&lt;WiredList&lt;
+   * E&gt;&gt;</code>. If you don't care about the exact type of the returned {@code
+   * List}, you can simply write:
+   *
+   * <blockquote><pre>{@code
+   * List<List<SomeType>> groups = wiredList.group(...);
+   * }</pre></blockquote>
+   *
+   * Otherwise use any combination of {@code List} and {@code WiredList} that suits
+   * your purpose.
    *
    * @param criteria The criteria used to group the elements
    * @return A list of element groups
    * @see #join(WiredList)
    */
-  public WiredList<WiredList<E>> group(List<Predicate<? super E>> criteria) {
-    Check.that(criteria).isNot(empty());
+  public <L0 extends List<E>, L1 extends List<L0>> L1 group(List<Predicate<?
+      super E>> criteria) {
+    Check.that(criteria).is(deepNotEmpty());
     List<WiredList<E>> groups = createGroups(criteria);
-    WiredList<WiredList<E>> result = new WiredList<>(groups);
+    var result = new WiredList<WiredList<E>>(groups);
     result.add(this);
-    return result;
+    return (L1) result;
   }
 
   @SuppressWarnings({"rawtypes"})
@@ -1215,12 +1241,11 @@ public final class WiredList<E> implements List<E> {
    */
   public WiredList<E> move(int fromIndex, int toIndex, int newFromIndex) {
     Check.on(indexOutOfBounds(), fromIndex, "fromIndex").is(gte(), 0);
-    Check.on(indexOutOfBounds(), toIndex, "toIndex")
-        .is(lte(), sz)
-        .is(gt(), fromIndex, emptySegmentNotAllowed());
-    Check.on(indexOutOfBounds(), newFromIndex, "newFromIndex")
-        .is(gte(), 0)
-        .is(lte(), sz);
+    Check.on(indexOutOfBounds(), toIndex, "toIndex").is(lte(), sz).is(gt(),
+        fromIndex,
+        emptySegmentNotAllowed());
+    Check.on(indexOutOfBounds(), newFromIndex, "newFromIndex").is(gte(), 0).is(lte(),
+        sz);
     if (newFromIndex > fromIndex) {
       moveToTail(fromIndex, toIndex, newFromIndex);
     } else if (newFromIndex < fromIndex) {
@@ -1660,8 +1685,8 @@ public final class WiredList<E> implements List<E> {
   }
 
   private IntCheck<IndexOutOfBoundsException> checkExclusive(int index) {
-    return Check.on(indexOutOfBounds(), index, INDEX)
-        .is(CommonChecks.indexOf(), this);
+    return Check.on(indexOutOfBounds(), index, INDEX).is(CommonChecks.indexOf(),
+        this);
   }
 
   private IntCheck<IndexOutOfBoundsException> checkInclusive(int index) {
@@ -1670,9 +1695,9 @@ public final class WiredList<E> implements List<E> {
 
   private void checkSegment(int fromIndex, int toIndex) {
     Check.on(indexOutOfBounds(), fromIndex, "fromIndex").is(gte(), 0);
-    Check.on(indexOutOfBounds(), toIndex, "toIndex")
-        .is(lte(), sz)
-        .is(gt(), fromIndex, emptySegmentNotAllowed());
+    Check.on(indexOutOfBounds(), toIndex, "toIndex").is(lte(), sz).is(gt(),
+        fromIndex,
+        emptySegmentNotAllowed());
   }
 
 }

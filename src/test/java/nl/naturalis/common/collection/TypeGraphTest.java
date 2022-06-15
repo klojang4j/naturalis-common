@@ -5,7 +5,6 @@ import org.junit.Test;
 import java.io.Serializable;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.*;
 
 public class TypeGraphTest {
@@ -28,7 +27,73 @@ public class TypeGraphTest {
         .add(LinkedHashSet.class, "LinkedHashSet")
         .freeze();
     List<Class<?>> keys = new ArrayList<>(m.keySet());
-    System.out.println(keys);
+    //System.out.println(keys);
+    assertEquals(13, keys.size());
+    assertEquals(Object.class, keys.get(0));
+    assertTrue(keys.indexOf(Number.class) < keys.indexOf(Double.class));
+    assertTrue(keys.indexOf(Number.class) < keys.indexOf(Integer.class));
+    assertTrue(keys.indexOf(Number.class) < keys.indexOf(Short.class));
+    assertTrue(keys.indexOf(Iterable.class) < keys.indexOf(Collection.class));
+    assertTrue(keys.indexOf(Collection.class) < keys.indexOf(List.class));
+    assertTrue(keys.indexOf(List.class) < keys.indexOf(ArrayList.class));
+    assertTrue(keys.indexOf(List.class) < keys.indexOf(LinkedList.class));
+    assertTrue(keys.indexOf(Collection.class) < keys.indexOf(Set.class));
+    assertTrue(keys.indexOf(Set.class) < keys.indexOf(HashSet.class));
+    assertTrue(keys.indexOf(Set.class) < keys.indexOf(LinkedHashSet.class));
+  }
+
+  @Test
+  public void entrySet00() {
+    // Works just like keysSet(), so we only include it as a sanity
+    // check, and for test coverage.
+    TypeGraph<String> m = TypeGraph.build(String.class)
+        .add(Object.class, "Object")
+        .add(Number.class, "Number")
+        .add(Integer.class, "Integer")
+        .add(Double.class, "Double")
+        .add(Short.class, "Short")
+        .add(Iterable.class, "Iterable")
+        .add(Collection.class, "Collection")
+        .add(List.class, "List")
+        .add(ArrayList.class, "ArrayList")
+        .add(LinkedList.class, "LinkedList")
+        .add(Set.class, "Set")
+        .add(HashSet.class, "HashSet")
+        .add(LinkedHashSet.class, "LinkedHashSet")
+        .freeze();
+    Set entries = m.entrySet();
+    assertEquals(13, entries.size());
+    System.out.println(entries);
+  }
+
+  @Test
+  public void values00() {
+    TypeGraph<String> m = TypeGraph.build(String.class)
+        .add(Object.class, "Foo")
+        .add(
+            Number.class,
+            "Bar")
+        .add(Integer.class, "Integer")
+        .add(Double.class, "Double")
+        .add(Short.class, "Foo")
+        .add(Iterable.class, "Bar")
+        .add(Collection.class, "Collection")
+        .add(List.class, "List")
+        .add(ArrayList.class, "Foo")
+        .add(LinkedList.class, "Bar")
+        .add(Set.class, "Set")
+        .add(HashSet.class, "HashSet")
+        .add(LinkedHashSet.class, "Foo")
+        .freeze();
+    assertEquals(Set.of("Foo",
+        "HashSet",
+        "Bar",
+        "Set",
+        "Double",
+        "List",
+        "Collection",
+        "Integer"), m.values());
+    //System.out.println(m.values());
   }
 
   @Test
@@ -84,7 +149,8 @@ public class TypeGraphTest {
   @Test
   public void test04() {
     TypeGraph<String> m = TypeGraph.build(String.class)
-        .add(ArrayList.class, "ArrayList")
+        .add(ArrayList.class,
+            "ArrayList")
         .add(List.class, "List")
         .add(Collection.class, "Collection")
         .freeze();
@@ -93,19 +159,16 @@ public class TypeGraphTest {
 
   @Test
   public void test05() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
-        .add(ArrayList.class, "ArrayList")
-        .add(MyListInterface.class, "MyListInterface")
-        .freeze();
+    TypeGraph<String> m = TypeGraph.build(String.class).add(
+        ArrayList.class,
+        "ArrayList").add(MyListInterface.class, "MyListInterface").freeze();
     assertEquals("ArrayList", m.get(MyArrayList.class));
   }
 
   @Test
   public void test06() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
-        .add(List.class, "List")
-        .add(Object.class, "Object")
-        .freeze();
+    TypeGraph<String> m = TypeGraph.build(String.class).add(List.class, "List").add(Object.class,
+        "Object").freeze();
     assertEquals("List", m.get(ArrayList.class));
   }
 
@@ -120,20 +183,16 @@ public class TypeGraphTest {
 
   @Test
   public void test08() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
-        .add(Object[].class, "Object[]")
-        .add(Object.class, "Object")
-        .freeze();
+    TypeGraph<String> m = TypeGraph.build(String.class).add(Object[].class,
+        "Object[]").add(Object.class, "Object").freeze();
     assertEquals(2, m.size());
     assertEquals("Object[]", m.get(ArrayList[].class));
   }
 
   @Test
   public void test09() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
-        .add(Object[].class, "Object[]")
-        .add(Object.class, "Object")
-        .freeze();
+    TypeGraph<String> m = TypeGraph.build(String.class).add(Object[].class,
+        "Object[]").add(Object.class, "Object").freeze();
     assertEquals("Object", m.get(Object.class));
   }
 
@@ -196,10 +255,8 @@ public class TypeGraphTest {
 
   @Test
   public void test14() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
-        .add(A0.class, "A0")
-        .add(Serializable.class, "Serializable")
-        .freeze();
+    TypeGraph<String> m = TypeGraph.build(String.class).add(A0.class, "A0").add(Serializable.class,
+        "Serializable").freeze();
     assertTrue(m.containsKey(A000.class));
     assertTrue(m.containsKey(A0001.class));
     assertEquals("A0", m.get(A0001.class));
@@ -249,11 +306,8 @@ public class TypeGraphTest {
 
   @Test(expected = DuplicateKeyException.class)
   public void test19() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
-        .add(Object.class, "FOO")
-        .add(A0.class, "A0")
-        .add(Object.class, "BAR")
-        .freeze();
+    TypeGraph<String> m = TypeGraph.build(String.class).add(Object.class, "FOO").add(A0.class,
+        "A0").add(Object.class, "BAR").freeze();
   }
 
 }

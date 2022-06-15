@@ -8,6 +8,7 @@ import nl.naturalis.common.x.invoke.InvokeUtils;
 import java.util.*;
 
 import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
+import static nl.naturalis.common.ArrayMethods.implode;
 import static nl.naturalis.common.check.CommonChecks.deepNotNull;
 import static nl.naturalis.common.check.CommonChecks.lt;
 
@@ -130,6 +131,43 @@ public final class ArraySet<E> extends ImmutableSet<E> {
       a[sz] = null;
     }
     return a;
+  }
+
+  private int hash;
+  private String str;
+
+  @Override
+  public int hashCode() {
+    if (hash == 0) {
+      hash = Arrays.hashCode(elems);
+    }
+    return hash;
+  }
+
+  @Override
+  @SuppressWarnings({"unchecked"})
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o instanceof Set s) {
+      Iterator<E> itr = s.iterator();
+      for (Object e : elems) {
+        if (!itr.hasNext() || !Objects.equals(e, itr.next())) {
+          return false;
+        }
+      }
+      return !itr.hasNext();
+    }
+    return false;
+  }
+
+  @Override
+  public String toString() {
+    if (str == null) {
+      str = '[' + implode(elems) + ']';
+    }
+    return str;
   }
 
 }

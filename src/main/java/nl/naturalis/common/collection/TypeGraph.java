@@ -115,26 +115,26 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
     }
 
     @SuppressWarnings({"unchecked"})
-    <E> void collectValues(Set<E> set) {
+    <E> void collectValues(Set<E> bucket) {
       for (var node : subclasses.values()) {
-        set.add((E) node.value);
-        node.collectValues(set);
+        bucket.add((E) node.value);
+        node.collectValues(bucket);
       }
       for (var node : subinterfaces.values()) {
-        set.add((E) node.value);
-        node.collectValues(set);
+        bucket.add((E) node.value);
+        node.collectValues(bucket);
       }
     }
 
     @SuppressWarnings({"unchecked"})
-    <E> void collectEntries(Set<Entry<Class<?>, E>> set) {
+    <E> void collectEntries(List<Entry<Class<?>, E>> bucket) {
       for (var node : subclasses.values()) {
-        set.add(new SimpleImmutableEntry<>(node.type, (E) node.value));
-        node.collectEntries(set);
+        bucket.add(new SimpleImmutableEntry<>(node.type, (E) node.value));
+        node.collectEntries(bucket);
       }
       for (var node : subinterfaces.values()) {
-        set.add(new SimpleImmutableEntry<>(node.type, (E) node.value));
-        node.collectEntries(set);
+        bucket.add(new SimpleImmutableEntry<>(node.type, (E) node.value));
+        node.collectEntries(bucket);
       }
     }
 
@@ -206,9 +206,8 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
     // interfaces can only be subtypes of other interfaced,
     // so we  don't need to bother with the regular classes
     // in the type tree
-    return (V) (type.isInterface()
-                    ? root.findInterface(type)
-                    : root.findClass(type, autobox));
+    return (V) (type.isInterface() ? root.findInterface(type) : root.findClass(type,
+        autobox));
   }
 
   @Override
@@ -256,12 +255,12 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
   @SuppressWarnings({"unchecked"})
   public Collection<V> values() {
     if (values == null) {
-      Set<V> set = new HashSet<>(1 + size * 4 / 3);
+      Set<V> bucket = new HashSet<>(1 + size * 4 / 3);
       if (root.value != null) {
-        set.add((V) root.value);
+        bucket.add((V) root.value);
       }
-      root.collectValues(set);
-      values = Set.copyOf(set);
+      root.collectValues(bucket);
+      values = Set.copyOf(bucket);
     }
     return values;
   }
@@ -270,12 +269,12 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
   @SuppressWarnings({"unchecked"})
   public Set<Entry<Class<?>, V>> entrySet() {
     if (entries == null) {
-      Set<Entry<Class<?>, V>> set = new HashSet<>(1 + size() * 4 / 3);
+      List<Entry<Class<?>, V>> bucket = new ArrayList<>(size);
       if (root.value != null) {
-        set.add(new SimpleImmutableEntry<>(Object.class, (V) root.value));
+        bucket.add(new SimpleImmutableEntry<>(Object.class, (V) root.value));
       }
-      root.collectEntries(set);
-      entries = Set.copyOf(set);
+      root.collectEntries(bucket);
+      entries = ArraySet.copyOf(bucket, true);
     }
     return entries;
   }
