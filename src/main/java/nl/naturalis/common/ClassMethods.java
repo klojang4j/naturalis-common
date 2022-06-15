@@ -15,15 +15,31 @@ import static nl.naturalis.common.check.CommonChecks.asObj;
  *
  * @author Ayco Holleman
  */
-public class ClassMethods {
+public final class ClassMethods {
 
   // primitive-to-wrapper
-  private static final Map<Class<?>, Class<?>> P2W = Map.of(double.class, Double.class, float.class, Float.class, long.class, Long.class, int.class, Integer.class, char.class, Character.class, short.class, Short.class, byte.class, Byte.class, boolean.class, Boolean.class);
+  private static final Map<Class<?>, Class<?>> P2W = Map.of(double.class,
+      Double.class,
+      float.class,
+      Float.class,
+      long.class,
+      Long.class,
+      int.class,
+      Integer.class,
+      char.class,
+      Character.class,
+      short.class,
+      Short.class,
+      byte.class,
+      Byte.class,
+      boolean.class,
+      Boolean.class);
 
   // wrapper-to-primitive
   private static final Map<Class<?>, Class<?>> W2P = swapAndFreeze(P2W);
 
   private ClassMethods() {
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -41,24 +57,16 @@ public class ClassMethods {
   }
 
   /**
-   * Tests whether the 1st argument is an instance of the specified class or
-   * interface. Equivalent to <code>superOrInterface.isInstance(instance)</code>.
-   * Since this method is overloaded with {@code Class} as the type of the first
-   * parameter, you cannot and should not use this method to test whether a {@code
-   * Class} object itself is an instance of something (even though it
-   * <i>is</i>, for example, an instance of {@link java.io.Serializable}).
+   * Alias for {@link Class#isInstance(Object)}.
    *
    * @param instance The object to test
-   * @param superOrInterface The class or interface to test the object against
+   * @param type The class or interface to test the object against
    * @return Whether the 1st argument is an instance of the 2nd argument
    */
-  public static boolean isA(Object instance, Class<?> superOrInterface) {
+  public static boolean isA(Object instance, Class<?> type) {
     Check.notNull(instance, "instance");
-    if (instance.getClass() == Class.class) {
-      return isSubtype((Class<?>) instance, superOrInterface);
-    }
-    Check.notNull(superOrInterface, "superOrInterface");
-    return superOrInterface.isInstance(instance);
+    Check.notNull(type, "type");
+    return type.isInstance(instance);
   }
 
   /**
@@ -88,7 +96,7 @@ public class ClassMethods {
    * @param class1 The class or interface to compare it against
    * @return {@code true} if the first class is a supertype of the second class;
    *     {@code false} otherwise
-   * @see CommonChecks#subtypeOf()
+   * @see CommonChecks#supertypeOf()
    */
   public static boolean isSupertype(Class<?> class0, Class<?> class1) {
     Check.notNull(class0, "class0");
@@ -290,8 +298,8 @@ public class ClassMethods {
    * @return The superclasses of the specified class.
    */
   public static List<Class<?>> getAncestors(Class<?> clazz) {
-    Check.notNull(clazz)
-        .isNot(asObj(Class::isInterface), "Cannot get ancestors for interface types");
+    Check.notNull(clazz).isNot(asObj(Class::isInterface),
+        "Cannot get ancestors for interface types");
     List<Class<?>> l = new ArrayList<>(5);
     for (Class<?> x = clazz.getSuperclass(); x != null; x = x.getSuperclass()) {
       l.add(x);
@@ -300,8 +308,8 @@ public class ClassMethods {
   }
 
   public static int countAncestors(Class<?> clazz) {
-    Check.notNull(clazz)
-        .isNot(asObj(Class::isInterface), "Cannot get ancestors for interface types");
+    Check.notNull(clazz).isNot(asObj(Class::isInterface),
+        "Cannot get ancestors for interface types");
     int i = 0;
     for (Class<?> x = clazz.getSuperclass(); x != null; x = x.getSuperclass()) {
       ++i;

@@ -620,13 +620,14 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument is a supertype of the specified class. Equivalent to
-   * {@link Class#isAssignableFrom(Class) Class::isAssignableFrom}.
+   * Verifies that the argument is extended or implemented by the specified class or
+   * interface. Equivalent to {@link ClassMethods#isSupertype(Class, Class)
+   * ClassMethods::isSupertype}.
    *
-   * @return A function implementing the test described above
+   * @return A {@code Relation} that implements the test described above
    */
   public static <T, U> Relation<Class<T>, Class<U>> supertypeOf() {
-    return Class::isAssignableFrom;
+    return ClassMethods::isSupertype;
   }
 
   static {
@@ -634,13 +635,14 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that the argument extends or implements the specified class /
-   * interface.
+   * Verifies that the argument extends or implements the specified class or
+   * interface. Equivalent to {@link ClassMethods#isSubtype Class, Class)
+   * ClassMethods::isSubtype}
    *
-   * @return A function implementing the test described above
+   * @return A {@code Relation} that implements the test described above
    */
   public static <T, U> Relation<Class<T>, Class<U>> subtypeOf() {
-    return (x, y) -> y.isAssignableFrom(x);
+    return ClassMethods::isSubtype;
   }
 
   static {
