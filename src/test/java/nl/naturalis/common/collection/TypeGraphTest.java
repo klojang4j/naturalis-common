@@ -97,6 +97,32 @@ public class TypeGraphTest {
   }
 
   @Test
+  public void copyOf00() {
+    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+        true,
+        Map.of(Number.class, "Number"));
+    assertTrue(m.containsKey(int.class));
+    assertEquals("Number", m.get(int.class));
+  }
+
+  @Test
+  public void copyOf01() {
+    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+        Map.of(Number.class, "Number"));
+    assertTrue(m.containsKey(int.class));
+    assertEquals("Number", m.get(int.class));
+  }
+
+  @Test
+  public void copyOf02() {
+    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+        false,
+        Map.of(Number.class, "Number"));
+    assertFalse(m.containsKey(int.class));
+    assertNull(m.get(int.class));
+  }
+
+  @Test
   public void test00() {
     TypeGraph<String> m = TypeGraph.build(String.class)
         .add(String.class, "String")

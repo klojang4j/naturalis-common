@@ -1,13 +1,12 @@
 package nl.naturalis.common.collection;
 
-import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.x.collection.ArraySet;
 
 import java.util.*;
 
 import static java.util.AbstractMap.SimpleImmutableEntry;
-import static nl.naturalis.common.ClassMethods.box;
+import static nl.naturalis.common.ClassMethods.*;
 import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
@@ -54,12 +53,12 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
     }
 
     Object findClass(Class<?> type, boolean autobox) {
-      if (ClassMethods.isSubtype(type, this.type)) {
+      if (isSubtype(type, this.type)) {
         Object val = findClass(type, subclasses);
         if (val == null) {
           val = findClass(type, subinterfaces);
         }
-        return ifNull(val, value);
+        return val == null ? value : val;
       } else if (type.isPrimitive()) {
         // this must be the root node b/c *everything*
         // is an Object except primitive types
@@ -69,7 +68,7 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
     }
 
     Object findInterface(Class<?> type) {
-      if (ClassMethods.isSubtype(type, this.type)) {
+      if (isSubtype(type, this.type)) {
         return ifNull(findInterface(type, subinterfaces), this.value);
       }
       return null;
@@ -149,23 +148,27 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
    * enabled.
    *
    * @param <U> The type of the values in the {@code Map}
+   * @param valueType The class of the values in the {@code Map}
    * @param src The {@code Map} to convert
-   * @return A {@code TypeGraph}
+   * @return A {@code TypeGraph} built from the entries in the provided map
    */
-  public static <U> TypeGraph<U> copyOf(Map<Class<?>, U> src) {
-    return copyOf(src, true);
+  public static <U> TypeGraph<U> copyOf(Class<U> valueType, Map<Class<?>, U> src) {
+    return copyOf(valueType, true, src);
   }
 
   /**
    * Converts the specified {@code Map} to a {@code TypeGraph}.
    *
    * @param <U> The type of the values in the {@code Map}
-   * @param src The {@code Map} to convert
+   * @param valueType The class of the values in the {@code Map}
    * @param autobox Whether to enable "autoboxing" (see {@link AbstractTypeMap})
-   * @return A {@code TypeGraph}
+   * @param src The {@code Map} to convert
+   * @return A {@code TypeGraph} built from the entries in the provided map
    */
   @SuppressWarnings({"unchecked"})
-  public static <U> TypeGraph<U> copyOf(Map<Class<?>, U> src, boolean autobox) {
+  public static <U> TypeGraph<U> copyOf(Class<U> valueType,
+      boolean autobox,
+      Map<Class<?>, U> src) {
     Check.notNull(src, "source map");
     TypeGraphBuilder<U> builder = (TypeGraphBuilder<U>) build(Object.class);
     builder.autobox(autobox);
@@ -206,8 +209,10 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
     // interfaces can only be subtypes of other interfaced,
     // so we  don't need to bother with the regular classes
     // in the type tree
-    return (V) (type.isInterface() ? root.findInterface(type) : root.findClass(type,
-        autobox));
+    if (type.isInterface()) {
+      return (V) root.findInterface(type);
+    }
+    return (V) root.findClass(type, autobox);
   }
 
   @Override
@@ -218,19 +223,10 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
     if (root.value != null) {
       return true;
     }
-    if (!type.isInterface()) {
-      for (TypeNode tn : root.subclasses.values()) {
-        if (ClassMethods.isSubtype(type, tn.type)) {
-          return true;
-        }
-      }
+    if (type.isInterface()) {
+      return null != root.findInterface(type);
     }
-    for (TypeNode tn : root.subinterfaces.values()) {
-      if (ClassMethods.isSubtype(type, tn.type)) {
-        return true;
-      }
-    }
-    return false;
+    return null != root.findClass(type, autobox);
   }
 
   @Override

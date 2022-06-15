@@ -1,7 +1,6 @@
 package nl.naturalis.common.collection;
 
 import nl.naturalis.common.ArrayMethods;
-import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.x.collection.ArraySet;
 
@@ -9,6 +8,7 @@ import java.util.*;
 
 import static java.util.AbstractMap.SimpleImmutableEntry;
 import static nl.naturalis.common.ClassMethods.box;
+import static nl.naturalis.common.ClassMethods.isSubtype;
 import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
@@ -50,12 +50,12 @@ public final class LinkedTypeGraph<V> extends AbstractTypeMap<V> {
     }
 
     Object findClass(Class<?> type, boolean autobox) {
-      if (ClassMethods.isSubtype(type, this.type)) {
+      if (isSubtype(type, this.type)) {
         Object val = findClass(type, subclasses);
         if (val == null) {
           val = findClass(type, subinterfaces);
         }
-        return ifNull(val, value);
+        return val == null ? value : val;
       } else if (type.isPrimitive()) {
         // this must be the root node b/c *everything*
         // is an Object except primitive types
@@ -65,7 +65,7 @@ public final class LinkedTypeGraph<V> extends AbstractTypeMap<V> {
     }
 
     Object findInterface(Class<?> type) {
-      if (ClassMethods.isSubtype(type, this.type)) {
+      if (isSubtype(type, this.type)) {
         return ifNull(findInterface(type, subinterfaces), this.value);
       }
       return null;
@@ -149,23 +149,26 @@ public final class LinkedTypeGraph<V> extends AbstractTypeMap<V> {
    * @param src The {@code Map} to convert
    * @return A {@code TypeGraphMap}
    */
-  public static <U> LinkedTypeGraph<U> copyOf(Map<Class<?>, U> src) {
-    return copyOf(src, true);
+  public static <U> LinkedTypeGraph<U> copyOf(Class<U> valueType,
+      Map<Class<?>, U> src) {
+    return copyOf(valueType, true, src);
   }
 
   /**
    * Converts the specified {@code Map} to a {@code TypeGraphMap}.
    *
    * @param <U> The type of the values in the {@code Map}
-   * @param src The {@code Map} to convert
+   * @param valueType
    * @param autobox Whether to enable "autoboxing" (see {@link AbstractTypeMap})
+   * @param src The {@code Map} to convert
    * @return A {@code TypeGraphMap}
    */
   @SuppressWarnings({"unchecked"})
-  public static <U> LinkedTypeGraph<U> copyOf(Map<Class<?>, U> src,
-      boolean autobox) {
+  public static <U> LinkedTypeGraph<U> copyOf(Class<U> valueType,
+      boolean autobox,
+      Map<Class<?>, U> src) {
     Check.notNull(src, "source map");
-    LinkedTypeGraphBuilder<U> builder = (LinkedTypeGraphBuilder<U>) build(Object.class);
+    LinkedTypeGraphBuilder<U> builder = (LinkedTypeGraphBuilder<U>) build(valueType);
     builder.autobox(autobox);
     src.forEach(builder::add);
     return builder.freeze();
@@ -205,9 +208,10 @@ public final class LinkedTypeGraph<V> extends AbstractTypeMap<V> {
     Class<?> type = Check.notNull(key)
         .is(instanceOf(), Class.class)
         .ok(Class.class::cast);
-    return type.isInterface()
-        ? (V) root.findInterface(type)
-        : (V) root.findClass(type, autobox);
+    if (type.isInterface()) {
+      return (V) root.findInterface(type);
+    }
+    return (V) root.findClass(type, autobox);
   }
 
   /**
@@ -221,20 +225,15 @@ public final class LinkedTypeGraph<V> extends AbstractTypeMap<V> {
     if (root.value != null) {
       return true;
     }
-    if (!type.isInterface()) {
-      if (containsSuper(root.subclasses, type)) {
-        return true;
-      }
+    if (type.isInterface()) {
+      return null != root.findInterface(type);
     }
-    if (containsSuper(root.subinterfaces, type)) {
-      return true;
-    }
-    return false;
+    return null != root.findClass(type, autobox);
   }
 
   private static boolean containsSuper(LinkedTypeNode[] nodes, Class<?> type) {
     return Arrays.stream(nodes)
-        .filter(node -> ClassMethods.isSubtype(type, node.type))
+        .filter(node -> isSubtype(type, node.type))
         .findAny()
         .isPresent();
   }
