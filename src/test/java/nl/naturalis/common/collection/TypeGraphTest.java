@@ -101,6 +101,8 @@ public class TypeGraphTest {
     TypeGraph<String> m = TypeGraph.copyOf(String.class,
         true,
         Map.of(Number.class, "Number"));
+    System.out.println("XXX: " + m.size());
+    assertFalse(m.isEmpty());
     assertTrue(m.containsKey(int.class));
     assertEquals("Number", m.get(int.class));
   }
@@ -118,6 +120,121 @@ public class TypeGraphTest {
     TypeGraph<String> m = TypeGraph.copyOf(String.class,
         false,
         Map.of(Number.class, "Number"));
+    assertFalse(m.containsKey(int.class));
+    assertNull(m.get(int.class));
+  }
+
+  @Test
+  public void size00() {
+    TypeGraph<String> m = TypeGraph.copyOf(String.class, false, Map.of());
+    assertEquals(0, m.size());
+    assertTrue(m.isEmpty());
+    assertFalse(m.containsKey(Object.class));
+  }
+
+  @Test
+  public void size01() {
+    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+        false,
+        Map.of(Serializable.class, "FOO"));
+    assertEquals(1, m.size());
+    assertFalse(m.isEmpty());
+    assertFalse(m.containsKey(Object.class));
+    assertTrue(m.containsKey(Serializable.class));
+    assertTrue(m.containsValue("FOO"));
+  }
+
+  @Test
+  public void autobox00() {
+    // When Object.class is present, anything goes. You don't even
+    // need to have autoboxing turned on! See comments for TypeMap.
+    TypeGraph<String> m = TypeGraph.copyOf(String.class, false, Map.of(Object.class,
+        "Object",
+        Serializable.class,
+        "Serializable",
+        Number.class,
+        "Number",
+        Integer.class,
+        "Integer"));
+    assertTrue(m.containsKey(int.class));
+    assertEquals("Object", m.get(int.class));
+  }
+
+  @Test // sanity check
+  public void autobox01() {
+    TypeGraph<String> m = TypeGraph.copyOf(String.class, false, Map.of(int.class,
+        "int",
+        Serializable.class,
+        "Serializable",
+        Number.class,
+        "Number",
+        Integer.class,
+        "Integer"));
+    assertTrue(m.containsKey(int.class));
+    assertEquals("int", m.get(int.class));
+  }
+
+  @Test
+  public void autobox02() {
+    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+        false,
+        Map.of(Serializable.class,
+            "Serializable",
+            Number.class,
+            "Number",
+            Integer.class,
+            "Integer"));
+    assertFalse(m.containsKey(int.class));
+    assertNull(m.get(int.class));
+  }
+
+  @Test
+  public void autobox03() {
+    TypeGraph<String> m = TypeGraph.copyOf(String.class, true, Map.of(Object.class,
+        "Object",
+        Serializable.class,
+        "Serializable",
+        Number.class,
+        "Number",
+        Integer.class,
+        "Integer"));
+    assertTrue(m.containsKey(int.class));
+    assertEquals("Integer", m.get(int.class));
+  }
+
+  @Test
+  public void autobox04() {
+    TypeGraph<String> m = TypeGraph.copyOf(String.class, true, Map.of(Object.class,
+        "Object",
+        Serializable.class,
+        "Serializable",
+        Number.class,
+        "Number"));
+    assertTrue(m.containsKey(int.class));
+    assertEquals("Number", m.get(int.class));
+  }
+
+  @Test
+  public void autobox05() {
+    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+        true,
+        Map.of(Object.class, "Object", Serializable.class, "Serializable"));
+    assertTrue(m.containsKey(int.class));
+    assertEquals("Serializable", m.get(int.class));
+  }
+
+  @Test
+  public void autobox06() {
+    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+        true,
+        Map.of(Object.class, "Object"));
+    assertTrue(m.containsKey(int.class));
+    assertEquals("Object", m.get(int.class));
+  }
+
+  @Test
+  public void autobox07() {
+    TypeGraph<String> m = TypeGraph.copyOf(String.class, true, Map.of());
     assertFalse(m.containsKey(int.class));
     assertNull(m.get(int.class));
   }

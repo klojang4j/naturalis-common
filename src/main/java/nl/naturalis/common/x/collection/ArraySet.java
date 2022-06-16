@@ -150,10 +150,22 @@ public final class ArraySet<E> extends ImmutableSet<E> {
     if (this == o) {
       return true;
     }
+    if (o instanceof ArraySet other) {
+      int len = other.elems.length;
+      if (elems.length == len) {
+        for (int i = 0; i < len; ++i) {
+          if (!elems[i].equals(other.elems[i])) {
+            return false;
+          }
+        }
+        return true;
+      }
+      return false;
+    }
     if (o instanceof Set s) {
       Iterator<E> itr = s.iterator();
       for (Object e : elems) {
-        if (!itr.hasNext() || !Objects.equals(e, itr.next())) {
+        if (!itr.hasNext() || !e.equals(itr.next())) {
           return false;
         }
       }

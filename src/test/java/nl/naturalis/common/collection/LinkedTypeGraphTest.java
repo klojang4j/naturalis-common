@@ -13,16 +13,23 @@ public class LinkedTypeGraphTest {
 
   @Test
   public void keySet00() {
-    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class).add(Object.class,
-        "Object").add(Number.class, "Number").add(
-        Integer.class,
-        "Integer").add(Double.class, "Double").add(Short.class, "Short").add(
-        Iterable.class,
-        "Iterable").add(Collection.class, "Collection").add(List.class, "List").add(
-        ArrayList.class,
-        "ArrayList").add(LinkedList.class, "LinkedList").add(Set.class, "Set").add(
-        HashSet.class,
-        "HashSet").add(LinkedHashSet.class, "LinkedHashSet").freeze();
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
+        .add(Object.class, "Object")
+        .add(Number.class, "Number")
+        .add(Integer.class, "Integer")
+        .add(Double.class, "Double")
+        .add(
+            Short.class,
+            "Short")
+        .add(Iterable.class, "Iterable")
+        .add(Collection.class, "Collection")
+        .add(List.class, "List")
+        .add(ArrayList.class, "ArrayList")
+        .add(LinkedList.class, "LinkedList")
+        .add(Set.class, "Set")
+        .add(HashSet.class, "HashSet")
+        .add(LinkedHashSet.class, "LinkedHashSet")
+        .freeze();
     List<Class<?>> keys = new ArrayList<>(m.keySet());
     //System.out.println(keys);
     assertEquals(13, keys.size());
@@ -43,16 +50,23 @@ public class LinkedTypeGraphTest {
   public void entrySet00() {
     // Works just like keysSet(), so we only include it as a sanity
     // check, and for test coverage.
-    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class).add(Object.class,
-        "Object").add(Number.class, "Number").add(
-        Integer.class,
-        "Integer").add(Double.class, "Double").add(Short.class, "Short").add(
-        Iterable.class,
-        "Iterable").add(Collection.class, "Collection").add(List.class, "List").add(
-        ArrayList.class,
-        "ArrayList").add(LinkedList.class, "LinkedList").add(Set.class, "Set").add(
-        HashSet.class,
-        "HashSet").add(LinkedHashSet.class, "LinkedHashSet").freeze();
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
+        .add(Object.class, "Object")
+        .add(Number.class, "Number")
+        .add(Integer.class, "Integer")
+        .add(Double.class, "Double")
+        .add(
+            Short.class,
+            "Short")
+        .add(Iterable.class, "Iterable")
+        .add(Collection.class, "Collection")
+        .add(List.class, "List")
+        .add(ArrayList.class, "ArrayList")
+        .add(LinkedList.class, "LinkedList")
+        .add(Set.class, "Set")
+        .add(HashSet.class, "HashSet")
+        .add(LinkedHashSet.class, "LinkedHashSet")
+        .freeze();
     Set entries = m.entrySet();
     assertEquals(13, entries.size());
     System.out.println(entries);
@@ -61,7 +75,9 @@ public class LinkedTypeGraphTest {
   @Test
   public void values00() {
     LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
-        .add(Object.class, "Foo")
+        .add(
+            Object.class,
+            "Foo")
         .add(Number.class, "Bar")
         .add(Integer.class, "Integer")
         .add(Double.class, "Double")
@@ -75,14 +91,16 @@ public class LinkedTypeGraphTest {
         .add(HashSet.class, "HashSet")
         .add(LinkedHashSet.class, "Foo")
         .freeze();
-    assertEquals(Set.of("Foo",
-        "HashSet",
-        "Bar",
-        "Set",
-        "Double",
-        "List",
-        "Collection",
-        "Integer"), m.values());
+    assertEquals(
+        Set.of("Foo",
+            "HashSet",
+            "Bar",
+            "Set",
+            "Double",
+            "List",
+            "Collection",
+            "Integer"),
+        m.values());
     //System.out.println(m.values());
   }
 
@@ -91,6 +109,7 @@ public class LinkedTypeGraphTest {
     LinkedTypeGraph<String> m = LinkedTypeGraph.copyOf(String.class,
         true,
         Map.of(Number.class, "Number"));
+    assertFalse(m.isEmpty());
     assertTrue(m.containsKey(int.class));
   }
 
@@ -112,10 +131,32 @@ public class LinkedTypeGraphTest {
   }
 
   @Test
+  public void size00() {
+    LinkedTypeGraph<String> m = LinkedTypeGraph.copyOf(String.class,
+        false,
+        Map.of());
+    assertEquals(0, m.size());
+    assertTrue(m.isEmpty());
+    assertFalse(m.containsKey(Object.class));
+  }
+
+  @Test
+  public void size01() {
+    LinkedTypeGraph<String> m = LinkedTypeGraph.copyOf(String.class,
+        false,
+        Map.of(Serializable.class, "FOO"));
+    assertEquals(1, m.size());
+    assertFalse(m.isEmpty());
+    assertFalse(m.containsKey(Object.class));
+  }
+
+  @Test
   public void test00() {
-    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class).add(
-        String.class,
-        "String").add(Number.class, "Number").add(Short.class, "Short").freeze();
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
+        .add(String.class, "String")
+        .add(Number.class, "Number")
+        .add(Short.class, "Short")
+        .freeze();
     assertEquals(3, m.size());
     String s = m.get(Short.class);
     assertEquals("Short", s);
@@ -268,12 +309,10 @@ public class LinkedTypeGraphTest {
 
   @Test
   public void test15() {
-    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
-        .add(A0.class,
-            "A0")
-        .add(A000.class, "A000")
-        .add(Serializable.class, "Serializable")
-        .freeze();
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class).add(A0.class,
+        "A0").add(A000.class, "A000").add(
+        Serializable.class,
+        "Serializable").freeze();
     assertTrue(m.containsKey(A000.class));
     assertTrue(m.containsKey(A0001.class));
     assertEquals("A000", m.get(A0001.class));
@@ -281,12 +320,10 @@ public class LinkedTypeGraphTest {
 
   @Test
   public void test16() {
-    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
-        .add(A0.class,
-            "A0")
-        .add(A0000.class, "A0000")
-        .add(Serializable.class, "Serializable")
-        .freeze();
+    LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class).add(A0.class,
+        "A0").add(A0000.class, "A0000").add(
+        Serializable.class,
+        "Serializable").freeze();
     assertFalse(m.containsKey(Object.class));
     assertTrue(m.containsKey(Serializable.class));
     assertEquals("A0000", m.get(A0000.class));
@@ -317,16 +354,14 @@ public class LinkedTypeGraphTest {
             "A0")
         .add(A00.class, "A00")
         .add(A01.class, "A01")
-        .add(A000.class, "A000")
+        .add(
+            A000.class,
+            "A000")
         .add(A0000.class, "A0000")
         .add(A0001.class, "A0001")
-        .add(
-            Serializable.class,
-            "Serializable")
+        .add(Serializable.class, "Serializable")
         .add(Closeable.class, "Closeable")
-        .add(
-            AutoCloseable.class,
-            "AutoCloseable")
+        .add(AutoCloseable.class, "AutoCloseable")
         .freeze();
     //System.out.println(m.simpleTypeNames());
     List<Class<?>> keys = new ArrayList<>(m.keySet());
@@ -348,16 +383,14 @@ public class LinkedTypeGraphTest {
             "A0")
         .add(A00.class, "A00")
         .add(A01.class, "A01")
-        .add(A000.class, "A000")
+        .add(
+            A000.class,
+            "A000")
         .add(A0000.class, "A0000")
         .add(A0001.class, "A0001")
-        .add(
-            Serializable.class,
-            "Serializable")
+        .add(Serializable.class, "Serializable")
         .add(Closeable.class, "Closeable")
-        .add(
-            AutoCloseable.class,
-            "AutoCloseable")
+        .add(AutoCloseable.class, "AutoCloseable")
         .freeze();
     List<Class<?>> keys = new ArrayList<>(m.breadthFirstKeySet());
     System.out.println(CollectionMethods.implode(keys, Class::getSimpleName));

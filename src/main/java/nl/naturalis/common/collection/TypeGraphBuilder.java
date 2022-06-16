@@ -43,8 +43,7 @@ public final class TypeGraphBuilder<V> {
     // extend other interfaces, so if the client passes an interface type to
     // get() or containsKey() we can significantly confine our search
     TypeNode toTypeNode() {
-      List<List<WritableTypeNode>> mySubtypes =
-          subtypes.group(subtype -> subtype.type.isInterface());
+      List<List<WritableTypeNode>> mySubtypes = subtypes.group(subtype -> subtype.type.isInterface());
       var subinterfaces = Map.ofEntries(createEntries(mySubtypes.get(0)));
       var subclasses = Map.ofEntries(createEntries(mySubtypes.get(1)));
       return new TypeNode(type, value, subclasses, subinterfaces);

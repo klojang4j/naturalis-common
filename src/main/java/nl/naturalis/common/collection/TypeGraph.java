@@ -7,7 +7,7 @@ import java.util.*;
 
 import static java.util.AbstractMap.SimpleImmutableEntry;
 import static nl.naturalis.common.ClassMethods.*;
-import static nl.naturalis.common.ObjectMethods.ifNull;
+import static nl.naturalis.common.CollectionMethods.implode;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
 /**
@@ -52,33 +52,35 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
       this.subinterfaces = subinterfaces;
     }
 
-    Object findClass(Class<?> type, boolean autobox) {
+    @SuppressWarnings({"unchecked"})
+    private <X> X value() {
+      return (X) value;
+    }
+
+    private Object findClass(Class<?> type) {
       if (isSubtype(type, this.type)) {
         Object val = findClass(type, subclasses);
         if (val == null) {
           val = findClass(type, subinterfaces);
         }
         return val == null ? value : val;
-      } else if (type.isPrimitive()) {
-        // this must be the root node b/c *everything*
-        // is an Object except primitive types
-        return autobox ? findClass(box(type), false) : this.value;
       }
       return null;
     }
 
-    Object findInterface(Class<?> type) {
+    private Object findInterface(Class<?> type) {
       if (isSubtype(type, this.type)) {
-        return ifNull(findInterface(type, subinterfaces), this.value);
+        Object val = findInterface(type, subinterfaces);
+        return val == null ? value : val;
       }
       return null;
     }
 
-    static Object findClass(Class<?> type, Map<Class<?>, TypeNode> typeNodes) {
-      var node = typeNodes.get(type);
+    private static Object findClass(Class<?> type, Map<Class<?>, TypeNode> nodes) {
+      var node = nodes.get(type);
       if (node == null) {
-        for (TypeNode n : typeNodes.values()) {
-          Object val = n.findClass(type, false);
+        for (TypeNode n : nodes.values()) {
+          Object val = n.findClass(type);
           if (val != null) {
             return val;
           }
@@ -88,10 +90,11 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
       return node.value;
     }
 
-    static Object findInterface(Class<?> type, Map<Class<?>, TypeNode> typeNodes) {
-      var node = typeNodes.get(type);
+    private static Object findInterface(Class<?> type,
+        Map<Class<?>, TypeNode> nodes) {
+      var node = nodes.get(type);
       if (node == null) {
-        for (TypeNode typeNode : typeNodes.values()) {
+        for (TypeNode typeNode : nodes.values()) {
           Object val = typeNode.findInterface(type);
           if (val != null) {
             return val;
@@ -102,7 +105,7 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
       return node.value;
     }
 
-    void collectTypes(List<Class<?>> bucket) {
+    private void collectTypes(List<Class<?>> bucket) {
       for (var node : subclasses.values()) {
         bucket.add(node.type);
         node.collectTypes(bucket);
@@ -114,25 +117,25 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
     }
 
     @SuppressWarnings({"unchecked"})
-    <E> void collectValues(Set<E> bucket) {
+    private <E> void collectValues(Set<E> bucket) {
       for (var node : subclasses.values()) {
-        bucket.add((E) node.value);
+        bucket.add(node.value());
         node.collectValues(bucket);
       }
       for (var node : subinterfaces.values()) {
-        bucket.add((E) node.value);
+        bucket.add(node.value());
         node.collectValues(bucket);
       }
     }
 
     @SuppressWarnings({"unchecked"})
-    <E> void collectEntries(List<Entry<Class<?>, E>> bucket) {
+    private <E> void collectEntries(List<Entry<Class<?>, E>> bucket) {
       for (var node : subclasses.values()) {
-        bucket.add(new SimpleImmutableEntry<>(node.type, (E) node.value));
+        bucket.add(new SimpleImmutableEntry<>(node.type, node.value()));
         node.collectEntries(bucket);
       }
       for (var node : subinterfaces.values()) {
-        bucket.add(new SimpleImmutableEntry<>(node.type, (E) node.value));
+        bucket.add(new SimpleImmutableEntry<>(node.type, node.value()));
         node.collectEntries(bucket);
       }
     }
@@ -165,12 +168,11 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
    * @param src The {@code Map} to convert
    * @return A {@code TypeGraph} built from the entries in the provided map
    */
-  @SuppressWarnings({"unchecked"})
   public static <U> TypeGraph<U> copyOf(Class<U> valueType,
       boolean autobox,
       Map<Class<?>, U> src) {
     Check.notNull(src, "source map");
-    TypeGraphBuilder<U> builder = (TypeGraphBuilder<U>) build(Object.class);
+    TypeGraphBuilder<U> builder = build(valueType);
     builder.autobox(autobox);
     src.forEach(builder::add);
     return builder.freeze();
@@ -206,13 +208,36 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
     Class<?> type = Check.notNull(key)
         .is(instanceOf(), Class.class)
         .ok(Class.class::cast);
-    // interfaces can only be subtypes of other interfaced,
-    // so we  don't need to bother with the regular classes
-    // in the type tree
-    if (type.isInterface()) {
-      return (V) root.findInterface(type);
+    if (type.isPrimitive()) {
+      TypeNode exactMatch = root.subclasses.get(type);
+      if (exactMatch == null) {
+        if (autobox) {
+          return getValue(box(type));
+        }
+        return root.value();
+      }
+      return exactMatch.value();
+    } else if (type.isArray()) {
+      Class<?> elemType = type.getComponentType();
+      if (elemType.isPrimitive()) {
+        TypeNode exactMatch = root.subclasses.get(type);
+        if (exactMatch == null) {
+          if (autobox) {
+            return getValue(box(elemType).arrayType());
+          }
+          return root.value();
+        }
+        return exactMatch.value();
+      }
     }
-    return (V) root.findClass(type, autobox);
+    return getValue(type);
+  }
+
+  @SuppressWarnings({"unchecked"})
+  private V getValue(Class<?> type) {
+    return (V) (type.isInterface()
+                    ? root.findInterface(type)
+                    : root.findClass(type));
   }
 
   @Override
@@ -220,13 +245,23 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
     Class<?> type = Check.notNull(key)
         .is(instanceOf(), Class.class)
         .ok(Class.class::cast);
-    if (root.value != null) {
-      return true;
+    if (type.isPrimitive()) {
+      boolean exactMatch = root.subclasses.containsKey(type);
+      if (!autobox) {
+        return exactMatch || root.value != null;
+      }
+      return exactMatch || hasKey(box(type));
+    } else if (type.isArray()) {
+      Class<?> elemType = type.getComponentType();
+      if (elemType.isPrimitive()) {
+        boolean exactMatch = root.subclasses.containsKey(type);
+        if (!autobox) {
+          return exactMatch || root.value != null;
+        }
+        return exactMatch || hasKey(box(elemType).arrayType());
+      }
     }
-    if (type.isInterface()) {
-      return null != root.findInterface(type);
-    }
-    return null != root.findClass(type, autobox);
+    return hasKey(type);
   }
 
   @Override
@@ -282,7 +317,56 @@ public final class TypeGraph<V> extends AbstractTypeMap<V> {
 
   @Override
   public boolean isEmpty() {
-    return size != 0;
+    return size == 0;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o instanceof Map m) {
+      if (size == m.size()) {
+        return entrySet().equals(m.entrySet());
+      }
+    }
+    return false;
+  }
+
+  private int hash;
+
+  @Override
+  public int hashCode() {
+    if (hash == 0) {
+      hash = entrySet().hashCode();
+    }
+    return hash;
+  }
+
+  @Override
+  public String toString() {
+    return '[' + implode(entrySet()) + ']';
+  }
+
+  private boolean hasKey(Class<?> type) {
+    if (root.value != null) { // Map contains Object.class
+      return true;
+    } else if (type.isInterface()) {
+      return contains(root.subinterfaces, type);
+    }
+    return contains(root.subclasses, type) || contains(root.subinterfaces, type);
+  }
+
+  private static boolean contains(Map<Class<?>, TypeNode> nodes, Class<?> type) {
+    if (nodes.containsKey(type)) {
+      return true;
+    }
+    for (Class<?> c : nodes.keySet()) {
+      if (isSupertype(c, type)) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

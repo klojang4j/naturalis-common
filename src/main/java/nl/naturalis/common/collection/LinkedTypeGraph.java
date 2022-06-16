@@ -313,7 +313,7 @@ public final class LinkedTypeGraph<V> extends AbstractTypeMap<V> {
 
   @Override
   public boolean isEmpty() {
-    return size != 0;
+    return size == 0;
   }
 
 }
