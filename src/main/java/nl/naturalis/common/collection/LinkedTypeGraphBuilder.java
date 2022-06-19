@@ -1,15 +1,14 @@
 package nl.naturalis.common.collection;
 
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.collection.LinkedTypeGraph.LinkedTypeNode;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import static nl.naturalis.common.ClassMethods.isSubtype;
 import static nl.naturalis.common.ClassMethods.isSupertype;
-import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.collection.LinkedTypeGraph.NO_SUBTYPES;
+import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
 /**
  * A builder class for {@link LinkedTypeGraph} instances.
@@ -40,16 +39,13 @@ public final class LinkedTypeGraphBuilder<V> {
       var subclasses = this.subclasses.stream()
           .map(WritableTypeNode::toTypeNode)
           .toArray(LinkedTypeNode[]::new);
-      if (subclasses.length == 0) {
-        subclasses = NO_SUBTYPES;
-      }
       var subinterfaces = this.subinterfaces.stream()
           .map(WritableTypeNode::toTypeNode)
           .toArray(LinkedTypeNode[]::new);
-      if (subinterfaces.length == 0) {
-        subinterfaces = NO_SUBTYPES;
-      }
-      return new LinkedTypeNode(type, value, subclasses, subinterfaces);
+      return new LinkedTypeNode(type,
+          value,
+          List.of(subclasses),
+          List.of(subinterfaces));
     }
 
     void addChild(WritableTypeNode node) {

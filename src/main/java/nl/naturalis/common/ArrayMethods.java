@@ -8,9 +8,11 @@ import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 import static java.lang.System.arraycopy;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.joining;
 import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.check.CommonChecks.*;
@@ -177,7 +179,7 @@ public final class ArrayMethods {
    */
   @SafeVarargs
   public static <T> boolean isPresent(T ref, T... array) {
-    return findReference(array, ref) != -1;
+    return refIndexOf(array, ref) != -1;
   }
 
   /**
@@ -284,12 +286,30 @@ public final class ArrayMethods {
    * @param reference The reference to search for (must not be null)
    * @return The array index of the reference
    */
-  public static int findReference(Object[] array, Object reference) {
+  public static int refIndexOf(Object[] array, Object reference) {
     Check.notNull(array, "array");
     Check.notNull(reference, "reference");
     return streamIndices(array).filter(i -> array[i] == reference)
         .findFirst()
         .orElse(-1);
+  }
+
+  public static <T> T find(T[] array, Predicate<T> test) {
+    return find(array, test, identity());
+  }
+
+  public static <T, R> R find(T[] array,
+      Predicate<T> test,
+      Function<T, R> property) {
+    Check.notNull(array, "array");
+    Check.notNull(test, "test");
+    Check.notNull(property, "property");
+    for (T obj : array) {
+      if (test.test(obj)) {
+        return property.apply(obj);
+      }
+    }
+    return null;
   }
 
   /**

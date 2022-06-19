@@ -7,8 +7,7 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 import static nl.naturalis.common.CollectionMethods.swapAndFreeze;
-import static nl.naturalis.common.check.CommonChecks.array;
-import static nl.naturalis.common.check.CommonChecks.asObj;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * Methods for inspecting types.
@@ -18,7 +17,8 @@ import static nl.naturalis.common.check.CommonChecks.asObj;
 public final class ClassMethods {
 
   // primitive-to-wrapper
-  private static final Map<Class<?>, Class<?>> P2W = Map.of(double.class,
+  private static final Map<Class<?>, Class<?>> P2W = Map.of(
+      double.class,
       Double.class,
       float.class,
       Float.class,
@@ -70,9 +70,9 @@ public final class ClassMethods {
   }
 
   /**
-   * Tests whether the first class extends or implements of the second class. In
-   * other words, whether it extends or implements the second class. In case you keep
-   * forgetting what "assignable from" even means. Equivalent to
+   * Tests whether the first class is the same as, or a subtype of the second class.
+   * In other words, whether it extends or implements the second class. In case you
+   * keep forgetting what "assignable from" even means. Equivalent to
    * <code>class1.isAssignableFrom(class0)</code>.
    *
    * @param class0 The class or interface you are interested in
@@ -88,9 +88,9 @@ public final class ClassMethods {
   }
 
   /**
-   * Tests whether the first class is a supertype of the second class. In other
-   * words, whether it is extended or implemented by the second class. Equivalent to
-   * <code>class0.isAssignableFrom(class1)</code>.
+   * Tests whether the first class is the same as, or a supertype of the second
+   * class. In other words, whether it is extended or implemented by the second
+   * class. Equivalent to <code>class0.isAssignableFrom(class1)</code>.
    *
    * @param class0 The class or interface you are interested in
    * @param class1 The class or interface to compare it against
@@ -118,107 +118,31 @@ public final class ClassMethods {
   }
 
   /**
-   * Returns whether the specified class is a {@link #isPrimitiveNumber primitive
-   * number} or extends {@link Number} (including {@code Number} itself).
-   *
-   * @param clazz The class to test
-   * @return Whether the specified class is a {@link #isPrimitiveNumber primitive
-   *     number} or extends {@code Number}
-   */
-  public static boolean isNumerical(Class<?> clazz) {
-    Check.notNull(clazz);
-    return Number.class.isAssignableFrom(clazz) || (clazz.isPrimitive()
-                                                        && clazz != boolean.class
-                                                        && clazz != char.class);
-  }
-
-  /**
-   * Returns whether the specified object is a primitive array or a {@code Class}
-   * object representing a primitive array. Defers to {@link
-   * #isPrimitiveArray(Class)} if the specified object is a {@code Class} object.
+   * Returns {@code true} if the specified type is a primitive array as per {@link
+   * #isPrimitiveArray(Class)}.
    *
    * @param obj The object to test
    * @return Whether it is a primitive array class
    */
   public static boolean isPrimitiveArray(Object obj) {
-    Check.notNull(obj);
-    if (obj.getClass() == Class.class) {
-      return isPrimitiveArray((Class<?>) obj);
+    if (obj instanceof Class c) {
+      return isPrimitiveArray(c);
     }
-    return isPrimitiveArray(obj.getClass());
+    return obj != null && isPrimitiveArray(obj.getClass());
   }
 
   /**
-   * Returns whether the class is a primitive array class.
+   * Returns {@code true} if the specified type is an array type and if the
+   * <i>deepest level</i> component is a primitive typr; {@code false} otherwise.
+   * So this method will return true for {@code int[]}, {@code int[][]}, {@code
+   * int[][][]}, etc. NB this method will return {@code false} if the argument is
+   * {@code null}.
    *
    * @param clazz The class to test
    * @return Whether it is a primitive array class
    */
   public static boolean isPrimitiveArray(Class<?> clazz) {
-    return clazz.isArray() && clazz.getComponentType().isPrimitive();
-  }
-
-  /**
-   * Returns whether the specified object is a primitive number array or a {@code
-   * Class} object representing a primitive number array. Defers to {@link
-   * #isPrimitiveNumberArray(Class)} if the specified object is a {@code Class}
-   * object.
-   *
-   * @param obj The object to test
-   * @return Whether it is a primitive array class
-   */
-  public static boolean isPrimitiveNumberArray(Object obj) {
-    Check.notNull(obj);
-    if (obj.getClass() == Class.class) {
-      return isPrimitiveArray((Class<?>) obj);
-    }
-    return isPrimitiveArray(obj.getClass());
-  }
-
-  /**
-   * Returns whether the specified class represents an array of primitive numbers.
-   *
-   * @param clazz The class to test
-   * @return Whether it is a primitive array class
-   */
-  public static boolean isPrimitiveNumberArray(Class<?> clazz) {
-    Check.notNull(clazz);
-    return clazz.isArray()
-        && clazz.getComponentType().isPrimitive()
-        && clazz.getComponentType() != boolean.class
-        && clazz.getComponentType() != char.class;
-  }
-
-  /**
-   * Returns whether the specified object is an array of a {@link #isNumerical
-   * numerical type} or a {@code Class} object representing an array of a numerical
-   * type.
-   *
-   * @param obj The object to test
-   * @return Whether it is an array of a {@code #isNumerical numerical type} or a
-   *     {@code Class} object representing an array of a numerical type
-   */
-  public static boolean isNumericalArray(Object obj) {
-    Check.notNull(obj);
-    if (obj.getClass() == Class.class) {
-      return isNumericalArray((Class<?>) obj);
-    }
-    return isNumericalArray(obj.getClass());
-  }
-
-  /**
-   * Returns whether the specified class represents an array of a {@link #isNumerical
-   * numerical type}.
-   *
-   * @param clazz The class to test
-   * @return whether it represents an array of a numerical type
-   */
-  public static boolean isNumericalArray(Class<?> clazz) {
-    Check.notNull(clazz);
-    Class<?> c;
-    return clazz.isArray()
-        && (Number.class.isAssignableFrom(c = clazz.getComponentType())
-                || (c.isPrimitive() && c != boolean.class && c != char.class));
+    return clazz.isArray() && ArrayInfo.forClass(clazz).baseType().isPrimitive();
   }
 
   /**
@@ -298,8 +222,10 @@ public final class ClassMethods {
    * @return The superclasses of the specified class.
    */
   public static List<Class<?>> getAncestors(Class<?> clazz) {
-    Check.notNull(clazz).isNot(asObj(Class::isInterface),
-        "Cannot get ancestors for interface types");
+    Check.notNull(clazz)
+        .isNot(
+            asObj(Class::isInterface),
+            "Cannot get ancestors for interface types");
     List<Class<?>> l = new ArrayList<>(5);
     for (Class<?> x = clazz.getSuperclass(); x != null; x = x.getSuperclass()) {
       l.add(x);
@@ -308,8 +234,10 @@ public final class ClassMethods {
   }
 
   public static int countAncestors(Class<?> clazz) {
-    Check.notNull(clazz).isNot(asObj(Class::isInterface),
-        "Cannot get ancestors for interface types");
+    Check.notNull(clazz)
+        .isNot(
+            asObj(Class::isInterface),
+            "Cannot get ancestors for interface types");
     int i = 0;
     for (Class<?> x = clazz.getSuperclass(); x != null; x = x.getSuperclass()) {
       ++i;
@@ -321,8 +249,7 @@ public final class ClassMethods {
    * Returns the entire interface hierarchy, both "horizontal" amd "vertical",
    * associated with specified class or interface. Returns an empty set if the
    * argument is a top-level interface, or if the class is a regular class that does
-   * not implement any interface (either directly, or indirectly)and neither directly
-   * nor indirectly through its superclasses).
+   * not implement any interface (directly, or indirectly via its superclass).
    *
    * @param clazz The {@code Class} object for which to retrieve the interface
    *     hierarchy
@@ -426,14 +353,9 @@ public final class ClassMethods {
    * @throws IllegalArgumentException If the argument is not an array class
    */
   public static String arrayClassName(Class<?> arrayClass) {
-    Check.notNull(arrayClass).is(array());
-    Class<?> c = arrayClass.getComponentType();
-    int i = 0;
-    for (; c.isArray(); c = c.getComponentType()) {
-      ++i;
-    }
-    StringBuilder sb = new StringBuilder(c.getName());
-    IntStream.rangeClosed(0, i).forEach(x -> sb.append("[]"));
+    var info = ArrayInfo.forClass(arrayClass);
+    var sb = new StringBuilder(info.baseType().getName());
+    IntStream.range(0, info.dimensions()).forEach(x -> sb.append("[]"));
     return sb.toString();
   }
 
@@ -459,14 +381,9 @@ public final class ClassMethods {
    * @throws IllegalArgumentException If the argument is not an array class
    */
   public static String arrayClassSimpleName(Class<?> arrayClass) {
-    Check.notNull(arrayClass).is(array());
-    Class<?> c = arrayClass.getComponentType();
-    int i = 0;
-    for (; c.isArray(); c = c.getComponentType()) {
-      ++i;
-    }
-    StringBuilder sb = new StringBuilder(c.getSimpleName());
-    IntStream.rangeClosed(0, i).forEach(x -> sb.append("[]"));
+    var info = ArrayInfo.forClass(arrayClass);
+    var sb = new StringBuilder(info.baseType().getSimpleName());
+    IntStream.range(0, info.dimensions()).forEach(x -> sb.append("[]"));
     return sb.toString();
   }
 

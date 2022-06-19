@@ -1,10 +1,12 @@
 package nl.naturalis.common.collection;
 
+import nl.naturalis.common.ClassMethods;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.x.collection.ImmutableSet;
 
 import java.util.*;
 
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static nl.naturalis.common.check.CommonChecks.sameAs;
 import static nl.naturalis.common.check.CommonGetters.type;
 
@@ -74,11 +76,17 @@ abstract class TypeSet<M extends AbstractTypeMap<Object>> extends
   }
 
   public List<String> typeNames() {
-    return map.typeNames();
+    return map.keySet()
+        .stream()
+        .map(ClassMethods::className)
+        .collect(toUnmodifiableList());
   }
 
   public List<String> simpleTypeNames() {
-    return map.simpleTypeNames();
+    return map.keySet()
+        .stream()
+        .map(ClassMethods::simpleClassName)
+        .collect(toUnmodifiableList());
   }
 
   @Override

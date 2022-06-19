@@ -1,5 +1,6 @@
 package nl.naturalis.common.collection;
 
+import nl.naturalis.common.ArrayInfo;
 import org.junit.Test;
 
 import java.io.Serializable;
@@ -240,6 +241,24 @@ public class TypeGraphTest {
   }
 
   @Test
+  public void autobox08() {
+    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+        true,
+        Map.of(int[][][].class, "int[][][]"));
+    assertTrue(m.containsKey(int[][][].class));
+    assertEquals("int[][][]", m.get(int[][][].class));
+  }
+
+  @Test
+  public void autobox09() {
+    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+        true,
+        Map.of(Integer[][][].class, "Integer[][][]"));
+    assertTrue(m.containsKey(int[][][].class));
+    //assertEquals("Integer[][][]", m.get(int[][][].class));
+  }
+
+  @Test
   public void test00() {
     TypeGraph<String> m = TypeGraph.build(String.class)
         .add(String.class, "String")
@@ -310,7 +329,8 @@ public class TypeGraphTest {
 
   @Test
   public void test06() {
-    TypeGraph<String> m = TypeGraph.build(String.class).add(List.class, "List").add(Object.class,
+    TypeGraph<String> m = TypeGraph.build(String.class).add(List.class, "List").add(
+        Object.class,
         "Object").freeze();
     assertEquals("List", m.get(ArrayList.class));
   }
@@ -398,7 +418,8 @@ public class TypeGraphTest {
 
   @Test
   public void test14() {
-    TypeGraph<String> m = TypeGraph.build(String.class).add(A0.class, "A0").add(Serializable.class,
+    TypeGraph<String> m = TypeGraph.build(String.class).add(A0.class, "A0").add(
+        Serializable.class,
         "Serializable").freeze();
     assertTrue(m.containsKey(A000.class));
     assertTrue(m.containsKey(A0001.class));
@@ -449,7 +470,8 @@ public class TypeGraphTest {
 
   @Test(expected = DuplicateKeyException.class)
   public void test19() {
-    TypeGraph<String> m = TypeGraph.build(String.class).add(Object.class, "FOO").add(A0.class,
+    TypeGraph<String> m = TypeGraph.build(String.class).add(Object.class, "FOO").add(
+        A0.class,
         "A0").add(Object.class, "BAR").freeze();
   }
 

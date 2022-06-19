@@ -1,7 +1,6 @@
 package nl.naturalis.common.collection;
 
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.collection.TypeGraph.TypeNode;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -39,11 +38,11 @@ public final class TypeGraphBuilder<V> {
       this.value = val;
     }
 
-    // Split the types in interfaces and non-interfaces. Interfaces can only
-    // extend other interfaces, so if the client passes an interface type to
-    // get() or containsKey() we can significantly confine our search
     TypeNode toTypeNode() {
-      List<List<WritableTypeNode>> mySubtypes = subtypes.group(subtype -> subtype.type.isInterface());
+      // Split the types in interfaces and non-interfaces. Interfaces can only
+      // extend other interfaces, so if the client passes an interface type to
+      // get() or containsKey() we can significantly confine our search
+      List<List<WritableTypeNode>> mySubtypes = subtypes.group(node -> node.type.isInterface());
       var subinterfaces = Map.ofEntries(createEntries(mySubtypes.get(0)));
       var subclasses = Map.ofEntries(createEntries(mySubtypes.get(1)));
       return new TypeNode(type, value, subclasses, subinterfaces);

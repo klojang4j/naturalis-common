@@ -1,6 +1,6 @@
 package nl.naturalis.common;
 
-import static nl.naturalis.common.ArrayMethods.findReference;
+import static nl.naturalis.common.ArrayMethods.refIndexOf;
 import static nl.naturalis.common.ClassMethods.box;
 import static nl.naturalis.common.Morph.stringify;
 
@@ -40,7 +40,7 @@ class MorphTable1 {
     if (ClassMethods.isSubtype(myType, Number.class)) {
       return new NumberConverter(toType).convert((Number) obj);
     } else if (myType.isEnum()) {
-      return findReference(myType.getEnumConstants(), obj);
+      return refIndexOf(myType.getEnumConstants(), obj);
     } else if (myType == Character.class) {
       return charToNumber(obj, box(toType));
     }
@@ -55,7 +55,11 @@ class MorphTable1 {
     if (s.length() == 1) {
       return s.charAt(0);
     }
-    throw new TypeConversionException(obj, toType, "String length exceeds 1: %s", obj);
+    throw new TypeConversionException(
+        obj,
+        toType,
+        "String length exceeds 1: %s",
+        obj);
   }
 
   private static Number charToNumber(Object obj, Class targetType) {

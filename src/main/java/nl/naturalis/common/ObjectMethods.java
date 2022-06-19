@@ -419,21 +419,19 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the first argument if it is not null, else the second argument. An
-   * {@link IllegalArgumentException} if the second argument is {@code null}.
+   * Returns the first argument if it is not null, else the second argument.
    *
    * @param value The value to return if not null
    * @param defVal The value to return if the first argument is {@code null}
    * @return A non-null value
    */
   public static <T> T ifNull(T value, T defVal) {
-    return value == null ? Check.notNull(defVal, "defVal").ok() : value;
+    return value == null ? defVal : value;
   }
 
   /**
-   * Returns the first argument if it is not {@code null}, else a value retrieved
-   * from the specified {@code Supplier}. An {@link IllegalArgumentException} if the
-   * {@code Supplier} supplies {@code null}.
+   * Returns the first argument if it is not {@code null}, else the value produced by
+   * the specified {@code Supplier}.
    *
    * @param <T> The type of the arguments and the return value
    * @param <E> The type of the exception that can potentially be thrown by the
@@ -444,18 +442,12 @@ public class ObjectMethods {
    */
   public static <T, E extends Exception> T ifNull(T value,
       ThrowingSupplier<? extends T, E> supplier) throws E {
-    Check.notNull(supplier, "supplier");
-    if (value == null) {
-      T val = supplier.get();
-      return Check.notNull(val, "supplied value").ok();
-    }
-    return value;
+    return value == null ? Check.notNull(supplier, "supplier").ok().get() : value;
   }
 
   /**
    * Returns the first argument if it is not empty (as per {@link #isEmpty(Object)}),
-   * else the second argument. An {@link IllegalArgumentException} if the {@code
-   * Supplier} supplies an empty value.
+   * else the second argument.
    *
    * @param <T> The type of the arguments and the return value
    * @param value The value to return if it is not empty
@@ -463,16 +455,13 @@ public class ObjectMethods {
    * @return a non-empty value
    */
   public static <T> T ifEmpty(T value, T defVal) {
-    if (isEmpty(value)) {
-      return Check.that(defVal, "defVal").isNot(empty()).ok();
-    }
-    return value;
+    return isEmpty(value) ? defVal : value;
   }
 
   /**
    * Returns the first argument if it is not empty (as per {@link #isEmpty(Object)}),
-   * else a value retrieved from the specified {@code Supplier}. An {@link
-   * IllegalArgumentException} if the {@code Supplier} supplies an empty value.
+   * else the value produced by the specified {@code Supplier} (which may be empty as
+   * well).
    *
    * @param value The value to return if not empty
    * @param supplier The supplier of a default value if {@code value} is null
@@ -482,16 +471,11 @@ public class ObjectMethods {
    */
   public static <T, E extends Exception> T ifEmpty(T value,
       ThrowingSupplier<? extends T, E> supplier) throws E {
-    Check.notNull(supplier, "supplier");
-    if (isEmpty(value)) {
-      T val = supplier.get();
-      return Check.notNull(val, "supplied value").ok();
-    }
-    return value;
+    return isEmpty(value) ? Check.notNull(supplier, "supplier").ok().get() : value;
   }
 
   /**
-   * Returns this first argument if it equals any of the allowed values, else {@code
+   * Returns this first argument if it is among the allowed values, else {@code
    * null}.
    *
    * @param value The value to test
@@ -505,8 +489,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns {@code null} if the first argument equals any of the forbidden values,
-   * else the first argument itself.
+   * Returns {@code null} if the first argument is among the forbidden values, else
+   * the first argument itself.
    *
    * @param <T> The type of the involved values
    * @param value The value to test
@@ -520,7 +504,8 @@ public class ObjectMethods {
 
   /**
    * Returns the result of passing the specified argument to the specified {@code
-   * Funtion} if the argument is not null, else returns null. For example:
+   * Function} if the argument is not {@code null}, else returns {@code null}. For
+   * example:
    *
    * <pre>
    * String[] strs = ifNotNull("Hello World", s -> s.split(" "));

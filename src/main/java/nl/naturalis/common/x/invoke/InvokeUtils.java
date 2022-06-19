@@ -25,7 +25,9 @@ public class InvokeUtils {
 
   private static final Map<Class<?>, MethodHandle> noArgConstructors = new HashMap<>();
   private static final Map<Class<?>, MethodHandle> intArgConstructors = new HashMap<>();
-  private static final Set<String> NON_GETTERS = Set.of("getClass", "toString", "hashCode");
+  private static final Set<String> NON_GETTERS = Set.of("getClass",
+      "toString",
+      "hashCode");
 
   private static final Class[] NARROW_TO_WIDE = pack(byte.class,
       short.class,
@@ -111,11 +113,13 @@ public class InvokeUtils {
   }
 
   /**
-   * Returns all getters of the specified class. If {@code strict} is {@code false}, any method with
-   * a zero-length parameter list and a non-{@code void} return type is regarded as a getter
-   * <i>except</i> {@code getClass()}, {@code hashCode()} and {@code toString()}. Otherwise the
-   * JavaBeans naming conventions are followed, with the exception that methods returning a {@link
-   * Boolean} (rather than {@code boolean}) are allowed to have a name starting with "is".
+   * Returns all getters of the specified class. If {@code strict} is {@code false},
+   * any method with a zero-length parameter list and a non-{@code void} return type
+   * is regarded as a getter
+   * <i>except</i> {@code getClass()}, {@code hashCode()} and {@code toString()}.
+   * Otherwise the JavaBeans naming conventions are followed, with the exception that
+   * methods returning a {@link Boolean} (rather than {@code boolean}) are allowed to
+   * have a name starting with "is".
    *
    * @param beanClass The bean class from which to extract the getter methods
    * @param strict Whether to apply strict JavaBeans naming conventions
@@ -169,12 +173,13 @@ public class InvokeUtils {
   }
 
   /**
-   * Returns the property name corresponding to the specified method, which is assumed to be a
-   * getter. If the method cannot be identified as a getter, an {@link IllegalArgumentException} is
-   * thrown. If {@code strict} is {@code false}, any method with a zero-length parameter list and a
-   * non-{@code void} return type is regarded as a getter. Otherwise the JavaBeans naming
-   * conventions are followed strictly, with the exception that methods returning a {@link Boolean}
-   * (rather than {@code boolean}) are allowed to have a name starting with "is".
+   * Returns the property name corresponding to the specified method, which is
+   * assumed to be a getter. If the method cannot be identified as a getter, an
+   * {@link IllegalArgumentException} is thrown. If {@code strict} is {@code false},
+   * any method with a zero-length parameter list and a non-{@code void} return type
+   * is regarded as a getter. Otherwise the JavaBeans naming conventions are followed
+   * strictly, with the exception that methods returning a {@link Boolean} (rather
+   * than {@code boolean}) are allowed to have a name starting with "is".
    *
    * @param m The method from which to extract a property name
    * @param strict Whether to be strict as regards the method name
@@ -199,9 +204,9 @@ public class InvokeUtils {
   }
 
   /**
-   * Returns the property name corresponding to the specified method, which is assumed to be a
-   * setter. If the method cannot be identified as a setter, an {@link IllegalArgumentException} is
-   * thrown.
+   * Returns the property name corresponding to the specified method, which is
+   * assumed to be a setter. If the method cannot be identified as a setter, an
+   * {@link IllegalArgumentException} is thrown.
    *
    * @param m The method from which to extract a property name
    * @return The name of the property corresponding to the method
@@ -229,7 +234,8 @@ public class InvokeUtils {
     String fmt = "Method %s %s(%s) in class %s is not a %s";
     String rt = ClassMethods.simpleClassName(m.getReturnType());
     String clazz = ClassMethods.className(m.getDeclaringClass());
-    String params = ArrayMethods.implode(m.getParameterTypes(), ClassMethods::simpleClassName);
+    String params = ArrayMethods.implode(m.getParameterTypes(),
+        ClassMethods::simpleClassName);
     String type = asGetter ? "getter" : "setter";
     String msg = String.format(fmt, rt, m.getName(), params, clazz, type);
     return new IllegalArgumentException(msg);
@@ -241,7 +247,8 @@ public class InvokeUtils {
       return true;
     }
     if (n.length() > 3 && n.startsWith("is") && isUpperCase(n.charAt(2))) {
-      return m.getReturnType() == boolean.class || m.getReturnType() == Boolean.class;
+      return m.getReturnType() == boolean.class
+          || m.getReturnType() == Boolean.class;
     }
     return false;
   }
