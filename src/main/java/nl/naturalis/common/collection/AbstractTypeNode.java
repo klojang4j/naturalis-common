@@ -1,7 +1,6 @@
 package nl.naturalis.common.collection;
 
-import nl.naturalis.common.ArrayInfo;
-import nl.naturalis.common.Tuple2;
+import nl.naturalis.common.ArrayType;
 
 import java.util.*;
 
@@ -200,7 +199,7 @@ abstract sealed class AbstractTypeNode permits TypeNode, LinkedTypeNode {
     if (type.isPrimitive()) {
       return box(type);
     } else if (isPrimitiveArray(type)) {
-      ArrayInfo.forClass(type).box();
+      ArrayType.forClass(type).box();
     }
     return null;
   }

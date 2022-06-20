@@ -1,6 +1,5 @@
 package nl.naturalis.common.collection;
 
-import nl.naturalis.common.ArrayInfo;
 import org.junit.Test;
 
 import java.io.Serializable;

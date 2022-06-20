@@ -142,7 +142,7 @@ public final class ClassMethods {
    * @return Whether it is a primitive array class
    */
   public static boolean isPrimitiveArray(Class<?> clazz) {
-    return clazz.isArray() && ArrayInfo.forClass(clazz).baseType().isPrimitive();
+    return clazz.isArray() && ArrayType.forClass(clazz).baseType().isPrimitive();
   }
 
   /**
@@ -332,7 +332,7 @@ public final class ClassMethods {
   }
 
   /**
-   * Returns a description for the specified array that is a bit easier on they eye
+   * Returns a description for the specified array that is a bit easier on the eye
    * than what you get from {@link Class#getName()}. For example {@code
    * arrayClassName(new String[0][0])} will return {@code java.lang.String[][]}.
    *
@@ -345,7 +345,7 @@ public final class ClassMethods {
   }
 
   /**
-   * Returns a description for the specified array class that is a bit easier on they
+   * Returns a description for the specified array class that is a bit easier on the
    * eye than what you get from {@link Class#getName()}.
    *
    * @param arrayClass The array type
@@ -353,7 +353,7 @@ public final class ClassMethods {
    * @throws IllegalArgumentException If the argument is not an array class
    */
   public static String arrayClassName(Class<?> arrayClass) {
-    var info = ArrayInfo.forClass(arrayClass);
+    var info = ArrayType.forClass(arrayClass);
     var sb = new StringBuilder(info.baseType().getName());
     IntStream.range(0, info.dimensions()).forEach(x -> sb.append("[]"));
     return sb.toString();
@@ -381,7 +381,7 @@ public final class ClassMethods {
    * @throws IllegalArgumentException If the argument is not an array class
    */
   public static String arrayClassSimpleName(Class<?> arrayClass) {
-    var info = ArrayInfo.forClass(arrayClass);
+    var info = ArrayType.forClass(arrayClass);
     var sb = new StringBuilder(info.baseType().getSimpleName());
     IntStream.range(0, info.dimensions()).forEach(x -> sb.append("[]"));
     return sb.toString();

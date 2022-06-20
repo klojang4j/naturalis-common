@@ -1,6 +1,6 @@
 package nl.naturalis.common.collection;
 
-import nl.naturalis.common.ArrayInfo;
+import nl.naturalis.common.ArrayType;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.x.collection.ArraySet;
 
@@ -44,7 +44,7 @@ abstract sealed class NativeTypeMap<V, TYPE_NODE extends AbstractTypeNode> exten
         }
       }
     } else if (isPrimitiveArray(type)) {
-      var info = ArrayInfo.forClass(type);
+      var info = ArrayType.forClass(type);
       if ((val = root.getPrimitive(type)) == null) {
         if (autobox) {
           val = root.get(info.box());
@@ -77,7 +77,7 @@ abstract sealed class NativeTypeMap<V, TYPE_NODE extends AbstractTypeNode> exten
       }
     } else if (isPrimitiveArray(type)) {
       if (autobox) {
-        Class<?> boxed = ArrayInfo.forClass(type).box();
+        Class<?> boxed = ArrayType.forClass(type).box();
         found = containsPrimitiveOrBoxedType(type, boxed);
       } else {
         found = containsPrimitiveType(type);
