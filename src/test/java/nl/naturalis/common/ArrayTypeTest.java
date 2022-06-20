@@ -115,6 +115,18 @@ public class ArrayTypeTest {
   }
 
   @Test
+  public void boxed00() {
+    ArrayType at = new ArrayType(short.class, 1);
+    assertEquals(new ArrayType(Short.class, 1), at.boxed());
+  }
+
+  @Test
+  public void unboxed00() {
+    ArrayType at = new ArrayType(Double.class, 4);
+    assertEquals(new ArrayType(double.class, 4), at.unboxed());
+  }
+
+  @Test
   public void box00() {
     ArrayType at = new ArrayType(short.class, 1);
     assertEquals(Short[].class, at.box());
