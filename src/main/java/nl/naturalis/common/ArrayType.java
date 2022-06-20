@@ -156,6 +156,24 @@ public record ArrayType(Class<?> baseType, int dimensions) {
   }
 
   /**
+   * Returns the {@code ArrayType} for the boxed version of the base type.
+   *
+   * @return The {@code ArrayType} for the boxed version of the base type
+   */
+  public ArrayType boxed() {
+    return new ArrayType(ClassMethods.box(baseType), dimensions);
+  }
+
+  /**
+   * Returns the {@code ArrayType} for the unboxed version of the base type.
+   *
+   * @return The {@code ArrayType} for the unboxed version of the base type
+   */
+  public ArrayType unboxed() {
+    return new ArrayType(ClassMethods.unbox(baseType), dimensions);
+  }
+
+  /**
    * Returns the simple class name of the array type encoded by this {@code
    * ArrayType}, in a format that is a bit easier on the eye than what you get from
    * {@link Class#getSimpleName()}. For example the returned value for {@code

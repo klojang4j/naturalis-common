@@ -1,14 +1,16 @@
 package nl.naturalis.common.collection;
 
+import nl.naturalis.common.ArrayType;
 import nl.naturalis.common.Tuple2;
 import nl.naturalis.common.check.Check;
 
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Set;
 
-import static nl.naturalis.common.ClassMethods.box;
-import static nl.naturalis.common.check.CommonChecks.sameAs;
-import static nl.naturalis.common.check.CommonGetters.type;
+import static nl.naturalis.common.ClassMethods.*;
+import static nl.naturalis.common.ObjectMethods.ifNull;
+import static nl.naturalis.common.check.CommonChecks.instanceOf;
 
 /*
  * Currently only extended by TypeHashMap, but could be base class for any TypeMap
@@ -28,24 +30,26 @@ abstract sealed class MultiPassTypeMap<V> extends AbstractTypeMap<V> permits
 
   @Override
   public V get(Object key) {
-    Check.notNull(key).has(type(), sameAs(), Class.class);
-    Class<?> type = (Class<?>) key;
-    Tuple2<Class<?>, V> tuple = find(type);
-    if (tuple == null) {
+    Class<?> type = Check.notNull(key)
+        .is(instanceOf(), Class.class)
+        .ok(Class.class::cast);
+    Tuple2<Class<?>, V> entry = find(type);
+    if (entry.second() == NULL) {
       return null;
     }
-    if (autoExpand && type != tuple.first()) {
-      backend().put(type, tuple.second());
+    if (autoExpand && type != entry.first()) {
+      backend().put(type, entry.second());
     }
-    return tuple.second();
+    return entry.second();
   }
 
   @Override
   public boolean containsKey(Object key) {
-    Check.notNull(key).has(type(), sameAs(), Class.class);
-    Class<?> type = (Class<?>) key;
+    Class<?> type = Check.notNull(key)
+        .is(instanceOf(), Class.class)
+        .ok(Class.class::cast);
     Tuple2<Class<?>, V> entry = find(type);
-    if (entry == null) {
+    if (entry.second() == NULL) {
       return false;
     }
     if (autoExpand && type != entry.first()) {
@@ -54,96 +58,100 @@ abstract sealed class MultiPassTypeMap<V> extends AbstractTypeMap<V> permits
     return true;
   }
 
-  private Tuple2<Class<?>, V> find(Class<?> k) {
-    V v = backend().get(k);
-    return v == null
-        ? k.isArray() ? findArrayType(k) : findSimpleType(k)
-        : Tuple2.of(k, v);
+  private Tuple2<Class<?>, V> find(Class<?> type) {
+    V val;
+    if ((val = backend().get(type)) != null) {
+      return Tuple2.of(type, val);
+    }
+    Tuple2<Class<?>, V> result = null;
+    if (type.isArray()) {
+      ArrayType at = ArrayType.forClass(type);
+      if (at.baseType().isPrimitive()) {
+        if (autobox) {
+          result = find(at.box());
+        }
+      } else if (at.baseType().isInterface()) {
+        result = findInterfaceArray(at);
+      } else if ((result = findSuperClassArray(at)) == null) {
+        result = findInterfaceArray(at);
+      }
+    } else if (type.isPrimitive()) {
+      if (autobox) {
+        result = find(box(type));
+      }
+    } else if (type.isInterface()) {
+      result = findInterface(type);
+    } else if ((result = findSuperClass(type)) == null) {
+      result = findInterface(type);
+    }
+    if (result == null) {
+      return defaultValue();
+    }
+    return result;
   }
 
-  private Tuple2<Class<?>, V> findSimpleType(Class<?> k) {
-    if (k.isInterface()) {
-      Tuple2<Class<?>, V> t = climbInterfaces(k, false);
-      return t == null ? defaultValue() : t;
-    }
-    // We don't want to search for Object.class just yet.
-    for (Class<?> c = k.getSuperclass();
-        c != null && c != Object.class;
-        c = c.getSuperclass()) {
-      V v = backend().get(c);
-      if (v != null) {
-        return Tuple2.of(c, v);
+  private Tuple2<Class<?>, V> findSuperClass(Class<?> type) {
+    List<Class<?>> supertypes = getAncestors(type);
+    for (Class<?> c : supertypes) {
+      if (c == Object.class) {
+        break; // don't resort to that one just yet
       }
-    }
-    for (Class<?> c = k; c != null && c != Object.class; c = c.getSuperclass()) {
-      Tuple2<Class<?>, V> t = climbInterfaces(c, false);
-      if (t != null) {
-        return t;
-      }
-    }
-    if (autobox && k.isPrimitive()) {
-      return find(box(k));
-    }
-    return defaultValue();
-  }
-
-  private Tuple2<Class<?>, V> findArrayType(Class<?> k) {
-    Class<?> elementType = k.componentType();
-    if (elementType.isInterface()) {
-      Tuple2<Class<?>, V> t = climbInterfaces(elementType, true);
-      return t == null ? defaultValue() : t;
-    }
-    for (Class<?> c = elementType.getSuperclass();
-        c != null;
-        c = c.getSuperclass()) {
-      Class<?> arrayType = c.arrayType();
-      V v = backend().get(arrayType);
-      if (v != null) {
-        return Tuple2.of(arrayType, v);
-      }
-    }
-    for (Class<?> c = elementType; c != null; c = c.getSuperclass()) {
-      Tuple2<Class<?>, V> t = climbInterfaces(c, true);
-      if (t != null) {
-        return t;
-      }
-    }
-    if (autobox && elementType.isPrimitive()) {
-      return find(box(elementType).arrayType());
-    }
-    return defaultValue();
-  }
-
-  private AtomicReference<Tuple2<Class<?>, V>> defVal;
-
-  private Tuple2<Class<?>, V> defaultValue() {
-    if (defVal == null) {
-      V val = backend().get(Object.class);
-      Tuple2<Class<?>, V> tuple = (val == null)
-          ? null
-          : Tuple2.of(Object.class, val);
-      defVal = new AtomicReference<>(tuple);
-    }
-    return defVal.getPlain();
-  }
-
-  private Tuple2<Class<?>, V> climbInterfaces(Class<?> clazz, boolean array) {
-    for (Class<?> c : clazz.getInterfaces()) {
-      Class<?> c0 = array ? c.arrayType() : c;
-      V v = backend().get(c0);
-      if (v != null) {
-        return Tuple2.of(c0, v);
-      }
-    }
-    // Start new loop for breadth-first traversal. We prefer
-    // more specific interfaces over less specific interfaces
-    for (Class<?> c : clazz.getInterfaces()) {
-      Tuple2<Class<?>, V> t = climbInterfaces(c, array);
-      if (t != null) {
-        return t;
+      V val = backend().get(c);
+      if (val != null) {
+        return Tuple2.of(c, val);
       }
     }
     return null;
+  }
+
+  private Tuple2<Class<?>, V> findInterface(Class<?> type) {
+    Set<Class<?>> supertypes = getAllInterfaces(type);
+    for (Class<?> c : supertypes) {
+      V val = backend().get(c);
+      if (val != null) {
+        return Tuple2.of(c, val);
+      }
+    }
+    return null;
+  }
+
+  private Tuple2<Class<?>, V> findSuperClassArray(ArrayType arrayType) {
+    List<Class<?>> supertypes = getAncestors(arrayType.baseType());
+    for (Class<?> c : supertypes) {
+      // Now we do want to go up all the way to Object.class, because
+      // what we are actually going to ask for is Object[].class (or
+      // whatever the dimensionality of the array type)
+      Class<?> arrayClass = arrayType.toClass(c);
+      V val = backend().get(arrayClass);
+      if (val != null) {
+        return Tuple2.of(arrayClass, val);
+      }
+    }
+    return null;
+  }
+
+  private Tuple2<Class<?>, V> findInterfaceArray(ArrayType arrayType) {
+    Set<Class<?>> supertypes = getAllInterfaces(arrayType.baseType());
+    for (Class<?> c : supertypes) {
+      Class<?> arrayClass = arrayType.toClass(c);
+      V val = backend().get(arrayClass);
+      if (val != null) {
+        return Tuple2.of(arrayClass, val);
+      }
+    }
+    return null;
+  }
+
+  @SuppressWarnings({"unchecked"})
+  private final V NULL = (V) new Object();
+  private Tuple2<Class<?>, V> defVal;
+
+  private Tuple2<Class<?>, V> defaultValue() {
+    if (defVal == null) {
+      V val = ifNull(backend().get(Object.class), NULL);
+      defVal = new Tuple2<>(Object.class, val);
+    }
+    return defVal;
   }
 
   @Override

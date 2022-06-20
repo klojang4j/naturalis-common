@@ -9,25 +9,28 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 import static nl.naturalis.common.check.CommonChecks.deepNotNull;
 
 /**
- * A {@link TypeMap} that is internally backed by a regular {@link HashMap}. Type
- * lookups may involve several queries against the backing map. If the requested type
- * is not itself present in the backing map, the {@code TypeHashMap} will climb up
- * the type's class and interface hierarchy to see if any of its supertypes is.
+ * A {@link TypeMap} that is internally backed by a regular {@link Map}. Type lookups
+ * may involve several queries against the backing map. If a type, requested via
+ * {@code get} or {@code containsKey}, is not itself present in the backing map, the
+ * {@code TypeHashMap} will climb up the type's class and interface hierarchy to see
+ * if any of its supertypes is.
  *
  * <h4>Auto-expansion</h4>
  *
- * <p>A {@code TypeHashMap} is immutable. All map-altering methods throw an
- * {@link UnsupportedOperationException}. However, it can be configured to
- * automatically absorb subtypes of types that already are in the map. If the
- * requested type is not present in the map, but one of its supertypes is, the {@link
- * #get(Object) get} and {@link #containsKey(Object) containsKey} methods will
- * tacitly add the subtype to the map, associating it with the value of the
- * supertype. Thus, when the subtype is requested again, it will result in a direct
- * hit. In the end, a {@code TypeHashMap} will behave (and perform) like a regular
- * {@code HashMap}. It is just a pass-thru for the backing map.
+ * <p>As required by the {@link TypeMap} specification, {@code TypeHashMap} is
+ * an immutable class. All map-altering methods throw an {@link
+ * UnsupportedOperationException}. However, it can be configured to tacitly absorb
+ * new types upon being requested, provided the new type is a subtype of a type that
+ * is already in the map. The new type will then be associated with the same value as
+ * its supertype. Thus, when the type is requested again, it will result in a direct
+ * hit. In the end, a {@code TypeHashMap} will be nothing but a pass-through shell
+ * around the {@code HashMap} that backs it - and perform as such!
  *
  * @param <V> The type of the values in the {@code Map}
  * @author Ayco Holleman
+ * @see TypeMap
+ * @see TypeGraph
+ * @see LinkedTypeGraph
  */
 public final class TypeHashMap<V> extends MultiPassTypeMap<V> {
 
@@ -40,21 +43,21 @@ public final class TypeHashMap<V> extends MultiPassTypeMap<V> {
    * @return A {@code TypeHashMap}
    */
   public static <U> TypeHashMap<U> copyOf(Map<Class<?>, U> src) {
-    return copyOf(src, false, true);
+    return copyOf(true, false, src);
   }
 
   /**
    * Converts the specified {@code Map} to a {@code TypeHashMap}.
    *
    * @param <U> The type of the values in the {@code Map}
-   * @param src The {@code Map} to convert
-   * @param autoExpand Whether to enable auto-expansion (see class comments)
    * @param autobox Whether to enable "autoboxing" (see {@link AbstractTypeMap})
+   * @param autoExpand Whether to enable auto-expansion (see class comments)
+   * @param src The {@code Map} to convert
    * @return A {@code TypeHashMap}
    */
-  public static <U> TypeHashMap<U> copyOf(Map<Class<?>, U> src,
+  public static <U> TypeHashMap<U> copyOf(boolean autobox,
       boolean autoExpand,
-      boolean autobox) {
+      Map<Class<?>, U> src) {
     Check.that(src, "src").is(deepNotNull());
     return autoExpand
         ? new TypeHashMap<>(src, 2, autobox)
@@ -97,7 +100,7 @@ public final class TypeHashMap<V> extends MultiPassTypeMap<V> {
 
   @Override
   public Collection<V> values() {
-    return autoExpand ? Set.copyOf(backend.values()) : backend.values();
+    return Set.copyOf(backend.values());
   }
 
   @Override

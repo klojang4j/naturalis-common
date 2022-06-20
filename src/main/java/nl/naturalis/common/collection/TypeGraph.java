@@ -1,14 +1,10 @@
 package nl.naturalis.common.collection;
 
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.x.collection.ArraySet;
 
-import java.util.*;
-
-import static java.util.AbstractMap.SimpleImmutableEntry;
-import static nl.naturalis.common.ClassMethods.*;
-import static nl.naturalis.common.CollectionMethods.implode;
-import static nl.naturalis.common.check.CommonChecks.instanceOf;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A {@link TypeMap} that stores its entries in a data structure that reflects the
@@ -22,7 +18,9 @@ import static nl.naturalis.common.check.CommonChecks.instanceOf;
  * {@code get} method, on the other hand, needs to descend into the type hierarchy
  * until it finds the requested type, or knows for sure it is absent.
  *
- * <p>The key set provides a depth-first view of the type hierarchy.
+ * <p>The {@link #keySet()} method returns a depth-first view of the type
+ * hierarchy within the map. You can also request a {@link #keySetBreadthFirst()
+ * breadth-first view} of the type hierarchy.
  *
  * @param <V> The type of the values in the  {@code Map}
  * @see TypeGraphBuilder
@@ -74,17 +72,17 @@ public final class TypeGraph<V> extends NativeTypeMap<V, TypeNode> {
     return Check.notNull(valueType).ok(TypeGraphBuilder::new);
   }
 
-  private final TypeNode root;
-  private final int size;
-
-  private Set<Class<?>> keys;
-  private Collection<V> values;
-  private Set<Entry<Class<?>, V>> entries;
-
   TypeGraph(TypeNode root, int size, boolean autobox) {
     super(root, size, autobox);
-    this.root = root;
-    this.size = size;
+  }
+
+  /**
+   * Returns a breadth-first view of the type hierarchy within this {@code Map}.
+   *
+   * @return A breadth-first view of the type hierarchy within this {@code Map}
+   */
+  public Set<Class<?>> keySetBreadthFirst() {
+    return super.keySetBreadthFirst();
   }
 
 }

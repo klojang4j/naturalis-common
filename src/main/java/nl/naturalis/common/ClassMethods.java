@@ -222,10 +222,8 @@ public final class ClassMethods {
    * @return The superclasses of the specified class.
    */
   public static List<Class<?>> getAncestors(Class<?> clazz) {
-    Check.notNull(clazz)
-        .isNot(
-            asObj(Class::isInterface),
-            "Cannot get ancestors for interface types");
+    Check.notNull(clazz).isNot(Class::isInterface,
+        "Cannot get ancestors for interface type {0}", clazz);
     List<Class<?>> l = new ArrayList<>(5);
     for (Class<?> x = clazz.getSuperclass(); x != null; x = x.getSuperclass()) {
       l.add(x);
@@ -236,7 +234,7 @@ public final class ClassMethods {
   public static int countAncestors(Class<?> clazz) {
     Check.notNull(clazz)
         .isNot(
-            asObj(Class::isInterface),
+            Class::isInterface,
             "Cannot get ancestors for interface types");
     int i = 0;
     for (Class<?> x = clazz.getSuperclass(); x != null; x = x.getSuperclass()) {
@@ -246,7 +244,7 @@ public final class ClassMethods {
   }
 
   /**
-   * Returns the entire interface hierarchy, both "horizontal" amd "vertical",
+   * Returns the entire interface hierarchy, both "horizontal" and "vertical",
    * associated with specified class or interface. Returns an empty set if the
    * argument is a top-level interface, or if the class is a regular class that does
    * not implement any interface (directly, or indirectly via its superclass).
@@ -257,19 +255,20 @@ public final class ClassMethods {
    */
   public static Set<Class<?>> getAllInterfaces(Class<?> clazz) {
     Check.notNull(clazz);
-    Set<Class<?>> interfaces = new LinkedHashSet<>();
-    collectInterfaces(interfaces, clazz);
+    Set<Class<?>> bucket = new LinkedHashSet<>();
+    collectInterfaces(clazz, bucket);
     for (Class<?> c = clazz.getSuperclass(); c != null; c = c.getSuperclass()) {
-      collectInterfaces(interfaces, c);
+      collectInterfaces(c, bucket);
     }
-    return interfaces;
+    return bucket;
   }
 
-  private static void collectInterfaces(Set<Class<?>> interfaces, Class<?> clazz) {
+  private static void collectInterfaces(Class<?> clazz,
+      Set<Class<?>> bucket) {
     Class<?>[] myInterfaces = clazz.getInterfaces();
-    interfaces.addAll(List.of(myInterfaces));
+    bucket.addAll(Arrays.asList(myInterfaces));
     for (Class<?> c : myInterfaces) {
-      collectInterfaces(interfaces, c);
+      collectInterfaces(c, bucket);
     }
   }
 

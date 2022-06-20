@@ -2,55 +2,40 @@ package nl.naturalis.common.collection;
 
 import org.junit.Test;
 
-import java.io.BufferedOutputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
-import java.nio.Buffer;
 import java.util.*;
 
-import static nl.naturalis.common.ClassMethods.*;
 import static org.junit.Assert.*;
 
-public class TypeGraphTest {
+public class TypeHashMapTest {
+
+  //////////////////////////////////////////////////////////////
+  // Specific for TypeHashMap. DON'T OVERWRITE when copy-pasting
+  //////////////////////////////////////////////////////////////
+  @Test
+  public void autoExpand00() {
+    TypeHashMap<String> m = TypeHashMap.copyOf(true, true,
+        Map.of(Integer.class, "Integer"));
+    assertEquals(1, m.size());
+    assertTrue(m.containsKey(int.class));
+    assertEquals(2, m.size());
+  }
 
   @Test
-  public void keySet00() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
-        .add(Object.class, "Object")
-        .add(Number.class, "Number")
-        .add(Integer.class, "Integer")
-        .add(Double.class, "Double")
-        .add(Short.class, "Short")
-        .add(Iterable.class, "Iterable")
-        .add(Collection.class, "Collection")
-        .add(List.class, "List")
-        .add(ArrayList.class, "ArrayList")
-        .add(LinkedList.class, "LinkedList")
-        .add(Set.class, "Set")
-        .add(HashSet.class, "HashSet")
-        .add(LinkedHashSet.class, "LinkedHashSet")
-        .freeze();
-    List<Class<?>> keys = new ArrayList<>(m.keySet());
-    //System.out.println(keys);
-    assertEquals(13, keys.size());
-    assertEquals(Object.class, keys.get(0));
-    assertTrue(keys.indexOf(Number.class) < keys.indexOf(Double.class));
-    assertTrue(keys.indexOf(Number.class) < keys.indexOf(Integer.class));
-    assertTrue(keys.indexOf(Number.class) < keys.indexOf(Short.class));
-    assertTrue(keys.indexOf(Iterable.class) < keys.indexOf(Collection.class));
-    assertTrue(keys.indexOf(Collection.class) < keys.indexOf(List.class));
-    assertTrue(keys.indexOf(List.class) < keys.indexOf(ArrayList.class));
-    assertTrue(keys.indexOf(List.class) < keys.indexOf(LinkedList.class));
-    assertTrue(keys.indexOf(Collection.class) < keys.indexOf(Set.class));
-    assertTrue(keys.indexOf(Set.class) < keys.indexOf(HashSet.class));
-    assertTrue(keys.indexOf(Set.class) < keys.indexOf(LinkedHashSet.class));
+  public void autoExpand01() {
+    TypeHashMap<String> m = TypeHashMap.copyOf(true, false,
+        Map.of(Integer.class, "Integer"));
+    assertEquals(1, m.size());
+    assertTrue(m.containsKey(int.class));
+    assertEquals(1, m.size());
   }
+  //////////////////////////////////////////////////////////////
 
   @Test
   public void entrySet00() {
     // Works just like keysSet(), so we only include it as a sanity
     // check, and for test coverage.
-    TypeGraph<String> m = TypeGraph.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(Object.class, "Object")
         .add(Number.class, "Number")
         .add(Integer.class, "Integer")
@@ -67,12 +52,12 @@ public class TypeGraphTest {
         .freeze();
     Set entries = m.entrySet();
     assertEquals(13, entries.size());
-    //System.out.println(entries);
+    // we can't say much more about the order of the keys with TypeHashMap
   }
 
   @Test
   public void values00() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(Object.class, "Foo")
         .add(
             Number.class,
@@ -102,7 +87,7 @@ public class TypeGraphTest {
 
   @Test
   public void copyOf00() {
-    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+    TypeHashMap<String> m = TypeHashMap.copyOf(true,
         true,
         Map.of(Number.class, "Number"));
     assertFalse(m.isEmpty());
@@ -112,7 +97,7 @@ public class TypeGraphTest {
 
   @Test
   public void copyOf01() {
-    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+    TypeHashMap<String> m = TypeHashMap.copyOf(true, false,
         Map.of(Number.class, "Number"));
     assertTrue(m.containsKey(int.class));
     assertEquals("Number", m.get(int.class));
@@ -120,7 +105,7 @@ public class TypeGraphTest {
 
   @Test
   public void copyOf02() {
-    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+    TypeHashMap<String> m = TypeHashMap.copyOf(false,
         false,
         Map.of(Number.class, "Number"));
     assertFalse(m.containsKey(int.class));
@@ -129,7 +114,7 @@ public class TypeGraphTest {
 
   @Test
   public void size00() {
-    TypeGraph<String> m = TypeGraph.copyOf(String.class, false, Map.of());
+    TypeHashMap<String> m = TypeHashMap.copyOf(false, false, Map.of());
     assertEquals(0, m.size());
     assertTrue(m.isEmpty());
     assertFalse(m.containsKey(Object.class));
@@ -137,7 +122,7 @@ public class TypeGraphTest {
 
   @Test
   public void size01() {
-    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+    TypeHashMap<String> m = TypeHashMap.copyOf(false,
         false,
         Map.of(Serializable.class, "FOO"));
     assertEquals(1, m.size());
@@ -151,7 +136,7 @@ public class TypeGraphTest {
   public void autobox00() {
     // When Object.class is present, anything goes. You don't even
     // need to have autoboxing turned on! See comments for TypeMap.
-    TypeGraph<String> m = TypeGraph.copyOf(String.class, false, Map.of(Object.class,
+    TypeHashMap<String> m = TypeHashMap.copyOf(false, false, Map.of(Object.class,
         "Object",
         Serializable.class,
         "Serializable",
@@ -165,7 +150,7 @@ public class TypeGraphTest {
 
   @Test // sanity check
   public void autobox01() {
-    TypeGraph<String> m = TypeGraph.copyOf(String.class, false, Map.of(int.class,
+    TypeHashMap<String> m = TypeHashMap.copyOf(false, false, Map.of(int.class,
         "int",
         Serializable.class,
         "Serializable",
@@ -179,7 +164,7 @@ public class TypeGraphTest {
 
   @Test
   public void autobox02() {
-    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+    TypeHashMap<String> m = TypeHashMap.copyOf(false,
         false,
         Map.of(Serializable.class,
             "Serializable",
@@ -193,7 +178,7 @@ public class TypeGraphTest {
 
   @Test
   public void autobox03() {
-    TypeGraph<String> m = TypeGraph.copyOf(String.class, true, Map.of(Object.class,
+    TypeHashMap<String> m = TypeHashMap.copyOf(true, true, Map.of(Object.class,
         "Object",
         Serializable.class,
         "Serializable",
@@ -207,7 +192,7 @@ public class TypeGraphTest {
 
   @Test
   public void autobox04() {
-    TypeGraph<String> m = TypeGraph.copyOf(String.class, true, Map.of(Object.class,
+    TypeHashMap<String> m = TypeHashMap.copyOf(true, true, Map.of(Object.class,
         "Object",
         Serializable.class,
         "Serializable",
@@ -219,7 +204,7 @@ public class TypeGraphTest {
 
   @Test
   public void autobox05() {
-    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+    TypeHashMap<String> m = TypeHashMap.copyOf(true,
         true,
         Map.of(Object.class, "Object", Serializable.class, "Serializable"));
     assertTrue(m.containsKey(int.class));
@@ -228,7 +213,7 @@ public class TypeGraphTest {
 
   @Test
   public void autobox06() {
-    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+    TypeHashMap<String> m = TypeHashMap.copyOf(true,
         true,
         Map.of(Object.class, "Object"));
     assertTrue(m.containsKey(int.class));
@@ -237,14 +222,14 @@ public class TypeGraphTest {
 
   @Test
   public void autobox07() {
-    TypeGraph<String> m = TypeGraph.copyOf(String.class, true, Map.of());
+    TypeHashMap<String> m = TypeHashMap.copyOf(true, true, Map.of());
     assertFalse(m.containsKey(int.class));
     assertNull(m.get(int.class));
   }
 
   @Test
   public void autobox08() {
-    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+    TypeHashMap<String> m = TypeHashMap.copyOf(true,
         true,
         Map.of(int[][][].class, "int[][][]"));
     assertTrue(m.containsKey(int[][][].class));
@@ -253,16 +238,16 @@ public class TypeGraphTest {
 
   @Test
   public void autobox09() {
-    TypeGraph<String> m = TypeGraph.copyOf(String.class,
+    TypeHashMap<String> m = TypeHashMap.copyOf(true,
         true,
         Map.of(Integer[][][].class, "Integer[][][]"));
     assertTrue(m.containsKey(int[][][].class));
-    //assertEquals("Integer[][][]", m.get(int[][][].class));
+    assertEquals("Integer[][][]", m.get(int[][][].class));
   }
 
   @Test
   public void test00() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(String.class, "String")
         .add(Number.class, "Number")
         .add(Short.class, "Short")
@@ -281,7 +266,7 @@ public class TypeGraphTest {
 
   @Test
   public void test01() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(Object.class, "Object")
         .freeze();
     assertEquals(1, m.size());
@@ -290,7 +275,7 @@ public class TypeGraphTest {
 
   @Test
   public void test02() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(Object.class, "Object")
         .freeze();
     assertEquals(1, m.size());
@@ -299,7 +284,7 @@ public class TypeGraphTest {
 
   @Test
   public void test03() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(Object.class, "Object")
         .freeze();
     assertEquals(1, m.size());
@@ -312,7 +297,7 @@ public class TypeGraphTest {
 
   @Test
   public void test04() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(ArrayList.class,
             "ArrayList")
         .add(List.class, "List")
@@ -323,23 +308,24 @@ public class TypeGraphTest {
 
   @Test
   public void test05() {
-    TypeGraph<String> m = TypeGraph.build(String.class).add(
-        ArrayList.class,
-        "ArrayList").add(MyListInterface.class, "MyListInterface").freeze();
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
+        .add(ArrayList.class, "ArrayList")
+        .add(MyListInterface.class, "MyListInterface").freeze();
     assertEquals("ArrayList", m.get(MyArrayList.class));
   }
 
   @Test
   public void test06() {
-    TypeGraph<String> m = TypeGraph.build(String.class).add(List.class, "List").add(
-        Object.class,
-        "Object").freeze();
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
+        .add(List.class, "List")
+        .add(Object.class, "Object")
+        .freeze();
     assertEquals("List", m.get(ArrayList.class));
   }
 
   @Test
   public void test07() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(List[].class, "List[]")
         .add(Object.class, "Object")
         .freeze();
@@ -348,22 +334,23 @@ public class TypeGraphTest {
 
   @Test
   public void test08() {
-    TypeGraph<String> m = TypeGraph.build(String.class).add(Object[].class,
-        "Object[]").add(Object.class, "Object").freeze();
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
+        .add(Object[].class, "Object[]")
+        .add(Object.class, "Object").freeze();
     assertEquals(2, m.size());
     assertEquals("Object[]", m.get(ArrayList[].class));
   }
 
   @Test
   public void test09() {
-    TypeGraph<String> m = TypeGraph.build(String.class).add(Object[].class,
+    TypeHashMap<String> m = TypeHashMap.build(String.class).add(Object[].class,
         "Object[]").add(Object.class, "Object").freeze();
     assertEquals("Object", m.get(Object.class));
   }
 
   @Test
   public void test10() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .autobox(true)
         .add(Object.class, "Object")
         .freeze();
@@ -372,7 +359,7 @@ public class TypeGraphTest {
 
   @Test
   public void test11() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .autobox(false)
         .add(Object.class, "Object")
         .freeze();
@@ -381,7 +368,7 @@ public class TypeGraphTest {
 
   @Test
   public void test12() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .autobox(false)
         .add(Object.class, "Object")
         .freeze();
@@ -390,7 +377,7 @@ public class TypeGraphTest {
 
   @Test
   public void test13() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(Iterable.class, "Iterable")
         .add(Collection.class, "Collection")
         .add(Set.class, "Set")
@@ -420,7 +407,7 @@ public class TypeGraphTest {
 
   @Test
   public void test14() {
-    TypeGraph<String> m = TypeGraph.build(String.class).add(A0.class, "A0").add(
+    TypeHashMap<String> m = TypeHashMap.build(String.class).add(A0.class, "A0").add(
         Serializable.class,
         "Serializable").freeze();
     assertTrue(m.containsKey(A000.class));
@@ -430,7 +417,7 @@ public class TypeGraphTest {
 
   @Test
   public void test15() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(A0.class, "A0")
         .add(A000.class, "A000")
         .add(Serializable.class, "Serializable")
@@ -442,7 +429,7 @@ public class TypeGraphTest {
 
   @Test
   public void test16() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(A0.class, "A0")
         .add(A0000.class, "A0000")
         .add(Serializable.class, "Serializable")
@@ -454,7 +441,7 @@ public class TypeGraphTest {
 
   @Test(expected = DuplicateKeyException.class)
   public void test17() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(A01.class, "A01")
         .add(A0.class, "A0")
         .add(A01.class, "FOO")
@@ -463,7 +450,7 @@ public class TypeGraphTest {
 
   @Test(expected = DuplicateKeyException.class)
   public void test18() {
-    TypeGraph<String> m = TypeGraph.build(String.class)
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(A0.class, "A0")
         .add(A01.class, "A01")
         .add(A01.class, "A01")
@@ -472,9 +459,13 @@ public class TypeGraphTest {
 
   @Test(expected = DuplicateKeyException.class)
   public void test19() {
-    TypeGraph<String> m = TypeGraph.build(String.class).add(Object.class, "FOO").add(
-        A0.class,
-        "A0").add(Object.class, "BAR").freeze();
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
+        .add(Object.class, "FOO")
+        .add(
+            A0.class,
+            "A0")
+        .add(Object.class, "BAR")
+        .freeze();
   }
 
 }

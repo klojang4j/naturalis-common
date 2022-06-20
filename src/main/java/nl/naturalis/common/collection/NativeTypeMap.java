@@ -6,6 +6,7 @@ import nl.naturalis.common.x.collection.ArraySet;
 
 import java.util.*;
 
+import static java.util.AbstractMap.SimpleImmutableEntry;
 import static nl.naturalis.common.ClassMethods.*;
 import static nl.naturalis.common.CollectionMethods.implode;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
@@ -44,10 +45,9 @@ abstract sealed class NativeTypeMap<V, TYPE_NODE extends AbstractTypeNode> exten
         }
       }
     } else if (isPrimitiveArray(type)) {
-      var info = ArrayType.forClass(type);
       if ((val = root.getPrimitive(type)) == null) {
         if (autobox) {
-          val = root.get(info.box());
+          val = root.get(ArrayType.forClass(type).box());
         }
         if (val == null) {
           val = root.value();
@@ -91,34 +91,6 @@ abstract sealed class NativeTypeMap<V, TYPE_NODE extends AbstractTypeNode> exten
       found = containsExactOrSuperType(type, root.subinterfaces());
     }
     return found;
-  }
-
-  private boolean containsPrimitiveType(Class<?> type) {
-    for (var node : root.subclasses()) {
-      if (node.type == type) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private boolean containsPrimitiveOrBoxedType(Class<?> primitive, Class<?> boxed) {
-    for (var node : root.subclasses()) {
-      if (node.type == primitive || isSupertype(node.type, boxed)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private boolean containsExactOrSuperType(Class<?> type,
-      Collection<? extends AbstractTypeNode> nodes) {
-    for (var node : nodes) {
-      if (isSupertype(node.type, type)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   @Override
@@ -171,9 +143,7 @@ abstract sealed class NativeTypeMap<V, TYPE_NODE extends AbstractTypeNode> exten
     if (entries == null) {
       List<Entry<Class<?>, V>> bucket = new ArrayList<>(size);
       if (root.value() != null) {
-        bucket.add(new AbstractMap.SimpleImmutableEntry<>(
-            Object.class,
-            root.value()));
+        bucket.add(new SimpleImmutableEntry<>(Object.class, root.value()));
       }
       root.collectEntries(bucket);
       entries = ArraySet.copyOf(bucket, true);
@@ -217,6 +187,34 @@ abstract sealed class NativeTypeMap<V, TYPE_NODE extends AbstractTypeNode> exten
   @Override
   public String toString() {
     return '[' + implode(entrySet()) + ']';
+  }
+
+  private boolean containsPrimitiveType(Class<?> type) {
+    for (var node : root.subclasses()) {
+      if (node.type == type) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean containsPrimitiveOrBoxedType(Class<?> primitive, Class<?> boxed) {
+    for (var node : root.subclasses()) {
+      if (node.type == primitive || isSupertype(node.type, boxed)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean containsExactOrSuperType(Class<?> type,
+      Collection<? extends AbstractTypeNode> nodes) {
+    for (var node : nodes) {
+      if (isSupertype(node.type, type)) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }
