@@ -8,14 +8,15 @@ import java.util.Map;
 import static java.util.stream.Collectors.toUnmodifiableList;
 
 /**
- * A specialisation of the {@link Map} interface, used to map Java types to values or
- * actions (in the form of lambdas). The {@code TypeMap} interface does specify any
- * methods of its own. It is the required behaviour of its implementations that take
- * it beyond the {@code Map} interface. They behave as follows: if a type, requested
- * via {@link #get(Object) get} or {@link #containsKey(Object) containsKey}, is not
- * present in the map, but one of its supertypes is, then it will return the value
- * associated with the supertype. The requested type's class hierarchy takes
- * precedence over its interface hierarchy.
+ * A specialisation of the {@link Map} interface, used to map Java types to values.
+ * It can be especially useful to bind transformation functions (in the form of
+ * lambdas) to the appropriate Java types. The {@code TypeMap} interface does not
+ * specify any methods of its own. It is the required behaviour of its
+ * implementations that take it beyond the {@code Map} interface. Type maps behave as
+ * follows: if a type, requested via {@link #get(Object) get} or {@link
+ * #containsKey(Object) containsKey}, is not present in the map, but one of its
+ * supertypes is, then it will return the value associated with the supertype. The
+ * requested type's class hierarchy takes precedence over its interface hierarchy.
  *
  * <p>A {@code TypeMap} is not modifiable. All map-altering methods throw an
  * {@link UnsupportedOperationException}. {@link #getOrDefault(Object, Object)} will

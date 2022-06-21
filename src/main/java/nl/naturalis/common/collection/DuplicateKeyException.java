@@ -11,14 +11,27 @@ import static nl.naturalis.common.CollectionMethods.implode;
  */
 public class DuplicateKeyException extends RuntimeException {
 
+  /**
+   * Default constructor.
+   */
   public DuplicateKeyException() {
     super();
   }
 
+  /**
+   * Creates a new {@code DuplicateKeyException} for the specified keys.
+   *
+   * @param key The duplicate key.
+   */
   public DuplicateKeyException(Object key) {
     super("Duplicate key: " + key);
   }
 
+  /**
+   * Creates a new {@code DuplicateKeyException} for the specified keys.
+   *
+   * @param keys The duplicate keys.
+   */
   public DuplicateKeyException(List<Object> keys) {
     super("Duplicate keys: " + implode(keys));
   }

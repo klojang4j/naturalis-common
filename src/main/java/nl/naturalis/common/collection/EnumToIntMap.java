@@ -14,21 +14,23 @@ import java.util.Set;
 import java.util.function.ObjIntConsumer;
 import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
+
 import nl.naturalis.common.Tuple;
 import nl.naturalis.common.check.Check;
 
 /**
- * A fast enum-to-int Map implementation. The map is backed by a simple int array with the same
- * length as the number of constants in the {@code enum} class. One integer must be designated to
- * signify the absence of a key within the map. By default this is {@link Integer#MIN_VALUE
- * Integer.MIN_VALUE}. If an element in the int array has this value, it means there is no entry for
- * the corresponding enum constant in the map. It is not allowed to add a key with this value to the
- * map, as is would in effect amount to <i>removing</i> that key from the map. It is also not
- * allowed to pass this value to {@link #containsValue(int) containsValue}. In both cases an {@code
- * IllegalArgumentException} is thrown.
+ * A fast enum-to-int Map implementation. The map is backed by a simple int array
+ * with the same length as the number of constants in the {@code enum} class. One
+ * integer must be designated to signify the absence of a key within the map. By
+ * default this is {@link Integer#MIN_VALUE Integer.MIN_VALUE}. If an element in the
+ * int array has this value, it means there is no entry for the corresponding enum
+ * constant in the map. It is not allowed to add a key with this value to the map, as
+ * is would in effect amount to <i>removing</i> that key from the map. It is also not
+ * allowed to pass this value to {@link #containsValue(int) containsValue}. In both
+ * cases an {@code IllegalArgumentException} is thrown.
  *
- * @author Ayco Holleman
  * @param <K> The type of the enum class
+ * @author Ayco Holleman
  */
 public final class EnumToIntMap<K extends Enum<K>> {
 
@@ -37,9 +39,10 @@ public final class EnumToIntMap<K extends Enum<K>> {
   private final int kav; // the value used to indicate the absence of a key
 
   /**
-   * Creates a new empty {@code EnumToIntMap} for the specified enum class using {@link
-   * Integer#MIN_VALUE Integer.MIN_VALUE} as the <i>key-absent-value</i> value. All elements in the
-   * backing array will be initialized to this value (meaning that the map is empty).
+   * Creates a new empty {@code EnumToIntMap} for the specified enum class using
+   * {@link Integer#MIN_VALUE Integer.MIN_VALUE} as the <i>key-absent-value</i>
+   * value. All elements in the backing array will be initialized to this value
+   * (meaning that the map is empty).
    *
    * @param enumClass The type of the enum class
    */
@@ -48,9 +51,10 @@ public final class EnumToIntMap<K extends Enum<K>> {
   }
 
   /**
-   * Creates a new {@code EnumToIntMap} for the specified enum class with the specified integer as
-   * the <i>key-absent-value</i> value. All elements in the backing array will be initialized to
-   * this value (meaning that the map is empty).
+   * Creates a new {@code EnumToIntMap} for the specified enum class with the
+   * specified integer as the <i>key-absent-value</i> value. All elements in the
+   * backing array will be initialized to this value (meaning that the map is
+   * empty).
    *
    * @param enumClass The type of the enum class
    * @param keyAbsentValue The value used to signify the absence of a key
@@ -60,9 +64,10 @@ public final class EnumToIntMap<K extends Enum<K>> {
   }
 
   /**
-   * Creates a new {@code EnumToIntMap} using Integer.MIN_VALUE as the <i>key-absent-value</i> value
-   * and with its keys initialized using the specified initializer function. For example: {@code new
-   * EnumToIntMap(WeekDay.class, k -> k.ordinal() +1)}.
+   * Creates a new {@code EnumToIntMap} using Integer.MIN_VALUE as the
+   * <i>key-absent-value</i> value and with its keys initialized using the specified
+   * initializer function. For example: {@code new EnumToIntMap(WeekDay.class, k ->
+   * k.ordinal() +1)}.
    *
    * @param enumClass The type of the enum class
    * @param initializer A function called to initialize the array elements
@@ -72,14 +77,16 @@ public final class EnumToIntMap<K extends Enum<K>> {
   }
 
   /**
-   * Creates a new {@code EnumToIntMap} with the specified <i>key-absent-value</i> value and the
-   * specified initializer function.
+   * Creates a new {@code EnumToIntMap} with the specified <i>key-absent-value</i>
+   * value and the specified initializer function.
    *
    * @param enumClass The type of the enum class
    * @param keyAbsentValue The value used to signify the absence of a key
    * @param initializer A function called to initialize the array elements
    */
-  public EnumToIntMap(Class<K> enumClass, int keyAbsentValue, ToIntFunction<K> initializer) {
+  public EnumToIntMap(Class<K> enumClass,
+      int keyAbsentValue,
+      ToIntFunction<K> initializer) {
     this.keys =
         Check.notNull(enumClass, "enumClass")
             .notHas(constants(), empty(), "Empty enum not supported")
@@ -90,8 +97,8 @@ public final class EnumToIntMap<K extends Enum<K>> {
   }
 
   /**
-   * Instantiates a new {@code EnumToIntMap} with the same key-value mappings as the specifed {@code
-   * EnumToIntMap} and with the same <i>key-absent-value</i> value.
+   * Instantiates a new {@code EnumToIntMap} with the same key-value mappings as the
+   * specifed {@code EnumToIntMap} and with the same <i>key-absent-value</i> value.
    *
    * @param other The {@code EnumToIntMap} whose key-value mappings to copy
    */
@@ -104,8 +111,9 @@ public final class EnumToIntMap<K extends Enum<K>> {
   }
 
   /**
-   * Instantiates a new {@code EnumToIntMap} with the same key-value mappings as the specifed {@code
-   * EnumToIntMap}, but (potentially) with a new <i>key-absent-value</i>.
+   * Instantiates a new {@code EnumToIntMap} with the same key-value mappings as the
+   * specifed {@code EnumToIntMap}, but (potentially) with a new
+   * <i>key-absent-value</i>.
    *
    * @param other The {@code EnumToIntMap} whose key-value mappings to copy
    * @param keyAbsentValue The value used to signify the absence of a key
@@ -129,8 +137,10 @@ public final class EnumToIntMap<K extends Enum<K>> {
   }
 
   /**
-   * Whether or not the map contains the specified value. It is not permitted to search for the
-   * <i>key-absent-value</i> value. An {@code IllegalArgumentException} is thrown if you do.
+   * Whether or not the map contains the specified value. It is not permitted to
+   * search for the
+   * <i>key-absent-value</i> value. An {@code IllegalArgumentException} is thrown if
+   * you do.
    *
    * @param val The value
    * @return Whether or not the map contains the value
@@ -141,21 +151,21 @@ public final class EnumToIntMap<K extends Enum<K>> {
   }
 
   /**
-   * Returns the value to which the specified key is mapped, or the <i>key-absent-value</i> if this
-   * map contains no mapping for the key. (A regular {@code Map} would return {@code null} in the
-   * latter case.)
+   * Returns the value to which the specified key is mapped, or the
+   * <i>key-absent-value</i> if this map contains no mapping for the key. (A regular
+   * {@code Map} would return {@code null} in the latter case.)
    *
    * @param key The key whose associated value is to be returned
-   * @return The value to which the specified key is mapped, or the <i>key-absent-value</i> if this
-   *     map contains no mapping for the key
+   * @return The value to which the specified key is mapped, or the
+   *     <i>key-absent-value</i> if this map contains no mapping for the key
    */
   public int get(K key) {
     return valueOf(Check.notNull(key).ok());
   }
 
   /**
-   * Returns the value associated with the specified enum constant or {@coded dfault} if the map did
-   * not contain an entry for the specified enum constant.
+   * Returns the value associated with the specified enum constant or {@code dfault}
+   * if the map did not contain an entry for the specified enum constant.
    *
    * @param key The key to retrieve the value of.
    * @param dfault The integer to return if the map did not contain the key
@@ -171,8 +181,8 @@ public final class EnumToIntMap<K extends Enum<K>> {
    * @param key The key
    * @param val The value
    * @return The previous value associated with the specified enum constant or the
-   *     <i>key-absent-value</i> value if the map did not contain an entry for the enum constant
-   *     yet.
+   *     <i>key-absent-value</i> value if the map did not contain an entry for the
+   *     enum constant yet.
    */
   public int put(K key, int val) {
     Check.notNull(key, "key");
@@ -197,9 +207,9 @@ public final class EnumToIntMap<K extends Enum<K>> {
   }
 
   /**
-   * Adds all entries of the specified map to this map, overwriting any previous values. The source
-   * map must not contain the <i>key-absent-value</i> of this map. An {@link
-   * IllegalArgumentException} is thrown if it does.
+   * Adds all entries of the specified map to this map, overwriting any previous
+   * values. The source map must not contain the <i>key-absent-value</i> of this map.
+   * An {@link IllegalArgumentException} is thrown if it does.
    *
    * @param other The {@code EnumToIntMap} whose key-value mappings to copy
    */
@@ -209,9 +219,10 @@ public final class EnumToIntMap<K extends Enum<K>> {
   }
 
   /**
-   * Adds all entries of the specified map to this map. This method acts as a bridge to
-   * fully-generic map implementations. The source map must not contain the <i>key-absent-value</i>
-   * of this map. An {@link IllegalArgumentException} is thrown if it does.
+   * Adds all entries of the specified map to this map. This method acts as a bridge
+   * to fully-generic map implementations. The source map must not contain the
+   * <i>key-absent-value</i> of this map. An {@link IllegalArgumentException} is
+   * thrown if it does.
    *
    * @param other The {@code Map} whose key-value mappings to copy
    */
@@ -234,8 +245,8 @@ public final class EnumToIntMap<K extends Enum<K>> {
    * Removes the mapping for a key from this map if it is present.
    *
    * @param key The key
-   * @return The previous value associated with key, or the <i>key-absent-value</i> value if there
-   *     was no mapping for key.
+   * @return The previous value associated with key, or the <i>key-absent-value</i>
+   *     value if there was no mapping for key.
    */
   public int remove(K key) {
     Check.notNull(key, "key");
@@ -268,21 +279,25 @@ public final class EnumToIntMap<K extends Enum<K>> {
    * @return A set view of the mappings contained in this map
    */
   public Set<Map.Entry<K, Integer>> entrySet() {
-    return streamKeys().map(k -> Tuple.of(k, valueOf(k))).map(Tuple::toEntry).collect(toSet());
+    return streamKeys().map(k -> Tuple.of(k, valueOf(k)))
+        .map(Tuple::toEntry)
+        .collect(toSet());
   }
 
   /**
-   * Returns true if this map contains no key-value mappings, false otherwise.
+   * Returns {@code true} if this map contains no key-value mappings, {@code false}
+   * otherwise.
    *
-   * @return
+   * @return {@code true} if this map contains no key-value mappings, {@code false}
+   *     otherwise
    */
   public boolean isEmpty() {
     return size() == 0;
   }
 
   /**
-   * Performs the given action for each entry in this map until all entries have been processed or
-   * the action throws an exception.
+   * Performs the given action for each entry in this map until all entries have been
+   * processed or the action throws an exception.
    *
    * @param consumer
    */
@@ -290,7 +305,9 @@ public final class EnumToIntMap<K extends Enum<K>> {
     streamKeys().forEach(k -> consumer.accept(k, valueOf(k)));
   }
 
-  /** Removes all of the mappings from this map. */
+  /**
+   * Removes all of the mappings from this map.
+   */
   public void clear() {
     Arrays.fill(data, kav);
   }
@@ -324,9 +341,9 @@ public final class EnumToIntMap<K extends Enum<K>> {
   }
 
   /**
-   * Returns {@code true} if the argument is an {@code EnumToIntMap} for the same {@code enum} class
-   * and if it contains the same key-value mappings, {@code false} otherwise. The two maps need not
-   * have the same <i>key-absent-value</i> value.
+   * Returns {@code true} if the argument is an {@code EnumToIntMap} for the same
+   * {@code enum} class and if it contains the same key-value mappings, {@code false}
+   * otherwise. The two maps need not have the same <i>key-absent-value</i> value.
    */
   @Override
   public boolean equals(Object obj) {
@@ -382,4 +399,5 @@ public final class EnumToIntMap<K extends Enum<K>> {
   private int valueOf(K key) {
     return data[key.ordinal()];
   }
+
 }

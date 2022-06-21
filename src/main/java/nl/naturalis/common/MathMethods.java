@@ -39,8 +39,6 @@ public final class MathMethods {
    * @param value The integer to divide
    * @param divideBy The integer to divide it by
    * @return The result of the division, rounded to the preceding integer
-   * @implNote Since this is a very low-level operation, no argument-checking is
-   *     done
    */
   public static int divDown(int value, int divideBy) {
     return value / divideBy;

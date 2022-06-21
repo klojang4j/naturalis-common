@@ -17,7 +17,9 @@ import static nl.naturalis.common.check.CommonChecks.instanceOf;
  * be requested often compared to the other types, it pays to {@link
  * LinkedTypeGraphBuilder#add(Class, Object) add} that type first.
  *
- * <p>The key set provides a depth-first view of the type hierarchy.
+ * <p>The {@link #keySet()} method returns a depth-first view of the type
+ * hierarchy within the map. You can also request a {@link #keySetBreadthFirst()
+ * breadth-first view} of the type hierarchy.
  *
  * @param <V> The type of the values in the {@code Map}
  * @see TypeGraph
@@ -71,6 +73,15 @@ public final class LinkedTypeGraph<V> extends NativeTypeMap<V, LinkedTypeNode> {
 
   LinkedTypeGraph(LinkedTypeNode root, int size, boolean autobox) {
     super(root, size, autobox);
+  }
+
+  /**
+   * Returns a breadth-first view of the type hierarchy within this {@code Map}.
+   *
+   * @return A breadth-first view of the type hierarchy within this {@code Map}
+   */
+  public Set<Class<?>> keySetBreadthFirst() {
+    return super.keySetBreadthFirst();
   }
 
 }

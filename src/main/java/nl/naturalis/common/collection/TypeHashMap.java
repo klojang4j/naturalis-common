@@ -12,8 +12,8 @@ import static nl.naturalis.common.check.CommonChecks.deepNotNull;
  * A {@link TypeMap} that is internally backed by a regular {@link Map}. Type lookups
  * may involve several queries against the backing map. If a type, requested via
  * {@code get} or {@code containsKey}, is not itself present in the backing map, the
- * {@code TypeHashMap} will climb up the type's class and interface hierarchy to see
- * if any of its supertypes is.
+ * {@code TypeHashMap} will first climb up the type's class hierarchy and then up its
+ * interface hierarchy to see if any of its supertypes is.
  *
  * <h4>Auto-expansion</h4>
  *
@@ -24,7 +24,10 @@ import static nl.naturalis.common.check.CommonChecks.deepNotNull;
  * is already in the map. The new type will then be associated with the same value as
  * its supertype. Thus, when the type is requested again, it will result in a direct
  * hit. In the end, a {@code TypeHashMap} will be nothing but a pass-through shell
- * around the {@code HashMap} that backs it - and perform as such!
+ * around the {@code HashMap} that backs it - and perform as such.
+ *
+ * <p>(Implementation node: with auto-expansion disabled, the backing map is not
+ * actually a {@code HashMap}.)
  *
  * @param <V> The type of the values in the {@code Map}
  * @author Ayco Holleman

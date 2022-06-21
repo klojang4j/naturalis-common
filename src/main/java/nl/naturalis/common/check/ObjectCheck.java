@@ -124,7 +124,13 @@ public final class ObjectCheck<T, E extends Exception> {
     if (test.test(arg)) {
       return this;
     }
-    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, null, null));
+    throw exc.apply(getCustomMessage(message,
+        msgArgs,
+        test,
+        argName,
+        arg,
+        null,
+        null));
   }
 
   /**
@@ -152,7 +158,13 @@ public final class ObjectCheck<T, E extends Exception> {
     if (!test.test(arg)) {
       return this;
     }
-    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, null, null));
+    throw exc.apply(getCustomMessage(message,
+        msgArgs,
+        test,
+        argName,
+        arg,
+        null,
+        null));
   }
 
   /**
@@ -256,7 +268,13 @@ public final class ObjectCheck<T, E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, null, object));
+    throw exc.apply(getCustomMessage(message,
+        msgArgs,
+        test,
+        argName,
+        arg,
+        null,
+        object));
   }
 
   /**
@@ -285,7 +303,13 @@ public final class ObjectCheck<T, E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, null, object));
+    throw exc.apply(getCustomMessage(message,
+        msgArgs,
+        test,
+        argName,
+        arg,
+        null,
+        object));
   }
 
   /**
@@ -394,7 +418,13 @@ public final class ObjectCheck<T, E extends Exception> {
     if (test.exists(arg, object)) {
       return this;
     }
-    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, null, object));
+    throw exc.apply(getCustomMessage(message,
+        msgArgs,
+        test,
+        argName,
+        arg,
+        null,
+        object));
   }
 
   /**
@@ -422,7 +452,13 @@ public final class ObjectCheck<T, E extends Exception> {
     if (!test.exists(arg, object)) {
       return this;
     }
-    throw exc.apply(getCustomMessage(message, msgArgs, test, argName, arg, null, object));
+    throw exc.apply(getCustomMessage(message,
+        msgArgs,
+        test,
+        argName,
+        arg,
+        null,
+        object));
   }
 
   /**
