@@ -156,4 +156,10 @@ public class ArrayTypeTest {
     assertEquals("double[][][][]", at.toString());
   }
 
+  @Test
+  public void arrayClassName00() {
+    ArrayType at = new ArrayType(Double.class, 2);
+    assertEquals("java.lang.Double[][]", at.arrayClassName());
+  }
+
 }
