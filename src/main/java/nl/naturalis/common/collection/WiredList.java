@@ -24,18 +24,23 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * relatively costly compared to {@link ArrayList}. It is very efficient, however, at
  * inserting, deleting and moving around chunks of list elements (i.e. structural
  * changes). The larger the chunks the bigger the gain, again compared to {@code
- * ArrayList}. This implementation of {@link List} <b>does not support</b> the {@link
- * List#subList(int, int) subList} method.
+ * ArrayList}.
  *
- * <h4>Use in multi-threaded context</h4>
+ * <p>This implementation of {@link List} <b>does not support</b> the
+ * {@link List#subList(int, int) subList} method. See {@link #subList(int, int)} for
+ * more details.
+ *
+ * <h4>Thread safety</h4>
  *
  * <p>List edits are always destructive, and they nearly always don't just
  * change the values in the list, but the underlying data structure itself.
  * Therefore, careless use of a {@code WiredList} in a multi-threaded context can
  * leave it in a seriously compromised state. {@code WiredList} itself makes no
- * attempt to protect itself against this. You should use a {@link
+ * attempt to protect itself against this. You can use a {@link
  * SynchronizedWiredList} if it is likely that multiple threads accessing the same
- * list concurrently will cause the list to get corrupted.
+ * list concurrently will cause the list to get corrupted. Alternatively, if you
+ * intend to make heavy use of the fluent API (see below), you may be better off
+ * sticking with {@code WiredList} and synchronize around the entire call chain.
  *
  * <h4>Iteration</h4>
  *
@@ -79,8 +84,7 @@ public final class WiredList<E> implements List<E> {
   }
 
   private static Supplier<IllegalArgumentException> autoEmbedNotAllowed() {
-    return () -> new IllegalArgumentException("list cannot be embedded within "
-        + "itself");
+    return () -> new IllegalArgumentException("list cannot be embedded within itself");
   }
 
   private static Supplier<IllegalStateException> callNextFirst() {
@@ -100,21 +104,21 @@ public final class WiredList<E> implements List<E> {
   // ======================================================= //
 
   // @VisibleForTesting
-  private static class Node<F> {
+  private static class Node<V> {
 
-    F val;
-    Node<F> prev;
-    Node<F> next;
+    V val;
+    Node<V> prev;
+    Node<V> next;
 
-    Node(F val) {this.val = val;}
+    Node(V val) {this.val = val;}
 
-    Node(Node<F> prev, F val) {
+    Node(Node<V> prev, V val) {
       this.prev = prev;
       this.val = val;
       prev.next = this;
     }
 
-    F value() {
+    V value() {
       return val;
     }
 
@@ -131,7 +135,7 @@ public final class WiredList<E> implements List<E> {
   @SuppressWarnings({"unchecked", "rawtypes"})
   private static class Chain {
 
-    static <F> Chain of(F[] values) {
+    static <V> Chain of(V[] values) {
       var head = new Node(values[0]);
       var tail = head;
       for (int i = 1; i < values.length; ++i) {
@@ -140,11 +144,11 @@ public final class WiredList<E> implements List<E> {
       return new Chain(head, tail, values.length);
     }
 
-    static <F> Chain of(Collection<F> values) {
+    static <V> Chain of(Collection<V> values) {
       if (values instanceof WiredList wl) {
         return copyOf(wl.head, wl.size());
       }
-      Iterator<F> itr = values.iterator();
+      Iterator<V> itr = values.iterator();
       var head = new Node<>(itr.next());
       var tail = head;
       while (itr.hasNext()) {
@@ -509,42 +513,27 @@ public final class WiredList<E> implements List<E> {
     sz = chain.length;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public int size() {
     return sz;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean isEmpty() {
     return sz == 0;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean contains(Object o) {
     return indexOf(o) != -1;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean containsAll(Collection<?> c) {
     Check.notNull(c, COLLECTION);
     return new HashSet<>(this).containsAll(c);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public int indexOf(Object o) {
     int i = 0;
@@ -566,9 +555,6 @@ public final class WiredList<E> implements List<E> {
     return -1;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public int lastIndexOf(Object o) {
     int i = sz - 1;
@@ -591,17 +577,11 @@ public final class WiredList<E> implements List<E> {
     return -1;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public E get(int index) {
     return checkExclusive(index).ok(this::nodeAt).val;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public E set(int index, E value) {
     var node = checkExclusive(index).ok(this::nodeAt);
@@ -633,35 +613,23 @@ public final class WiredList<E> implements List<E> {
     return old;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean add(E value) {
     append(value);
     return true;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public void add(int index, E value) {
     checkInclusive(index);
     insert(index, new Node<>(value));
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean addAll(Collection<? extends E> values) {
     return addAll(sz, values);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean addAll(int index, Collection<? extends E> values) {
     checkInclusive(index);
@@ -672,18 +640,12 @@ public final class WiredList<E> implements List<E> {
     return !values.isEmpty();
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public E remove(int index) {
     Node<E> node = checkExclusive(index).ok(this::nodeAt);
     return destroy(node);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean remove(Object o) {
     if (o == null) {
@@ -706,9 +668,6 @@ public final class WiredList<E> implements List<E> {
     return false;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean removeIf(Predicate<? super E> test) {
     Check.notNull(test, TEST);
@@ -725,9 +684,6 @@ public final class WiredList<E> implements List<E> {
     return size != this.sz;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean removeAll(Collection<?> c) {
     Check.notNull(c, COLLECTION);
@@ -736,9 +692,6 @@ public final class WiredList<E> implements List<E> {
     return size != this.sz;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean retainAll(Collection<?> c) {
     Check.notNull(c, COLLECTION);
@@ -749,9 +702,10 @@ public final class WiredList<E> implements List<E> {
 
   /**
    * Inserts the specified value at the start of the list, right-shifting the
-   * original elements.
+   * original elements. A.k.a. "unshift".
    *
    * @param value The value to insert
+   * @return This {@code WiredList}
    */
   public WiredList<E> prepend(E value) {
     insert(0, new Node<>(value));
@@ -759,14 +713,36 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
+   * Removes the first element from the list, left-shifting the remaining elements.
+   * A.k.a. "shift".
+   *
+   * @return The value of the removed element
+   */
+  public E deleteFirst() {
+    Check.that(sz).is(ne(), 0, emptyListNotAllowed());
+    return destroy(head);
+  }
+
+  /**
    * Appends the specified value to the end of the list. Equivalent to {@code
-   * add(value)}.
+   * add(value)}. A.k.a. "push".
    *
    * @param value The value to append to the list
+   * @return This {@code WiredList}
    */
   public WiredList<E> append(E value) {
     insert(sz, new Node<>(value));
     return this;
+  }
+
+  /**
+   * Removes the last element from the list. A.k.a. "pop".
+   *
+   * @return The value of the removed element
+   */
+  public E deleteLast() {
+    Check.that(sz).is(ne(), 0, emptyListNotAllowed());
+    return destroy(tail);
   }
 
   /**
@@ -779,26 +755,6 @@ public final class WiredList<E> implements List<E> {
     checkInclusive(index);
     insert(index, new Node<>(value));
     return this;
-  }
-
-  /**
-   * Removes the first element from the list, left-shifting the remaining elements.
-   *
-   * @return The value of the removed element
-   */
-  public E deleteFirst() {
-    Check.that(sz).is(ne(), 0, emptyListNotAllowed());
-    return destroy(head);
-  }
-
-  /**
-   * Removes the last element from the list.
-   *
-   * @return The value of the removed element
-   */
-  public E deleteLast() {
-    Check.that(sz).is(ne(), 0, emptyListNotAllowed());
-    return destroy(tail);
   }
 
   /**
@@ -851,7 +807,7 @@ public final class WiredList<E> implements List<E> {
   /**
    * Replaces the segment identified by {@code fromIndex} and {@code toIndex} with
    * the values from the specified collection. The segment must contain at least one
-   * element.
+   * element. Part of the fluent API.
    *
    * @param fromIndex The start index (inclusive) of the segment to replace
    * @param toIndex The end index (exclusive) of
@@ -871,7 +827,7 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Returns a deep copy of this {@code WiredList}. Changes made to the copy will not
+   * Returns a copy of this {@code WiredList}. Changes made to the copy will not
    * propagate to this instance, and vice versa.
    *
    * @return A deep copy of this {@code WiredList}
@@ -881,7 +837,7 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Returns a deep copy of the specified segment. Changes made to the copy will not
+   * Returns a copy of the specified segment. Changes made to the copy will not
    * propagate to this instance, and vice versa.
    *
    * @param fromIndex The start index (inclusive) of the segment
@@ -933,12 +889,12 @@ public final class WiredList<E> implements List<E> {
 
   /**
    * Embeds the specified list in this list. This method is very efficient, but it is
-   * a destructive operation for the provided list - it will be empty afterwards. If
+   * a destructive operation for the provided list (it will be empty afterwards). If
    * you don't want this to happen, use {@link #insertAll(int, Collection) addAll}.
    *
    * @param index The index at which to embed the list
    * @param other The list to embed
-   * @return this {@code WiredList}
+   * @return This {@code WiredList}
    */
   public WiredList<E> embed(int index, WiredList<? extends E> other) {
     checkInclusive(index);
@@ -956,12 +912,12 @@ public final class WiredList<E> implements List<E> {
 
   /**
    * Appends the specified list to this list. This method is very efficient, but it
-   * is a destructive operation for the provided list - it will be empty afterwards.
+   * is a destructive operation for the provided list (it will be empty afterwards).
    * If you don't want this to happen, use {@link #appendAll(Collection) appendAll}
    * or {@link #addAll(Collection) addAll}.
    *
    * @param other The list to embed
-   * @return this {@code WiredList}
+   * @return This {@code WiredList}
    * @see #join(WiredList)
    */
   public WiredList<E> join(WiredList<? extends E> other) {
@@ -977,10 +933,10 @@ public final class WiredList<E> implements List<E> {
    * @param itsToIndex The end index of the segment (exclusive)
    * @return This {@code WiredList}
    */
-  public WiredList<E> excise(WiredList<? extends E> other,
+  public WiredList<E> transfer(WiredList<? extends E> other,
       int itsFromIndex,
       int itsToIndex) {
-    return excise(sz, other, itsFromIndex, itsToIndex);
+    return transfer(sz, other, itsFromIndex, itsToIndex);
   }
 
   /**
@@ -994,7 +950,7 @@ public final class WiredList<E> implements List<E> {
    * @return This {@code WiredList}
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
-  public WiredList<E> excise(int myIndex,
+  public WiredList<E> transfer(int myIndex,
       WiredList<? extends E> other,
       int itsFromIndex,
       int itsToIndex) {
@@ -1292,9 +1248,6 @@ public final class WiredList<E> implements List<E> {
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public Object[] toArray() {
     if (sz == 0) {
@@ -1308,9 +1261,6 @@ public final class WiredList<E> implements List<E> {
     return result;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public <T> T[] toArray(T[] a) {
     Check.notNull(a);
@@ -1328,9 +1278,6 @@ public final class WiredList<E> implements List<E> {
     return a;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public void clear() {
     for (var x = head; x != null; ) {
@@ -1428,25 +1375,16 @@ public final class WiredList<E> implements List<E> {
     return reverse ? new ReverseWiredIterator() : new ForwardWiredIterator();
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public ListIterator<E> listIterator() {
     return isEmpty() ? emptyListIterator() : new ListItr();
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public ListIterator<E> listIterator(int index) {
     return checkExclusive(index).ok(ListItr::new);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -1468,9 +1406,6 @@ public final class WiredList<E> implements List<E> {
     return false;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public int hashCode() {
     int hash = 1;
@@ -1480,15 +1415,20 @@ public final class WiredList<E> implements List<E> {
     return hash;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   public String toString() {
     return '[' + CollectionMethods.implode(this) + ']';
   }
 
   /**
-   * <b>Not supported by this implementation.</b>
+   * <p>This implementation of {@link List} <b>does not support</b> the
+   * {@link List#subList(int, int) subList} method. Its specification requires that
+   * non-structural changes in the returned list are reflected in the original list
+   * (and vice versa). However, except for the {@link #set(int, Object)} method, all
+   * changes in {@code WiredList} <i>are</i> structural changes. Even the {@link
+   * #clear()} method, taken as an example in the specification, is a (very)
+   * destructive change in {@code WiredList}. However, {@code WiredList} <i>does</i>
+   * provide a method that returns a sublist ({@link #copySegment(int, int)
+   * copySegment}). It just has no relation to the original list any longer.
    */
   @Override
   @SuppressWarnings({"unused"})

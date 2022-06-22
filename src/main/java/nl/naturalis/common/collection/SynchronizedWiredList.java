@@ -891,7 +891,7 @@ public final class SynchronizedWiredList<E> implements List<E> {
   }
 
   /**
-   * Forwards to {@link WiredList#excise(int, WiredList, int, int)}.
+   * Forwards to {@link WiredList#transfer(int, WiredList, int, int)}.
    */
   public SynchronizedWiredList<E> excise(SynchronizedWiredList<? extends E> other,
       int itsFromIndex,
@@ -902,7 +902,7 @@ public final class SynchronizedWiredList<E> implements List<E> {
       Lock l2;
       (l2 = other.getWriteLock()).lock();
       try {
-        wl.excise(other.wl, itsFromIndex, itsToIndex);
+        wl.transfer(other.wl, itsFromIndex, itsToIndex);
         return this;
       } finally {
         l2.unlock();
@@ -913,7 +913,7 @@ public final class SynchronizedWiredList<E> implements List<E> {
   }
 
   /**
-   * Forwards to {@link WiredList#excise(int, WiredList, int, int)}.
+   * Forwards to {@link WiredList#transfer(int, WiredList, int, int)}.
    */
   public SynchronizedWiredList<E> excise(int myIndex,
       SynchronizedWiredList<? extends E> other,
@@ -925,7 +925,7 @@ public final class SynchronizedWiredList<E> implements List<E> {
       Lock l2;
       (l2 = other.getWriteLock()).lock();
       try {
-        wl.excise(myIndex, other.wl, itsFromIndex, itsToIndex);
+        wl.transfer(myIndex, other.wl, itsFromIndex, itsToIndex);
         return this;
       } finally {
         l2.unlock();
