@@ -15,31 +15,37 @@ import static java.util.function.Predicate.not;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
- * Specifies a path to a value within an object. For example: {@code employee.address.street}. Path
- * segments are separated by the dot character ('.'). Array indices are specified as separate path
- * segments. For example: {@code employees.3.address.street}. Non-numeric segments can be either
- * bean properties or map keys. Therefore the {@code Path} class does not impose any constraints on
- * what constitutes a valid path segment, since a map key can be anything (including {@code null} or
- * an empty string). Of course, if the path segment denotes a JavaBean property, it should be a
- * valid Java identifier.
+ * Specifies a path to a value within an object. For example: {@code
+ * employee.address.street}. Path segments are separated by the dot character ('.').
+ * Array indices are specified as separate path segments. For example: {@code
+ * employees.3.address.street}. Non-numeric segments can be either bean properties or
+ * map keys. Therefore the {@code Path} class does not impose any constraints on what
+ * constitutes a valid path segment, since a map key can be anything (including
+ * {@code null} or an empty string). Of course, if the path segment denotes a
+ * JavaBean property, it should be a valid Java identifier.
  *
  * <h4>Escaping</h4>
  *
- * <p>If a path segment represents a map key that happens to contain the segment separator ('.'),
- * it must be escaped using the circumflex character ('^'). So {@code my.awkward.map.key} should be
- * escaped like this: {@code my^.awkward^.map^.key}. The escape character itself must not be
- * escaped. In case you want a segment to denote need the {@code null} key of a {@code Map}, use
- * this escape sequence: {@code ^0}. So {@code lookups.^0.name} references the {@code name} field of
- * an object stored under key {@code null} in the {@code lookups} map. In case you want a segment to
- * denote the empty-string key of a {@code Map}, simply make it a zero-length segment: {@code
- * lookups..name}. You can let the {@link #escape(String) escape} method do the escaping for you.
+ * <p>If a path segment represents a map key that happens to contain the segment
+ * separator ('.'),
+ * it must be escaped using the circumflex character ('^'). So {@code
+ * my.awkward.map.key} should be escaped like this: {@code my^.awkward^.map^.key}.
+ * The escape character itself must not be escaped. In case you want a segment to
+ * denote need the {@code null} key of a {@code Map}, use this escape sequence:
+ * {@code ^0}. So {@code lookups.^0.name} references the {@code name} field of an
+ * object stored under key {@code null} in the {@code lookups} map. In case you want
+ * a segment to denote the empty-string key of a {@code Map}, simply make it a
+ * zero-length segment: {@code lookups..name}. You can let the {@link #escape(String)
+ * escape} method do the escaping for you.
  *
- * <p>Do not escape path segments when passing them individually (as a {@code String} array) to the
+ * <p>Do not escape path segments when passing them individually (as a {@code String}
+ * array) to the
  * constructor. Only escape them when passing a complete path string.
  *
  * @author Ayco Holleman
  */
-public final class Path implements Comparable<Path>, Iterable<String>, Sizeable, Emptyable {
+public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
+    Emptyable {
 
   /**
    * The empty path (containing zero path segments).
@@ -60,7 +66,8 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   public static final String NULL_SEGMENT = "^0";
 
   /**
-   * Static factory method. Returns a new {@code Path} instance for the specified path string.
+   * Static factory method. Returns a new {@code Path} instance for the specified
+   * path string.
    *
    * @param path The path
    * @return a new {@code Path} instance for the specified path string
@@ -70,8 +77,10 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Applies escaping to a path segment. Can be used to construct complete path strings. Do
-   * <i>not</i> use when passing individual path segments as a {@code String} array to the {@link
+   * Applies escaping to a path segment. Can be used to construct complete path
+   * strings. Do
+   * <i>not</i> use when passing individual path segments as a {@code String} array
+   * to the {@link
    * #Path(String[]) constructor}.
    *
    * @param segment The path segment to escape
@@ -141,8 +150,9 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns the path segment at the specified index. Specify a negative index to count back from
-   * the last segment of the {@code Path} (-1 returns the last path segment).
+   * Returns the path segment at the specified index. Specify a negative index to
+   * count back from the last segment of the {@code Path} (-1 returns the last path
+   * segment).
    *
    * @param index The array index of the path segment
    * @return The path segment at the specified index.
@@ -155,12 +165,13 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns a new {@code Path} starting with the segment at the specified array index. Specify a
-   * negative index to count back from the last segment of the {@code Path} (-1 returns the last
-   * path segment).
+   * Returns a new {@code Path} starting with the segment at the specified array
+   * index. Specify a negative index to count back from the last segment of the
+   * {@code Path} (-1 returns the last path segment).
    *
    * @param offset The index of the first segment of the new {@code Path}
-   * @return A new {@code Path} starting with the segment at the specified array index
+   * @return A new {@code Path} starting with the segment at the specified array
+   *     index
    */
   public Path subpath(int offset) {
     int from = offset < 0
@@ -171,13 +182,14 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns a new {@code Path} consisting of {@code length} segments starting with segment {@code
-   * offset}. The first argument may be negative to indicate a left-offset from the last segment.
+   * Returns a new {@code Path} consisting of {@code length} segments starting with
+   * segment {@code offset}. The first argument may be negative to indicate a
+   * left-offset from the last segment.
    *
    * @param offset The index of the first segment of the new {@code Path}
    * @param length The number of segments in the new {@code Path}
-   * @return A new {@code Path} consisting of {@code len} segments starting with segment {@code
-   *     from}.
+   * @return A new {@code Path} consisting of {@code len} segments starting with
+   *     segment {@code from}.
    */
   public Path subpath(int offset, int length) {
     int from = offset < 0
@@ -188,8 +200,9 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Return the parent of this {@code Path}. If this {@code Path} is empty, this method returns
-   * null. If it consists of a single segment, and empty {@code Path} is returned.
+   * Return the parent of this {@code Path}. If this {@code Path} is empty, this
+   * method returns null. If it consists of a single segment, and empty {@code Path}
+   * is returned.
    *
    * @return The parent of this {@code Path}
    */
@@ -202,22 +215,23 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns a new {@code Path} containing only the segments of this {@code Path} that are not array
-   * indices.
+   * Returns a new {@code Path} containing only the segments of this {@code Path}
+   * that are not array indices.
    *
    * @return A new {@code Path} without any array indices
    */
   public Path getCanonicalPath() {
-    return new Path(stream().filter(not(NumberMethods::isPlainInt)).toArray(String[]::new));
+    return new Path(stream().filter(not(NumberMethods::isInt))
+        .toArray(String[]::new));
   }
 
   /**
-   * Returns a new {@code Path} representing the concatenation of this {@code Path} and the
-   * specified {@code Path}.
+   * Returns a new {@code Path} representing the concatenation of this {@code Path}
+   * and the specified {@code Path}.
    *
    * @param path The path to append to this {@code Path}
-   * @return A new {@code Path} representing the concatenation of this {@code Path} and the
-   *     specified {@code Path}
+   * @return A new {@code Path} representing the concatenation of this {@code Path}
+   *     and the specified {@code Path}
    */
   public Path append(String path) {
     Check.notNull(path, "path");
@@ -225,12 +239,12 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns a new {@code Path} consisting of the segments of this {@code Path} plus the segments of
-   * the specified {@code Path}.
+   * Returns a new {@code Path} consisting of the segments of this {@code Path} plus
+   * the segments of the specified {@code Path}.
    *
    * @param other The {@code Path} to append to this {@code Path}.
-   * @return A new {@code Path} consisting of the segments of this {@code Path} plus the segments of
-   *     the specified {@code Path}
+   * @return A new {@code Path} consisting of the segments of this {@code Path} plus
+   *     the segments of the specified {@code Path}
    */
   public Path append(Path other) {
     Check.notNull(other, "other");
@@ -238,13 +252,13 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns a new {@code Path} with the path segment at the specified array index set to the new
-   * value.
+   * Returns a new {@code Path} with the path segment at the specified array index
+   * set to the new value.
    *
    * @param index The array index of the segment to replace
    * @param newValue The new segment
-   * @return A new {@code Path} with the path segment at the specified array index set to the new
-   *     value
+   * @return A new {@code Path} with the path segment at the specified array index
+   *     set to the new value
    */
   public Path replace(int index, String newValue) {
     Check.that(index, "index").is(gte(), 0).is(lte(), elems.length);
@@ -254,7 +268,8 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
   }
 
   /**
-   * Returns a new {@code Path} with all segments of this {@code Path} except the first segment.
+   * Returns a new {@code Path} with all segments of this {@code Path} except the
+   * first segment.
    *
    * @return
    */
@@ -323,7 +338,8 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    */
   @Override
   public boolean equals(Object obj) {
-    return this == obj || (obj instanceof Path p && Arrays.deepEquals(elems, p.elems));
+    return this == obj || (obj instanceof Path p && Arrays.deepEquals(elems,
+        p.elems));
   }
 
   /**

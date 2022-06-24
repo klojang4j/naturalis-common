@@ -5,7 +5,9 @@ import nl.naturalis.common.check.Check;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
+import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.function.UnaryOperator;
 
 import static nl.naturalis.common.ObjectMethods.isEmpty;
@@ -21,121 +23,386 @@ import static nl.naturalis.common.check.CommonChecks.*;
 @SuppressWarnings("rawtypes")
 public final class NumberMethods {
 
-  private static final int STRLEN_MAX_INT = String.valueOf(Integer.MAX_VALUE)
-      .length();
-  private static final int STRLEN_MAX_SHORT = String.valueOf(Short.MAX_VALUE)
-      .length();
-
   private NumberMethods() {
     throw new UnsupportedOperationException();
   }
 
   /**
-   * Returns whether the specified string represents a valid integer. This method
-   * delegates to {@link BigDecimal#intValueExact()} and is therefore stricter than
-   * {@link Integer#parseInt(String)}.
-   *
-   * @param str The string
-   * @return Whether it represents a valid integer
-   */
-  public static boolean isInteger(String str) {
-    if (!isEmpty(str)) {
-      try {
-        new BigInteger(str).intValueExact();
-        return true;
-      } catch (NumberFormatException | ArithmeticException ignored) {
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Parses the specified string into an {@code Integer}. Throws an {@link
-   * TypeConversionException} if the string is not a number or if the number is too
-   * big to fit into an {@code Integer}. This method delegates to {@link
-   * BigDecimal#intValueExact()} and is therefore stricter than {@link
-   * Integer#parseInt(String)}.
+   * Parses the specified string into an {@code int}. This method delegates to {@link
+   * BigInteger#intValueExact()} and is therefore stricter than {@link
+   * Integer#parseInt(String)}. The {@link NumberFormatException} and the {@link
+   * ArithmeticException} thrown from {@code intValueExact()} are both converted to a
+   * {@link TypeConversionException}. Note that neither {@code intValueExact()} nor
+   * this method {@link String#strip() strips} the string before parsing it.
    *
    * @param s The string to be parsed
-   * @return The {@code Integer} representation of the string
+   * @return The {@code int} value represented by the string
    */
   public static int parseInt(String s) throws TypeConversionException {
+    if (isEmpty(s)) {
+      throw new TypeConversionException(s, int.class);
+    }
     try {
       return new BigInteger(s).intValueExact();
     } catch (NumberFormatException | ArithmeticException e) {
-      throw new TypeConversionException(s, int.class, e.getMessage());
+      throw new TypeConversionException(s, int.class, e.toString());
     }
   }
 
   /**
-   * Returns {@code true} if the specified string consists of digits only (without
-   * plus or minus sign), has no leading zeros, and fits into a 32-bit integer.
+   * Returns whether the specified string can be parsed into an {@code int} without
+   * causing integer overflow. The argument is allowed to be {@code null}, in which
+   * case the return value will be {@code false}.
    *
-   * @param s The string
-   * @return Whether the specified string is a valid, digit-only integer
+   * @param s The string to be parsed
+   * @return Whether the specified string can be parsed into an {@code int} without
+   *     causing integer overflow
    */
-  public static boolean isPlainInt(String s) {
-    if (isEmpty(s) || s.length() > STRLEN_MAX_INT) {
-      return false;
-    } else if (s.charAt(0) == '0') {
-      return s.length() == 1;
-    }
-    return s.codePoints().allMatch(Character::isDigit) && isInteger(s);
-  }
-
-  /**
-   * Returns an empty {@code OptionalInt} if the specified string does not represent
-   * a {@link #isPlainInt(String) plain integer}, else the integer parsed from the
-   * string.
-   *
-   * @param s The string
-   * @return An {@code OptionalInt} plain, non-negative integer, consisting of digits
-   *     only, without plus or minus sign, without leading zeros, and fitting into a
-   *     32-bit integer, or an empty {@code OptionalInt}
-   */
-  public static OptionalInt toPlainInt(String s) {
-    if (isEmpty(s) || s.length() > STRLEN_MAX_INT) {
-      return OptionalInt.empty();
-    } else if (s.charAt(0) == '0') {
-      return s.length() == 1 ? OptionalInt.of(0) : OptionalInt.empty();
-    }
-    return s.codePoints().allMatch(Character::isDigit)
-        ? OptionalInt.of(parseInt(s))
-        : OptionalInt.empty();
-  }
-
-  /**
-   * Returns whether the specified string represents a valid {@code short}.
-   *
-   * @param str The string
-   * @return Whether the specified string represents a valid {@code short}.
-   */
-  @SuppressWarnings("ResultOfMethodCallIgnored")
-  public static boolean isShort(String str) {
-    if (!isEmpty(str)) {
+  public static boolean isInt(String s) {
+    if (!isEmpty(s)) {
       try {
-        new BigInteger(str).shortValueExact();
+        parseInt(s);
         return true;
-      } catch (NumberFormatException | ArithmeticException ignored) {
+      } catch (TypeConversionException ignored) {
       }
     }
     return false;
   }
 
   /**
-   * Returns {@code true} if the specified string consists of digits only (without
-   * plus or minus sign), has no leading zeros, and fits into a 16-bit integer.
+   * Returns an empty {@code OptionalInt} if the specified string cannot be parsed
+   * into a 32-bit integer, else an {@code OptionalInt} containing the {@code int}
+   * value parsed out of the string.
    *
-   * @param str The string
-   * @return Whether the specified string is a valid, digit-only 16-but integer
+   * @param s The string to be parsed
+   * @return An {@code OptionalInt} containing the {@code int} value parsed out of
+   *     the string
    */
-  public static boolean isPlainShort(String str) {
-    if (isEmpty(str) || str.length() > STRLEN_MAX_SHORT) {
-      return false;
-    } else if (str.charAt(0) != '0') {
-      return str.length() == 1;
+  public static OptionalInt toInt(String s) {
+    if (!isEmpty(s)) {
+      try {
+        return OptionalInt.of(parseInt(s));
+      } catch (TypeConversionException ignored) {
+      }
     }
-    return str.codePoints().allMatch(Character::isDigit) && isShort(str);
+    return OptionalInt.empty();
+  }
+
+  /**
+   * Parses the specified string into a {@code long}. This method delegates to {@link
+   * BigInteger#longValueExact()} and is therefore stricter than {@link
+   * Long#parseLong(String)}. The {@link NumberFormatException} and the {@link
+   * ArithmeticException} thrown from {@code longValueExact()} are both converted to
+   * a {@link TypeConversionException}. Note that neither {@code intValueExact()} nor
+   * this method {@link String#strip() strips} the string before parsing it.
+   *
+   * @param s The string to be parsed
+   * @return The {@code long} value represented by the string
+   */
+  public static long parseLong(String s) throws TypeConversionException {
+    if (isEmpty(s)) {
+      throw new TypeConversionException(s, long.class);
+    }
+    try {
+      return new BigInteger(s).longValueExact();
+    } catch (NumberFormatException | ArithmeticException e) {
+      throw new TypeConversionException(s, long.class, e.toString());
+    }
+  }
+
+  /**
+   * Returns whether the specified string can be parsed into an {@code long} without
+   * causing integer overflow. The argument is allowed to be {@code null}, in which
+   * case the return value will be {@code false}.
+   *
+   * @param s The string to be parsed
+   * @return Whether the specified string can be parsed into a {@code long} without
+   *     causing integer overflow
+   */
+  public static boolean isLong(String s) {
+    if (!isEmpty(s)) {
+      try {
+        parseLong(s);
+        return true;
+      } catch (TypeConversionException ignored) {
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns an empty {@code OptionalLong} if the specified string cannot be parsed
+   * into a 64-bit integer, else an {@code OptionalLong} containing the {@code long}
+   * value parsed out of the string.
+   *
+   * @param s The string to be parsed
+   * @return An {@code OptionalLong} containing the {@code long} value parsed out of
+   *     the string
+   */
+  public static OptionalLong toLong(String s) {
+    if (!isEmpty(s)) {
+      try {
+        return OptionalLong.of(parseLong(s));
+      } catch (TypeConversionException ignored) {
+      }
+    }
+    return OptionalLong.empty();
+  }
+
+  /**
+   * Parses the specified string into a {@code double}. This method delegates to
+   * {@link BigInteger#doubleValue()}. The {@link NumberFormatException} thrown from
+   * {@code doubleValue()} is converted to a {@link TypeConversionException}. This
+   * method also throws a {@code TypeConversionException} if the string is parsed
+   * into {@link Double#NaN}, {@link Double#POSITIVE_INFINITY} or {@link
+   * Double#NEGATIVE_INFINITY}. Note that neither {@code doubleValue()} nor this
+   * method {@link String#strip() strips} the string before parsing it.
+   *
+   * @param s The string to be parsed
+   * @return The {@code double} value represented by the string
+   */
+  public static double parseDouble(String s) throws TypeConversionException {
+    if (isEmpty(s)) {
+      throw new TypeConversionException(s, double.class);
+    }
+    try {
+      double d;
+      if (Double.isFinite(d = new BigDecimal(s).doubleValue())) {
+        return d;
+      }
+    } catch (NumberFormatException e) {
+      throw new TypeConversionException(s, double.class, e.toString());
+    }
+    throw new TypeConversionException(s, double.class, "NaN or Infinity");
+  }
+
+  /**
+   * Returns whether the specified string can be parsed into a {@code double} without
+   * producing {@link Double#NaN}, {@link Double#POSITIVE_INFINITY} or {@link
+   * Double#NEGATIVE_INFINITY}. The argument is allowed to be {@code null}, in which
+   * case the return value will be {@code false}.
+   *
+   * @param s The string to be parsed
+   * @return Whether he specified string can be parsed into a regular, finite {@code
+   *     double}
+   */
+  public static boolean isDouble(String s) {
+    if (!isEmpty(s)) {
+      try {
+        parseDouble(s);
+        return true;
+      } catch (TypeConversionException ignored) {
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns an empty {@code OptionalDouble} if the specified string cannot be parsed
+   * into a regular, finite {@code double} value, else an {@code OptionalDouble}
+   * containing the {@code double} value parsed out of the string.
+   *
+   * @param s The string to be parsed
+   * @return An {@code OptionalDouble} containing the {@code double} value parsed out
+   *     of the string
+   */
+  public static OptionalDouble toDouble(String s) {
+    if (!isEmpty(s)) {
+      try {
+        return OptionalDouble.of(parseDouble(s));
+      } catch (TypeConversionException ignored) {
+      }
+    }
+    return OptionalDouble.empty();
+  }
+
+  /**
+   * Parses the specified string into a {@code float}. This method delegates to
+   * {@link BigInteger#floatValue()}. The {@link NumberFormatException} thrown from
+   * {@code floatValue()} is converted to a {@link TypeConversionException}. This
+   * method also throws a {@code TypeConversionException} if the string is parsed
+   * into {@link Float#NaN}, {@link Float#POSITIVE_INFINITY} or {@link
+   * Float#NEGATIVE_INFINITY}. Note that neither {@code floatValue()} nor this method
+   * {@link String#strip() strips} the string before parsing it.
+   *
+   * @param s The string to be parsed
+   * @return The {@code float} value represented by the string
+   */
+  public static float parseFloat(String s) throws TypeConversionException {
+    if (isEmpty(s)) {
+      throw new TypeConversionException(s, float.class);
+    }
+    try {
+      float d;
+      if (Float.isFinite(d = new BigDecimal(s).floatValue())) {
+        return d;
+      }
+    } catch (NumberFormatException e) {
+      throw new TypeConversionException(s, float.class, e.toString());
+    }
+    throw new TypeConversionException(s, float.class, "NaN or Infinity");
+  }
+
+  /**
+   * Returns whether the specified string can be parsed into a {@code float} without
+   * producing {@link Float#NaN}, {@link Float#POSITIVE_INFINITY} or {@link
+   * Float#NEGATIVE_INFINITY}. The argument is allowed to be {@code null}, in which
+   * case the return value will be {@code false}.
+   *
+   * @param s The string to be parsed
+   * @return Whether he specified string can be parsed into a regular, finite {@code
+   *     float}
+   */
+  public static boolean isFloat(String s) {
+    if (!isEmpty(s)) {
+      try {
+        parseFloat(s);
+        return true;
+      } catch (TypeConversionException ignored) {
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns an empty {@code OptionalDouble} if the specified string cannot be parsed
+   * into a regular, finite {@code float} value, else an {@code OptionalDouble}
+   * containing the {@code float} value parsed out of the string.
+   *
+   * @param s The string to be parsed
+   * @return An {@code OptionalDouble} containing the {@code float} value parsed out
+   *     of the string
+   */
+  public static OptionalDouble toFloat(String s) {
+    if (!isEmpty(s)) {
+      try {
+        return OptionalDouble.of(parseFloat(s));
+      } catch (TypeConversionException ignored) {
+      }
+    }
+    return OptionalDouble.empty();
+  }
+
+  /**
+   * Parses the specified string into a {@code short}. This method delegates to
+   * {@link BigInteger#shortValueExact()} and is therefore stricter than {@link
+   * Short#parseShort(String)}. The {@link NumberFormatException} and the {@link
+   * ArithmeticException} thrown from {@code shortValueExact()} are both converted to
+   * a {@link TypeConversionException}. Note that neither {@code shortValueExact()}
+   * nor this method {@link String#strip() strips} the string before parsing it.
+   *
+   * @param s The string to be parsed
+   * @return The {@code short} value represented by the string
+   */
+  public static short parseShort(String s) throws TypeConversionException {
+    if (isEmpty(s)) {
+      throw new TypeConversionException(s, short.class);
+    }
+    try {
+      return new BigInteger(s).shortValueExact();
+    } catch (NumberFormatException | ArithmeticException e) {
+      throw new TypeConversionException(s, short.class, e.toString());
+    }
+  }
+
+  /**
+   * Returns whether the specified string can be parsed into an {@code short} without
+   * causing integer overflow. The argument is allowed to be {@code null}, in which
+   * case the return value will be {@code false}.
+   *
+   * @param s The string to be parsed
+   * @return Whether he specified string can be parsed into a {@code short} without
+   *     causing integer overflow
+   */
+  public static boolean isShort(String s) {
+    if (!isEmpty(s)) {
+      try {
+        parseShort(s);
+        return true;
+      } catch (TypeConversionException ignored) {
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns an empty {@code OptionalInt} if the specified string cannot be parsed
+   * into a 16-bit integer, else an {@code OptionalInt} containing the {@code short}
+   * value parsed out of the string.
+   *
+   * @param s The string to be parsed
+   * @return An {@code OptionalInt} containing the {@code short} value parsed out of
+   *     the string
+   */
+  public static OptionalInt toShort(String s) {
+    if (!isEmpty(s)) {
+      try {
+        return OptionalInt.of(parseShort(s));
+      } catch (TypeConversionException ignored) {
+      }
+    }
+    return OptionalInt.empty();
+  }
+
+  /**
+   * Parses the specified string into a {@code byte}. This method delegates to {@link
+   * BigInteger#byteValueExact()} and is therefore stricter than {@link
+   * Byte#parseByte(String)}. The {@link NumberFormatException} and the {@link
+   * ArithmeticException} thrown from {@code byteValueExact()} are both converted to
+   * a {@link TypeConversionException}. Note that neither {@code byteValueExact()}
+   * nor this method {@link String#strip() strips} the string before parsing it.
+   *
+   * @param s The string to be parsed
+   * @return The {@code byte} value represented by the string
+   */
+  public static int parseByte(String s) throws TypeConversionException {
+    if (isEmpty(s)) {
+      throw new TypeConversionException(s, byte.class);
+    }
+    try {
+      return new BigInteger(s).shortValueExact();
+    } catch (NumberFormatException | ArithmeticException e) {
+      throw new TypeConversionException(s, byte.class, e.toString());
+    }
+  }
+
+  /**
+   * Returns whether the specified string can be parsed into an {@code byte} without
+   * causing integer overflow. The argument is allowed to be {@code null}, in which
+   * case the return value will be {@code false}.
+   *
+   * @param s The string to be parsed
+   * @return Whether he specified string can be parsed into a {@code byte} without
+   *     causing an integer overflow
+   */
+  public static boolean isByte(String s) {
+    if (!isEmpty(s)) {
+      try {
+        parseByte(s);
+        return true;
+      } catch (TypeConversionException ignored) {
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Returns an empty {@code OptionalInt} if the specified string cannot be parsed
+   * into an 8-bit integer, else an {@code OptionalInt} containing the {@code byte}
+   * value parsed out of the string.
+   *
+   * @param s The string to be parsed
+   * @return An {@code OptionalInt} containing the {@code byte} value parsed out of
+   *     the string
+   */
+  public static OptionalInt toByte(String s) {
+    if (!isEmpty(s)) {
+      try {
+        return OptionalInt.of(parseByte(s));
+      } catch (TypeConversionException ignored) {
+      }
+    }
+    return OptionalInt.empty();
   }
 
   /**

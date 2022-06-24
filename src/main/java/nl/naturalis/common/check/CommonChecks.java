@@ -220,12 +220,12 @@ public final class CommonChecks {
 
   /**
    * Verifies that a {@code String} argument represents a valid integer. Equivalent
-   * to {@link NumberMethods#isInteger(String) NumberMethods::isInteger}.
+   * to {@link NumberMethods#isInt(String) NumberMethods::isInteger}.
    *
    * @return A function implementing the test described above
    */
   public static Predicate<String> integer() {
-    return NumberMethods::isInteger;
+    return NumberMethods::isInt;
   }
 
   static {

@@ -25,7 +25,7 @@ final class PrimitiveArraySegmentReader extends SegmentReader<Object> {
       if (isEmpty(segment)) {
         return error(EMPTY_SEGMENT, () -> emptySegment(path));
       }
-      OptionalInt opt = NumberMethods.toPlainInt(segment);
+      OptionalInt opt = NumberMethods.toInt(segment);
       if (opt.isEmpty()) {
         return error(INDEX_EXPECTED, () -> indexExpected(path));
       }

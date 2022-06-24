@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.OptionalLong;
 
 public class NumberMethodsTest {
 
@@ -275,4 +276,21 @@ public class NumberMethodsTest {
     int i = NumberMethods.parse("0", Integer.class);
     assertEquals(0, i);
   }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseInt00() {
+    NumberMethods.parseInt("  22");
+  }
+
+  @Test
+  public void parseInt01() {
+    assertEquals(-22, NumberMethods.parseInt("-00000000000022"));
+    assertEquals(+22, NumberMethods.parseInt("+00000000000022"));
+  }
+
+  @Test
+  public void isInt01() {
+    assertTrue(NumberMethods.isInt("42"));
+  }
+
 }
