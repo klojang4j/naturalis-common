@@ -290,37 +290,37 @@ public class CommonChecksTest {
 
   @Test
   public void integer00() {
-    Check.that("42").is(integer());
+    Check.that("42").is(int32());
     assertTrue(true);
   }
 
   @Test
   public void integer01() {
-    Check.that("42.5").isNot(integer());
+    Check.that("42.5").isNot(int32());
     assertTrue(true);
   }
 
   @Test
   public void integer02() {
-    Check.that("").isNot(integer());
+    Check.that("").isNot(int32());
     assertTrue(true);
   }
 
   @Test
   public void integer03() {
-    Check.that((String) null).isNot(integer());
+    Check.that((String) null).isNot(int32());
     assertTrue(true);
   }
 
   @Test
   public void integer04() {
-    Check.that("" + Long.MAX_VALUE).isNot(integer());
+    Check.that("" + Long.MAX_VALUE).isNot(int32());
     assertTrue(true);
   }
 
   @Test
   public void integer05() {
-    Check.that("00042").is(integer());
+    Check.that("00042").is(int32());
     assertTrue(true);
   }
 

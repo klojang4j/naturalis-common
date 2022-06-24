@@ -219,17 +219,93 @@ public final class CommonChecks {
   }
 
   /**
-   * Verifies that a {@code String} argument represents a valid integer. Equivalent
-   * to {@link NumberMethods#isInt(String) NumberMethods::isInteger}.
+   * Verifies that the argument can be parsed into a 32-bit integer
+   * (a&#46;k&#46;a&#46; an {@code int}). Equivalent to {@link
+   * NumberMethods#isInt(String) NumberMethods::isInt}.
    *
    * @return A function implementing the test described above
    */
-  public static Predicate<String> integer() {
+  public static Predicate<String> int32() {
     return NumberMethods::isInt;
   }
 
   static {
-    setMetadata(integer(), msgInteger(), "integer");
+    setMetadata(int32(), msgInt32(), "int32");
+  }
+
+  /**
+   * Verifies that the argument can be parsed into a 64-bit integer
+   * (a&#46;k&#46;a&#46; a {@code long}). Equivalent to {@link
+   * NumberMethods#isLong(String) NumberMethods::isLong}.
+   *
+   * @return A function implementing the test described above
+   */
+  public static Predicate<String> int64() {
+    return NumberMethods::isLong;
+  }
+
+  static {
+    setMetadata(int64(), msgInt64(), "int64");
+  }
+
+  /**
+   * Verifies that the argument can be parsed into a 16-bit integer
+   * (a&#46;k&#46;a&#46; a {@code short}). Equivalent to {@link
+   * NumberMethods#isShort(String) NumberMethods::isShort}.
+   *
+   * @return A function implementing the test described above
+   */
+  public static Predicate<String> int16() {
+    return NumberMethods::isShort;
+  }
+
+  static {
+    setMetadata(int16(), msgInt16(), "int16");
+  }
+
+  /**
+   * Verifies that the argument can be parsed into a 8-bit integer
+   * (a&#46;k&#46;a&#46; a {@code byte}). Equivalent to {@link
+   * NumberMethods#isByte(String) NumberMethods::isByte}.
+   *
+   * @return A function implementing the test described above
+   */
+  public static Predicate<String> int8() {
+    return NumberMethods::isByte;
+  }
+
+  static {
+    setMetadata(int8(), msgInt8(), "int8");
+  }
+
+  /**
+   * Verifies that the argument can be parsed into a 32-bit floating point value
+   * (a&#46;k&#46;a&#46; a {@code float}). Equivalent to {@link
+   * NumberMethods#isFloat(String) NumberMethods::isFloat}.
+   *
+   * @return A function implementing the test described above
+   */
+  public static Predicate<String> float32() {
+    return NumberMethods::isFloat;
+  }
+
+  static {
+    setMetadata(float32(), msgFloat32(), "float32");
+  }
+
+  /**
+   * Verifies that the argument can be parsed into a 64-bit floating point value
+   * (a&#46;k&#46;a&#46; a {@code double}). Equivalent to {@link
+   * NumberMethods#isDouble(String) NumberMethods::isDouble}.
+   *
+   * @return A function implementing the test described above
+   */
+  public static Predicate<String> float64() {
+    return NumberMethods::isDouble;
+  }
+
+  static {
+    setMetadata(float64(), msgFloat64(), "float64");
   }
 
   /**

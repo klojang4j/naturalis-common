@@ -50,8 +50,8 @@ public class MsgPredicateTest {
     Check.that(true).isNot(no());
     Check.that(Boolean.TRUE).is(yes());
     Check.that(Boolean.FALSE).isNot(yes());
-    Check.that("foo").isNot(integer());
-    Check.that("123").is(integer());
+    Check.that("foo").isNot(int32());
+    Check.that("123").is(int32());
     Check.that("abc").isNot((String s) -> s.endsWith("xyz"));
     Check.that(new int[10]).is(array());
     Check.that(float[].class).is(array());
@@ -262,24 +262,24 @@ public class MsgPredicateTest {
   }
 
   @Test
-  public void integer00() {
+  public void int32_00() {
     try {
-      Check.that("foo", "calcium").is(integer());
+      Check.that("foo", "calcium").is(int32());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("calcium must be parsable as integer (was foo)", e.getMessage());
+      assertEquals("calcium cannot be parsed into int (was foo)", e.getMessage());
       return;
     }
     fail();
   }
 
   @Test
-  public void integer10() {
+  public void int32_10() {
     try {
-      Check.that("42", "calcium").isNot(integer());
+      Check.that("42", "calcium").isNot(int32());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("calcium must not be parsable as integer (was 42)",
+      assertEquals("calcium must not be parsable into int (was 42)",
           e.getMessage());
       return;
     }

@@ -57,10 +57,40 @@ final class MsgPredicate {
         : x.name() + MUST_BE + "null or blank" + was2(x);
   }
 
-  static PrefabMsgFormatter msgInteger() {
+  static PrefabMsgFormatter msgInt32() {
     return x -> x.negated()
-        ? x.name() + MUST_NOT_BE + "parsable as integer" + was1(x)
-        : x.name() + MUST_BE + "parsable as integer" + was1(x);
+        ? x.name() + MUST_NOT_BE + "parsable into int" + was1(x) // BS
+        : x.name() + " cannot be parsed into int" + was1(x);
+  }
+
+  static PrefabMsgFormatter msgInt64() {
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "parsable into long" + was1(x) // BS
+        : x.name() + " cannot be parsed into long" + was1(x);
+  }
+
+  static PrefabMsgFormatter msgInt16() {
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "parsable into short" + was1(x) // BS
+        : x.name() + " cannot be parsed into short" + was1(x);
+  }
+
+  static PrefabMsgFormatter msgInt8() {
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "parsable into byte" + was1(x) // BS
+        : x.name() + " cannot be parsed into byte" + was1(x);
+  }
+
+  static PrefabMsgFormatter msgFloat32() {
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "parsable into float" + was1(x) // BS
+        : x.name() + " cannot be parsed into float" + was1(x);
+  }
+
+  static PrefabMsgFormatter msgFloat64() {
+    return x -> x.negated()
+        ? x.name() + MUST_NOT_BE + "parsable into double" + was1(x) // BS
+        : x.name() + " cannot be parsed into double" + was1(x);
   }
 
   static PrefabMsgFormatter msgArray() {

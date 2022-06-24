@@ -1,15 +1,15 @@
 package nl.naturalis.common;
 
-import static nl.naturalis.common.NumberMethods.fitsInto;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertTrue;
-
-import nl.naturalis.common.invoke.IllegalAssignmentException;
 import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.OptionalLong;
+
+import static nl.naturalis.common.NumberMethods.fitsInto;
+import static org.junit.Assert.*;
 
 public class NumberMethodsTest {
 
@@ -288,9 +288,506 @@ public class NumberMethodsTest {
     assertEquals(+22, NumberMethods.parseInt("+00000000000022"));
   }
 
+  @Test(expected = TypeConversionException.class)
+  public void parseInt02() {
+    NumberMethods.parseInt("-200000000000022");
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseInt03() {
+    NumberMethods.parseInt(null);
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseInt04() {
+    NumberMethods.parseInt("");
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseInt05() {
+    NumberMethods.parseInt("42.6");
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseInt06() {
+    NumberMethods.parseInt("12foo");
+  }
+
+  @Test
+  public void toInt01() {
+    assertEquals(OptionalInt.of(-22), NumberMethods.toInt("-00000000000022"));
+    assertEquals(OptionalInt.of(+22), NumberMethods.toInt("+00000000000022"));
+  }
+
+  @Test
+  public void toInt02() {
+    assertEquals(OptionalInt.empty(), NumberMethods.toInt("-200000000000022"));
+  }
+
+  @Test
+  public void toInt03() {
+    assertEquals(OptionalInt.empty(), NumberMethods.toInt(null));
+  }
+
+  @Test
+  public void toInt04() {
+    assertEquals(OptionalInt.empty(), NumberMethods.toInt(""));
+  }
+
+  @Test
+  public void toInt05() {
+    assertEquals(OptionalInt.empty(), NumberMethods.toInt("42.6"));
+  }
+
+  @Test
+  public void toInt06() {
+    assertEquals(OptionalInt.empty(), NumberMethods.toInt("12foo"));
+  }
+
   @Test
   public void isInt01() {
     assertTrue(NumberMethods.isInt("42"));
+    assertTrue(NumberMethods.isInt("-42"));
+  }
+
+  @Test
+  public void isInt02() {
+    assertFalse(NumberMethods.isInt(null));
+  }
+
+  @Test
+  public void isInt03() {
+    assertFalse(NumberMethods.isInt(""));
+  }
+
+  @Test
+  public void isInt04() {
+    assertFalse(NumberMethods.isInt("1.3"));
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseDouble00() {
+    NumberMethods.parseDouble("  22");
+  }
+
+  @Test
+  public void parseDouble01() {
+    assertEquals(-22.3D, NumberMethods.parseDouble("-00000000000022.3"), 0D);
+    assertEquals(+22.3D, NumberMethods.parseDouble("+00000000000022.3"), 0D);
+    assertFalse(Double.isNaN(NumberMethods.parseDouble("1.0E292")));
+    assertFalse(Double.isInfinite(NumberMethods.parseDouble("1.0E292")));
+    assertFalse(Double.isInfinite(NumberMethods.parseDouble("1.0E292")));
+    assertFalse(Double.isInfinite(NumberMethods.parseDouble("1.0E-44")));
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseDouble02() {
+    NumberMethods.parseDouble("1"
+        + ".67E299999999999999999999999999999999999999999999999999");
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseDouble03() {
+    NumberMethods.parseDouble(null);
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseDouble04() {
+    NumberMethods.parseDouble("");
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseDouble05() {
+    NumberMethods.parseDouble("12foo");
+  }
+
+  @Test
+  public void toDouble00() {
+    assertEquals(OptionalDouble.of(-22), NumberMethods.toDouble("-00000000000022"));
+    assertEquals(OptionalDouble.of(+22), NumberMethods.toDouble("+00000000000022"));
+  }
+
+  @Test
+  public void toDouble01() {
+    assertEquals(OptionalDouble.empty(), NumberMethods.toDouble("3.0D"));
+  }
+
+  @Test
+  public void toDouble02() {
+    assertEquals(OptionalDouble.empty(), NumberMethods.toDouble(null));
+  }
+
+  @Test
+  public void toDouble03() {
+    assertEquals(OptionalDouble.empty(), NumberMethods.toDouble(""));
+  }
+
+  @Test
+  public void toDouble04() {
+    assertEquals(OptionalDouble.empty(), NumberMethods.toDouble("12foo"));
+  }
+
+  @Test
+  public void isDouble00() {
+    assertTrue(NumberMethods.isDouble("42"));
+    assertTrue(NumberMethods.isDouble("-42.8989"));
+  }
+
+  @Test
+  public void isDouble01() {
+    assertFalse(NumberMethods.isDouble(null));
+  }
+
+  @Test
+  public void isDouble02() {
+    assertFalse(NumberMethods.isDouble(""));
+  }
+
+  @Test
+  public void isDouble03() {
+    assertFalse(NumberMethods.isDouble("1.3D"));
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseFloat00() {
+    NumberMethods.parseFloat("  22");
+  }
+
+  @Test
+  public void parseFloat01() {
+    assertEquals(-22F, NumberMethods.parseFloat("-00000000000022"), 0F);
+    assertEquals(+22.5F, NumberMethods.parseFloat("+00000000000022.5"), 0F);
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseFloat02() {
+    NumberMethods.parseFloat("-3.6F");
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseFloat03() {
+    NumberMethods.parseFloat(null);
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseFloat04() {
+    NumberMethods.parseFloat("");
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseFloat05() {
+    NumberMethods.parseFloat("12foo");
+  }
+
+  @Test
+  public void toFloat01() {
+    assertEquals(OptionalDouble.of(-1.3E1), NumberMethods.toFloat("-1.3E1"));
+  }
+
+  @Test
+  public void toFloat02() {
+    assertEquals(OptionalDouble.empty(), NumberMethods.toFloat(null));
+  }
+
+  @Test
+  public void toFloat03() {
+    assertEquals(OptionalDouble.empty(), NumberMethods.toFloat(""));
+  }
+
+  @Test
+  public void toFloat04() {
+    assertEquals(OptionalDouble.empty(), NumberMethods.toFloat("42.+6"));
+  }
+
+  @Test
+  public void toFloat05() {
+    assertEquals(OptionalDouble.empty(), NumberMethods.toFloat("12foo"));
+  }
+
+  @Test
+  public void isFloat01() {
+    assertTrue(NumberMethods.isFloat("42"));
+    assertTrue(NumberMethods.isFloat("-42"));
+  }
+
+  @Test
+  public void isFloat02() {
+    assertFalse(NumberMethods.isFloat(null));
+  }
+
+  @Test
+  public void isFloat03() {
+    assertFalse(NumberMethods.isFloat(""));
+  }
+
+  @Test
+  public void isFloat04() {
+    assertTrue(NumberMethods.isFloat("1.3"));
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseLong00() {
+    NumberMethods.parseLong("  22");
+  }
+
+  @Test
+  public void parseLong01() {
+    assertEquals(-22, NumberMethods.parseLong("-00000000000022"));
+    assertEquals(+22, NumberMethods.parseLong("+00000000000022"));
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseLong02() {
+    NumberMethods.parseLong("-9999999999999999999999999999992");
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseLong03() {
+    NumberMethods.parseLong(null);
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseLong04() {
+    NumberMethods.parseLong("");
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseLong05() {
+    NumberMethods.parseLong("42.6");
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseLong06() {
+    NumberMethods.parseLong("12foo");
+  }
+
+  @Test
+  public void toLong01() {
+    assertEquals(OptionalLong.of(-22), NumberMethods.toLong("-00000000000022"));
+    assertEquals(OptionalLong.of(+22), NumberMethods.toLong("+00000000000022"));
+  }
+
+  @Test
+  public void toLong02() {
+    assertEquals(OptionalLong.empty(), NumberMethods.toLong(
+        "99999999999999999999999999"));
+  }
+
+  @Test
+  public void toLong03() {
+    assertEquals(OptionalLong.empty(), NumberMethods.toLong(null));
+  }
+
+  @Test
+  public void toLong04() {
+    assertEquals(OptionalLong.empty(), NumberMethods.toLong(""));
+  }
+
+  @Test
+  public void toLong05() {
+    assertEquals(OptionalLong.empty(), NumberMethods.toLong("42.6"));
+  }
+
+  @Test
+  public void toLong06() {
+    assertEquals(OptionalLong.empty(), NumberMethods.toLong("12foo"));
+  }
+
+  @Test
+  public void isLong01() {
+    assertTrue(NumberMethods.isLong("42"));
+    assertTrue(NumberMethods.isLong("-42"));
+  }
+
+  @Test
+  public void isLong02() {
+    assertFalse(NumberMethods.isLong(null));
+  }
+
+  @Test
+  public void isLong03() {
+    assertFalse(NumberMethods.isLong(""));
+  }
+
+  @Test
+  public void isLong04() {
+    assertFalse(NumberMethods.isLong("1.3"));
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseShort00() {
+    NumberMethods.parseShort("  22");
+  }
+
+  @Test
+  public void parseShort01() {
+    assertEquals(-22, NumberMethods.parseShort("-00000000000022"));
+    assertEquals(+22, NumberMethods.parseShort("+00000000000022"));
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseShort02() {
+    NumberMethods.parseShort("-200000000000022");
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseShort03() {
+    NumberMethods.parseShort(null);
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseShort04() {
+    NumberMethods.parseShort("");
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseShort05() {
+    NumberMethods.parseShort("42.6");
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseShort06() {
+    NumberMethods.parseShort("12foo");
+  }
+
+  @Test
+  public void toShort01() {
+    assertEquals(OptionalInt.of(-22), NumberMethods.toShort("-00000000000022"));
+    assertEquals(OptionalInt.of(+22), NumberMethods.toShort("+00000000000022"));
+  }
+
+  @Test
+  public void toShort02() {
+    assertEquals(OptionalInt.empty(), NumberMethods.toShort("-200000000000022"));
+  }
+
+  @Test
+  public void toShort03() {
+    assertEquals(OptionalInt.empty(), NumberMethods.toShort(null));
+  }
+
+  @Test
+  public void toShort04() {
+    assertEquals(OptionalInt.empty(), NumberMethods.toShort(""));
+  }
+
+  @Test
+  public void toShort05() {
+    assertEquals(OptionalInt.empty(), NumberMethods.toShort("42.6"));
+  }
+
+  @Test
+  public void toShort06() {
+    assertEquals(OptionalInt.empty(), NumberMethods.toShort("12foo"));
+  }
+
+  @Test
+  public void isShort01() {
+    assertTrue(NumberMethods.isShort("42"));
+    assertTrue(NumberMethods.isShort("-42"));
+  }
+
+  @Test
+  public void isShort02() {
+    assertFalse(NumberMethods.isShort(null));
+  }
+
+  @Test
+  public void isShort03() {
+    assertFalse(NumberMethods.isShort(""));
+  }
+
+  @Test
+  public void isShort04() {
+    assertFalse(NumberMethods.isShort("1.3"));
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseByte00() {
+    NumberMethods.parseByte("  22");
+  }
+
+  @Test
+  public void parseByte01() {
+    assertEquals(-22, NumberMethods.parseByte("-00000000000022"));
+    assertEquals(+22, NumberMethods.parseByte("+00000000000022"));
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseByte02() {
+    NumberMethods.parseByte("-200000000000022");
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseByte03() {
+    NumberMethods.parseByte(null);
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseByte04() {
+    NumberMethods.parseByte("");
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseByte05() {
+    NumberMethods.parseByte("42.6");
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseByte06() {
+    NumberMethods.parseByte("12foo");
+  }
+
+  @Test
+  public void toByte01() {
+    assertEquals(OptionalInt.of(-22), NumberMethods.toByte("-00000000000022"));
+    assertEquals(OptionalInt.of(+22), NumberMethods.toByte("+00000000000022"));
+  }
+
+  @Test
+  public void toByte02() {
+    assertEquals(OptionalInt.empty(), NumberMethods.toByte("-200000000000022"));
+  }
+
+  @Test
+  public void toByte03() {
+    assertEquals(OptionalInt.empty(), NumberMethods.toByte(null));
+  }
+
+  @Test
+  public void toByte04() {
+    assertEquals(OptionalInt.empty(), NumberMethods.toByte(""));
+  }
+
+  @Test
+  public void toByte05() {
+    assertEquals(OptionalInt.empty(), NumberMethods.toByte("42.6"));
+  }
+
+  @Test
+  public void toByte06() {
+    assertEquals(OptionalInt.empty(), NumberMethods.toByte("12foo"));
+  }
+
+  @Test
+  public void isByte01() {
+    assertTrue(NumberMethods.isByte("42"));
+    assertTrue(NumberMethods.isByte("-42"));
+  }
+
+  @Test
+  public void isByte02() {
+    assertFalse(NumberMethods.isByte(null));
+  }
+
+  @Test
+  public void isByte03() {
+    assertFalse(NumberMethods.isByte(""));
+  }
+
+  @Test
+  public void isByte04() {
+    assertFalse(NumberMethods.isByte("1.3"));
   }
 
 }
