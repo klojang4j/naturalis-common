@@ -1,7 +1,6 @@
 package nl.naturalis.common.check;
 
 import nl.naturalis.common.*;
-import nl.naturalis.common.collection.IntList;
 import nl.naturalis.common.function.IntObjRelation;
 import nl.naturalis.common.function.IntRelation;
 import nl.naturalis.common.function.ObjIntRelation;
@@ -14,7 +13,6 @@ import java.nio.BufferOverflowException;
 import java.util.*;
 import java.util.function.*;
 
-import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.MsgIntObjRelation.*;
 import static nl.naturalis.common.check.MsgIntPredicate.*;
 import static nl.naturalis.common.check.MsgIntRelation.*;
@@ -1342,96 +1340,100 @@ public final class CommonChecks {
   //////////////////////////////////////////////////////////////////////////////////
 
   /**
-   * <p>Verifies that the argument can be used as index into the specified array or
-   * array-like object.
+   * Verifies that the argument can be used as index into the specified array. No
+   * preliminary check is done to ensure the provided object actually is an array.
+   * Execute the {@link #array()} check first if necessary.
    *
-   * <p>Note that there is no upper bound on type parameter {@code <T>}, but the
-   * object of this {@link IntObjRelation} <b>must</b> be one of the following:
-   * <ul>
-   *   <li>an array</li>
-   *   <li>an instance of {@link List}</li>
-   *   <li>an instance of {@link IntList}</li>
-   *   <li>an instance of {@link String}</li>
-   * </ul>
-   * An {@link InvalidCheckException} is thrown if the argument has any other type.
-   *
-   * <blockquote>
-   *
-   * <pre>{@code
-   * Check.that(4).is(indexOf(), "Hello world!"); // true
-   * Check.that(5).is(indexOf(), new File[5]); // false
-   * Check.that(-1).is(indexOf(), List.of("foo", "bar")); // false
-   * }</pre>
-   *
-   * </blockquote>
-   *
-   * @param <T> The type of the array or array-like object
+   * @param <T> The type of the array
    * @return A function implementing the test described above
    */
-  public static <T> IntObjRelation<T> indexOf() {
-    return (x, y) -> {
-      return y instanceof List l
-          ? x >= 0 && x < l.size()
-          : y instanceof String s
-              ? x >= 0 && x < s.length()
-              : y.getClass().isArray()
-                  ? x >= 0 && x < Array.getLength(y)
-                  : y instanceof IntList il
-                      ? x >= 0 && x < il.size()
-                      : notApplicable("indexOf", y);
-    };
+  public static <T> IntObjRelation<T> arrayIndexOf() {
+    return (x, y) -> x >= 0 && x < Array.getLength(y);
   }
 
   static {
-    setMetadata(indexOf(), msgIndexOf(), "indexOf");
+    setMetadata(arrayIndexOf(), msgIndexOf(), "arrayIndexOf");
+  }
+
+  /**
+   * Verifies that the argument can be used as index into the specified {@code
+   * String}.
+   *
+   * @return A function implementing the test described above
+   */
+  public static IntObjRelation<String> stringIndexOf() {
+    return (x, y) -> x >= 0 && x < y.length();
+  }
+
+  static {
+    setMetadata(stringIndexOf(), msgIndexOf(), "stringIndexOf");
+  }
+
+  /**
+   * Verifies that the argument can be used as index into the specified {@code
+   * List}.
+   *
+   * @return A function implementing the test described above
+   */
+  public static <T> IntObjRelation<List<T>> listIndexOf() {
+    return (x, y) -> x >= 0 && x < y.size();
+  }
+
+  static {
+    setMetadata(listIndexOf(), msgIndexOf(), "listIndexOf");
   }
 
   /**
    * <p>Verifies that the argument can be used as a "from" or "to" index in
-   * operations like {@link String#substring(int, int) substring} and {@link
-   * List#subList(int, int) subList}. These operations allow both the "from" index
-   * and the "to" index to be just past the last element of the list. In other words,
-   * they allow them to be equal to the size of the list.
+   * operations like (but not necessarily limited to) {@link
+   * Arrays#copyOfRange(int[], int, int)}. These operations allow both the "from"
+   * index and the "to" index to be just past the last element of the array. In other
+   * words, they allow them to be equal to the length of the array.
    *
-   * <p>Note that there is no upper bound on type parameter {@code <T>}, but the
-   * object of this {@link IntObjRelation} <b>must</b> be one of the following:
-   * <ul>
-   *   <li>an array</li>
-   *   <li>an instance of {@link List}</li>
-   *   <li>an instance of {@link IntList}</li>
-   *   <li>an instance of {@link String}</li>
-   * </ul>
-   * An {@link InvalidCheckException} is thrown if the argument has any other type.
-   *
-   * <blockquote>
-   *
-   * <pre>{@code
-   * Check.that(4).is(indexOf(), "Hello world!"); // true
-   * Check.that(5).is(indexOf(), new File[5]); // true
-   * Check.that(-1).is(indexOf(), List.of("foo", "bar")); // false
-   * }</pre>
-   *
-   * </blockquote>
-   *
-   * @param <T> The type of the array or array-like object
+   * @param <T> The type of the array
    * @return A function implementing the test described above
    */
-  public static <T> IntObjRelation<T> indexInclusiveOf() {
-    return (x, y) -> {
-      return y instanceof List l
-          ? x >= 0 && x <= l.size()
-          : y instanceof String s
-              ? x >= 0 && x <= s.length()
-              : y.getClass().isArray()
-                  ? x >= 0 && x <= Array.getLength(y)
-                  : y instanceof IntList il
-                      ? x >= 0 && x <= il.size()
-                      : notApplicable("indexInclusiveOf", y);
-    };
+  public static <T> IntObjRelation<T> subArrayIndexOf() {
+    return (x, y) -> x >= 0 && x <= Array.getLength(y);
   }
 
   static {
-    setMetadata(indexInclusiveOf(), msgIndexInclusiveOf(), "indexInclusiveOf");
+    setMetadata(subArrayIndexOf(), msgIndexInclusiveOf(), "subArrayIndexOf");
+  }
+
+  /**
+   * <p>Verifies that the argument can be used as a "from" or "to" index in
+   * operations like (but not necessarily limited to) {@link String#substring(int,
+   * int)}. These operations allow both the "from" index and the "to" index to be
+   * just past the end of the string. In other words, they allow them to be equal to
+   * the length of the string.
+   *
+   * @return A function implementing the test described above
+   */
+  public static IntObjRelation<String> subStringIndexOf() {
+    return (x, y) -> x >= 0 && x <= y.length();
+  }
+
+  static {
+    setMetadata(subStringIndexOf(), msgIndexInclusiveOf(), "subStringIndexOf");
+  }
+
+  /**
+   * <p>Verifies that the argument can be used as a "from" or "to" index in
+   * operations like (but not necessarily limited to) {@link List#subList(int, int)}.
+   * These operations allow both the "from" index and the "to" index to be just past
+   * the last element of the list. In other words, they allow them to be equal to the
+   * size of the list.
+   *
+   * @param <T> The type of the elements in the list
+   * @return A function implementing the test described above
+   */
+  public static <T> IntObjRelation<List<T>> subListIndexOf() {
+    return (x, y) -> x >= 0 && x <= y.size();
+  }
+
+  static {
+    setMetadata(subStringIndexOf(), msgIndexInclusiveOf(), "subListIndexOf");
   }
 
   /**
@@ -1503,6 +1505,17 @@ public final class CommonChecks {
    */
   public static Function<String, IndexOutOfBoundsException> indexOutOfBounds() {
     return IndexOutOfBoundsException::new;
+  }
+
+  /**
+   * (Not a check) A {@code Supplier} of an {@code IndexOutOfBoundsException} for the
+   * specified index.
+   *
+   * @return A {@code Supplier} of an {@code IndexOutOfBoundsException}
+   * @see IndexOutOfBoundsException#IndexOutOfBoundsException(int)
+   */
+  public static Supplier<IndexOutOfBoundsException> indexOutOfBounds(int index) {
+    return () -> new IndexOutOfBoundsException(index);
   }
 
   /**

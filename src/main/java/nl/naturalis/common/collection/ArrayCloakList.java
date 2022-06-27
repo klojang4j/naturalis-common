@@ -378,7 +378,8 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   }
 
   private void checkIndex(int index) {
-    Check.on(indexOutOfBounds(), index, "index").is(CommonChecks.indexOf(), data);
+    Check.on(indexOutOfBounds(), index, "index").is(CommonChecks.arrayIndexOf(),
+        data);
   }
 
 }

@@ -1,11 +1,7 @@
 package nl.naturalis.common.check;
 
-import nl.naturalis.common.IntPair;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.time.DayOfWeek;
-import java.util.Collection;
 import java.util.List;
 
 import static nl.naturalis.common.ArrayMethods.*;
@@ -29,9 +25,15 @@ public class ObjectCheckTest {
     Check.that("abc").has(s -> s.substring(1), "myprop", EQ(), "bc");
     Check.that("abc").has(s -> s.substring(1), EQ(), "bc", "custom message");
     Check.that("abc").has(s -> s.substring(1), EQ(), "bc", () -> new Exception());
-    Check.that((Integer) 2).has(unbox(), indexOf(), ints(2, 4, 6));
-    Check.that((Integer) 2).has(unbox(), indexOf(), ints(2, 4, 6), "custom message");
-    Check.that((Integer) 2).has(unbox(), indexOf(), ints(2, 4, 6), () -> new Exception());
+    Check.that((Integer) 2).has(unbox(), CommonChecks.arrayIndexOf(), ints(2, 4, 6));
+    Check.that((Integer) 2).has(unbox(),
+        CommonChecks.arrayIndexOf(),
+        ints(2, 4, 6),
+        "custom message");
+    Check.that((Integer) 2).has(unbox(),
+        CommonChecks.arrayIndexOf(),
+        ints(2, 4, 6),
+        () -> new Exception());
   }
 
   @Test
@@ -47,8 +49,14 @@ public class ObjectCheckTest {
     Check.that("abc").notHas(s -> s.substring(1), EQ(), "ab", "custom message");
     Check.that("abc").notHas(s -> s.substring(1), EQ(), "ab", () -> new Exception());
     Check.that((Integer) 2).notHas(unbox(), inIntArray(), ints(1, 3, 5));
-    Check.that((Integer) 2).notHas(unbox(), inIntArray(), ints(1, 3, 5), "custom message");
-    Check.that((Integer) 2).notHas(unbox(), inIntArray(), ints(1, 3, 5), () -> new Exception());
+    Check.that((Integer) 2).notHas(unbox(),
+        inIntArray(),
+        ints(1, 3, 5),
+        "custom message");
+    Check.that((Integer) 2).notHas(unbox(),
+        inIntArray(),
+        ints(1, 3, 5),
+        () -> new Exception());
   }
 
   @Test
@@ -57,7 +65,8 @@ public class ObjectCheckTest {
       Check.that(new int[2][2], "lolita").is(NULL());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("lolita must be null (was int[2][] of [int[2] of [0, 0], int[2] of [0, 0]])",
+      assertEquals(
+          "lolita must be null (was int[2][] of [int[2] of [0, 0], int[2] of [0, 0]])",
           e.getMessage());
       return;
     }
@@ -70,7 +79,8 @@ public class ObjectCheckTest {
       Check.that(new String[0], "lolita").isNot(empty());
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("lolita must not be null or empty (was String[0])", e.getMessage());
+      assertEquals("lolita must not be null or empty (was String[0])",
+          e.getMessage());
       return;
     }
     fail();
@@ -94,7 +104,8 @@ public class ObjectCheckTest {
       Check.that(new float[1][1][1]).isNot(deepNotEmpty(), "Definitely 3D: ${arg}");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("Definitely 3D: float[1][][] of [float[1][] of [float[1] of [0.0]]]",
+      assertEquals(
+          "Definitely 3D: float[1][][] of [float[1][] of [float[1] of [0.0]]]",
           e.getMessage());
       return;
     }
@@ -108,7 +119,8 @@ public class ObjectCheckTest {
 
   @Test(expected = UnsupportedOperationException.class)
   public void isNot_Predicate_CustomExc00() {
-    Check.that(new float[1][1][1]).isNot(deepNotEmpty(), () -> new UnsupportedOperationException());
+    Check.that(new float[1][1][1]).isNot(deepNotEmpty(),
+        () -> new UnsupportedOperationException());
   }
 
   @Test
@@ -161,7 +173,9 @@ public class ObjectCheckTest {
 
   @Test(expected = UnsupportedOperationException.class)
   public void is_Relation_CustomExc00() {
-    Check.that(MONDAY).is(GTE(), THURSDAY, () -> new UnsupportedOperationException());
+    Check.that(MONDAY).is(GTE(),
+        THURSDAY,
+        () -> new UnsupportedOperationException());
   }
 
   @Test(expected = UnsupportedOperationException.class)
@@ -187,7 +201,8 @@ public class ObjectCheckTest {
       Check.that(doubles(1D, 2D, 3D), "tanya's length").isNot(lenGTE(), 2);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("tanya's length must not be >= 2 (was double[3] of [1.0, 2.0, 3.0])",
+      assertEquals(
+          "tanya's length must not be >= 2 (was double[3] of [1.0, 2.0, 3.0])",
           e.getMessage());
       return;
     }
@@ -209,7 +224,10 @@ public class ObjectCheckTest {
   @Test
   public void isNot_ObjIntRelation_CustomMsg00() {
     try {
-      Check.that(List.of(1, 2, 3, 4, 5, 6)).isNot(sizeGT(), 2, "Shopping list: ${arg}", "foo");
+      Check.that(List.of(1, 2, 3, 4, 5, 6)).isNot(sizeGT(),
+          2,
+          "Shopping list: ${arg}",
+          "foo");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("Shopping list: ListN[6] of [1, 2, 3, 4, 5, 6]", e.getMessage());
@@ -220,12 +238,16 @@ public class ObjectCheckTest {
 
   @Test(expected = UnsupportedOperationException.class)
   public void is_ObjIntRelation_CustomExc00() {
-    Check.that("12345").is(strlenEQ(), 10, () -> new UnsupportedOperationException());
+    Check.that("12345").is(strlenEQ(),
+        10,
+        () -> new UnsupportedOperationException());
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void isNot_ObjIntRelation_CustomExc00() {
-    Check.that(List.of(1, 2, 3)).isNot(sizeEQ(), 3, () -> new UnsupportedOperationException());
+    Check.that(List.of(1, 2, 3)).isNot(sizeEQ(),
+        3,
+        () -> new UnsupportedOperationException());
   }
 
 }

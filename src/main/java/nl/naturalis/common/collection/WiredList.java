@@ -2,7 +2,6 @@ package nl.naturalis.common.collection;
 
 import nl.naturalis.common.CollectionMethods;
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.check.CommonChecks;
 import nl.naturalis.common.check.IntCheck;
 import nl.naturalis.common.x.invoke.InvokeUtils;
 
@@ -1624,13 +1623,12 @@ public final class WiredList<E> implements List<E> {
     return x;
   }
 
-  private IntCheck<IndexOutOfBoundsException> checkExclusive(int index) {
-    return Check.on(indexOutOfBounds(), index, INDEX).is(CommonChecks.indexOf(),
-        this);
+  private IntCheck<IllegalArgumentException> checkExclusive(int index) {
+    return Check.that(index).is(listIndexOf(), this, indexOutOfBounds(index));
   }
 
-  private IntCheck<IndexOutOfBoundsException> checkInclusive(int index) {
-    return Check.on(indexOutOfBounds(), index, INDEX).is(indexInclusiveOf(), this);
+  private IntCheck<IllegalArgumentException> checkInclusive(int index) {
+    return Check.that(index).is(subListIndexOf(), this, indexOutOfBounds(index));
   }
 
   private void checkSegment(int fromIndex, int toIndex) {

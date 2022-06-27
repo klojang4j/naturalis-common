@@ -2,10 +2,6 @@ package nl.naturalis.common.check;
 
 import org.junit.Test;
 
-import java.io.IOException;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-
 import static nl.naturalis.common.ArrayMethods.ints;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static org.junit.Assert.assertEquals;
@@ -24,15 +20,22 @@ public class IntCheckTest {
     Check.that(42).is(lt(), 43, () -> new UnsupportedOperationException());
     Check.that(42).is(inIntArray(), ints(40, 42, 44));
     Check.that(42).is(inIntArray(), ints(40, 42, 44), "custom message");
-    Check.that(42).is(inIntArray(), ints(40, 42, 44), () -> new UnsupportedOperationException());
+    Check.that(42).is(inIntArray(),
+        ints(40, 42, 44),
+        () -> new UnsupportedOperationException());
     Check.that(42).has(box(), deepNotEmpty());
     Check.that(42).has(box(), "box", deepNotEmpty());
     Check.that(42).has(box(), deepNotEmpty(), "custom message");
-    Check.that(42).has(box(), deepNotEmpty(), () -> new UnsupportedOperationException());
+    Check.that(42).has(box(),
+        deepNotEmpty(),
+        () -> new UnsupportedOperationException());
     Check.that(42).has(i -> i / 7, eq(), 6);
     Check.that(42).has(i -> i / 7, eq(), 6, "myprop");
     Check.that(42).has(i -> i / 7, eq(), 6, "custom message");
-    Check.that(42).has(i -> i / 7, eq(), 6, () -> new UnsupportedOperationException());
+    Check.that(42).has(i -> i / 7,
+        eq(),
+        6,
+        () -> new UnsupportedOperationException());
   }
 
   @Test
@@ -43,16 +46,21 @@ public class IntCheckTest {
     Check.that(42).isNot(gt(), 43);
     Check.that(42).isNot(gt(), 43, "custom message");
     Check.that(42).isNot(gt(), 43, () -> new UnsupportedOperationException());
-    Check.that(42).isNot(indexOf(), "42");
-    Check.that(42).isNot(indexOf(), "42", "custom message");
-    Check.that(42).isNot(indexOf(), "42", () -> new UnsupportedOperationException());
+    Check.that(42).isNot(stringIndexOf(), "42");
+    Check.that(42).isNot(stringIndexOf(), "42", "custom message");
+    Check.that(42).isNot(stringIndexOf(),
+        "42",
+        () -> new UnsupportedOperationException());
     Check.that(42).notHas(box(), NULL());
     Check.that(42).notHas(box(), NULL(), "custom message");
     Check.that(42).notHas(box(), NULL(), () -> new UnsupportedOperationException());
     Check.that(42).notHas(box(), "box", NULL());
     Check.that(42).notHas(i -> i / 7, eq(), 9);
     Check.that(42).notHas(i -> i / 7, eq(), 9, "custom message");
-    Check.that(42).notHas(i -> i / 7, eq(), 9, () -> new UnsupportedOperationException());
+    Check.that(42).notHas(i -> i / 7,
+        eq(),
+        9,
+        () -> new UnsupportedOperationException());
     Check.that(42).notHas(i -> i / 7, eq(), 9, "my prop");
   }
 
@@ -178,7 +186,8 @@ public class IntCheckTest {
       Check.that(7, "cat").is(inIntArray(), ints(2, 4, 6, 8, 10));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("cat must be element of int[5] of [2, 4, 6, 8, 10] (was 7)", e.getMessage());
+      assertEquals("cat must be element of int[5] of [2, 4, 6, 8, 10] (was 7)",
+          e.getMessage());
       return;
     }
     fail();
@@ -187,7 +196,7 @@ public class IntCheckTest {
   @Test
   public void isNot_IntObjRelation00() {
     try {
-      Check.that(2, "cat").isNot(indexOf(), "1234567");
+      Check.that(2, "cat").isNot(stringIndexOf(), "1234567");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("cat must be < 0 or >= 7 (was 2)", e.getMessage());
@@ -211,7 +220,7 @@ public class IntCheckTest {
   @Test
   public void isNot_IntObjRelation_CustomMsg00() {
     try {
-      Check.that(2).isNot(indexOf(), "${0}", "BAR");
+      Check.that(2).isNot(stringIndexOf(), "${0}", "BAR");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("BAR", e.getMessage());
@@ -222,12 +231,16 @@ public class IntCheckTest {
 
   @Test(expected = IndexOutOfBoundsException.class)
   public void is_IntObjRelation_CustomExc00() {
-    Check.that(7).is(indexOf(), ints(2, 4, 6, 8, 10), () -> new IndexOutOfBoundsException());
+    Check.that(7).is(arrayIndexOf(),
+        ints(2, 4, 6, 8, 10),
+        () -> new IndexOutOfBoundsException());
   }
 
   @Test(expected = IndexOutOfBoundsException.class)
   public void isNot_IntObjRelation_CustomExc00() {
-    Check.that(2).isNot(indexOf(), "1234567", () -> new IndexOutOfBoundsException());
+    Check.that(2).isNot(stringIndexOf(),
+        "1234567",
+        () -> new IndexOutOfBoundsException());
   }
 
   @Test
@@ -257,7 +270,9 @@ public class IntCheckTest {
   @Test
   public void has_Name_Predicate00() {
     try {
-      Check.that(100, "my").has(box(), "box", x -> x.getClass().equals(String.class));
+      Check.that(100, "my").has(box(),
+          "box",
+          x -> x.getClass().equals(String.class));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("Invalid value for my.box: 100", e.getMessage());
@@ -269,7 +284,9 @@ public class IntCheckTest {
   @Test
   public void notHas_Name_Predicate00() {
     try {
-      Check.that(100, "my").notHas(box(), "box", x -> x.getClass().equals(Integer.class));
+      Check.that(100, "my").notHas(box(),
+          "box",
+          x -> x.getClass().equals(Integer.class));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("Invalid value for my.box: 100", e.getMessage());
@@ -305,7 +322,9 @@ public class IntCheckTest {
   @Test(expected = IndexOutOfBoundsException.class)
   public void has_Predicate_CustomExc00() {
     Check.that(100)
-        .has(box(), x -> x.getClass().equals(String.class), () -> new IndexOutOfBoundsException());
+        .has(box(),
+            x -> x.getClass().equals(String.class),
+            () -> new IndexOutOfBoundsException());
   }
 
   @Test(expected = IndexOutOfBoundsException.class)

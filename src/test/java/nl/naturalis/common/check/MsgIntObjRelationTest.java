@@ -18,9 +18,9 @@ public class MsgIntObjRelationTest {
 
   @Test
   public void intObjRelation00() {
-    Check.that(7).is(indexOf(), new float[10]);
-    Check.that(7).is(indexOf(), initializeList(10, "foo"));
-    Check.that(7).is(indexOf(), "Hello, Sam");
+    Check.that(7).is(arrayIndexOf(), new float[10]);
+    Check.that(7).is(listIndexOf(), initializeList(10, "foo"));
+    Check.that(7).is(stringIndexOf(), "Hello, Sam");
     Check.that(7).is(inIntArray(), ints(3, 5, 7, 9));
     Check.that(7).is(inRange(), IntPair.of(7, 8));
     Check.that(7).isNot(inRange(), IntPair.of(6, 7));
@@ -31,7 +31,7 @@ public class MsgIntObjRelationTest {
   @Test
   public void indexOf00() {
     try {
-      Check.that(7, "pepsi").is(indexOf(), new Object[5]);
+      Check.that(7, "pepsi").is(arrayIndexOf(), new Object[5]);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("pepsi must be >= 0 and < 5 (was 7)", e.getMessage());
@@ -43,7 +43,7 @@ public class MsgIntObjRelationTest {
   @Test
   public void indexOf01() {
     try {
-      Check.that(7, "pepsi").isNot(indexOf(), new Object[10]);
+      Check.that(7, "pepsi").isNot(arrayIndexOf(), new Object[10]);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("pepsi must be < 0 or >= 10 (was 7)", e.getMessage());
@@ -55,7 +55,7 @@ public class MsgIntObjRelationTest {
   @Test
   public void listIndexOf00() {
     try {
-      Check.that(7, "cola").is(indexOf(), initializeList(5, "foo"));
+      Check.that(7, "cola").is(listIndexOf(), initializeList(5, "foo"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("cola must be >= 0 and < 5 (was 7)", e.getMessage());
@@ -67,7 +67,7 @@ public class MsgIntObjRelationTest {
   @Test
   public void listIndexOf01() {
     try {
-      Check.that(7, "cola").isNot(indexOf(), initializeList(10, "foo"));
+      Check.that(7, "cola").isNot(listIndexOf(), initializeList(10, "foo"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("cola must be < 0 or >= 10 (was 7)", e.getMessage());
@@ -79,7 +79,7 @@ public class MsgIntObjRelationTest {
   @Test
   public void strIndexOf00() {
     try {
-      Check.that(7, "corona").is(indexOf(), "Hello");
+      Check.that(7, "corona").is(stringIndexOf(), "Hello");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("corona must be >= 0 and < 5 (was 7)", e.getMessage());
@@ -91,7 +91,7 @@ public class MsgIntObjRelationTest {
   @Test
   public void strIndexOf01() {
     try {
-      Check.that(7, "corona").isNot(indexOf(), "Hello, Sam");
+      Check.that(7, "corona").isNot(stringIndexOf(), "Hello, Sam");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals("corona must be < 0 or >= 10 (was 7)", e.getMessage());

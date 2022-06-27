@@ -370,11 +370,11 @@ public final class IntArrayList implements IntList {
   }
 
   private void checkIndex(int index) {
-    Check.on(indexOutOfBounds(), index, "index").is(CommonChecks.indexOf(), this);
+    Check.that(index).is(CommonChecks.arrayIndexOf(), buf, indexOutOfBounds(index));
   }
 
   private void checkIndexInclusive(int index) {
-    Check.on(indexOutOfBounds(), index, "index").is(indexInclusiveOf(), this);
+    Check.that(index).is(subArrayIndexOf(), buf, indexOutOfBounds(index));
   }
 
 }

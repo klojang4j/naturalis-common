@@ -17,99 +17,126 @@ public class StringMethodsTest {
     assertEquals("null", append(new StringBuilder(), null).toString());
     assertEquals("12", append(new StringBuilder(), 1, '2').toString());
     assertEquals("12345", append(new StringBuilder(), 1, '2', "345").toString());
-    assertEquals("12345 ", append(new StringBuilder(), 1, '2', "345", ' ').toString());
+    assertEquals("12345 ",
+        append(new StringBuilder(), 1, '2', "345", ' ').toString());
     assertEquals(
         "12345 SUNDAY",
-        append(new StringBuilder(), 1, '2', "345", ' ', DayOfWeek.SUNDAY).toString());
+        append(new StringBuilder(),
+            1,
+            '2',
+            "345",
+            ' ',
+            DayOfWeek.SUNDAY).toString());
     assertEquals(
         "12345 SUNDAY ",
-        append(new StringBuilder(), 1, '2', "345", ' ', DayOfWeek.SUNDAY, " ").toString());
+        append(new StringBuilder(),
+            1,
+            '2',
+            "345",
+            ' ',
+            DayOfWeek.SUNDAY,
+            " ").toString());
     assertEquals(
         "12345 SUNDAY 1.2",
-        append(new StringBuilder(), 1, '2', "345", ' ', DayOfWeek.SUNDAY, " ", 1.2).toString());
+        append(new StringBuilder(),
+            1,
+            '2',
+            "345",
+            ' ',
+            DayOfWeek.SUNDAY,
+            " ",
+            1.2).toString());
     assertEquals(
         "12345 SUNDAY 1.2750",
-        append(new StringBuilder(), 1, '2', "345", ' ', DayOfWeek.SUNDAY, " ", 1.2, (short) 750)
+        append(new StringBuilder(),
+            1,
+            '2',
+            "345",
+            ' ',
+            DayOfWeek.SUNDAY,
+            " ",
+            1.2,
+            (short) 750)
             .toString());
     assertEquals(
         "12345 SUNDAY 1.2750[1, 3]",
         append(
-                new StringBuilder(),
-                1,
-                '2',
-                "345",
-                ' ',
-                DayOfWeek.SUNDAY,
-                " ",
-                1.2,
-                (short) 750,
-                List.of(1, 3))
+            new StringBuilder(),
+            1,
+            '2',
+            "345",
+            ' ',
+            DayOfWeek.SUNDAY,
+            " ",
+            1.2,
+            (short) 750,
+            List.of(1, 3))
             .toString());
     assertEquals(
         "12345 SUNDAY 1.2750[1, 3] ",
         append(
-                new StringBuilder(),
-                1,
-                '2',
-                "345",
-                ' ',
-                DayOfWeek.SUNDAY,
-                " ",
-                1.2,
-                (short) 750,
-                List.of(1, 3),
-                ' ')
+            new StringBuilder(),
+            1,
+            '2',
+            "345",
+            ' ',
+            DayOfWeek.SUNDAY,
+            " ",
+            1.2,
+            (short) 750,
+            List.of(1, 3),
+            ' ')
             .toString());
     assertEquals(
         "12345 SUNDAY 1.2750[1, 3] null",
         append(
-                new StringBuilder(),
-                1,
-                '2',
-                "345",
-                ' ',
-                DayOfWeek.SUNDAY,
-                " ",
-                1.2,
-                (short) 750,
-                List.of(1, 3),
-                ' ',
-                (Integer) null)
+            new StringBuilder(),
+            1,
+            '2',
+            "345",
+            ' ',
+            DayOfWeek.SUNDAY,
+            " ",
+            1.2,
+            (short) 750,
+            List.of(1, 3),
+            ' ',
+            (Integer) null)
             .toString());
     assertEquals(
         "12345 SUNDAY 1.2750[1, 3] null",
         append(
-                new StringBuilder(),
-                1,
-                '2',
-                "345",
-                ' ',
-                DayOfWeek.SUNDAY,
-                " ",
-                1.2,
-                (short) 750,
-                List.of(1, 3),
-                ' ',
-                null,
-                "")
+            new StringBuilder(),
+            1,
+            '2',
+            "345",
+            ' ',
+            DayOfWeek.SUNDAY,
+            " ",
+            1.2,
+            (short) 750,
+            List.of(1, 3),
+            ' ',
+            null,
+            "")
             .toString());
     assertEquals(
         "12345 SUNDAY 1.2750[1, 3] null333",
         append(
-                new StringBuilder(),
-                1,
-                '2',
-                "345",
-                ' ',
-                DayOfWeek.SUNDAY,
-                " ",
-                1.2,
-                (short) 750,
-                List.of(1, 3),
-                ' ',
-                null,
-                "",
-                333)
+            new StringBuilder(),
+            1,
+            '2',
+            "345",
+            ' ',
+            DayOfWeek.SUNDAY,
+            " ",
+            1.2,
+            (short) 750,
+            List.of(1, 3),
+            ' ',
+            null,
+            "",
+            333)
             .toString());
   }
 
@@ -603,15 +630,15 @@ public class StringMethodsTest {
   public void getLineAndColumn00() {
     String s = "To be\nOr not to be\nThat is the question\n Whether 't is nobler\nIn the mind";
     int idx = 0;
-    assertArrayEquals(new int[] {0, 0}, PrintMethods.getLineAndColumn(s, idx, "\n"));
+    assertArrayEquals(new int[] {0, 0}, getLineAndColumn(s, idx, "\n"));
     idx = s.indexOf("not");
-    assertArrayEquals(new int[] {1, 3}, PrintMethods.getLineAndColumn(s, idx, "\n"));
+    assertArrayEquals(new int[] {1, 3}, getLineAndColumn(s, idx, "\n"));
     idx = s.indexOf("is");
-    assertArrayEquals(new int[] {2, 5}, PrintMethods.getLineAndColumn(s, idx, "\n"));
+    assertArrayEquals(new int[] {2, 5}, getLineAndColumn(s, idx, "\n"));
     idx = s.indexOf("mind");
-    assertArrayEquals(new int[] {4, 7}, PrintMethods.getLineAndColumn(s, idx, "\n"));
+    assertArrayEquals(new int[] {4, 7}, getLineAndColumn(s, idx, "\n"));
     idx = s.indexOf("\n"); // hmmm ...
-    assertArrayEquals(new int[] {0, 5}, PrintMethods.getLineAndColumn(s, idx, "\n"));
+    assertArrayEquals(new int[] {0, 5}, getLineAndColumn(s, idx, "\n"));
   }
 
   @Test
@@ -636,7 +663,8 @@ public class StringMethodsTest {
 
   @Test
   public void concat00() {
-    assertEquals("There are 7 days in a week", concat("There are ", 7, ' ', "days in a ", "week"));
+    assertEquals("There are 7 days in a week",
+        concat("There are ", 7, ' ', "days in a ", "week"));
   }
 
   @Test
@@ -646,4 +674,5 @@ public class StringMethodsTest {
     assertEquals("abc", ifBlank("\r\n", "abc"));
     assertEquals("abcd", ifBlank("abcd", "abc"));
   }
+
 }
