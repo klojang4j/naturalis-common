@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 import java.util.stream.IntStream;
 
 import static java.lang.System.arraycopy;
@@ -338,6 +339,48 @@ public final class ArrayMethods {
     Check.notNull(template, "template");
     Check.that(length, "length").is(gte(), 0);
     return InvokeUtils.newArray(template.getClass(), length);
+  }
+
+  private static final Map<Class, ToIntFunction<Object>> hashCoders =
+      Map.of(
+          int[].class, obj -> Arrays.hashCode((int[]) obj),
+          long[].class, obj -> Arrays.hashCode((long[]) obj),
+          double[].class, obj -> Arrays.hashCode((double[]) obj),
+          float[].class, obj -> Arrays.hashCode((float[]) obj),
+          char[].class, obj -> Arrays.hashCode((char[]) obj),
+          short[].class, obj -> Arrays.hashCode((short[]) obj),
+          byte[].class, obj -> Arrays.hashCode((byte[]) obj));
+
+  /**
+   * Returns the hash code of an array. Allow you to retrieve the hash code of an
+   * array object even if you don't know its exact type. An {@link
+   * IllegalArgumentException} is thrown if the argument is not an array.
+   *
+   * @param array The array
+   * @return Its hash code
+   */
+  public static int hashCode(Object array) {
+    Check.notNull(array).is(array());
+    if (array instanceof Object[] objs) {
+      return Arrays.hashCode(objs);
+    }
+    return hashCoders.get(array.getClass()).applyAsInt(array);
+  }
+
+  /**
+   * Returns the deep hash code of an array. Allow you to retrieve the deep hash code
+   * of an array object even if you don't know its exact type. An {@link
+   * IllegalArgumentException} is thrown if the argument is not an array.
+   *
+   * @param array The array
+   * @return Its deep hash code
+   */
+  public static int deepHashCode(Object array) {
+    Check.notNull(array).is(array());
+    if (array instanceof Object[] objs) {
+      return Arrays.deepHashCode(objs);
+    }
+    return hashCoders.get(array.getClass()).applyAsInt(array);
   }
 
   /**

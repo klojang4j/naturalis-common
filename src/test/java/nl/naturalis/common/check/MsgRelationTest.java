@@ -6,12 +6,15 @@ import org.junit.Test;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static java.time.DayOfWeek.*;
 import static nl.naturalis.common.ArrayMethods.pack;
-import static nl.naturalis.common.CollectionMethods.newHashMap;
 import static nl.naturalis.common.CollectionMethods.newArrayList;
+import static nl.naturalis.common.CollectionMethods.newHashMap;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static org.junit.Assert.*;
 
@@ -41,10 +44,12 @@ public class MsgRelationTest {
     Check.that(map).is((x, y) -> x.containsKey(y), "Greeting");
     Check.that(map).is(Map::containsKey, "Greeting");
     Check.that(map).is(hasKey(), "Greeting");
-    Check.that(map).is((Map<String, Object> x, String y) -> x.containsKey(y), "Greeting");
+    Check.that(map).is((Map<String, Object> x, String y) -> x.containsKey(y),
+        "Greeting");
     Check.that(map).is(objObj((x, y) -> x.containsKey(y)), "Greeting");
     Check.that(map).is(objObj(Map::containsKey), "Greeting");
-    Check.that(map).is((Relation<Map<String, Object>, String>) Map::containsKey, "Greeting");
+    Check.that(map).is((Relation<Map<String, Object>, String>) Map::containsKey,
+        "Greeting");
   }
 
   @Test
@@ -202,7 +207,7 @@ public class MsgRelationTest {
       Check.that(9.7F, "siphon").is(sameAs(), 9.7D);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertTrue(e.getMessage().startsWith("siphon must be reference to Double@"));
+      assertTrue(e.getMessage().startsWith("siphon must be identical to Double@"));
       assertTrue(e.getMessage().contains(" (was Float@"));
       assertTrue(e.getMessage().endsWith(")"));
       return;
@@ -216,7 +221,8 @@ public class MsgRelationTest {
       Check.that(WEDNESDAY, "siphon").isNot(sameAs(), WEDNESDAY);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertTrue(e.getMessage().startsWith("siphon must not be reference to DayOfWeek@"));
+      assertTrue(e.getMessage().startsWith("siphon must not be identical to "
+          + "DayOfWeek@"));
       return;
     }
     fail();
@@ -228,7 +234,8 @@ public class MsgRelationTest {
       Check.that(null, "siphon").is(sameAs(), WEDNESDAY);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertTrue(e.getMessage().startsWith("siphon must be reference to DayOfWeek@"));
+      assertTrue(e.getMessage().startsWith("siphon must be identical to "
+          + "DayOfWeek@"));
       return;
     }
     fail();
@@ -240,7 +247,8 @@ public class MsgRelationTest {
       Check.that(WEDNESDAY, "siphon").is(sameAs(), null);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertTrue(e.getMessage().startsWith("siphon must be reference to null (was DayOfWeek@"));
+      assertTrue(e.getMessage().startsWith("siphon must be identical to null (was "
+          + "DayOfWeek@"));
       return;
     }
     fail();
@@ -297,10 +305,12 @@ public class MsgRelationTest {
   @Test
   public void supertype00() {
     try {
-      Check.that(OutputStream.class, "trevor").is(supertypeOf(), OutputStream[].class);
+      Check.that(OutputStream.class, "trevor").is(supertypeOf(),
+          OutputStream[].class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("trevor must be supertype of java.io.OutputStream[] (was java.io.OutputStream)",
+      assertEquals(
+          "trevor must be supertype of java.io.OutputStream[] (was java.io.OutputStream)",
           e.getMessage());
       return;
     }
@@ -310,7 +320,8 @@ public class MsgRelationTest {
   @Test
   public void supertype01() {
     try {
-      Check.that(OutputStream.class, "trevor").isNot(supertypeOf(), FileOutputStream.class);
+      Check.that(OutputStream.class, "trevor").isNot(supertypeOf(),
+          FileOutputStream.class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
@@ -324,11 +335,14 @@ public class MsgRelationTest {
   @Test
   public void subtypeOf00() {
     try {
-      Check.that(OutputStream.class, "babbage").is(subtypeOf(), OutputStream[].class);
+      Check.that(OutputStream.class, "babbage").is(subtypeOf(),
+          OutputStream[].class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("babbage must extend/implement java.io.OutputStream[] (was java.io"
-          + ".OutputStream)", e.getMessage());
+      assertEquals(
+          "babbage must extend/implement java.io.OutputStream[] (was java.io"
+              + ".OutputStream)",
+          e.getMessage());
       return;
     }
     fail();
@@ -340,7 +354,8 @@ public class MsgRelationTest {
       Check.that(OutputStream.class, "babbage").is(subtypeOf(), Comparable.class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("babbage must extend/implement Comparable (was java.io.OutputStream)",
+      assertEquals(
+          "babbage must extend/implement Comparable (was java.io.OutputStream)",
           e.getMessage());
       return;
     }
@@ -353,7 +368,8 @@ public class MsgRelationTest {
       Check.that(String.class, "babbage").isNot(subtypeOf(), CharSequence.class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("babbage must not extend/implement CharSequence (was String)", e.getMessage());
+      assertEquals("babbage must not extend/implement CharSequence (was String)",
+          e.getMessage());
       return;
     }
     fail();
@@ -365,7 +381,8 @@ public class MsgRelationTest {
       Check.that(Float.class, "babbage").isNot(subtypeOf(), Comparable.class);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("babbage must not extend/implement Comparable (was Float)", e.getMessage());
+      assertEquals("babbage must not extend/implement Comparable (was Float)",
+          e.getMessage());
       return;
     }
     fail();
@@ -556,8 +573,10 @@ public class MsgRelationTest {
       Check.that("star", "werner").is(valueIn(), beatles);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("werner must be value in HashMap[4] of {george: harrison, john: lennon, paul: "
-          + "mccartney, gue...} (was star)", e.getMessage());
+      assertEquals(
+          "werner must be value in HashMap[4] of {george: harrison, john: lennon, paul: "
+              + "mccartney, gue...} (was star)",
+          e.getMessage());
       return;
     }
     fail();
@@ -581,7 +600,8 @@ public class MsgRelationTest {
   @Test
   public void elementOf00() {
     try {
-      Check.that("lennon", "tolstoy").is(elementOf(), pack("mccartney", "harrisson", "star"));
+      Check.that("lennon", "tolstoy").is(elementOf(),
+          pack("mccartney", "harrisson", "star"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
@@ -595,7 +615,8 @@ public class MsgRelationTest {
   @Test
   public void elementOf01() {
     try {
-      Check.that("star", "tolstoy").isNot(elementOf(), pack("mccartney", "harrisson", "star"));
+      Check.that("star", "tolstoy").isNot(elementOf(),
+          pack("mccartney", "harrisson", "star"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       assertEquals(
@@ -613,8 +634,10 @@ public class MsgRelationTest {
           .is(supersetOf(), List.of("mccartney", "harrisson", "star"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("frodo must be superset of ListN[3] of [mccartney, harrisson, star] "
-          + "(was ListN[3] of [mccartney, harrisson, lennon])", e.getMessage());
+      assertEquals(
+          "frodo must be superset of ListN[3] of [mccartney, harrisson, star] "
+              + "(was ListN[3] of [mccartney, harrisson, lennon])",
+          e.getMessage());
       return;
     }
     fail();
@@ -627,8 +650,10 @@ public class MsgRelationTest {
           .isNot(supersetOf(), List.of("mccartney", "harrisson", "star"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("frodo must not be superset of ListN[3] of [mccartney, harrisson, star] "
-          + "(was ListN[4] of [lennon, mccartney, harrisson, star])", e.getMessage());
+      assertEquals(
+          "frodo must not be superset of ListN[3] of [mccartney, harrisson, star] "
+              + "(was ListN[4] of [lennon, mccartney, harrisson, star])",
+          e.getMessage());
       return;
     }
     fail();
@@ -641,8 +666,10 @@ public class MsgRelationTest {
           .is(subsetOf(), List.of("mccartney", "harrisson", "star"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("kremlin must be subset of ListN[3] of [mccartney, harrisson, star] "
-          + "(was ListN[3] of [mccartney, harrisson, lennon])", e.getMessage());
+      assertEquals(
+          "kremlin must be subset of ListN[3] of [mccartney, harrisson, star] "
+              + "(was ListN[3] of [mccartney, harrisson, lennon])",
+          e.getMessage());
       return;
     }
     fail();
@@ -655,8 +682,10 @@ public class MsgRelationTest {
           .isNot(subsetOf(), List.of("lennon", "mccartney", "harrisson", "star"));
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("kremlin must not be subset of ListN[4] of [lennon, mccartney, harrisson, star] "
-          + "(was ListN[4] of [lennon, mccartney, harrisson, star])", e.getMessage());
+      assertEquals(
+          "kremlin must not be subset of ListN[4] of [lennon, mccartney, harrisson, star] "
+              + "(was ListN[4] of [lennon, mccartney, harrisson, star])",
+          e.getMessage());
       return;
     }
     fail();
@@ -733,7 +762,8 @@ public class MsgRelationTest {
       Check.that("     ", "bandung").is(substringOf(), "abcd");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("bandung must be substring of abcd (was \"     \")", e.getMessage());
+      assertEquals("bandung must be substring of abcd (was \"     \")",
+          e.getMessage());
       return;
     }
     fail();
@@ -745,7 +775,8 @@ public class MsgRelationTest {
       Check.that("abc", "mordor").is(equalsIgnoreCase(), "XYZ");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("mordor must be equal (ignoring case) to XYZ (was abc)", e.getMessage());
+      assertEquals("mordor must be equal (ignoring case) to XYZ (was abc)",
+          e.getMessage());
       return;
     }
     fail();
@@ -757,7 +788,8 @@ public class MsgRelationTest {
       Check.that("123", "mordor").isNot(equalsIgnoreCase(), "123");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("mordor must not be equal (ignoring case) to 123 (was 123)", e.getMessage());
+      assertEquals("mordor must not be equal (ignoring case) to 123 (was 123)",
+          e.getMessage());
       return;
     }
     fail();
@@ -793,7 +825,8 @@ public class MsgRelationTest {
       Check.that("Thus spoke Zarathustra", "pathos").is(endsWith(), "STRA");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("pathos must end with STRA (was Thus spoke Zarathustra)", e.getMessage());
+      assertEquals("pathos must end with STRA (was Thus spoke Zarathustra)",
+          e.getMessage());
       return;
     }
     fail();
@@ -805,7 +838,8 @@ public class MsgRelationTest {
       Check.that("Thus spoke Zarathustra", "pathos").isNot(endsWith(), "stra");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("pathos must not end with stra (was Thus spoke Zarathustra)", e.getMessage());
+      assertEquals("pathos must not end with stra (was Thus spoke Zarathustra)",
+          e.getMessage());
       return;
     }
     fail();

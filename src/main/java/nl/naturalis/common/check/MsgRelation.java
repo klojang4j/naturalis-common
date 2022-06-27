@@ -9,8 +9,12 @@ final class MsgRelation {
 
   static PrefabMsgFormatter msgSameAs() {
     return x -> x.negated()
-        ? x.name() + MUST_NOT_BE + "reference to " + sysId(x.obj())
-        : x.name() + MUST_BE + "reference to " + sysId(x.obj()) + was(sysId((x.arg())));
+        ? x.name() + MUST_NOT_BE + "identical to " + sysId(x.obj())
+        : x.name()
+            + MUST_BE
+            + "identical to "
+            + sysId(x.obj())
+            + was(sysId((x.arg())));
   }
 
   static PrefabMsgFormatter msgNullOr() {
@@ -22,8 +26,13 @@ final class MsgRelation {
 
   static PrefabMsgFormatter msgInstanceOf() {
     return x -> x.negated()
-        ? x.name() + MUST_NOT_BE + "instance of" + obj(className(x.obj())) + was(x.arg())
-        : x.name() + MUST_BE + "instance of" + obj(className(x.obj())) + was(className(x.arg()));
+        ? x.name()
+        + MUST_NOT_BE
+        + "instance of"
+        + obj(className(x.obj()))
+        + was(x.arg())
+        : x.name() + MUST_BE + "instance of" + obj(className(x.obj())) + was(
+            className(x.arg()));
   }
 
   static PrefabMsgFormatter msgSubtypeOf() {

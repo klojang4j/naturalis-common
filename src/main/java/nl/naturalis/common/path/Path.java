@@ -27,25 +27,23 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * <h4>Escaping</h4>
  *
  * <p>If a path segment represents a map key that happens to contain the segment
- * separator ('.'),
- * it must be escaped using the circumflex character ('^'). So {@code
- * my.awkward.map.key} should be escaped like this: {@code my^.awkward^.map^.key}.
- * The escape character itself must not be escaped. In case you want a segment to
- * denote need the {@code null} key of a {@code Map}, use this escape sequence:
- * {@code ^0}. So {@code lookups.^0.name} references the {@code name} field of an
- * object stored under key {@code null} in the {@code lookups} map. In case you want
- * a segment to denote the empty-string key of a {@code Map}, simply make it a
- * zero-length segment: {@code lookups..name}. You can let the {@link #escape(String)
- * escape} method do the escaping for you.
+ * separator ('.'), it must be escaped using the circumflex character ('^'). So
+ * {@code my.awkward.map.key} should be escaped like this: {@code
+ * my^.awkward^.map^.key}. The escape character itself must not be escaped. In case
+ * you want a segment to denote need the {@code null} key of a {@code Map}, use this
+ * escape sequence: {@code ^0}. So {@code lookups.^0.name} references the {@code
+ * name} field of an object stored under key {@code null} in the {@code lookups} map.
+ * In case you want a segment to denote the empty-string key of a {@code Map}, simply
+ * make it a zero-length segment: {@code lookups..name}. You can let the {@link
+ * #escape(String) escape} method do the escaping for you.
  *
- * <p>Do not escape path segments when passing them individually (as a {@code String}
- * array) to the
- * constructor. Only escape them when passing a complete path string.
+ * <p>Do not escape path segments when passing them individually (as a {@code
+ * String}
+ * array) to the constructor. Only escape them when passing a complete path string.
  *
  * @author Ayco Holleman
  */
-public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
-    Emptyable {
+public final class Path implements Comparable<Path>, Iterable<String> {
 
   /**
    * The empty path (containing zero path segments).
@@ -80,8 +78,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    * Applies escaping to a path segment. Can be used to construct complete path
    * strings. Do
    * <i>not</i> use when passing individual path segments as a {@code String} array
-   * to the {@link
-   * #Path(String[]) constructor}.
+   * to the {@link #Path(String[]) constructor}.
    *
    * @param segment The path segment to escape
    * @return The escaped version of the segment
@@ -320,22 +317,14 @@ public final class Path implements Comparable<Path>, Iterable<String>, Sizeable,
    *
    * @return The number of segments in this {@code Path}
    */
-  @Override
   public int size() {
     return elems.length;
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
   public boolean isEmpty() {
     return elems.length == 0;
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public boolean equals(Object obj) {
     return this == obj || (obj instanceof Path p && Arrays.deepEquals(elems,
