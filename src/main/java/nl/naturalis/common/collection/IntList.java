@@ -1,7 +1,7 @@
 package nl.naturalis.common.collection;
 
-import static nl.naturalis.common.ArrayMethods.asPrimitiveArray;
-import static nl.naturalis.common.check.CommonChecks.notNull;
+import nl.naturalis.common.check.Check;
+import nl.naturalis.common.function.ThrowingIntConsumer;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -10,15 +10,14 @@ import java.util.OptionalInt;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
-import nl.naturalis.common.check.Check;
-import nl.naturalis.common.function.ThrowingIntConsumer;
+import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
- * Yes, we have one, too, while we await Valhalla. Note that {@code IntList} is a
- * sealed interface with just two implementations: one ({@link IntArrayList}) allows
- * mutations on the list and the other is immutable. Instance of the immutable
- * variant can only be obtained through the static factory methods on this
- * interface.
+ * The ubiquitous {@code List} of primitive {@code int} values, while we await
+ * Valhalla. Note that {@code IntList} is a sealed interface with just two
+ * implementations: one ({@link IntArrayList}) allows mutations on the list and the
+ * other is immutable. Instances of the immutable variant can only be obtained
+ * through the static factory methods on this interface.
  */
 public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
 
@@ -197,7 +196,8 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
   void add(int value);
 
   /**
-   * Inserts the specified integer.
+   * Inserts the specified value at the specified index, right-shifting all elements
+   * at, and following that the index.
    *
    * @param index The index at which to insert the integer
    * @param value The integer to insert
@@ -205,21 +205,21 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
   void add(int index, int value);
 
   /**
-   * Appends the integers in the specified list to this list.
+   * Appends the values in the specified {@code IntList}  to this list.
    *
    * @param other An {@code IntList} containing the integers to append
    */
   void addAll(IntList other);
 
   /**
-   * Appends the specified integer array.
+   * Appends the specified values.
    *
    * @param values The integers to append
    */
   void addAll(int[] values);
 
   /**
-   * Inserts the integers in the specified list into this list.
+   * Inserts the values in the specified {@code IntList} into this list.
    *
    * @param index The index at which to insert the integers
    * @param other The integers to insert
@@ -227,7 +227,8 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
   void addAll(int index, IntList other);
 
   /**
-   * Inserts the specified integer array.
+   * Inserts the specified {@code int} array into this list at the specified index,
+   * right-shifting the elements at, and following the index.
    *
    * @param index The index at which to insert the integers
    * @param values The integers to insert

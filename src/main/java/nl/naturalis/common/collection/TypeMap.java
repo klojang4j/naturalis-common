@@ -1,33 +1,33 @@
 package nl.naturalis.common.collection;
 
-import nl.naturalis.common.ClassMethods;
-
-import java.util.List;
 import java.util.Map;
 
-import static java.util.stream.Collectors.toUnmodifiableList;
-
 /**
- * A specialisation of the {@link Map} interface, used to map Java types to values.
- * It can be especially useful to bind transformation functions (in the form of
- * lambdas) to the appropriate Java types. The {@code TypeMap} interface does not
- * specify any methods of its own. It is the required behaviour of its
- * implementations that take it beyond the {@code Map} interface. Type maps behave as
- * follows: if a type, requested via {@link #get(Object) get} or {@link
- * #containsKey(Object) containsKey}, is not present in the map, but one of its
- * supertypes is, then it will return the value associated with the supertype. The
- * requested type's class hierarchy takes precedence over its interface hierarchy.
+ * <p>A specialisation of the {@link Map} interface, aimed at providing natural
+ * default values for groups of Java types through a common ancestor. Type maps can
+ * be especially useful to bind actions or operations (in the form of lambdas) to the
+ * Java types to which they are applicable. The {@code TypeMap} interface does not
+ * specify any methods of its own. However, it <i>does</i> specify behavior that
+ * takes it beyond the {@code Map} interface.
+ *
+ * <p>Implementation of {@code TypeMap} must behave as follows: if a type,
+ * requested via {@link #get(Object) get} or {@link #containsKey(Object)
+ * containsKey}, is not present in the map, but one of its supertypes is, then it
+ * will return the value associated with the supertype (or {@code true} in the case
+ * of {@code containsKey}). If the requested type is a class (rather than an
+ * interface), its class hierarchy takes precedence over its interface hierarchy. The
+ * behaviour for annotation types is not undefined.
  *
  * <p>A {@code TypeMap} is not modifiable. All map-altering methods throw an
- * {@link UnsupportedOperationException}. {@link #getOrDefault(Object, Object)} will
- * also throw an {@code UnsupportedOperationException} as it sidesteps the {@code
+ * {@link UnsupportedOperationException}. {@link #getOrDefault(Object, Object)} also
+ * throws an {@code UnsupportedOperationException} as it sidesteps the {@code
  * TypeMap} paradigm. Neither keys nor values are allowed to be {@code null}. If the
- * map contains {@code Object.class}, it is guaranteed to always return a non-null
- * value. Note that this is, in fact, a deviation from Java's type hierarchy since
- * primitive types do not extend {@code Object.class}. However, the point of the
- * {@code TypeMap} interface is to provide natural default values for groups of types
- * through a common ancestor, and {@code Object.class} is the obvious candidate for
- * providing the ultimate, last-resort, fall-back value.
+ * map contains key {@code Object.class}, it is guaranteed to always return a
+ * non-null value. Note that this is, in fact, a deviation from Java's type hierarchy
+ * since primitive types do not extend {@code Object.class}. However, the point of
+ * the {@code TypeMap} interface is to provide natural default values for groups of
+ * types through a common ancestor, and {@code Object.class} is the obvious candidate
+ * for providing the ultimate, last-resort, fall-back value.
  *
  * <h4>Autoboxing</h4>
  *
@@ -42,6 +42,10 @@ import static java.util.stream.Collectors.toUnmodifiableList;
  * type. This applies not just to primitive types, but also to arrays of a primitive
  * type. Thus, with autoboxing enabled, {@code int[]} will be "autoboxed" to {@code
  * Integer[]}.
+ *
+ * <p>Note that, irrespective of whether autoboxing is enabled or disabled, the
+ * presence of {@code Object.class} in the map guarantees that a non-null value will
+ * be returned for whatever type is requested, even primitive types.
  *
  * @param <V> The type of the values in the {@code Map}
  * @author Ayco Holleman

@@ -3,24 +3,25 @@ package nl.naturalis.common.function;
 import java.util.function.Function;
 
 /**
- * An alternative to Java's {@link Function} interface where the {@code apply} method is allowed to
- * throw a checked exception.
+ * An alternative to Java's {@link Function} interface where the {@code apply} method
+ * is allowed to throw a checked exception.
  *
+ * @param <T> the type of the input variable
+ * @param <R> the type of the return value
+ * @param <X> the type of the exception potentially being thrown
  * @author Ayco Holleman
- * @param <T> The type of the input variable
- * @param <R> The type of the return value
- * @param <E> The type of the exception potentially being thrown
  */
 @FunctionalInterface
-public interface ThrowingFunction<T, R, E extends Throwable> {
+public interface ThrowingFunction<T, R, X extends Throwable> {
 
   /**
-   * Calculates a value for the provided argument while potentially throwing an exception of type
-   * {@code E}.
+   * Calculates a value for the provided argument while potentially throwing an
+   * exception of type {@code E}.
    *
-   * @param arg The input variable
-   * @return A value of type {@code R}
-   * @throws E The exception potentially being thrown
+   * @param arg the input variable
+   * @return a value of type {@code R}
+   * @throws X if the operation fails
    */
-  R apply(T arg) throws E;
+  R apply(T arg) throws X;
+
 }

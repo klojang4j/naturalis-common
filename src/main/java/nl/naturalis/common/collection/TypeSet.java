@@ -1,97 +1,15 @@
 package nl.naturalis.common.collection;
 
-import nl.naturalis.common.ClassMethods;
-import nl.naturalis.common.check.Check;
-import nl.naturalis.common.x.collection.ImmutableSet;
+import java.util.Set;
 
-import java.util.*;
-
-import static java.util.stream.Collectors.toUnmodifiableList;
-import static nl.naturalis.common.check.CommonChecks.sameAs;
-import static nl.naturalis.common.check.CommonGetters.type;
-
-abstract class TypeSet<M extends AbstractTypeMap<Object>> extends
-    ImmutableSet<Class<?>> {
-
-  static final Object FOO = new Object();
-
-  static Map<Class<?>, Object> toMap(Collection<? extends Class<?>> types) {
-    Map<Class<?>, Object> m = new LinkedHashMap<>(types.size());
-    types.forEach(x -> m.put(x, FOO));
-    return m;
-  }
-
-  final M map;
-
-  TypeSet(M map) {
-    this.map = map;
-  }
-
-  @Override
-  public int size() {
-    return map.size();
-  }
-
-  @Override
-  public boolean isEmpty() {
-    return size() == 0;
-  }
-
-  @Override
-  public boolean contains(Object o) {
-    Check.notNull(o).has(type(), sameAs(), Class.class);
-    return map.containsKey(o);
-  }
-
-  @Override
-  public Iterator<Class<?>> iterator() {
-    return map.keySet().iterator();
-  }
-
-  @Override
-  public Object[] toArray() {
-    return map.keySet().toArray();
-  }
-
-  @Override
-  public <T> T[] toArray(T[] a) {
-    Check.notNull(a);
-    return map.keySet().toArray(a);
-  }
-
-  @Override
-  public boolean containsAll(Collection<?> c) {
-    Check.notNull(c);
-    return c.stream().filter(map::containsKey).count() == c.size();
-  }
-
-  @Override
-  public int hashCode() {
-    return map.keySet().hashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return map.keySet().equals(obj);
-  }
-
-  public List<String> typeNames() {
-    return map.keySet()
-        .stream()
-        .map(ClassMethods::className)
-        .collect(toUnmodifiableList());
-  }
-
-  public List<String> simpleTypeNames() {
-    return map.keySet()
-        .stream()
-        .map(ClassMethods::simpleClassName)
-        .collect(toUnmodifiableList());
-  }
-
-  @Override
-  public String toString() {
-    return map.keySet().toString();
-  }
-
+/**
+ * The {@code TypeSet} interface is the {@link Set} counterpart to the {@link
+ * TypeMap} interface. As with {@link TypeMap}, the {@code TypeSet} does not specify
+ * any methods of its own. It is the behavior required of implementations that take
+ * it beyond the {@code Set} interface. See the class comments for {@link TypeMap}
+ * for a detailed explanation. The behavior of the {@code contains} method must
+ * follow the same logic as the {@code containKey} method of {@code TypeMap}. In
+ * practice all implementations are backed by a {@code TypeMap} instance.
+ */
+public sealed interface TypeSet extends Set<Class<?>> permits AbstractTypeSet {
 }

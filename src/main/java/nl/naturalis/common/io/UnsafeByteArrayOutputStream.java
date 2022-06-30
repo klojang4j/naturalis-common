@@ -10,13 +10,16 @@ import java.io.OutputStream;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.length;
 import static nl.naturalis.common.util.ResizeMethod.MULTIPLY;
+import static nl.naturalis.common.util.ResizeMethod.getMinIncrease;
 
 /**
  * An output stream in which the data is written into a byte array. The buffer
  * automatically grows as data is written to it. Contrary to Java's own {@link
  * ByteArrayOutputStream}, the internal byte array is exposed to the client via
- * {@link #getBackingArray()}. To extract the "live" bytes from the backing array,
- * use the {@link #size()} method.
+ * {@link #getBackingArray()}, which might save you an array copy (e.g. when passing
+ * the byte array to the {@link String#String(byte[], int, int) String constructor}).
+ * To extract the "live" bytes from the backing array, use the {@link #size()}
+ * method.
  *
  * <p>Closing a {@code ByteArrayOutputStream} has no effect. The methods in this
  * class can be called after the stream has been closed without generating an {@code
@@ -24,7 +27,7 @@ import static nl.naturalis.common.util.ResizeMethod.MULTIPLY;
  *
  * @author Ayco Holleman
  */
-public class UnsafeByteArrayOutputStream extends OutputStream {
+public final class UnsafeByteArrayOutputStream extends OutputStream {
 
   private final ResizeMethod resizeMethod;
   private final float resizeAmount;
@@ -49,7 +52,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    * @param capacity The initial buffer capacity
    */
   public UnsafeByteArrayOutputStream(int capacity) {
-    this(new byte[capacity], 0);
+    this(capacity, MULTIPLY, 2F);
   }
 
   /**
@@ -57,10 +60,10 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    * specified byte array. When it reaches full capacity it is replaced with a buffer
    * twice its size.
    *
-   * @param buf The initial byte array to write to
-   * @param offset The offset of the first byte to write.The offset may be equal
+   * @param buf the initial byte array to write to
+   * @param offset the offset of the first byte to write.The offset may be equal
    *     to the byte array's length (causing write actions to append to what is
-   *     already in the array) but not greater.
+   *     already in the array), but not greater.
    */
   public UnsafeByteArrayOutputStream(byte[] buf, int offset) {
     this(buf, offset, MULTIPLY, 2F);
@@ -70,7 +73,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    * Creates a new {@code UnsafeByteArrayOutputStream}. The buffer capacity is
    * initially {@code size} bytes, though its size increases if necessary.
    *
-   * @param capacity The initial length of the byte array
+   * @param capacity the initial length of the byte array
    * @param resizeMethod The type of expansion. Whichever {@code resizeAmount}
    *     value and {@code ResizeMethod} you choose, the buffer capacity will always
    *     be increased enough to sustain the next {@code write} action.
@@ -80,31 +83,40 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
   public UnsafeByteArrayOutputStream(int capacity,
       ResizeMethod resizeMethod,
       float resizeAmount) {
-    this(new byte[capacity], 0, resizeMethod, resizeAmount);
+    Check.that(capacity, "capacity").is(gte(), 0);
+    Check.that(resizeMethod, "resizeMethod").is(notNull());
+    Check.that(resizeAmount, "resizeAmount").is(GT(), 0F);
+    this.buf = new byte[capacity];
+    this.resizeMethod = resizeMethod;
+    this.resizeAmount = resizeAmount;
   }
 
   /**
    * Creates a new {@code UnsafeByteArrayOutputStream} that wraps around the
    * specified byte array.
    *
-   * @param buf The initial byte array to write to
-   * @param offset The offset of the first byte to write. The offset may be equal
+   * @param buf the initial byte array to write to
+   * @param offset the offset of the first byte to write. The offset may be equal
    *     to the byte array's length (causing write actions to append to what is
    *     already in the array) but not greater.
-   * @param resizeMethod The type of expansion. Whichever {@code resizeAmount}
+   * @param resizeMethod the array resize method. Whichever {@code resizeAmount}
    *     value and {@code ResizeMethod} you choose, the buffer capacity will always
    *     be increased enough to sustain the next {@code write} action.
-   * @param resizeAmount The amount by which the increase the size of the byte
+   * @param resizeAmount the amount by which to increase the size of the byte
    *     array when it reaches full capacity
    */
   public UnsafeByteArrayOutputStream(byte[] buf,
       int offset,
       ResizeMethod resizeMethod,
       float resizeAmount) {
-    this.buf = Check.notNull(buf, "buf").has(length(), gt(), 0).ok();
-    this.sz = Check.that(offset, "offset").is(lte(), buf.length).ok();
-    this.resizeAmount = Check.that(resizeAmount, "resizeAmount").is(GT(), 0F).ok();
-    this.resizeMethod = Check.notNull(resizeMethod, "resizeMethod").ok();
+    Check.that(buf, "buf").is(notNull());
+    Check.that(offset, "offset").is(subArrayIndexOf(), buf);
+    Check.that(resizeMethod, "resizeMethod").is(notNull());
+    Check.that(resizeAmount, "resizeAmount").is(GT(), 0F);
+    this.buf = buf;
+    this.sz = offset;
+    this.resizeAmount = resizeAmount;
+    this.resizeMethod = resizeMethod;
   }
 
   /**
@@ -114,8 +126,9 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    */
   @Override
   public void write(int b) {
-    if (sz == buf.length) {
-      increaseCapacity(1);
+    int minIncrease = getMinIncrease(buf.length, sz, 1);
+    if (minIncrease > 0) {
+      increaseCapacity(minIncrease);
     }
     buf[sz++] = (byte) b;
   }
@@ -142,8 +155,9 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    */
   public void write(byte[] b, int off, int len) {
     Check.offsetLength(b, off, len);
-    if (sz + len > buf.length) {
-      increaseCapacity(sz + len - buf.length);
+    int minIncrease = getMinIncrease(buf.length, sz, len);
+    if (minIncrease > 0) {
+      increaseCapacity(minIncrease);
     }
     System.arraycopy(b, off, buf, sz, len);
     sz += len;
@@ -165,7 +179,7 @@ public class UnsafeByteArrayOutputStream extends OutputStream {
    * Returns the backing array for this instance. Use the {@link #size()} method to
    * extract the "live" bytes from the backing array.
    *
-   * @return The backing array
+   * @return the backing array
    */
   public byte[] getBackingArray() {
     return buf;

@@ -5,36 +5,35 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A specialized {@link Set} implementation for {@code Class} objects. It returns
- * {@code true} from its {@link Set#contains(Object) contains} method if the set
- * contains the specified type <i>or any of its super types</i>.
+ * An implementation of {@link TypeSet} that is internally backed by a {@link
+ * TypeHashMap}.
  *
  * @author Ayco Holleman
+ * @see TypeMap
  * @see TypeSet
- * @see AbstractTypeMap
- * @see TypeHashMap
+ * @see TypeGraphSet
  */
-public class TypeHashSet extends TypeSet<TypeHashMap<Object>> {
+public final class TypeHashSet extends AbstractTypeSet<TypeHashMap<Object>> {
 
   /**
-   * Returns a {@code SimpleTypeSet} containing the specified types. Autoboxing will
-   * be enabled. Auto-expansion will be disabled.
+   * Returns a {@code TypeHashSet} containing the specified types. Autoboxing will be
+   * enabled. Auto-expansion will be disabled.
    *
    * @param types The types to include
-   * @return A {@code SimpleTypeSet} containing the specified types
+   * @return A {@code TypeHashSet} containing the specified types
    */
   public static TypeHashSet of(Class<?>... types) {
     return copyOf(List.of(types));
   }
 
   /**
-   * Returns a {@code SimpleTypeSet} for the specified types.
+   * Returns a {@code TypeHashSet} for the specified types.
    *
    * @param autoExpand Whether to enable auto-expansion (see {@link
    *     TypeHashMap})
-   * @param autobox Whether to enable "autoboxing" (see {@link AbstractTypeMap})
+   * @param autobox Whether to enable "autoboxing" (see {@link TypeMap})
    * @param types The types to include
-   * @return A {@code SimpleTypeSet} containing the specified types
+   * @return A {@code TypeHashSet} containing the specified types
    */
   public static TypeHashSet of(boolean autoExpand,
       boolean autobox,
@@ -43,17 +42,17 @@ public class TypeHashSet extends TypeSet<TypeHashMap<Object>> {
   }
 
   /**
-   * Converts the specified {@code Collection} to a {@code SimpleTypeSet}.
+   * Converts the specified {@code Collection} to a {@code TypeHashSet}.
    *
    * @param src The {@code Collection} to convert
-   * @return a {@code SimpleTypeSet}.
+   * @return a {@code TypeHashSet}.
    */
   public static TypeHashSet copyOf(Collection<Class<?>> src) {
     return copyOf(src, false, true);
   }
 
   /**
-   * Converts the specified {@code Collection} to a {@code SimpleTypeSet}.
+   * Converts the specified {@code Collection} to a {@code TypeHashSet}.
    *
    * @param src The {@code Collection} to convert
    * @param autoExpand Whether to enable auto-expansion. See {@link

@@ -22,11 +22,12 @@ import static nl.naturalis.common.check.CommonChecks.deepNotNull;
  * UnsupportedOperationException}. However, it can be configured to tacitly absorb
  * new types upon being requested, provided the new type is a subtype of a type that
  * is already in the map. The new type will then be associated with the same value as
- * its supertype. Thus, when the type is requested again, it will result in a direct
+ * the supertype. Thus, when the type is requested again, it will result in a direct
  * hit. In the end, a {@code TypeHashMap} will be nothing but a pass-through shell
  * around the {@code HashMap} that backs it - and perform as such.
  *
- * <p>(Implementation node: with auto-expansion disabled, the backing map is not
+ * <p>(Implementation node: with auto-expansion <i>disabled</i>, the backing map is
+ * not
  * actually a {@code HashMap}.)
  *
  * @param <V> The type of the values in the {@code Map}

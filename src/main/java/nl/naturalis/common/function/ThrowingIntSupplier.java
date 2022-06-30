@@ -6,18 +6,18 @@ import java.util.function.IntSupplier;
  * An alternative to Java's {@link IntSupplier} interface where the {@code get}
  * method is allowed to throw a checked exception.
  *
- * @param <E> The type of the exception potentially being thrown
+ * @param <X> the type of the exception potentially being thrown
  * @author Ayco Holleman
  */
 @FunctionalInterface
-public interface ThrowingIntSupplier<E extends Throwable> {
+public interface ThrowingIntSupplier<X extends Throwable> {
 
   /**
-   * Produces an integer value while potentially throwing an exception.
+   * Gets a result.
    *
-   * @return The value produced by the supplier
-   * @throws E If an exception occurred while producing the integer
+   * @return a result
+   * @throws X if the operation fails
    */
-  int get() throws E;
+  int getAsInt() throws X;
 
 }

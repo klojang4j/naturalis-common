@@ -5,13 +5,12 @@ import nl.naturalis.common.io.UnsafeByteArrayOutputStream;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.StandardOpenOption.*;
 import static nl.naturalis.common.StringMethods.lpad;
 import static nl.naturalis.common.check.CommonChecks.*;
 
@@ -22,48 +21,178 @@ import static nl.naturalis.common.check.CommonChecks.*;
  */
 public class IOMethods {
 
-  public static final String INVALID_PATH = "Invalid path: \"${0}\"";
+  private static final String INVALID_PATH = "No such resource: \"${0}\"";
 
-  private IOMethods() {}
-
-  public static String toString(Class<?> clazz, String path) {
-    return toString(clazz, path, 512);
+  private IOMethods() {
+    throw new UnsupportedOperationException();
   }
 
-  public static String toString(Class<?> clazz, String path, int chunkSize) {
+  /**
+   * Returns the contents of the specified file.
+   *
+   * @param path the path to the file
+   * @return the contents of the specified file
+   */
+  public static String getContents(String path) {
+    Check.notNull(path);
+    File f = Check.that(new File(path)).is(file()).ok();
+    try (FileInputStream fis = new FileInputStream(f)) {
+      return getContents(fis);
+    } catch (IOException e) {
+      throw ExceptionMethods.uncheck(e);
+    }
+  }
+
+  /**
+   * Returns the contents of the specified resource. Bytes are read in chunks of 512
+   * bytes.
+   *
+   * @param clazz the {@code Class} to call {@link Class#getResourceAsStream(String)
+   *     getResourceAsStream} on
+   * @param path the path to the resource
+   * @return the contents of the specified resource
+   */
+  public static String getContents(Class<?> clazz, String path) {
+    return getContents(clazz, path, 512);
+  }
+
+  /**
+   * Returns the contents of the specified resource.
+   *
+   * @param clazz the {@code Class} to call {@link Class#getResourceAsStream(String)
+   *     getResourceAsStream} on
+   * @param path the path to the resource
+   * @param chunkSize the number of bytes read at a time
+   * @return the contents of the specified resource
+   */
+  public static String getContents(Class<?> clazz, String path, int chunkSize) {
     Check.notNull(clazz, "clazz");
-    Check.that(path, "path").isNot(empty());
+    Check.notNull(path, "path");
     try (InputStream in = clazz.getResourceAsStream(path)) {
       Check.that(in).is(notNull(), INVALID_PATH, path);
-      return toString(in, chunkSize);
+      return getContents(in, chunkSize);
     } catch (IOException e) {
       throw ExceptionMethods.uncheck(e);
     }
   }
 
-  public static String toString(Path path) {
-    Check.notNull(path).has(Path::isAbsolute, yes(), "Path must be absolute");
-    try (FileInputStream fis = new FileInputStream(path.toFile())) {
-      return toString(fis);
-    } catch (IOException e) {
-      throw ExceptionMethods.uncheck(e);
-    }
+  /**
+   * Returns a {@code String} created from the bytes read from the specified input
+   * stream. Bytes are read in chunks of 512 bytes. The input stream is <i>not</i>
+   * closed once all bytes have been read.
+   *
+   * @param in the input stream
+   * @return a {@code String} from the bytes read from the specified input stream
+   */
+  public static String getContents(InputStream in) {
+    return getContents(in, 512);
   }
 
-  public static String toString(InputStream in) {
-    return toString(in, 512);
-  }
-
-  public static String toString(InputStream in, int chunkSize) {
+  /**
+   * Returns a {@code String} created from the bytes read from the specified input
+   * stream. The input stream is <i>not</i> closed once all bytes have been read.
+   *
+   * @param in the input stream
+   * @param chunkSize the number of bytes read at a time
+   * @return a {@code String} from the bytes read from the specified input stream
+   */
+  public static String getContents(InputStream in, int chunkSize) {
+    Check.that(chunkSize, "chunkSize").is(gt(), 0);
     UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(chunkSize);
     pipe(in, out, chunkSize);
-    return new String(out.getBackingArray(), 0, out.size(), StandardCharsets.UTF_8);
+    return new String(out.getBackingArray(), 0, out.size(), UTF_8);
   }
 
+  /**
+   * Simple file-write method. Not efficient, but easy to use. Overwrites
+   * pre-existing contents!
+   *
+   * @param path The path to the file
+   * @param contents The contents to be written
+   */
+  public static void write(String path, String contents) {
+    Check.notNull(path, "path");
+    Check.notNull(contents, "contents");
+    try {
+      Files.writeString(Path.of(path), contents, UTF_8, CREATE, TRUNCATE_EXISTING);
+    } catch (IOException e) {
+      throw ExceptionMethods.uncheck(e);
+    }
+  }
+
+  /**
+   * Simple file-write method. Not efficient, but easy to use. Appends the specified
+   * string to the contents of the specified file.
+   *
+   * @param path The path to the file
+   * @param contents The contents to be written
+   */
+  public static void append(String path, String contents) {
+    Check.notNull(path, "path");
+    Check.notNull(contents, "contents");
+    try {
+      Files.writeString(Path.of(path), contents, UTF_8, CREATE, APPEND);
+    } catch (IOException e) {
+      throw ExceptionMethods.uncheck(e);
+    }
+  }
+
+  /**
+   * Returns the contents of the specified resource as a byte array. Bytes are read
+   * in chunks of 512 bytes.
+   *
+   * @param clazz the {@code Class} to call {@link Class#getResourceAsStream(String)
+   *     getResourceAsStream} on
+   * @param path the path to the resource
+   * @return the bytes contained in the specified resource
+   */
+  public static byte[] read(Class<?> clazz, String path) {
+    return read(clazz, path, 512);
+  }
+
+  /**
+   * Returns the contents of the specified resource as a byte array.
+   *
+   * @param clazz the {@code Class} to call {@link Class#getResourceAsStream(String)
+   *     getResourceAsStream} on
+   * @param path the path to the resource
+   * @param chunkSize the number of bytes read at a time
+   * @return the contents of the specified resource
+   */
+  public static byte[] read(Class<?> clazz, String path, int chunkSize) {
+    Check.notNull(clazz, "clazz");
+    Check.notNull(path, "path");
+    try (InputStream in = clazz.getResourceAsStream(path)) {
+      Check.that(in).is(notNull(), INVALID_PATH, path);
+      return read(in, chunkSize);
+    } catch (IOException e) {
+      throw ExceptionMethods.uncheck(e);
+    }
+  }
+
+  /**
+   * Returns a {@code byte[]} array containing the bytes read from the specified
+   * input stream. Bytes are read in chunks of 512 bytes. The input stream is
+   * <i>not</i> closed once all bytes have been read.
+   *
+   * @param in the input stream
+   * @return a {@code byte[]} array containing the bytes read from the specified
+   *     input stream
+   */
   public static byte[] read(InputStream in) {
     return read(in, 512);
   }
 
+  /**
+   * Returns a {@code byte[]} array containing the bytes read from the specified
+   * input stream. Bytes are read in chunks of the specified size. The input stream
+   * is <i>not</i> closed once all bytes have been read.
+   *
+   * @param in the input stream
+   * @param chunkSize the number of bytes read at a time
+   * @return a {@code byte[]} array containing the bytes read from the specified
+   *     input stream
+   */
   public static byte[] read(InputStream in, int chunkSize) {
     ByteArrayOutputStream out = new ByteArrayOutputStream(chunkSize);
     pipe(in, out, chunkSize);
@@ -75,8 +204,8 @@ public class IOMethods {
    * output stream. Bytes are read and written in chunks of 512 bytes at a time.
    * Neither the input stream nor the output stream is closed when done.
    *
-   * @param in The input stream
-   * @param out The output stream
+   * @param in the input stream
+   * @param out the output stream
    */
   public static void pipe(InputStream in, OutputStream out) {
     pipe(in, out, 512);
@@ -87,9 +216,9 @@ public class IOMethods {
    * output stream. Bytes are read and written in chunks of the specified size.
    * Neither the input stream nor the output stream is closed when done.
    *
-   * @param in The input stream
-   * @param out The output stream
-   * @param chunkSize The number of bytes read/written at a time
+   * @param in the input stream
+   * @param out the output stream
+   * @param chunkSize the number of bytes read/written at a time
    */
   public static void pipe(InputStream in, OutputStream out, int chunkSize) {
     Check.notNull(in, "in");
@@ -109,10 +238,13 @@ public class IOMethods {
   }
 
   /**
-   * Creates a new, empty file in the file system's temp directory. Equivalent to
-   * <code> createTempFile(IOMethods.class, "tmp", true)</code>.
+   * Creates a new, empty file in the file system's temp directory. Equivalent to:
    *
-   * @return A {@code File} object for a new, empty file in the file system's temp
+   * <blockquote><pre>{@code
+   * createTempFile(IOMethods.class, "tmp", true)
+   * }</pre></blockquote>
+   *
+   * @return a {@code File} object for a new, empty file in the file system's temp
    *     directory
    * @throws IOException If an I/O error occurs
    */
@@ -121,14 +253,17 @@ public class IOMethods {
   }
 
   /**
-   * Creates a new, empty file in the file system's temp directory. Equivalent to
-   * <code> createTempFile(requester "tmp", true)</code>.
+   * Creates a new, empty file in the file system's temp directory. Equivalent to:
    *
-   * @param requester The class requesting the temp file (simple name will become
+   * <blockquote><pre>{@code
+   * createTempFile(requester "tmp", true)
+   * }</pre></blockquote>
+   *
+   * @param requester the class requesting the temp file (simple name will become
    *     part of the file name)
-   * @return A {@code File} object for a new, empty file in the file system's temp
+   * @return a {@code File} object for a new, empty file in the file system's temp
    *     directory
-   * @throws IOException If an I/O error occurs
+   * @throws IOException if an I/O error occurs
    */
   public static File createTempFile(Class<?> requester) throws IOException {
     return createTempFile(requester, true);
@@ -136,12 +271,15 @@ public class IOMethods {
 
   /**
    * Creates a {@code File} object with a unique file name, located file system's
-   * temp directory. Equivalent to <code>createTempFile(requester "tmp",
-   * touch)</code>.
+   * temp directory. Equivalent to:
    *
-   * @param requester The class requesting the temp file (simple name will become
+   * <blockquote><pre>{@code
+   * createTempFile(requester "tmp", touch)
+   * }</pre></blockquote>
+   *
+   * @param requester the class requesting the temp file (simple name will become
    *     part of the file name)
-   * @return A {@code File} object for a new, empty file in the file system's temp
+   * @return a {@code File} object for a new, empty file in the file system's temp
    *     directory
    * @throws IOException If an I/O error occurs
    */
@@ -152,23 +290,22 @@ public class IOMethods {
 
   /**
    * Creates a {@code File} object with a unique file name, located in file system's
-   * temp directory. Using {@link File#createTempFile(String, String)} may fail if
-   * temporary files are created in rapid succession as it seems to use only
-   * System.currentTimeMillis() to invent a file name. This method has a 100% chance
-   * of generating a unique file name.
+   * temp directory. Using {@link File#createTempFile(String, String)} appears to
+   * fail if many threads are creating temp files in rapid succession. This method
+   * has a 100% chance of generating a unique file name.
    *
-   * @param requester The class requesting the temp file (simple name will become
+   * @param requester the class requesting the temp file (simple name will become
    *     part of the file name)
    * @param extension The extension to append to the generated file name
    * @param touch Whether to actually create the file on the file system
-   * @return A {@code File} object for a new, empty file in the file system's temp
+   * @return a {@code File} object for a new, empty file in the file system's temp
    *     directory
    * @throws IOException If an I/O error occurs
    */
   public static synchronized File createTempFile(Class<?> requester,
       String extension,
       boolean touch) throws IOException {
-    String path = getPath(requester, extension);
+    String path = uniquePath(requester, extension);
     File f = new File(path);
     if (touch) {
       Check.on(IOException::new, f)
@@ -182,7 +319,7 @@ public class IOMethods {
    * Creates a new, empty directory in the file system's temp directory. Equivalent
    * to <code> createTempFile(IOMethods.class, ".dir", true)</code>.
    *
-   * @return A {@code File} object for a new, empty directory in the file system's
+   * @return a {@code File} object for a new, empty directory in the file system's
    *     temp directory
    * @throws IOException If an I/O error occurs
    */
@@ -194,9 +331,9 @@ public class IOMethods {
    * Creates a new, empty file in the file system's temp directory. Equivalent to
    * <code> createTempFile(requester ".dir", true)</code>.
    *
-   * @param requester The class requesting the temp file (simple name will become
+   * @param requester the class requesting the temp file (simple name will become
    *     part of the file name)
-   * @return A {@code File} object for a new, empty file in the file system's temp
+   * @return a {@code File} object for a new, empty file in the file system's temp
    *     directory
    * @throws IOException If an I/O error occurs
    */
@@ -209,9 +346,9 @@ public class IOMethods {
    * temp directory. Equivalent to <code>createTempFile(requester "dir",
    * touch)</code>.
    *
-   * @param requester The class requesting the temp file (simple name will become
+   * @param requester the class requesting the temp file (simple name will become
    *     part of the file name)
-   * @return A {@code File} object for a new, empty directory in the file system's
+   * @return a {@code File} object for a new, empty directory in the file system's
    *     temp directory
    * @throws IOException If an I/O error occurs
    */
@@ -227,46 +364,25 @@ public class IOMethods {
    * System.currentTimeMillis() to invent a file name. This method has a 100% chance
    * of generating a unique file name.
    *
-   * @param requester The class requesting the temp directory (simple name will
+   * @param requester the class requesting the temp directory (simple name will
    *     become part of the file name)
    * @param extension The extension to append to the generated directory name
    * @param touch Whether to actually create the directory on the file system
-   * @return A {@code File} object for a new, empty directory in the file system's
+   * @return a {@code File} object for a new, empty directory in the file system's
    *     temp directory
    * @throws IOException If an I/O error occurs
    */
   public static synchronized File createTempDir(Class<?> requester,
       String extension,
       boolean touch) throws IOException {
-    String path = getPath(requester, extension);
+    String path = uniquePath(requester, extension);
     File f = new File(path);
     if (touch) {
-      Check.on(IOException::new, f)
-          .isNot(fileExists(), "File exists already: ${arg}");
+      Check.on(IOException::new, f).isNot(fileExists());
       f.mkdir();
     }
     return f;
   }
-
-  private static String getPath(Class<?> requester, String extension) {
-    Check.notNull(requester, "requester");
-    Check.that(extension, "extension").isNot(blank());
-    String path = StringMethods.append(new StringBuilder(64),
-        System.getProperty("java.io.tmpdir"),
-        "/",
-        requester.getSimpleName().toLowerCase(),
-        ".",
-        Thread.currentThread().getName().toLowerCase(),
-        ".",
-        lpad(counter.incrementAndGet(), 6, '0'),
-        ".",
-        System.currentTimeMillis(),
-        ".",
-        extension).toString();
-    return path;
-  }
-
-  private static final AtomicInteger counter = new AtomicInteger();
 
   /**
    * Deletes the file or directory denoted by the specified path. Directories need
@@ -278,6 +394,7 @@ public class IOMethods {
    *     java.nio.file.FileVisitor)}
    */
   public static void rm(String path) throws IOException {
+    Check.notNull(path);
     Path p = Path.of(path);
     if (!Files.exists(p)) {
       return;
@@ -297,6 +414,26 @@ public class IOMethods {
         return FileVisitResult.CONTINUE;
       }
     });
+  }
+
+  private static final AtomicLong counter = new AtomicLong();
+
+  private static String uniquePath(Class<?> requester, String extension) {
+    Check.notNull(requester, "requester");
+    Check.that(extension, "extension").isNot(blank());
+    String path = StringMethods.append(new StringBuilder(64),
+        System.getProperty("java.io.tmpdir"),
+        "/",
+        requester.getSimpleName().toLowerCase(),
+        ".",
+        Thread.currentThread().getName().toLowerCase(),
+        ".",
+        lpad(counter.incrementAndGet(), 8, '0'),
+        ".",
+        System.currentTimeMillis(),
+        ".",
+        extension).toString();
+    return path;
   }
 
 }

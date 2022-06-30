@@ -5,19 +5,19 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A specialized {@link Set} implementation for {@code Class} objects. It returns
- * {@code true} from its {@link Set#contains(Object) contains} method if the set
- * contains the specified type <i>or any of its super types</i>.
+ * An implementation of {@link TypeSet} that is internally backed by a {@link
+ * TypeGraph}.
  *
  * @author Ayco Holleman
- * @see AbstractTypeMap
- * @see TypeGraph
+ * @see TypeMap
+ * @see TypeSet
+ * @see TypeHashSet
  */
-public class TypeGraphSet extends TypeSet<TypeGraph<Object>> {
+public final class TypeGraphSet extends AbstractTypeSet<TypeGraph<Object>> {
 
   /**
    * Returns a {@code TypeGraphSet} containing the specified types. Autoboxing will
-   * bee enabled.
+   * be enabled.
    *
    * @param types The types to include
    * @return A {@code TypeGraphSet} containing the specified types
@@ -29,7 +29,7 @@ public class TypeGraphSet extends TypeSet<TypeGraph<Object>> {
   /**
    * Returns {@code TypeGraphSet} containing the specified types.
    *
-   * @param autobox Whether to enable "autoboxing" (see {@link AbstractTypeMap})
+   * @param autobox Whether to enable "autoboxing" (see {@link TypeMap})
    * @param types The types to include
    * @return An {@code TypeGraphSet} containing the specified types
    */
@@ -52,10 +52,13 @@ public class TypeGraphSet extends TypeSet<TypeGraph<Object>> {
    * Converts the specified {@code Collection} to a {@code TypeSet}.
    *
    * @param src The {@code Collection} to convert
-   * @param autobox Whether to enable "autoboxing" (see {@link AbstractTypeMap})
+   * @param autobox Whether to enable "autoboxing" (see {@link TypeMap})
    * @return A {@code TypeSet} containing the types in the specified collection
    */
   public static TypeGraphSet copyOf(Collection<Class<?>> src, boolean autobox) {
+    if (src instanceof TypeGraphSet tgs && tgs.map.autobox == autobox) {
+      return tgs;
+    }
     return new TypeGraphSet(src, autobox);
   }
 
@@ -68,7 +71,7 @@ public class TypeGraphSet extends TypeSet<TypeGraph<Object>> {
     TypeGraphBuilder<Object> builder = TypeGraph.build(Object.class);
     builder.autobox(autobox);
     for (Class<?> clazz : c) {
-      builder.add(clazz, FOO);
+      builder.add(clazz, WHATEVER);
     }
     return builder.freeze();
   }
