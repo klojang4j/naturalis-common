@@ -2,6 +2,7 @@ package nl.naturalis.common;
 
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -12,7 +13,7 @@ import static org.junit.Assert.*;
 public class IOMethodsTest {
 
   @Test
-  public void toString00() throws IOException {
+  public void getContents00() throws IOException {
     String s = getContents(getClass(), "/IOMethodsTest.foo.txt");
     assertEquals("This is a test.", s);
     // Bad, but not forbidden:
@@ -36,6 +37,37 @@ public class IOMethodsTest {
       assertEquals("This is a test.", getContents(is, "This is a test.".length()));
     }
 
+  }
+
+  @Test
+  public void getContents01() throws IOException {
+    File f = createTempFile();
+    try {
+      write(f.getPath(), "Hello, World!");
+      String s = getContents(f.getPath());
+      assertEquals("Hello, World!", s);
+    } finally {
+      f.delete();
+    }
+  }
+
+  @Test
+  public void write00() throws IOException {
+    File f = createTempFile();
+    try {
+      write(f.getPath(), "Hello, World!");
+      append(f.getPath(), " How are you?");
+      String s = getContents(f.getPath());
+      assertEquals("Hello, World! How are you?", s);
+      append(f.getPath(), " I am fine.");
+      s = getContents(f.getPath());
+      assertEquals("Hello, World! How are you? I am fine.", s);
+      write(f.getPath(), "Hello, World!");
+      s = getContents(f.getPath());
+      assertEquals("Hello, World!", s);
+    } finally {
+      f.delete();
+    }
   }
 
   @Test
