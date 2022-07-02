@@ -8,9 +8,12 @@ import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import static nl.naturalis.common.ObjectMethods.isEmpty;
+import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
@@ -22,6 +25,8 @@ import static nl.naturalis.common.check.CommonChecks.*;
  */
 @SuppressWarnings("rawtypes")
 public final class NumberMethods {
+
+  static final String UNSUPPORTED_NUMBER_TYPE = "unsupported Number type: {0}";
 
   private NumberMethods() {
     throw new UnsupportedOperationException();
@@ -405,31 +410,43 @@ public final class NumberMethods {
     return OptionalInt.empty();
   }
 
+  private static final Map<Class<?>, Function<Number, BigDecimal>> TO_BIG_DECIMAL =
+      Map.of(
+          BigDecimal.class, BigDecimal.class::cast,
+          BigInteger.class, n -> new BigDecimal((BigInteger) n),
+          Double.class, n -> BigDecimal.valueOf((double) n),
+          Float.class, n -> BigDecimal.valueOf((float) n),
+          Long.class, n -> new BigDecimal((Long) n),
+          Integer.class, n -> new BigDecimal((Integer) n),
+          Short.class, n -> new BigDecimal((Short) n),
+          Byte.class, n -> new BigDecimal((Byte) n)
+      );
+
   /**
-   * Converts a {@code Number} of unspecified type to a {@code BigDecimal}.
+   * Converts a {@code Number} of unspecified type to a {@code BigDecimal}. If the
+   * number is a {@code Double} or a {@code Float}, it is converted by passing it
+   * {@code BigDecimal.valueOf}, thus keeping its precision intact. Otherwise the
+   * number is passed itself to the constructor of {@code BigDecimal}. This method
+   * does not support the more "exotic" {@code Number} types, like {@link
+   * AtomicLong}.
    *
    * @param n The number
    * @return The {@code BigDecimal} representing the number
    */
   public static BigDecimal toBigDecimal(Number n) {
-    Class<? extends Number> t = n.getClass();
-    return t == BigDecimal.class
-        ? (BigDecimal) n
-        : t == BigInteger.class
-            ? new BigDecimal((BigInteger) n)
-            : t == Double.class
-                ? BigDecimal.valueOf((Double) n)
-                : t == Long.class
-                    ? new BigDecimal((Long) n)
-                    : t == Float.class
-                        ? BigDecimal.valueOf((Float) n)
-                        : new BigDecimal(n.intValue());
+    Check.notNull(n);
+    Function<Number, BigDecimal> fnc = TO_BIG_DECIMAL.get(n.getClass());
+    if (fnc != null) {
+      return fnc.apply(n);
+    }
+    return fail(UNSUPPORTED_NUMBER_TYPE, n.getClass());
   }
 
   /**
    * Converts the specified number into a number of the specified type. Throws an
    * {@link TypeConversionException} if the number is too big to fit into the target
-   * type.
+   * type. This method does not support the more "exotic" {@code Number} types, like
+   * {@link AtomicLong}.
    *
    * @param <T> The type of the number to be converted
    * @param <U> The target type
