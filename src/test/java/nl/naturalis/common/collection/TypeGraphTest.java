@@ -2,13 +2,9 @@ package nl.naturalis.common.collection;
 
 import org.junit.Test;
 
-import java.io.BufferedOutputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
-import java.nio.Buffer;
 import java.util.*;
 
-import static nl.naturalis.common.ClassMethods.*;
 import static org.junit.Assert.*;
 
 public class TypeGraphTest {
@@ -452,7 +448,7 @@ public class TypeGraphTest {
     assertEquals("A0000", m.get(A0000.class));
   }
 
-  @Test(expected = DuplicateKeyException.class)
+  @Test(expected = DuplicateException.class)
   public void test17() {
     TypeGraph<String> m = TypeGraph.build(String.class)
         .add(A01.class, "A01")
@@ -461,7 +457,7 @@ public class TypeGraphTest {
         .freeze();
   }
 
-  @Test(expected = DuplicateKeyException.class)
+  @Test(expected = DuplicateException.class)
   public void test18() {
     TypeGraph<String> m = TypeGraph.build(String.class)
         .add(A0.class, "A0")
@@ -470,7 +466,7 @@ public class TypeGraphTest {
         .freeze();
   }
 
-  @Test(expected = DuplicateKeyException.class)
+  @Test(expected = DuplicateException.class)
   public void test19() {
     TypeGraph<String> m = TypeGraph.build(String.class).add(Object.class, "FOO").add(
         A0.class,

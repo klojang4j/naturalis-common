@@ -2,19 +2,19 @@ package nl.naturalis.common.x.collection;
 
 import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.collection.DuplicateKeyException;
+import nl.naturalis.common.collection.DuplicateException;
 import nl.naturalis.common.x.invoke.InvokeUtils;
 
 import java.util.*;
 
 import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
 import static nl.naturalis.common.ArrayMethods.implode;
-import static nl.naturalis.common.check.CommonChecks.deepNotNull;
-import static nl.naturalis.common.check.CommonChecks.lt;
+import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.collection.DuplicateException.Category.ELEMENT;
 
 public final class ArraySet<E> extends ImmutableSet<E> {
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
+  @SuppressWarnings({"rawtypes"})
   private static final ArraySet EMPTY = new ArraySet(EMPTY_OBJECT_ARRAY);
 
   @SuppressWarnings({"unchecked"})
@@ -22,47 +22,58 @@ public final class ArraySet<E> extends ImmutableSet<E> {
     return (ArraySet<E>) EMPTY;
   }
 
-  public static <E> ArraySet<E> of(E[] values, boolean internal) {
-    if (internal) {
-      return values.length == 0 ? empty() : new ArraySet<>(values);
+  /*
+   * If trusted, the provided array is supposed to be internally generated, going out
+   * of scope immediately, and known to contain unique values only. All bets are off
+   * if this is not the case!!!! In that case the array will be swallowed rather than
+   * copied into the ArraySet.
+   */
+  public static <E> ArraySet<E> of(E[] values, boolean trust) {
+    if (values.length == 0) {
+      return empty();
+    } else if (trust) {
+      return new ArraySet<>(values);
     }
-    Check.that(values, "array").is(deepNotNull());
-    if (new HashSet<>(Arrays.asList(values)).size() != values.length) {
-      throw new DuplicateKeyException();
+    Set<E> set = new HashSet<>();
+    for (E e : values) {
+      Check.that(e).is(notNull(), "null elements not allowed");
+      if (!set.add(e)) {
+        throw new DuplicateException(ELEMENT, e);
+      }
     }
-    return values.length == 0 ? empty() : new ArraySet<>(values);
+    Object[] copy = new Object[values.length];
+    System.arraycopy(values, 0, copy, 0, values.length);
+    return new ArraySet<>(copy);
   }
 
-  public static <E> ArraySet<E> copyOf(List<E> list, boolean internal) {
-    if (internal) {
-      return list.isEmpty() ? empty() : new ArraySet<>(list);
+  public static <E> ArraySet<E> copyOf(List<E> values, boolean trust) {
+    if (values.size() == 0) {
+      return empty();
+    } else if (trust) {
+      return new ArraySet<>(values.toArray());
     }
-    Check.that(list, "list").is(deepNotNull());
-    if (new HashSet<>(list).size() != list.size()) {
-      throw new DuplicateKeyException();
+    Set<E> set = new HashSet<>();
+    for (E e : values) {
+      Check.that(e).is(notNull(), "null elements not allowed");
+      if (!set.add(e)) {
+        throw new DuplicateException(ELEMENT, e);
+      }
     }
-    return list.isEmpty() ? empty() : new ArraySet<>(list);
+    return new ArraySet<>(values.toArray());
   }
 
-  public static <E> ArraySet<E> copyOf(Set<E> set, boolean internal) {
-    if (internal) {
-      return set instanceof ArraySet<E> arraySet
-          ? arraySet
-          : set.isEmpty() ? empty() : new ArraySet<>(set);
+  public static <E> ArraySet<E> copyOf(Set<E> set, boolean trust) {
+    if (!trust) {
+      Check.that(set, "set").is(deepNotNull());
     }
-    Check.that(set, "set").is(deepNotNull());
     return set instanceof ArraySet<E> arraySet
         ? arraySet
-        : set.isEmpty() ? empty() : new ArraySet<>(set);
+        : set.isEmpty() ? empty() : new ArraySet<>(set.toArray());
   }
 
   private final Object[] elems;
 
-  private ArraySet(Collection<E> c) {
-    elems = c.toArray();
-  }
-
-  private ArraySet(E[] elems) {
+  private ArraySet(Object[] elems) {
     this.elems = elems;
   }
 

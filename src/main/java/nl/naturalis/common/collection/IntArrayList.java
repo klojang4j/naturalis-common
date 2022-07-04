@@ -281,6 +281,18 @@ public final class IntArrayList implements IntList {
   }
 
   @Override
+  public void sort() {
+    Arrays.sort(buf, 0, size);
+  }
+
+  @Override
+  public void sortDescending() {
+    sort();
+    // Not ideal, but OK for now
+    ArrayMethods.reverse(buf, 0, size);
+  }
+
+  @Override
   public boolean isEmpty() {
     return size == 0;
   }
@@ -297,6 +309,9 @@ public final class IntArrayList implements IntList {
 
   @Override
   public int[] toArray() {
+    if (size == 0) {
+      return EMPTY_INT_ARRAY;
+    }
     int[] b = new int[size];
     arraycopy(buf, 0, b, 0, size);
     return b;
@@ -304,7 +319,7 @@ public final class IntArrayList implements IntList {
 
   @Override
   public List<Integer> toGenericList() {
-    return List.of(asWrapperArray(buf));
+    return List.of(toWrapperArray(buf));
   }
 
   @Override

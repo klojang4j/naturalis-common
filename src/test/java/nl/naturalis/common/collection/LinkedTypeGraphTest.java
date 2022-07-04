@@ -467,7 +467,7 @@ public class LinkedTypeGraphTest {
     assertEquals("A0000", m.get(A0000.class));
   }
 
-  @Test(expected = DuplicateKeyException.class)
+  @Test(expected = DuplicateException.class)
   public void test17() {
     LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(A01.class, "A01")
@@ -476,7 +476,7 @@ public class LinkedTypeGraphTest {
         .freeze();
   }
 
-  @Test(expected = DuplicateKeyException.class)
+  @Test(expected = DuplicateException.class)
   public void test18() {
     LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class)
         .add(A0.class, "A0")
@@ -485,7 +485,7 @@ public class LinkedTypeGraphTest {
         .freeze();
   }
 
-  @Test(expected = DuplicateKeyException.class)
+  @Test(expected = DuplicateException.class)
   public void test19() {
     LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class).add(Object.class,
         "FOO").add(

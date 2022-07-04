@@ -38,6 +38,23 @@ public final class ClassMethods {
   // wrapper-to-primitive
   private static final Map<Class<?>, Class<?>> W2P = swapAndFreeze(P2W);
 
+  private static final Map<Class<?>, Object> PRIMITIVE_DEFAULTS = Map.of(int.class,
+      0,
+      boolean.class,
+      Boolean.FALSE,
+      double.class,
+      0D,
+      long.class,
+      0L,
+      float.class,
+      0F,
+      short.class,
+      (short) 0,
+      byte.class,
+      (byte) 0,
+      char.class,
+      '\0');
+
   private ClassMethods() {
     throw new UnsupportedOperationException();
   }
@@ -384,6 +401,21 @@ public final class ClassMethods {
     var sb = new StringBuilder(info.baseType().getSimpleName());
     IntStream.range(0, info.dimensions()).forEach(x -> sb.append("[]"));
     return sb.toString();
+  }
+
+  /**
+   * Returns zero, cast to the appropriate type, for primitive types; {@code null}
+   * for any other type.
+   *
+   * @param <T> The type of the class
+   * @param type The class for which to retrieve the default value
+   * @return The default value
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> T getTypeDefault(Class<T> type) {
+    return Check.notNull(type, "type").isNot(sameAs(), void.class).ok().isPrimitive()
+        ? (T) PRIMITIVE_DEFAULTS.get(type)
+        : null;
   }
 
 }

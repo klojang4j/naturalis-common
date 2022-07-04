@@ -28,7 +28,7 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
    * collection.
    *
    * @param c The {@code Integer} collection to extract the integers from
-   * @return An unmodifiable {@code IntList}
+   * @return an unmodifiable {@code IntList}
    */
   static IntList copyOf(Collection<Integer> c) {
     Check.notNull(c);
@@ -48,7 +48,7 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
    * Returns an unmodifiable copy of the specified {@code IntList}.
    *
    * @param other The {@code IntList} to extract the integers from
-   * @return An unmodifiable {@code IntList}
+   * @return an unmodifiable {@code IntList}
    */
   static IntList copyOf(IntList other) {
     Check.notNull(other);
@@ -63,7 +63,7 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
   /**
    * Returns an unmodifiable, empty {@code IntList}.
    *
-   * @return An unmodifiable, empty {@code IntList}
+   * @return an unmodifiable, empty {@code IntList}
    */
   static IntList of() {
     return EMPTY;
@@ -73,7 +73,7 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
    * Returns an unmodifiable {@code IntList} containing the provided element.
    *
    * @param e0 The one and only element in the list
-   * @return An unmodifiable {@code IntList} containing the provided element
+   * @return an unmodifiable {@code IntList} containing the provided element
    */
   static IntList of(int e0) {
     int[] buf = new int[] {e0};
@@ -85,7 +85,7 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
    *
    * @param e0 The 1st element
    * @param e1 The 2nd element
-   * @return An unmodifiable {@code IntList} containing the provided elements
+   * @return an unmodifiable {@code IntList} containing the provided elements
    */
   static IntList of(int e0, int e1) {
     int[] buf = new int[] {e0, e1};
@@ -98,7 +98,7 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
    * @param e0 The 1st element
    * @param e1 The 2nd element
    * @param e2 The 3rd element
-   * @return An unmodifiable {@code IntList} containing the provided elements
+   * @return an unmodifiable {@code IntList} containing the provided elements
    */
   static IntList of(int e0, int e1, int e2) {
     int[] buf = new int[] {e0, e1, e2};
@@ -112,7 +112,7 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
    * @param e1 The 2nd element
    * @param e2 The 3rd element
    * @param e3 The 4th element
-   * @return An unmodifiable {@code IntList} containing the provided elements
+   * @return an unmodifiable {@code IntList} containing the provided elements
    */
   static IntList of(int e0, int e1, int e2, int e3) {
     int[] buf = new int[] {e0, e1, e2, e3};
@@ -128,7 +128,7 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
    * @param e3 The 4th element
    * @param e4 The 5th element
    * @param moreElems More elements to include in the list
-   * @return An unmodifiable {@code IntList} containing the provided elements
+   * @return an unmodifiable {@code IntList} containing the provided elements
    */
   static IntList of(int e0, int e1, int e2, int e3, int e4, int... moreElems) {
     Check.notNull(moreElems, "array");
@@ -147,7 +147,7 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
    *
    * @param values An {@code int} array containing the values for the {@code
    *     IntList}
-   * @return An unmodifiable {@code IntList} containing the specified values
+   * @return an unmodifiable {@code IntList} containing the specified values
    */
   static IntList of(int[] values) {
     Check.notNull(values, "array");
@@ -161,7 +161,7 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
   /**
    * Returns the value at the specified index.
    *
-   * @param index The list index
+   * @param index the list index
    * @return The value at the specified index
    */
   int get(int index);
@@ -169,8 +169,8 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
   /**
    * Sets the value at the specified index.
    *
-   * @param index The list index
-   * @param value The value
+   * @param index the list index
+   * @param value the value
    */
   void set(int index, int value);
 
@@ -179,19 +179,29 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
    * occurrence of the specified value, or an empty {@link OptionalInt} if the value
    * is not present.
    *
-   * @param value The value to search for
-   * @return An {@link OptionalInt} containing the array index of the first
+   * @param value the value to search for
+   * @return an {@link OptionalInt} containing the array index of the first
    *     occurrence of the specified value, or an empty {@link OptionalInt} if the
    *     value is not present
    */
   OptionalInt indexOf(int value);
 
+  /**
+   * Returns an {@link OptionalInt} containing the array index of the last occurrence
+   * of the specified value, or an empty {@link OptionalInt} if the value is not
+   * present.
+   *
+   * @param value the value to search for
+   * @return an {@link OptionalInt} containing the array index of the first
+   *     occurrence of the specified value, or an empty {@link OptionalInt} if the
+   *     value is not present
+   */
   OptionalInt lastIndexOf(int value);
 
   /**
    * Appends the specified integer.
    *
-   * @param value The integer to append
+   * @param value the integer to append
    */
   void add(int value);
 
@@ -199,29 +209,29 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
    * Inserts the specified value at the specified index, right-shifting all elements
    * at, and following that the index.
    *
-   * @param index The index at which to insert the integer
-   * @param value The integer to insert
+   * @param index the index at which to insert the integer
+   * @param value the integer to insert
    */
   void add(int index, int value);
 
   /**
    * Appends the values in the specified {@code IntList}  to this list.
    *
-   * @param other An {@code IntList} containing the integers to append
+   * @param other an {@code IntList} containing the integers to append
    */
   void addAll(IntList other);
 
   /**
    * Appends the specified values.
    *
-   * @param values The integers to append
+   * @param values the integers to append
    */
   void addAll(int[] values);
 
   /**
    * Inserts the values in the specified {@code IntList} into this list.
    *
-   * @param index The index at which to insert the integers
+   * @param index the index at which to insert the integers
    * @param other The integers to insert
    */
   void addAll(int index, IntList other);
@@ -230,22 +240,22 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
    * Inserts the specified {@code int} array into this list at the specified index,
    * right-shifting the elements at, and following the index.
    *
-   * @param index The index at which to insert the integers
-   * @param values The integers to insert
+   * @param index the index at which to insert the integers
+   * @param values the integers to insert
    */
   void addAll(int index, int[] values);
 
   /**
    * Removes the element at the specified index
    *
-   * @param index The index of the element to remove
+   * @param index the index of the element to remove
    */
   void removeByIndex(int index);
 
   /**
    * Removes the first occurrence of the specified value in this {@code IntList}.
    *
-   * @param value The value to remove
+   * @param value the value to remove
    * @return {@code true} if the value was present; {@code false} otherwise
    */
   boolean removeByValue(int value);
@@ -262,7 +272,7 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
   /**
    * Removes the specified values from this {@code IntList}.
    *
-   * @param values The values to remove
+   * @param values the values to remove
    * @return Whether the list changed
    */
   boolean removeAll(int... values);
@@ -348,23 +358,33 @@ public sealed interface IntList permits IntArrayList, UnmodifiableIntList {
   void setCapacity(int newCapacity);
 
   /**
-   * Converts this {@code IntList} to an unmodifiable {@code List<Integer>}.
+   * Sorts the elements in this list in ascending order.
+   */
+  void sort();
+
+  /**
+   * Sorts the elements in this list in descending order.
+   */
+  void sortDescending();
+
+  /**
+   * Converts this {@code IntList} to a fixed-size, mutable {@code List<Integer>}.
    *
-   * @return An unmodifiable {@code List&lt;Integer&gt;}
+   * @return an fixed-size, mutable {@code List<Integer>}
    */
   List<Integer> toGenericList();
 
   /**
    * Converts the list to an {@code int[]} array
    *
-   * @return An {@code int[]} array containing the values in this list
+   * @return an {@code int[]} array containing the values in this list
    */
   int[] toArray();
 
   /**
    * Returns an {@code IntStream} of the elements in this list.
    *
-   * @return An {@code IntStream} of the elements in this list
+   * @return an {@code IntStream} of the elements in this list
    */
   IntStream stream();
 

@@ -110,8 +110,10 @@ public class IntArrayListTest {
     IntArrayList list1 = new IntArrayList(IntList.of(12, 13, 14));
     list0.addAll(list1);
     assertEquals(15, list0.size());
-    assertEquals(IntList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14), list0);
-    assertEquals(list0, IntList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14));
+    assertEquals(IntList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14),
+        list0);
+    assertEquals(list0,
+        IntList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14));
   }
 
   @Test
@@ -126,8 +128,10 @@ public class IntArrayListTest {
     IntArrayList list1 = new IntArrayList(IntList.of(12, 13, 14));
     list0.addAll(list1);
     assertEquals(15, list0.size());
-    assertEquals(IntList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14), list0);
-    assertEquals(list0, IntList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14));
+    assertEquals(IntList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14),
+        list0);
+    assertEquals(list0,
+        IntList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14));
   }
 
   @Test
@@ -329,6 +333,16 @@ public class IntArrayListTest {
     assertFalse(list.retainAll(Set.of(1, 9)));
     assertTrue(list.retainAll(Set.of(1000, 2000)));
     assertTrue(list.isEmpty());
+  }
+
+  @Test
+  public void sort00() {
+    IntList list = new IntArrayList();
+    list.addAll(ints(3, 0, 2, 5, 4, 1));
+    list.sortDescending();
+    assertEquals(IntList.of(5, 4, 3, 2, 1, 0), list);
+    list.sort();
+    assertEquals(IntList.of(0, 1, 2, 3, 4, 5), list);
   }
 
 }

@@ -1,7 +1,6 @@
 package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.collection.ArrayCloakList;
 import nl.naturalis.common.x.invoke.InvokeUtils;
 
 import java.lang.reflect.Array;
@@ -29,14 +28,19 @@ public final class ArrayMethods {
   }
 
   /**
-   * A zero-length Object array
+   * A zero-length Object array.
    */
   public static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
   /**
-   * A zero-length String array
+   * A zero-length String array.
    */
   public static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+  /**
+   * A zero-length int array.
+   */
+  public static final int[] EMPTY_INT_ARRAY = new int[0];
 
   static final String START_INDEX = "Start index";
   static final String END_INDEX = "End index";
@@ -44,11 +48,11 @@ public final class ArrayMethods {
   private static final Long MAX_ARR_LEN = (long) Integer.MAX_VALUE;
 
   /**
-   * Appends the specified object to the specified array.
+   * Appends an element to an array.
    *
-   * @param array The array to append the object to
-   * @param obj The object to append
-   * @return A concatenation of {@code array} and {@code obj}
+   * @param array the array to append the object to
+   * @param obj the object to append
+   * @return a new array containing the original array plus the extra element
    */
   public static <T> T[] append(T[] array, T obj) {
     Check.notNull(array, "array");
@@ -59,14 +63,13 @@ public final class ArrayMethods {
   }
 
   /**
-   * Appends the specified objects to the specified array.
+   * Appends multiple elements to an array.
    *
-   * @param array The array to append the objects to
-   * @param obj0 The 1st object to append
-   * @param obj1 The 2nd object to append
-   * @param moreObjs More objects to append
-   * @return A concatenation of {@code array}, {@code obj1}, {@code obj2} and {@code
-   *     moreObjs}
+   * @param array the array to append the objects to
+   * @param obj0 the 1st object to append
+   * @param obj1 the 2nd object to append
+   * @param moreObjs more objects to append
+   * @return a new array containing the original array plus the extra elements
    */
   @SafeVarargs
   public static <T> T[] append(T[] array, T obj0, T obj1, T... moreObjs) {
@@ -82,12 +85,12 @@ public final class ArrayMethods {
   }
 
   /**
-   * Returns a new array containing all elements of the specified arrays.
+   * Concatenates two arrays.
    *
-   * @param <T> The element type of the arrays
+   * @param <T> the element type of the arrays
    * @param arr0 The 1st array to go into the new array
    * @param arr1 The 2nd array to go into the new array
-   * @return A new array containing all elements of the specified arrays
+   * @return a new array containing all elements of the specified arrays
    */
   @SuppressWarnings("unchecked")
   public static <T> T[] concat(T[] arr0, T[] arr1) {
@@ -95,14 +98,14 @@ public final class ArrayMethods {
   }
 
   /**
-   * Returns a new array containing all elements of the specified arrays.
+   * Concatenates multiple arrays.
    *
-   * @param <T> The element type of the arrays.
+   * @param <T> the element type of the arrays.
    * @param arr0 The 1st array to go into the new array
    * @param arr1 The 2nd array to go into the new array
    * @param arr2 The 3rd array to go into the new array
    * @param moreArrays More arrays to concatenate
-   * @return A new array containing all elements of the specified arrays
+   * @return a new array containing all elements of the specified arrays
    */
   @SafeVarargs
   public static <T> T[] concat(T[] arr0, T[] arr1, T[] arr2, T[]... moreArrays) {
@@ -134,53 +137,39 @@ public final class ArrayMethods {
   }
 
   /**
-   * Returns {@code true} if the specified array contains the specified value, {@code
-   * false} otherwise.
+   * Returns {@code true} if the specified array contains the specified value.
    *
-   * @param value The value to search for
-   * @param array The array to search
-   * @return Whether the array contains the value
+   * @param value the value to search for
+   * @param array the array to search
+   * @return whether the array contains the value
+   * @see #indexOf(int[], int)
    */
   public static boolean isElementOf(int value, int[] array) {
     return indexOf(array, value).isPresent();
   }
 
   /**
-   * Returns {@code true} if the specified array contains the specified value, {@code
-   * false} otherwise.
+   * Returns {@code true} if the specified array contains the specified value.
    *
-   * @param value The value to search for
-   * @param array The array to search
-   * @return Whether the array contains the value
+   * @param value the value to search for
+   * @param array the array to search
+   * @return whether the array contains the value
+   * @see #indexOf(Object[], Object)
    */
   public static <T> boolean isElementOf(T value, T[] array) {
     return indexOf(array, value) != -1;
   }
 
   /**
-   * Returns {@code true} if the specified array contains the specified value, {@code
-   * false} otherwise.
+   * Returns {@code true} if the specified array contains the specified reference.
    *
-   * @param value The value to search for
-   * @param array The array to search
-   * @return Whether the array contains the value
+   * @param value the value to search for
+   * @param array the array to search
+   * @return whether the array contains the value
+   * @see #refIndexOf(Object[], Object)
    */
-  @SafeVarargs
-  public static <T> boolean isOneOf(T value, T... array) {
-    return indexOf(array, value) != -1;
-  }
-
-  /**
-   * Returns {@code true} if the specified array contains the specified reference,
-   * {@code false} otherwise.
-   *
-   * @param ref The reference to search for
-   * @param array The array to search
-   * @return Whether the array contains the specified reference
-   */
-  @SafeVarargs
-  public static <T> boolean isPresent(T ref, T... array) {
-    return refIndexOf(array, ref) != -1;
+  public static <T> boolean refIsElementOf(T value, T[] array) {
+    return refIndexOf(array, value) != -1;
   }
 
   /**
@@ -188,9 +177,9 @@ public final class ArrayMethods {
    * occurrence of the specified value within the specified array. Returns an empty
    * {@link OptionalInt} if the array does not contain the value.
    *
-   * @param array The array to search
-   * @param value The value to search for
-   * @return An {@link OptionalInt} containing the array index of the value
+   * @param array the array to search
+   * @param value the value to search for
+   * @return an {@link OptionalInt} containing the array index of the value
    */
   public static OptionalInt indexOf(int[] array, int value) {
     Check.notNull(array, "array");
@@ -207,9 +196,9 @@ public final class ArrayMethods {
    * of the specified value within the specified array. Returns an empty {@link
    * OptionalInt} if the array does not contain the value.
    *
-   * @param array The array to search
-   * @param value The value to search for
-   * @return An {@link OptionalInt} containing the array index of the value
+   * @param array the array to search
+   * @param value the value to search for
+   * @return an {@link OptionalInt} containing the array index of the value
    */
   public static OptionalInt lastIndexOf(int[] array, int value) {
     Check.notNull(array, "array");
@@ -226,10 +215,10 @@ public final class ArrayMethods {
    * the specified array. Returns -1 if the array does not contain the value.
    * Searching for null is allowed.
    *
-   * @param <T> The type of the elements within the array
-   * @param array The array to search
-   * @param value The value to search for (may be null)
-   * @return The array index of the value
+   * @param <T> the type of the elements within the array
+   * @param array the array to search
+   * @param value the value to search for (may be null)
+   * @return the array index of the value
    */
   public static <T> int indexOf(T[] array, T value) {
     Check.notNull(array, "array");
@@ -254,10 +243,10 @@ public final class ArrayMethods {
    * specified array. Returns -1 if the array does not contain the value. Searching
    * for null is allowed.
    *
-   * @param <T> The type of the elements within the array
-   * @param array The array to search
-   * @param value The value to search for (may be null)
-   * @return The array index of the value
+   * @param <T> the type of the elements within the array
+   * @param array the array to search
+   * @param value the value to search for (may be null)
+   * @return the array index of the value
    */
   public static <T> int lastIndexOf(T[] array, T value) {
     Check.notNull(array, "array");
@@ -278,27 +267,69 @@ public final class ArrayMethods {
   }
 
   /**
-   * Returns the array index of the first occurrence of the specified object within
-   * the specified array, using reference comparisons to identify the object. Returns
-   * -1 if the array does not contain the specified reference. Searching for null is
+   * Returns the array index of the first occurrence of the specified object, using
+   * reference comparisons to identify the object. Returns -1 if the array does not
+   * contain the specified reference. Searching for null is
    * <i>not</i> allowed.
    *
-   * @param array The array to search
+   * @param array the array to search
    * @param reference The reference to search for (must not be null)
-   * @return The array index of the reference
+   * @return the array index of the reference
    */
   public static int refIndexOf(Object[] array, Object reference) {
     Check.notNull(array, "array");
     Check.notNull(reference, "reference");
-    return streamIndices(array).filter(i -> array[i] == reference)
-        .findFirst()
-        .orElse(-1);
+    for (int i = 0; i < array.length; ++i) {
+      if (array[i] == reference) {
+        return i;
+      }
+    }
+    return -1;
   }
 
+  /**
+   * Returns the array index of the last occurrence of the specified object, using
+   * reference comparisons to identify the object. Returns -1 if the array does not
+   * contain the specified reference. Searching for null is <i>not</i> allowed.
+   *
+   * @param array the array to search
+   * @param reference The reference to search for (must not be null)
+   * @return the array index of the reference
+   */
+  public static int refLastIndexOf(Object[] array, Object reference) {
+    Check.notNull(array, "array");
+    Check.notNull(reference, "reference");
+    for (int i = 0; i < array.length; ++i) {
+      if (array[i] == reference) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * Returns the first array element that passes some test.
+   *
+   * @param array the array
+   * @param test the test
+   * @param <T> the type of the array elements
+   * @return the first array element that passes the specified test
+   */
   public static <T> T find(T[] array, Predicate<T> test) {
     return find(array, test, identity());
   }
 
+  /**
+   * Returns some property of the first array element that passes some test.
+   *
+   * @param array the array
+   * @param test the test
+   * @param property a function that extracts some value from thr array element
+   * @param <T> the type of the array elements
+   * @param <R> the type of the value extracted from the array element
+   * @return the value extracted from the first array element that passed the
+   *     specified test.
+   */
   public static <T, R> R find(T[] array,
       Predicate<T> test,
       Function<T, R> property) {
@@ -314,11 +345,78 @@ public final class ArrayMethods {
   }
 
   /**
+   * Reverses the order of the elements in the specified array.
+   *
+   * @param array the array
+   * @param <T> the type of the array elements
+   * @return the input array
+   */
+  public static <T> T[] reverse(T[] array) {
+    return doReverse(array, 0, array.length);
+  }
+
+  /**
+   * Reverses the order of the elements in the specified array segment
+   *
+   * @param array the array
+   * @param <T> the type of the array elements
+   * @return the input array
+   */
+  public static <T> T[] reverse(T[] array, int from, int to) {
+    Check.fromTo(array, from, to);
+    return doReverse(array, from, to);
+  }
+
+  private static <T> T[] doReverse(T[] array, int from, int to) {
+    int len = to - from;
+    T tmp;
+    for (int i = from, j = to - 1; i < len / 2; ++i, --j) {
+      tmp = array[i];
+      array[i] = array[j];
+      array[j] = tmp;
+    }
+    return array;
+  }
+
+  /**
+   * Reverses the order of the elements in the specified array.
+   *
+   * @param array the array
+   * @return the input array
+   */
+  public static int[] reverse(int[] array) {
+    return doReverse(array, 0, array.length);
+  }
+
+  /**
+   * Reverses the order of the elements in the specified array segment
+   *
+   * @param array the array
+   * @return the input array
+   */
+  public static int[] reverse(int[] array, int from, int to) {
+    Check.notNull(array, "array");
+    Check.fromTo(array.length, from, to);
+    return doReverse(array, from, to);
+  }
+
+  private static int[] doReverse(int[] array, int from, int to) {
+    int len = to - from;
+    int tmp;
+    for (int i = from, j = to - 1; i < len / 2; ++i, --j) {
+      tmp = array[i];
+      array[i] = array[j];
+      array[j] = tmp;
+    }
+    return array;
+  }
+
+  /**
    * Returns a new, empty array with the same element type and length as the
    * specified array's element type and length.
    *
-   * @param <T> The type of the elements in the requested array
-   * @param template An array with the same length and element type as the
+   * @param <T> the type of the elements in the requested array
+   * @param template an array with the same length and element type as the
    *     requested array
    */
   public static <T> T[] fromTemplate(T[] template) {
@@ -330,10 +428,10 @@ public final class ArrayMethods {
    * element type. The length of the returned array is specified through the {@code
    * length} parameter.
    *
-   * @param <T> The type of the elements in the requested array
-   * @param template An array with the same element type as the requested array
-   * @param length The desired length of the new array
-   * @return A new array with the same length and element type as the specified array
+   * @param <T> the type of the elements in the requested array
+   * @param template an array with the same element type as the requested array
+   * @param length the desired length of the new array
+   * @return a new array with the same length and element type as the specified array
    */
   public static <T> T[] fromTemplate(T[] template, int length) {
     Check.notNull(template, "template");
@@ -341,7 +439,7 @@ public final class ArrayMethods {
     return InvokeUtils.newArray(template.getClass(), length);
   }
 
-  private static final Map<Class, ToIntFunction<Object>> hashCoders =
+  private static final Map<Class<?>, ToIntFunction<Object>> hashCoders =
       Map.of(
           int[].class, obj -> Arrays.hashCode((int[]) obj),
           long[].class, obj -> Arrays.hashCode((long[]) obj),
@@ -356,7 +454,7 @@ public final class ArrayMethods {
    * array object even if you don't know its exact type. An {@link
    * IllegalArgumentException} is thrown if the argument is not an array.
    *
-   * @param array The array
+   * @param array the array
    * @return Its hash code
    */
   public static int hashCode(Object array) {
@@ -372,7 +470,7 @@ public final class ArrayMethods {
    * of an array object even if you don't know its exact type. An {@link
    * IllegalArgumentException} is thrown if the argument is not an array.
    *
-   * @param array The array
+   * @param array the array
    * @return Its deep hash code
    */
   public static int deepHashCode(Object array) {
@@ -387,8 +485,8 @@ public final class ArrayMethods {
    * PHP-style implode method, concatenating the array elements using ", "
    * (comma-space) as separator. Optimized for {@code int[]} arrays.
    *
-   * @param array The array to implode
-   * @return A concatenation of the elements in the array.
+   * @param array the array to implode
+   * @return a concatenation of the elements in the array.
    */
   public static String implodeInts(int[] array) {
     return implodeInts(array, DEFAULT_IMPLODE_SEPARATOR);
@@ -400,9 +498,9 @@ public final class ArrayMethods {
    * PHP-style implode method, concatenating the array elements using the specified
    * separator. Optimized for {@code int[]} arrays.
    *
-   * @param array The array to implode
+   * @param array the array to implode
    * @param separator The separator string
-   * @return A concatenation of the elements in the array.
+   * @return a concatenation of the elements in the array.
    */
   public static String implodeInts(int[] array, String separator) {
     return implodeInts(array, separator, -1);
@@ -412,12 +510,12 @@ public final class ArrayMethods {
    * PHP-style implode method, concatenating at most {@code limit} array elements
    * using ", " (comma-space) as separator.
    *
-   * @param array The array to implode
+   * @param array the array to implode
    * @param limit The maximum number of elements to collect. The specified number
    *     will be clamped to {@code array.length} (i.e. it's OK to specify a number
    *     greater than {@code array.length}). You can specify -1 as a shorthand for
    *     {@code array.length}.
-   * @return A concatenation of the elements in the array.
+   * @return a concatenation of the elements in the array.
    */
   public static String implodeInts(int[] array, int limit) {
     return implodeInts(array, DEFAULT_IMPLODE_SEPARATOR, limit);
@@ -427,10 +525,10 @@ public final class ArrayMethods {
    * PHP-style implode method, concatenating at most {@code limit} array elements
    * using ", " (comma-space) as separator.
    *
-   * @param array The array to implode
+   * @param array the array to implode
    * @param stringifier A {@code Function} that converts the array elements to
    *     strings
-   * @return A concatenation of the elements in the array.
+   * @return a concatenation of the elements in the array.
    */
   public static String implodeInts(int[] array, IntFunction<String> stringifier) {
     return implodeInts(array, stringifier, DEFAULT_IMPLODE_SEPARATOR, 0, -1);
@@ -440,13 +538,13 @@ public final class ArrayMethods {
    * PHP-style implode method, concatenating at most {@code limit} array elements
    * using the specified separator.
    *
-   * @param array The array to implode
+   * @param array the array to implode
    * @param separator The separator string
    * @param limit The maximum number of elements to collect. The specified number
    *     will be clamped to {@code array.length} (i.e. it's OK to specify a number
    *     greater than {@code array.length}). You can specify -1 as a shorthand for
    *     {@code array.length}.
-   * @return A concatenation of the elements in the array.
+   * @return a concatenation of the elements in the array.
    */
   public static String implodeInts(int[] array, String separator, int limit) {
     return implodeInts(array, INT_TO_STR, separator, 0, limit);
@@ -455,7 +553,7 @@ public final class ArrayMethods {
   /**
    * PHP-style implode method, optimized for {@code int[]} arrays.
    *
-   * @param array The array to implode
+   * @param array the array to implode
    * @param stringifier A {@code Function} that converts the array elements to
    *     strings
    * @param separator The separator string
@@ -465,7 +563,7 @@ public final class ArrayMethods {
    *     (exclusive). The specified number will be clamped to {@code array.length}
    *     (i.e. it's OK to specify a number greater than {@code array.length}). You
    *     can specify -1 as a shorthand for {@code array.length}.
-   * @return A concatenation of the elements in the array.
+   * @return a concatenation of the elements in the array.
    * @see CollectionMethods#implode(Collection, Function, String, int, int)
    */
   public static String implodeInts(int[] array,
@@ -489,8 +587,8 @@ public final class ArrayMethods {
    * arrays, but you <i>can</i> use it to implode any type of array. An {@link
    * IllegalArgumentException} is thrown if {@code array} is not an array.
    *
-   * @param array The array to implode
-   * @return A concatenation of the elements in the array.
+   * @param array the array to implode
+   * @return a concatenation of the elements in the array.
    * @see CollectionMethods#implode(Collection, String)
    */
   public static String implodeAny(Object array) {
@@ -503,9 +601,9 @@ public final class ArrayMethods {
    * <i>can</i> use it to implode any type of array. An {@link
    * IllegalArgumentException} is thrown if {@code array} is not an array.
    *
-   * @param array The array to implode
+   * @param array the array to implode
    * @param separator The separator string
-   * @return A concatenation of the elements in the array.
+   * @return a concatenation of the elements in the array.
    * @see CollectionMethods#implode(Collection, String)
    */
   public static String implodeAny(Object array, String separator) {
@@ -518,10 +616,10 @@ public final class ArrayMethods {
    * arrays, but you <i>can</i> use it to implode any type of array. An {@link
    * IllegalArgumentException} is thrown if {@code array} is not an array.
    *
-   * @param array The array to implode
+   * @param array the array to implode
    * @param stringifier A {@code Function} that converts the array elements to
    *     strings
-   * @return A concatenation of the elements in the array.
+   * @return a concatenation of the elements in the array.
    * @see CollectionMethods#implode(Collection, String)
    */
   public static String implodeAny(Object array,
@@ -536,12 +634,12 @@ public final class ArrayMethods {
    * <i>can</i> use it to implode any type of array. An {@link
    * IllegalArgumentException} is thrown if {@code array} is not an array.
    *
-   * @param array The array to implode
+   * @param array the array to implode
    * @param limit The maximum number of elements to collect. The specified number
    *     will be clamped to {@code array.length} (i.e. it's OK to specify a number
    *     greater than {@code array.length}). You can specify -1 as a shorthand for
    *     {@code array.length}.
-   * @return A concatenation of the elements in the array.
+   * @return a concatenation of the elements in the array.
    */
   public static String implodeAny(Object array, int limit) {
     return implodeAny(array, DEFAULT_IMPLODE_SEPARATOR, limit);
@@ -554,12 +652,12 @@ public final class ArrayMethods {
    * <i>can</i> use it to implode any type of array. An {@link
    * IllegalArgumentException} is thrown if {@code array} is not an array.
    *
-   * @param array The array to implode
+   * @param array the array to implode
    * @param limit The maximum number of elements to collect. The specified number
    *     will be clamped to {@code array.length} (i.e. it's OK to specify a number
    *     greater than {@code array.length}). You can specify -1 as a shorthand for
    *     {@code array.length}.
-   * @return A concatenation of the elements in the array.
+   * @return a concatenation of the elements in the array.
    */
   public static String implodeAny(Object array, String separator, int limit) {
     return implodeAny(array, Objects::toString, separator, 0, limit);
@@ -571,7 +669,7 @@ public final class ArrayMethods {
    * <i>can</i> use it to implode any type of array. An {@link
    * IllegalArgumentException} is thrown if {@code array} is not an array.
    *
-   * @param array The array to implode
+   * @param array the array to implode
    * @param stringifier A {@code Function} that converts the array elements to
    *     strings
    * @param separator The separator string
@@ -581,7 +679,7 @@ public final class ArrayMethods {
    *     (exclusive). The specified number will be clamped to {@code array.length}
    *     (i.e. it's OK to specify a number greater than {@code array.length}). You
    *     can specify -1 as a shorthand for {@code array.length}.
-   * @return A concatenation of the elements in the array.
+   * @return a concatenation of the elements in the array.
    * @see CollectionMethods#implode(Collection, Function, String, int, int)
    */
   public static String implodeAny(Object array,
@@ -604,8 +702,8 @@ public final class ArrayMethods {
    * PHP-style implode method, concatenating the array elements using ", "
    * (comma-space) as separator.
    *
-   * @param array The collection to implode
-   * @return A concatenation of the elements in the collection.
+   * @param array the collection to implode
+   * @return a concatenation of the elements in the collection.
    * @see CollectionMethods#implode(Collection)
    */
   public static <T> String implode(T[] array) {
@@ -616,9 +714,9 @@ public final class ArrayMethods {
    * PHP-style implode method, concatenating the array elements using the specified
    * separator.
    *
-   * @param array The array to implode
+   * @param array the array to implode
    * @param separator The separator string
-   * @return A concatenation of the elements in the array.
+   * @return a concatenation of the elements in the array.
    * @see CollectionMethods#implode(Collection, String)
    */
   public static <T> String implode(T[] array, String separator) {
@@ -630,12 +728,12 @@ public final class ArrayMethods {
    * PHP-style implode method, concatenating at most {@code limit} array elements
    * using ", " (comma+space) as separator.
    *
-   * @param array The array to implode
+   * @param array the array to implode
    * @param limit The maximum number of elements to collect. The specified number
    *     will be clamped to {@code array.length} (i.e. it's OK to specify a number
    *     greater than {@code array.length}). You can specify -1 as a shorthand for
    *     {@code array.length}.
-   * @return A concatenation of the elements in the array.
+   * @return a concatenation of the elements in the array.
    * @see CollectionMethods#implode(Collection, int)
    */
   public static <T> String implode(T[] array, int limit) {
@@ -646,10 +744,10 @@ public final class ArrayMethods {
    * PHP-style implode method, concatenating at most {@code limit} array elements
    * using ", " (comma+space) as separator.
    *
-   * @param array The array to implode
+   * @param array the array to implode
    * @param stringifier A {@code Function} that converts the array elements to
    *     strings
-   * @return A concatenation of the elements in the array.
+   * @return a concatenation of the elements in the array.
    * @see CollectionMethods#implode(Collection, int)
    */
   public static <T> String implode(T[] array, Function<T, String> stringifier) {
@@ -660,13 +758,13 @@ public final class ArrayMethods {
    * PHP-style implode method, concatenating at most {@code limit} array elements
    * using the specified separator.
    *
-   * @param array The array to implode
+   * @param array the array to implode
    * @param separator The separator string
    * @param limit The maximum number of elements to collect. The specified number
    *     will be clamped to {@code array.length} (i.e. it's OK to specify a number
    *     greater than {@code array.length}). You can specify -1 as a shorthand for
    *     {@code array.length}.
-   * @return A concatenation of the elements in the array.
+   * @return a concatenation of the elements in the array.
    * @see CollectionMethods#implode(Collection, String, int)
    */
   public static <T> String implode(T[] array, String separator, int limit) {
@@ -676,7 +774,7 @@ public final class ArrayMethods {
   /**
    * PHP-style implode method.
    *
-   * @param array The array to implode
+   * @param array the array to implode
    * @param stringifier A {@code Function} that converts the array elements to
    *     strings
    * @param separator The separator string
@@ -686,7 +784,7 @@ public final class ArrayMethods {
    *     (exclusive). The specified number will be clamped to {@code array.length}
    *     (i.e. it's OK to specify a number greater than {@code array.length}). You
    *     can specify -1 as a shorthand for {@code array.length}.
-   * @return A concatenation of the elements in the array.
+   * @return a concatenation of the elements in the array.
    * @see CollectionMethods#implode(Collection, Function, String, int, int)
    */
   public static <T> String implode(T[] array,
@@ -708,8 +806,8 @@ public final class ArrayMethods {
   /**
    * Returns an {@code IntStream} of the indices of the specified array.
    *
-   * @param <T> The component type of the array
-   * @param array The array
+   * @param <T> the component type of the array
+   * @param array the array
    * @return a {@code Stream} of its indices
    */
   private static <T> IntStream streamIndices(T[] array) {
@@ -720,9 +818,9 @@ public final class ArrayMethods {
    * Simply returns the specified array, but allows for leaner code when statically
    * imported.
    *
-   * @param <T> The type of the objects to pack
+   * @param <T> the type of the objects to pack
    * @param objs The array
-   * @return The same array
+   * @return the same array
    */
   @SafeVarargs
   public static <T> T[] pack(T... objs) {
@@ -734,7 +832,7 @@ public final class ArrayMethods {
    * imported.
    *
    * @param ints The array
-   * @return The same array
+   * @return the same array
    */
   public static int[] ints(int... ints) {
     return ints;
@@ -745,7 +843,7 @@ public final class ArrayMethods {
    * imported.
    *
    * @param chars The array
-   * @return The same array
+   * @return the same array
    */
   public static char[] chars(char... chars) {
     return chars;
@@ -756,7 +854,7 @@ public final class ArrayMethods {
    * imported.
    *
    * @param doubles The array
-   * @return The same array
+   * @return the same array
    */
   public static double[] doubles(double... doubles) {
     return doubles;
@@ -767,7 +865,7 @@ public final class ArrayMethods {
    * imported.
    *
    * @param longs The array
-   * @return The same array
+   * @return the same array
    */
   public static long[] longs(long... longs) {
     return longs;
@@ -778,7 +876,7 @@ public final class ArrayMethods {
    * imported.
    *
    * @param floats The array
-   * @return The same array
+   * @return the same array
    */
   public static float[] floats(float... floats) {
     return floats;
@@ -787,10 +885,10 @@ public final class ArrayMethods {
   /**
    * Prefixes the specified object to the specified array.
    *
-   * @param <T> The type of the array elements and the object to be prefixed
-   * @param array The array to be prefixed
-   * @param obj The object to prefix
-   * @return A new array containing the specified object and the elements of the
+   * @param <T> the type of the array elements and the object to be prefixed
+   * @param array the array to be prefixed
+   * @param obj the object to prefix
+   * @return a new array containing the specified object and the elements of the
    *     specified array
    */
   public static <T> T[] prefix(T[] array, T obj) {
@@ -807,12 +905,12 @@ public final class ArrayMethods {
   /**
    * Prefixes the specified object to the specified array.
    *
-   * @param <T> The type of the array elements and the object to be prefixed
-   * @param array The array to be prefixed
-   * @param obj0 The 1st object to prefix
-   * @param obj1 The 2nd object to prefix
-   * @param moreObjs More objects to prefix
-   * @return A new array containing the specified objects and the elements of the
+   * @param <T> the type of the array elements and the object to be prefixed
+   * @param array the array to be prefixed
+   * @param obj0 the 1st object to prefix
+   * @param obj1 the 2nd object to prefix
+   * @param moreObjs more objects to prefix
+   * @return a new array containing the specified objects and the elements of the
    *     specified array
    */
   @SafeVarargs
@@ -836,7 +934,7 @@ public final class ArrayMethods {
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Integer> asList(int[] values) {
-    return Arrays.asList(asWrapperArray(values));
+    return Arrays.asList(toWrapperArray(values));
   }
 
   /**
@@ -847,7 +945,7 @@ public final class ArrayMethods {
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Float> asList(float[] values) {
-    return List.of(asWrapperArray(values));
+    return List.of(toWrapperArray(values));
   }
 
   /**
@@ -858,7 +956,7 @@ public final class ArrayMethods {
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Double> asList(double[] values) {
-    return List.of(asWrapperArray(values));
+    return List.of(toWrapperArray(values));
   }
 
   /**
@@ -869,7 +967,7 @@ public final class ArrayMethods {
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Long> asList(long[] values) {
-    return List.of(asWrapperArray(values));
+    return List.of(toWrapperArray(values));
   }
 
   /**
@@ -880,7 +978,7 @@ public final class ArrayMethods {
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Short> asList(short[] values) {
-    return List.of(asWrapperArray(values));
+    return List.of(toWrapperArray(values));
   }
 
   /**
@@ -891,7 +989,7 @@ public final class ArrayMethods {
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Byte> asList(byte[] values) {
-    return List.of(asWrapperArray(values));
+    return List.of(toWrapperArray(values));
   }
 
   /**
@@ -902,235 +1000,141 @@ public final class ArrayMethods {
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Character> asList(char[] values) {
-    return List.of(asWrapperArray(values));
+    return List.of(toWrapperArray(values));
   }
 
   /**
-   * Converts a primitive {@code boolean} array into a
-   * <code>{@code List&lt;Boolean&gt;}</code>.
+   * Converts a primitive {@code boolean} array into a {@code List<Boolean>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Boolean> asList(boolean[] values) {
-    return List.of(asWrapperArray(values));
+    return List.of(toWrapperArray(values));
   }
 
   /**
-   * Converts the specified {@code int} array into an {@link
-   * ArrayCloakList<Integer>}.
+   * Converts an {@code Integer} array to an {@code int} array.
    *
-   * @param values the array elements.
-   * @return a {@code List} containing the same elements in the same order
-   */
-  public static List<Integer> cloak(int[] values) {
-    return new ArrayCloakList<>(asWrapperArray(values));
-  }
-
-  /**
-   * Converts the specified {@code double} array into an {@link
-   * ArrayCloakList<Double>}.
-   *
-   * @param values the array elements.
-   * @return a {@code List} containing the same elements in the same order
-   */
-  public static List<Double> cloak(double[] values) {
-    return new ArrayCloakList<>(asWrapperArray(values));
-  }
-
-  /**
-   * Converts the specified {@code long} array into an {@link ArrayCloakList<Long>}.
-   *
-   * @param values the array elements.
-   * @return a {@code List} containing the same elements in the same order
-   */
-  public static List<Long> cloak(long[] values) {
-    return new ArrayCloakList<>(asWrapperArray(values));
-  }
-
-  /**
-   * Converts the specified {@code float} array into an {@link
-   * ArrayCloakList<Float>}.
-   *
-   * @param values the array elements.
-   * @return a {@code List} containing the same elements in the same order
-   */
-  public static List<Float> cloak(float[] values) {
-    return new ArrayCloakList<>(asWrapperArray(values));
-  }
-
-  /**
-   * Converts the specified {@code short} array into an {@link
-   * ArrayCloakList<Short>}.
-   *
-   * @param values the array elements.
-   * @return a {@code List} containing the same elements in the same order
-   */
-  public static List<Short> cloak(short[] values) {
-    return new ArrayCloakList<>(asWrapperArray(values));
-  }
-
-  /**
-   * Converts the specified {@code byte} array into an {@link ArrayCloakList<Byte>}.
-   *
-   * @param values the array elements.
-   * @return a {@code List} containing the same elements in the same order
-   */
-  public static List<Byte> cloak(byte[] values) {
-    return new ArrayCloakList<>(asWrapperArray(values));
-  }
-
-  /**
-   * Converts the specified {@code char} array into an {@link
-   * ArrayCloakList<Character>}.
-   *
-   * @param values the array elements.
-   * @return a {@code List} containing the same elements in the same order
-   */
-  public static List<Character> cloak(char[] values) {
-    return new ArrayCloakList<>(asWrapperArray(values));
-  }
-
-  /**
-   * Converts the specified {@code char} array into an {@link
-   * ArrayCloakList<Character>}.
-   *
-   * @param values the array elements.
-   * @return a {@code List} containing the same elements in the same order
-   */
-  public static List<Boolean> cloak(boolean[] values) {
-    return new ArrayCloakList<>(asWrapperArray(values));
-  }
-
-  private static final String ERR_NO_NULLS = "Array must not contain null values";
-
-  /**
-   * Converts the specified {@code Integer} array to an {@code int} array,
-   * substituting the specified default value for {@code null} values in the source
-   * array.
-   *
-   * @param values The {@code Integer} array
-   * @param dfault The {@code int} value to use for {@code null} values in the
-   *     {@code Integer} array
-   * @return The {@code int} array
+   * @param values the {@code Integer} array
+   * @param dfault The {@code int} value to convert {@code null} elements in the
+   *     source array to
+   * @return the {@code int} array
    */
   public static int[] asPrimitiveArray(Integer[] values, int dfault) {
     Check.notNull(values);
-    int[] arr = new int[values.length];
-    IntStream.range(0, values.length)
-        .forEach(i -> arr[i] = ifNull(values[i], dfault));
-    return arr;
+    return Arrays.stream(values).mapToInt(i -> ifNull(i, dfault)).toArray();
   }
 
   /**
-   * Converts the specified {@code Integer} array to an {@code int} array. The {@code
-   * Integer} array must not contain null values.
+   * Converts an {@code Integer} array to an {@code int} array. {@code null} elements
+   * in the source array are converted to 0 (zero).
    *
-   * @param values The {@code Integer} array
-   * @return The {@code int} array
+   * @param values the {@code Integer} array
+   * @return the {@code int} array
    */
   public static int[] asPrimitiveArray(Integer[] values) {
-    Check.notNull(values);
-    int[] arr = new int[values.length];
-    for (int i = 0; i < values.length; ++i) {
-      arr[i] = Check.that(values[i]).is(notNull(), ERR_NO_NULLS).ok();
-    }
-    return arr;
+    return asPrimitiveArray(values, 0);
   }
 
   /**
-   * Converts the specified {@code int} array to an {@code Integer} array.
+   * Converts an {@code int} array to an {@code Integer} array.
    *
-   * @param values The {@code int} array
-   * @return The {@code Integer} array
+   * @param values the {@code int} array
+   * @return the {@code Integer} array
    */
-  public static Integer[] asWrapperArray(int[] values) {
+  public static Integer[] toWrapperArray(int[] values) {
     return Check.notNull(values).ok(Arrays::stream).boxed().toArray(Integer[]::new);
   }
 
   /**
-   * Converts the specified {@code double} array to a {@code Double} array.
+   * Converts a {@code double} array to a {@code Double} array.
    *
-   * @param values The {@code double} array
-   * @return The {@code Double} array
+   * @param values the {@code double} array
+   * @return the {@code Double} array
    */
-  public static Double[] asWrapperArray(double[] values) {
+  public static Double[] toWrapperArray(double[] values) {
     return Check.notNull(values).ok(Arrays::stream).boxed().toArray(Double[]::new);
   }
 
   /**
-   * Converts the specified {@code long} array to a {@code Long} array.
+   * Converts a {@code long} array to a {@code Long} array.
    *
-   * @param values The {@code long} array
-   * @return The {@code Long} array
+   * @param values the {@code long} array
+   * @return the {@code Long} array
    */
-  public static Long[] asWrapperArray(long[] values) {
+  public static Long[] toWrapperArray(long[] values) {
     return Check.notNull(values).ok(Arrays::stream).boxed().toArray(Long[]::new);
   }
 
   /**
-   * Converts the specified {@code float} array to a {@code Float} array.
+   * Converts a {@code float} array to a {@code Float} array.
    *
-   * @param values The {@code float} array
-   * @return The {@code Float} array
+   * @param values the {@code float} array
+   * @return the {@code Float} array
    */
-  public static Float[] asWrapperArray(float[] values) {
-    Check.notNull(values);
-    return IntStream.range(0, values.length)
-        .mapToObj(i -> values[i])
-        .toArray(Float[]::new);
+  public static Float[] toWrapperArray(float[] values) {
+    var res = new Float[Check.notNull(values).ok().length];
+    for (int i = 0; i < values.length; ++i) {
+      res[i] = values[i];
+    }
+    return res;
   }
 
   /**
-   * Converts the specified {@code short} array to a {@code Short} array.
+   * Converts a {@code short} array to a {@code Short} array.
    *
-   * @param values The {@code short} array
-   * @return The {@code Short} array
+   * @param values the {@code short} array
+   * @return the {@code Short} array
    */
-  public static Short[] asWrapperArray(short[] values) {
-    Check.notNull(values);
-    return IntStream.range(0, values.length)
-        .mapToObj(i -> values[i])
-        .toArray(Short[]::new);
+  public static Short[] toWrapperArray(short[] values) {
+    var res = new Short[Check.notNull(values).ok().length];
+    for (int i = 0; i < values.length; ++i) {
+      res[i] = values[i];
+    }
+    return res;
   }
 
   /**
-   * Converts the specified {@code byte} array to a {@code Byte} array.
+   * Converts a {@code byte} array to a {@code Byte} array.
    *
-   * @param values The {@code byte} array
-   * @return The {@code Byte} array
+   * @param values the {@code byte} array
+   * @return the {@code Byte} array
    */
-  public static Byte[] asWrapperArray(byte[] values) {
-    Check.notNull(values);
-    return IntStream.range(0, values.length)
-        .mapToObj(i -> values[i])
-        .toArray(Byte[]::new);
+  public static Byte[] toWrapperArray(byte[] values) {
+    var res = new Byte[Check.notNull(values).ok().length];
+    for (int i = 0; i < values.length; ++i) {
+      res[i] = values[i];
+    }
+    return res;
   }
 
   /**
-   * Converts the specified {@code char} array to a {@code Character} array.
+   * Converts a {@code char} array to a {@code Character} array.
    *
-   * @param values The {@code char} array
-   * @return The {@code Character} array
+   * @param values the {@code char} array
+   * @return the {@code Character} array
    */
-  public static Character[] asWrapperArray(char[] values) {
-    Check.notNull(values);
-    return IntStream.range(0, values.length)
-        .mapToObj(i -> values[i])
-        .toArray(Character[]::new);
+  public static Character[] toWrapperArray(char[] values) {
+    var res = new Character[Check.notNull(values).ok().length];
+    for (int i = 0; i < values.length; ++i) {
+      res[i] = values[i];
+    }
+    return res;
   }
 
   /**
-   * Converts the specified {@code boolean} array to a {@code Boolean} array.
+   * Converts a {@code boolean} array to a {@code Boolean} array.
    *
-   * @param values The {@code boolean} array
-   * @return The {@code Boolean} array
+   * @param values the {@code boolean} array
+   * @return the {@code Boolean} array
    */
-  public static Boolean[] asWrapperArray(boolean[] values) {
-    Check.notNull(values);
-    return IntStream.range(0, values.length)
-        .mapToObj(i -> values[i])
-        .toArray(Boolean[]::new);
+  public static Boolean[] toWrapperArray(boolean[] values) {
+    var res = new Boolean[Check.notNull(values).ok().length];
+    for (int i = 0; i < values.length; ++i) {
+      res[i] = values[i];
+    }
+    return res;
   }
 
 }

@@ -2,17 +2,20 @@ package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.check.CommonChecks;
+import nl.naturalis.common.function.IntRelation;
+import nl.naturalis.common.function.Relation;
 import nl.naturalis.common.function.ThrowingSupplier;
 
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.toSet;
 import static nl.naturalis.common.ArrayMethods.isElementOf;
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
 import static nl.naturalis.common.check.CommonChecks.notNull;
-import static nl.naturalis.common.check.CommonChecks.sameAs;
 
 /**
  * General methods applicable to objects of any type.
@@ -41,23 +44,6 @@ import static nl.naturalis.common.check.CommonChecks.sameAs;
 public class ObjectMethods {
 
   private static final String ERR_NULL_OPTIONAL = "Optional must not be null";
-
-  private static final Map<Class<?>, Object> PRIMITIVE_DEFAULTS = Map.of(int.class,
-      0,
-      boolean.class,
-      Boolean.FALSE,
-      double.class,
-      0D,
-      long.class,
-      0L,
-      float.class,
-      0F,
-      short.class,
-      (short) 0,
-      byte.class,
-      (byte) 0,
-      char.class,
-      '\0');
 
   private ObjectMethods() {
     throw new UnsupportedOperationException();
@@ -512,7 +498,8 @@ public class ObjectMethods {
    */
   public static <T, E extends Exception> T ifNull(T value,
       ThrowingSupplier<? extends T, E> supplier) throws E {
-    return value == null ? Check.notNull(supplier, "supplier").ok().get() : value;
+    Check.notNull(supplier, "supplier");
+    return value == null ? supplier.get() : value;
   }
 
   /**
@@ -555,6 +542,7 @@ public class ObjectMethods {
    */
   @SuppressWarnings("unchecked")
   public static <T> T nullUnless(T value, T... allowedValues) {
+    Check.notNull(allowedValues, "allowedValue");
     return isElementOf(value, allowedValues) ? value : null;
   }
 
@@ -569,6 +557,7 @@ public class ObjectMethods {
    */
   @SuppressWarnings("unchecked")
   public static <T> T nullIf(T value, T... forbiddenValues) {
+    Check.notNull(forbiddenValues, "forbiddenValues");
     return isElementOf(value, forbiddenValues) ? null : value;
   }
 
@@ -627,7 +616,7 @@ public class ObjectMethods {
 
   /**
    * Returns the result of passing the specified argument to the specified {@code
-   * Funtion} if the argument is not {@link #isEmpty(Object) empty}, else a default
+   * Function} if the argument is not {@link #isEmpty(Object) empty}, else a default
    * value.
    *
    * @param <T> The type of the value to transform
@@ -642,18 +631,130 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns the primitive default for primitive types; {@code null} for any other
-   * type.
+   * Replaces a value with another value if it satisfies a certain criterion. Note
+   * that the {@link CommonChecks} class defines various predicates that might be of
+   * use.
    *
-   * @param <T> The type of the class
-   * @param type The class for which to retrieve the default value
-   * @return The default value
+   * @param value the value to test and possibly return
+   * @param criterion the criterion determining which value to return
+   * @param replacement the replacement value
+   * @param <T> the type of the values
+   * @return the value determined by the criterion
    */
-  @SuppressWarnings("unchecked")
-  public static <T> T getTypeDefault(Class<T> type) {
-    return Check.notNull(type, "type").isNot(sameAs(), void.class).ok().isPrimitive()
-        ? (T) PRIMITIVE_DEFAULTS.get(type)
-        : null;
+  public static <T> T replaceIf(T value,
+      Predicate<? super T> criterion,
+      T replacement) {
+    return criterion.test(value) ? replacement : value;
+  }
+
+  /**
+   * Replaces a value with another value if it has a certain relation <i>to</i> that
+   * value. Note that the {@link CommonChecks} class defines various relations that
+   * might be of use. This method can be used to apply some sort of clamping. For
+   * example:
+   *
+   * <blockquote><pre>{@code
+   * // import static nl.naturalis.common.check.CommonChecks.GT;
+   *
+   * // Prevent dates from lying in the future:
+   * LocalDate myLocalDate = replaceIf(someLocalDate, GT(), LocalDate.now());
+   * }</pre></blockquote>
+   *
+   * @param value the value to test and possibly return
+   * @param relation the relation that needs to exist between the value and the
+   *     replacement value in order for the replacement value to be returned
+   * @param replacement the replacement value
+   * @param <T> the type of the values
+   * @return the value determined by the relation by the two values
+   */
+  public static <T> T clamp(T value, Relation<T, T> relation, T replacement) {
+    return relation.exists(value, replacement) ? replacement : value;
+  }
+
+  /**
+   * Replaces a value with another value if it has a certain relation to yet another
+   * value. Note that the {@link CommonChecks} class defines various relations that
+   * might be of use. For example:
+   *
+   * <blockquote><pre>{@code
+   * // import static nl.naturalis.common.check.CommonChecks.EQ;
+   *
+   * // Replace green with blue:
+   * Color color = replaceIf(someColor, EQ(), Color.GREEN, Color.BLUE);
+   * }</pre></blockquote>
+   *
+   * @param value the value to test and possibly return
+   * @param relation the relation that needs to exist between the value and the
+   *     compare-to value in order for the replacement value to be returned
+   * @param compareTo the compare-to value
+   * @param replacement the value returned if the specified relation is found to
+   *     exist between the value and the compare-to value
+   * @param <T> the type of the values
+   * @return the value determined by the relation by the two values
+   */
+  public static <T> T replaceIf(T value,
+      Relation<T, T> relation,
+      T compareTo,
+      T replacement) {
+    return relation.exists(value, compareTo) ? replacement : value;
+  }
+
+  /**
+   * Replaces a value with another value if it satisfies a certain criterion. Note
+   * that the {@link CommonChecks} class defines various predicates that might be of
+   * use.
+   *
+   * @param value the value to test and possibly return
+   * @param criterion the criterion determining which value to return
+   * @param replacement the replacement value
+   * @return the value determined by the criterion
+   */
+  public static int replaceIf(int value, IntPredicate criterion, int replacement) {
+    return criterion.test(value) ? replacement : value;
+  }
+
+  /**
+   * Retains a value if it has a certain relation to another value, else replaces it
+   * <i>with</i> that value. Note that the {@link CommonChecks} class defines
+   * various relations that might be of use. This method can be used to apply some
+   * sort of clamping. For example:
+   *
+   * <blockquote><pre>{@code
+   * // import static nl.naturalis.common.check.CommonChecks.gt;
+   *
+   * // Prevent dates from lying in the future:
+   * int speed = replaceIf(someSpeed, gt(), 65);
+   * }</pre></blockquote>
+   *
+   * @param value the value to test and possibly return
+   * @param relation the relation that needs to exist between the value and the
+   *     replacement value in order for the replacement value to be returned
+   * @param replacement
+   * @param replacement the replacement value
+   * @return the value determined by the relation by the two values
+   */
+  public static int clamp(int value, IntRelation relation, int replacement) {
+    return relation.exists(value, replacement) ? replacement : value;
+  }
+
+  /**
+   * Replaces a value with another value if it has a certain relation to yet another
+   * value. Note that the {@link CommonChecks} class defines various relations that
+   * might be of use.
+   *
+   * @param value the value to test and possibly return
+   * @param relation the relation that needs to exist between the value and the
+   *     compare-to value in order for the replacement value to be returned
+   * @param compareTo the compare-to value
+   * @param replacement the value returned if the specified relation is found to
+   *     exist between the value and the compare-to value
+   * @return the value determined by the relation by the two values
+   */
+  public static int replaceIf(int value,
+      IntRelation relation,
+      int compareTo,
+      int replacement) {
+    return relation.exists(value, compareTo) ? replacement : value;
   }
 
   /**

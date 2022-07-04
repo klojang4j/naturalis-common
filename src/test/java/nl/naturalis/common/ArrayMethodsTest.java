@@ -7,6 +7,7 @@ import java.util.OptionalInt;
 
 import static nl.naturalis.common.ArrayMethods.*;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
 
 public class ArrayMethodsTest {
 
@@ -143,16 +144,6 @@ public class ArrayMethodsTest {
   }
 
   @Test
-  public void isOneOf00() {
-    assertTrue(isOneOf("a", null, "a", "b", "c", "d"));
-    assertTrue(isOneOf(null, null, "a", "b", "c", "d"));
-    assertTrue(isOneOf("c", null, "a", "b", "c", "d"));
-    assertTrue(isOneOf("", null, ""));
-    assertFalse(isOneOf("FOO", null, "a", "b", "c", "d"));
-    assertFalse(isOneOf("FOO"));
-  }
-
-  @Test
   public void prefix01() {
     String[] a = {"a", "b", "c"};
     String[] expected = {"1", "a", "b", "c"};
@@ -231,10 +222,10 @@ public class ArrayMethodsTest {
     assertArrayEquals(expected, asPrimitiveArray(ints));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void asPrimitiveArray01() {
     Integer[] ints = {1, 2, null, 4, 5};
-    asPrimitiveArray(ints);
+    assertArrayEquals(ints(1, 2, 0, 4, 5), asPrimitiveArray(ints));
   }
 
   @Test
@@ -248,29 +239,29 @@ public class ArrayMethodsTest {
   public void asWrapperArray00() {
     assertArrayEquals(
         new Integer[] {1, 2, 3, 4, 5},
-        asWrapperArray(new int[] {1, 2, 3, 4, 5}));
+        toWrapperArray(new int[] {1, 2, 3, 4, 5}));
     assertArrayEquals(
         new Long[] {1L, 2L, 3L, 4L, 5L},
-        asWrapperArray(new long[] {1, 2, 3, 4, 5}));
+        toWrapperArray(new long[] {1, 2, 3, 4, 5}));
     assertArrayEquals(
         new Double[] {1D, 2D, 3D, 4D, 5D},
-        asWrapperArray(new double[] {1, 2, 3, 4, 5}));
+        toWrapperArray(new double[] {1, 2, 3, 4, 5}));
     assertArrayEquals(
         new Float[] {1F, 2F, 3F, 4F, 5F},
-        asWrapperArray(new float[] {1, 2, 3, 4, 5}));
+        toWrapperArray(new float[] {1, 2, 3, 4, 5}));
     assertArrayEquals(
         new Short[] {1, 2, 3, 4, 5},
-        asWrapperArray(new short[] {1, 2, 3, 4, 5}));
+        toWrapperArray(new short[] {1, 2, 3, 4, 5}));
     assertArrayEquals(
         new Byte[] {1, 2, 3, 4, 5},
-        asWrapperArray(new byte[] {1, 2, 3, 4, 5}));
+        toWrapperArray(new byte[] {1, 2, 3, 4, 5}));
     assertArrayEquals(
         new Character[] {1, 2, 3, 4, 5},
-        asWrapperArray(new char[] {1, 2, 3, 4, 5}));
+        toWrapperArray(new char[] {1, 2, 3, 4, 5}));
     assertArrayEquals(
         new Boolean[] {Boolean.FALSE, Boolean.FALSE, Boolean.TRUE},
-        asWrapperArray(new boolean[] {false, false, true}));
-    assertArrayEquals(new Integer[0], asWrapperArray(new int[0]));
+        toWrapperArray(new boolean[] {false, false, true}));
+    assertArrayEquals(new Integer[0], toWrapperArray(new int[0]));
   }
 
   @Test
@@ -294,22 +285,22 @@ public class ArrayMethodsTest {
     assertNotEquals(List.of(1, 2, 3), new long[] {1, 2, 3});
   }
 
-  @Test
-  public void cloak00() {
-    assertEquals(List.of(1, 2, 3), cloak(new int[] {1, 2, 3}));
-    assertEquals(List.of(1L, 2L, 3L), cloak(new long[] {1, 2, 3}));
-    assertEquals(List.of(1D, 2D, 3D), cloak(new double[] {1, 2, 3}));
-    assertEquals(List.of(1F, 2F, 3F), cloak(new float[] {1, 2, 3}));
-    assertEquals(
-        List.of((short) 1, (short) 2, (short) 3),
-        cloak(new short[] {1, 2, 3}));
-    assertEquals(List.of((byte) 1, (byte) 2, (byte) 3), cloak(new byte[] {1, 2, 3}));
-    assertEquals(List.of((char) 1, (char) 2, (char) 3), cloak(new char[] {1, 2, 3}));
-    assertEquals(
-        List.of(Boolean.FALSE, Boolean.TRUE),
-        cloak(new boolean[] {false, true}));
-    assertNotEquals(List.of(1, 2, 3), new long[] {1, 2, 3});
-  }
+  //  @Test
+  //  public void cloak00() {
+  //    assertEquals(List.of(1, 2, 3), cloak(new int[] {1, 2, 3}));
+  //    assertEquals(List.of(1L, 2L, 3L), cloak(new long[] {1, 2, 3}));
+  //    assertEquals(List.of(1D, 2D, 3D), cloak(new double[] {1, 2, 3}));
+  //    assertEquals(List.of(1F, 2F, 3F), cloak(new float[] {1, 2, 3}));
+  //    assertEquals(
+  //        List.of((short) 1, (short) 2, (short) 3),
+  //        cloak(new short[] {1, 2, 3}));
+  //    assertEquals(List.of((byte) 1, (byte) 2, (byte) 3), cloak(new byte[] {1, 2, 3}));
+  //    assertEquals(List.of((char) 1, (char) 2, (char) 3), cloak(new char[] {1, 2, 3}));
+  //    assertEquals(
+  //        List.of(Boolean.FALSE, Boolean.TRUE),
+  //        cloak(new boolean[] {false, true}));
+  //    assertNotEquals(List.of(1, 2, 3), new long[] {1, 2, 3});
+  //  }
 
   @Test
   public void packAndFriends00() {
@@ -325,6 +316,84 @@ public class ArrayMethodsTest {
     assertArrayEquals(new String[0], pack());
     assertArrayEquals(new Integer[0], pack());
     assertNull(pack(null)); // Hm, do we like this?
+  }
+
+  public void reverse00() {
+    int[] array = ints();
+    reverse(array);
+    assertArrayEquals(EMPTY_INT_ARRAY, array);
+    array = ints(1);
+    reverse(array);
+    assertArrayEquals(ints(1), array);
+    array = ints(1, 2);
+    reverse(array);
+    assertArrayEquals(ints(2, 1), array);
+    array = ints(1, 2, 3);
+    reverse(array);
+    assertArrayEquals(ints(3, 2, 1), array);
+    array = ints(1, 2, 3, 4);
+    reverse(array);
+    assertArrayEquals(ints(4, 3, 2, 1), array);
+    array = ints(1, 2, 3, 4, 5);
+    reverse(array);
+    assertArrayEquals(ints(5, 4, 3, 2, 1), array);
+    array = ints(1, 2, 3, 4, 5, 6);
+    reverse(array);
+    assertArrayEquals(ints(6, 5, 4, 3, 2, 1), array);
+  }
+
+  public void reverse01() {
+    Integer[] array = pack();
+    reverse(array);
+    assertArrayEquals(EMPTY_OBJECT_ARRAY, array);
+    array = pack(1);
+    reverse(array);
+    assertArrayEquals(pack(1), array);
+    array = pack(1, 2);
+    reverse(array);
+    assertArrayEquals(pack(2, 1), array);
+    array = pack(1, 2, 3);
+    reverse(array);
+    assertArrayEquals(pack(3, 2, 1), array);
+    array = pack(1, 2, 3, 4);
+    reverse(array);
+    assertArrayEquals(pack(4, 3, 2, 1), array);
+    array = pack(1, 2, 3, 4, 5);
+    reverse(array);
+    assertArrayEquals(pack(5, 4, 3, 2, 1), array);
+    array = pack(1, 2, 3, 4, 5, 6);
+    reverse(array);
+    assertArrayEquals(pack(6, 5, 4, 3, 2, 1), array);
+  }
+
+  public void reverse02() {
+    int[] array = ints(0, 1, 2, 3, 4, 5, 6);
+    reverse(array, 1, 7);
+    assertArrayEquals(ints(0, 6, 5, 4, 3, 2, 1), array);
+    array = ints(0, 1, 2, 3, 4, 5, 6);
+    reverse(array, 1, 6);
+    assertArrayEquals(ints(0, 5, 4, 3, 2, 1, 6), array);
+    array = ints(0, 1, 2, 3, 4, 5, 6);
+    reverse(array, 1, 2);
+    assertArrayEquals(ints(0, 1, 2, 3, 4, 5, 6), array);
+    array = ints(0, 1, 2, 3, 4, 5, 6);
+    reverse(array, 1, 3);
+    assertArrayEquals(ints(0, 2, 1, 3, 4, 5, 6), array);
+  }
+
+  public void reverse03() {
+    Integer[] array = pack(0, 1, 2, 3, 4, 5, 6);
+    reverse(array, 1, 7);
+    assertArrayEquals(pack(0, 6, 5, 4, 3, 2, 1), array);
+    array = pack(0, 1, 2, 3, 4, 5, 6);
+    reverse(array, 1, 6);
+    assertArrayEquals(pack(0, 5, 4, 3, 2, 1, 6), array);
+    array = pack(0, 1, 2, 3, 4, 5, 6);
+    reverse(array, 1, 2);
+    assertArrayEquals(pack(0, 1, 2, 3, 4, 5, 6), array);
+    array = pack(0, 1, 2, 3, 4, 5, 6);
+    reverse(array, 1, 3);
+    assertArrayEquals(pack(0, 2, 1, 3, 4, 5, 6), array);
   }
 
 }

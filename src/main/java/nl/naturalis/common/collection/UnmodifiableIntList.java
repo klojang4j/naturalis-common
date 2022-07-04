@@ -11,7 +11,7 @@ import java.util.OptionalInt;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
-import static nl.naturalis.common.ArrayMethods.asWrapperArray;
+import static nl.naturalis.common.ArrayMethods.toWrapperArray;
 import static nl.naturalis.common.ArrayMethods.implodeInts;
 import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonChecks.lt;
@@ -89,32 +89,32 @@ final class UnmodifiableIntList implements IntList {
 
   @Override
   public boolean removeAll(IntList list) {
-    return false;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public boolean removeAll(int... values) {
-    return false;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public boolean removeAll(Collection<?> c) {
-    return false;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public boolean retainAll(IntList list) {
-    return false;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public boolean retainAll(int... values) {
-    return false;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public boolean retainAll(Collection<?> c) {
-    return false;
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -151,6 +151,16 @@ final class UnmodifiableIntList implements IntList {
   }
 
   @Override
+  public void sort() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void sortDescending() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public int[] toArray() {
     int[] b = new int[buf.length];
     System.arraycopy(buf, 0, b, 0, buf.length);
@@ -158,7 +168,7 @@ final class UnmodifiableIntList implements IntList {
   }
 
   public List<Integer> toGenericList() {
-    return List.of(asWrapperArray(buf));
+    return List.of(ArrayMethods.toWrapperArray(buf));
   }
 
   @Override
@@ -183,13 +193,10 @@ final class UnmodifiableIntList implements IntList {
   public boolean equals(Object obj) {
     if (this == obj) {
       return true;
-    } else if (obj == null) {
-      return false;
     } else if (obj instanceof UnmodifiableIntList uil) {
-      return size() == uil.size() && Arrays.equals(buf, uil.buf);
+      return Arrays.equals(buf, uil.buf);
     } else if (obj instanceof IntArrayList ial) {
-      return size() == ial.size()
-          && Arrays.equals(buf, 0, size(), ial.buf, 0, size());
+      return Arrays.equals(buf, 0, size(), ial.buf, 0, size());
     }
     return false;
   }
@@ -199,10 +206,7 @@ final class UnmodifiableIntList implements IntList {
 
   public int hashCode() {
     if (hash == 0) {
-      hash = buf[0];
-      for (int i = 1; i < buf.length; ++i) {
-        hash = hash * 31 + buf[i];
-      }
+      Arrays.hashCode(buf);
     }
     return hash;
   }

@@ -3,7 +3,6 @@ package nl.naturalis.common;
 import nl.naturalis.common.collection.WiredList;
 import org.junit.Test;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,6 +11,7 @@ import static java.util.Collections.emptyList;
 import static nl.naturalis.common.ArrayMethods.*;
 import static nl.naturalis.common.CollectionMethods.asList;
 import static nl.naturalis.common.ObjectMethods.*;
+import static nl.naturalis.common.check.CommonChecks.*;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertNull;
 
@@ -344,12 +344,25 @@ public class ObjectMethodsTest {
   }
 
   @Test
-  public void getTypeDefaultIf00() {
-    assertNull(getTypeDefault(Class.class));
-    assertNull(getTypeDefault(Object.class));
-    assertNull(getTypeDefault(Cloneable.class));
-    assertEquals((short) 0, (short) getTypeDefault(short.class));
-    assertEquals(0F, (float) getTypeDefault(float.class), 0F);
+  public void replaceIf00() {
+    assertEquals("42", replaceIf("42", empty(), "43"));
+    assertEquals("43", replaceIf("", empty(), "43"));
+    assertEquals("42", clamp("42", GT(), "43"));
+    assertEquals("43", clamp("43", GT(), "43"));
+    assertEquals("43", clamp("44", GT(), "43"));
+    assertEquals("44", replaceIf("44", LT(), "43", "50"));
+    assertEquals("50", replaceIf("40", LT(), "43", "50"));
+  }
+
+  @Test
+  public void replaceIf02() {
+    assertEquals(42, replaceIf(42, odd(), -1));
+    assertEquals(-1, replaceIf(42, even(), -1));
+    assertEquals(42, ObjectMethods.clamp(42, gt(), 43));
+    assertEquals(43, ObjectMethods.clamp(43, gt(), 43));
+    assertEquals(43, ObjectMethods.clamp(44, gt(), 43));
+    assertEquals(44, replaceIf(44, lt(), 43, 50));
+    assertEquals(50, replaceIf(40, lt(), 43, 50));
   }
 
 }

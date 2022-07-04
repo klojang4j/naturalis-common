@@ -33,21 +33,21 @@ public class CollectionMethods {
   @SuppressWarnings({"rawtypes", "unchecked"})
   private static final TypeHashMap<Function> LISTIFIERS =
       TypeHashMap.build(Function.class)
-      .autobox(false)
-      .autoExpand(false)
-      .add(List.class, List.class::cast)
-      .add(Collection.class, o -> new ArrayList<>((Collection) o))
-      .add(int[].class, o -> ArrayMethods.asList((int[]) o))
-      .add(double[].class, o -> ArrayMethods.asList((double[]) o))
-      .add(long[].class, o -> ArrayMethods.asList((long[]) o))
-      .add(byte[].class, o -> ArrayMethods.asList((byte[]) o))
-      .add(char[].class, o -> ArrayMethods.asList((char[]) o))
-      .add(float[].class, o -> ArrayMethods.asList((float[]) o))
-      .add(short[].class, o -> ArrayMethods.asList((short[]) o))
-      .add(boolean[].class, o -> ArrayMethods.asList((boolean[]) o))
-      .add(Object[].class, o -> Arrays.asList((Object[]) o))
-      .add(Object.class, Arrays::asList)
-      .freeze();
+          .autobox(false)
+          .autoExpand(false)
+          .add(List.class, List.class::cast)
+          .add(Collection.class, o -> new ArrayList<>((Collection) o))
+          .add(int[].class, o -> ArrayMethods.asList((int[]) o))
+          .add(double[].class, o -> ArrayMethods.asList((double[]) o))
+          .add(long[].class, o -> ArrayMethods.asList((long[]) o))
+          .add(byte[].class, o -> ArrayMethods.asList((byte[]) o))
+          .add(char[].class, o -> ArrayMethods.asList((char[]) o))
+          .add(float[].class, o -> ArrayMethods.asList((float[]) o))
+          .add(short[].class, o -> ArrayMethods.asList((short[]) o))
+          .add(boolean[].class, o -> ArrayMethods.asList((boolean[]) o))
+          .add(Object[].class, o -> Arrays.asList((Object[]) o))
+          .add(Object.class, Arrays::asList)
+          .freeze();
 
   /**
    * Converts the specified object to a {@code List}. If the value already is a
@@ -60,7 +60,7 @@ public class CollectionMethods {
    *
    * @param val The value to convert
    * @return The value converted to a {@code List}
-   * @see ArrayMethods#asWrapperArray(int[])
+   * @see ArrayMethods#toWrapperArray(int[])
    * @see ArrayMethods#asList(int[])
    */
   @SuppressWarnings({"unchecked"})

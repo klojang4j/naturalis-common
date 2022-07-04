@@ -2,6 +2,9 @@ package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
 
+import java.util.AbstractMap;
+import java.util.Map;
+
 /**
  * Generic 2-tuple of non-null objects.
  *
@@ -34,6 +37,15 @@ public record Tuple2<T, U>(T first, U second) {
   public Tuple2(T first, U second) {
     this.first = Check.notNull(first, "first component").ok();
     this.second = Check.notNull(second, "second component").ok();
+  }
+
+  /**
+   * Converts this instance to an immutable {@code Map} entry.
+   *
+   * @return an immutable {@code Map} entry
+   */
+  public Map.Entry<T, U> toEntry() {
+    return new AbstractMap.SimpleImmutableEntry<>(first, second);
   }
 
 }

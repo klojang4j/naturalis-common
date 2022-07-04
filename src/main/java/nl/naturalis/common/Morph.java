@@ -8,7 +8,7 @@ import java.util.Collection;
 
 import static nl.naturalis.common.ArrayMethods.pack;
 import static nl.naturalis.common.ClassMethods.isAutoUnboxedAs;
-import static nl.naturalis.common.ObjectMethods.getTypeDefault;
+import static nl.naturalis.common.ClassMethods.getTypeDefault;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**

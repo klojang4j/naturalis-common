@@ -9,6 +9,7 @@ import java.util.List;
 import static nl.naturalis.common.ClassMethods.isSubtype;
 import static nl.naturalis.common.ClassMethods.isSupertype;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
+import static nl.naturalis.common.collection.DuplicateException.Category.KEY;
 
 /**
  * A builder class for {@link LinkedTypeGraph} instances.
@@ -58,7 +59,7 @@ public final class LinkedTypeGraphBuilder<V> {
 
     void addSubclass(WritableTypeNode node) {
       if (node.type == this.type) {
-        throw new DuplicateKeyException(node.type);
+        throw new DuplicateException(KEY, node.type);
       }
       Iterator<WritableTypeNode> itr = subclasses.wiredIterator();
       while (itr.hasNext()) {
@@ -84,7 +85,7 @@ public final class LinkedTypeGraphBuilder<V> {
 
     void addSubinterface(WritableTypeNode node) {
       if (node.type == this.type) {
-        throw new DuplicateKeyException(node.type);
+        throw new DuplicateException(KEY, node.type);
       }
       WiredIterator<WritableTypeNode> itr = subinterfaces.wiredIterator();
       while (itr.hasNext()) {
@@ -143,7 +144,7 @@ public final class LinkedTypeGraphBuilder<V> {
         root.value = value;
         ++size;
       } else {
-        throw new DuplicateKeyException(Object.class);
+        throw new DuplicateException(KEY, Object.class);
       }
     } else {
       root.addChild(new WritableTypeNode(type, value));

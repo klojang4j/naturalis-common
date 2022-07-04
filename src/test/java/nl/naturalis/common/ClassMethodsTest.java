@@ -6,9 +6,8 @@ import java.util.function.Function;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertNull;
 
 public class ClassMethodsTest {
 
@@ -35,12 +34,14 @@ public class ClassMethodsTest {
 
   @Test
   public void getArrayTypeName01() {
-    assertEquals("java.lang.String[][][]", ClassMethods.arrayClassName(new String[0][0][0]));
+    assertEquals("java.lang.String[][][]",
+        ClassMethods.arrayClassName(new String[0][0][0]));
   }
 
   @Test
   public void getArrayTypeSimpleName01() {
-    assertEquals("String[][][]", ClassMethods.arrayClassSimpleName(new String[0][0][0]));
+    assertEquals("String[][][]",
+        ClassMethods.arrayClassSimpleName(new String[0][0][0]));
   }
 
   @Test // Interesting: Enum.class returns false for Class::isEnum
@@ -51,7 +52,13 @@ public class ClassMethodsTest {
 
   @Test
   public void getAllInterfaces00() {
-    Set<Class<?>> expected = Set.of(NavigableSet.class, Cloneable.class, Serializable.class, SortedSet.class, Set.class, Collection.class, Iterable.class);
+    Set<Class<?>> expected = Set.of(NavigableSet.class,
+        Cloneable.class,
+        Serializable.class,
+        SortedSet.class,
+        Set.class,
+        Collection.class,
+        Iterable.class);
     Set<Class<?>> actual = ClassMethods.getAllInterfaces(TreeSet.class);
     // System.out.println(implode(actual.toArray(), "\n"));
     assertEquals(expected, actual);
@@ -59,10 +66,22 @@ public class ClassMethodsTest {
 
   @Test
   public void getAllInterfaces01() {
-    Set<Class<?>> expected = Set.of(SortedSet.class, Set.class, Collection.class, Iterable.class);
+    Set<Class<?>> expected = Set.of(SortedSet.class,
+        Set.class,
+        Collection.class,
+        Iterable.class);
     Set<Class<?>> actual = ClassMethods.getAllInterfaces(NavigableSet.class);
     // System.out.println(implode(actual.toArray(), "\n"));
     assertEquals(expected, actual);
+  }
+
+  @Test
+  public void getTypeDefaultIf00() {
+    assertNull(ClassMethods.getTypeDefault(Class.class));
+    assertNull(ClassMethods.getTypeDefault(Object.class));
+    assertNull(ClassMethods.getTypeDefault(Cloneable.class));
+    assertEquals((short) 0, (short) ClassMethods.getTypeDefault(short.class));
+    assertEquals(0F, (float) ClassMethods.getTypeDefault(float.class), 0F);
   }
 
 }
