@@ -6,6 +6,8 @@ import nl.naturalis.common.util.ResizeMethod;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.length;
@@ -210,7 +212,7 @@ public final class UnsafeByteArrayOutputStream extends OutputStream {
    * output stream is discarded. The output stream can be used again, reusing the
    * already allocated buffer space.
    */
-  public synchronized void reset() {
+  public void reset() {
     sz = 0;
   }
 
@@ -219,6 +221,15 @@ public final class UnsafeByteArrayOutputStream extends OutputStream {
    * called on it.
    */
   public void close() {}
+
+  @Override
+  public String toString() {
+    return new String(buf, 0, size(), StandardCharsets.UTF_8);
+  }
+
+  public String toString(Charset charset) {
+    return new String(buf, 0, size(), charset);
+  }
 
   private void increaseCapacity(int minIncrease) {
     int newSize = resizeMethod.resize(buf.length, resizeAmount, minIncrease);

@@ -1,18 +1,20 @@
 package nl.naturalis.common.exception;
 
 import nl.naturalis.common.ExceptionMethods;
+import nl.naturalis.common.check.Check;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.Optional;
 
 import static nl.naturalis.common.ExceptionMethods.getRootCause;
 
 /**
- * A subclass of {@code RuntimeException} that behaves just like the root cause of
- * the exception it wraps. The {@code RuntimeException} methods it overrides do
- * nothing but delegate to the same method on the root cause. This makes its stack
- * trace very small and informative, at the cost of not knowing how the original
- * exception bubbled up.
+ * A {@code RuntimeException} that wraps the root cause of another exception. It
+ * behaves as though it is the root cause itself: it overrides all methods from
+ * {@code Exception} by calling the same method on the root cause. This makes its
+ * stack trace very small and informative, at the cost of not knowing how the
+ * original exception bubbled up.
  *
  * @author Ayco Holleman
  * @see UncheckedException
@@ -20,8 +22,10 @@ import static nl.naturalis.common.ExceptionMethods.getRootCause;
  */
 public class RootException extends RuntimeException {
 
+  private final Optional<String> customMessage;
+
   /**
-   * Creates a {@code RootException} wrapping the provided {@code Exception}.
+   * Creates a {@code RootCause} wrapping the provided {@code Exception}.
    *
    * @param cause The exception to wrap
    */
@@ -30,14 +34,38 @@ public class RootException extends RuntimeException {
   }
 
   /**
-   * Creates a {@code RootException} with a custom message, wrapping the provided
-   * {@code Exception}.
+   * Creates a {@code RootCause} with a custom message.
    *
    * @param message A custom message
    * @param cause The exception to wrap
    */
   public RootException(String message, Throwable cause) {
-    super(message, getRootCause(cause));
+    super(Check.notNull(cause, "cause").ok(UncheckedException::peal));
+    this.customMessage = Optional.ofNullable(message);
+  }
+
+  /**
+   * Returns the exception wrapped by this {@code RootException}. Note that {@link
+   * #getCause()} does <i>not</i> return that exception. It returns the
+   * <i>cause</i> of the root cause (i.e. {@code null}).
+   *
+   * @return The exception directly wrapped by this {@code UncheckedException}
+   */
+  @SuppressWarnings("unchecked")
+  public <E extends Throwable> E unwrap() {
+    return (E) super.getCause();
+  }
+
+  /**
+   * Returns an {@code Optional} containing the custom message passed in through the
+   * two-arg constructor or an empty {@code Optional} if the single-arg constructor
+   * was used.
+   *
+   * @return An {@code Optional} containing the custom message passed in through the
+   *     constructor
+   */
+  public Optional<String> getCustomMessage() {
+    return customMessage;
   }
 
   /**

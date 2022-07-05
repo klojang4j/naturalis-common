@@ -8,10 +8,10 @@ import java.io.PrintWriter;
 import java.util.Optional;
 
 /**
- * A subclass of {@code RuntimeException} that behaves just like {@link Exception} it
- * wraps. It overrides all methods from {@code Exception} by calling the same method
- * on the wrapped exception. For example {@code uncheckedException.getCause ()}
- * returns {@code wrappedException.getCause()} (the cause of the cause!). You
+ * A {@code RuntimeException} that behaves just like {@link Exception} it wraps: it
+ * overrides all methods from {@code Exception} by calling the same method on the
+ * wrapped exception. For example {@code uncheckedException.getCause ()} returns
+ * {@code wrappedException.getCause()} (the cause of the cause!). You
  * <i>can</i> provide a custom message, though, which you can retrieve through
  * {@link #getCustomMessage()} ({@link #getMessage()} returns {@code
  * wrappedException.getMessage()}).
@@ -19,8 +19,8 @@ import java.util.Optional;
  * <p>This behaviour can be useful when wrapping checked exceptions that in
  * practice cannot sensibly be dealt with. This is often the case with, for example,
  * {@code IOException}, {@code SQLException} and other exceptions where the Javadocs
- * basically say that they are thrown "when something goes wrong". (No kiddin' ...)
- * These exceptions are runtime exceptions for all practical purposes.
+ * state that they are thrown "when something goes wrong". These exceptions are
+ * runtime exceptions for all practical purposes.
  *
  * <p>By hiding completely behind the wrapped exception, an {@code
  * UncheckedException} has a less cumbersome stack trace than a straight {@code
@@ -28,15 +28,29 @@ import java.util.Optional;
  * dealing with an {@code UncheckedException} is by calling {@code getClass()} on
  * it.
  *
- * <p>You don't need to worry about wrapping an {code UncheckedException} with an
- * {@code UncheckedException}. The constructors peal away all causes until they find
- * something that is not an {@code UncheckedException}.
+ * <p>An {code UncheckedException} can be safely (i.e. blindly) wrapped into an
+ * {@code UncheckedException}. The constructors "bore through" the causes until they
+ * find something that is not an {@code UncheckedException} and not a {@link
+ * RootException}.
  *
  * @author Ayco Holleman
  * @see RootException
  * @see ExceptionMethods#uncheck(Throwable)
  */
 public class UncheckedException extends RuntimeException {
+
+  static Throwable peal(Throwable t) {
+    do {
+      if (t instanceof UncheckedException ue) {
+        t = ue.unwrap();
+      } else if (t instanceof RootException re) {
+        t = re.unwrap();
+      } else {
+        break;
+      }
+    } while (true);
+    return t;
+  }
 
   private final Optional<String> customMessage;
 
@@ -46,7 +60,7 @@ public class UncheckedException extends RuntimeException {
    * @param cause
    */
   public UncheckedException(Throwable cause) {
-    this(null, Check.notNull(cause, "cause").ok(UncheckedException::pealAway));
+    this(null, Check.notNull(cause, "cause").ok(UncheckedException::peal));
   }
 
   /**
@@ -56,8 +70,7 @@ public class UncheckedException extends RuntimeException {
    * @param cause
    */
   public UncheckedException(String message, Throwable cause) {
-    // Peal until we find something other than an UncheckedException
-    super(Check.notNull(cause, "cause").ok(UncheckedException::pealAway));
+    super(Check.notNull(cause, "cause").ok(UncheckedException::peal));
     this.customMessage = Optional.ofNullable(message);
   }
 
@@ -83,8 +96,8 @@ public class UncheckedException extends RuntimeException {
 
   /**
    * Returns an {@code Optional} containing the custom message passed in through the
-   * {@link #UncheckedException(String, Throwable) constructor} or an empty {@code
-   * Optional} if the single-arg constructor was used.
+   * two-arg constructor or an empty {@code Optional} if the single-arg constructor
+   * was used.
    *
    * @return An {@code Optional} containing the custom message passed in through the
    *     constructor
@@ -139,13 +152,6 @@ public class UncheckedException extends RuntimeException {
   @Override
   public StackTraceElement[] getStackTrace() {
     return super.getCause().getStackTrace();
-  }
-
-  private static Throwable pealAway(Throwable t) {
-    while (t.getClass() == UncheckedException.class) {
-      t = ((UncheckedException) t).unwrap();
-    }
-    return t;
   }
 
 }

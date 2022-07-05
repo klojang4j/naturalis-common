@@ -1,14 +1,12 @@
 package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.x.Param;
 import nl.naturalis.common.x.invoke.InvokeUtils;
 
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.IntFunction;
-import java.util.function.Predicate;
-import java.util.function.ToIntFunction;
+import java.util.function.*;
 import java.util.stream.IntStream;
 
 import static java.lang.System.arraycopy;
@@ -55,7 +53,7 @@ public final class ArrayMethods {
    * @return a new array containing the original array plus the extra element
    */
   public static <T> T[] append(T[] array, T obj) {
-    Check.notNull(array, "array");
+    Check.notNull(array, Param.ARRAY);
     T[] arr = fromTemplate(array, array.length + 1);
     arraycopy(array, 0, arr, 0, array.length);
     arr[array.length] = obj;
@@ -73,8 +71,8 @@ public final class ArrayMethods {
    */
   @SafeVarargs
   public static <T> T[] append(T[] array, T obj0, T obj1, T... moreObjs) {
-    Check.notNull(array, "array");
-    Check.notNull(moreObjs, "moreObjs");
+    Check.notNull(array, Param.ARRAY);
+    Check.notNull(moreObjs, Param.MORE_OBJS);
     int sz = array.length + 2 + moreObjs.length;
     T[] arr = fromTemplate(array, sz);
     arraycopy(array, 0, arr, 0, array.length);
@@ -182,7 +180,7 @@ public final class ArrayMethods {
    * @return an {@link OptionalInt} containing the array index of the value
    */
   public static OptionalInt indexOf(int[] array, int value) {
-    Check.notNull(array, "array");
+    Check.notNull(array, Param.ARRAY);
     for (int x = 0; x < array.length; ++x) {
       if (array[x] == value) {
         return OptionalInt.of(x);
@@ -201,7 +199,7 @@ public final class ArrayMethods {
    * @return an {@link OptionalInt} containing the array index of the value
    */
   public static OptionalInt lastIndexOf(int[] array, int value) {
-    Check.notNull(array, "array");
+    Check.notNull(array, Param.ARRAY);
     for (int x = array.length - 1; x >= 0; --x) {
       if (array[x] == value) {
         return OptionalInt.of(x);
@@ -221,7 +219,7 @@ public final class ArrayMethods {
    * @return the array index of the value
    */
   public static <T> int indexOf(T[] array, T value) {
-    Check.notNull(array, "array");
+    Check.notNull(array, Param.ARRAY);
     if (value == null) {
       for (int x = 0; x < array.length; ++x) {
         if (array[x] == null) {
@@ -249,7 +247,7 @@ public final class ArrayMethods {
    * @return the array index of the value
    */
   public static <T> int lastIndexOf(T[] array, T value) {
-    Check.notNull(array, "array");
+    Check.notNull(array, Param.ARRAY);
     if (value == null) {
       for (int x = array.length - 1; x >= 0; --x) {
         if (array[x] == null) {
@@ -277,7 +275,7 @@ public final class ArrayMethods {
    * @return the array index of the reference
    */
   public static int refIndexOf(Object[] array, Object reference) {
-    Check.notNull(array, "array");
+    Check.notNull(array, Param.ARRAY);
     Check.notNull(reference, "reference");
     for (int i = 0; i < array.length; ++i) {
       if (array[i] == reference) {
@@ -297,9 +295,9 @@ public final class ArrayMethods {
    * @return the array index of the reference
    */
   public static int refLastIndexOf(Object[] array, Object reference) {
-    Check.notNull(array, "array");
+    Check.notNull(array, Param.ARRAY);
     Check.notNull(reference, "reference");
-    for (int i = 0; i < array.length; ++i) {
+    for (int i = array.length - 1; i >= 0; --i) {
       if (array[i] == reference) {
         return i;
       }
@@ -315,33 +313,52 @@ public final class ArrayMethods {
    * @param <T> the type of the array elements
    * @return the first array element that passes the specified test
    */
-  public static <T> T find(T[] array, Predicate<T> test) {
+  public static <T> Result<T> find(T[] array, Predicate<T> test) {
     return find(array, test, identity());
   }
 
   /**
-   * Returns some property of the first array element that passes some test.
+   * Returns a property of the first array element that passes some test.
    *
    * @param array the array
    * @param test the test
    * @param property a function that extracts some value from thr array element
    * @param <T> the type of the array elements
    * @param <R> the type of the value extracted from the array element
-   * @return the value extracted from the first array element that passed the
-   *     specified test.
+   * @return the {@code Nullable} containing the value extracted from the first array
+   *     element that passed the specified test, or {@code null} if no element passed
+   *     the test
    */
-  public static <T, R> R find(T[] array,
+  public static <T, R> Result<R> find(T[] array,
       Predicate<T> test,
       Function<T, R> property) {
-    Check.notNull(array, "array");
-    Check.notNull(test, "test");
-    Check.notNull(property, "property");
-    for (T obj : array) {
-      if (test.test(obj)) {
-        return property.apply(obj);
-      }
-    }
-    return null;
+    Check.notNull(array, Param.ARRAY);
+    Check.notNull(test, Param.TEST);
+    Check.notNull(property, Param.PROPERTY);
+    return Arrays.stream(array)
+        .filter(test)
+        .map(property)
+        .map(Result::of)
+        .findFirst()
+        .orElse(Result.none());
+  }
+
+  /**
+   * Returns the first array element that passes some test.
+   *
+   * @param array the array
+   * @param test the test
+   * @return the first array element that passes the specified test or an empty
+   *     {@code OptionalInt} if no element passed the test
+   */
+  public static OptionalInt find(int[] array, IntPredicate test) {
+    Check.notNull(array, Param.ARRAY);
+    Check.notNull(test, Param.TEST);
+    return Arrays.stream(array)
+        .filter(test)
+        .mapToObj(OptionalInt::of)
+        .findFirst()
+        .orElse(OptionalInt.empty());
   }
 
   /**
@@ -368,11 +385,9 @@ public final class ArrayMethods {
   }
 
   private static <T> T[] doReverse(T[] array, int from, int to) {
-    int len = to - from;
-    T tmp;
-    for (int i = from, j = to - 1; i < len / 2; ++i, --j) {
-      tmp = array[i];
-      array[i] = array[j];
+    for (int i = 0, j = to - 1; i < (to - from) / 2; ++i, --j) {
+      T tmp = array[from + i];
+      array[from + i] = array[j];
       array[j] = tmp;
     }
     return array;
@@ -395,17 +410,15 @@ public final class ArrayMethods {
    * @return the input array
    */
   public static int[] reverse(int[] array, int from, int to) {
-    Check.notNull(array, "array");
+    Check.notNull(array, Param.ARRAY);
     Check.fromTo(array.length, from, to);
     return doReverse(array, from, to);
   }
 
   private static int[] doReverse(int[] array, int from, int to) {
-    int len = to - from;
-    int tmp;
-    for (int i = from, j = to - 1; i < len / 2; ++i, --j) {
-      tmp = array[i];
-      array[i] = array[j];
+    for (int i = 0, j = to - 1; i < (to - from) / 2; ++i, --j) {
+      int tmp = array[from + i];
+      array[from + i] = array[j];
       array[j] = tmp;
     }
     return array;
@@ -435,7 +448,7 @@ public final class ArrayMethods {
    */
   public static <T> T[] fromTemplate(T[] template, int length) {
     Check.notNull(template, "template");
-    Check.that(length, "length").is(gte(), 0);
+    Check.that(length, Param.LENGTH).is(gte(), 0);
     return InvokeUtils.newArray(template.getClass(), length);
   }
 
@@ -571,11 +584,11 @@ public final class ArrayMethods {
       String separator,
       int from,
       int to) {
-    Check.notNull(array, "array");
+    Check.notNull(array, Param.ARRAY);
     Check.notNull(separator, "separator");
-    Check.that(from, "from").is(gte(), 0).is(lte(), array.length);
+    Check.that(from, Param.FROM_INDEX).is(gte(), 0).is(lte(), array.length);
     int x = to == -1 ? array.length : Math.min(to, array.length);
-    Check.that(x, "to").is(gte(), from);
+    Check.that(x, Param.TO_INDEX).is(gte(), from);
     return Arrays.stream(array, from, x)
         .mapToObj(stringifier)
         .collect(joining(separator));
@@ -687,11 +700,11 @@ public final class ArrayMethods {
       String separator,
       int from,
       int to) {
-    int len = Check.notNull(array, "array").is(array()).ok(Array::getLength);
+    int len = Check.notNull(array, Param.ARRAY).is(array()).ok(Array::getLength);
     Check.notNull(separator, "separator");
-    Check.that(from, "from").is(gte(), 0).is(lte(), len);
+    Check.that(from, Param.FROM_INDEX).is(gte(), 0).is(lte(), len);
     int x = to == -1 ? len : Math.min(to, len);
-    Check.that(x, "to").is(gte(), from);
+    Check.that(x, Param.TO_INDEX).is(gte(), from);
     return IntStream.range(from, x)
         .mapToObj(i -> Array.get(array, i))
         .map(stringifier)
@@ -792,26 +805,15 @@ public final class ArrayMethods {
       String separator,
       int from,
       int to) {
-    Check.notNull(array, "array");
+    Check.notNull(array, Param.ARRAY);
     Check.notNull(stringifier, "stringifier");
     Check.notNull(separator, "separator");
-    Check.that(from, "from").is(gte(), 0).is(lte(), array.length);
+    Check.that(from, Param.FROM_INDEX).is(gte(), 0).is(lte(), array.length);
     int x = to == -1 ? array.length : Math.min(to, array.length);
-    Check.that(x, "to").is(gte(), from);
+    Check.that(x, Param.TO_INDEX).is(gte(), from);
     return Arrays.stream(array, from, x)
         .map(stringifier)
         .collect(joining(separator));
-  }
-
-  /**
-   * Returns an {@code IntStream} of the indices of the specified array.
-   *
-   * @param <T> the component type of the array
-   * @param array the array
-   * @return a {@code Stream} of its indices
-   */
-  private static <T> IntStream streamIndices(T[] array) {
-    return Check.notNull(array).ok(x -> IntStream.range(0, x.length));
   }
 
   /**
@@ -892,10 +894,7 @@ public final class ArrayMethods {
    *     specified array
    */
   public static <T> T[] prefix(T[] array, T obj) {
-    Check.notNull(array, "array");
-    if (array.length == 0) {
-      return pack(obj);
-    }
+    Check.notNull(array, Param.ARRAY);
     T[] res = fromTemplate(array, array.length + 1);
     res[0] = obj;
     arraycopy(array, 0, res, 1, array.length);
@@ -915,8 +914,8 @@ public final class ArrayMethods {
    */
   @SafeVarargs
   public static <T> T[] prefix(T[] array, T obj0, T obj1, T... moreObjs) {
-    Check.notNull(array, "array");
-    Check.notNull(moreObjs, "moreObjs");
+    Check.notNull(array, Param.ARRAY);
+    Check.notNull(moreObjs, Param.MORE_OBJS);
     int sz = array.length + 2 + moreObjs.length;
     T[] res = fromTemplate(array, sz);
     res[0] = obj0;

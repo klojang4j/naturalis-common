@@ -7,7 +7,6 @@ import java.util.OptionalInt;
 
 import static nl.naturalis.common.ArrayMethods.*;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertArrayEquals;
 
 public class ArrayMethodsTest {
 
@@ -32,6 +31,14 @@ public class ArrayMethodsTest {
     String[] a = {"a", "b", "c"};
     String[] expected = {"a", "b", "c", "1", "2", "3", "4", "5", "6", "7"};
     String[] actual = append(a, "1", "2", "3", "4", "5", "6", "7");
+    assertArrayEquals(expected, actual);
+  }
+
+  @Test
+  public void append04() {
+    String[] a = {};
+    String[] expected = {"a"};
+    String[] actual = append(a, "a");
     assertArrayEquals(expected, actual);
   }
 
@@ -123,7 +130,7 @@ public class ArrayMethodsTest {
   }
 
   @Test
-  public void find01() {
+  public void refIndexOf01() {
     String s0 = "Hello";
     // Use constructor. Otherwise compiler detects we're using the same
     // string twice and creates just one instance.
@@ -168,6 +175,14 @@ public class ArrayMethodsTest {
   }
 
   @Test
+  public void prefix04() {
+    String[] a = {};
+    String[] expected = {"a"};
+    String[] actual = prefix(a, "a");
+    assertArrayEquals(expected, actual);
+  }
+
+  @Test
   public void implodeInts00() {
     int[] ints = {1, 2, 3, 4, 5};
     assertEquals("2|4", implodeInts(ints, i -> "" + (2 * i), "|", 0, 2));
@@ -179,6 +194,7 @@ public class ArrayMethodsTest {
     assertEquals("1|2|3|4|5", implodeInts(ints, "|"));
     assertEquals("1, 2, 3", implodeInts(ints, 3));
     assertEquals("1, 2, 3, 4, 5", implodeInts(ints));
+    assertEquals("2, 4, 6, 8, 10", implodeInts(ints, i -> "" + (2 * i)));
   }
 
   @Test
@@ -199,6 +215,8 @@ public class ArrayMethodsTest {
     assertEquals("1|2|3|4|5", implodeAny(longs, "|"));
     assertEquals("1, 2, 3", implodeAny(longs, 3));
     assertEquals("1, 2, 3, 4, 5", implodeAny(longs));
+    byte[] bytes = {(byte) 1, (byte) 2, (byte) 3};
+    assertEquals("2, 4, 6", implodeAny(bytes, i -> "" + (2 * (byte) i)));
   }
 
   @Test
@@ -213,6 +231,7 @@ public class ArrayMethodsTest {
     assertEquals("1|2|3|4|5", implode(ints, "|"));
     assertEquals("1, 2, 3", implode(ints, 3));
     assertEquals("1, 2, 3, 4, 5", implode(ints));
+    assertEquals("2, 4, 6, 8, 10", implode(ints, i -> "" + (2 * i)));
   }
 
   @Test
@@ -285,23 +304,6 @@ public class ArrayMethodsTest {
     assertNotEquals(List.of(1, 2, 3), new long[] {1, 2, 3});
   }
 
-  //  @Test
-  //  public void cloak00() {
-  //    assertEquals(List.of(1, 2, 3), cloak(new int[] {1, 2, 3}));
-  //    assertEquals(List.of(1L, 2L, 3L), cloak(new long[] {1, 2, 3}));
-  //    assertEquals(List.of(1D, 2D, 3D), cloak(new double[] {1, 2, 3}));
-  //    assertEquals(List.of(1F, 2F, 3F), cloak(new float[] {1, 2, 3}));
-  //    assertEquals(
-  //        List.of((short) 1, (short) 2, (short) 3),
-  //        cloak(new short[] {1, 2, 3}));
-  //    assertEquals(List.of((byte) 1, (byte) 2, (byte) 3), cloak(new byte[] {1, 2, 3}));
-  //    assertEquals(List.of((char) 1, (char) 2, (char) 3), cloak(new char[] {1, 2, 3}));
-  //    assertEquals(
-  //        List.of(Boolean.FALSE, Boolean.TRUE),
-  //        cloak(new boolean[] {false, true}));
-  //    assertNotEquals(List.of(1, 2, 3), new long[] {1, 2, 3});
-  //  }
-
   @Test
   public void packAndFriends00() {
     assertArrayEquals(new String[] {"a", "b", "c"}, pack("a", "b", "c"));
@@ -318,6 +320,7 @@ public class ArrayMethodsTest {
     assertNull(pack(null)); // Hm, do we like this?
   }
 
+  @Test
   public void reverse00() {
     int[] array = ints();
     reverse(array);
@@ -342,6 +345,7 @@ public class ArrayMethodsTest {
     assertArrayEquals(ints(6, 5, 4, 3, 2, 1), array);
   }
 
+  @Test
   public void reverse01() {
     Integer[] array = pack();
     reverse(array);
@@ -366,6 +370,7 @@ public class ArrayMethodsTest {
     assertArrayEquals(pack(6, 5, 4, 3, 2, 1), array);
   }
 
+  @Test
   public void reverse02() {
     int[] array = ints(0, 1, 2, 3, 4, 5, 6);
     reverse(array, 1, 7);
@@ -381,6 +386,7 @@ public class ArrayMethodsTest {
     assertArrayEquals(ints(0, 2, 1, 3, 4, 5, 6), array);
   }
 
+  @Test
   public void reverse03() {
     Integer[] array = pack(0, 1, 2, 3, 4, 5, 6);
     reverse(array, 1, 7);
@@ -394,6 +400,46 @@ public class ArrayMethodsTest {
     array = pack(0, 1, 2, 3, 4, 5, 6);
     reverse(array, 1, 3);
     assertArrayEquals(pack(0, 2, 1, 3, 4, 5, 6), array);
+  }
+
+  @Test
+  public void find00() {
+    Result<Integer> x = find(pack(0, 1, 2, 3, 4, 5), i -> (int) i > 3);
+    assertEquals(4, (int) x.get());
+  }
+
+  @Test
+  public void find01() {
+    Result<Integer> x = find(pack(0, 1, 2, 3, 4, 5), i -> (int) i > 5);
+    assertFalse(x.isPresent());
+    Integer y = find(pack(0, 1, 2, 3, 4, 5), i -> (int) i > 5).orElse(100);
+    assertEquals(100, (int) y);
+  }
+
+  @Test
+  public void find02() {
+    OptionalInt x = find(ints(0, 1, 2, 3, 4, 5), i -> i > 3);
+    assertEquals(4, x.getAsInt());
+  }
+
+  @Test
+  public void find03() {
+    OptionalInt x = find(ints(0, 1, 2, 3, 4, 5), i -> i > 5);
+    assertFalse(x.isPresent());
+  }
+
+  @Test
+  public void refLastIndexOf00() {
+    String s = "world";
+    String[] strs = pack("hello", s, s);
+    assertEquals(2, refLastIndexOf(strs, s));
+  }
+
+  @Test
+  public void refLastIndexOf01() {
+    String s = "world";
+    String[] strs = pack("hello", s, s, "foo", "bar");
+    assertEquals(2, refLastIndexOf(strs, s));
   }
 
 }
