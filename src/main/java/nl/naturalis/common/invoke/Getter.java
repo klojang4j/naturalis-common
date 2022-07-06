@@ -15,14 +15,14 @@ import static java.lang.invoke.MethodHandles.lookup;
 public final class Getter {
 
   private final Method method;
-  private final MethodHandle handle;
+  private final MethodHandle mh;
   private final String property;
 
   Getter(Method method, String property) {
     this.method = method;
     this.property = property;
     try {
-      this.handle = lookup().unreflect(method);
+      this.mh = lookup().unreflect(method);
     } catch (IllegalAccessException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -31,7 +31,7 @@ public final class Getter {
   /**
    * Returns the name of the property.
    *
-   * @return The name of the property
+   * @return the name of the property
    */
   public String getProperty() {
     return property;
@@ -40,7 +40,7 @@ public final class Getter {
   /**
    * Returns the type of the property.
    *
-   * @return The type of the property
+   * @return the type of the property
    */
   public Class<?> getReturnType() {
     return method.getReturnType();
@@ -50,11 +50,12 @@ public final class Getter {
    * Reads the value of the property off the specified bean
    *
    * @param bean The bean off which to read the property's value
-   * @return The value of the property
-   * @throws Throwable The unspecified {@code Throwable} associated with calls to {@link
-   *     MethodHandle#invoke(Object...) MethodHandle.invoke}.
+   * @return the value of the property
+   * @throws Throwable The unspecified {@code Throwable} associated with calls to
+   *     {@link MethodHandle#invoke(Object...) MethodHandle.invoke}.
    */
   public Object read(Object bean) throws Throwable {
-    return handle.invoke(bean);
+    return mh.invoke(bean);
   }
+
 }

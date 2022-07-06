@@ -11,7 +11,7 @@ import java.util.OptionalInt;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
-import static nl.naturalis.common.ArrayMethods.toWrapperArray;
+import static nl.naturalis.common.ArrayMethods.box;
 import static nl.naturalis.common.ArrayMethods.implodeInts;
 import static nl.naturalis.common.check.CommonChecks.gte;
 import static nl.naturalis.common.check.CommonChecks.lt;
@@ -168,7 +168,7 @@ final class UnmodifiableIntList implements IntList {
   }
 
   public List<Integer> toGenericList() {
-    return List.of(ArrayMethods.toWrapperArray(buf));
+    return List.of(ArrayMethods.box(buf));
   }
 
   @Override

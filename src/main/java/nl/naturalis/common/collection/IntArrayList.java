@@ -226,7 +226,7 @@ public final class IntArrayList implements IntList {
     Check.notNull(c);
     Set<Integer> set = new LinkedHashSet<>(toGenericList());
     if (set.removeAll(c)) {
-      buf = asPrimitiveArray(set.toArray(Integer[]::new));
+      buf = unbox(set.toArray(Integer[]::new));
       size = set.size();
       return true;
     }
@@ -250,7 +250,7 @@ public final class IntArrayList implements IntList {
     Check.notNull(c);
     Set<Integer> set = new LinkedHashSet<>(toGenericList());
     if (set.retainAll(c)) {
-      buf = asPrimitiveArray(set.toArray(Integer[]::new));
+      buf = unbox(set.toArray(Integer[]::new));
       size = set.size();
       return true;
     }
@@ -319,7 +319,7 @@ public final class IntArrayList implements IntList {
 
   @Override
   public List<Integer> toGenericList() {
-    return List.of(toWrapperArray(buf));
+    return List.of(box(buf));
   }
 
   @Override

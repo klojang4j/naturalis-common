@@ -14,14 +14,14 @@ import java.lang.reflect.Method;
 public final class Setter {
 
   private final Method method;
-  private final MethodHandle handle;
+  private final MethodHandle mh;
   private final String property;
 
   Setter(Method method, String property) {
     this.method = method;
     this.property = property;
     try {
-      this.handle = MethodHandles.lookup().unreflect(method);
+      this.mh = MethodHandles.lookup().unreflect(method);
     } catch (IllegalAccessException e) {
       throw ExceptionMethods.uncheck(e);
     }
@@ -30,7 +30,7 @@ public final class Setter {
   /**
    * Returns the name of the property.
    *
-   * @return The name of the property
+   * @return the name of the property
    */
   public String getProperty() {
     return property;
@@ -39,7 +39,7 @@ public final class Setter {
   /**
    * Returns the type of the property.
    *
-   * @return The type of the property
+   * @return the type of the property
    */
   public Class<?> getParamType() {
     return method.getParameterTypes()[0];
@@ -48,33 +48,34 @@ public final class Setter {
   /**
    * Sets the property on the specified bean to the specified value.
    *
-   * @param bean The object receiving the value
-   * @param value The value
-   * @throws IllegalAssignmentException If the value cannot be cast to the type of the property,
-   *     or if the value is {@code null} and the property has a primitive type. This is a {@link
-   *     RuntimeException}, but you might still want to catch it as it can often be handled in a
-   *     meaningful way.
-   * @throws Throwable The unspecified {@code Throwable} associated with calls to {@link
-   *     MethodHandle#invoke(Object...) MethodHandle.invoke}.
+   * @param bean the object receiving the value
+   * @param value the value
+   * @throws IllegalAssignmentException If the value cannot be cast to the type
+   *     of the property, or if the value is {@code null} and the property has a
+   *     primitive type. This is a {@link RuntimeException}, but you might still want
+   *     to catch it as it can often be handled in a meaningful way.
+   * @throws Throwable The unspecified {@code Throwable} associated with calls to
+   *     {@link MethodHandle#invoke(Object...) MethodHandle.invoke}.
    */
-  public void write(Object bean, Object value) throws IllegalAssignmentException, Throwable {
+  public void write(Object bean, Object value)
+      throws IllegalAssignmentException, Throwable {
     if (value == null) {
       if (getParamType().isPrimitive()) {
         throw illegalAssignment(null);
       }
     }
     try {
-      handle.invoke(bean, value);
+      mh.invoke(bean, value);
     } catch (ClassCastException e) {
       throw illegalAssignment(value);
     }
   }
 
   /**
-   * Generates an {@link IllegalAssignmentException} indicating that the specified value cannot be
-   * assigned to the property encapsulated by this {@code Setter}.
+   * Generates an {@link IllegalAssignmentException} indicating that the specified
+   * value cannot be assigned to the property encapsulated by this {@code Setter}.
    *
-   * @param value The value
+   * @param value the value
    * @return An {@link IllegalAssignmentException} for the specified value
    */
   public IllegalAssignmentException illegalAssignment(Object value) {
@@ -84,4 +85,5 @@ public final class Setter {
         getParamType(),
         value);
   }
+
 }

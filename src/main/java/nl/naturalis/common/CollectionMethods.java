@@ -60,7 +60,7 @@ public class CollectionMethods {
    *
    * @param val The value to convert
    * @return The value converted to a {@code List}
-   * @see ArrayMethods#toWrapperArray(int[])
+   * @see ArrayMethods#box(int[])
    * @see ArrayMethods#asList(int[])
    */
   @SuppressWarnings({"unchecked"})

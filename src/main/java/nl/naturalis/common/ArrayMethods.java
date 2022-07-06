@@ -112,11 +112,10 @@ public final class ArrayMethods {
     Check.notNull(arr2, "arr2");
     Check.notNull(moreArrays, "moreArrays");
     long x = Arrays.stream(moreArrays).flatMap(Arrays::stream).count();
-    long y = arr0.length + arr1.length + arr2.length + x;
-    Check.that(y).is(LTE(), MAX_ARR_LEN, "Concatenated array too large");
-    int i = (int) y;
-    T[] all = fromTemplate(arr0, i);
-    i = 0;
+    x += arr0.length + arr1.length + arr2.length;
+    Check.that(x).is(LTE(), MAX_ARR_LEN, "Concatenated array too large");
+    T[] all = fromTemplate(arr0, (int) x);
+    int i = 0;
     arraycopy(arr0, 0, all, i, arr0.length);
     i += arr0.length;
     arraycopy(arr1, 0, all, i, arr1.length);
@@ -926,90 +925,83 @@ public final class ArrayMethods {
   }
 
   /**
-   * Converts a primitive {@code int} array into a
-   * <code>{@code List&lt;Integer&gt;}</code>.
+   * Converts an {@code int} array to fixed-size, mutable {@code List<Integer>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Integer> asList(int[] values) {
-    return Arrays.asList(toWrapperArray(values));
+    return Arrays.asList(box(values));
   }
 
   /**
-   * Converts a primitive {@code float} array into a
-   * <code>{@code List&lt;Float&gt;}</code>.
+   * Converts a {@code float} array to fixed-size, mutable {@code List<Float>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Float> asList(float[] values) {
-    return List.of(toWrapperArray(values));
+    return Arrays.asList(box(values));
   }
 
   /**
-   * Converts a primitive {@code double} array into a
-   * <code>{@code List&lt;Double&gt;}</code>.
+   * Converts a {@code double} array to fixed-size, mutable {@code List<Double>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Double> asList(double[] values) {
-    return List.of(toWrapperArray(values));
+    return Arrays.asList(box(values));
   }
 
   /**
-   * Converts a primitive {@code long} array into a
-   * <code>{@code List&lt;Long&gt;}</code>.
+   * Converts a {@code long} array to fixed-size, mutable {@code List<Long>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Long> asList(long[] values) {
-    return List.of(toWrapperArray(values));
+    return Arrays.asList(box(values));
   }
 
   /**
-   * Converts a primitive {@code short} array into a
-   * <code>{@code List&lt;Short&gt;}</code>.
+   * Converts a {@code short} array to fixed-size, mutable {@code List<Short>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Short> asList(short[] values) {
-    return List.of(toWrapperArray(values));
+    return Arrays.asList(box(values));
   }
 
   /**
-   * Converts a primitive {@code byte} array into a
-   * <code>{@code List&lt;Byte&gt;}</code>.
+   * Converts a {@code byte} array to fixed-size, mutable {@code List<Byte>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Byte> asList(byte[] values) {
-    return List.of(toWrapperArray(values));
+    return Arrays.asList(box(values));
   }
 
   /**
-   * Converts a primitive {@code char} array into a
-   * <code>{@code List&lt;Character&gt;}</code>.
+   * Converts a {@code char} array to fixed-size, mutable {@code List<Character>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Character> asList(char[] values) {
-    return List.of(toWrapperArray(values));
+    return Arrays.asList(box(values));
   }
 
   /**
-   * Converts a primitive {@code boolean} array into a {@code List<Boolean>}.
+   * Converts a {@code boolean} array to fixed-size, mutable {@code List<Boolean>}.
    *
    * @param values the array elements.
    * @return a {@code List} containing the same elements in the same order
    */
   public static List<Boolean> asList(boolean[] values) {
-    return List.of(toWrapperArray(values));
+    return Arrays.asList(box(values));
   }
 
   /**
@@ -1020,7 +1012,7 @@ public final class ArrayMethods {
    *     source array to
    * @return the {@code int} array
    */
-  public static int[] asPrimitiveArray(Integer[] values, int dfault) {
+  public static int[] unbox(Integer[] values, int dfault) {
     Check.notNull(values);
     return Arrays.stream(values).mapToInt(i -> ifNull(i, dfault)).toArray();
   }
@@ -1032,8 +1024,8 @@ public final class ArrayMethods {
    * @param values the {@code Integer} array
    * @return the {@code int} array
    */
-  public static int[] asPrimitiveArray(Integer[] values) {
-    return asPrimitiveArray(values, 0);
+  public static int[] unbox(Integer[] values) {
+    return unbox(values, 0);
   }
 
   /**
@@ -1042,37 +1034,37 @@ public final class ArrayMethods {
    * @param values the {@code int} array
    * @return the {@code Integer} array
    */
-  public static Integer[] toWrapperArray(int[] values) {
+  public static Integer[] box(int[] values) {
     return Check.notNull(values).ok(Arrays::stream).boxed().toArray(Integer[]::new);
   }
 
   /**
-   * Converts a {@code double} array to a {@code Double} array.
+   * Converts a {@code double} array to fixed-size, mutable {@code Double} array.
    *
    * @param values the {@code double} array
    * @return the {@code Double} array
    */
-  public static Double[] toWrapperArray(double[] values) {
+  public static Double[] box(double[] values) {
     return Check.notNull(values).ok(Arrays::stream).boxed().toArray(Double[]::new);
   }
 
   /**
-   * Converts a {@code long} array to a {@code Long} array.
+   * Converts a {@code long} array to fixed-size, mutable {@code Long} array.
    *
    * @param values the {@code long} array
    * @return the {@code Long} array
    */
-  public static Long[] toWrapperArray(long[] values) {
+  public static Long[] box(long[] values) {
     return Check.notNull(values).ok(Arrays::stream).boxed().toArray(Long[]::new);
   }
 
   /**
-   * Converts a {@code float} array to a {@code Float} array.
+   * Converts a {@code float} array to fixed-size, mutable {@code Float} array.
    *
    * @param values the {@code float} array
    * @return the {@code Float} array
    */
-  public static Float[] toWrapperArray(float[] values) {
+  public static Float[] box(float[] values) {
     var res = new Float[Check.notNull(values).ok().length];
     for (int i = 0; i < values.length; ++i) {
       res[i] = values[i];
@@ -1081,12 +1073,12 @@ public final class ArrayMethods {
   }
 
   /**
-   * Converts a {@code short} array to a {@code Short} array.
+   * Converts a {@code short} array to fixed-size, mutable {@code Short} array.
    *
    * @param values the {@code short} array
    * @return the {@code Short} array
    */
-  public static Short[] toWrapperArray(short[] values) {
+  public static Short[] box(short[] values) {
     var res = new Short[Check.notNull(values).ok().length];
     for (int i = 0; i < values.length; ++i) {
       res[i] = values[i];
@@ -1095,12 +1087,12 @@ public final class ArrayMethods {
   }
 
   /**
-   * Converts a {@code byte} array to a {@code Byte} array.
+   * Converts a {@code byte} array to fixed-size, mutable {@code Byte} array.
    *
    * @param values the {@code byte} array
    * @return the {@code Byte} array
    */
-  public static Byte[] toWrapperArray(byte[] values) {
+  public static Byte[] box(byte[] values) {
     var res = new Byte[Check.notNull(values).ok().length];
     for (int i = 0; i < values.length; ++i) {
       res[i] = values[i];
@@ -1109,12 +1101,12 @@ public final class ArrayMethods {
   }
 
   /**
-   * Converts a {@code char} array to a {@code Character} array.
+   * Converts a {@code char} array to fixed-size, mutable {@code Character} array.
    *
    * @param values the {@code char} array
    * @return the {@code Character} array
    */
-  public static Character[] toWrapperArray(char[] values) {
+  public static Character[] box(char[] values) {
     var res = new Character[Check.notNull(values).ok().length];
     for (int i = 0; i < values.length; ++i) {
       res[i] = values[i];
@@ -1123,12 +1115,12 @@ public final class ArrayMethods {
   }
 
   /**
-   * Converts a {@code boolean} array to a {@code Boolean} array.
+   * Converts a {@code boolean} array to fixed-size, mutable {@code Boolean} array.
    *
    * @param values the {@code boolean} array
    * @return the {@code Boolean} array
    */
-  public static Boolean[] toWrapperArray(boolean[] values) {
+  public static Boolean[] box(boolean[] values) {
     var res = new Boolean[Check.notNull(values).ok().length];
     for (int i = 0; i < values.length; ++i) {
       res[i] = values[i];

@@ -25,12 +25,6 @@ final class MsgUtil {
     throw new AssertionError();
   }
 
-  // Common message patterns:
-  static final String MSG_PREDICATE = "%s must%s %s";
-  static final String MSG_PREDICATE_WAS = MSG_PREDICATE + " (was %s)";
-  static final String MSG_RELATION = "%s must%s %s %s";
-  static final String MSG_RELATION_WAS = MSG_RELATION + " (was %s)";
-
   // Max display width (characters) for stringified values.
   private static final int MAX_DISPLAY_WIDTH = 55;
 
@@ -45,12 +39,17 @@ final class MsgUtil {
       String s = argName == null ? DEF_ARG_NAME : argName;
       return "Invalid value for " + s + ": " + toStr(argVal);
     }
-    return formatter.apply(new MsgArgs(test, negated, argName, argVal, argType, obj));
+    return formatter.apply(new MsgArgs(test,
+        negated,
+        argName,
+        argVal,
+        argType,
+        obj));
   }
 
   private static final Character DONT_PARSE_FLAG = '\0';
 
-  static boolean dontParseMessage(Object[] msgArgs) {
+  private static boolean dontParseMessage(Object[] msgArgs) {
     return msgArgs.length == 1 && DONT_PARSE_FLAG.equals(msgArgs[0]);
   }
 
@@ -167,7 +166,11 @@ final class MsgUtil {
     if (m.size() == 0) {
       return scn;
     }
-    String s = implode(m.entrySet(), MsgUtil::entryToString, DEFAULT_IMPLODE_SEPARATOR, 0, 10);
+    String s = implode(m.entrySet(),
+        MsgUtil::entryToString,
+        DEFAULT_IMPLODE_SEPARATOR,
+        0,
+        10);
     return scn + " of {" + trim(s, m.size()) + '}';
   }
 

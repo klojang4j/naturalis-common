@@ -1,8 +1,8 @@
 package nl.naturalis.common.invoke;
 
 /**
- * Used to indicate whether you want to allow or disallow properties from being read by a {@link
- * BeanReader} or written by a {@link BeanWriter}.
+ * Used to indicate whether you want to allow or disallow properties from being read
+ * by a {@link BeanReader} or written by a {@link BeanWriter}.
  */
 public enum IncludeExclude {
   /**

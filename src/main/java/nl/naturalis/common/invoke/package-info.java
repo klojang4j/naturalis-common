@@ -1,6 +1,6 @@
 /**
- * A set of classes that uses the {@code java.lang.invoke} package rather than reflection to
- * implement bean manipulation functionality.
+ * Provides a bean reader and bean writer based on method handles and a minimal
+ * amount of reflection.
  *
  * @author Ayco Holleman
  */

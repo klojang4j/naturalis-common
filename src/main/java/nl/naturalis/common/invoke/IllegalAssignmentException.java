@@ -6,8 +6,8 @@ import static nl.naturalis.common.ClassMethods.simpleClassName;
 import static nl.naturalis.common.ObjectMethods.ifNotNull;
 
 /**
- * Thrown by a {@link BeanWriter} if it failed to write a value to a property, for example because
- * of a type mismatch.
+ * Thrown by a {@link BeanWriter} if it failed to write a value to a property, for
+ * example because of a type mismatch.
  */
 public final class IllegalAssignmentException extends InvokeException {
 

@@ -238,49 +238,49 @@ public class ArrayMethodsTest {
   public void asPrimitiveArray00() {
     Integer[] ints = {1, 2, 3, 4, 5};
     int[] expected = {1, 2, 3, 4, 5};
-    assertArrayEquals(expected, asPrimitiveArray(ints));
+    assertArrayEquals(expected, unbox(ints));
   }
 
   @Test
   public void asPrimitiveArray01() {
     Integer[] ints = {1, 2, null, 4, 5};
-    assertArrayEquals(ints(1, 2, 0, 4, 5), asPrimitiveArray(ints));
+    assertArrayEquals(ints(1, 2, 0, 4, 5), unbox(ints));
   }
 
   @Test
   public void asPrimitiveArray02() {
     Integer[] ints = {1, 2, null, 4, 5};
     int[] expected = {1, 2, 42, 4, 5};
-    assertArrayEquals(expected, asPrimitiveArray(ints, 42));
+    assertArrayEquals(expected, unbox(ints, 42));
   }
 
   @Test
   public void asWrapperArray00() {
     assertArrayEquals(
         new Integer[] {1, 2, 3, 4, 5},
-        toWrapperArray(new int[] {1, 2, 3, 4, 5}));
+        box(new int[] {1, 2, 3, 4, 5}));
     assertArrayEquals(
         new Long[] {1L, 2L, 3L, 4L, 5L},
-        toWrapperArray(new long[] {1, 2, 3, 4, 5}));
+        box(new long[] {1, 2, 3, 4, 5}));
     assertArrayEquals(
         new Double[] {1D, 2D, 3D, 4D, 5D},
-        toWrapperArray(new double[] {1, 2, 3, 4, 5}));
+        box(new double[] {1, 2, 3, 4, 5}));
     assertArrayEquals(
         new Float[] {1F, 2F, 3F, 4F, 5F},
-        toWrapperArray(new float[] {1, 2, 3, 4, 5}));
+        box(new float[] {1, 2, 3, 4, 5}));
     assertArrayEquals(
         new Short[] {1, 2, 3, 4, 5},
-        toWrapperArray(new short[] {1, 2, 3, 4, 5}));
+        box(new short[] {1, 2, 3, 4, 5}));
     assertArrayEquals(
         new Byte[] {1, 2, 3, 4, 5},
-        toWrapperArray(new byte[] {1, 2, 3, 4, 5}));
+        box(new byte[] {1, 2, 3, 4, 5}));
     assertArrayEquals(
         new Character[] {1, 2, 3, 4, 5},
-        toWrapperArray(new char[] {1, 2, 3, 4, 5}));
+        box(new char[] {1, 2, 3, 4, 5}));
     assertArrayEquals(
         new Boolean[] {Boolean.FALSE, Boolean.FALSE, Boolean.TRUE},
-        toWrapperArray(new boolean[] {false, false, true}));
-    assertArrayEquals(new Integer[0], toWrapperArray(new int[0]));
+        box(new boolean[] {false, false, true}));
+    assertArrayEquals(new Integer[0], box(new int[0]));
   }
 
   @Test
