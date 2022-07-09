@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import static nl.naturalis.common.CollectionMethods.newHashMap;
 import static nl.naturalis.common.path.ErrorCode.INDEX_OUT_OF_BOUNDS;
-import static nl.naturalis.common.path.ErrorCode.NO_SUCH_KEY;
+import static nl.naturalis.common.path.ErrorCode.*;
 import static org.junit.Assert.*;
 
 public class PathWalkerTest {
@@ -120,7 +120,13 @@ public class PathWalkerTest {
   public void test14() throws MalformedURLException {
     Company shell = shell();
     List<Path> paths = paths("departments.0.employees.0.extraInfo.https://nos^.nl");
-    assertNull(new PathWalker(paths, false).read(shell));
+    try {
+      new PathWalker(paths, false).read(shell);
+    } catch (PathWalkerException e) {
+      assertEquals(NO_SUCH_KEY, e.getErrorCode());
+      return;
+    }
+    fail();
   }
 
   @Test

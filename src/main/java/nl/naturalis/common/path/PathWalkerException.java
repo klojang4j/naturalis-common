@@ -87,9 +87,15 @@ public final class PathWalkerException extends RuntimeException {
     return () -> new PathWalkerException(TYPE_NOT_SUPPORTED, msg);
   }
 
-  static Factory notModifiable(Path path, Class<?> type, String method) {
-    String fmt = "%s found at %s does not support %s operation";
-    String msg = String.format(fmt, simpleClassName(type), path, method);
+  static Factory notModifiable(Path path,
+      int segment,
+      Class<?> type) {
+    String fmt = "Path %s, segment %s: %s found at %s appears to be unmodifiable";
+    String msg = String.format(fmt,
+        path,
+        segment,
+        simpleClassName(type),
+        path.segment(segment));
     return () -> new PathWalkerException(NOT_MODIFIABLE, msg);
   }
 
@@ -98,10 +104,10 @@ public final class PathWalkerException extends RuntimeException {
       KeyDeserializationException exc) {
     String msg;
     if (exc.getMessage() == null) {
-      String fmt = "Error while processing segment %s of %s: failed to deserialize %s into map key";
-      msg = String.format(fmt, segment, path, path.segment(segment));
+      String fmt = "Path %s, segment %s: failed to deserialize \"%s\" into map key";
+      msg = String.format(fmt, path, segment, path.segment(segment));
     } else {
-      String fmt = "Error while processing segment %s of %s: failed to deserialize %s into map key";
+      String fmt = "Path %s, segment %s: %s";
       msg = String.format(fmt, segment, path, exc.getMessage());
     }
     return () -> new PathWalkerException(KEY_DESERIALIZATION_FAILED, msg);

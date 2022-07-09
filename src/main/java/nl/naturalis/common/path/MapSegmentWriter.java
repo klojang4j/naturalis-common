@@ -3,8 +3,7 @@ package nl.naturalis.common.path;
 import java.util.Map;
 
 import static nl.naturalis.common.path.ErrorCode.*;
-import static nl.naturalis.common.path.PathWalkerException.keyDeserializationFailed;
-import static nl.naturalis.common.path.PathWalkerException.unexpectedError;
+import static nl.naturalis.common.path.PathWalkerException.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 final class MapSegmentWriter extends SegmentWriter<Map> {
@@ -26,7 +25,11 @@ final class MapSegmentWriter extends SegmentWriter<Map> {
         return deadEnd(keyDeserializationFailed(path, segment, e));
       }
     }
-    map.put(key, value);
+    try {
+      map.put(key, value);
+    } catch (UnsupportedOperationException e) {
+      return deadEnd(notModifiable(path, segment, Map.class));
+    }
     return true;
   }
 

@@ -26,7 +26,7 @@ final class ListSegmentWriter extends SegmentWriter<List> {
       try {
         list.set(opt.getAsInt(), value);
       } catch (UnsupportedOperationException e) {
-        return deadEnd(notModifiable(path.parent(), List.class, "set"));
+        return deadEnd(notModifiable(path.parent(), segment, List.class));
       }
       return true;
     }

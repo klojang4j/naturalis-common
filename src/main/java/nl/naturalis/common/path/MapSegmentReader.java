@@ -22,7 +22,11 @@ final class MapSegmentReader extends SegmentReader<Map<?, ?>> {
         return deadEnd(keyDeserializationFailed(path, segment, e));
       }
     }
-    return new ObjectReader(se, kd).read(map.get(key), path, ++segment);
+    Object val = map.get(key);
+    if (val == null && !map.containsKey(key)) {
+      return deadEnd(noSuchKey(path, segment, key));
+    }
+    return new ObjectReader(se, kd).read(val, path, ++segment);
   }
 
 }
