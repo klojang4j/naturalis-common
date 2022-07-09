@@ -2,7 +2,6 @@ package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.check.CommonChecks;
-import nl.naturalis.common.collection.TypeGraph;
 import nl.naturalis.common.collection.TypeHashMap;
 import nl.naturalis.common.collection.TypeMap;
 import nl.naturalis.common.function.IntRelation;
@@ -232,18 +231,6 @@ public class ObjectMethods {
     return !isEmpty(arg);
   }
 
-  private static final TypeMap<Predicate> deepNotEmptyChecks = TypeHashMap.build(
-          Predicate.class)
-      .autobox(false)
-      .autoExpand(3)
-      .add(CharSequence.class, ObjectMethods::isNotEmpty)
-      .add(Object[].class, x -> dne((Object[]) x))
-      .add(Collection.class, x -> dne((Collection) x))
-      .add(Map.class, x -> dne((Map) x))
-      .add(Optional.class, x -> dne((Optional) x))
-      .add(Emptyable.class, x -> ((Emptyable) x).isDeepNotEmpty())
-      .freeze();
-
   /**
    * Verifies that the argument is recursively non-empty. More precisely, this method
    * returns {@code true} if any of the following applies:
@@ -269,11 +256,14 @@ public class ObjectMethods {
    * @see CommonChecks#deepNotEmpty()
    */
   public static boolean isDeepNotEmpty(Object arg) {
-    if (arg == null || (isPrimitiveArray(arg) && getArrayLength(arg) > 0)) {
-      return false;
-    }
-    Predicate p = deepNotEmptyChecks.get(arg.getClass());
-    return p == null || p.test(arg);
+    return arg != null
+        && (!(arg instanceof CharSequence cs) || cs.length() > 0)
+        && (!(arg instanceof Collection c) || dne(c))
+        && (!(arg instanceof Map m) || dne(m))
+        && (!(arg instanceof Object[] x) || dne(x))
+        && (!(arg instanceof Optional o) || dne(o))
+        && (!(arg instanceof Emptyable e) || e.isDeepNotEmpty())
+        && (!isPrimitiveArray(arg) || getArrayLength(arg) > 0);
   }
 
   private static boolean dne(Collection coll) {

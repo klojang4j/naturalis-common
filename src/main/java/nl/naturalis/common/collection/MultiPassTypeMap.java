@@ -4,16 +4,14 @@ import nl.naturalis.common.ArrayType;
 import nl.naturalis.common.Tuple2;
 import nl.naturalis.common.check.Check;
 
-import java.io.Serializable;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static nl.naturalis.common.ClassMethods.*;
+import static nl.naturalis.common.ObjectMethods.ifNotNull;
 import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
-import static nl.naturalis.common.check.CommonChecks.subtypeOf;
 
 /*
  * Currently only extended by TypeHashMap, but could be base class for any TypeMap
@@ -68,16 +66,7 @@ abstract sealed class MultiPassTypeMap<V> extends AbstractTypeMap<V> permits
     }
     Tuple2<Class<?>, V> result = null;
     if (type.isArray()) {
-      ArrayType at = ArrayType.forClass(type);
-      if (at.baseType().isPrimitive()) {
-        if (autobox) {
-          result = find(at.box());
-        }
-      } else if (at.baseType().isInterface()) {
-        result = findInterfaceArray(at);
-      } else if ((result = findSuperClassArray(at)) == null) {
-        result = findInterfaceArray(at);
-      }
+      result = findArrayType(type);
     } else if (type.isPrimitive()) {
       if (autobox) {
         result = find(box(type));
@@ -88,7 +77,7 @@ abstract sealed class MultiPassTypeMap<V> extends AbstractTypeMap<V> permits
       result = findInterface(type);
     }
     if (result == null) {
-      return defaultValue();
+      return getDefaultValue();
     }
     return result;
   }
@@ -97,7 +86,7 @@ abstract sealed class MultiPassTypeMap<V> extends AbstractTypeMap<V> permits
     List<Class<?>> supertypes = getAncestors(type);
     for (Class<?> c : supertypes) {
       if (c == Object.class) {
-        break; // don't resort to that one just yet
+        break; // that's our last resort
       }
       V val = backend().get(c);
       if (val != null) {
@@ -118,12 +107,33 @@ abstract sealed class MultiPassTypeMap<V> extends AbstractTypeMap<V> permits
     return null;
   }
 
+  private Tuple2<Class<?>, V> findArrayType(Class<?> type) {
+    ArrayType arrayType = ArrayType.forClass(type);
+    if (arrayType.baseType().isPrimitive()) {
+      if (autobox) {
+        return find(arrayType.box());
+      }
+    }
+    Tuple2<Class<?>, V> result = null;
+    if (arrayType.baseType().isInterface()) {
+      if ((result = findInterfaceArray(arrayType)) != null) {
+        return result;
+      }
+    } else if ((result = findSuperClassArray(arrayType)) != null) {
+      return result;
+    } else if ((result = findInterfaceArray(arrayType)) != null) {
+      return result;
+    }
+    return ifNotNull(backend().get(Object[].class),
+        v -> Tuple2.of(Object[].class, v));
+  }
+
   private Tuple2<Class<?>, V> findSuperClassArray(ArrayType arrayType) {
     List<Class<?>> supertypes = getAncestors(arrayType.baseType());
     for (Class<?> c : supertypes) {
-      // Now we do want to go up all the way to Object.class, because
-      // what we are actually going to ask for is Object[].class (or
-      // whatever the dimensionality of the array type)
+      if (c == Object.class) {
+        break;
+      }
       Class<?> arrayClass = arrayType.toClass(c);
       V val = backend().get(arrayClass);
       if (val != null) {
@@ -135,7 +145,6 @@ abstract sealed class MultiPassTypeMap<V> extends AbstractTypeMap<V> permits
 
   private Tuple2<Class<?>, V> findInterfaceArray(ArrayType arrayType) {
     Set<Class<?>> supertypes = getAllInterfaces(arrayType.baseType());
-    supertypes.add(Object.class); // e.g. Serializable[] < Object[] !
     for (Class<?> c : supertypes) {
       Class<?> arrayClass = arrayType.toClass(c);
       V val = backend().get(arrayClass);
@@ -150,7 +159,9 @@ abstract sealed class MultiPassTypeMap<V> extends AbstractTypeMap<V> permits
   private final V NULL = (V) new Object();
   private Tuple2<Class<?>, V> defVal;
 
-  private Tuple2<Class<?>, V> defaultValue() {
+  // The value associated with Object.class, or null if
+  // the map does not contain key Object.class
+  private Tuple2<Class<?>, V> getDefaultValue() {
     if (defVal == null) {
       V val = ifNull(backend().get(Object.class), NULL);
       defVal = new Tuple2<>(Object.class, val);
