@@ -1,36 +1,38 @@
 package nl.naturalis.common.path;
 
-import static nl.naturalis.common.ObjectMethods.isEmpty;
-import static nl.naturalis.common.path.PathWalkerException.*;
-import static nl.naturalis.common.path.ErrorCode.*;
-
-import java.util.function.Function;
-
 import nl.naturalis.common.invoke.BeanWriter;
 import nl.naturalis.common.invoke.NoPublicSettersException;
-import nl.naturalis.common.path.PathWalker.OnError;
+
+import static nl.naturalis.common.ObjectMethods.isEmpty;
+import static nl.naturalis.common.path.PathWalkerException.noSuchProperty;
+import static nl.naturalis.common.path.PathWalkerException.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 final class BeanSegmentWriter extends SegmentWriter<Object> {
 
-  BeanSegmentWriter(OnError oe, Function<Path, Object> kd) {
-    super(oe, kd);
+  BeanSegmentWriter(boolean suppressExceptions, KeyDeserializer keyDeserializer) {
+    super(suppressExceptions, keyDeserializer);
   }
 
   @Override
-  ErrorCode write(Object bean, Path path, Object value) throws Throwable {
-    String segment = path.segment(-1);
-    if (isEmpty(segment)) {
-      return error(EMPTY_SEGMENT, () -> emptySegment(path));
+  boolean write(Object bean, Path path, Object value) {
+    int segment = path.size() - 1;
+    String property = path.segment(segment);
+    if (isEmpty(property)) {
+      return deadEnd(emptySegment(path, segment));
     }
     BeanWriter bw;
     try {
       bw = new BeanWriter(bean.getClass());
     } catch (NoPublicSettersException e) {
-      return error(TERMINAL_VALUE, () -> terminalValue(path));
+      return deadEnd(terminalValue(path, segment, bean.getClass()));
     }
-    bw.set(bean, segment, value);
-    return error(OK, null);
+    try {
+      bw.set(bean, property, value);
+      return true;
+    } catch (Throwable t) {
+      return deadEnd(unexpectedError(path, segment, t));
+    }
   }
 
 }

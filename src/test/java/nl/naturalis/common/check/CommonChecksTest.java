@@ -10,6 +10,7 @@ import java.util.*;
 
 import static nl.naturalis.common.ArrayMethods.*;
 import static nl.naturalis.common.check.CommonChecks.*;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 public class CommonChecksTest {
@@ -216,10 +217,12 @@ public class CommonChecksTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void deepNotEmpty06() {
-    Check.that(pack("a",
-            "b",
-            pack("1", "2", pack("X", "Y", pack(EMPTY_STRING_ARRAY)))))
-        .is(deepNotEmpty());
+    Object[] arr0 = pack(EMPTY_STRING_ARRAY);
+    assertSame(EMPTY_STRING_ARRAY, arr0);
+    Object[] arr1 = pack("X", "Y", arr0);
+    Object[] arr2 = pack("1", "2", arr1);
+    Object[] arr3 = pack("a", "b", arr2);
+    Check.that(arr3).is(deepNotEmpty());
   }
 
   @Test(expected = IllegalArgumentException.class)

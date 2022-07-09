@@ -1,37 +1,33 @@
 package nl.naturalis.common.path;
 
-import nl.naturalis.common.path.PathWalker.OnError;
-
 import java.util.Map;
-import java.util.function.Function;
 
 import static nl.naturalis.common.path.ErrorCode.*;
-import static nl.naturalis.common.path.PathWalkerException.exception;
+import static nl.naturalis.common.path.PathWalkerException.keyDeserializationFailed;
+import static nl.naturalis.common.path.PathWalkerException.unexpectedError;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 final class MapSegmentWriter extends SegmentWriter<Map> {
 
-  MapSegmentWriter(OnError oe, Function<Path, Object> kd) {
-    super(oe, kd);
+  MapSegmentWriter(boolean suppressExceptions, KeyDeserializer keyDeserializer) {
+    super(suppressExceptions, keyDeserializer);
   }
 
   @Override
-  ErrorCode write(Map map, Path path, Object value) {
-    String segment = path.segment(-1);
-    Object k;
-    if (segment == null) {
-      k = null;
-    } else if (keyDeserializer() == null) {
-      k = segment;
+  boolean write(Map map, Path path, Object value) {
+    int segment = path.size() - 1;
+    Object key;
+    if (kd == null) {
+      key = path.segment(segment);
     } else {
       try {
-        k = keyDeserializer().apply(path);
-      } catch (Throwable t) {
-        return error(EXCEPTION, () -> exception(path, t));
+        key = kd.deserialize(path, segment);
+      } catch (KeyDeserializationException e) {
+        return deadEnd(keyDeserializationFailed(path, segment, e));
       }
     }
-    map.put(k, value);
-    return error(OK, null);
+    map.put(key, value);
+    return true;
   }
 
 }

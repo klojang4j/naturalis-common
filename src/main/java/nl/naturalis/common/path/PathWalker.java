@@ -1,64 +1,47 @@
 package nl.naturalis.common.path;
 
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.x.Param;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.length;
-import static nl.naturalis.common.check.CommonGetters.size;
-import static nl.naturalis.common.path.ErrorCode.OK;
-import static nl.naturalis.common.path.PathWalker.OnError.RETURN_NULL;
-import static nl.naturalis.common.path.PathWalker.OnError.THROW_EXCEPTION;
 
 /**
- * A {@code PathWalker} lets you read and write deeply nested values using {@link Path} objects. The
- * {@code PathWalker} class is useful for reading large batches of sparsely populated objects. For
- * some of these objects, the {@code PathWalker} may not be able to follow the path all the way to
- * the end, for example because it hit a {@code null} value before it reached the last path segment,
- * or because it hit a terminal value like a primitive or a {@code String}. By default, this will
- * not cause the {@code PathWalker} to throw an exception. It will just return {@code null}.
+ * A {@code PathWalker} lets you read and write deeply nested values using
+ * {@link Path} objects. It can read almost any type of object it encounters as it
+ * walks down the path towards the last path segment: JavaBeans, maps, collections,
+ * arrays, scalars, and opaque types like {@code String}. It can also write to most
+ * of them. A {@code PathWalker} can be useful when processing large batches of
+ * sparsely populated maps or objects and/or it doesn't really matter whether a
+ * deeply nested value is {@code null} or just not present at all. By default, the
+ * {@code PathWalker} will return {@code null} in either case (although you can
+ * change this).
  *
  * @author Ayco Holleman
  */
 @SuppressWarnings({"unchecked"})
 public final class PathWalker {
 
-  /**
-   * Symbolic constants for what to do if a read/write action fails.
-   */
-  public enum OnError {
-    /**
-     * Instructs the {@code PathWalker} to return {@code null}. This is the default behaviour.
-     */
-    RETURN_NULL,
-    /**
-     * Instructs the {@code PathWalker} to return an {@link ErrorCode}.
-     */
-    RETURN_CODE,
-    /**
-     * Instructs the {@code PathWalker} to throw a {@link PathWalkerException}, from which you can
-     * retrieve the {@link ErrorCode} again.
-     */
-    THROW_EXCEPTION
-  }
+  private static final String PATHS = "paths";
 
   private final Path[] paths;
-  private final OnError oe;
-  private final Function<Path, Object> kd;
+  private final boolean se;
+  private final KeyDeserializer kd;
 
   /**
    * Creates a {@code PathWalker} for the specified paths.
    *
-   * @param paths The paths to walk through the provided host objects
+   * @param paths One or more paths representing possibly deeply-nested
+   *     properties
    */
   public PathWalker(Path... paths) {
-    Check.that(paths, "paths").isNot(empty()).is(deepNotNull());
+    Check.that(paths, PATHS).isNot(empty()).is(deepNotNull());
     this.paths = Arrays.copyOf(paths, paths.length);
-    this.oe = RETURN_NULL;
+    this.se = true;
     this.kd = null;
   }
 
@@ -68,9 +51,9 @@ public final class PathWalker {
    * @param paths The paths to walk through the provided host objects
    */
   public PathWalker(String... paths) {
-    Check.that(paths, "paths").isNot(empty()).is(deepNotNull());
+    Check.that(paths, PATHS).isNot(empty()).is(deepNotNull());
     this.paths = Arrays.stream(paths).map(Path::new).toArray(Path[]::new);
-    this.oe = RETURN_NULL;
+    this.se = true;
     this.kd = null;
   }
 
@@ -80,19 +63,23 @@ public final class PathWalker {
    * @param paths The paths to walk through the provided host objects
    */
   public PathWalker(List<Path> paths) {
-    this(paths, RETURN_NULL);
+    this(paths, true);
   }
 
   /**
    * Creates a {@code PathWalker} for the specified paths.
    *
    * @param paths The action to take if a path could not be read or written
-   * @param onError The action to take if the {@code PathWalker} hits a dead end
+   * @param suppressExceptions If {@code true}, the {@code read} methods will
+   *     return {@code null} for paths that could not be read. The {@code write}
+   *     methods will quietly return without having written the value. If
+   *     {@code false}, a {@link PathWalkerException} will be thrown detailing the
+   *     error.
    */
-  public PathWalker(List<Path> paths, OnError onError) {
-    Check.notNull(paths, "paths").has(size(), positive());
+  public PathWalker(List<Path> paths, boolean suppressExceptions) {
+    Check.that(paths, PATHS).isNot(empty()).is(deepNotNull());
     this.paths = paths.toArray(Path[]::new);
-    this.oe = Check.notNull(onError, "onError").ok();
+    this.se = suppressExceptions;
     this.kd = null;
   }
 
@@ -100,147 +87,125 @@ public final class PathWalker {
    * Creates a {@code PathWalker} for the specified paths.
    *
    * @param paths The paths to walk
-   * @param onError The action to take if a path could not be read or written
-   * @param keyDeserializer A function that converts path segments to map keys. You need to
-   *     provide this if the host objects are, or contain, {@link Map} instances with non-string
-   *     keys. The function is given the path up to, and including the path segment that
-   *     <i>represents</i> the key, and it should return the <i>actual</i> key
+   * @param suppressExceptions If {@code true}, the {@code read} methods will
+   *     return {@code null} for paths that could not be read. The {@code write}
+   *     methods will quietly return without having written the value. If
+   *     {@code false}, a {@link PathWalkerException} will be thrown detailing the
+   *     error.
+   * @param keyDeserializer A function that converts path segments to map keys.
+   *     You need to provide this if the host objects are, or contain, {@link Map}
+   *     instances with non-string keys.
    */
-  public PathWalker(List<Path> paths, OnError onError, Function<Path, Object> keyDeserializer) {
-    Check.notNull(paths, "paths").has(size(), positive());
+  public PathWalker(List<Path> paths,
+      boolean suppressExceptions,
+      KeyDeserializer keyDeserializer) {
+    Check.that(paths, PATHS).is(deepNotEmpty());
+    Check.notNull(keyDeserializer, "keyDeserializer");
     this.paths = paths.toArray(Path[]::new);
-    this.oe = Check.notNull(onError, "onError").ok();
-    this.kd = Check.notNull(keyDeserializer, "keyDeserializer").ok();
+    this.se = suppressExceptions;
+    this.kd = keyDeserializer;
   }
 
   // For internal use
-  PathWalker(Path path, OnError oe, Function<Path, Object> kd) {
+  PathWalker(Path path,
+      boolean suppressExceptions,
+      KeyDeserializer keyDeserializer) {
     this.paths = new Path[] {path};
-    this.oe = oe;
-    this.kd = kd;
+    this.se = suppressExceptions;
+    this.kd = keyDeserializer;
   }
 
   /**
-   * Returns the values of all paths within the specified host object.
+   * Returns the values of all paths specified through the constructor.
    *
-   * @param host The object to read the path values from
-   * @return The values of all paths within the specified host object
-   * @throws PathWalkerException
+   * @param host the object to read the values from
+   * @return the values of all paths specified through the constructor
+   * @throws PathWalkerException If {@code suppressExceptions} is false and the
+   *     {@code PathWalker} fails to retrieve the values of one or more paths.
    */
   public Object[] readValues(Object host) throws PathWalkerException {
-    ObjectReader reader = new ObjectReader(oe, kd);
-    return Arrays.stream(paths).map(p -> reader.read(host, p)).toArray();
+    ObjectReader reader = new ObjectReader(se, kd);
+    return Arrays.stream(paths).map(path -> reader.read(host, path, 0)).toArray();
   }
 
   /**
-   * Reads the values of all paths and places them in the provided output array. The length of the
-   * output array must be greater than or equal to the number of paths specified through the
-   * constructor.
+   * Reads the values of all paths specified through the constructor.
    *
-   * @param host The object from which to read the values
-   * @param output An array into which to place the values
-   * @throws PathWalkerException
+   * @param host the object to read the path values from
+   * @param output an array into which to place the values. The length of the
+   *     output array must be equal to, or greater than the number of paths specified
+   *     through the constructor.
+   * @throws PathWalkerException If {@code suppressExceptions} is false and the
+   *     {@code PathWalker} fails to retrieve the values of one or more paths.
    */
   public void readValues(Object host, Object[] output) throws PathWalkerException {
-    Check.notNull(output, "output").has(length(), gte(), paths.length);
-    ObjectReader reader = new ObjectReader(oe, kd);
+    Check.notNull(output, Param.OUTPUT).has(length(), gte(), paths.length);
+    ObjectReader reader = new ObjectReader(se, kd);
     for (int i = 0; i < paths.length; ++i) {
-      output[i] = reader.read(host, paths[i]);
+      output[i] = reader.read(host, paths[i], 0);
     }
   }
 
   /**
-   * Reads the values of all paths and inserts them into the provided path-to-value map.
+   * Reads the values of all paths and inserts them into the provided path-to-value
+   * map.
    *
-   * @param host The object from which to read the values
+   * @param host the object from which to read the values
    * @param output The {@code Map} into which to put the values
-   * @throws PathWalkerException
+   * @throws PathWalkerException If {@code suppressExceptions} is false and the
+   *     {@code PathWalker} fails to retrieve the values of one or more paths.
    */
-  public void readValues(Object host, Map<Path, Object> output) throws PathWalkerException {
-    Check.notNull(output, "output");
-    ObjectReader reader = new ObjectReader(oe, kd);
-    Arrays.stream(paths).forEach(p -> output.put(p, reader.read(host, p)));
+  public void readValues(Object host, Map<Path, Object> output)
+      throws PathWalkerException {
+    Check.notNull(output, Param.OUTPUT);
+    ObjectReader reader = new ObjectReader(se, kd);
+    Arrays.stream(paths).forEach(p -> output.put(p, reader.read(host, p, 0)));
   }
 
   /**
-   * Returns the value of the first path within the specified host object.
+   * Reads the value of the first path specified through the constructor. Convenient
+   * if you specified just one path.
    *
    * @param <T> The type of the value being returned
-   * @param host The object to walk
-   * @return The value referenced by the first path
-   * @throws PathWalkerException
+   * @param host the object from which to read the value
+   * @return the value of the first path specified through the constructor
+   * @throws PathWalkerException If {@code suppressExceptions} is false and the
+   *     {@code PathWalker} fails to retrieve the value of the first path.
    */
   public <T> T read(Object host) {
-    return (T) new ObjectReader(oe, kd).read(host, paths[0]);
+    return (T) new ObjectReader(se, kd).read(host, paths[0], 0);
   }
 
   /**
-   * Writes the specified values to the paths specified through the constructor. The number of
-   * values must equal the number of paths. If {@link OnError} is {@link OnError#RETURN_CODE
-   * RETURN_CODE}, this method turns into a fail-fast method, returning the {@link ErrorCode} of the
-   * first failed assignment, or {@link ErrorCode#OK} if all assignments succeeded. If {@link
-   * OnError} is {@code OnDeadEnd#RETURN_NULL RETURN_NULL}, this method always returns {@code null}
-   * and a write failure will not cause the method to be cut short.
+   * Sets the values of the paths specified through the constructor. The provided
+   * array of values must have the same length as the number of paths.
    *
-   * @param host The object to which to write the values
+   * @param host the object to which to write the values
    * @param values The values to write
-   * @return {@code null} ot the {@code ErrorCode} of the first failed assignment
+   * @return the number of successfully written values
    */
-  public ErrorCode writeValues(Object host, Object... values) {
-    Check.notNull(values, "values").has(length(), eq(), paths.length);
-    ObjectWriter writer = new ObjectWriter(oe, kd);
-    if (oe == RETURN_NULL || oe == THROW_EXCEPTION) {
-      for (int i = 0; i < paths.length; ++i) {
-        writer.write(host, paths[i], values[i]);
-      }
-      return null;
-    }
+  public int writeValues(Object host, Object... values) {
+    Check.notNull(values, Param.VALUES).has(length(), eq(), paths.length);
+    ObjectWriter writer = new ObjectWriter(se, kd);
+    int x = 0;
     for (int i = 0; i < paths.length; ++i) {
-      ErrorCode code = writer.write(host, paths[i], values[i]);
-      if (code != OK) {
-        return code;
+      if (writer.write(host, paths[i], values[i])) {
+        ++x;
       }
     }
-    return OK;
+    return x;
   }
 
   /**
-   * Writes the specified values to the paths specified through the constructor. The number of
-   * values must equal the number of paths. A write failure will never cause this method to be cut
-   * short. If {@link OnError} is {@code OnDeadEnd #RETURN_NULL RETURN_NULL}, this method returns
-   * {@code null}. If it is {@code OnDeadEnd#RETURN_CODE RETURN_CODE}, an array of {@link ErrorCode
-   * error codes} is returned.
+   * Sets the value of the first path specified through the constructor. Convenient
+   * if you specified just one path.
    *
-   * @param host The object to which to write the values
-   * @param values The values to write
-   * @return {@code null} or an array of {@code ErrorCode} instances, depending on the value of
-   *     {@code OnDeadEnd}
-   */
-  public ErrorCode[] writeAll(Object host, Object... values) {
-    Check.notNull(values, "values").has(length(), eq(), paths.length);
-    ObjectWriter writer = new ObjectWriter(oe, kd);
-    if (oe == RETURN_NULL || oe == THROW_EXCEPTION) {
-      for (int i = 0; i < paths.length; ++i) {
-        writer.write(host, paths[i], values[i]);
-      }
-      return null;
-    }
-    ErrorCode[] codes = new ErrorCode[paths.length];
-    for (int i = 0; i < paths.length; ++i) {
-      codes[i] = writer.write(host, paths[i], values[i]);
-    }
-    return codes;
-  }
-
-  /**
-   * Sets the value of the first path.
-   *
-   * @param host The object into which to write the value
+   * @param host the object to write the value to
    * @param value The value to write
-   * @return {@code null} or an  {@code ErrorCode}, depending on the value of {@code OnDeadEnd}
+   * @return {@code true} if the value was successfully written
    */
-  public ErrorCode write(Object host, Object value) {
-    return new ObjectWriter(oe, kd).write(host, paths[0], value);
+  public boolean write(Object host, Object value) {
+    return new ObjectWriter(se, kd).write(host, paths[0], value);
   }
 
 }

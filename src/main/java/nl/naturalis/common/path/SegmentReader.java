@@ -1,33 +1,23 @@
 package nl.naturalis.common.path;
 
-import nl.naturalis.common.path.PathWalker.OnError;
-
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 abstract sealed class SegmentReader<T> permits ArraySegmentReader, BeanSegmentReader,
     CollectionSegmentReader, MapSegmentReader, PrimitiveArraySegmentReader {
 
-  private final OnError oe;
-  private final Function<Path, Object> kd;
+  final boolean se;
+  final KeyDeserializer kd;
 
-  SegmentReader(OnError oe, Function<Path, Object> kd) {
-    this.oe = oe;
-    this.kd = kd;
+  SegmentReader(boolean suppressExceptions, KeyDeserializer keyDeserializer) {
+    this.se = suppressExceptions;
+    this.kd = keyDeserializer;
   }
 
-  abstract Object read(T obj, Path path) throws Throwable;
+  abstract Object read(T obj, Path path, int segment);
 
-  ErrorCode error(ErrorCode code, Supplier<PathWalkerException> exc) {
-    return PathWalkerException.error(oe, code, exc);
-  }
-
-  ObjectReader nextSegmentReader() {
-    return new ObjectReader(oe, kd);
-  }
-
-  Function<Path, Object> keyDeserializer() {
-    return kd;
+  Object deadEnd(PathWalkerException.Factory excFactory) {
+    if (se) {
+      return null;
+    }
+    throw excFactory.get();
   }
 
 }

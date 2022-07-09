@@ -1,33 +1,26 @@
 package nl.naturalis.common.path;
 
-import nl.naturalis.common.NumberMethods;
-import nl.naturalis.common.path.PathWalker.OnError;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.OptionalInt;
-import java.util.function.Function;
 
-import static nl.naturalis.common.ObjectMethods.isEmpty;
-import static nl.naturalis.common.path.ErrorCode.*;
-import static nl.naturalis.common.path.PathWalkerException.*;
+import static nl.naturalis.common.NumberMethods.toInt;
+import static nl.naturalis.common.path.PathWalkerException.indexExpected;
+import static nl.naturalis.common.path.PathWalkerException.indexOutOfBounds;
 
 @SuppressWarnings("rawtypes")
 final class CollectionSegmentReader extends SegmentReader<Collection> {
 
-  CollectionSegmentReader(OnError oe, Function<Path, Object> kd) {
-    super(oe, kd);
+  CollectionSegmentReader(boolean suppressExceptions,
+      KeyDeserializer keyDeserializer) {
+    super(suppressExceptions, keyDeserializer);
   }
 
   @Override
-  Object read(Collection collection, Path path) {
-    String segment = path.segment(0);
-    if (isEmpty(segment)) {
-      return error(EMPTY_SEGMENT, () -> emptySegment(path));
-    }
-    OptionalInt opt = NumberMethods.toInt(segment);
+  Object read(Collection collection, Path path, int segment) {
+    OptionalInt opt = toInt(path.segment(segment));
     if (opt.isEmpty()) {
-      return error(INDEX_EXPECTED, () -> indexExpected(path));
+      return deadEnd(indexExpected(path, segment));
     }
     int idx = opt.getAsInt();
     if (idx < collection.size()) {
@@ -35,10 +28,10 @@ final class CollectionSegmentReader extends SegmentReader<Collection> {
       for (; idx != 0 && iter.hasNext(); --idx, iter.next())
         ;
       if (iter.hasNext()) {
-        return nextSegmentReader().read(iter.next(), path.shift());
+        return new ObjectReader(se, kd).read(iter.next(), path, ++segment);
       }
     }
-    return error(INDEX_OUT_OF_BOUNDS, () -> indexOutOfBounds(path));
+    return deadEnd(indexOutOfBounds(path, segment));
   }
 
 }

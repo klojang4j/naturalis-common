@@ -70,11 +70,11 @@ public final class BeanReader<T> {
    *
    * @param beanClass the bean class
    * @param strictNaming If {@code false}, all methods with a zero-length
-   *     parameter list and a non-{@code void} return type, except {@code
-   *     getClass()}, {@code hashCode()} and {@code toString()}, will be regarded as
-   *     getters. Otherwise JavaBeans naming conventions will be applied regarding
-   *     which methods qualify as getters, with the exception that methods returning
-   *     a {@link Boolean} are allowed to have a name starting with "is".
+   *     parameter list and a non-{@code void} return type, except
+   *     {@code getClass()}, {@code hashCode()} and {@code toString()}, will be
+   *     regarded as getters. Otherwise JavaBeans naming conventions will be applied
+   *     regarding which methods qualify as getters, with the exception that methods
+   *     returning a {@link Boolean} are allowed to have a name starting with "is".
    * @param includeExclude whether to include or exclude the specified
    *     properties
    * @param properties the properties to be included/excluded
@@ -122,20 +122,36 @@ public final class BeanReader<T> {
   }
 
   /**
-   * Returns the bean properties that will actually be read by this {@code
-   * BeanReader}.
+   * Returns {@code true} if the specified string represents a property that can be
+   * read by this {@code BeanReader}. Note that this check is already done by the
+   * {@link #read(Object, String) read} method before it will actually attempt to
+   * read from the provided bean. Only perform this check if there is a considerable
+   * chance that the provided string is <i>not</i> a readable property.
    *
-   * @return the bean properties that will actually be read by this {@code
-   *     BeanReader}
+   * @param property The string to be tested
+   * @return {@code true} if the specified string represents a property that can be
+   *     read by this {@code BeanReader}
+   * @see #getReadableProperties()
    */
-  public Set<String> getIncludedProperties() {
+  public boolean canRead(String property) {
+    return getters.keySet().contains(property);
+  }
+
+  /**
+   * Returns the bean properties that this {@code BeanReader} will read. That will be
+   * all accessible properties minus the properties excluded through the constructor
+   * (if any).
+   *
+   * @return the bean properties that this {@code BeanReader} will read
+   */
+  public Set<String> getReadableProperties() {
     return getters.keySet();
   }
 
   /**
    * Returns the {@link Getter getters} used by the {@code BeanReader} to read bean
-   * properties. The returned {@code Map} maps the name of a property to the {@code
-   * Getter} used to read it.
+   * properties. The returned {@code Map} maps the name of a property to the
+   * {@code Getter} used to read it.
    *
    * @return all getters used to read bean properties.
    */

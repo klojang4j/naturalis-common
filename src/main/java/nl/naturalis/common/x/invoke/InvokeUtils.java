@@ -12,8 +12,7 @@ import java.util.*;
 
 import static java.lang.Character.isUpperCase;
 import static java.lang.Character.toLowerCase;
-import static java.lang.invoke.MethodHandles.arrayConstructor;
-import static java.lang.invoke.MethodHandles.publicLookup;
+import static java.lang.invoke.MethodHandles.*;
 import static java.lang.invoke.MethodType.methodType;
 import static java.lang.reflect.Modifier.isStatic;
 import static nl.naturalis.common.ArrayMethods.pack;
@@ -88,6 +87,32 @@ public class InvokeUtils {
       return (T[]) mh.invoke(length);
     } catch (Throwable t) {
       throw ExceptionMethods.uncheck(t);
+    }
+  }
+
+  public static int getArrayLength(Object array) {
+    try {
+      return (int) arrayLength(array.getClass()).invoke(array);
+    } catch (Throwable t) {
+      throw InvokeException.arrayInspectionFailed(array, t);
+    }
+  }
+
+  // Range check not included !!
+  public static <T> T getArrayElement(Object array, int idx) {
+    try {
+      return (T) arrayElementGetter(array.getClass()).invoke(array, idx);
+    } catch (Throwable t) {
+      throw InvokeException.arrayInspectionFailed(array, t);
+    }
+  }
+
+  // Range check not included !!
+  public static void setArrayElement(Object array, int idx, Object value) {
+    try {
+      arrayElementSetter(array.getClass()).invoke(array, idx, value);
+    } catch (Throwable t) {
+      throw InvokeException.arrayInspectionFailed(array, t);
     }
   }
 

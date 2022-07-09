@@ -4,6 +4,8 @@ import nl.naturalis.common.ArrayType;
 import nl.naturalis.common.Tuple2;
 import nl.naturalis.common.check.Check;
 
+import java.io.Serializable;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +13,7 @@ import java.util.Set;
 import static nl.naturalis.common.ClassMethods.*;
 import static nl.naturalis.common.ObjectMethods.ifNull;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
+import static nl.naturalis.common.check.CommonChecks.subtypeOf;
 
 /*
  * Currently only extended by TypeHashMap, but could be base class for any TypeMap
@@ -132,6 +135,7 @@ abstract sealed class MultiPassTypeMap<V> extends AbstractTypeMap<V> permits
 
   private Tuple2<Class<?>, V> findInterfaceArray(ArrayType arrayType) {
     Set<Class<?>> supertypes = getAllInterfaces(arrayType.baseType());
+    supertypes.add(Object.class); // e.g. Serializable[] < Object[] !
     for (Class<?> c : supertypes) {
       Class<?> arrayClass = arrayType.toClass(c);
       V val = backend().get(arrayClass);

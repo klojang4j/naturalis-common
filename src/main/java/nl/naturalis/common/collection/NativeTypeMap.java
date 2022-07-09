@@ -44,7 +44,7 @@ abstract sealed class NativeTypeMap<V, TYPE_NODE extends AbstractTypeNode> exten
           val = root.value();
         }
       }
-    } else if (isPrimitiveArray(type)) {
+    } else if (isDeeplyPrimitiveArray(type)) {
       if ((val = root.getPrimitive(type)) == null) {
         if (autobox) {
           val = root.get(ArrayType.forClass(type).box());
@@ -75,7 +75,7 @@ abstract sealed class NativeTypeMap<V, TYPE_NODE extends AbstractTypeNode> exten
       } else {
         found = containsPrimitiveType(type);
       }
-    } else if (isPrimitiveArray(type)) {
+    } else if (isDeeplyPrimitiveArray(type)) {
       if (autobox) {
         Class<?> boxed = ArrayType.forClass(type).box();
         found = containsPrimitiveOrBoxedType(type, boxed);

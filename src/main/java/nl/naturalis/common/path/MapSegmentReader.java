@@ -1,28 +1,28 @@
 package nl.naturalis.common.path;
 
-import nl.naturalis.common.path.PathWalker.OnError;
-
 import java.util.Map;
-import java.util.function.Function;
 
-import static nl.naturalis.common.path.ErrorCode.NO_SUCH_KEY;
-import static nl.naturalis.common.path.PathWalkerException.noSuchKey;
+import static nl.naturalis.common.path.PathWalkerException.*;
 
-@SuppressWarnings("rawtypes")
-final class MapSegmentReader extends SegmentReader<Map<String, Object>> {
+final class MapSegmentReader extends SegmentReader<Map<?, ?>> {
 
-  MapSegmentReader(OnError oe, Function<Path, Object> kd) {
-    super(oe, kd);
+  MapSegmentReader(boolean suppressExceptions, KeyDeserializer keyDeserializer) {
+    super(suppressExceptions, keyDeserializer);
   }
 
   @Override
-  Object read(Map map, Path path) {
-    String segment = path.segment(0);
-    Object key = keyDeserializer() == null ? segment : keyDeserializer().apply(path);
-    if (map.containsKey(key)) {
-      return nextSegmentReader().read(map.get(key), path.shift());
+  Object read(Map<?, ?> map, Path path, int segment) {
+    Object key;
+    if (kd == null) {
+      key = path.segment(segment);
+    } else {
+      try {
+        key = kd.deserialize(path, segment);
+      } catch (KeyDeserializationException e) {
+        return deadEnd(keyDeserializationFailed(path, segment, e));
+      }
     }
-    return error(NO_SUCH_KEY, () -> noSuchKey(path));
+    return new ObjectReader(se, kd).read(map.get(key), path, ++segment);
   }
 
 }

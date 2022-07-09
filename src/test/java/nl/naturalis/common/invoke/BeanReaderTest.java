@@ -65,19 +65,26 @@ public class BeanReaderTest {
 
   @Test
   public void test02() {
-    BeanReader<Person> reader = new BeanReader<>(Person.class, "firstName", "lastName");
-    assertEquals(Set.of("firstName", "lastName"), reader.getIncludedProperties());
+    BeanReader<Person> reader = new BeanReader<>(Person.class,
+        "firstName",
+        "lastName");
+    assertEquals(Set.of("firstName", "lastName"), reader.getReadableProperties());
   }
 
   @Test(expected = NoSuchPropertyException.class)
   public void test04() {
-    BeanReader<Person> reader = new BeanReader<>(Person.class, "firstName", "lastName");
+    BeanReader<Person> reader = new BeanReader<>(Person.class,
+        "firstName",
+        "lastName");
     reader.read(new Person(), "lastModified");
   }
 
   @Test(expected = NoSuchPropertyException.class)
   public void test05() {
-    BeanReader<Person> reader = new BeanReader<>(Person.class, EXCLUDE, "firstName", "lastName");
+    BeanReader<Person> reader = new BeanReader<>(Person.class,
+        EXCLUDE,
+        "firstName",
+        "lastName");
     reader.read(new Person(), "firstName");
   }
 

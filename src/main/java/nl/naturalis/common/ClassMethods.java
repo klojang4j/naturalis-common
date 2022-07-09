@@ -78,7 +78,7 @@ public final class ClassMethods {
    *
    * @param instance The object to test
    * @param type The class or interface to test the object against
-   * @return Whether the 1st argument is an instance of the 2nd argument
+   * @return whether the 1st argument is an instance of the 2nd argument
    */
   public static boolean isA(Object instance, Class<?> type) {
     Check.notNull(instance, "instance");
@@ -94,8 +94,8 @@ public final class ClassMethods {
    *
    * @param class0 The class or interface you are interested in
    * @param class1 The class or interface to compare it against
-   * @return {@code true} if the first class is a subtype of the second class; {@code
-   *     false} otherwise
+   * @return {@code true} if the first class is a subtype of the second class;
+   *     {@code false} otherwise
    * @see CommonChecks#subtypeOf()
    */
   public static boolean isSubtype(Class<?> class0, Class<?> class1) {
@@ -126,8 +126,8 @@ public final class ClassMethods {
    * that this does not include {@code char.class}, just like {@link Character} does
    * not extend {@link Number}.
    *
-   * @param clazz The class to test
-   * @return Whether the specified class is one of the primitive number classes
+   * @param clazz the class to test
+   * @return whether the specified class is one of the primitive number classes
    */
   public static boolean isPrimitiveNumber(Class<?> clazz) {
     Check.notNull(clazz);
@@ -135,11 +135,11 @@ public final class ClassMethods {
   }
 
   /**
-   * Returns {@code true} if the specified type is a primitive array as per {@link
-   * #isPrimitiveArray(Class)}.
+   * Returns {@code true} if the specified type is a primitive array as per
+   * {@link #isPrimitiveArray(Class)}.
    *
    * @param obj The object to test
-   * @return Whether it is a primitive array class
+   * @return whether it is a primitive array class
    */
   public static boolean isPrimitiveArray(Object obj) {
     if (obj instanceof Class c) {
@@ -149,24 +149,35 @@ public final class ClassMethods {
   }
 
   /**
-   * Returns {@code true} if the specified type is an array type and if the
-   * <i>deepest level</i> component is a primitive typr; {@code false} otherwise.
-   * So this method will return true for {@code int[]}, {@code int[][]}, {@code
-   * int[][][]}, etc. NB this method will return {@code false} if the argument is
-   * {@code null}.
+   * Returns {@code true} if the specified type is an array of a primitive type.
    *
-   * @param clazz The class to test
-   * @return Whether it is a primitive array class
+   * @param clazz the class to test
+   * @return whether it is a primitive array class
    */
   public static boolean isPrimitiveArray(Class<?> clazz) {
+    Check.notNull(clazz);
+    return clazz.isArray() && clazz.getComponentType().isPrimitive();
+  }
+
+  /**
+   * Returns {@code true} if the specified type is an array whose deepest-level
+   * component type is a primitive type. So this method will return {@code true} not
+   * just for {@code int[]}, but also for {@code int[][]}, {@code int[][][]}, etc.
+   *
+   * @param clazz the class to test
+   * @return {@code true} if the specified type is an array whose deepest-level
+   *     component type is a primitive type
+   */
+  public static boolean isDeeplyPrimitiveArray(Class<?> clazz) {
+    Check.notNull(clazz);
     return clazz.isArray() && ArrayType.forClass(clazz).baseType().isPrimitive();
   }
 
   /**
-   * Returns whether the specified is one of the primitive wrapper classes.
+   * Returns whether the specified class is one of the primitive wrapper classes.
    *
-   * @param clazz The class to test
-   * @return Whether the specified is one of the primitive wrapper classes
+   * @param clazz the class to test
+   * @return whether the specified class is one of the primitive wrapper classes
    */
   public static boolean isWrapper(Class<?> clazz) {
     return W2P.containsKey(clazz);
@@ -180,7 +191,7 @@ public final class ClassMethods {
    *
    * @param classToTest The class to test
    * @param primitiveClass Supposedly a primitively class
-   * @return Whether instances of the first class will be auto-unboxed into instances
+   * @return whether instances of the first class will be auto-unboxed into instances
    *     of the second class
    */
   public static boolean isAutoUnboxedAs(Class<?> classToTest,
@@ -198,7 +209,7 @@ public final class ClassMethods {
    *
    * @param classToTest The class to test
    * @param wrapperClass Supposedly a wrapper class
-   * @return Whether instances of the first class will be auto-unboxed into instances
+   * @return whether instances of the first class will be auto-unboxed into instances
    *     of the second class
    */
   public static boolean isAutoBoxedAs(Class<?> classToTest, Class<?> wrapperClass) {
@@ -211,7 +222,7 @@ public final class ClassMethods {
    * If the specified class is a primitive type, returns the corresponding primitive
    * wrapper class, else the specified class itself.
    *
-   * @param clazz The (primitive) class
+   * @param clazz the (primitive) class
    * @return The corresponding wrapper class
    */
   public static Class<?> box(Class<?> clazz) {
@@ -223,7 +234,7 @@ public final class ClassMethods {
    * If the specified class is a primitive wrapper class, returns the corresponding
    * primitive type, else the specified class itself.
    *
-   * @param clazz The (wrapper) class
+   * @param clazz the (wrapper) class
    * @return The corresponding primitive class
    */
   public static Class<?> unbox(Class<?> clazz) {
@@ -232,10 +243,10 @@ public final class ClassMethods {
   }
 
   /**
-   * Returns the superclasses of the specified class up to, and including {@code
-   * Object.class}.
+   * Returns the superclasses of the specified class up to, and including
+   * {@code Object.class}.
    *
-   * @param clazz The class for which to get the superclasses
+   * @param clazz the class for which to get the superclasses
    * @return The superclasses of the specified class.
    */
   public static List<Class<?>> getAncestors(Class<?> clazz) {
@@ -266,7 +277,7 @@ public final class ClassMethods {
    * argument is a top-level interface, or if the class is a regular class that does
    * not implement any interface (directly, or indirectly via its superclass).
    *
-   * @param clazz The {@code Class} object for which to retrieve the interface
+   * @param clazz the {@code Class} object for which to retrieve the interface
    *     hierarchy
    * @return The interface hierarchy for the specified {@code Class} object
    */
@@ -291,8 +302,8 @@ public final class ClassMethods {
 
   /**
    * Returns a prettified version of the fully-qualified class name. If the argument
-   * is an array, {@link #arrayClassName(Object)} is returned, else {@code
-   * obj.getClass().getName()}.
+   * is an array, {@link #arrayClassName(Object)} is returned, else
+   * {@code obj.getClass().getName()}.
    *
    * @param obj The object whose class name to return
    * @return The class name
@@ -307,10 +318,10 @@ public final class ClassMethods {
 
   /**
    * Returns a prettified version of the fully-qualified class name. If the argument
-   * is an array class, {@link #arrayClassName(Object)} is returned, else {@code
-   * obj.getClass().getName()}.
+   * is an array class, {@link #arrayClassName(Object)} is returned, else
+   * {@code obj.getClass().getName()}.
    *
-   * @param clazz The class whose name to return
+   * @param clazz the class whose name to return
    * @return The class name
    */
   public static String className(Class<?> clazz) {
@@ -320,8 +331,8 @@ public final class ClassMethods {
 
   /**
    * Returns a prettified version of the simple class name. If the argument is an
-   * array, {@link #arrayClassSimpleName(Object)} is returned, else {@code
-   * obj.getClass().getSimpleName()}.
+   * array, {@link #arrayClassSimpleName(Object)} is returned, else
+   * {@code obj.getClass().getSimpleName()}.
    *
    * @param obj The object whose class name to return
    * @return The class name
@@ -336,10 +347,10 @@ public final class ClassMethods {
 
   /**
    * Returns a prettified version of the simple class name. If the argument is an
-   * array class, {@link #arrayClassSimpleName(Class)} is returned, else {@code
-   * obj.getClass().getSimpleName()}.
+   * array class, {@link #arrayClassSimpleName(Class)} is returned, else
+   * {@code obj.getClass().getSimpleName()}.
    *
-   * @param clazz The class whose ame to return
+   * @param clazz the class whose ame to return
    * @return The class name
    */
   public static String simpleClassName(Class<?> clazz) {
@@ -349,8 +360,9 @@ public final class ClassMethods {
 
   /**
    * Returns a description for the specified array that is a bit easier on the eye
-   * than what you get from {@link Class#getName()}. For example {@code
-   * arrayClassName(new String[0][0])} will return {@code java.lang.String[][]}.
+   * than what you get from {@link Class#getName()}. For example
+   * {@code arrayClassName(new String[0][0])} will return
+   * {@code java.lang.String[][]}.
    *
    * @param array The array
    * @return A more intuitive description of the array's type
@@ -377,8 +389,8 @@ public final class ClassMethods {
 
   /**
    * Returns a short description for the specified array that is a bit easier on they
-   * eye than what you get from {@link Class#getSimpleName()}. For example {@code
-   * arrayClassName(new String[0][0])} will return {@code String[][]}.
+   * eye than what you get from {@link Class#getSimpleName()}. For example
+   * {@code arrayClassName(new String[0][0])} will return {@code String[][]}.
    *
    * @param array The array
    * @return The simple name of the array type

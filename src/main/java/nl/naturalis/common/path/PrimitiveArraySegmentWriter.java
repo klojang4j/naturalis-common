@@ -1,39 +1,34 @@
 package nl.naturalis.common.path;
 
-import nl.naturalis.common.NumberMethods;
-import nl.naturalis.common.path.PathWalker.OnError;
-
 import java.util.OptionalInt;
-import java.util.function.Function;
 
 import static java.lang.invoke.MethodHandles.arrayElementSetter;
 import static java.lang.invoke.MethodHandles.arrayLength;
-import static nl.naturalis.common.ObjectMethods.isEmpty;
-import static nl.naturalis.common.path.ErrorCode.*;
+import static nl.naturalis.common.NumberMethods.toInt;
 import static nl.naturalis.common.path.PathWalkerException.*;
+import static nl.naturalis.common.x.invoke.InvokeUtils.*;
 
 final class PrimitiveArraySegmentWriter extends SegmentWriter<Object> {
 
-  PrimitiveArraySegmentWriter(OnError oe, Function<Path, Object> kd) {
-    super(oe, kd);
+  PrimitiveArraySegmentWriter(boolean suppressExceptions,
+      KeyDeserializer keyDeserializer) {
+    super(suppressExceptions, keyDeserializer);
   }
 
   @Override
-  ErrorCode write(Object array, Path path, Object value) throws Throwable {
-    String segment = path.segment(-1);
-    if (isEmpty(segment)) {
-      return error(EMPTY_SEGMENT, () -> emptySegment(path));
-    }
-    OptionalInt opt = NumberMethods.toInt(segment);
+  boolean write(Object array, Path path, Object value) {
+    int segment = path.size() - 1;
+    OptionalInt opt = toInt(path.segment(segment));
     if (opt.isEmpty()) {
-      return error(INDEX_EXPECTED, () -> indexExpected(path));
+      return deadEnd(indexExpected(path, segment));
     }
     int idx = opt.getAsInt();
-    if (idx < (int) arrayLength(array.getClass()).invoke(array)) {
-      arrayElementSetter(array.getClass()).invoke(array, idx, value);
-      return error(OK, null);
+    int len = getArrayLength(array);
+    if (idx >= 0 && idx < len) {
+      setArrayElement(array, idx, value);
+      return true;
     }
-    return error(INDEX_OUT_OF_BOUNDS, () -> indexOutOfBounds(path));
+    return deadEnd(indexOutOfBounds(path, segment));
   }
 
 }

@@ -1,6 +1,7 @@
 package nl.naturalis.common.collection;
 
 import nl.naturalis.common.CollectionMethods;
+import nl.naturalis.common.Emptyable;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.x.collection.ArraySet;
 
@@ -28,14 +29,14 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * there is no entry for the corresponding enum constant in the map. It is not
  * allowed to add a key with this value to the map, as is would in effect amount to
  * <i>removing</i> that key from the map. It is also not allowed to pass this value
- * to {@link #containsValue(int) containsValue}. In both cases an {@code
- * IllegalArgumentException} is thrown. Empty enum classes (i.e. enum classes without
- * enum constants) are not supported.
+ * to {@link #containsValue(int) containsValue}. In both cases an
+ * {@code IllegalArgumentException} is thrown. Empty enum classes (i.e. enum classes
+ * without enum constants) are not supported.
  *
  * @param <K> The type of the enum class
  * @author Ayco Holleman
  */
-public final class EnumToIntMap<K extends Enum<K>> {
+public final class EnumToIntMap<K extends Enum<K>> implements Emptyable {
 
   private final K[] keys;
   private final int[] data;
@@ -145,8 +146,8 @@ public final class EnumToIntMap<K extends Enum<K>> {
 
   /**
    * Returns {@code true} if this map maps one or more keys to the specified value.
-   * It is not permitted to search for the <i>key-absent-value</i> value. An {@code
-   * IllegalArgumentException} is thrown if you do.
+   * It is not permitted to search for the <i>key-absent-value</i> value. An
+   * {@code IllegalArgumentException} is thrown if you do.
    *
    * @param val The value
    * @return Whether the map contains the value

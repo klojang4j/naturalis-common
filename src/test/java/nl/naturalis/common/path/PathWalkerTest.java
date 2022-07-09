@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import static nl.naturalis.common.CollectionMethods.newHashMap;
 import static nl.naturalis.common.path.ErrorCode.INDEX_OUT_OF_BOUNDS;
 import static nl.naturalis.common.path.ErrorCode.NO_SUCH_KEY;
-import static nl.naturalis.common.path.PathWalker.OnError.RETURN_CODE;
 import static org.junit.Assert.*;
 
 public class PathWalkerTest {
@@ -35,7 +34,8 @@ public class PathWalkerTest {
   public void test03() throws MalformedURLException {
     Company shell = shell();
     List<Path> paths = paths("sales");
-    assertEquals(new BigDecimal(Integer.MAX_VALUE), new PathWalker(paths).read(shell));
+    assertEquals(new BigDecimal(Integer.MAX_VALUE),
+        new PathWalker(paths).read(shell));
   }
 
   @Test
@@ -70,14 +70,20 @@ public class PathWalkerTest {
   public void test08() throws MalformedURLException {
     Company shell = shell();
     List<Path> paths = paths("quarterlySales.10");
-    assertEquals(INDEX_OUT_OF_BOUNDS, new PathWalker(paths, RETURN_CODE).read(shell));
+    try {
+      new PathWalker(paths, false).read(shell);
+    } catch (PathWalkerException e) {
+      assertEquals(INDEX_OUT_OF_BOUNDS, e.getErrorCode());
+      return;
+    }
+    fail();
   }
 
   @Test
   public void test09() throws MalformedURLException {
     Company shell = shell();
     List<Path> paths = paths("quarterlySales.10.foo");
-    assertEquals(INDEX_OUT_OF_BOUNDS, new PathWalker(paths, RETURN_CODE).read(shell));
+    assertNull(new PathWalker(paths, true).read(shell));
   }
 
   @Test
@@ -114,18 +120,18 @@ public class PathWalkerTest {
   public void test14() throws MalformedURLException {
     Company shell = shell();
     List<Path> paths = paths("departments.0.employees.0.extraInfo.https://nos^.nl");
-    assertEquals(NO_SUCH_KEY, new PathWalker(paths, RETURN_CODE).read(shell));
+    assertNull(new PathWalker(paths, false).read(shell));
   }
 
   @Test
   public void test15() throws MalformedURLException {
     Company shell = shell();
     List<Path> paths = paths("departments.0.employees.0.extraInfo.https://nos^.nl");
-    PathWalker pw = new PathWalker(paths, RETURN_CODE, (p) -> {
+    PathWalker pw = new PathWalker(paths, true, (p, s) -> {
       try {
-        return new URL(p.segment(0));
+        return new URL(p.segment(-1));
       } catch (MalformedURLException e) {
-        throw ExceptionMethods.uncheck(e);
+        throw new KeyDeserializationException();
       }
     });
     assertEquals("OkiDoki", pw.read(shell));
@@ -136,11 +142,11 @@ public class PathWalkerTest {
     Company shell = shell();
     List<Path> paths = paths("departments.0.employees.0.extraInfo."
         + Path.escape("https://nos.nl"));
-    PathWalker pw = new PathWalker(paths, RETURN_CODE, (p) -> {
+    PathWalker pw = new PathWalker(paths, true, (p, s) -> {
       try {
-        return new URL(p.segment(0));
+        return new URL(p.segment(-1));
       } catch (MalformedURLException e) {
-        throw ExceptionMethods.uncheck(e);
+        throw new KeyDeserializationException();
       }
     });
     assertEquals("OkiDoki", pw.read(shell));
@@ -150,7 +156,7 @@ public class PathWalkerTest {
   public void test17() throws MalformedURLException {
     Company shell = shell();
     List<Path> paths = paths("departments.0.employees.0.extraInfo.^0");
-    PathWalker pw = new PathWalker(paths, RETURN_CODE);
+    PathWalker pw = new PathWalker(paths, true);
     assertEquals("corrupt entry", pw.read(shell));
   }
 
@@ -158,7 +164,7 @@ public class PathWalkerTest {
   public void test18() throws MalformedURLException {
     Company shell = shell();
     List<Path> paths = paths("departments.0.employees.0.extraInfo.deep stuff.e=mc2");
-    PathWalker pw = new PathWalker(paths, RETURN_CODE);
+    PathWalker pw = new PathWalker(paths, true);
     assertEquals("Einstein", pw.read(shell));
   }
 
@@ -185,8 +191,10 @@ public class PathWalkerTest {
     Company shell = shell();
     PathWalker pw = new PathWalker("departments.0.employees.0.extraInfo.hobbies");
     pw.write(shell, List.of("Karaoke", "judo"));
-    assertEquals("01", List.of("Karaoke", "judo"), shell.getDepartments().get(0).getEmployees().get(
-        0).getExtraInfo().get("hobbies"));
+    assertEquals("01",
+        List.of("Karaoke", "judo"),
+        shell.getDepartments().get(0).getEmployees().get(
+            0).getExtraInfo().get("hobbies"));
   }
 
   @Test
@@ -194,8 +202,10 @@ public class PathWalkerTest {
     Company shell = shell();
     PathWalker pw = new PathWalker("departments.0.employees.0.extraInfo.^0");
     pw.write(shell, List.of("Karaoke", "judo"));
-    assertEquals("01", List.of("Karaoke", "judo"), shell.getDepartments().get(0).getEmployees().get(
-        0).getExtraInfo().get(null));
+    assertEquals("01",
+        List.of("Karaoke", "judo"),
+        shell.getDepartments().get(0).getEmployees().get(
+            0).getExtraInfo().get(null));
   }
 
   private static List<Path> paths(String... strings) {
@@ -203,7 +213,10 @@ public class PathWalkerTest {
   }
 
   private static float[][] shellQuarterlySales =
-      new float[][] {{10, 11, 12, 13}, {20, 21, 22, 23}, {30, 31, 32, 33}, {40, 41, 42, 43}};
+      new float[][] {{10, 11, 12, 13},
+          {20, 21, 22, 23},
+          {30, 31, 32, 33},
+          {40, 41, 42, 43}};
 
   private static Company shell() throws MalformedURLException {
     Company company = new Company();
@@ -235,7 +248,13 @@ public class PathWalkerTest {
         new URL("https://nos.nl"),
         "OkiDoki",
         "deep stuff",
-        newHashMap(10, String.class, String.class, "e=mc2", "Einstein", "cogito", "Descartes"),
+        newHashMap(10,
+            String.class,
+            String.class,
+            "e=mc2",
+            "Einstein",
+            "cogito",
+            "Descartes"),
         "numberOfPets",
         2));
     hr.getEmployees().add(piet);

@@ -1,5 +1,6 @@
 package nl.naturalis.common.io;
 
+import nl.naturalis.common.Emptyable;
 import nl.naturalis.common.check.Check;
 import nl.naturalis.common.util.ResizeMethod;
 
@@ -16,20 +17,21 @@ import static nl.naturalis.common.util.ResizeMethod.getMinIncrease;
 
 /**
  * An output stream in which the data is written into a byte array. The buffer
- * automatically grows as data is written to it. Contrary to Java's own {@link
- * ByteArrayOutputStream}, the internal byte array is exposed to the client via
- * {@link #getBackingArray()}, which might save you an array copy (e.g. when passing
- * the byte array to the {@link String#String(byte[], int, int) String constructor}).
- * To extract the "live" bytes from the backing array, use the {@link #size()}
- * method.
+ * automatically grows as data is written to it. Contrary to Java's own
+ * {@link ByteArrayOutputStream}, the internal byte array is exposed to the client
+ * via {@link #getBackingArray()}, which might save you an array copy (e.g. when
+ * passing the byte array to the
+ * {@link String#String(byte[], int, int) String constructor}). To extract the "live"
+ * bytes from the backing array, use the {@link #size()} method.
  *
  * <p>Closing a {@code ByteArrayOutputStream} has no effect. The methods in this
- * class can be called after the stream has been closed without generating an {@code
- * IOException}.
+ * class can be called after the stream has been closed without generating an
+ * {@code IOException}.
  *
  * @author Ayco Holleman
  */
-public final class UnsafeByteArrayOutputStream extends OutputStream {
+public final class UnsafeByteArrayOutputStream extends OutputStream implements
+    Emptyable {
 
   private final ResizeMethod resizeMethod;
   private final float resizeAmount;
@@ -136,8 +138,8 @@ public final class UnsafeByteArrayOutputStream extends OutputStream {
   }
 
   /**
-   * Writes the complete contents of the specified byte array to this {@code
-   * ExposedByteArrayOutputStream}.
+   * Writes the complete contents of the specified byte array to this
+   * {@code ExposedByteArrayOutputStream}.
    *
    * @param b the data
    */
@@ -148,8 +150,8 @@ public final class UnsafeByteArrayOutputStream extends OutputStream {
   }
 
   /**
-   * Writes {@code len} bytes from the specified byte array starting at offset {@code
-   * off} to this {@code ExposedByteArrayOutputStream}.
+   * Writes {@code len} bytes from the specified byte array starting at offset
+   * {@code off} to this {@code ExposedByteArrayOutputStream}.
    *
    * @param b the data
    * @param off the start offset in the data
@@ -205,6 +207,11 @@ public final class UnsafeByteArrayOutputStream extends OutputStream {
    */
   public int size() {
     return sz;
+  }
+
+  @Override
+  public boolean isEmpty() {
+    return sz == 0;
   }
 
   /**

@@ -26,6 +26,14 @@ public sealed class InvokeException extends RuntimeException permits
     return new InvokeException(msg);
   }
 
+  public static InvokeException arrayInspectionFailed(Object array,
+      Throwable throwable) {
+    String msg = String.format("array inspection failed for %s: %s",
+        simpleClassName(array),
+        throwable);
+    return new InvokeException(msg);
+  }
+
   static InvokeException wrap(Throwable t, Object bean, Getter getter) {
     return new InvokeException("Error while reading %s.%s: %s",
         simpleClassName(bean),
