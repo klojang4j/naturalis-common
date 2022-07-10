@@ -77,7 +77,7 @@ public class Morph<T> {
     } else if (toType.isArray()) {
       return toArray(obj);
     } else if (ClassMethods.isSubtype(toType, Collection.class)) {
-      return MorphTable0.getInstance().morph(obj, toType);
+      return MorphToCollection.getInstance().morph(obj, toType);
     }
     Class myType = obj.getClass();
     if (myType.isArray()) {

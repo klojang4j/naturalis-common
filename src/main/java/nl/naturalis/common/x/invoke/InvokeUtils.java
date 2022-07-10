@@ -13,6 +13,7 @@ import java.util.*;
 import static java.lang.Character.isUpperCase;
 import static java.lang.Character.toLowerCase;
 import static java.lang.invoke.MethodHandles.*;
+import static java.lang.invoke.MethodHandles.arrayElementSetter;
 import static java.lang.invoke.MethodType.methodType;
 import static java.lang.reflect.Modifier.isStatic;
 import static nl.naturalis.common.ArrayMethods.pack;
@@ -113,6 +114,20 @@ public class InvokeUtils {
       arrayElementSetter(array.getClass()).invoke(array, idx, value);
     } catch (Throwable t) {
       throw InvokeException.arrayInspectionFailed(array, t);
+    }
+  }
+
+  public static void copyArrayElements(Object fromArray, Collection toCollection) {
+    try {
+      int len = (int) arrayLength(fromArray.getClass()).invoke(fromArray);
+      if (len != 0) {
+        MethodHandle mh = arrayElementGetter(fromArray.getClass());
+        for (int i = 0; i < len; ++i) {
+          toCollection.add(mh.invoke(fromArray, i));
+        }
+      }
+    } catch (Throwable t) {
+      throw InvokeException.arrayInspectionFailed(fromArray, t);
     }
   }
 

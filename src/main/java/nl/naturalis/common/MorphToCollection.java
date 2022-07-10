@@ -1,37 +1,39 @@
 package nl.naturalis.common;
 
+import nl.naturalis.common.x.invoke.InvokeUtils;
+
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
-import static nl.naturalis.common.x.invoke.InvokeUtils.newInstance;
+import static nl.naturalis.common.x.invoke.InvokeUtils.*;
 
 /*
- * Used to morph objects into {@code Collection} instances. We maintain a small table of
- * object-to-collection functions for ubiquitous {@code Collection} classes. Others are created on
- * demand. It's pointless to try and use generics here. It will fight you. Too much dynamic stuff
- * going on.
+ * Used to morph objects into {@code Collection} instances. We maintain a small table
+ * of object-to-collection functions for ubiquitous {@code Collection} classes.
+ * Others are created on demand. It's pointless to try and use generics here. It will
+ * fight you. Too much dynamic stuff going on.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-class MorphTable0 {
+class MorphToCollection {
 
-  private static MorphTable0 INSTANCE;
+  private static MorphToCollection INSTANCE;
 
-  static MorphTable0 getInstance() {
+  static MorphToCollection getInstance() {
     if (INSTANCE == null) {
-      INSTANCE = new MorphTable0();
+      INSTANCE = new MorphToCollection();
     }
     return INSTANCE;
   }
 
   private final Map<Class, Function<Object, Collection>> table;
 
-  private MorphTable0() {
+  private MorphToCollection() {
     Map<Class, Function<Object, Collection>> tmp = new HashMap<>();
-    tmp.put(Iterable.class, MorphTable0::toList);
-    tmp.put(Collection.class, MorphTable0::toList);
+    tmp.put(Iterable.class, MorphToCollection::toList);
+    tmp.put(Collection.class, MorphToCollection::toList);
     tmp.put(List.class, obj -> toCollection1(obj, ArrayList::new));
     tmp.put(ArrayList.class, obj -> toCollection1(obj, ArrayList::new));
     tmp.put(LinkedList.class, obj -> toCollection2(obj, LinkedList::new));
@@ -54,9 +56,8 @@ class MorphTable0 {
   private <T extends Collection> T toSpecialCollection(Object obj, Class<T> toType) {
     T collection;
     try {
-      // If the Collection subclass has a no-arg constructor, we're good.
-      // Otherwise we give up
-      collection = newInstance(toType);
+      // If toType has a no-arg constructor, we're good. Otherwise we give up.
+      collection = InvokeUtils.newInstance(toType);
     } catch (Throwable t) {
       throw new TypeConversionException(obj, toType, t.toString());
     }
@@ -64,48 +65,44 @@ class MorphTable0 {
   }
 
   private static Collection toList(Object obj) {
-    Collection trg;
+    Collection collection;
     if (obj.getClass().isArray()) {
-      trg = new ArrayList(Array.getLength(obj));
-      copyArrayElements(obj, trg);
+      collection = new ArrayList(Array.getLength(obj));
+      copyArrayElements(obj, collection);
     } else {
-      trg = Collections.singletonList(obj);
+      collection = Collections.singletonList(obj);
     }
-    return trg;
+    return collection;
   }
 
-  private static Collection toCollection1(Object obj, IntFunction<Collection> constructor) {
-    Collection trg;
-    if (obj instanceof Collection) {
-      Collection src = (Collection) obj;
-      trg = constructor.apply(src.size());
-      trg.addAll(src);
+  private static Collection toCollection1(Object obj,
+      IntFunction<Collection> constructor) {
+    Collection collection;
+    if (obj instanceof Collection src) {
+      collection = constructor.apply(src.size());
+      collection.addAll(src);
     } else if (obj.getClass().isArray()) {
-      trg = constructor.apply(Array.getLength(obj));
-      copyArrayElements(obj, trg);
+      collection = constructor.apply(Array.getLength(obj));
+      copyArrayElements(obj, collection);
     } else {
-      trg = constructor.apply(1);
-      trg.add(obj);
+      collection = constructor.apply(1);
+      collection.add(obj);
     }
-    return trg;
+    return collection;
   }
 
-  private static Collection toCollection2(Object obj, Supplier<Collection> supplier) {
-    Collection trg = supplier.get();
+  private static Collection toCollection2(Object obj,
+      Supplier<Collection> supplier) {
+    Collection collection = supplier.get();
     if (obj instanceof Collection) {
-      trg = supplier.get();
-      trg.addAll((Collection) obj);
+      collection = supplier.get();
+      collection.addAll((Collection) obj);
     } else if (obj.getClass().isArray()) {
-      copyArrayElements(obj, trg);
+      copyArrayElements(obj, collection);
     } else {
-      trg.add(obj);
+      collection.add(obj);
     }
-    return trg;
+    return collection;
   }
 
-  private static void copyArrayElements(Object obj, Collection c) {
-    for (int i = 0; i < Array.getLength(obj); ++i) {
-      c.add(Array.get(obj, i));
-    }
-  }
 }
