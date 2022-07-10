@@ -461,11 +461,67 @@ public class TypeHashMapTest {
   public void test19() {
     TypeHashMap<String> m = TypeHashMap.build(String.class)
         .add(Object.class, "FOO")
-        .add(
-            A0.class,
-            "A0")
+        .add(A0.class, "A0")
         .add(Object.class, "BAR")
         .freeze();
+  }
+
+  @Test
+  public void test20() {
+    TypeHashMap<String> m = TypeHashMap.build(String.class)
+        .add(Object[].class, "Object[]")
+        .add(Collection[].class, "Collection[]")
+        .add(Set[].class, "Set[]")
+        .add(List[].class, "List[]")
+        .add(AbstractList[].class, "AbstractList[]")
+        .freeze();
+    Class<?> c = SortedSet[].class;
+    assertTrue(m.containsKey(c));
+    assertEquals("Set[]", m.get(c));
+
+    c = TreeSet[].class;
+    assertTrue(m.containsKey(c));
+    assertEquals("Set[]", m.get(c));
+
+    c = List[].class;
+    assertTrue(m.containsKey(c));
+    assertEquals("List[]", m.get(c));
+
+    c = ArrayList[].class;
+    assertTrue(m.containsKey(c));
+    assertEquals("AbstractList[]", m.get(c));
+
+    c = WiredList[].class;
+    assertTrue(m.containsKey(c));
+    assertEquals("List[]", m.get(c));
+
+    c = Serializable[].class;
+    assertTrue(m.containsKey(c));
+    assertEquals("Object[]", m.get(c));
+
+    c = Iterable[].class;
+    assertTrue(m.containsKey(c));
+    assertEquals("Object[]", m.get(c));
+
+    c = int[].class;
+    assertTrue(m.containsKey(c));
+    assertEquals("Object[]", m.get(c));
+
+    c = Object[].class;
+    assertTrue(m.containsKey(c));
+    assertEquals("Object[]", m.get(c));
+
+    c = Object.class;
+    assertFalse(m.containsKey(c));
+    assertNull(m.get(c));
+
+    c = Set.class;
+    assertFalse(m.containsKey(c));
+    assertNull(m.get(c));
+
+    c = AbstractList.class;
+    assertFalse(m.containsKey(c));
+    assertNull(m.get(c));
   }
 
 }
