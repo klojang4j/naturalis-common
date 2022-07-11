@@ -11,8 +11,7 @@ import java.util.function.Supplier;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
-import static java.util.Collections.emptyIterator;
-import static java.util.Collections.emptyListIterator;
+import static java.util.Collections.*;
 import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
 import static nl.naturalis.common.MathMethods.divUp;
 import static nl.naturalis.common.check.CommonChecks.*;
@@ -22,8 +21,8 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * list manipulation. As with any doubly-linked list, index-based retrieval is
  * relatively costly compared to {@link ArrayList}. It is very efficient, however, at
  * inserting, deleting and moving around chunks of list elements (i.e. structural
- * changes). The larger the chunks the bigger the gain, again compared to {@code
- * ArrayList}.
+ * changes). The larger the chunks the bigger the gain, again compared to
+ * {@code ArrayList}.
  *
  * <p>This implementation of {@link List} <b>does not support</b> the
  * {@link List#subList(int, int) subList} method. See {@link #subList(int, int)} for
@@ -35,9 +34,9 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * change the values in the list, but the underlying data structure itself.
  * Therefore, careless use of a {@code WiredList} in a multi-threaded context can
  * leave it in a seriously compromised state. {@code WiredList} itself makes no
- * attempt to protect itself against this. You can use a {@link
- * SynchronizedWiredList} if it is likely that multiple threads accessing the same
- * list concurrently will cause the list to get corrupted. Alternatively, if you
+ * attempt to protect itself against this. You can use a
+ * {@link SynchronizedWiredList} if it is likely that multiple threads accessing the
+ * same list concurrently will cause the list to get corrupted. Alternatively, if you
  * intend to make heavy use of the fluent API (see below), you may be better off
  * sticking with {@code WiredList} and synchronize around the entire call chain.
  *
@@ -45,15 +44,16 @@ import static nl.naturalis.common.check.CommonChecks.*;
  *
  * <p>You should always use an {@code Iterator} to iterate over the elements in the
  * list (which you implicitly would when executing a {@code forEach} loop). Using an
- * index/get loop is possible, but performs poorly. The {@link Iterator} and {@link
- * ListIterator} implementations prescribed by the {@code List} interface are
+ * index/get loop is possible, but performs poorly. The {@link Iterator} and
+ * {@link ListIterator} implementations prescribed by the {@code List} interface are
  * no-frills iterators that throw an {@code UnsupportedOperationException} from all
- * methods designated as optional by the specification. In addition, the {@code
- * WiredList class} also features a {@link #reverseIterator()} and a {@link
- * #wiredIterator()} method. The latter returns an instance of the {@link
- * WiredIterator} interface. Unlike a {@link ListIterator}, this is a one-way-only
- * iterator, but it still provides the same functionality, and it <i>does</i>
- * implement the methods that are optional in the {@code ListIterator} interface.
+ * methods designated as optional by the specification. In addition, the
+ * {@code WiredList class} also features a {@link #reverseIterator()} and a
+ * {@link #wiredIterator()} method. The latter returns an instance of the
+ * {@link WiredIterator} interface. Unlike a {@link ListIterator}, this is a
+ * one-way-only iterator, but it still provides the same functionality, and it
+ * <i>does</i> implement the methods that are optional in the {@code ListIterator}
+ * interface.
  *
  * <h4>Fluent API</h4>
  *
@@ -69,7 +69,6 @@ import static nl.naturalis.common.check.CommonChecks.*;
 public final class WiredList<E> implements List<E> {
 
   // Ubiquitous parameter names within this class
-  private static final String INDEX = "index";
   private static final String WIRED_LIST = "WiredList";
   private static final String TEST = "test";
   private static final String COLLECTION = "collection";
@@ -472,13 +471,13 @@ public final class WiredList<E> implements List<E> {
   /**
    * Concatenates the provided {@code WiredList} instances. This is a destructive
    * operation for the argument for the {@code WiredList} instances within the
-   * provided {@code List}. They will be empty when the method returns. See {@link
-   * #join(WiredList)}.
+   * provided {@code List}. They will be empty when the method returns. See
+   * {@link #join(WiredList)}.
    *
    * @param lists The {@code WiredList} instances to concatenate
    * @param <E> The type of the elements in the list
-   * @return A new {@code WiredList} containing the elements in the individual {@code
-   *     WiredList} instances
+   * @return A new {@code WiredList} containing the elements in the individual
+   *     {@code WiredList} instances
    */
   public static <E> WiredList<E> join(List<WiredList<E>> lists) {
     WiredList<E> wl = new WiredList<>();
@@ -496,8 +495,8 @@ public final class WiredList<E> implements List<E> {
   public WiredList() {}
 
   /**
-   * Creates a new {@code WiredList} containing the elements in the specified {@code
-   * Collection}.
+   * Creates a new {@code WiredList} containing the elements in the specified
+   * {@code Collection}.
    *
    * @param c The collection whose elements to copy to this {@code WiredList}
    */
@@ -723,8 +722,8 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Appends the specified value to the end of the list. Equivalent to {@code
-   * add(value)}. A.k.a. "push".
+   * Appends the specified value to the end of the list. Equivalent to
+   * {@code add(value)}. A.k.a. "push".
    *
    * @param value The value to append to the list
    * @return This {@code WiredList}
@@ -745,8 +744,8 @@ public final class WiredList<E> implements List<E> {
   }
 
   /**
-   * Appends the specified value to the end of the list. Equivalent to {@code
-   * add(value)}.
+   * Appends the specified value to the end of the list. Equivalent to
+   * {@code add(value)}.
    *
    * @param value The value to append to the list
    */
@@ -1003,7 +1002,7 @@ public final class WiredList<E> implements List<E> {
    * @see #group(List)
    */
   public <L0 extends List<E>, L1 extends List<L0>> L1 group(Predicate<? super E> criterion) {
-    return group(Arrays.asList(criterion));
+    return group(singletonList(criterion));
   }
 
   /**
@@ -1020,8 +1019,8 @@ public final class WiredList<E> implements List<E> {
    * and the remaining criteria are skipped.
    *
    * <p>NB The actual type of the return value is <code>WiredList&lt;WiredList&lt;
-   * E&gt;&gt;</code>. If you don't care about the exact type of the returned {@code
-   * List}, you can simply write:
+   * E&gt;&gt;</code>. If you don't care about the exact type of the returned
+   * {@code List}, you can simply write:
    *
    * <blockquote><pre>{@code
    * List<List<SomeType>> groups = wiredList.group(...);
@@ -1034,11 +1033,12 @@ public final class WiredList<E> implements List<E> {
    * @return A list of element groups
    * @see #join(WiredList)
    */
+  @SuppressWarnings({"unchecked"})
   public <L0 extends List<E>, L1 extends List<L0>> L1 group(List<Predicate<?
       super E>> criteria) {
     Check.that(criteria).is(deepNotEmpty());
     List<WiredList<E>> groups = createGroups(criteria);
-    var result = new WiredList<WiredList<E>>(groups);
+    var result = new WiredList<>(groups);
     result.add(this);
     return (L1) result;
   }
@@ -1091,8 +1091,8 @@ public final class WiredList<E> implements List<E> {
    * Splits this {@code WiredList} into the specified number of {@code WiredList}
    * instances. See {@link #partition(int)}.
    *
-   * @param count The number of {@code WiredList} instances to split this {@code
-   *     WiredList} into
+   * @param count The number of {@code WiredList} instances to split this
+   *     {@code WiredList} into
    * @return A list containing the specified number of {@code WiredList} instances
    */
   public WiredList<WiredList<E>> split(int count) {
@@ -1365,8 +1365,8 @@ public final class WiredList<E> implements List<E> {
    * Returns a {@link WiredIterator} that traverses the list from the first element
    * to the last, or the other way round, depending on the value of the argument
    *
-   * @param reverse Whether to iterate from the first to the last ({@code
-   *     false}), or from the last to the first ({@code true})
+   * @param reverse Whether to iterate from the first to the last
+   *     ({@code false}), or from the last to the first ({@code true})
    * @return A {@code WiredIterator} that traverses the list from the first element
    *     to the last, or the other way round
    */
@@ -1423,11 +1423,12 @@ public final class WiredList<E> implements List<E> {
    * {@link List#subList(int, int) subList} method. Its specification requires that
    * non-structural changes in the returned list are reflected in the original list
    * (and vice versa). However, except for the {@link #set(int, Object)} method, all
-   * changes in {@code WiredList} <i>are</i> structural changes. Even the {@link
-   * #clear()} method, taken as an example in the specification, is a (very)
+   * changes in {@code WiredList} <i>are</i> structural changes. Even the
+   * {@link #clear()} method, taken as an example in the specification, is a (very)
    * destructive change in {@code WiredList}. However, {@code WiredList} <i>does</i>
-   * provide a method that returns a sublist ({@link #copySegment(int, int)
-   * copySegment}). It just has no relation to the original list any longer.
+   * provide a method that returns a sublist
+   * ({@link #copySegment(int, int) copySegment}). It just has no relation to the
+   * original list any longer.
    */
   @Override
   @SuppressWarnings({"unused"})

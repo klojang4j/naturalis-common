@@ -1,12 +1,15 @@
 package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.x.Param;
 
 import java.lang.reflect.Array;
-import java.util.function.IntBinaryOperator;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Map;
+import java.util.function.UnaryOperator;
 
-import static nl.naturalis.common.check.CommonChecks.gt;
-import static nl.naturalis.common.check.CommonChecks.negative;
+import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
  * Math-related methods.
@@ -14,6 +17,24 @@ import static nl.naturalis.common.check.CommonChecks.negative;
  * @author Ayco Holleman
  */
 public final class MathMethods {
+
+  private static final Map<Class, UnaryOperator<? extends Number>> absFunctions = Map.of(
+      Integer.class,
+      n -> n.intValue() >= 0 ? n : Integer.valueOf(-n.intValue()),
+      Double.class,
+      n -> n.doubleValue() >= 0 ? n : Double.valueOf(-n.doubleValue()),
+      Long.class,
+      n -> n.longValue() >= 0 ? n : Long.valueOf(-n.longValue()),
+      Float.class,
+      n -> n.floatValue() >= 0 ? n : Float.valueOf(-n.floatValue()),
+      Short.class,
+      n -> n.shortValue() >= 0 ? n : Short.valueOf((short) -n.shortValue()),
+      Byte.class,
+      n -> n.byteValue() >= 0 ? n : Byte.valueOf((byte) -n.byteValue()),
+      BigInteger.class,
+      n -> ((BigInteger) n).abs(),
+      BigDecimal.class,
+      n -> ((BigDecimal) n).abs());
 
   private MathMethods() {
     throw new UnsupportedOperationException();
@@ -508,7 +529,7 @@ public final class MathMethods {
   }
 
   private static void checkArray(Object array) {
-    Check.notNull(array, "array");
+    Check.notNull(array, Param.ARRAY);
   }
 
   private static void checkItemIndex(int itemIndex) {
@@ -521,6 +542,73 @@ public final class MathMethods {
 
   private static void checkColCount(int colCount) {
     Check.that(colCount, "column count").is(gt(), 0);
+  }
+
+  /**
+   * Returns the absolute value of an arbitrary type of number.
+   *
+   * @param <T> the type of the number
+   * @param number the number
+   * @return Its absolute value
+   */
+  @SuppressWarnings("unchecked")
+  public static <T extends Number> T abs(T number) {
+    UnaryOperator op = Check.notNull(number).ok(n -> absFunctions.get(n.getClass()));
+    return (T) op.apply(number);
+  }
+
+  /**
+   * Returns the zero-based number (a.k.a. index) of the last page, given the
+   * specified row count and page size (rows per page).
+   *
+   * @param rowCount The total number of rows to divide up into pages
+   * @param rowsPerPage The maximum number of rows per page
+   * @return the zero-based (a.k.a. index) number of the last page
+   */
+  public static int getIndexOfLastPage(int rowCount, int rowsPerPage) {
+    Check.that(rowCount, "rowCount").isNot(gte(), 0);
+    Check.that(rowsPerPage, "rowsPerPage").is(gt(), 0);
+    if (rowCount == 0) {
+      return 0;
+    }
+    return ((rowCount - 1) / rowsPerPage);
+  }
+
+  /**
+   * Returns the number of pages need to contain the specified number of rows, given
+   * the specified number of rows per page.
+   *
+   * @param rowCount The total number of rows to divide up into pages
+   * @param rowsPerPage The maximum number of rows per page
+   * @return the total number of pages you need for the specified row count
+   */
+  public static int getPageCount(int rowCount, int rowsPerPage) {
+    return getIndexOfLastPage(rowCount, rowsPerPage) + 1;
+  }
+
+  /**
+   * Returns the number of populated rows on the last page, given the specified row
+   * count and page size (rows per page). That's just {@code rowCount % pageSize}.
+   *
+   * @param rowCount The total number of rows to divide up into pages
+   * @param rowsPerPage The maximum number of rows per page
+   * @return the number of rows in the last page
+   */
+  public static int countRowsOnLastPage(int rowCount, int rowsPerPage) {
+    Check.that(rowCount, "rowCount").is(gte(), 0);
+    Check.that(rowsPerPage, "rowsPerPage").is(gt(), 0);
+    return rowCount % rowsPerPage;
+  }
+
+  /**
+   * Returns the number of trailing, empty rows in the last page.
+   *
+   * @param rowCount The total number of rows to divide up into pages
+   * @param rowsPerPage The maximum number of rows per page
+   * @return the number of unoccupied rows in the last page
+   */
+  public static int countEmptyRowsOnLastPage(int rowCount, int rowsPerPage) {
+    return rowsPerPage - countRowsOnLastPage(rowCount, rowsPerPage);
   }
 
 }

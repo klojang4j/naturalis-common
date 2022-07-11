@@ -1,6 +1,6 @@
 package nl.naturalis.common.x.collection;
 
-import nl.naturalis.common.collection.DuplicateException;
+import nl.naturalis.common.collection.DuplicateValueException;
 import nl.naturalis.common.util.MutableInt;
 import org.junit.Test;
 
@@ -18,7 +18,7 @@ public class ArraySetTest {
     set = ArraySet.of(pack(0, 1, 2, 3, 4), false);
   }
 
-  @Test(expected = DuplicateException.class)
+  @Test(expected = DuplicateValueException.class)
   public void of01() {
     ArraySet.of(pack(0, 1, 2, 3, 4, 4), false);
   }
@@ -36,7 +36,7 @@ public class ArraySetTest {
     assertEquals(Set.of(0, 1, 2, 3, 4), set);
   }
 
-  @Test(expected = DuplicateException.class)
+  @Test(expected = DuplicateValueException.class)
   public void copyOfList01() {
     ArraySet.copyOf(Arrays.asList(0, 0, 1, 1, 2, 3, 4), false);
   }

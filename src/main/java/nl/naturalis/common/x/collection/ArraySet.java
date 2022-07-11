@@ -2,7 +2,7 @@ package nl.naturalis.common.x.collection;
 
 import nl.naturalis.common.ArrayMethods;
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.collection.DuplicateException;
+import nl.naturalis.common.collection.DuplicateValueException;
 import nl.naturalis.common.x.invoke.InvokeUtils;
 
 import java.util.*;
@@ -10,7 +10,7 @@ import java.util.*;
 import static nl.naturalis.common.ArrayMethods.EMPTY_OBJECT_ARRAY;
 import static nl.naturalis.common.ArrayMethods.implode;
 import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.collection.DuplicateException.Category.ELEMENT;
+import static nl.naturalis.common.collection.DuplicateValueException.Category.ELEMENT;
 
 public final class ArraySet<E> extends ImmutableSet<E> {
 
@@ -38,7 +38,7 @@ public final class ArraySet<E> extends ImmutableSet<E> {
     for (E e : values) {
       Check.that(e).is(notNull(), "null elements not allowed");
       if (!set.add(e)) {
-        throw new DuplicateException(ELEMENT, e);
+        throw new DuplicateValueException(ELEMENT, e);
       }
     }
     Object[] copy = new Object[values.length];
@@ -56,7 +56,7 @@ public final class ArraySet<E> extends ImmutableSet<E> {
     for (E e : values) {
       Check.that(e).is(notNull(), "null elements not allowed");
       if (!set.add(e)) {
-        throw new DuplicateException(ELEMENT, e);
+        throw new DuplicateValueException(ELEMENT, e);
       }
     }
     return new ArraySet<>(values.toArray());

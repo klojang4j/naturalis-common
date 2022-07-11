@@ -117,7 +117,7 @@ public class ObjectMethods {
    * Returns whether the specified argument is null or empty. This method is (and can
    * be) used for broad-stroke methods like {@link #ifEmpty(Object, Object)} and
    * {@link CommonChecks#empty()}, where you don't know the exact type of the
-   * argument. More precisely, thie method returns {@code true} if any of the
+   * argument. More precisely, the method returns {@code true} if any of the
    * following applies:
    *
    * <p>
@@ -306,6 +306,19 @@ public class ObjectMethods {
    * @return whether it is not null and does not contain any null values
    */
   public static boolean isDeepNotNull(Object arg) {
+    if (arg == null) {
+      return false;
+    } else if (arg instanceof Object[] x) {
+      return Arrays.stream(x).allMatch(notNull());
+    } else if (arg instanceof Collection c) {
+      return c.stream().allMatch(notNull());
+    } else if (arg instanceof Map<?, ?> m) {
+      return m.entrySet().stream()
+          .allMatch(e -> e.getKey() != null && e.getValue() != null);
+    }
+    return true;
+
+    /* Java 18
     return switch (arg) {
       case null -> false;
       case Object[] x -> Arrays.stream(x).allMatch(notNull());
@@ -314,6 +327,7 @@ public class ObjectMethods {
           .allMatch(e -> e.getKey() != null && e.getValue() != null);
       default -> true;
     };
+    */
   }
 
   /**
@@ -480,8 +494,8 @@ public class ObjectMethods {
   }
 
   /**
-   * Generates a hash code for the provided arguments using using
-   * <i>empty-equals-null</i> semantics. See {@link #hashCode()}.
+   * Generates a hash code for the provided arguments using <i>empty-equals-null</i>
+   * semantics. See {@link #hashCode()}.
    *
    * @param objs The objects to generate a hash code for
    * @return The hash code
@@ -605,7 +619,8 @@ public class ObjectMethods {
 
   /**
    * Returns the result of passing the specified argument to the specified
-   * {@code Funtion} if the argument is not null, else a default value. For example:
+   * {@code Function} if the argument is not null, else a default value. For
+   * example:
    *
    * <pre>
    * String[] strs = ifNotNull("Hello World", s -> s.split(" "), new String[0]);
@@ -624,7 +639,7 @@ public class ObjectMethods {
 
   /**
    * Returns the result of passing the specified argument to the specified
-   * {@code Funtion} if the argument is not {@link #isEmpty(Object) empty}, else
+   * {@code Function} if the argument is not {@link #isEmpty(Object) empty}, else
    * returns null.
    *
    * @param <T> The type of the value to transform
@@ -781,7 +796,7 @@ public class ObjectMethods {
 
   /**
    * Empty-to-null: returns {@code null} if the argument is empty (as per
-   * {@link #isEmpty(Object), else the argument itself.
+   * {@link #isEmpty(Object)}), else the argument itself.
    *
    * @param <T> The type of the argument
    * @param arg the argument
@@ -846,7 +861,7 @@ public class ObjectMethods {
   }
 
   /**
-   * Returns zero the argument is null, else the argument itself.
+   * Returns zero if the argument is null, else the argument itself.
    *
    * @param arg An argument of type {@code Double}
    * @return The argument or the default value of the corresponding primitive type

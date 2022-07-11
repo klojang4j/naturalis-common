@@ -1,13 +1,8 @@
 package nl.naturalis.common;
 
-import nl.naturalis.common.check.Check;
-import nl.naturalis.common.x.invoke.ValueExactMethod;
+import nl.naturalis.common.x.invoke.BigDecimalConverter;
 
-import java.lang.invoke.MethodHandle;
 import java.math.BigDecimal;
-
-import static nl.naturalis.common.NumberMethods.UNSUPPORTED_NUMBER_TYPE;
-import static nl.naturalis.common.check.CommonChecks.notNull;
 
 class NumberConverter<T extends Number> {
 
@@ -29,29 +24,21 @@ class NumberConverter<T extends Number> {
       return (T) number;
     }
     BigDecimal bd = NumberMethods.toBigDecimal(number);
-    if (to == Double.class) {
-      double d = bd.doubleValue();
-      if (d == Double.POSITIVE_INFINITY || d == Double.NEGATIVE_INFINITY) {
-        throw targetTypeTooNarrow(number, to);
-      }
-      return (T) (Double) d;
-    } else if (to == Float.class) {
-      float f = bd.floatValue();
-      if (f == Float.POSITIVE_INFINITY || f == Float.NEGATIVE_INFINITY) {
-        throw targetTypeTooNarrow(number, to);
-      }
-      return (T) (Float) f;
-    } else {
-      MethodHandle mh = ValueExactMethod.INSTANCE.getMethodHandle(to);
-      Check.that(mh).is(notNull(), UNSUPPORTED_NUMBER_TYPE, to);
-      try {
-        return (T) mh.invoke(bd);
-      } catch (ArithmeticException e) {
-        throw targetTypeTooNarrow(number, to);
-      } catch (Throwable e) {
-        throw ExceptionMethods.uncheck(e);
-      }
-    }
+    //    if (to == Double.class) {
+    //      double d = bd.doubleValue();
+    //      if (d == Double.POSITIVE_INFINITY || d == Double.NEGATIVE_INFINITY) {
+    //        throw targetTypeTooNarrow(number, to);
+    //      }
+    //      return (T) (Double) d;
+    //    } else if (to == Float.class) {
+    //      float f = bd.floatValue();
+    //      if (f == Float.POSITIVE_INFINITY || f == Float.NEGATIVE_INFINITY) {
+    //        throw targetTypeTooNarrow(number, to);
+    //      }
+    //      return (T) (Float) f;
+    //    } else {
+    return new BigDecimalConverter(bd).convertTo(to);
+    //    }
   }
 
   private static <T extends Number, U extends Number> TypeConversionException targetTypeTooNarrow(

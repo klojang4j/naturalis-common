@@ -1,5 +1,7 @@
 package nl.naturalis.common;
 
+import nl.naturalis.common.x.invoke.BigDecimalConverter;
+
 import java.math.BigDecimal;
 
 final class NumberParser<T extends Number> {
@@ -13,10 +15,10 @@ final class NumberParser<T extends Number> {
   T parse(String s) {
     BigDecimal bd;
     try {
-      bd = new BigDecimal(s);
-    } catch (NumberFormatException e) {
+      return new BigDecimalConverter(new BigDecimal(s)).convertTo(targetType);
+    } catch (NumberFormatException | TypeConversionException e) {
       throw new TypeConversionException(s, targetType);
     }
-    return new NumberConverter<>(targetType).convert(bd);
   }
+
 }

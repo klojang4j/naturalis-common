@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.collection.DuplicateException.Category.KEY;
+import static nl.naturalis.common.collection.DuplicateValueException.Category.KEY;
 
 /**
  * A builder class for {@link TypeHashMap} instances.
@@ -79,7 +79,7 @@ public final class TypeHashMapBuilder<V> {
    */
   public TypeHashMapBuilder<V> add(Class<?> type, V value) {
     Check.notNull(type, "type").isNot(keyIn(), temp,
-        () -> new DuplicateException(KEY, type));
+        () -> new DuplicateValueException(KEY, type));
     Check.notNull(value, "value").is(instanceOf(), valueType);
     temp.put(type, value);
     return this;

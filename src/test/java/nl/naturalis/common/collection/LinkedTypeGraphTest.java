@@ -443,19 +443,19 @@ public class LinkedTypeGraphTest {
     assertEquals("A0000", m.get(A0000.class));
   }
 
-  @Test(expected = DuplicateException.class)
+  @Test(expected = DuplicateValueException.class)
   public void test17() {
     LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class).add(A01.class,
         "A01").add(A0.class, "A0").add(A01.class, "FOO").freeze();
   }
 
-  @Test(expected = DuplicateException.class)
+  @Test(expected = DuplicateValueException.class)
   public void test18() {
     LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class).add(A0.class,
         "A0").add(A01.class, "A01").add(A01.class, "A01").freeze();
   }
 
-  @Test(expected = DuplicateException.class)
+  @Test(expected = DuplicateValueException.class)
   public void test19() {
     LinkedTypeGraph<String> m = LinkedTypeGraph.build(String.class).add(Object.class,
         "FOO").add(A0.class, "A0").add(Object.class, "BAR").freeze();

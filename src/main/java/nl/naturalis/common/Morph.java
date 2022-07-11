@@ -89,11 +89,11 @@ public class Morph<T> {
       return empty ? getTypeDefault(toType) : convert(coll.iterator()
           .next(), toType);
     }
-    Object out = MorphTable1.getInstance().morph(obj, toType);
+    Object out = MorphToNumber.getInstance().morph(obj, toType);
     if (out != null) {
       return (T) out;
     } else if (toType.isEnum()) {
-      return (T) MorphTable2.getInstance().morph(obj, toType);
+      return (T) MorphToEnum.getInstance().morph(obj, toType);
     }
     throw new TypeConversionException(obj, toType);
   }

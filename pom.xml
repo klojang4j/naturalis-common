@@ -17,8 +17,8 @@
         <!-- ==================================================================== -->
         <!-- *** Build settings                                               *** -->
         <!-- ==================================================================== -->
-        <maven.compiler.source>18</maven.compiler.source>
-        <maven.compiler.target>18</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- ==================================================================== -->
@@ -130,7 +130,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
-                        <argLine>--enable-preview</argLine>
+                        <!--argLine>++enable-preview</argLine-->
                     </configuration>
                 </plugin>
                 <plugin>
@@ -157,7 +157,7 @@
                                     <version>[3.6.3,)</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
-                                    <version>[11,)</version>
+                                    <version>[17,)</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>
@@ -228,7 +228,7 @@
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
                     <compilerArgs>
-                        <arg>--enable-preview</arg>
+                        <!--arg>++enable-preview</arg-->
                     </compilerArgs>
                 </configuration>
             </plugin>
@@ -264,7 +264,7 @@
                     <failOnWarnings>false</failOnWarnings>
                     <quiet>true</quiet>
                     <doclint>none</doclint>
-                    <additionalJOption>--enable-preview</additionalJOption>
+                    <!-- additionalJOption>++enable-preview</additionalJOption-->
                 </configuration>
                 <executions>
                     <execution>

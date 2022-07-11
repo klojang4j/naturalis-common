@@ -448,7 +448,7 @@ public class TypeGraphTest {
     assertEquals("A0000", m.get(A0000.class));
   }
 
-  @Test(expected = DuplicateException.class)
+  @Test(expected = DuplicateValueException.class)
   public void test17() {
     TypeGraph<String> m = TypeGraph.build(String.class)
         .add(A01.class, "A01")
@@ -457,7 +457,7 @@ public class TypeGraphTest {
         .freeze();
   }
 
-  @Test(expected = DuplicateException.class)
+  @Test(expected = DuplicateValueException.class)
   public void test18() {
     TypeGraph<String> m = TypeGraph.build(String.class)
         .add(A0.class, "A0")
@@ -466,7 +466,7 @@ public class TypeGraphTest {
         .freeze();
   }
 
-  @Test(expected = DuplicateException.class)
+  @Test(expected = DuplicateValueException.class)
   public void test19() {
     TypeGraph<String> m = TypeGraph.build(String.class).add(Object.class, "FOO").add(
         A0.class,

@@ -1,6 +1,6 @@
 package nl.naturalis.common.check;
 
-import nl.naturalis.common.NumberMethods;
+import nl.naturalis.common.MathMethods;
 import nl.naturalis.common.function.Relation;
 
 import java.lang.reflect.Array;
@@ -11,12 +11,13 @@ import static nl.naturalis.common.ClassMethods.simpleClassName;
 import static nl.naturalis.common.ObjectMethods.ifNull;
 
 /**
- * Defines various functions that retrieve some oft-used property of a well-known class. For
- * example: {@link Object#toString() Object::toString}. They can optionally be used as the first
- * argument to the various {@code has(...)} and {@code notHas(...) } methods of {@link IntCheck} and
- * {@link ObjectCheck}. The advantage of using these functions rather than the method references
- * they return is that they have been associated with a description of the property they expose, so
- * generating an error message requires very little hand-crafting. For example:
+ * Defines various functions that retrieve some oft-used property of a well-known
+ * class. For example: {@link Object#toString() Object::toString}. They can
+ * optionally be used as the first argument to the various {@code has(...)} and
+ * {@code notHas(...) } methods of {@link IntCheck} and {@link ObjectCheck}. The
+ * advantage of using these functions rather than the method references they return
+ * is that they have been associated with a description of the property they expose,
+ * so generating an error message requires very little hand-crafting. For example:
  *
  * <blockquote>
  *
@@ -27,9 +28,10 @@ import static nl.naturalis.common.ObjectMethods.ifNull;
  *
  * </blockquote>
  *
- * <p>Note that the word "getter" is suggestive, but also misleading. The functions defined here
- * really are just that: functions that transform the argument into some other value, which can then
- * be subjected to further tests.
+ * <p>Note that the word "getter" is suggestive, but also misleading. The functions
+ * defined here
+ * really are just that: functions that transform the argument into some other value,
+ * which can then be subjected to further tests.
  *
  * <blockquote>
  *
@@ -40,10 +42,11 @@ import static nl.naturalis.common.ObjectMethods.ifNull;
  *
  * </blockquote>
  *
- * <p>As with the checks in the {@link CommonChecks} class, <i>none of the functions defined here
- * execute a preliminary null check</i>. Many of them simply return a method reference. They rely
- * upon being embedded in chain of checks, the first of which should be the {@link
- * CommonChecks#notNull() notNull} check (if necessary).
+ * <p>As with the checks in the {@link CommonChecks} class, <i>none of the functions
+ * defined here
+ * execute a preliminary null check</i>. Many of them simply return a method
+ * reference. They rely upon being embedded in chain of checks, the first of which
+ * should be the {@link CommonChecks#notNull() notNull} check (if necessary).
  *
  * @author Ayco Holleman
  */
@@ -57,9 +60,10 @@ public class CommonGetters {
   private static Map<Object, BiFunction<Object, String, String>> tmp = new HashMap<>();
 
   /**
-   * Returns the boxed version of the argument. Equivalent to {@link Integer#valueOf(int)
-   * Integer::valueOf}. This "getter" is especially useful to get access to the many {@link
-   * Relation} checks in the {@link CommonChecks} class when validating an {@code int} argument:
+   * Returns the boxed version of the argument. Equivalent to
+   * {@link Integer#valueOf(int) Integer::valueOf}. This "getter" is especially
+   * useful to get access to the many {@link Relation} checks in the
+   * {@link CommonChecks} class when validating an {@code int} argument:
    *
    * <blockquote>
    *
@@ -88,8 +92,8 @@ public class CommonGetters {
   }
 
   /**
-   * Returns the unboxed version of the argument. Equivalent to {@link Integer#intValue()
-   * Integer::intValue}.
+   * Returns the unboxed version of the argument. Equivalent to
+   * {@link Integer#intValue() Integer::intValue}.
    *
    * @return The unboxed version of the argument
    */
@@ -102,8 +106,8 @@ public class CommonGetters {
   }
 
   /**
-   * Returns the result of calling {@code toString()} on the argument. Equivalent to {@link
-   * Object#toString() Object::toString}.
+   * Returns the result of calling {@code toString()} on the argument. Equivalent to
+   * {@link Object#toString() Object::toString}.
    *
    * @param <T> The type of the object on which to call {@code toString{}}.
    * @return The result of calling {@code toString()} on the argument
@@ -117,7 +121,8 @@ public class CommonGetters {
   }
 
   /**
-   * Returns the length of a {@code CharSequence}. Equivalent to {@code CharSequence::length}.
+   * Returns the length of a {@code CharSequence}. Equivalent to
+   * {@code CharSequence::length}.
    *
    * @return The length of a {@code CharSequence}
    */
@@ -130,8 +135,8 @@ public class CommonGetters {
   }
 
   /**
-   * Returns the upper case version of the argument. Equivalent to {@link String#toUpperCase()
-   * String::toUpperCase}.
+   * Returns the upper case version of the argument. Equivalent to
+   * {@link String#toUpperCase() String::toUpperCase}.
    *
    * @return The upper case version of the argument
    */
@@ -144,8 +149,8 @@ public class CommonGetters {
   }
 
   /**
-   * Returns the lower case version of the argument. Equivalent to {@link String#toLowerCase()
-   * String::toLowerCase}.
+   * Returns the lower case version of the argument. Equivalent to
+   * {@link String#toLowerCase() String::toLowerCase}.
    *
    * @return The lower case version of the argument
    */
@@ -158,8 +163,8 @@ public class CommonGetters {
   }
 
   /**
-   * Returns the {@code Class} of the argument. Equivalent to {@link Object#getClass()
-   * Object::getClass}.
+   * Returns the {@code Class} of the argument. Equivalent to
+   * {@link Object#getClass() Object::getClass}.
    *
    * @param <T> The type of the object
    * @return The {@code Class} of the argument
@@ -173,8 +178,8 @@ public class CommonGetters {
   }
 
   /**
-   * Returns the constants of an enum class. Equivalent to {@link Class#getEnumConstants()
-   * Class::getEnumConstants}.
+   * Returns the constants of an enum class. Equivalent to
+   * {@link Class#getEnumConstants() Class::getEnumConstants}.
    *
    * @param <T> The enum class
    * @return The constants of an enum class
@@ -184,11 +189,13 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(constants(), (arg, argName) -> base(argName, arg) + ".getEnumConstants()");
+    tmp.put(constants(),
+        (arg, argName) -> base(argName, arg) + ".getEnumConstants()");
   }
 
   /**
-   * Returns the name of an enum constant. Equivalent to {@link Enum#name() Enum::name}.
+   * Returns the name of an enum constant. Equivalent to
+   * {@link Enum#name() Enum::name}.
    *
    * @param <T> The type of the enum class
    * @return The name of the enum constant
@@ -202,7 +209,8 @@ public class CommonGetters {
   }
 
   /**
-   * Returns the ordinal of an enum constant. Equivalent to {@link Enum#ordinal() Enum::ordinal}.
+   * Returns the ordinal of an enum constant. Equivalent to
+   * {@link Enum#ordinal() Enum::ordinal}.
    *
    * @param <T> The type of the enum class
    * @return The ordinal of the enum constant
@@ -216,8 +224,8 @@ public class CommonGetters {
   }
 
   /**
-   * A function that returns the length of an array argument. Equivalent to {@link
-   * Array#getLength(Object) Array::getLength}.
+   * A function that returns the length of an array argument. Equivalent to
+   * {@link Array#getLength(Object) Array::getLength}.
    *
    * @param <T> The type of the array.
    * @return A {@code Function} that returns the length of an array
@@ -231,7 +239,8 @@ public class CommonGetters {
   }
 
   /**
-   * Returns the size of a {@code Collection} argument. Equivalent to {@code Collection::size}.
+   * Returns the size of a {@code Collection} argument. Equivalent to
+   * {@code Collection::size}.
    *
    * @param <C> The type of the {@code Collection}
    * @return The size of a {@code Collection} argument
@@ -241,9 +250,9 @@ public class CommonGetters {
   }
 
   /**
-   * Alias for the {@link #size()} getter. This getter may come in handy when you create an
-   * extension or implementation of a collection framework class, in which case using the {@code
-   * #size()} getter would cause a name clash.
+   * Alias for the {@link #size()} getter. This getter may come in handy when you
+   * create an extension or implementation of a collection framework class, in which
+   * case using the {@code #size()} getter would cause a name clash.
    *
    * @param <C> The type of the {@code Collection}
    * @return The size of a {@code Collection} argument
@@ -257,8 +266,9 @@ public class CommonGetters {
   }
 
   /**
-   * Returns the size of a {@code List} argument. Equivalent to {@code List::size}. Can be used if
-   * there already is a {@code size()} method in the class in which to execute a size check.
+   * Returns the size of a {@code List} argument. Equivalent to {@code List::size}.
+   * Can be used if there already is a {@code size()} method in the class in which to
+   * execute a size check.
    *
    * @param <L> The type of the {@code List}
    * @return Returns the size of a {@code List} argument
@@ -272,8 +282,9 @@ public class CommonGetters {
   }
 
   /**
-   * Returns the size of a {@code Set} argument. Equivalent to {@code Set::size}. Can be used if
-   * there already is a {@code size()} method in the class in which to execute a size check.
+   * Returns the size of a {@code Set} argument. Equivalent to {@code Set::size}. Can
+   * be used if there already is a {@code size()} method in the class in which to
+   * execute a size check.
    *
    * @param <S> The type of the {@code Set}.
    * @return The size of a {@code Set} argument
@@ -301,7 +312,8 @@ public class CommonGetters {
   }
 
   /**
-   * Returns the keys of a {@code Map} argument. Equivalent to {@link Map#keySet() Map::keySet}.
+   * Returns the keys of a {@code Map} argument. Equivalent to
+   * {@link Map#keySet() Map::keySet}.
    *
    * @param <K> The type of the keys in the map
    * @param <V> The type of the values in the map
@@ -313,11 +325,13 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(keySet(), (arg, argName) -> argName == null ? "map keys" : argName + ".keySet()");
+    tmp.put(keySet(),
+        (arg, argName) -> argName == null ? "map keys" : argName + ".keySet()");
   }
 
   /**
-   * Returns the keys of a {@code Map} argument. Equivalent to {@link Map#values() Map::values}.
+   * Returns the keys of a {@code Map} argument. Equivalent to
+   * {@link Map#values() Map::values}.
    *
    * @param <K> The type of the keys in the map
    * @param <V> The type of the values in the map
@@ -329,11 +343,13 @@ public class CommonGetters {
   }
 
   static {
-    tmp.put(values(), (arg, argName) -> argName == null ? "map values" : argName + ".values()");
+    tmp.put(values(),
+        (arg, argName) -> argName == null ? "map values" : argName + ".values()");
   }
 
   /**
-   * Returns the key of a {@code Map} entry. Equivalent to {@code Map.Entry::getKey}.
+   * Returns the key of a {@code Map} entry. Equivalent to
+   * {@code Map.Entry::getKey}.
    *
    * @param <K> The type of the key of the entry
    * @param <V> The type of the value of the entry
@@ -348,7 +364,8 @@ public class CommonGetters {
   }
 
   /**
-   * Returns the value of a {@code Map} entry. Equivalent to {@code Map.Entry::getValue}.
+   * Returns the value of a {@code Map} entry. Equivalent to
+   * {@code Map.Entry::getValue}.
    *
    * @param <K> The type of the key of the entry
    * @param <V> The type of the value of the entry
@@ -363,8 +380,8 @@ public class CommonGetters {
   }
 
   /**
-   * Returns the absolute value of an {@code int} argument. Equivalent to {@link Math#abs(int)
-   * Math::abs}.
+   * Returns the absolute value of an {@code int} argument. Equivalent to
+   * {@link Math#abs(int) Math::abs}.
    *
    * @return A {@code Function} that returns the absolute value of an integer
    */
@@ -377,14 +394,14 @@ public class CommonGetters {
   }
 
   /**
-   * Returns the absolute value of a {@code Number}. Equivalent to {@link NumberMethods#abs(Number)
-   * NumberMethods::abs}.
+   * Returns the absolute value of a {@code Number}. Equivalent to
+   * {@link MathMethods#abs(Number) NumberMethods::abs}.
    *
    * @param <T> The type of the {@code Number}
    * @return The absolute value of a {@code Number}
    */
   public static <T extends Number> Function<T, T> ABS() {
-    return NumberMethods::abs;
+    return MathMethods::abs;
   }
 
   static {
@@ -395,7 +412,10 @@ public class CommonGetters {
   /*            End of getter definitions                    */
   /* +++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
-  static String formatProperty(Object arg, String argName, Object getter, Class getterClass) {
+  static String formatProperty(Object arg,
+      String argName,
+      Object getter,
+      Class getterClass) {
     BiFunction<Object, String, String> fmt = NAMES.get(getter);
     if (fmt == null) {
       String s0 = getterClass == ToIntFunction.class ? "applyAsInt" : "apply";
@@ -405,7 +425,10 @@ public class CommonGetters {
     return fmt.apply(arg, argName);
   }
 
-  static String formatProperty(int arg, String argName, Object getter, Class getterClass) {
+  static String formatProperty(int arg,
+      String argName,
+      Object getter,
+      Class getterClass) {
     BiFunction<Object, String, String> fmt = NAMES.get(getter);
     if (fmt == null) {
       String s0 = getterClass == IntUnaryOperator.class ? "applyAsInt" : "apply";

@@ -17,7 +17,7 @@ import static nl.naturalis.common.x.invoke.InvokeUtils.*;
  * fight you. Too much dynamic stuff going on.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-class MorphToCollection {
+final class MorphToCollection {
 
   private static MorphToCollection INSTANCE;
 

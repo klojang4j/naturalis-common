@@ -13,7 +13,7 @@ import static nl.naturalis.common.ClassMethods.isSubtype;
 import static nl.naturalis.common.ClassMethods.isSupertype;
 import static nl.naturalis.common.check.CommonChecks.deepNotNull;
 import static nl.naturalis.common.check.CommonChecks.instanceOf;
-import static nl.naturalis.common.collection.DuplicateException.Category.KEY;
+import static nl.naturalis.common.collection.DuplicateValueException.Category.KEY;
 
 /**
  * A builder class for {@link TypeGraph} instances.
@@ -59,7 +59,7 @@ public final class TypeGraphBuilder<V> {
 
     void addChild(WritableTypeNode node) {
       if (node.type == this.type) {
-        throw new DuplicateException(KEY, node.type);
+        throw new DuplicateValueException(KEY, node.type);
       }
       Iterator<WritableTypeNode> itr = subtypes.wiredIterator();
       boolean inserted = false;
@@ -122,7 +122,7 @@ public final class TypeGraphBuilder<V> {
         root.value = value;
         ++size;
       } else {
-        throw new DuplicateException(KEY, Object.class);
+        throw new DuplicateValueException(KEY, Object.class);
       }
     } else {
       root.addChild(new WritableTypeNode(type, value));

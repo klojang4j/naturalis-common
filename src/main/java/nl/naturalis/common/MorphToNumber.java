@@ -5,23 +5,23 @@ import static nl.naturalis.common.ClassMethods.box;
 import static nl.naturalis.common.Morph.stringify;
 
 /*
- * Used to morph objects into primitives and primitive wrapper types. Also used to convert to {@code
- * BigDecimal} and {@code BigInteger}. It's pointless to try and use generics here. It will fight
- * you. Too much dynamic stuff going on.
+ * Used to morph objects into primitives and primitive wrapper types. Also used to
+ * convert to {@code BigDecimal} and {@code BigInteger}. It's pointless to try and
+ * use generics here. It will fight you. Too much dynamic stuff going on.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-class MorphTable1 {
+final class MorphToNumber {
 
-  private static MorphTable1 INSTANCE;
+  private static MorphToNumber INSTANCE;
 
-  static MorphTable1 getInstance() {
+  static MorphToNumber getInstance() {
     if (INSTANCE == null) {
-      INSTANCE = new MorphTable1();
+      INSTANCE = new MorphToNumber();
     }
     return INSTANCE;
   }
 
-  private MorphTable1() {}
+  private MorphToNumber() {}
 
   Object morph(Object obj, Class toType) {
     Class type = box(toType);
@@ -55,8 +55,7 @@ class MorphTable1 {
     if (s.length() == 1) {
       return s.charAt(0);
     }
-    throw new TypeConversionException(
-        obj,
+    throw new TypeConversionException(obj,
         toType,
         "String length exceeds 1: %s",
         obj);

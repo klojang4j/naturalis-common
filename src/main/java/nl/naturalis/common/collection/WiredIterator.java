@@ -19,9 +19,9 @@ public sealed interface WiredIterator<E> extends Iterator<E>, AutoCloseable perm
     WiredList.ReverseWiredIterator {
 
   /**
-   * Sets the value of the element arrived at by the last call to {@link #next()
-   * next()}. An {@link IllegalStateException} is thrown if {@link #next()} has not
-   * been called yet.
+   * Sets the value of the element arrived at by the last call to
+   * {@link #next() next()}. An {@link IllegalStateException} is thrown if
+   * {@link #next()} has not been called yet.
    *
    * @param newVal The new value for the element.
    */
@@ -29,17 +29,19 @@ public sealed interface WiredIterator<E> extends Iterator<E>, AutoCloseable perm
 
   /**
    * Returns the value that would be returned by a call to {@link #next()} without
-   * actually moving towards the next element. A {@link java.util.NoSuchElementException}
-   * is thrown if the iterator has arrived at the last element.
+   * actually moving towards the next element. A
+   * {@link java.util.NoSuchElementException} is thrown if the iterator has arrived
+   * at the last element.
    *
-   * @return The value that would be returned by a call to{@code #next()}.
+   * @return The value that would be returned by a call to{@code next()}.
    */
   E peek();
 
   /**
    * Flips the direction of the iteration. The returned {@code Iterator} is
-   * initialized to be at the same element as this {@code Iterator}. An {@link
-   * IllegalStateException} is thrown if {@link #next()} has not been called yet.
+   * initialized to be at the same element as this {@code Iterator}. An
+   * {@link IllegalStateException} is thrown if {@link #next()} has not been called
+   * yet.
    *
    * @return A {@code WiredIterator} that the traverses the list in the opposite
    *     direction.
