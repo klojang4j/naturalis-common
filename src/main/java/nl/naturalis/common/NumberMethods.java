@@ -1,7 +1,6 @@
 package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
-import nl.naturalis.common.x.invoke.BigDecimalConverter;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -15,6 +14,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static nl.naturalis.common.ObjectMethods.isEmpty;
+import static nl.naturalis.common.TypeConversionException.inputTypeNotSupported;
+import static nl.naturalis.common.TypeConversionException.targetTypeNotSupported;
 import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.CommonChecks.*;
 
@@ -25,10 +26,47 @@ import static nl.naturalis.common.check.CommonChecks.*;
  *
  * @author Ayco Holleman
  */
-@SuppressWarnings("rawtypes")
 public final class NumberMethods {
 
+  static final Predicate<Number> yes() {return n -> true;}
+
   static final String UNSUPPORTED_NUMBER_TYPE = "unsupported Number type: {0}";
+
+  private static final String NAN_OR_INFINITY = "NaN or Infinity";
+
+  private static final Map<Class<? extends Number>, Function<Number, BigDecimal>> toBigDecimalConversions =
+      Map.of(
+          BigDecimal.class, BigDecimal.class::cast,
+          BigInteger.class, x -> new BigDecimal((BigInteger) x),
+          Double.class, x -> BigDecimal.valueOf((double) x),
+          Float.class, x -> BigDecimal.valueOf((float) x),
+          Long.class, x -> new BigDecimal((Long) x),
+          AtomicLong.class, x -> new BigDecimal(((AtomicLong) x).get()),
+          Integer.class, x -> new BigDecimal((Integer) x),
+          AtomicInteger.class, x -> new BigDecimal(((AtomicInteger) x).get()),
+          Short.class, x -> new BigDecimal((Short) x),
+          Byte.class, x -> new BigDecimal((Byte) x)
+      );
+
+  private static final Map<Class<?>, Function<String, Number>> parsers = Map.of(
+      Double.class, NumberMethods::parseDouble,
+      Float.class, NumberMethods::parseFloat,
+      Long.class, NumberMethods::parseLong,
+      AtomicLong.class, s -> new AtomicLong(parseLong(s)),
+      Integer.class, NumberMethods::parseInt,
+      AtomicInteger.class, s -> new AtomicInteger(parseInt(s)),
+      Short.class, NumberMethods::parseShort,
+      Byte.class, NumberMethods::parseByte);
+
+  private static final Map<Class<?>, Predicate<Number>> fitsIntoTests = Map.of(
+      Double.class, FitsIntoDouble::test,
+      Float.class, FitsIntoFloat::test,
+      Long.class, FitsIntoLong::test,
+      AtomicLong.class, FitsIntoLong::test,
+      Integer.class, FitsIntoInt::test,
+      AtomicInteger.class, FitsIntoInt::test,
+      Short.class, FitsIntoShort::test,
+      Byte.class, FitsIntoByte::test);
 
   private NumberMethods() {
     throw new UnsupportedOperationException();
@@ -182,7 +220,7 @@ public final class NumberMethods {
     } catch (NumberFormatException e) {
       throw new TypeConversionException(s, double.class, e.toString());
     }
-    throw new TypeConversionException(s, double.class, "NaN or Infinity");
+    throw new TypeConversionException(s, double.class, NAN_OR_INFINITY);
   }
 
   /**
@@ -249,7 +287,7 @@ public final class NumberMethods {
     } catch (NumberFormatException e) {
       throw new TypeConversionException(s, float.class, e.toString());
     }
-    throw new TypeConversionException(s, float.class, "NaN or Infinity");
+    throw new TypeConversionException(s, float.class, NAN_OR_INFINITY);
   }
 
   /**
@@ -366,12 +404,12 @@ public final class NumberMethods {
    * @param s the string to be parsed
    * @return the {@code byte} value represented by the string
    */
-  public static int parseByte(String s) throws TypeConversionException {
+  public static byte parseByte(String s) throws TypeConversionException {
     if (isEmpty(s)) {
       throw new TypeConversionException(s, byte.class);
     }
     try {
-      return new BigInteger(s).shortValueExact();
+      return new BigInteger(s).byteValueExact();
     } catch (NumberFormatException | ArithmeticException e) {
       throw new TypeConversionException(s, byte.class, e.toString());
     }
@@ -416,55 +454,6 @@ public final class NumberMethods {
     return OptionalInt.empty();
   }
 
-  private static final Map<Class<?>, Function<Number, BigDecimal>> TO_BIG_DECIMAL =
-      Map.of(
-          BigDecimal.class, BigDecimal.class::cast,
-          BigInteger.class, n -> new BigDecimal((BigInteger) n),
-          Double.class, n -> BigDecimal.valueOf((double) n),
-          Float.class, n -> BigDecimal.valueOf((float) n),
-          Long.class, n -> new BigDecimal((Long) n),
-          Integer.class, n -> new BigDecimal((Integer) n),
-          Short.class, n -> new BigDecimal((Short) n),
-          Byte.class, n -> new BigDecimal((Byte) n)
-      );
-
-  /**
-   * Converts a {@code Number} of unspecified type to a {@code BigDecimal}. If the
-   * number is a {@code Double} or a {@code Float}, it is converted by passing it
-   * {@code BigDecimal.valueOf}, thus keeping its precision intact. Otherwise the
-   * number is passed itself to the constructor of {@code BigDecimal}. This method
-   * does not support the more "exotic" {@code Number} types, like
-   * {@link AtomicLong}.
-   *
-   * @param n the number
-   * @return the {@code BigDecimal} representing the number
-   */
-  public static BigDecimal toBigDecimal(Number n) {
-    Check.notNull(n);
-    Function<Number, BigDecimal> fnc = TO_BIG_DECIMAL.get(n.getClass());
-    if (fnc != null) {
-      return fnc.apply(n);
-    }
-    return fail(UNSUPPORTED_NUMBER_TYPE, n.getClass());
-  }
-
-  /**
-   * Converts a number of an unspecified type to a number of a definite type. Throws
-   * an {@link TypeConversionException} if the number is too big to fit into the
-   * target type. This method does not support more "exotic" {@code Number} types,
-   * like {@link AtomicLong}.
-   *
-   * @param <T> the type of the number to be converted
-   * @param <U> The target type
-   * @param number the number to be converted
-   * @param targetType the class of the target type
-   * @return an instance of the target type
-   */
-  public static <T extends Number, U extends Number> U convert(T number,
-      Class<U> targetType) {
-    return new NumberConverter<>(targetType).convert(number);
-  }
-
   /**
    * Parses the specified string into a number of the specified type. Throws an
    * {@link TypeConversionException} if the string is not a number or if the number
@@ -477,12 +466,66 @@ public final class NumberMethods {
    */
   public static <T extends Number> T parse(String s, Class<T> targetType)
       throws TypeConversionException {
-    return new NumberParser<>(targetType).parse(s);
+    Check.notNull(targetType, "targetType");
+    Function<String, Number> parser = parsers.get(targetType);
+    Check.that(parser).is(notNull(), () -> targetTypeNotSupported(s, targetType));
+    return (T) parser.apply(s);
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  //                            END OF PARSE METHOD                             //
+  ////////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Converts a {@code Number} of an unspecified type to a {@code BigDecimal}.
+   *
+   * @param n the number
+   * @return the {@code BigDecimal} representing the number
+   */
+  public static BigDecimal toBigDecimal(Number n) {
+    Check.notNull(n);
+    Function<Number, BigDecimal> fnc = toBigDecimalConversions.get(n.getClass());
+    if (fnc != null) {
+      return fnc.apply(n);
+    }
+    throw inputTypeNotSupported(n, BigDecimal.class);
+  }
+
+  /**
+   * Converts a number of an unspecified type to a number of a definite type. Throws
+   * an {@link TypeConversionException} if the number cannot be converted to the
+   * target type without loss of information. In addition, a
+   * {@code TypeConversionException} is thrown if the number is a {@code float} or
+   * {@code Double} with value {@code NaN}, {@code POSITIVE_INFINITY} or
+   * {@code NEGATIVE_INFINITY}. In other words, these values <i>always</i> result in
+   * a {@code TypeConversionException}, even if the conversion turns out to be a
+   * float-to-float or double-to-double conversion. The number is allowed to be
+   * {@code null}, in which case {@code null} will be returned.
+   *
+   * @param <T> The input type
+   * @param <R> The output type
+   * @param number the number to be converted
+   * @param targetType the class of the target type
+   * @return an instance of the target type
+   */
+  @SuppressWarnings({"unchecked"})
+  public static <T extends Number, R extends Number> R convert(T number,
+      Class<R> targetType) throws TypeConversionException {
+    Check.notNull(targetType, "targetType").is(subtypeOf(), Number.class);
+    if (number == null || targetType.isInstance(number)) {
+      return (R) number;
+    } else if (number instanceof Double d && !Double.isFinite(d)) {
+      throw new TypeConversionException(number, targetType, NAN_OR_INFINITY);
+    } else if (number instanceof Float f && !Float.isFinite(f)) {
+      throw new TypeConversionException(number, targetType, NAN_OR_INFINITY);
+    }
+    return new BigDecimalConverter(toBigDecimal(number)).convertTo(targetType);
   }
 
   /**
    * Returns whether the specified {@code Number} can be converted into an instance
-   * of the specified {@code Number} class without loss of information.
+   * of the specified {@code Number} class without loss of information. The number is
+   * allowed to be {@code null}, in which case {@code true} will be returned.
    *
    * @param <T> the type of {@code Number} to convert to
    * @param number the {@code Number} to convert
@@ -491,107 +534,15 @@ public final class NumberMethods {
    */
   public static <T extends Number> boolean fitsInto(Number number,
       Class<T> targetType) {
-    Class<?> myType = Check.notNull(number, "number")
-        .isNot(instanceOf(), BigDecimal.class)
-        .isNot(instanceOf(), BigInteger.class)
-        .ok(Object::getClass);
-    Check.notNull(targetType, "targetType")
-        .isNot(sameAs(), BigDecimal.class)
-        .isNot(sameAs(), BigInteger.class);
-    if (myType == targetType || targetType == Double.class) {
+    Check.notNull(targetType, "targetType");
+    if (number == null) {
       return true;
-    } else if (targetType == Float.class) {
-      return fitsIntoFloat(number);
-    } else if (targetType == Long.class) {
-      return fitsIntoLong(number);
-    } else if (targetType == Integer.class) {
-      return fitsIntoInt(number);
-    } else if (targetType == Short.class) {
-      return fitsIntoShort(number);
     }
-    return fitsIntoByte(number);
-  }
-
-  private static final Map<Class<?>, Predicate<Number>> fitsIntoPredicates = Map.of(
-      Double.class, x -> true,
-      Float.class, NumberMethods::fitsIntoFloat,
-      Long.class, NumberMethods::fitsIntoLong,
-      AtomicLong.class, NumberMethods::fitsIntoLong,
-      Integer.class, NumberMethods::fitsIntoInt,
-      AtomicInteger.class, NumberMethods::fitsIntoInt,
-      Short.class, NumberMethods::fitsIntoShort,
-      Byte.class, NumberMethods::fitsIntoByte);
-
-  private static boolean fitsIntoFloat(Number number) {
-    Class<?> type = number.getClass();
-    if (type == Double.class) {
-      return (float) number.doubleValue() == number.doubleValue();
+    Predicate<Number> tester = fitsIntoTests.get(targetType);
+    if (tester != null) {
+      return tester.test(number);
     }
-    return true;
-  }
-
-  private static boolean fitsIntoLong(Number number) {
-    Class<?> type = number.getClass();
-    if (type == Double.class) {
-      return (long) number.doubleValue() == number.doubleValue();
-    } else if (type == Float.class) {
-      return (long) number.floatValue() == number.floatValue();
-    } else if (number instanceof BigDecimal bd) {
-      return new BigDecimalConverter(bd).fitsInto(long.class);
-    }
-    return true;
-  }
-
-  private static boolean fitsIntoInt(Number number) {
-    Class<?> type = number.getClass();
-    if (type == Double.class) {
-      return (int) number.doubleValue() == number.doubleValue();
-    } else if (type == Float.class) {
-      return (int) number.floatValue() == number.floatValue();
-    } else if (type == Long.class) {
-      return number.longValue() <= Integer.MAX_VALUE
-          && number.longValue() >= Integer.MIN_VALUE;
-    } else if (number instanceof BigDecimal bd) {
-      return new BigDecimalConverter(bd).fitsInto(int.class);
-    }
-    return true;
-  }
-
-  private static boolean fitsIntoShort(Number number) {
-    Class<?> type = number.getClass();
-    if (type == Double.class) {
-      return (short) number.doubleValue() == number.doubleValue();
-    } else if (type == Float.class) {
-      return (short) number.floatValue() == number.floatValue();
-    } else if (type == Long.class) {
-      return number.longValue() <= Short.MAX_VALUE
-          && number.longValue() >= Short.MIN_VALUE;
-    } else if (type == Integer.class) {
-      return number.intValue() <= Short.MAX_VALUE
-          && number.intValue() >= Short.MIN_VALUE;
-    } else if (number instanceof BigDecimal bd) {
-      return new BigDecimalConverter(bd).fitsInto(short.class);
-    }
-    return true;
-  }
-
-  private static boolean fitsIntoByte(Number number) {
-    Class<?> type = number.getClass();
-    if (type == Double.class) {
-      return (byte) number.doubleValue() == number.doubleValue();
-    } else if (type == Float.class) {
-      return (byte) number.floatValue() == number.floatValue();
-    } else if (type == Long.class) {
-      return number.longValue() <= Byte.MAX_VALUE
-          && number.longValue() >= Byte.MIN_VALUE;
-    } else if (type == Integer.class) {
-      return number.intValue() <= Byte.MAX_VALUE
-          && number.intValue() >= Byte.MIN_VALUE;
-    } else if (number instanceof BigDecimal bd) {
-
-    }
-    return number.shortValue() <= Byte.MAX_VALUE
-        && number.shortValue() >= Byte.MIN_VALUE;
+    throw inputTypeNotSupported(number, targetType);
   }
 
 }

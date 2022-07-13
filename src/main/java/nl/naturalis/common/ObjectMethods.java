@@ -931,6 +931,18 @@ public class ObjectMethods {
     return ifNull(arg, Boolean.FALSE);
   }
 
+  /**
+   * Does a brute-force cast of one generic type to another.
+   *
+   * @param input The value to be cast
+   * @param <T> The input type
+   * @param <R> The output type
+   * @return The cast value
+   */
+  public static <T, R> R bruteCast(T input) {
+    return (R) input;
+  }
+
   private static boolean eq(Object arg0, Object arg1) {
     if (arg0 instanceof Object[] && arg1 instanceof Object[]) {
       return arraysEqual((Object[]) arg0, (Object[]) arg1);

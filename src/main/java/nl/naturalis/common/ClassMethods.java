@@ -135,11 +135,12 @@ public final class ClassMethods {
   }
 
   /**
-   * Returns {@code true} if the specified type is a primitive array as per
-   * {@link #isPrimitiveArray(Class)}.
+   * Returns {@code true} if the specified object is an array of a primitive type, or
+   * a {@code Class} object representing an array of a primitive type.
    *
    * @param obj The object to test
-   * @return whether it is a primitive array class
+   * @return {@code true} if the specified object is an array of a primitive type, or
+   *     a {@code Class} object representing an array of a primitive type
    */
   public static boolean isPrimitiveArray(Object obj) {
     if (obj instanceof Class c) {
@@ -149,10 +150,12 @@ public final class ClassMethods {
   }
 
   /**
-   * Returns {@code true} if the specified type is an array of a primitive type.
+   * Returns {@code true} if the specified type represents an array of a primitive
+   * type.
    *
    * @param clazz the class to test
-   * @return whether it is a primitive array class
+   * @return {@code true} if the specified type represents an array of a primitive
+   *     type
    */
   public static boolean isPrimitiveArray(Class<?> clazz) {
     Check.notNull(clazz);
@@ -160,13 +163,14 @@ public final class ClassMethods {
   }
 
   /**
-   * Returns {@code true} if the specified type is an array whose deepest-level
-   * component type is a primitive type. So this method will return {@code true} not
-   * just for {@code int[]}, but also for {@code int[][]}, {@code int[][][]}, etc.
+   * Returns {@code true} if the specified type represents an array with a primitive
+   * type as its deepest-level component type. So this method will return
+   * {@code true} not just for {@code int[]}, but also for {@code int[][]},
+   * {@code int[][][]}, etc.
    *
    * @param clazz the class to test
-   * @return {@code true} if the specified type is an array whose deepest-level
-   *     component type is a primitive type
+   * @return {@code true} if the specified type represents an array with a primitive
+   *     type as its deepest-level component type
    */
   public static boolean isDeeplyPrimitiveArray(Class<?> clazz) {
     Check.notNull(clazz);
@@ -174,23 +178,26 @@ public final class ClassMethods {
   }
 
   /**
-   * Returns whether the specified class is one of the primitive wrapper classes.
+   * Returns {@code true} if the specified class is one of the primitive wrapper
+   * classes.
    *
    * @param clazz the class to test
-   * @return whether the specified class is one of the primitive wrapper classes
+   * @return {@code true} if the specified class is one of the primitive wrapper
+   *     classes
    */
   public static boolean isWrapper(Class<?> clazz) {
     return W2P.containsKey(clazz);
   }
 
   /**
-   * Returns whether instances of the first class will be auto-unboxed into instances
-   * of the second class. This method does not check whether the first class actually
-   * is a wrapper class and the second a primitive class. If either is not true, the
-   * method will return {@code false}.
+   * Returns {@code true} if first argument is a primitive wrapper type and the
+   * second argument is the corresponding primitive type. If the first class is not a
+   * wrapper class (like {@code Integer.class}), or the second class is not a
+   * primitive type (like {@code int.class}), this method returns {@code false}.
    *
-   * @param classToTest The class to test
-   * @param primitiveClass Supposedly a primitively class
+   * @param classToTest the class to test
+   * @param primitiveClass the class to compare it with (supposedly, but not
+   *     necessarily, a primitive type)
    * @return whether instances of the first class will be auto-unboxed into instances
    *     of the second class
    */
@@ -202,13 +209,14 @@ public final class ClassMethods {
   }
 
   /**
-   * Returns whether instances of the first class will be auto-unboxed into instances
-   * of the second class. This method does not check whether the first class actually
-   * is a wrapper class and the second a primitive class. If either is not true, the
-   * method will return {@code false}.
+   * Returns {@code true} if first argument is a primitive type and the second
+   * argument is the corresponding wrapper class. If the first class is not a
+   * primitive type (like {@code int.class}), or the second class is not a wrapper
+   * class (like {@code Integer.class}), this method returns {@code false}.
    *
-   * @param classToTest The class to test
-   * @param wrapperClass Supposedly a wrapper class
+   * @param classToTest the class to test
+   * @param wrapperClass the class to compare it with (supposedly, but not
+   *     necessarily, a primitive wrapper type)
    * @return whether instances of the first class will be auto-unboxed into instances
    *     of the second class
    */

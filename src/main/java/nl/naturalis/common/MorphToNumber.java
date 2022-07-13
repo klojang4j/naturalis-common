@@ -3,6 +3,7 @@ package nl.naturalis.common;
 import static nl.naturalis.common.ArrayMethods.refIndexOf;
 import static nl.naturalis.common.ClassMethods.box;
 import static nl.naturalis.common.Morph.stringify;
+import static nl.naturalis.common.ObjectMethods.bruteCast;
 
 /*
  * Used to morph objects into primitives and primitive wrapper types. Also used to
@@ -38,13 +39,13 @@ final class MorphToNumber {
   private static Number toNumber(Object obj, Class toType) {
     Class myType = obj.getClass();
     if (ClassMethods.isSubtype(myType, Number.class)) {
-      return new NumberConverter(toType).convert((Number) obj);
+      return NumberMethods.convert((Number) obj, toType);
     } else if (myType.isEnum()) {
       return refIndexOf(myType.getEnumConstants(), obj);
     } else if (myType == Character.class) {
       return charToNumber(obj, box(toType));
     }
-    return new NumberParser(toType).parse(stringify(obj));
+    return NumberMethods.parse(stringify(obj), toType);
   }
 
   private static Character toChar(Object obj, Class toType) {
@@ -64,7 +65,7 @@ final class MorphToNumber {
   private static Number charToNumber(Object obj, Class targetType) {
     char c = (Character) obj;
     if (c >= '0' && c <= '9') {
-      return new NumberConverter(targetType).convert(c - 48);
+      return NumberMethods.convert(c - 48, targetType);
     }
     throw new TypeConversionException(obj, targetType);
   }

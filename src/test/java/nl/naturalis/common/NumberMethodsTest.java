@@ -49,7 +49,8 @@ public class NumberMethodsTest {
     assertTrue(fitsInto(Byte.MAX_VALUE, Float.class));
     assertTrue(fitsInto(Byte.MIN_VALUE, Float.class));
     assertTrue(fitsInto(3.00000D, Float.class));
-    assertFalse(fitsInto(3.00001D, Float.class));
+    assertTrue(fitsInto(3.00001D, Float.class));
+    assertTrue(fitsInto(3.00001D, Float.class));
   }
 
   @Test
@@ -58,10 +59,10 @@ public class NumberMethodsTest {
     assertFalse(fitsInto(Double.MIN_VALUE, Long.class));
     assertFalse(fitsInto(Float.MAX_VALUE, Long.class));
     assertFalse(fitsInto(Float.MIN_VALUE, Long.class));
-    assertTrue(fitsInto(Double.valueOf(Long.MAX_VALUE), Long.class));
-    assertTrue(fitsInto(Double.valueOf(Long.MIN_VALUE), Long.class));
-    assertTrue(fitsInto(Float.valueOf(Long.MAX_VALUE), Long.class));
-    assertTrue(fitsInto(Float.valueOf(Long.MIN_VALUE), Long.class));
+    assertFalse(fitsInto(Double.valueOf(Long.MAX_VALUE), Long.class));
+    assertFalse(fitsInto(Double.valueOf(Long.MIN_VALUE), Long.class));
+    assertFalse(fitsInto(Float.valueOf(Long.MAX_VALUE), Long.class));
+    assertFalse(fitsInto(Float.valueOf(Long.MIN_VALUE), Long.class));
     assertTrue(fitsInto(Long.MAX_VALUE, Long.class));
     assertTrue(fitsInto(Long.MIN_VALUE, Long.class));
     assertTrue(fitsInto(Integer.MAX_VALUE, Long.class));
@@ -84,7 +85,7 @@ public class NumberMethodsTest {
     assertFalse(fitsInto(Long.MIN_VALUE, Integer.class));
     assertTrue(fitsInto(Double.valueOf(Integer.MAX_VALUE), Integer.class));
     assertTrue(fitsInto(Double.valueOf(Integer.MIN_VALUE), Integer.class));
-    assertTrue(fitsInto(Float.valueOf(Integer.MAX_VALUE), Integer.class));
+    assertFalse(fitsInto(Float.valueOf(Integer.MAX_VALUE), Integer.class));
     assertTrue(fitsInto(Float.valueOf(Integer.MIN_VALUE), Integer.class));
     assertTrue(fitsInto(Long.valueOf(Integer.MAX_VALUE), Integer.class));
     assertTrue(fitsInto(Long.valueOf(Integer.MIN_VALUE), Integer.class));
@@ -175,16 +176,6 @@ public class NumberMethodsTest {
   @Test(expected = TypeConversionException.class)
   public void convert10() {
     NumberMethods.convert(300345, Byte.class);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void fitsInto11() {
-    fitsInto(42L, BigInteger.class);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void fitsInto12() {
-    fitsInto(42L, BigDecimal.class);
   }
 
   @Test

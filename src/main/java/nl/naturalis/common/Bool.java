@@ -5,17 +5,19 @@ import java.util.Set;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static nl.naturalis.common.ClassMethods.*;
+import static nl.naturalis.common.ObjectMethods.bruteCast;
 
 /**
  * Converts values from various non-boolean types to boolean values. Where
- * applicable, {@code null} is accepted as an argument and evaluates to {@code
- * false}. Values evaluating to {@code true} and values evaluating to {@code false}
- * will both be tightly defined, rather than (for example) 1 counting as {@code true}
- * and anything else as {@code false}. If an argument is neither a {@code true} value
- * nor a {@code false} value, an {@link IllegalArgumentException} is thrown. The
- * static method use the {@link #TRUE_STRINGS} and {@link #FALSE_STRINGS} sets to
- * determine if a {@code String} is true-ish or falsy. You can also instantiate the
- * {@code Bool} class with your own {@code true} strings and {@code false} strings.
+ * applicable, {@code null} is accepted as an argument and evaluates to
+ * {@code false}. Values evaluating to {@code true} and values evaluating to
+ * {@code false} will both be tightly defined, rather than (for example) 1 counting
+ * as {@code true} and anything else as {@code false}. If an argument is neither a
+ * {@code true} value nor a {@code false} value, an {@link IllegalArgumentException}
+ * is thrown. The static method use the {@link #TRUE_STRINGS} and
+ * {@link #FALSE_STRINGS} sets to determine if a {@code String} is true-ish or falsy.
+ * You can also instantiate the {@code Bool} class with your own {@code true} strings
+ * and {@code false} strings.
  *
  * @author Ayco Holleman
  */
@@ -25,15 +27,23 @@ public class Bool {
    * The default set of strings that count as {@code true} values (ignoring case):
    * "true", "1", "yes", "on", "enabled".
    */
-  public static final Set<String> TRUE_STRINGS = Set.of("true", "1", "yes", "on", "enabled");
+  public static final Set<String> TRUE_STRINGS = Set.of("true",
+      "1",
+      "yes",
+      "on",
+      "enabled");
 
   /**
    * The default set of strings that count as {@code false} values (ignoring case):
    * "false", "0", "false", "off", "disabled".
    */
-  public static final Set<String> FALSE_STRINGS = Set.of("false", "0", "no", "off", "disabled");
+  public static final Set<String> FALSE_STRINGS = Set.of("false",
+      "0",
+      "no",
+      "off",
+      "disabled");
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
+  @SuppressWarnings({"unchecked"})
   public static <T> T to(Class<T> targetType, boolean b) {
     if (targetType == boolean.class || targetType == Boolean.class) {
       return (T) Boolean.valueOf(b);
@@ -41,12 +51,12 @@ public class Bool {
       return (T) Boolean.valueOf(b).toString();
     } else if (isSubtype(targetType, Number.class)) {
       return b
-          ? (T) new NumberConverter(targetType).convert(1)
-          : (T) new NumberConverter(targetType).convert(0);
+          ? (T) NumberMethods.convert(1, bruteCast(targetType))
+          : (T) NumberMethods.convert(0, bruteCast(targetType));
     } else if (isPrimitiveNumber(targetType)) {
       return b
-          ? (T) new NumberConverter(box(targetType)).convert(1)
-          : (T) new NumberConverter(box(targetType)).convert(0);
+          ? (T) NumberMethods.convert(1, bruteCast(box(targetType)))
+          : (T) NumberMethods.convert(0, bruteCast(box(targetType)));
     } else if (targetType == char.class || targetType == Character.class) {
       return (T) (b ? Character.valueOf('1') : Character.valueOf('0'));
     }
@@ -294,9 +304,9 @@ public class Bool {
   }
 
   /**
-   * Converts the specified {@code char} to a {@code Boolean} value. Returns {@code
-   * true} if the argument equals '1'; {@code false} if the argument equals '0';
-   * otherwise throws a {@link TypeConversionException}.
+   * Converts the specified {@code char} to a {@code Boolean} value. Returns
+   * {@code true} if the argument equals '1'; {@code false} if the argument equals
+   * '0'; otherwise throws a {@link TypeConversionException}.
    *
    * @param c The argument
    * @return The corresponding {@code Boolean} value
