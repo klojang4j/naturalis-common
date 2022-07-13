@@ -16,8 +16,8 @@ import java.util.function.Predicate;
 import static nl.naturalis.common.ObjectMethods.isEmpty;
 import static nl.naturalis.common.TypeConversionException.inputTypeNotSupported;
 import static nl.naturalis.common.TypeConversionException.targetTypeNotSupported;
-import static nl.naturalis.common.check.Check.fail;
-import static nl.naturalis.common.check.CommonChecks.*;
+import static nl.naturalis.common.check.CommonChecks.notNull;
+import static nl.naturalis.common.check.CommonChecks.subtypeOf;
 
 /**
  * Methods for working with {@code Number} instances. Note that this class is about
@@ -28,11 +28,11 @@ import static nl.naturalis.common.check.CommonChecks.*;
  */
 public final class NumberMethods {
 
-  static final Predicate<Number> yes() {return n -> true;}
-
   static final String UNSUPPORTED_NUMBER_TYPE = "unsupported Number type: {0}";
 
   private static final String NAN_OR_INFINITY = "NaN or Infinity";
+
+  static Predicate<Number> yes() {return n -> true;}
 
   private static final Map<Class<? extends Number>, Function<Number, BigDecimal>> toBigDecimalConversions =
       Map.of(
@@ -502,8 +502,8 @@ public final class NumberMethods {
    * float-to-float or double-to-double conversion. The number is allowed to be
    * {@code null}, in which case {@code null} will be returned.
    *
-   * @param <T> The input type
-   * @param <R> The output type
+   * @param <T> the input type
+   * @param <R> the output type
    * @param number the number to be converted
    * @param targetType the class of the target type
    * @return an instance of the target type
@@ -515,11 +515,11 @@ public final class NumberMethods {
     if (number == null || targetType.isInstance(number)) {
       return (R) number;
     } else if (number instanceof Double d && !Double.isFinite(d)) {
-      throw new TypeConversionException(number, targetType, NAN_OR_INFINITY);
+      throw nanOrInfinity(number, targetType);
     } else if (number instanceof Float f && !Float.isFinite(f)) {
-      throw new TypeConversionException(number, targetType, NAN_OR_INFINITY);
+      throw nanOrInfinity(number, targetType);
     }
-    return new BigDecimalConverter(toBigDecimal(number)).convertTo(targetType);
+    return BigDecimalConverter.convertTo(number, targetType);
   }
 
   /**
@@ -543,6 +543,10 @@ public final class NumberMethods {
       return tester.test(number);
     }
     throw inputTypeNotSupported(number, targetType);
+  }
+
+  static TypeConversionException nanOrInfinity(Number n, Class<?> targetType) {
+    return new TypeConversionException(n, targetType, NAN_OR_INFINITY);
   }
 
 }

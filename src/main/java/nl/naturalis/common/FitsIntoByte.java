@@ -5,6 +5,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
+import static nl.naturalis.common.BigDecimalConverter.doubleFitsInto;
+import static nl.naturalis.common.BigDecimalConverter.floatFitsInto;
 import static nl.naturalis.common.NumberMethods.*;
 
 import static nl.naturalis.common.TypeConversionException.inputTypeNotSupported;
@@ -15,8 +17,8 @@ class FitsIntoByte {
   private static final Byte B_MAX = Byte.MAX_VALUE;
 
   private static final Map<Class<?>, Predicate<Number>> fitsIntoByte = Map.of(
-      Double.class, n -> new BigDecimalConverter((Double) n).fitsInto(Byte.class),
-      Float.class, n -> new BigDecimalConverter((Float) n).fitsInto(Byte.class),
+      Double.class, n -> doubleFitsInto(n, Byte.class),
+      Float.class, n -> floatFitsInto(n, Byte.class),
       Long.class, n -> n.longValue() >= B_MIN && n.longValue() <= B_MAX,
       AtomicLong.class, n -> n.longValue() >= B_MIN && n.longValue() <= B_MAX,
       Integer.class, n -> n.intValue() >= B_MIN && n.intValue() <= B_MAX,

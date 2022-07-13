@@ -3,6 +3,7 @@ package nl.naturalis.common;
 import nl.naturalis.common.check.Check;
 
 import static java.lang.invoke.MethodHandles.lookup;
+import static nl.naturalis.common.NumberMethods.toBigDecimal;
 import static nl.naturalis.common.TypeConversionException.targetTypeNotSupported;
 
 import java.lang.invoke.MethodHandle;
@@ -27,8 +28,6 @@ final class BigDecimalConverter {
 
   private static final BigDecimal MAX_DOUBLE = BigDecimal.valueOf(Double.MAX_VALUE);
   private static final BigDecimal MIN_DOUBLE = BigDecimal.valueOf(Double.MIN_VALUE);
-
-  private static final String TYPE_NOT_SUPPORTED = "unsupported number type: {0}";
 
   static final Map<Class<? extends Number>, MethodHandle> VALUE_EXACT_METHODS = getMethodHandles();
 
@@ -70,76 +69,39 @@ final class BigDecimalConverter {
     throw targetTypeNotSupported(n, targetType);
   }
 
-  private final BigDecimal bd;
-
-  BigDecimalConverter(BigDecimal bd) {
-    this.bd = bd;
-  }
-
-  BigDecimalConverter(Double d) {
-    this.bd = BigDecimal.valueOf(d);
-  }
-
-  BigDecimalConverter(Float f) {
-    this.bd = BigDecimal.valueOf(f);
-  }
-
   @SuppressWarnings({"unchecked"})
-  <T extends Number> T convertTo(Class<T> targetType) {
-    BigDecimal bd = this.bd;
+  static <T extends Number> T convertTo(Number number, Class<T> targetType) {
+    BigDecimal bd = toBigDecimal(number);
     if (targetType == BigDecimal.class) {
       return (T) bd;
     } else if (targetType == Double.class) {
-      BigDecimal abs = bd.abs(MathContext.UNLIMITED);
+      BigDecimal abs = bd.abs(MathContext.DECIMAL64);
       if (abs.compareTo(MIN_DOUBLE) < 0 || abs.compareTo(MAX_DOUBLE) > 0) {
-        throw targetTypeTooNarrow(targetType);
+        throw targetTypeTooNarrow(number, targetType);
       }
       return (T) Double.valueOf(bd.doubleValue());
     } else if (targetType == Float.class) {
-      BigDecimal abs = bd.abs(MathContext.UNLIMITED);
+      BigDecimal abs = bd.abs(MathContext.DECIMAL64);
       if (abs.compareTo(MIN_FLOAT) < 0 || abs.compareTo(MAX_FLOAT) > 0) {
-        throw targetTypeTooNarrow(targetType);
+        throw targetTypeTooNarrow(number, targetType);
       }
       return (T) Float.valueOf(bd.floatValue());
     } else if (targetType == AtomicInteger.class) {
-      return (T) new AtomicInteger(convertTo(Integer.class));
+      return (T) new AtomicInteger(convertTo(number, Integer.class));
     } else if (targetType == AtomicLong.class) {
-      return (T) new AtomicLong(convertTo(Long.class));
+      return (T) new AtomicLong(convertTo(number, Long.class));
     }
     MethodHandle method = VALUE_EXACT_METHODS.get(targetType);
     if (method != null) {
       try {
         return (T) method.invoke(bd);
       } catch (ArithmeticException e) {
-        throw targetTypeTooNarrow(targetType);
+        throw targetTypeTooNarrow(number, targetType);
       } catch (Throwable t) {
-        throw ExceptionMethods.uncheck(t);
+        throw new TypeConversionException(number, targetType, t.toString());
       }
     }
     throw targetTypeNotSupported(bd, targetType);
-  }
-
-  boolean fitsInto(Class<?> targetType) {
-    if (targetType == Double.class) {
-      BigDecimal abs = bd.abs(MathContext.DECIMAL64);
-      return abs.compareTo(MIN_DOUBLE) >= 0 && abs.compareTo(MAX_DOUBLE) <= 0;
-    } else if (targetType == Float.class) {
-      BigDecimal abs = bd.abs(MathContext.DECIMAL64);
-      return abs.compareTo(MIN_FLOAT) >= 0 && abs.compareTo(MAX_FLOAT) <= 0;
-    } else if (targetType == AtomicInteger.class) {
-      return fitsInto(Integer.class);
-    } else if (targetType == AtomicLong.class) {
-      return fitsInto(Long.class);
-    }
-    MethodHandle valueExactMethod = VALUE_EXACT_METHODS.get(targetType);
-    try {
-      valueExactMethod.invoke(bd);
-      return true;
-    } catch (ArithmeticException e) {
-      return false;
-    } catch (Throwable t) {
-      throw ExceptionMethods.uncheck(t);
-    }
   }
 
   private static Map<Class<? extends Number>, MethodHandle> getMethodHandles() {
@@ -176,10 +138,8 @@ final class BigDecimalConverter {
     return Map.copyOf(tmp);
   }
 
-  private TypeConversionException targetTypeTooNarrow(Class<?> targetType) {
-    String fmt = "BigDecimal does not fit into %s";
-    String scn = targetType.getSimpleName();
-    return new TypeConversionException(bd, targetType, fmt, bd, scn);
+  private static TypeConversionException targetTypeTooNarrow(Number n, Class<?> c) {
+    return new TypeConversionException(n, c, "target type too narrow");
   }
 
 }
