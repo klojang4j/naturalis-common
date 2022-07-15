@@ -13,6 +13,10 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 import static nl.naturalis.common.ObjectMethods.isEmpty;
+import static nl.naturalis.common.ToDoubleConversion.BIG_MAX_DOUBLE;
+import static nl.naturalis.common.ToDoubleConversion.BIG_MIN_DOUBLE;
+import static nl.naturalis.common.ToFloatConversion.BIG_MAX_FLOAT;
+import static nl.naturalis.common.ToFloatConversion.BIG_MIN_FLOAT;
 import static nl.naturalis.common.TypeConversionException.inputTypeNotSupported;
 import static nl.naturalis.common.TypeConversionException.targetTypeNotSupported;
 import static nl.naturalis.common.check.CommonChecks.notNull;
@@ -169,13 +173,9 @@ public final class NumberMethods {
   }
 
   /**
-   * Parses the specified string into an {@code int}. This method delegates to
-   * {@link BigDecimal#intValueExact()} and is therefore stricter than
-   * {@link Integer#parseInt(String)}. The {@link NumberFormatException} and the
-   * {@link ArithmeticException} thrown from {@code intValueExact()} are both
-   * converted to a {@link TypeConversionException}. Note that neither
-   * {@code intValueExact()} nor this method {@link String#strip() strips} the string
-   * before parsing it.
+   * Parses the specified string into a {@code int}. If the string does not represent
+   * a number, or if it cannot be parsed into an {@code int} without loss of
+   * information, a {@link TypeConversionException} is thrown.
    *
    * @param s the string to be parsed
    * @return the {@code int} value represented by the string
@@ -192,9 +192,9 @@ public final class NumberMethods {
   }
 
   /**
-   * Returns whether the specified string can be parsed into an {@code int} without
-   * causing integer overflow. The argument is allowed to be {@code null}, in which
-   * case the return value will be {@code false}.
+   * Returns {@code true} if the specified string can be parsed into an {@code int}
+   * without loss of information. The argument is allowed to be {@code null}, in
+   * which case the return value will be {@code false}.
    *
    * @param s the string to be parsed
    * @return whether the specified string can be parsed into an {@code int} without
@@ -231,13 +231,9 @@ public final class NumberMethods {
   }
 
   /**
-   * Parses the specified string into a {@code long}. This method delegates to
-   * {@link BigDecimal#longValueExact()} and is therefore stricter than
-   * {@link Long#parseLong(String)}. The {@link NumberFormatException} and the
-   * {@link ArithmeticException} thrown from {@code longValueExact()} are both
-   * converted to a {@link TypeConversionException}. Note that neither
-   * {@code intValueExact()} nor this method {@link String#strip() strips} the string
-   * before parsing it.
+   * Parses the specified string into a {@code long}. If the string does not
+   * represent a number, or if it cannot be parsed into a {@code long} without loss
+   * of information, a {@link TypeConversionException} is thrown.
    *
    * @param s the string to be parsed
    * @return the {@code long} value represented by the string
@@ -254,9 +250,9 @@ public final class NumberMethods {
   }
 
   /**
-   * Returns whether the specified string can be parsed into an {@code long} without
-   * causing integer overflow. The argument is allowed to be {@code null}, in which
-   * case the return value will be {@code false}.
+   * Returns {@code true} if the specified string can be parsed into a {@code long}
+   * without loss of information. The argument is allowed to be {@code null}, in
+   * which case the return value will be {@code false}.
    *
    * @param s the string to be parsed
    * @return whether the specified string can be parsed into a {@code long} without
@@ -293,36 +289,32 @@ public final class NumberMethods {
   }
 
   /**
-   * Parses the specified string into a {@code double}. This method delegates to
-   * {@link BigInteger#doubleValue()}. The {@link NumberFormatException} thrown from
-   * {@code doubleValue()} is converted to a {@link TypeConversionException}. This
-   * method also throws a {@code TypeConversionException} if the string is parsed
-   * into {@link Double#NaN}, {@link Double#POSITIVE_INFINITY} or
-   * {@link Double#NEGATIVE_INFINITY}. Note that neither {@code doubleValue()} nor
-   * this method {@link String#strip() strips} the string before parsing it.
+   * Parses the specified string into a {@code double}. If the string does not
+   * represent a number, or if it cannot be parsed into a {@code double} without loss
+   * of information, a {@link TypeConversionException} is thrown.
    *
    * @param s the string to be parsed
    * @return the {@code double} value represented by the string
    */
   public static double parseDouble(String s) throws TypeConversionException {
     if (!isEmpty(s)) {
+      BigDecimal bd;
       try {
-        double d;
-        if (Double.isFinite(d = new BigDecimal(s).doubleValue())) {
-          return d;
-        }
+        bd = new BigDecimal(s);
       } catch (NumberFormatException e) {
         throw new TypeConversionException(s, double.class, e.toString());
       }
-      throw new TypeConversionException(s, double.class, NAN_OR_INFINITY);
+      BigDecimal x = bd.abs();
+      if (x.compareTo(BIG_MIN_DOUBLE) >= 0 && x.compareTo(BIG_MAX_DOUBLE) <= 0) {
+        return bd.doubleValue();
+      }
     }
     throw new TypeConversionException(s, double.class);
   }
 
   /**
-   * Returns whether the specified string can be parsed into a {@code double} without
-   * producing {@link Double#NaN}, {@link Double#POSITIVE_INFINITY} or
-   * {@link Double#NEGATIVE_INFINITY}. The argument is allowed to be {@code null}, in
+   * Returns {@code true} if the specified string can be parsed into a {@code double}
+   * without loss of information. The argument is allowed to be {@code null}, in
    * which case the return value will be {@code false}.
    *
    * @param s the string to be parsed
@@ -342,8 +334,8 @@ public final class NumberMethods {
 
   /**
    * Returns an empty {@code OptionalDouble} if the specified string cannot be parsed
-   * into a regular, finite {@code double} value, else an {@code OptionalDouble}
-   * containing the {@code double} value parsed out of the string.
+   * into a {@code double} value, else an {@code OptionalDouble} containing the
+   * {@code double} value parsed out of the string.
    *
    * @param s the string to be parsed
    * @return an {@code OptionalDouble} containing the {@code double} value parsed out
@@ -360,36 +352,32 @@ public final class NumberMethods {
   }
 
   /**
-   * Parses the specified string into a {@code float}. This method delegates to
-   * {@link BigInteger#floatValue()}. The {@link NumberFormatException} thrown from
-   * {@code floatValue()} is converted to a {@link TypeConversionException}. This
-   * method also throws a {@code TypeConversionException} if the string is parsed
-   * into {@link Float#NaN}, {@link Float#POSITIVE_INFINITY} or
-   * {@link Float#NEGATIVE_INFINITY}. Note that neither {@code floatValue()} nor this
-   * method {@link String#strip() strips} the string before parsing it.
+   * Parses the specified string into a {@code float}. If the string does not
+   * represent a number, or if it cannot be parsed into a {@code float} without loss
+   * of information, a {@link TypeConversionException} is thrown.
    *
    * @param s the string to be parsed
    * @return the {@code float} value represented by the string
    */
   public static float parseFloat(String s) throws TypeConversionException {
     if (!isEmpty(s)) {
+      BigDecimal bd;
       try {
-        float d;
-        if (Float.isFinite(d = new BigDecimal(s).floatValue())) {
-          return d;
-        }
+        bd = new BigDecimal(s);
       } catch (NumberFormatException e) {
-        throw new TypeConversionException(s, float.class, e.toString());
+        throw new TypeConversionException(s, double.class, e.toString());
       }
-      throw new TypeConversionException(s, float.class, NAN_OR_INFINITY);
+      BigDecimal x = bd.abs();
+      if (x.compareTo(BIG_MIN_FLOAT) >= 0 && x.compareTo(BIG_MAX_FLOAT) <= 0) {
+        return bd.floatValue();
+      }
     }
-    throw new TypeConversionException(s, float.class);
+    throw new TypeConversionException(s, double.class);
   }
 
   /**
-   * Returns whether the specified string can be parsed into a {@code float} without
-   * producing {@link Float#NaN}, {@link Float#POSITIVE_INFINITY} or
-   * {@link Float#NEGATIVE_INFINITY}. The argument is allowed to be {@code null}, in
+   * Returns {@code true} if the specified string can be parsed into a {@code float}
+   * without loss of information. The argument is allowed to be {@code null}, in
    * which case the return value will be {@code false}.
    *
    * @param s the string to be parsed
@@ -427,13 +415,9 @@ public final class NumberMethods {
   }
 
   /**
-   * Parses the specified string into a {@code short}. This method delegates to
-   * {@link BigDecimal#shortValueExact()} and is therefore stricter than
-   * {@link Short#parseShort(String)}. The {@link NumberFormatException} and the
-   * {@link ArithmeticException} thrown from {@code shortValueExact()} are both
-   * converted to a {@link TypeConversionException}. Note that neither
-   * {@code shortValueExact()} nor this method {@link String#strip() strips} the
-   * string before parsing it.
+   * Parses the specified string into a {@code short}. If the string does not
+   * represent a number, or if it cannot be parsed into a {@code short} without loss
+   * of information, a {@link TypeConversionException} is thrown.
    *
    * @param s the string to be parsed
    * @return the {@code short} value represented by the string
@@ -450,9 +434,9 @@ public final class NumberMethods {
   }
 
   /**
-   * Returns whether the specified string can be parsed into an {@code short} without
-   * causing integer overflow. The argument is allowed to be {@code null}, in which
-   * case the return value will be {@code false}.
+   * Returns {@code true} if the specified string can be parsed into a {@code short}
+   * without loss of information. The argument is allowed to be {@code null}, in
+   * which case the return value will be {@code false}.
    *
    * @param s the string to be parsed
    * @return whether he specified string can be parsed into a {@code short} without
@@ -489,13 +473,9 @@ public final class NumberMethods {
   }
 
   /**
-   * Parses the specified string into a {@code byte}. This method delegates to
-   * {@link BigDecimal#byteValueExact()} and is therefore stricter than
-   * {@link Byte#parseByte(String)}. The {@link NumberFormatException} and the
-   * {@link ArithmeticException} thrown from {@code byteValueExact()} are both
-   * converted to a {@link TypeConversionException}. Note that neither
-   * {@code byteValueExact()} nor this method {@link String#strip() strips} the
-   * string before parsing it.
+   * Parses the specified string into a {@code byte}. If the string does not
+   * represent a number, or if it cannot be parsed into a {@code byte} without loss
+   * of information, a {@link TypeConversionException} is thrown.
    *
    * @param s the string to be parsed
    * @return the {@code byte} value represented by the string
@@ -512,9 +492,9 @@ public final class NumberMethods {
   }
 
   /**
-   * Returns whether the specified string can be parsed into an {@code byte} without
-   * causing integer overflow. The argument is allowed to be {@code null}, in which
-   * case the return value will be {@code false}.
+   * Returns {@code true} if the specified string can be parsed into a {@code byte}
+   * without loss of information. The argument is allowed to be {@code null}, in
+   * which case the return value will be {@code false}.
    *
    * @param s the string to be parsed
    * @return whether he specified string can be parsed into a {@code byte} without
@@ -551,10 +531,9 @@ public final class NumberMethods {
   }
 
   /**
-   * Parses the specified string into an {@code BigInteger}. This method delegates to
-   * {@link BigDecimal#toBigIntegerExact()}. The {@link NumberFormatException} and
-   * the {@link ArithmeticException} thrown from {@code intValueExact()} are both
-   * converted to a {@link TypeConversionException}.
+   * Parses the specified string into a {@code BigInteger}. If the string does not
+   * represent a number, or if it cannot be parsed into a {@code BigInteger} without
+   * loss of information, a {@link TypeConversionException} is thrown.
    *
    * @param s the string to be parsed
    * @return the {@code BigInteger} value represented by the string
@@ -568,9 +547,9 @@ public final class NumberMethods {
   }
 
   /**
-   * Returns whether the specified string can be parsed into an {@code BigInteger}.
-   * The argument is allowed to be {@code null}, in which case the return value will
-   * be {@code false}.
+   * Returns {@code true} if the specified string can be parsed into a
+   * {@code BigInteger} without loss of information. The argument is allowed to be
+   * {@code null}, in which case the return value will be {@code false}.
    *
    * @param s the string to be parsed
    * @return whether he specified string can be parsed into a {@code BigInteger}
@@ -606,9 +585,8 @@ public final class NumberMethods {
   }
 
   /**
-   * Parses the specified string into an {@code BigDecimal}. The
-   * {@link NumberFormatException} potentially being thrown while the string is
-   * parsed is converted to a {@link TypeConversionException}.
+   * Parses the specified string into a {@code BigInteger}. If the string does not
+   * represent a number, a {@link TypeConversionException} is thrown.
    *
    * @param s the string to be parsed
    * @return the {@code BigDecimal} value represented by the string
@@ -622,9 +600,9 @@ public final class NumberMethods {
   }
 
   /**
-   * Returns whether the specified string can be parsed into an {@code BigDecimal}.
-   * The argument is allowed to be {@code null}, in which case the return value will
-   * be {@code false}.
+   * Returns {@code true} if the specified string can be parsed into a
+   * {@code BigDecimal}. The argument is allowed to be {@code null}, in which case
+   * the return value will be {@code false}.
    *
    * @param s the string to be parsed
    * @return whether he specified string can be parsed into a {@code BigDecimal}
@@ -721,12 +699,8 @@ public final class NumberMethods {
   /**
    * Safely converts a number of an unspecified type to a number of a definite type.
    * Throws a {@link TypeConversionException} if the number cannot be converted to
-   * the target type without loss of information, or if the number is a {@code Float}
-   * or {@code Double} with value {@code NaN}, {@code POSITIVE_INFINITY} or
-   * {@code NEGATIVE_INFINITY}. In other words, these values will <i>never</i> be
-   * returned, even if the conversion happens to be a float-to-float or
-   * double-to-double conversion. The number is allowed to be {@code null}, since
-   * that value can be assigned to any {@code Number} type.
+   * the target type without loss of information. The number is allowed to be
+   * {@code null}, since that value can be assigned to any {@code Number} type.
    *
    * @param <T> the input type
    * @param <R> the output type
@@ -740,10 +714,6 @@ public final class NumberMethods {
     Check.notNull(targetType, "targetType");
     if (number == null || number.getClass() == targetType) {
       return (R) number;
-    } else if (number instanceof Double d && !Double.isFinite(d)) {
-      throw nanOrInfinity(number, targetType);
-    } else if (number instanceof Float f && !Float.isFinite(f)) {
-      throw nanOrInfinity(number, targetType);
     }
     UnaryOperator<Number> converter = converters.get(targetType);
     if (converter != null) {
@@ -754,9 +724,8 @@ public final class NumberMethods {
 
   /**
    * Returns {@code true} if the specified number can be converted to the specified
-   * target type without loss of information, and it is not equal to {@code NaN},
-   * {@code POSITIVE_INFINITY} or {@code NEGATIVE_INFINITY}. The number is allowed to
-   * be {@code null}, in which case {@code true} will be returned.
+   * target type without loss of information. The number is allowed to be
+   * {@code null}, in which case {@code true} will be returned.
    *
    * @param <T> the type of {@code Number} to convert to
    * @param number the {@code Number} to convert
@@ -812,10 +781,6 @@ public final class NumberMethods {
     } catch (ArithmeticException e) {
       return false;
     }
-  }
-
-  static TypeConversionException nanOrInfinity(Number n, Class<?> targetType) {
-    return new TypeConversionException(n, targetType, "NaN or Infinity");
   }
 
 }
