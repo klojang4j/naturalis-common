@@ -18,9 +18,11 @@ import static nl.naturalis.common.TypeConversionException.targetTypeNotSupported
 import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
- * Methods for working with {@code Number} instances. Note that this class is about
- * casting, parsing and inspecting numbers. For mathematical operation on them, use
- * {@link MathMethods}.
+ * Methods for parsing, inspecting and converting {@code Number} instances. The focus
+ * is on lossless conversion from one {@code Number} type to another {@code Number}
+ * type.
+ *
+ * <p>NB For mathematical operations, see {@link MathMethods}.
  *
  * @author Ayco Holleman
  */
@@ -95,24 +97,20 @@ public final class NumberMethods {
       Short.class, ToShortConversion::exec,
       Byte.class, ToByteConversion::exec);
 
-  private static final Class[] wrappersNarrowToWide = {Byte.class,
+  private static final Set<Class<? extends Number>> wrappers = Set.of(Byte.class,
       Short.class,
       Integer.class,
       Long.class,
       Float.class,
-      Double.class};
+      Double.class);
 
-  private static final Class[] integralsNarrowToWide = {Byte.class,
+  private static final Set<Class<? extends Number>> integrals = Set.of(Byte.class,
       Short.class,
       Integer.class,
+      AtomicInteger.class,
       Long.class,
-      BigInteger.class};
-
-  private static final Set<Class<? extends Number>> wrappers = Set.of(
-      wrappersNarrowToWide);
-
-  private static final Set<Class<? extends Number>> integrals = Set.of(
-      integralsNarrowToWide);
+      AtomicLong.class,
+      BigInteger.class);
 
   private NumberMethods() {
     throw new UnsupportedOperationException();
@@ -124,10 +122,10 @@ public final class NumberMethods {
    * {@code Float}, {@code Double}.
    *
    * @param numberType the class to test
-   * @param <T> the type of the {@code Number}
    * @return whether the class is a primitive number wrapper
+   * @see ClassMethods#isPrimitiveNumber(Class)
    */
-  public static <T extends Number> boolean isWrapper(Class<T> numberType) {
+  public static boolean isWrapper(Class<?> numberType) {
     Check.notNull(numberType);
     return wrappers.contains(numberType);
   }
@@ -150,13 +148,12 @@ public final class NumberMethods {
    * Returns {@code true} if the specified class is one of {@code Byte},
    * {@code Short}, {@code Integer}, {@code Long}, {@code BigInteger}.
    *
-   * @param numberType the class to test
-   * @param <T> the type of the {@code Number}
+   * @param type the class to test
    * @return whether the class is an integral number type
    */
-  public static <T extends Number> boolean isIntegral(Class<T> numberType) {
-    Check.notNull(numberType);
-    return integrals.contains(numberType);
+  public static boolean isIntegral(Class<?> type) {
+    Check.notNull(type);
+    return integrals.contains(type);
   }
 
   /**
@@ -672,6 +669,7 @@ public final class NumberMethods {
    * @param targetType the class of the {@code Number} type
    * @return a {@code Number} of the specified type
    */
+  @SuppressWarnings("unchecked")
   public static <T extends Number> T parse(String s, Class<T> targetType)
       throws TypeConversionException {
     Check.notNull(targetType, "targetType");
@@ -721,15 +719,14 @@ public final class NumberMethods {
   }
 
   /**
-   * Converts a number of an unspecified type to a number of a definite type. Throws
-   * an {@link TypeConversionException} if the number cannot be converted to the
-   * target type without loss of information. In addition, a
-   * {@code TypeConversionException} is thrown if the number is a {@code float} or
-   * {@code Double} with value {@code NaN}, {@code POSITIVE_INFINITY} or
-   * {@code NEGATIVE_INFINITY}. In other words, these values <i>always</i> result in
-   * a {@code TypeConversionException}, even if the conversion turns out to be a
-   * float-to-float or double-to-double conversion. The number is allowed to be
-   * {@code null}, in which case {@code null} will be returned.
+   * Safely converts a number of an unspecified type to a number of a definite type.
+   * Throws a {@link TypeConversionException} if the number cannot be converted to
+   * the target type without loss of information, or if the number is a {@code Float}
+   * or {@code Double} with value {@code NaN}, {@code POSITIVE_INFINITY} or
+   * {@code NEGATIVE_INFINITY}. In other words, these values will <i>never</i> be
+   * returned, even if the conversion happens to be a float-to-float or
+   * double-to-double conversion. The number is allowed to be {@code null}, since
+   * that value can be assigned to any {@code Number} type.
    *
    * @param <T> the input type
    * @param <R> the output type
@@ -741,7 +738,7 @@ public final class NumberMethods {
   public static <T extends Number, R extends Number> R convert(T number,
       Class<R> targetType) throws TypeConversionException {
     Check.notNull(targetType, "targetType");
-    if (number == null || targetType.isInstance(number)) {
+    if (number == null || number.getClass() == targetType) {
       return (R) number;
     } else if (number instanceof Double d && !Double.isFinite(d)) {
       throw nanOrInfinity(number, targetType);
@@ -753,14 +750,13 @@ public final class NumberMethods {
       return (R) converter.apply(number);
     }
     throw targetTypeNotSupported(number, targetType);
-    //return BigDecimalConverter.convert(number, targetType);
   }
 
   /**
-   * Returns {@code true} if the specified {@code Number} can be converted into an
-   * instance of the specified {@code Number} class without loss of information. The
-   * number is allowed to be {@code null}, in which case {@code true} will be
-   * returned.
+   * Returns {@code true} if the specified number can be converted to the specified
+   * target type without loss of information, and it is not equal to {@code NaN},
+   * {@code POSITIVE_INFINITY} or {@code NEGATIVE_INFINITY}. The number is allowed to
+   * be {@code null}, in which case {@code true} will be returned.
    *
    * @param <T> the type of {@code Number} to convert to
    * @param number the {@code Number} to convert
@@ -780,14 +776,32 @@ public final class NumberMethods {
     throw inputTypeNotSupported(number, targetType);
   }
 
+  /**
+   * Determines whether the specified float's fractional part is 0 or absent.
+   *
+   * @param f the {@code float} to inspect
+   * @return whether the specified float's fractional part is 0 or absent
+   */
   public static boolean isRound(float f) {
     return isRound(new BigDecimal(Float.toString(f)));
   }
 
+  /**
+   * Determines whether the specified double's fractional part is 0 or absent.
+   *
+   * @param d the {@code double} to inspect
+   * @return whether the specified double's fractional part is 0 or absent
+   */
   public static boolean isRound(double d) {
     return isRound(new BigDecimal(Double.toString(d)));
   }
 
+  /**
+   * Determines whether the specified BigDecimal's fractional part is 0 or absent.
+   *
+   * @param bd the {@code BigDecimal} to inspect
+   * @return whether the specified BigDecimal's fractional part is 0 or absent
+   */
   public static boolean isRound(BigDecimal bd) {
     if (bd.signum() == 0 || bd.scale() == 0) {
       return true;
@@ -798,11 +812,6 @@ public final class NumberMethods {
     } catch (ArithmeticException e) {
       return false;
     }
-  }
-
-  private static boolean finite(Number number) {
-    return (number.getClass() != Double.class || Double.isFinite((Double) number))
-        && (number.getClass() != Float.class || Float.isFinite((Float) number));
   }
 
   static TypeConversionException nanOrInfinity(Number n, Class<?> targetType) {

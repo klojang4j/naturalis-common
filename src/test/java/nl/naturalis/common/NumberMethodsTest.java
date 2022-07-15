@@ -2,6 +2,7 @@ package nl.naturalis.common;
 
 import org.junit.Test;
 
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.OptionalDouble;
@@ -10,7 +11,7 @@ import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static nl.naturalis.common.NumberMethods.fitsInto;
+import static nl.naturalis.common.NumberMethods.*;
 import static org.junit.Assert.*;
 
 public class NumberMethodsTest {
@@ -887,6 +888,26 @@ public class NumberMethodsTest {
   @Test
   public void isByte04() {
     assertFalse(NumberMethods.isByte("1.3"));
+  }
+
+  @Test
+  public void isInteger00() {
+    assertTrue(isIntegral(7));
+    assertTrue(isIntegral(Integer.class));
+    assertTrue(isIntegral(new BigInteger("56")));
+    assertTrue(isIntegral(new AtomicLong(56)));
+    assertFalse(isIntegral(int.class));
+    assertFalse(isIntegral(7.0));
+    assertFalse(isIntegral(OutputStream.class));
+    assertFalse(isIntegral(new BigDecimal("6")));
+  }
+
+  @Test
+  public void isWrapper00() {
+    assertTrue(isWrapper(Integer.class));
+    assertFalse(isWrapper(int.class));
+    assertFalse(isWrapper(AtomicLong.class));
+    assertFalse(isWrapper(OutputStream.class));
   }
 
 }

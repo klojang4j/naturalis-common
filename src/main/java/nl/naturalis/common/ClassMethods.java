@@ -128,6 +128,7 @@ public final class ClassMethods {
    *
    * @param clazz the class to test
    * @return whether the specified class is one of the primitive number classes
+   * @see NumberMethods#isWrapper(Class)
    */
   public static boolean isPrimitiveNumber(Class<?> clazz) {
     Check.notNull(clazz);
@@ -171,6 +172,7 @@ public final class ClassMethods {
    * @param clazz the class to test
    * @return {@code true} if the specified type represents an array with a primitive
    *     type as its deepest-level component type
+   * @see ArrayType
    */
   public static boolean isDeeplyPrimitiveArray(Class<?> clazz) {
     Check.notNull(clazz);
@@ -179,7 +181,8 @@ public final class ClassMethods {
 
   /**
    * Returns {@code true} if the specified class is one of the primitive wrapper
-   * classes.
+   * classes. Use {@link NumberMethods#isWrapper(Class)} to establish whether the
+   * class is a primitive <i>number</i> wrapper.
    *
    * @param clazz the class to test
    * @return {@code true} if the specified class is one of the primitive wrapper
@@ -227,8 +230,8 @@ public final class ClassMethods {
   }
 
   /**
-   * If the specified class is a primitive type, returns the corresponding primitive
-   * wrapper class, else the specified class itself.
+   * Returns the wrapper class corresponding to the specified class <i>if</i> it is a
+   * primitive type; else the class itself is returned.
    *
    * @param clazz the (primitive) class
    * @return The corresponding wrapper class
@@ -239,8 +242,8 @@ public final class ClassMethods {
   }
 
   /**
-   * If the specified class is a primitive wrapper class, returns the corresponding
-   * primitive type, else the specified class itself.
+   * Returns the primitive type corresponding to the specified class <i>if</i> it is
+   * a wrapper class; else the class itself is returned.
    *
    * @param clazz the (wrapper) class
    * @return The corresponding primitive class
