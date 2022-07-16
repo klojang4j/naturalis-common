@@ -12,6 +12,9 @@ import static nl.naturalis.common.TypeConversionException.inputTypeNotSupported;
 
 class ToLongConversion {
 
+  static final BigDecimal BIG_MIN_LONG = new BigDecimal(Long.MIN_VALUE);
+  static final BigDecimal BIG_MAX_LONG = new BigDecimal(Long.MAX_VALUE);
+
   private static final Map<Class<?>, Predicate<Number>> fitsIntoLong = Map.of(
       BigDecimal.class, ToLongConversion::testBigDecimal,
       BigInteger.class, ToLongConversion::testBigInteger,

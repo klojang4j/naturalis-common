@@ -461,6 +461,26 @@ public class NumberMethodsTest {
   }
 
   @Test
+  public void parseInt07() {
+    assertEquals(12, parseInt("12E0"));
+  }
+
+  @Test
+  public void parseInt08() {
+    assertEquals(12, parseInt("1.2E1"));
+  }
+
+  @Test
+  public void parseInt09() {
+    assertEquals(12, parseInt(".12E2"));
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parseInt10() {
+    assertEquals(12, parseInt("1.2E-2"));
+  }
+
+  @Test
   public void parseAny00() {
     assertEquals(34, parse("34", AtomicInteger.class).get());
     assertEquals(34L, parse("34", AtomicLong.class).get());

@@ -4,10 +4,10 @@ import nl.naturalis.common.check.Check;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.*;
+import java.util.concurrent.atomic.DoubleAccumulator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -17,14 +17,19 @@ import static nl.naturalis.common.ToDoubleConversion.BIG_MAX_DOUBLE;
 import static nl.naturalis.common.ToDoubleConversion.BIG_MIN_DOUBLE;
 import static nl.naturalis.common.ToFloatConversion.BIG_MAX_FLOAT;
 import static nl.naturalis.common.ToFloatConversion.BIG_MIN_FLOAT;
+import static nl.naturalis.common.ToLongConversion.BIG_MAX_LONG;
+import static nl.naturalis.common.ToLongConversion.BIG_MIN_LONG;
 import static nl.naturalis.common.TypeConversionException.inputTypeNotSupported;
 import static nl.naturalis.common.TypeConversionException.targetTypeNotSupported;
-import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
- * Methods for parsing, inspecting and converting {@code Number} instances. The focus
- * is on lossless conversion from one {@code Number} type to another {@code Number}
- * type.
+ * Methods for parsing, inspecting and converting {@code Number} instances. For all
+ * methods, the following applies, unless indicated otherwise: they support all
+ * {@link Number} types except the {@code Number} class itself and some very
+ * specialist subtypes: {@link DoubleAccumulator}. {@link DoubleAdder},
+ * {@link LongAccumulator} and {@link LongAdder}. They do support
+ * {@link AtomicInteger} and {@link AtomicLong}, however, as well as
+ * {@link BigInteger} and {@link BigDecimal}.
  *
  * <p>NB For mathematical operations, see {@link MathMethods}.
  *
@@ -32,9 +37,8 @@ import static nl.naturalis.common.check.CommonChecks.notNull;
  */
 public final class NumberMethods {
 
-  static final String UNSUPPORTED_NUMBER_TYPE = "unsupported Number type: {0}";
-
-  private static final String NAN_OR_INFINITY = "NaN or Infinity";
+  // parameter name
+  private static final String TARGET_TYPE = "targetType";
 
   static Predicate<Number> yes() {return n -> true;}
 
@@ -161,10 +165,10 @@ public final class NumberMethods {
   }
 
   /**
-   * Returns whether the specified number belongs is an integral number.
+   * Returns whether the specified number is an integral number.
    *
    * @param number the number to test
-   * @return whether the specified number belongs is an integral number
+   * @return whether the specified number is an integral number
    * @see #isIntegral(Class)
    */
   public static boolean isIntegral(Number number) {
@@ -181,14 +185,7 @@ public final class NumberMethods {
    * @return the {@code int} value represented by the string
    */
   public static int parseInt(String s) throws TypeConversionException {
-    if (!isEmpty(s)) {
-      try {
-        return new BigDecimal(s).intValueExact();
-      } catch (NumberFormatException | ArithmeticException e) {
-        throw new TypeConversionException(s, int.class, e.toString());
-      }
-    }
-    throw new TypeConversionException(s, int.class);
+    return (int) parseIntegral(s, int.class, Integer.MIN_VALUE, Integer.MAX_VALUE);
   }
 
   /**
@@ -201,14 +198,7 @@ public final class NumberMethods {
    *     causing integer overflow
    */
   public static boolean isInt(String s) {
-    if (!isEmpty(s)) {
-      try {
-        parseInt(s);
-        return true;
-      } catch (TypeConversionException ignored) {
-      }
-    }
-    return false;
+    return isIntegral(s, Integer.MIN_VALUE, Integer.MAX_VALUE);
   }
 
   /**
@@ -221,13 +211,7 @@ public final class NumberMethods {
    *     the string
    */
   public static OptionalInt toInt(String s) {
-    if (!isEmpty(s)) {
-      try {
-        return OptionalInt.of(parseInt(s));
-      } catch (TypeConversionException ignored) {
-      }
-    }
-    return OptionalInt.empty();
+    return toIntegral(s, Integer.MIN_VALUE, Integer.MAX_VALUE);
   }
 
   /**
@@ -240,11 +224,16 @@ public final class NumberMethods {
    */
   public static long parseLong(String s) throws TypeConversionException {
     if (!isEmpty(s)) {
+      BigDecimal bd;
       try {
-        return new BigDecimal(s).longValueExact();
-      } catch (NumberFormatException | ArithmeticException e) {
+        bd = new BigDecimal(s);
+      } catch (NumberFormatException e) {
         throw new TypeConversionException(s, long.class, e.toString());
       }
+      if (fitsIntoLong(bd)) {
+        return bd.longValue();
+      }
+      throw targetTypeTooNarrow(s, long.class);
     }
     throw new TypeConversionException(s, long.class);
   }
@@ -261,9 +250,8 @@ public final class NumberMethods {
   public static boolean isLong(String s) {
     if (!isEmpty(s)) {
       try {
-        parseLong(s);
-        return true;
-      } catch (TypeConversionException ignored) {
+        return fitsIntoLong(new BigDecimal(s));
+      } catch (NumberFormatException ignored) {
       }
     }
     return false;
@@ -281,8 +269,11 @@ public final class NumberMethods {
   public static OptionalLong toLong(String s) {
     if (!isEmpty(s)) {
       try {
-        return OptionalLong.of(parseLong(s));
-      } catch (TypeConversionException ignored) {
+        BigDecimal bd = new BigDecimal(s);
+        if (fitsIntoLong(bd)) {
+          return OptionalLong.of(bd.longValue());
+        }
+      } catch (NumberFormatException ignored) {
       }
     }
     return OptionalLong.empty();
@@ -309,7 +300,7 @@ public final class NumberMethods {
         return bd.doubleValue();
       }
     }
-    throw new TypeConversionException(s, double.class);
+    throw targetTypeTooNarrow(s, float.class);
   }
 
   /**
@@ -372,7 +363,7 @@ public final class NumberMethods {
         return bd.floatValue();
       }
     }
-    throw new TypeConversionException(s, double.class);
+    throw targetTypeTooNarrow(s, float.class);
   }
 
   /**
@@ -423,14 +414,7 @@ public final class NumberMethods {
    * @return the {@code short} value represented by the string
    */
   public static short parseShort(String s) throws TypeConversionException {
-    if (!isEmpty(s)) {
-      try {
-        return new BigDecimal(s).shortValueExact();
-      } catch (NumberFormatException | ArithmeticException e) {
-        throw new TypeConversionException(s, short.class, e.toString());
-      }
-    }
-    throw new TypeConversionException(s, short.class);
+    return (short) parseIntegral(s, short.class, Short.MIN_VALUE, Short.MAX_VALUE);
   }
 
   /**
@@ -443,14 +427,7 @@ public final class NumberMethods {
    *     causing integer overflow
    */
   public static boolean isShort(String s) {
-    if (!isEmpty(s)) {
-      try {
-        parseShort(s);
-        return true;
-      } catch (TypeConversionException ignored) {
-      }
-    }
-    return false;
+    return isIntegral(s, Short.MIN_VALUE, Short.MAX_VALUE);
   }
 
   /**
@@ -463,13 +440,7 @@ public final class NumberMethods {
    *     the string
    */
   public static OptionalInt toShort(String s) {
-    if (!isEmpty(s)) {
-      try {
-        return OptionalInt.of(parseShort(s));
-      } catch (TypeConversionException ignored) {
-      }
-    }
-    return OptionalInt.empty();
+    return toIntegral(s, Short.MIN_VALUE, Short.MAX_VALUE);
   }
 
   /**
@@ -481,14 +452,7 @@ public final class NumberMethods {
    * @return the {@code byte} value represented by the string
    */
   public static byte parseByte(String s) throws TypeConversionException {
-    if (!isEmpty(s)) {
-      try {
-        return new BigDecimal(s).byteValueExact();
-      } catch (NumberFormatException | ArithmeticException e) {
-        throw new TypeConversionException(s, byte.class, e.toString());
-      }
-    }
-    throw new TypeConversionException(s, byte.class);
+    return (byte) parseIntegral(s, byte.class, Byte.MIN_VALUE, Byte.MAX_VALUE);
   }
 
   /**
@@ -501,14 +465,7 @@ public final class NumberMethods {
    *     causing an integer overflow
    */
   public static boolean isByte(String s) {
-    if (!isEmpty(s)) {
-      try {
-        parseByte(s);
-        return true;
-      } catch (TypeConversionException ignored) {
-      }
-    }
-    return false;
+    return isIntegral(s, Byte.MIN_VALUE, Byte.MAX_VALUE);
   }
 
   /**
@@ -521,13 +478,7 @@ public final class NumberMethods {
    *     the string
    */
   public static OptionalInt toByte(String s) {
-    if (!isEmpty(s)) {
-      try {
-        return OptionalInt.of(parseByte(s));
-      } catch (TypeConversionException ignored) {
-      }
-    }
-    return OptionalInt.empty();
+    return toIntegral(s, Byte.MIN_VALUE, Byte.MAX_VALUE);
   }
 
   /**
@@ -539,11 +490,18 @@ public final class NumberMethods {
    * @return the {@code BigInteger} value represented by the string
    */
   public static BigInteger parseBigInteger(String s) {
-    try {
-      return new BigDecimal(s).toBigIntegerExact();
-    } catch (NumberFormatException | ArithmeticException e) {
-      throw new TypeConversionException(s, BigInteger.class, e.toString());
+    if (!isEmpty(s)) {
+      try {
+        BigDecimal bd = new BigDecimal(s);
+        if (isRound(bd)) {
+          return bd.toBigInteger();
+        }
+        throw targetTypeTooNarrow(s, BigInteger.class);
+      } catch (NumberFormatException e) {
+        throw new TypeConversionException(s, BigInteger.class, e.toString());
+      }
     }
+    throw new TypeConversionException(s, BigInteger.class);
   }
 
   /**
@@ -557,9 +515,11 @@ public final class NumberMethods {
   public static boolean isBigInteger(String s) {
     if (!isEmpty(s)) {
       try {
-        parseBigInteger(s);
-        return true;
-      } catch (TypeConversionException ignored) {
+        BigDecimal bd = new BigDecimal(s);
+        if (isRound(bd)) {
+          return true;
+        }
+      } catch (NumberFormatException ignored) {
       }
     }
     return false;
@@ -577,8 +537,11 @@ public final class NumberMethods {
   public static Optional<BigInteger> toBigInteger(String s) {
     if (!isEmpty(s)) {
       try {
-        return Optional.of(parseBigInteger(s));
-      } catch (TypeConversionException ignored) {
+        BigDecimal bd = new BigDecimal(s);
+        if (isRound(bd)) {
+          return Optional.of(bd.toBigInteger());
+        }
+      } catch (NumberFormatException ignored) {
       }
     }
     return Optional.empty();
@@ -650,10 +613,12 @@ public final class NumberMethods {
   @SuppressWarnings("unchecked")
   public static <T extends Number> T parse(String s, Class<T> targetType)
       throws TypeConversionException {
-    Check.notNull(targetType, "targetType");
+    Check.notNull(targetType, TARGET_TYPE);
     Function<String, Number> parser = parsers.get(targetType);
-    Check.that(parser).is(notNull(), () -> targetTypeNotSupported(s, targetType));
-    return (T) parser.apply(s);
+    if (parser != null) {
+      return (T) parser.apply(s);
+    }
+    throw targetTypeNotSupported(s, targetType);
   }
 
   /**
@@ -678,7 +643,7 @@ public final class NumberMethods {
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  //                            END OF PARSE METHOD                             //
+  //                           END OF PARSE METHODS                             //
   ////////////////////////////////////////////////////////////////////////////////
 
   /**
@@ -700,7 +665,7 @@ public final class NumberMethods {
    * Safely converts a number of an unspecified type to a number of a definite type.
    * Throws a {@link TypeConversionException} if the number cannot be converted to
    * the target type without loss of information. The number is allowed to be
-   * {@code null}, since that value can be assigned to any {@code Number} type.
+   * {@code null}, in which case {@code null} will be returned.
    *
    * @param <T> the input type
    * @param <R> the output type
@@ -711,13 +676,13 @@ public final class NumberMethods {
   @SuppressWarnings({"unchecked"})
   public static <T extends Number, R extends Number> R convert(T number,
       Class<R> targetType) throws TypeConversionException {
-    Check.notNull(targetType, "targetType");
+    Check.notNull(targetType, TARGET_TYPE);
     if (number == null || number.getClass() == targetType) {
       return (R) number;
     }
-    UnaryOperator<Number> converter = converters.get(targetType);
-    if (converter != null) {
-      return (R) converter.apply(number);
+    UnaryOperator<Number> fnc = converters.get(targetType);
+    if (fnc != null) {
+      return (R) fnc.apply(number);
     }
     throw targetTypeNotSupported(number, targetType);
   }
@@ -734,7 +699,7 @@ public final class NumberMethods {
    */
   public static <T extends Number> boolean fitsInto(Number number,
       Class<T> targetType) {
-    Check.notNull(targetType, "targetType");
+    Check.notNull(targetType, TARGET_TYPE);
     if (number == null) {
       return true;
     }
@@ -746,41 +711,95 @@ public final class NumberMethods {
   }
 
   /**
-   * Determines whether the specified float's fractional part is 0 or absent.
+   * Determines whether the specified float's fractional part is zero or absent.
    *
    * @param f the {@code float} to inspect
-   * @return whether the specified float's fractional part is 0 or absent
+   * @return whether the specified float's fractional part is zero or absent
    */
   public static boolean isRound(float f) {
     return isRound(new BigDecimal(Float.toString(f)));
   }
 
   /**
-   * Determines whether the specified double's fractional part is 0 or absent.
+   * Determines whether the specified double's fractional part is zero or absent.
    *
    * @param d the {@code double} to inspect
-   * @return whether the specified double's fractional part is 0 or absent
+   * @return whether the specified double's fractional part is zero or absent
    */
   public static boolean isRound(double d) {
     return isRound(new BigDecimal(Double.toString(d)));
   }
 
   /**
-   * Determines whether the specified BigDecimal's fractional part is 0 or absent.
+   * Determines whether the specified BigDecimal's fractional part is zero or
+   * absent.
    *
    * @param bd the {@code BigDecimal} to inspect
-   * @return whether the specified BigDecimal's fractional part is 0 or absent
+   * @return whether the specified BigDecimal's fractional part is zero or absent
    */
   public static boolean isRound(BigDecimal bd) {
-    if (bd.signum() == 0 || bd.scale() == 0) {
+    if (bd.signum() == 0
+        || bd.scale() <= 0
+        || bd.stripTrailingZeros().scale() == 0) {
       return true;
     }
-    try {
-      bd.setScale(0, RoundingMode.UNNECESSARY);
-      return true;
-    } catch (ArithmeticException e) {
-      return false;
+    return false;
+  }
+
+  private static long parseIntegral(String s,
+      Class<?> type,
+      long minVal,
+      long maxVal) {
+    if (!isEmpty(s)) {
+      try {
+        BigDecimal bd = new BigDecimal(s);
+        long l;
+        if (isRound(bd) && (l = bd.longValue()) >= minVal && l <= maxVal) {
+          return l;
+        }
+        throw targetTypeTooNarrow(s, type);
+      } catch (NumberFormatException e) {
+        throw new TypeConversionException(s, int.class, e.toString());
+      }
     }
+    throw new TypeConversionException(s, type);
+  }
+
+  private static boolean isIntegral(String s, long minVal, long maxVal) {
+    if (!isEmpty(s)) {
+      try {
+        BigDecimal bd = new BigDecimal(s);
+        long l;
+        return isRound(bd) && (l = bd.longValue()) >= minVal && l <= maxVal;
+      } catch (NumberFormatException ignored) {
+      }
+    }
+    return false;
+  }
+
+  private static OptionalInt toIntegral(String s, long minVal, long maxVal) {
+    if (!isEmpty(s)) {
+      try {
+        BigDecimal bd = new BigDecimal(s);
+        long l;
+        if (isRound(bd) && (l = bd.longValue()) >= minVal && l <= maxVal) {
+          return OptionalInt.of((int) l);
+        }
+      } catch (NumberFormatException ignored) {
+      }
+    }
+    return OptionalInt.empty();
+  }
+
+  private static boolean fitsIntoLong(BigDecimal bd) {
+    return isRound(bd)
+        && bd.compareTo(BIG_MIN_LONG) >= 0
+        && bd.compareTo(BIG_MAX_LONG) <= 0;
+  }
+
+  private static final TypeConversionException targetTypeTooNarrow(Object obj,
+      Class<?> targetType) {
+    return new TypeConversionException(obj, targetType, "target type too narrow");
   }
 
 }
