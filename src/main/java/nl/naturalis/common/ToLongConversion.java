@@ -15,13 +15,16 @@ class ToLongConversion {
   static final BigDecimal BIG_MIN_LONG = new BigDecimal(Long.MIN_VALUE);
   static final BigDecimal BIG_MAX_LONG = new BigDecimal(Long.MAX_VALUE);
 
+  static final BigInteger BIG_INT_MIN_LONG = BigInteger.valueOf(Long.MIN_VALUE);
+  static final BigInteger BIG_INT_MAX_LONG = BigInteger.valueOf(Long.MAX_VALUE);
+
   private static final Map<Class<?>, Predicate<Number>> fitsIntoLong = Map.of(
       BigDecimal.class, ToLongConversion::testBigDecimal,
       BigInteger.class, ToLongConversion::testBigInteger,
-      Double.class, n -> n.doubleValue() == n.longValue(),
-      //Double.class, FitsIntoLong::testDouble,
-      Float.class, n -> n.floatValue() == n.longValue(),
-      //Float.class, FitsIntoLong::testFloat,
+      //Double.class, n -> n.doubleValue() == n.longValue(),
+      Double.class, ToLongConversion::testDouble,
+      //Float.class, n -> n.floatValue() == n.longValue(),
+      Float.class, ToLongConversion::testFloat,
       Long.class, yes(),
       AtomicLong.class, yes(),
       Integer.class, yes(),
@@ -46,51 +49,30 @@ class ToLongConversion {
   }
 
   private static boolean testBigDecimal(Number n) {
-    try {
-      ((BigDecimal) n).longValueExact();
-      return true;
-    } catch (ArithmeticException e) {
-      return false;
-    }
+    BigDecimal bd = (BigDecimal) n;
+    return isRound(bd)
+        && bd.compareTo(BIG_MIN_LONG) >= 0
+        && bd.compareTo(BIG_MAX_LONG) <= 0;
   }
 
   private static boolean testBigInteger(Number n) {
-    try {
-      ((BigInteger) n).longValueExact();
-      return true;
-    } catch (ArithmeticException e) {
-      return false;
-    }
+    BigInteger bi = (BigInteger) n;
+    return bi.compareTo(BIG_INT_MIN_LONG) >= 0
+        && bi.compareTo(BIG_INT_MAX_LONG) <= 0;
   }
 
-  // Keep these methods around. They produce different result, and
-  // seem more formally correct.
-  @SuppressWarnings("unused")
   private static boolean testDouble(Number n) {
-    try {
-      new BigDecimal(Double.toString((Double) n)).longValueExact();
-      return true;
-    } catch (ArithmeticException e) {
-      return false;
-    }
+    Double d = (Double) n;
+    return isRound(d)
+        && d >= (double) Long.MIN_VALUE
+        && d <= (double) Long.MAX_VALUE;
   }
 
-  @SuppressWarnings("unused")
   private static boolean testFloat(Number n) {
-    try {
-      new BigDecimal(Float.toString((Float) n)).longValueExact();
-      return true;
-    } catch (ArithmeticException e) {
-      return false;
-    }
-  }
-
-  static Long doubleToLong(Number n) {
-    try {
-      return new BigDecimal(Double.toString((Double) n)).longValueExact();
-    } catch (ArithmeticException e) {
-      throw new TypeConversionException(n, Long.class);
-    }
+    Float f = (Float) n;
+    return isRound(f)
+        && f >= (float) Long.MIN_VALUE
+        && f <= (float) Long.MAX_VALUE;
   }
 
 }

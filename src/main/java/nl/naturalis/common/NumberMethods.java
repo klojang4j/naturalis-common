@@ -738,9 +738,7 @@ public final class NumberMethods {
    * @return whether the specified BigDecimal's fractional part is zero or absent
    */
   public static boolean isRound(BigDecimal bd) {
-    if (bd.signum() == 0
-        || bd.scale() <= 0
-        || bd.stripTrailingZeros().scale() == 0) {
+    if (bd.scale() <= 0 || bd.stripTrailingZeros().scale() == 0) {
       return true;
     }
     return false;

@@ -1135,6 +1135,10 @@ public class NumberMethodsTest {
 
   @Test
   public void isRound00() {
+    assertTrue(isRound(0));
+    assertTrue(isRound(0.00000000));
+    assertTrue(isRound(-0.00000000));
+    assertTrue(isRound(-0.00000000F));
     assertTrue(isRound(7D));
     assertTrue(isRound(7F));
     assertTrue(isRound(7.000D));
@@ -1144,6 +1148,11 @@ public class NumberMethodsTest {
     assertFalse(isRound(7.0009D));
     assertFalse(isRound(7.0009F));
     assertFalse(isRound(new BigDecimal("-7.0000008")));
+    assertFalse(isRound(new BigDecimal("2E-2")));
+    assertFalse(isRound(new BigDecimal(".2E-2")));
+    assertTrue(isRound(new BigDecimal(".2E+1")));
+    assertTrue(isRound(new BigDecimal(".2E+2")));
+    assertTrue(isRound(new BigDecimal(".02E+2")));
   }
 
 }
