@@ -1,6 +1,7 @@
 package nl.naturalis.common;
 
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.check.ObjectCheck;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -12,6 +13,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
+import static nl.naturalis.common.ClassMethods.box;
 import static nl.naturalis.common.ObjectMethods.isEmpty;
 import static nl.naturalis.common.ToDoubleConversion.BIG_MAX_DOUBLE;
 import static nl.naturalis.common.ToDoubleConversion.BIG_MIN_DOUBLE;
@@ -119,6 +121,17 @@ public final class NumberMethods {
       Long.class,
       AtomicLong.class,
       BigInteger.class);
+
+  private static final Set<Class<? extends Number>> supported = Set.of(Byte.class,
+      Short.class,
+      Integer.class,
+      AtomicInteger.class,
+      Long.class,
+      AtomicLong.class,
+      Float.class,
+      Double.class,
+      BigInteger.class,
+      BigDecimal.class);
 
   private NumberMethods() {
     throw new UnsupportedOperationException();
@@ -632,6 +645,7 @@ public final class NumberMethods {
    *     specified type
    */
   public static <T extends Number> boolean fitsInto(String s, Class<T> targetType) {
+    Check.notNull(targetType, TARGET_TYPE);
     if (!isEmpty(s)) {
       Predicate<String> tester = stringFitsInto.get(targetType);
       if (tester != null) {

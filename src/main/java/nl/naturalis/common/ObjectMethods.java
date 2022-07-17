@@ -932,7 +932,22 @@ public class ObjectMethods {
   }
 
   /**
-   * Does a brute-force cast of one generic type to another.
+   * Does a brute-force cast of one generic type to another. This method may come in
+   * handy, especially in the form of a method reference, when bumping up against the
+   * limits of Java's implementation of generics:
+   *
+   * <blockquote><pre>{@code
+   * List<CharSequence> l0 = List.of("Hello", "world");
+   * // WON'T COMPILE: List<String> l2 = l0;
+   * List<String> l2 = bruteCast(l0);
+   * }</pre></blockquote>
+   *
+   * <p>Note, however, that this method can easily cause a
+   * {@link ClassCastException} at runtime:
+   *
+   * <blockquote><pre>{@code
+   * String s = bruteCast(new File("/tmp/foo.txt")); // compiles!
+   * }</pre></blockquote>
    *
    * @param input The value to be cast
    * @param <T> The input type

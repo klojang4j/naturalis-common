@@ -1,8 +1,10 @@
 package nl.naturalis.common;
 
+import nl.naturalis.common.collection.IntList;
 import nl.naturalis.common.collection.WiredList;
 import org.junit.Test;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -71,6 +73,12 @@ public class ObjectMethodsTest {
     assertTrue(isEmpty((Object) null));
     assertFalse(isEmpty(LocalDate.now()));
     assertFalse(isEmpty(7D));
+    assertTrue(isEmpty(IntList.of()));
+    assertTrue(isEmpty((Object) IntList.of()));
+    assertFalse(isEmpty(IntList.of(0)));
+    assertFalse(isEmpty((Object) IntList.of(0)));
+    assertFalse(isEmpty(IntList.of(0, 1)));
+    assertTrue(isEmpty((IntList) null));
   }
 
   @Test
@@ -90,12 +98,18 @@ public class ObjectMethodsTest {
     assertTrue(isNotEmpty(Map.of("foo", "bar")));
     assertTrue(isNotEmpty(floats(2.2F, 3.3F)));
     assertTrue(isNotEmpty(new Float[] {7.7F}));
+    assertFalse(isNotEmpty(IntList.of()));
+    assertFalse(isNotEmpty((Object) IntList.of()));
+    assertTrue(isNotEmpty(IntList.of(0)));
+    assertTrue(isNotEmpty((Object) IntList.of(0)));
+    assertTrue(isNotEmpty(IntList.of(0, 1)));
   }
 
   @Test
   public void e2nEquals00() {
     assertTrue(e2nEquals(null, null));
     assertTrue(e2nEquals(null, ""));
+    assertTrue(e2nEquals("", null));
     assertTrue(e2nEquals(null, EMPTY_STRING_ARRAY));
     assertTrue(e2nEquals(Map.of(), null));
     assertTrue(e2nEquals(Optional.of(""), null));
@@ -165,6 +179,12 @@ public class ObjectMethodsTest {
     List list0 = List.of("hi", map2);
     assertFalse(isDeepNotEmpty(list0));
     assertFalse(isDeepNotEmpty(List.of("Hi", Collections.emptySet())));
+    assertTrue(isDeepNotEmpty(IntList.of(1, 2)));
+    assertFalse(isDeepNotEmpty(IntList.of()));
+    assertTrue(isDeepNotEmpty(Optional.of(IntList.of(1, 2))));
+    assertFalse(isDeepNotEmpty(Optional.of(IntList.of())));
+    assertTrue(isDeepNotEmpty(ints(1, 2, 3)));
+    assertFalse(isDeepNotEmpty(ints()));
   }
 
   @Test
@@ -248,10 +268,16 @@ public class ObjectMethodsTest {
     assertFalse(e2nDeepEquals(
         new ArrayList<>(),
         new HashSet<>()));
+    assertTrue(e2nDeepEquals(Map.of(), new HashMap<>()));
+    assertTrue(e2nDeepEquals(null, new HashMap<>()));
+    assertTrue(e2nDeepEquals(Map.of("", Set.of()), Map.of("", Set.of())));
+    assertFalse(e2nDeepEquals(Map.of("", Set.of()), Map.of("", List.of())));
+    assertFalse(e2nDeepEquals(Map.of(1, 2), new HashMap<>()));
+    assertFalse(e2nDeepEquals(null, new File("/tmp")));
   }
 
   @Test // behaviour with sets (pretty extreme edge cases)
-  public void e2nDeepEquals02() {
+  public void e2nDeepEquals01() {
 
     Set subsubset1 = setOf("John");
     Set subsubset2 = setOf("John", null);
@@ -363,6 +389,19 @@ public class ObjectMethodsTest {
     assertEquals(43, ObjectMethods.clamp(44, gt(), 43));
     assertEquals(44, replaceIf(44, lt(), 43, 50));
     assertEquals(50, replaceIf(40, lt(), 43, 50));
+  }
+
+  @Test(expected = ClassCastException.class)
+  public void bruteCast00() {
+    String s = bruteCast(new File("/tmp/foo.txt"));
+  }
+
+  @Test
+  public void bruteCast01() {
+    List<CharSequence> l0 = List.of("Hello", "world");
+    // WON'T COMPILE: List<String> l2 = l0;
+    List<String> l2 = bruteCast(l0);
+    assertEquals(Arrays.asList("Hello", "world"), l2);
   }
 
 }
