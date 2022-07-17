@@ -35,6 +35,33 @@ public class ObjectMethods {
   }
 
   /**
+   * Does a brute-force cast of one type to another. This method may come in handy,
+   * especially in the form of a method reference, when bumping up against the limits
+   * of Java's implementation of generics:
+   *
+   * <blockquote><pre>{@code
+   * List<CharSequence> list1 = List.of("Hello", "world");
+   * // WON'T COMPILE: List<String> list2 = list1;
+   * List<String> list2 = bruteCast(list1);
+   * }</pre></blockquote>
+   *
+   * <p>Handle with care, though, as it will just as easily brute-force its way to a
+   * {@link ClassCastException} at runtime:
+   *
+   * <blockquote><pre>{@code
+   * String s = bruteCast(new File("/tmp/foo.txt")); // compiles
+   * }</pre></blockquote>
+   *
+   * @param input The value to be cast
+   * @param <T> The input type
+   * @param <R> The output type
+   * @return The cast value
+   */
+  public static <T, R> R bruteCast(T input) {
+    return (R) input;
+  }
+
+  /**
    * Returns whether the specified {@code CharSequence} is null or empty.
    *
    * @param arg the {@code CharSequence} to check
@@ -929,33 +956,6 @@ public class ObjectMethods {
    */
   public static Boolean n2e(Boolean arg) {
     return ifNull(arg, Boolean.FALSE);
-  }
-
-  /**
-   * Does a brute-force cast of one generic type to another. This method may come in
-   * handy, especially in the form of a method reference, when bumping up against the
-   * limits of Java's implementation of generics:
-   *
-   * <blockquote><pre>{@code
-   * List<CharSequence> l0 = List.of("Hello", "world");
-   * // WON'T COMPILE: List<String> l2 = l0;
-   * List<String> l2 = bruteCast(l0);
-   * }</pre></blockquote>
-   *
-   * <p>Note, however, that this method can easily cause a
-   * {@link ClassCastException} at runtime:
-   *
-   * <blockquote><pre>{@code
-   * String s = bruteCast(new File("/tmp/foo.txt")); // compiles!
-   * }</pre></blockquote>
-   *
-   * @param input The value to be cast
-   * @param <T> The input type
-   * @param <R> The output type
-   * @return The cast value
-   */
-  public static <T, R> R bruteCast(T input) {
-    return (R) input;
   }
 
   private static boolean eq(Object arg0, Object arg1) {

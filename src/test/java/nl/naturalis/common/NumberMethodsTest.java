@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
 import static nl.naturalis.common.NumberMethods.*;
+import static nl.naturalis.common.ObjectMethods.bruteCast;
 import static nl.naturalis.common.ToDoubleConversion.BIG_MAX_DOUBLE;
 import static nl.naturalis.common.ToDoubleConversion.BIG_MIN_DOUBLE;
 import static org.junit.Assert.*;
@@ -357,6 +358,16 @@ public class NumberMethodsTest {
   }
 
   @Test(expected = TypeConversionException.class)
+  public void convert26() { // not a Number
+    Short s = convert(223D, (Class<Short>) bruteCast(OutputStream.class));
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void convert27() { // not supported
+    LongAdder la = convert(223D, LongAdder.class);
+  }
+
+  @Test(expected = TypeConversionException.class)
   public void parse01() {
     parse("300345", Byte.class);
   }
@@ -422,6 +433,16 @@ public class NumberMethodsTest {
   public void parse13() {
     Integer i = convert(42.000F, Integer.class);
     assertEquals(42, (int) i);
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parse14() { // not a Number
+    parse("223", (Class<Short>) bruteCast(OutputStream.class));
+  }
+
+  @Test(expected = TypeConversionException.class)
+  public void parse15() { // not supported
+    parse("223", LongAdder.class);
   }
 
   @Test(expected = TypeConversionException.class)
