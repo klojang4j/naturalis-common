@@ -20,47 +20,46 @@ public final class PathWalkerException extends RuntimeException {
     String fmt = INVALID_PATH
         + " *** no accessible property named \"%s\" in %s.class";
     String className = className(clazz);
-    String msg = String.format(fmt, path, segment, path.segment(segment), className);
-    return () -> new PathWalkerException(NO_SUCH_PROPERTY, msg);
-  }
-
-  static Factory opaqueType(Path path, int segment, Class<?> clazz) {
-    String fmt = INVALID_PATH + " *** no such property in class %s: %s";
-    String className = simpleClassName(clazz);
-    String msg = String.format(fmt, path, className, path.segment(segment));
+    String msg = String.format(fmt,
+        path,
+        segment + 1,
+        path.segment(segment),
+        className);
     return () -> new PathWalkerException(NO_SUCH_PROPERTY, msg);
   }
 
   static Factory noSuchKey(Path path, int segment, Object key) {
     String fmt = INVALID_PATH + " *** no such key: \"%s\"";
-    String msg = String.format(fmt, path, segment, path.segment(segment));
+    String msg = String.format(fmt, path, segment + 1, path.segment(segment));
     return () -> new PathWalkerException(NO_SUCH_KEY, msg);
   }
 
   static Factory indexExpected(Path path, int segment) {
-    String fmt = INVALID_PATH + " *** array index expected; found: %s";
-    String msg = String.format(fmt, path, segment, path.segment(segment));
+    String fmt = INVALID_PATH + " *** array index expected; found: \"%s\"";
+    String msg = String.format(fmt, path, segment + 1, path.segment(segment));
     return () -> new PathWalkerException(INDEX_EXPECTED, msg);
   }
 
   static Factory indexOutOfBounds(Path path, int segment) {
     String fmt = INVALID_PATH + " *** index out of bounds: %s";
-    String msg = String.format(fmt, path, segment, path.segment(segment));
+    String msg = String.format(fmt, path, segment + 1, path.segment(segment));
     return () -> new PathWalkerException(INDEX_OUT_OF_BOUNDS, msg);
   }
 
   static Factory nullValue(Path path, int segment) {
-    String fmt = INVALID_PATH + " *** terminal value at segment %s: null";
-    String msg = String.format(fmt, path, segment, path.segment(segment));
+    String fmt = INVALID_PATH
+        + " *** terminal value encountered at segment \"%s\": null";
+    String msg = String.format(fmt, path, segment + 1, path.segment(segment));
     return () -> new PathWalkerException(TERMINAL_VALUE, msg);
   }
 
   static Factory terminalValue(Path path, int segment, Object value) {
-    String fmt = INVALID_PATH + " *** terminal value at segment %s: (%s) %s";
+    String fmt = INVALID_PATH
+        + " *** terminal value encountered at segment \"%s\": (%s) %s";
     String className = simpleClassName(value.getClass());
     String msg = String.format(fmt,
         path,
-        segment,
+        segment + 1,
         path.segment(segment),
         className,
         value);
@@ -69,31 +68,32 @@ public final class PathWalkerException extends RuntimeException {
 
   static Factory emptySegment(Path path, int segment) {
     String fmt = INVALID_PATH + " *** segment must not be null or empty";
-    String msg = String.format(fmt, path, segment);
+    String msg = String.format(fmt, path, segment + 1);
     return () -> new PathWalkerException(EMPTY_SEGMENT, msg);
   }
 
-  static Factory typeMismatch(Path path, int segment, Class expected, Class actual) {
-    String fmt = INVALID_PATH + " *** cannot assign %s to %s";
-    String scn0 = simpleClassName(expected);
-    String scn1 = simpleClassName(actual);
-    String msg = String.format(fmt, path, segment, scn0, scn1);
+  static Factory typeMismatch(Path path, int segment, String message) {
+    String fmt = PATH_SEGMENT + "%s";
+    String msg = String.format(fmt, path, segment + 1, message);
     return () -> new PathWalkerException(TYPE_MISMATCH, msg);
   }
 
-  static Factory typeNotSupported(Object host) {
-    String fmt = PATH_SEGMENT + " don't know how to write instances of %s";
-    String msg = String.format(fmt, className(host));
-    return () -> new PathWalkerException(TYPE_NOT_SUPPORTED, msg);
+  static Factory typeMismatch(Path path, int segment, Class expected, Class actual) {
+    String fmt = PATH_SEGMENT + "cannot assign %s to %s";
+    String scn0 = simpleClassName(expected);
+    String scn1 = simpleClassName(actual);
+    String msg = String.format(fmt, path, segment + 1, scn0, scn1);
+    return () -> new PathWalkerException(TYPE_MISMATCH, msg);
   }
 
   static Factory notModifiable(Path path,
       int segment,
       Class<?> type) {
-    String fmt = PATH_SEGMENT + "%s found at %s appears to be unmodifiable";
+    String fmt = PATH_SEGMENT
+        + "%s implementation encountered at segment \"%s\" appears to be unmodifiable";
     String msg = String.format(fmt,
         path,
-        segment,
+        segment + 1,
         simpleClassName(type),
         path.segment(segment));
     return () -> new PathWalkerException(NOT_MODIFIABLE, msg);
@@ -104,18 +104,19 @@ public final class PathWalkerException extends RuntimeException {
       KeyDeserializationException exc) {
     String msg;
     if (exc.getMessage() == null) {
-      String fmt = PATH_SEGMENT + "failed to deserialize \"%s\" into map key";
+      String fmt = INVALID_PATH + " *** failed to deserialize \"%s\" into map key";
       msg = String.format(fmt, path, segment, path.segment(segment));
+      return () -> new PathWalkerException(KEY_DESERIALIZATION_FAILED, msg);
     } else {
-      String fmt = "Path %s, segment %s: %s";
-      msg = String.format(fmt, segment, path, exc.getMessage());
+      String fmt = INVALID_PATH + " *** %s";
+      msg = String.format(fmt, path, segment + 1, exc.getMessage());
     }
     return () -> new PathWalkerException(KEY_DESERIALIZATION_FAILED, msg);
   }
 
   static Factory unexpectedError(Path path, int segment, Throwable t) {
     String fmt = PATH_SEGMENT + "unexpected error *** %s";
-    String msg = String.format(fmt, segment, path, t);
+    String msg = String.format(fmt, path, segment + 1, t);
     return () -> new PathWalkerException(EXCEPTION, msg);
   }
 

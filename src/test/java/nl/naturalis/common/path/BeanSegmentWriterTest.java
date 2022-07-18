@@ -73,7 +73,7 @@ public class BeanSegmentWriterTest {
     PathWalker pw = new PathWalker(List.of(new Path("naughtyProperty")), false);
     Person person = new Person();
     try {
-      pw.write(person, 666);
+      pw.write(person, "foo");
     } catch (PathWalkerException e) {
       assertEquals(EXCEPTION, e.getErrorCode());
       throw e;
@@ -87,7 +87,7 @@ public class BeanSegmentWriterTest {
     try {
       pw.write(person, new File("/tmp/foo.txt"));
     } catch (PathWalkerException e) {
-      assertEquals(EXCEPTION, e.getErrorCode());
+      assertEquals(TYPE_MISMATCH, e.getErrorCode());
       throw e;
     }
   }

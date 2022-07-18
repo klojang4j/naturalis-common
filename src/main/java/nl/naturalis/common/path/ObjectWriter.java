@@ -1,15 +1,10 @@
 package nl.naturalis.common.path;
 
-import nl.naturalis.common.collection.TypeHashSet;
-
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static nl.naturalis.common.ClassMethods.isPrimitiveArray;
-import static nl.naturalis.common.path.ErrorCode.TYPE_NOT_SUPPORTED;
 import static nl.naturalis.common.path.PathWalkerException.nullValue;
-import static nl.naturalis.common.path.PathWalkerException.typeNotSupported;
 
 final class ObjectWriter {
 

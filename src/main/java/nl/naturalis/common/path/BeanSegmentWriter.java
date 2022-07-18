@@ -1,6 +1,7 @@
 package nl.naturalis.common.path;
 
 import nl.naturalis.common.invoke.BeanWriter;
+import nl.naturalis.common.invoke.IllegalAssignmentException;
 import nl.naturalis.common.invoke.NoPublicSettersException;
 import nl.naturalis.common.invoke.NoSuchPropertyException;
 
@@ -33,6 +34,8 @@ final class BeanSegmentWriter extends SegmentWriter<Object> {
       return true;
     } catch (NoSuchPropertyException e) {
       return deadEnd(noSuchProperty(path, segment, bean.getClass()));
+    } catch (IllegalAssignmentException e) {
+      return deadEnd(typeMismatch(path, segment, e.getMessage()));
     } catch (Throwable t) {
       return deadEnd(unexpectedError(path, segment, t));
     }
