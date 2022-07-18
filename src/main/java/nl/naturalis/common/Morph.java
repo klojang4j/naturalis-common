@@ -6,14 +6,12 @@ import nl.naturalis.common.invoke.BeanWriter;
 import java.lang.reflect.Array;
 import java.util.Collection;
 
-import static nl.naturalis.common.ArrayMethods.pack;
-import static nl.naturalis.common.ClassMethods.isAutoUnboxedAs;
-import static nl.naturalis.common.ClassMethods.getTypeDefault;
+import static nl.naturalis.common.ClassMethods.*;
 import static nl.naturalis.common.check.CommonChecks.notNull;
 
 /**
  * Performs a wide variety of type conversions. The conversions try to strike a
- * balance between being lenient without becoming outlandish or contrived.This class
+ * balance between being lenient without becoming outlandish or contrived. This class
  * is optionally used by the {@link BeanWriter} class to perform type conversions on
  * the values passed to its {@link BeanWriter#set(Object, String, Object) set}
  * method.
@@ -75,59 +73,28 @@ public class Morph<T> {
     } else if (toType == String.class) {
       return (T) obj.toString();
     } else if (toType.isArray()) {
-      return toArray(obj);
-    } else if (ClassMethods.isSubtype(toType, Collection.class)) {
-      return MorphToCollection.getInstance().morph(obj, toType);
+      return MorphToArray.morph(obj, toType);
+    } else if (isSubtype(toType, Collection.class)) {
+      return MorphToCollection.morph(obj, toType);
     }
     Class myType = obj.getClass();
     if (myType.isArray()) {
-      boolean empty = Array.getLength(obj) == 0;
-      return empty ? getTypeDefault(toType) : convert(Array.get(obj, 0), toType);
-    } else if (ClassMethods.isSubtype(myType, Collection.class)) {
+      return Array.getLength(obj) == 0
+          ? getTypeDefault(toType)
+          : convert(Array.get(obj, 0), toType);
+    } else if (isSubtype(myType, Collection.class)) {
       Collection coll = (Collection) obj;
-      boolean empty = coll.size() == 0;
-      return empty ? getTypeDefault(toType) : convert(coll.iterator()
-          .next(), toType);
+      return coll.isEmpty()
+          ? getTypeDefault(toType)
+          : convert(coll.iterator().next(), toType);
     }
-    Object out = MorphToNumber.getInstance().morph(obj, toType);
+    Object out = MorphToNumber.morph(obj, toType);
     if (out != null) {
       return (T) out;
     } else if (toType.isEnum()) {
-      return (T) MorphToEnum.getInstance().morph(obj, toType);
+      return (T) MorphToEnum.morph(obj, toType);
     }
     throw new TypeConversionException(obj, toType);
-  }
-
-  private T toArray(Object obj) {
-    if (obj.getClass().isArray()) {
-      return arrayToArray(obj);
-    } else if (ClassMethods.isSubtype(obj.getClass(), Collection.class)) {
-      return collectionToArray((Collection) obj);
-    }
-    return (T) pack(convert(obj, targetType.getComponentType()));
-  }
-
-  private T arrayToArray(Object inputArray) {
-    int sz = Array.getLength(inputArray);
-    Class elementType = targetType.getComponentType();
-    Object outputArray = Array.newInstance(elementType, sz);
-    for (int i = 0; i < sz; ++i) {
-      Object in = Array.get(inputArray, i);
-      Object out = convert(in, elementType);
-      Array.set(outputArray, i, out);
-    }
-    return (T) outputArray;
-  }
-
-  private T collectionToArray(Collection collection) {
-    Class elementType = targetType.getComponentType();
-    Object array = Array.newInstance(elementType, collection.size());
-    int i = 0;
-    for (Object in : collection) {
-      Object out = convert(in, elementType);
-      Array.set(array, i++, out);
-    }
-    return (T) array;
   }
 
   static String stringify(Object obj) {

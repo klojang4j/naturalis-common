@@ -50,7 +50,6 @@ final class ToFloatConversion {
   private static boolean testDouble(Number n) {
     double d = Math.abs(n.doubleValue());
     return d >= Float.MIN_VALUE && d <= Float.MAX_VALUE;
-    //return Double.toString(n.doubleValue()).equals(Float.toString(n.floatValue()));
   }
 
   private static boolean testBigInteger(Number n) {

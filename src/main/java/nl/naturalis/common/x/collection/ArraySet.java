@@ -131,7 +131,7 @@ public final class ArraySet<E> extends ImmutableSet<E> {
     Check.notNull(a);
     int sz = elems.length;
     if (a.length < sz) {
-      a = InvokeUtils.newArray(a.getClass(), sz);
+      a = (T[]) InvokeUtils.newArray(a.getClass(), sz);
     }
     int i = 0;
     Object[] result = a;

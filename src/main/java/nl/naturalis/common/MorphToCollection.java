@@ -10,42 +10,26 @@ import java.util.function.Supplier;
 
 import static nl.naturalis.common.x.invoke.InvokeUtils.*;
 
-/*
- * Used to morph objects into {@code Collection} instances. We maintain a small table
- * of object-to-collection functions for ubiquitous {@code Collection} classes.
- * Others are created on demand. It's pointless to try and use generics here. It will
- * fight you. Too much dynamic stuff going on.
- */
 @SuppressWarnings({"rawtypes", "unchecked"})
 final class MorphToCollection {
 
-  private static MorphToCollection INSTANCE;
-
-  static MorphToCollection getInstance() {
-    if (INSTANCE == null) {
-      INSTANCE = new MorphToCollection();
-    }
-    return INSTANCE;
-  }
-
-  private final Map<Class, Function<Object, Collection>> table;
-
   private MorphToCollection() {
-    Map<Class, Function<Object, Collection>> tmp = new HashMap<>();
-    tmp.put(Iterable.class, MorphToCollection::toList);
-    tmp.put(Collection.class, MorphToCollection::toList);
-    tmp.put(List.class, obj -> toCollection1(obj, ArrayList::new));
-    tmp.put(ArrayList.class, obj -> toCollection1(obj, ArrayList::new));
-    tmp.put(LinkedList.class, obj -> toCollection2(obj, LinkedList::new));
-    tmp.put(Set.class, obj -> toCollection1(obj, HashSet::new));
-    tmp.put(HashSet.class, obj -> toCollection1(obj, HashSet::new));
-    tmp.put(LinkedHashSet.class, obj -> toCollection2(obj, LinkedHashSet::new));
-    tmp.put(SortedSet.class, obj -> toCollection2(obj, TreeSet::new));
-    tmp.put(TreeSet.class, obj -> toCollection2(obj, TreeSet::new));
-    table = Map.copyOf(tmp);
+    throw new UnsupportedOperationException();
   }
 
-  <T extends Collection> T morph(Object obj, Class toType) {
+  private static final Map<Class, Function<Object, Collection>> table = Map.of(
+      Iterable.class, MorphToCollection::toList,
+      Collection.class, MorphToCollection::toList,
+      List.class, obj -> toCollection1(obj, ArrayList::new),
+      ArrayList.class, obj -> toCollection1(obj, ArrayList::new),
+      LinkedList.class, obj -> toCollection2(obj, LinkedList::new),
+      Set.class, obj -> toCollection1(obj, HashSet::new),
+      HashSet.class, obj -> toCollection1(obj, HashSet::new),
+      LinkedHashSet.class, obj -> toCollection2(obj, LinkedHashSet::new),
+      SortedSet.class, obj -> toCollection2(obj, TreeSet::new),
+      TreeSet.class, obj -> toCollection2(obj, TreeSet::new));
+
+  static <T extends Collection> T morph(Object obj, Class toType) {
     Function<Object, Collection> converter = table.get(toType);
     if (converter == null) {
       return toSpecialCollection(obj, (Class<T>) toType);
@@ -53,7 +37,8 @@ final class MorphToCollection {
     return (T) converter.apply(obj);
   }
 
-  private <T extends Collection> T toSpecialCollection(Object obj, Class<T> toType) {
+  private static <T extends Collection> T toSpecialCollection(Object obj,
+      Class<T> toType) {
     T collection;
     try {
       // If toType has a no-arg constructor, we're good. Otherwise we give up.

@@ -1264,7 +1264,7 @@ public final class WiredList<E> implements List<E> {
   public <T> T[] toArray(T[] a) {
     Check.notNull(a);
     if (a.length < sz) {
-      a = InvokeUtils.newArray(a.getClass(), sz);
+      a = (T[]) InvokeUtils.newArray(a.getClass(), sz);
     }
     int i = 0;
     Object[] result = a;

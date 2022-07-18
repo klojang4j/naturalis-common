@@ -13,18 +13,11 @@ import static nl.naturalis.common.ObjectMethods.bruteCast;
 @SuppressWarnings({"rawtypes", "unchecked"})
 final class MorphToNumber {
 
-  private static MorphToNumber INSTANCE;
-
-  static MorphToNumber getInstance() {
-    if (INSTANCE == null) {
-      INSTANCE = new MorphToNumber();
-    }
-    return INSTANCE;
+  private MorphToNumber() {
+    throw new UnsupportedOperationException();
   }
 
-  private MorphToNumber() {}
-
-  Object morph(Object obj, Class toType) {
+  static Object morph(Object obj, Class toType) {
     Class type = box(toType);
     if (type == Boolean.class) {
       return Bool.from(obj);

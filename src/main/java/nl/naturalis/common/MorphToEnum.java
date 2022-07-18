@@ -8,21 +8,14 @@ import java.util.Map;
 @SuppressWarnings({"rawtypes", "unchecked"})
 final class MorphToEnum {
 
-  private static MorphToEnum INSTANCE;
-
-  static MorphToEnum getInstance() {
-    if (INSTANCE == null) {
-      INSTANCE = new MorphToEnum();
-    }
-    return INSTANCE;
+  private MorphToEnum() {
+    throw new UnsupportedOperationException();
   }
 
-  private MorphToEnum() {}
+  private static final Map<Class, EnumParser> parsers = new HashMap<>();
 
-  private final Map<Class, EnumParser> table = new HashMap<>();
-
-  <T extends Enum<T>> T morph(Object obj, Class enumClass) {
-    return (T) table.computeIfAbsent(enumClass, EnumParser::new).parse(obj);
+  static <T extends Enum<T>> T morph(Object obj, Class enumClass) {
+    return (T) parsers.computeIfAbsent(enumClass, EnumParser::new).parse(obj);
   }
 
 }

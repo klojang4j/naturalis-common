@@ -19,11 +19,11 @@ import static nl.naturalis.common.check.CommonChecks.*;
  * the one you get from {@link Arrays#asList(Object[]) Arrays.asList} in that it
  * swallows rather than copies the array. However, it will also spit out the original
  * array (see {@link #uncloak()}), thus saving you one array copy when continuing
- * with the array again. All {@code add}-like methods throw an {@link
- * UnsupportedOperationException}. The {@code remove} methods, however,  have been
- * repurposed to nullify list elements, allowing them to be easily used as method
- * references. This {@code List} implementation accepts and may return {@code null}
- * values.
+ * with the array again. All {@code add}-like methods throw an
+ * {@link UnsupportedOperationException}. The {@code remove} methods, however,  have
+ * been repurposed to nullify list elements, allowing them to be easily used as
+ * method references. This {@code List} implementation accepts and may return
+ * {@code null} values.
  *
  * <p>Although this is a generic type, heap pollution through conversion to its
  * raw type is scrupulously guarded against, as there is no way to instantiate it
@@ -78,7 +78,7 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
   public ArrayCloakList(Class<E> elementType, int size) {
     Check.that(size, "size").is(gte(), 0);
     this.type = Check.notNull(elementType, "elementType").ok();
-    this.data = InvokeUtils.newArray(elementType.arrayType(), size);
+    this.data = (E[]) InvokeUtils.newArray(elementType.arrayType(), size);
   }
 
   /**
@@ -303,7 +303,7 @@ public class ArrayCloakList<E> implements List<E>, RandomAccess {
     var data = this.data;
     var sz = data.length;
     if (a.length < sz) {
-      a = InvokeUtils.newArray(a.getClass(), sz);
+      a = (T[]) InvokeUtils.newArray(a.getClass(), sz);
     }
     Object[] result = a;
     System.arraycopy(data, 0, result, 0, sz);

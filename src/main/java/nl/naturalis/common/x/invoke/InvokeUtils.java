@@ -60,7 +60,7 @@ public class InvokeUtils {
     return fail("huh?");
   }
 
-  public static <T> T newInstance(Class<T> clazz) throws Throwable {
+  public static <T> T newInstance(Class<T> clazz) {
     try {
       return (T) getNoArgConstructor(clazz).invoke();
     } catch (NoSuchMethodException e) {
@@ -82,10 +82,10 @@ public class InvokeUtils {
   }
 
   @SuppressWarnings({"unchecked"})
-  public static <T> T[] newArray(Class<?> clazz, int length) {
+  public static Object newArray(Class<?> clazz, int length) {
     MethodHandle mh = arrayConstructor(clazz);
     try {
-      return (T[]) mh.invoke(length);
+      return mh.invoke(length);
     } catch (Throwable t) {
       throw ExceptionMethods.uncheck(t);
     }

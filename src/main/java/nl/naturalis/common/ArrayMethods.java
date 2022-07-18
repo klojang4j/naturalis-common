@@ -190,8 +190,8 @@ public final class ArrayMethods {
 
   /**
    * Returns an {@link OptionalInt} containing the array index of the last occurrence
-   * of the specified value within the specified array. Returns an empty {@link
-   * OptionalInt} if the array does not contain the value.
+   * of the specified value within the specified array. Returns an empty
+   * {@link OptionalInt} if the array does not contain the value.
    *
    * @param array the array to search
    * @param value the value to search for
@@ -437,8 +437,8 @@ public final class ArrayMethods {
 
   /**
    * Returns a new, empty array with the same element type as the specified array's
-   * element type. The length of the returned array is specified through the {@code
-   * length} parameter.
+   * element type. The length of the returned array is specified through the
+   * {@code length} parameter.
    *
    * @param <T> the type of the elements in the requested array
    * @param template an array with the same element type as the requested array
@@ -448,7 +448,7 @@ public final class ArrayMethods {
   public static <T> T[] fromTemplate(T[] template, int length) {
     Check.notNull(template, "template");
     Check.that(length, Param.LENGTH).is(gte(), 0);
-    return InvokeUtils.newArray(template.getClass(), length);
+    return (T[]) InvokeUtils.newArray(template.getClass(), length);
   }
 
   private static final Map<Class<?>, ToIntFunction<Object>> hashCoders =
@@ -463,8 +463,8 @@ public final class ArrayMethods {
 
   /**
    * Returns the hash code of an array. Allow you to retrieve the hash code of an
-   * array object even if you don't know its exact type. An {@link
-   * IllegalArgumentException} is thrown if the argument is not an array.
+   * array object even if you don't know its exact type. An
+   * {@link IllegalArgumentException} is thrown if the argument is not an array.
    *
    * @param array the array
    * @return Its hash code
@@ -479,8 +479,8 @@ public final class ArrayMethods {
 
   /**
    * Returns the deep hash code of an array. Allow you to retrieve the deep hash code
-   * of an array object even if you don't know its exact type. An {@link
-   * IllegalArgumentException} is thrown if the argument is not an array.
+   * of an array object even if you don't know its exact type. An
+   * {@link IllegalArgumentException} is thrown if the argument is not an array.
    *
    * @param array the array
    * @return Its deep hash code
@@ -596,8 +596,8 @@ public final class ArrayMethods {
   /**
    * PHP-style implode method, concatenating the array elements using ", "
    * (comma-space) as separator. This method is primarily meant to implode primitive
-   * arrays, but you <i>can</i> use it to implode any type of array. An {@link
-   * IllegalArgumentException} is thrown if {@code array} is not an array.
+   * arrays, but you <i>can</i> use it to implode any type of array. An
+   * {@link IllegalArgumentException} is thrown if {@code array} is not an array.
    *
    * @param array the array to implode
    * @return a concatenation of the elements in the array.
@@ -625,8 +625,8 @@ public final class ArrayMethods {
   /**
    * PHP-style implode method, concatenating the array elements using ", "
    * (comma-space) as separator. This method is primarily meant to implode primitive
-   * arrays, but you <i>can</i> use it to implode any type of array. An {@link
-   * IllegalArgumentException} is thrown if {@code array} is not an array.
+   * arrays, but you <i>can</i> use it to implode any type of array. An
+   * {@link IllegalArgumentException} is thrown if {@code array} is not an array.
    *
    * @param array the array to implode
    * @param stringifier A {@code Function} that converts the array elements to
