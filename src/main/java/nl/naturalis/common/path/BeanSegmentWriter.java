@@ -2,6 +2,7 @@ package nl.naturalis.common.path;
 
 import nl.naturalis.common.invoke.BeanWriter;
 import nl.naturalis.common.invoke.NoPublicSettersException;
+import nl.naturalis.common.invoke.NoSuchPropertyException;
 
 import static nl.naturalis.common.ObjectMethods.isEmpty;
 import static nl.naturalis.common.path.PathWalkerException.noSuchProperty;
@@ -30,6 +31,8 @@ final class BeanSegmentWriter extends SegmentWriter<Object> {
     try {
       bw.set(bean, property, value);
       return true;
+    } catch (NoSuchPropertyException e) {
+      return deadEnd(noSuchProperty(path, segment, bean.getClass()));
     } catch (Throwable t) {
       return deadEnd(unexpectedError(path, segment, t));
     }

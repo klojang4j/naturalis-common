@@ -8,6 +8,7 @@ public class Person {
   private String firstName;
   private String lastName;
   private Address address;
+  private String naughtyProperty;
 
   public String getSsn() {
     return ssn;
@@ -41,6 +42,14 @@ public class Person {
     this.address = address;
   }
 
+  public String getNaughtyProperty() {
+    throw new RuntimeException("I always make a mess");
+  }
+
+  public void setNaughtyProperty(String naughtyProperty) {
+    throw new RuntimeException("I always make a mess");
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(address, firstName, lastName, ssn);
@@ -63,4 +72,5 @@ public class Person {
         && Objects.equals(lastName, other.lastName)
         && Objects.equals(ssn, other.ssn);
   }
+
 }

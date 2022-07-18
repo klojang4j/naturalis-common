@@ -29,8 +29,15 @@ final class ObjectWriter {
       segment = 0;
     } else {
       Path parent = path.parent();
-      PathWalker pw = new PathWalker(path.parent(), se, kd);
-      writeTo = pw.read(host);
+      PathWalker pw = new PathWalker(path.parent(), false, kd);
+      try {
+        writeTo = pw.read(host);
+      } catch (PathWalkerException e) {
+        if (se) {
+          return false;
+        }
+        throw e;
+      }
       segment = parent.size() - 1;
     }
     if (writeTo == null) {

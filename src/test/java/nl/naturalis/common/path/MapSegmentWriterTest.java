@@ -5,8 +5,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static nl.naturalis.common.path.ErrorCode.EXCEPTION;
-import static nl.naturalis.common.path.ErrorCode.KEY_DESERIALIZATION_FAILED;
+import static nl.naturalis.common.path.ErrorCode.*;
 import static org.junit.Assert.*;
 
 public class MapSegmentWriterTest {
@@ -90,6 +89,18 @@ public class MapSegmentWriterTest {
     } catch (PathWalkerException e) {
       System.out.println(e.getMessage());
       assertEquals(KEY_DESERIALIZATION_FAILED, e.getErrorCode());
+      throw e;
+    }
+  }
+
+  @Test(expected = PathWalkerException.class)
+  public void test06() {
+    Map m = Map.of("foo", "bar");
+    MapSegmentWriter writer = new MapSegmentWriter(false, null);
+    try {
+      writer.write(m, new Path("foo"), "fox");
+    } catch (PathWalkerException e) {
+      assertEquals(NOT_MODIFIABLE, e.getErrorCode());
       throw e;
     }
   }

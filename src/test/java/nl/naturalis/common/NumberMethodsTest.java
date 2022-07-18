@@ -1164,7 +1164,7 @@ public class NumberMethodsTest {
     assertTrue(isRound(7F));
     assertTrue(isRound(7.000D));
     assertTrue(isRound(7.000F));
-    assertTrue(isRound(new BigDecimal("7")));
+    assertTrue(isRound(7.000F));
     assertTrue(isRound(new BigDecimal("-7.0000000")));
     assertFalse(isRound(7.0009D));
     assertFalse(isRound(7.0009F));
@@ -1174,6 +1174,51 @@ public class NumberMethodsTest {
     assertTrue(isRound(new BigDecimal(".2E+1")));
     assertTrue(isRound(new BigDecimal(".2E+2")));
     assertTrue(isRound(new BigDecimal(".02E+2")));
+  }
+
+  @Test // pretty mundane value ("100.0") surfaced later as a bug
+  public void isRound01() {
+    assertTrue(isRound(new BigDecimal("100.0")));
+  }
+
+  @Test
+  public void isRound02() {
+    assertTrue(isRound(new BigDecimal("-100.0")));
+  }
+
+  @Test
+  public void isRound03() {
+    assertTrue(isRound(new BigDecimal("-107.0")));
+  }
+
+  @Test
+  public void isRound04() {
+    assertTrue(isRound(new BigDecimal("-100.000")));
+  }
+
+  @Test
+  public void isRound05() {
+    assertFalse(isRound(new BigDecimal("-100.70")));
+  }
+
+  @Test
+  public void isRound06() {
+    assertFalse(isRound(new BigDecimal("-100.700")));
+  }
+
+  @Test
+  public void isRound07() {
+    assertFalse(isRound(new BigDecimal("-100.7000")));
+  }
+
+  @Test
+  public void isRound08() {
+    assertFalse(isRound(new BigDecimal("-100.700006")));
+  }
+
+  @Test
+  public void isRound09() {
+    assertFalse(isRound(new BigDecimal(".700006")));
   }
 
 }

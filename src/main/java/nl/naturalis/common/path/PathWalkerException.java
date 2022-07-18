@@ -13,50 +13,50 @@ public final class PathWalkerException extends RuntimeException {
 
   interface Factory extends Supplier<PathWalkerException> {}
 
-  private static final String INVALID_PATH = "Invalid path: \"%s\" (segment %d). ";
+  private static final String INVALID_PATH = "invalid path: \"%s\" (segment %d)";
+  private static final String PATH_SEGMENT = "path %s, segment %s: ";
 
   static Factory noSuchProperty(Path path, int segment, Class<?> clazz) {
-    String fmt = INVALID_PATH + "No accessible property named \"%s\" in %s.class";
+    String fmt = INVALID_PATH
+        + " *** no accessible property named \"%s\" in %s.class";
     String className = className(clazz);
     String msg = String.format(fmt, path, segment, path.segment(segment), className);
     return () -> new PathWalkerException(NO_SUCH_PROPERTY, msg);
   }
 
   static Factory opaqueType(Path path, int segment, Class<?> clazz) {
-    String fmt = INVALID_PATH + "No such property in class %s: %s";
+    String fmt = INVALID_PATH + " *** no such property in class %s: %s";
     String className = simpleClassName(clazz);
     String msg = String.format(fmt, path, className, path.segment(segment));
     return () -> new PathWalkerException(NO_SUCH_PROPERTY, msg);
   }
 
   static Factory noSuchKey(Path path, int segment, Object key) {
-    String fmt = INVALID_PATH + "No such key: \"%s\"";
+    String fmt = INVALID_PATH + " *** no such key: \"%s\"";
     String msg = String.format(fmt, path, segment, path.segment(segment));
     return () -> new PathWalkerException(NO_SUCH_KEY, msg);
   }
 
   static Factory indexExpected(Path path, int segment) {
-    String fmt = INVALID_PATH + "Array index expected. Found: %s";
+    String fmt = INVALID_PATH + " *** array index expected; found: %s";
     String msg = String.format(fmt, path, segment, path.segment(segment));
     return () -> new PathWalkerException(INDEX_EXPECTED, msg);
   }
 
   static Factory indexOutOfBounds(Path path, int segment) {
-    String fmt = INVALID_PATH + "Index out of bounds: %s";
+    String fmt = INVALID_PATH + " *** index out of bounds: %s";
     String msg = String.format(fmt, path, segment, path.segment(segment));
     return () -> new PathWalkerException(INDEX_OUT_OF_BOUNDS, msg);
   }
 
   static Factory nullValue(Path path, int segment) {
-    String fmt = INVALID_PATH
-        + "Cannot proceed past terminal value at segment %s: null";
+    String fmt = INVALID_PATH + " *** terminal value at segment %s: null";
     String msg = String.format(fmt, path, segment, path.segment(segment));
     return () -> new PathWalkerException(TERMINAL_VALUE, msg);
   }
 
   static Factory terminalValue(Path path, int segment, Object value) {
-    String fmt = INVALID_PATH
-        + "Cannot proceed past terminal value at segment %s: (%s) %s";
+    String fmt = INVALID_PATH + " *** terminal value at segment %s: (%s) %s";
     String className = simpleClassName(value.getClass());
     String msg = String.format(fmt,
         path,
@@ -68,13 +68,13 @@ public final class PathWalkerException extends RuntimeException {
   }
 
   static Factory emptySegment(Path path, int segment) {
-    String fmt = INVALID_PATH + "Segment must not be null or empty";
+    String fmt = INVALID_PATH + " *** segment must not be null or empty";
     String msg = String.format(fmt, path, segment);
     return () -> new PathWalkerException(EMPTY_SEGMENT, msg);
   }
 
   static Factory typeMismatch(Path path, int segment, Class expected, Class actual) {
-    String fmt = INVALID_PATH + "Cannot assign %s to %s";
+    String fmt = INVALID_PATH + " *** cannot assign %s to %s";
     String scn0 = simpleClassName(expected);
     String scn1 = simpleClassName(actual);
     String msg = String.format(fmt, path, segment, scn0, scn1);
@@ -82,7 +82,7 @@ public final class PathWalkerException extends RuntimeException {
   }
 
   static Factory typeNotSupported(Object host) {
-    String fmt = "Don't know how to write instances of %s";
+    String fmt = PATH_SEGMENT + " don't know how to write instances of %s";
     String msg = String.format(fmt, className(host));
     return () -> new PathWalkerException(TYPE_NOT_SUPPORTED, msg);
   }
@@ -90,7 +90,7 @@ public final class PathWalkerException extends RuntimeException {
   static Factory notModifiable(Path path,
       int segment,
       Class<?> type) {
-    String fmt = "Path %s, segment %s: %s found at %s appears to be unmodifiable";
+    String fmt = PATH_SEGMENT + "%s found at %s appears to be unmodifiable";
     String msg = String.format(fmt,
         path,
         segment,
@@ -104,7 +104,7 @@ public final class PathWalkerException extends RuntimeException {
       KeyDeserializationException exc) {
     String msg;
     if (exc.getMessage() == null) {
-      String fmt = "Path %s, segment %s: failed to deserialize \"%s\" into map key";
+      String fmt = PATH_SEGMENT + "failed to deserialize \"%s\" into map key";
       msg = String.format(fmt, path, segment, path.segment(segment));
     } else {
       String fmt = "Path %s, segment %s: %s";
@@ -114,7 +114,7 @@ public final class PathWalkerException extends RuntimeException {
   }
 
   static Factory unexpectedError(Path path, int segment, Throwable t) {
-    String fmt = "Error while processing segment %s of %s: %s";
+    String fmt = PATH_SEGMENT + "unexpected error *** %s";
     String msg = String.format(fmt, segment, path, t);
     return () -> new PathWalkerException(EXCEPTION, msg);
   }

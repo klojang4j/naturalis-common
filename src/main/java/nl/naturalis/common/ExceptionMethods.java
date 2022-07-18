@@ -19,8 +19,6 @@ import java.util.function.Function;
  */
 public final class ExceptionMethods {
 
-  private static final String EXCEPTION = "exception";
-
   private ExceptionMethods() {
     throw new UnsupportedOperationException();
   }
@@ -33,7 +31,7 @@ public final class ExceptionMethods {
    * @return the root cause of the exception
    */
   public static Throwable getRootCause(Throwable exc) {
-    Check.notNull(exc, EXCEPTION);
+    Check.notNull(exc, Param.EXCEPTION);
     while (exc.getCause() != null) {
       exc = exc.getCause();
     }
@@ -47,7 +45,7 @@ public final class ExceptionMethods {
    * @return the root stack trace as a string
    */
   public static String getRootStackTraceAsString(Throwable exc) {
-    Check.notNull(exc, EXCEPTION);
+    Check.notNull(exc, Param.EXCEPTION);
     UnsafeByteArrayOutputStream bucket = new UnsafeByteArrayOutputStream(2048);
     getRootCause(exc).printStackTrace(new PrintStream(bucket));
     return bucket.toString().strip();
@@ -55,16 +53,16 @@ public final class ExceptionMethods {
 
   /**
    * Returns the exception message and stack trace of the root cause of {@code exc},
-   * using the specified string(s) to filter stack trace elements. {@link
-   * StackTraceElement#getClassName()} contains the filter string, the stack trace
-   * element will be included in the output.
+   * using the specified string(s) to filter stack trace elements.
+   * {@link StackTraceElement#getClassName()} contains the filter string, the stack
+   * trace element will be included in the output.
    *
    * @param exc the exception
    * @param filter One or more filters on stack trace elements
    * @return the root stack trace as a string
    */
   public static String getRootStackTraceAsString(Throwable exc, String... filter) {
-    Check.notNull(exc, EXCEPTION);
+    Check.notNull(exc, Param.EXCEPTION);
     Check.notNull(filter, Param.FILTER);
     UnsafeByteArrayOutputStream baos = new UnsafeByteArrayOutputStream(1024);
     PrintStream pw = new PrintStream(baos);
@@ -83,10 +81,10 @@ public final class ExceptionMethods {
 
   /**
    * Returns the stack trace of the root cause of the specified exception, using the
-   * specified string(s) to filter stack trace elements. If the {@link
-   * StackTraceElement#getClassName() class name} of the stack trace element {@link
-   * String#contains(CharSequence) contains} the filter string, the stack trace
-   * element will be included in the returned array.
+   * specified string(s) to filter stack trace elements. If the
+   * {@link StackTraceElement#getClassName() class name} of the stack trace element
+   * {@link String#contains(CharSequence) contains} the filter string, the stack
+   * trace element will be included in the returned array.
    *
    * @param exc the exception
    * @param filter One or more filters on stack trace elements
@@ -94,7 +92,7 @@ public final class ExceptionMethods {
    */
   public static StackTraceElement[] getRootStackTrace(Throwable exc,
       String... filter) {
-    Check.notNull(exc, EXCEPTION);
+    Check.notNull(exc, Param.EXCEPTION);
     Check.notNull(filter, Param.FILTER);
     if (filter.length == 0) {
       return getRootCause(exc).getStackTrace();
@@ -113,15 +111,15 @@ public final class ExceptionMethods {
 
   /**
    * Returns a detailed exception message that includes the class, method and line
-   * number of the absolute origin of the provided exception. Equivalent to {@code
-   * new ExceptionSource(getRootCause(t)).getDetailedMessage()}.
+   * number of the absolute origin of the provided exception. Equivalent to
+   * {@code new ExceptionSource(getRootCause(t)).getDetailedMessage()}.
    *
    * @param exc the exception to extract the extra information from
    * @return A detailed exception message
    * @see ExceptionOrigin#getDetailedMessage()
    */
   public static String getDetailedMessage(Throwable exc) {
-    Check.notNull(exc, EXCEPTION);
+    Check.notNull(exc, Param.EXCEPTION);
     return new ExceptionOrigin(getRootCause(exc)).getDetailedMessage();
   }
 
@@ -146,7 +144,7 @@ public final class ExceptionMethods {
    * @see ExceptionOrigin#getDetailedMessage()
    */
   public static String getDetailedMessage(Throwable exc, String search) {
-    Check.notNull(exc, EXCEPTION);
+    Check.notNull(exc, Param.EXCEPTION);
     return new ExceptionOrigin(exc, search).getDetailedMessage();
   }
 
@@ -158,7 +156,7 @@ public final class ExceptionMethods {
    * @return the specified throwable or a {@code RuntimeException} wrapping it
    */
   public static RuntimeException wrap(Throwable exc) {
-    if (Check.notNull(exc, EXCEPTION).ok() instanceof RuntimeException rte) {
+    if (Check.notNull(exc, Param.EXCEPTION).ok() instanceof RuntimeException rte) {
       return rte;
     }
     return new RuntimeException(exc);
@@ -169,8 +167,8 @@ public final class ExceptionMethods {
    * else a {@code RuntimeException} wrapping the throwable.
    *
    * @param exc A checked or unchecked exception
-   * @param customMessage A custom message passed on to the {@code
-   *     RuntimeException} wrapping the original exception
+   * @param customMessage A custom message passed on to the
+   *     {@code RuntimeException} wrapping the original exception
    * @param msgArgs The {@code String.format} message arguments to the custom
    *     message
    * @return the specified throwable or a {@code RuntimeException} wrapping it
@@ -178,7 +176,7 @@ public final class ExceptionMethods {
   public static RuntimeException wrap(Throwable exc,
       String customMessage,
       Object... msgArgs) {
-    Check.notNull(exc, EXCEPTION);
+    Check.notNull(exc, Param.EXCEPTION);
     Check.notNull(customMessage, "customMessage");
     Check.notNull(msgArgs, Param.MSG_ARGS);
     if (exc instanceof RuntimeException rte) {
@@ -195,8 +193,8 @@ public final class ExceptionMethods {
    * else a {@code RuntimeException} produced by the specified function.
    *
    * @param <T> The type of the {@code RuntimeException}
-   * @param exc the exception to be wrapped if it is not a {@code
-   *     RuntimeException}
+   * @param exc the exception to be wrapped if it is not a
+   *     {@code RuntimeException}
    * @param exceptionFactory The producer of the {@code RuntimeException},
    *     typically the one-arg constructor of an {@code Exception} that takes a
    *     {@code Throwable} argument ("cause")
@@ -204,7 +202,7 @@ public final class ExceptionMethods {
    */
   public static <T extends RuntimeException> RuntimeException wrap(
       Throwable exc, Function<Throwable, T> exceptionFactory) {
-    Check.notNull(exc, EXCEPTION);
+    Check.notNull(exc, Param.EXCEPTION);
     Check.notNull(exceptionFactory, "exceptionFactory");
     if (exc instanceof RuntimeException rte) {
       return rte;
@@ -226,13 +224,13 @@ public final class ExceptionMethods {
    * }</pre></blockquote>
    *
    * @param <T> The type of the {@code RuntimeException}
-   * @param exception the exception to be wrapped if it is not a {@code
-   *     RuntimeException}
+   * @param exception the exception to be wrapped if it is not a
+   *     {@code RuntimeException}
    * @param exceptionFactory The producer of the {@code RuntimeException},
    *     typically the two-argument constructor of an {@code Exception} that takes a
    *     {@code String} argument and a {@code Throwable} argument
-   * @param customMessage A custom message passed on to the {@code
-   *     RuntimeException} wrapping the original exception
+   * @param customMessage A custom message passed on to the
+   *     {@code RuntimeException} wrapping the original exception
    * @param msgArgs The {@code String.format} message arguments to the custom
    *     message
    * @return the specified throwable or a {@code RuntimeException} wrapping it
@@ -242,8 +240,9 @@ public final class ExceptionMethods {
       BiFunction<String, Throwable, T> exceptionFactory,
       String customMessage,
       Object... msgArgs) {
-    if (Check.notNull(exception, EXCEPTION).ok() instanceof RuntimeException) {
-      return (RuntimeException) exception;
+    Check.notNull(exception, Param.EXCEPTION);
+    if (exception instanceof RuntimeException rte) {
+      return rte;
     }
     Check.notNull(customMessage, "customMessage");
     Check.notNull(exceptionFactory, "exceptionFactory");
@@ -257,13 +256,13 @@ public final class ExceptionMethods {
    * Returns the specified throwable if it already is a {@code RuntimeException},
    * else an {@link UncheckedException} wrapping the throwable. This method is
    * primarily meant to "uncheck" checked exceptions that you cannot in practice
-   * properly deal with, like some {@code IOException}s thrown, according to the
-   * Javadocs, "if an I/O error occurs".
+   * properly deal with, and is therefore, for all practical purposes a runtime
+   * exception. For example an {@code IOException} which is documented as being
+   * thrown "if an I/O error occurs".
    *
    * @param exc A checked or unchecked exception
    * @return the provided {@code Throwable} or an {@code UncheckedException} wrapping
    *     it
-   * @see UncheckedException
    * @see UncheckedException
    */
   public static RuntimeException uncheck(Throwable exc) {
@@ -274,12 +273,13 @@ public final class ExceptionMethods {
    * Returns the specified throwable if it already is a {@code RuntimeException},
    * else an {@link UncheckedException} wrapping the throwable. This method is
    * primarily meant to "uncheck" checked exceptions that you cannot in practice
-   * properly deal with, like some {@code IOException}s thrown, according to the
-   * Javadocs, "if an I/O error occurs".
+   * properly deal with, and is therefore, for all practical purposes a runtime
+   * exception. For example an {@code IOException} which is documented as being
+   * thrown "if an I/O error occurs".
    *
    * @param exc A checked or unchecked exception
-   * @param customMessage A custom message to pass to the constructor of {@code
-   *     UncheckedException}
+   * @param customMessage A custom message to pass to the constructor of
+   *     {@code UncheckedException}
    * @return the provided {@code Throwable} or an {@code UncheckedException} wrapping
    *     it
    * @see UncheckedException
@@ -308,8 +308,8 @@ public final class ExceptionMethods {
    * provided exception.
    *
    * @param exc A checked or unchecked exception
-   * @param customMessage A custom message to pass to the constructor of {@code
-   *     UncheckedException}
+   * @param customMessage A custom message to pass to the constructor of
+   *     {@code UncheckedException}
    * @return the provided {@code Throwable} or a {@code RootException} wrapping its
    *     root cause
    * @see RootException

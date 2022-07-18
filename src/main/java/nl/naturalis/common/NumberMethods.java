@@ -13,6 +13,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
+import static java.math.BigDecimal.ONE;
+import static java.math.BigDecimal.TEN;
 import static nl.naturalis.common.ClassMethods.box;
 import static nl.naturalis.common.ObjectMethods.isEmpty;
 import static nl.naturalis.common.ToDoubleConversion.BIG_MAX_DOUBLE;
@@ -752,10 +754,18 @@ public final class NumberMethods {
    * @return whether the specified BigDecimal's fractional part is zero or absent
    */
   public static boolean isRound(BigDecimal bd) {
-    if (bd.scale() <= 0 || bd.stripTrailingZeros().scale() == 0) {
-      return true;
-    }
-    return false;
+    // NB The 1st check is cheap and catches a lot of the cases.
+    // The 2nd second is superfluous in the presence of the 3rd.
+    // However, it still catches quite a few cases and seems
+    // sufficiently cheap compared to the 3rd check that it seems
+    // worth paying the price of wasted CPU cycles if we do fall
+    // through to the 3rd check. The 3rd and 4th check are
+    // equivalent, but the 3rd check seems more efficient. Needs
+    // to be measured though.
+    return bd.scale() <= 0
+        || bd.stripTrailingZeros().scale() == 0
+        || bd.divideToIntegralValue(ONE).compareTo(bd) == 0
+        /*|| bd.remainder(ONE).signum() == 0 */;
   }
 
   private static long parseIntegral(String s,
