@@ -52,7 +52,7 @@ public final class PathWalker {
    */
   public PathWalker(String... paths) {
     Check.that(paths, PATHS).isNot(empty()).is(deepNotNull());
-    this.paths = Arrays.stream(paths).map(Path::new).toArray(Path[]::new);
+    this.paths = Arrays.stream(paths).map(Path::of).toArray(Path[]::new);
     this.se = true;
     this.kd = null;
   }

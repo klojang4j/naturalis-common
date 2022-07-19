@@ -11,7 +11,7 @@ public class PrimArraySegmentWriterTest {
   public void test01a() throws Throwable {
     int[] array = new int[] {1, 2, 3, 4};
     PrimitiveArraySegmentWriter writer = new PrimitiveArraySegmentWriter(true, null);
-    assertTrue(writer.write(array, new Path("2"), 42));
+    assertTrue(writer.write(array, Path.of("2"), 42));
     assertEquals(42, array[2]);
   }
 
@@ -20,7 +20,7 @@ public class PrimArraySegmentWriterTest {
     int[] array = new int[] {1, 2, 3, 4};
     PrimitiveArraySegmentWriter writer = new PrimitiveArraySegmentWriter(false,
         null);
-    assertTrue(writer.write(array, new Path("2"), 42));
+    assertTrue(writer.write(array, Path.of("2"), 42));
     assertEquals(42, array[2]);
   }
 
@@ -28,7 +28,7 @@ public class PrimArraySegmentWriterTest {
   public void test02() throws Throwable {
     int[] array = new int[] {1, 2, 3, 4};
     PrimitiveArraySegmentWriter writer = new PrimitiveArraySegmentWriter(true, null);
-    assertTrue(writer.write(array, new Path("path.to.array.3"), 42));
+    assertTrue(writer.write(array, Path.of("path.to.array.3"), 42));
     assertEquals(42, array[3]);
   }
 
@@ -37,7 +37,7 @@ public class PrimArraySegmentWriterTest {
     int[] array = new int[] {1, 2, 3, 4};
     PrimitiveArraySegmentWriter writer = new PrimitiveArraySegmentWriter(true, null);
     // INDEX_OUT_OF_BOUNDS
-    assertFalse(writer.write(array, new Path("8"), 42));
+    assertFalse(writer.write(array, Path.of("8"), 42));
   }
 
   @Test
@@ -46,7 +46,7 @@ public class PrimArraySegmentWriterTest {
     PrimitiveArraySegmentWriter writer = new PrimitiveArraySegmentWriter(false,
         null);
     try {
-      writer.write(array, new Path("8"), 42);
+      writer.write(array, Path.of("8"), 42);
     } catch (PathWalkerException e) {
       System.out.println(e.toString());
       assertEquals(INDEX_OUT_OF_BOUNDS, e.getErrorCode());
@@ -59,7 +59,7 @@ public class PrimArraySegmentWriterTest {
   public void test04a() throws Throwable {
     int[] array = new int[] {1, 2, 3, 4};
     PrimitiveArraySegmentWriter writer = new PrimitiveArraySegmentWriter(true, null);
-    assertFalse(writer.write(array, new Path("path.to.array.8"), 42));
+    assertFalse(writer.write(array, Path.of("path.to.array.8"), 42));
   }
 
   @Test(expected = PathWalkerException.class)
@@ -68,7 +68,7 @@ public class PrimArraySegmentWriterTest {
     PrimitiveArraySegmentWriter writer = new PrimitiveArraySegmentWriter(false,
         null);
     try {
-      writer.write(array, new Path("path.to.array.8"), 42);
+      writer.write(array, Path.of("path.to.array.8"), 42);
     } catch (PathWalkerException e) {
       assertEquals(INDEX_OUT_OF_BOUNDS, e.getErrorCode());
       throw e;
@@ -79,7 +79,7 @@ public class PrimArraySegmentWriterTest {
   public void test05a() throws Throwable {
     int[] array = new int[] {1, 2, 3, 4};
     PrimitiveArraySegmentWriter writer = new PrimitiveArraySegmentWriter(true, null);
-    assertFalse(writer.write(array, new Path("path.to.array.foo"), 42));
+    assertFalse(writer.write(array, Path.of("path.to.array.foo"), 42));
   }
 
   @Test(expected = PathWalkerException.class)
@@ -88,7 +88,7 @@ public class PrimArraySegmentWriterTest {
     PrimitiveArraySegmentWriter writer = new PrimitiveArraySegmentWriter(false,
         null);
     try {
-      writer.write(array, new Path("path.to.array.foo"), 42);
+      writer.write(array, Path.of("path.to.array.foo"), 42);
     } catch (PathWalkerException e) {
       assertEquals(INDEX_EXPECTED, e.getErrorCode());
       throw e;
@@ -101,7 +101,7 @@ public class PrimArraySegmentWriterTest {
     PrimitiveArraySegmentWriter writer = new PrimitiveArraySegmentWriter(false,
         null);
     try {
-      writer.write(array, new Path("path.to.array."), 42);
+      writer.write(array, Path.of("path.to.array."), 42);
     } catch (PathWalkerException e) {
       assertEquals(INDEX_EXPECTED, e.getErrorCode());
       return;
@@ -113,7 +113,7 @@ public class PrimArraySegmentWriterTest {
   public void test06b() throws Throwable {
     int[] array = new int[] {1, 2, 3, 4};
     PrimitiveArraySegmentWriter writer = new PrimitiveArraySegmentWriter(true, null);
-    assertFalse(writer.write(array, new Path("path.to.array."), 42));
+    assertFalse(writer.write(array, Path.of("path.to.array."), 42));
   }
 
 }

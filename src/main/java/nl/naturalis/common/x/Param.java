@@ -17,6 +17,9 @@ public final class Param {
   public static final String TEST = "test";
   public static final String TO_INDEX = "to";
   public static final String VALUES = "values";
+  public static final String VALUE = "value";
+  public static final String PATH = "path";
+  public static final String MAP = "map";
 
   private Param() {
     throw new UnsupportedOperationException();

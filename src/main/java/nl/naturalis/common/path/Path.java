@@ -2,6 +2,7 @@ package nl.naturalis.common.path;
 
 import nl.naturalis.common.*;
 import nl.naturalis.common.check.Check;
+import nl.naturalis.common.x.Param;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,43 +13,60 @@ import java.util.stream.Stream;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
 import static java.util.function.Predicate.not;
+import static nl.naturalis.common.ArrayMethods.EMPTY_STRING_ARRAY;
+import static nl.naturalis.common.ArrayMethods.implode;
 import static nl.naturalis.common.check.CommonChecks.*;
 
 /**
- * Specifies a path to a value within an object. For example: {@code
- * employee.address.street}. Path segments are separated by the dot character ('.').
- * Array indices are specified as separate path segments. For example: {@code
- * employees.3.address.street}. Non-numeric segments can be either bean properties or
- * map keys. Therefore the {@code Path} class does not impose any constraints on what
- * constitutes a valid path segment, since a map key can be anything (including
- * {@code null} or an empty string). Of course, if the path segment denotes a
- * JavaBean property, it should be a valid Java identifier.
+ * Specifies a path to a value within an object. For example:
+ * {@code employee.address.street}. Path segments are separated by the dot character
+ * ('.'). Array indices are specified as separate path segments. For example:
+ * {@code employees.3.address.street}. Non-numeric segments can be either bean
+ * properties or map keys. Therefore the {@code Path} class does not impose any
+ * constraints on what constitutes a valid path segment. A map key, after all, can be
+ * anything - including {@code null} and the empty string. Of course, if the path
+ * segment denotes a JavaBean property, it should be a valid Java identifier.
  *
  * <h4>Escaping</h4>
+ * <p>These are the escaping rules when specifying path strings:
+ * <ul>
+ *   <li>If a path segment represents a map key that happens to contain the
+ *      segment separator ('.'), it must be escaped using the circumflex
+ *      character ('^'). So a map key with the value {@code "my.awkward.map.key"}
+ *      should be escaped like this: {@code "my^.awkward^.map^.key"}.
+ *  <li>The escape character ('^') itself must not be escaped. Thus, if the
+ *      escape character is followed by anything but a dot or the zero character
+ *      (see next rule), it is just that character.
+ *  <li>If a segment needs to denote a map key with value {@code null}, use this
+ *      escape sequence: {@code "^0"}. So the path {@code "lookups.^0.name"}
+ *      references the {@code name} field of an object stored under key
+ *      {@code null} in the {@code lookups} map.
+ *  <li>If a segment needs to denote a map key whose value is the empty string,
+ *      simply make it a zero-length segment: {@code "lookups..name"}. This also
+ *      implies that a path string that ends with a dot in fact ends with an
+ *      empty (zero-length) segment.
+ * </ul>
  *
  * <p>If a path segment represents a map key that happens to contain the segment
- * separator ('.'), it must be escaped using the circumflex character ('^'). So
- * {@code my.awkward.map.key} should be escaped like this: {@code
- * my^.awkward^.map^.key}. The escape character itself must not be escaped. In case
- * you want a segment to denote need the {@code null} key of a {@code Map}, use this
- * escape sequence: {@code ^0}. So {@code lookups.^0.name} references the {@code
- * name} field of an object stored under key {@code null} in the {@code lookups} map.
- * In case you want a segment to denote the empty-string key of a {@code Map}, simply
- * make it a zero-length segment: {@code lookups..name}. You can let the {@link
- * #escape(String) escape} method do the escaping for you.
+ * separator ('.'), it must be escaped using the circumflex character ('^'). So a map
+ * key with the unfortunate value of {@code "my.awkward.map.key"} should be escaped
+ * like this: {@code "my^.awkward^.map^.key"}. The escape character itself must not
+ * be escaped. If a segment needs to denote a map key with value {@code null}, use
+ * this escape sequence: {@code "^0"}. So the path {@code "lookups.^0.name"}
+ * references the {@code name} field of an object stored under key {@code null} in
+ * the {@code lookups} map. In case you want a segment to denote a map key whose
+ * value is the empty string, simply make it a zero-length segment:
+ * {@code "lookups..name"}.
+ *
+ * You can let the {@link #escape(String) escape} method do the escaping for you.
  *
  * <p>Do not escape path segments when passing them individually (as a {@code
- * String}
- * array) to the constructor. Only escape them when passing a complete path string.
+ * String} array) to the constructor. Only escape them when passing a complete path
+ * string.
  *
  * @author Ayco Holleman
  */
-public final class Path implements Comparable<Path>, Iterable<String> {
-
-  /**
-   * The empty path (containing zero path segments).
-   */
-  public static Path EMPTY_PATH = new Path();
+public final class Path implements Comparable<Path>, Iterable<String>, Emptyable {
 
   /**
    * The segment separator within a path: '.' (dot).
@@ -62,6 +80,10 @@ public final class Path implements Comparable<Path>, Iterable<String> {
    * The character sequence to use for {@code null} keys: "^0"
    */
   public static final String NULL_SEGMENT = "^0";
+  /**
+   * The empty path (containing zero path segments).
+   */
+  public static Path EMPTY_PATH = new Path();
 
   /**
    * Static factory method. Returns a new {@code Path} instance for the specified
@@ -71,14 +93,21 @@ public final class Path implements Comparable<Path>, Iterable<String> {
    * @return a new {@code Path} instance for the specified path string
    */
   public static Path of(String path) {
+    Check.notNull(path, Param.PATH);
     return new Path(path);
+  }
+
+  public static Path copyOf(Path other) {
+    return Check.notNull(other).ok(Path::new);
   }
 
   /**
    * Applies escaping to a path segment. Can be used to construct complete path
-   * strings. Do
-   * <i>not</i> use when passing individual path segments as a {@code String} array
-   * to the {@link #Path(String[]) constructor}.
+   * strings. <i>Do not use</i> when passing a {@code String} array containing the
+   * individual path segments to the {@link #Path(String[]) constructor}. Only use
+   * this method to construct valid path strings from individual path segments. You
+   * only need to use this method if the segment contains a dot ('.') or the escape
+   * character ('^');
    *
    * @param segment The path segment to escape
    * @return The escaped version of the segment
@@ -105,11 +134,9 @@ public final class Path implements Comparable<Path>, Iterable<String> {
   private String str; // Caches toString()
   private int hash; // Caches hashCode()
 
-  /**
-   * Creates a new empty {@code Path}.
-   */
-  public Path() {
-    elems = new String[0];
+  // Reserved for EMPTY PATH
+  private Path() {
+    elems = EMPTY_STRING_ARRAY;
   }
 
   /**
@@ -117,18 +144,18 @@ public final class Path implements Comparable<Path>, Iterable<String> {
    *
    * @param path The path string from which to create the {@code Path}
    */
-  public Path(String path) {
-    Check.notNull(path, "path");
+  private Path(String path) {
     elems = parse(str = path);
   }
 
   /**
-   * Creates a {@code Path} object from the specified path segments.
+   * Creates a {@code Path} object from the specified path segments. <i>Do not escape
+   * the individual path segments.</i>
    *
    * @param segments The path segments from which to create the {@code Path}
    */
-  public Path(String... segments) {
-    Check.notNull(segments, "segments");
+  public Path(String[] segments) {
+    Check.notNull(segments);
     elems = new String[segments.length];
     arraycopy(segments, 0, elems, 0, segments.length);
   }
@@ -139,11 +166,42 @@ public final class Path implements Comparable<Path>, Iterable<String> {
    * @param other The {@code Path} to initialize this {@code Path} with
    */
   public Path(Path other) {
-    Check.notNull(other, "other");
+    Check.notNull(other);
     // Since we are immutable we can happily share state
     this.elems = other.elems;
     this.str = other.str;
     this.hash = other.hash;
+  }
+
+  private static String[] parse(String path) {
+    ArrayList<String> elems = new ArrayList<>();
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < path.length(); i++) {
+      switch (path.charAt(i)) {
+        case SEP:
+          String s = sb.toString();
+          elems.add(s.equals(NULL_SEGMENT) ? null : s);
+          sb.setLength(0);
+          break;
+        case ESC:
+          if (i < path.length() - 1 && path.charAt(i + 1) == SEP) {
+            sb.append(SEP);
+            ++i;
+          } else {
+            sb.append(ESC);
+          }
+          break;
+        default:
+          sb.append(path.charAt(i));
+      }
+    }
+    if (sb.length() > 0) {
+      String s = sb.toString();
+      elems.add(s.equals(NULL_SEGMENT) ? null : s);
+    } else if (path.endsWith(".")) {
+      elems.add(StringMethods.EMPTY);
+    }
+    return elems.toArray(String[]::new);
   }
 
   /**
@@ -359,44 +417,9 @@ public final class Path implements Comparable<Path>, Iterable<String> {
   @Override
   public String toString() {
     if (str == null) {
-      str = stream().map(Path::escape).collect(Collectors.joining("."));
+      str = implode(elems, Path::escape, ".", 0, elems.length);
     }
     return str;
-  }
-
-  private static String[] parse(String path) {
-    ArrayList<String> elems = new ArrayList<>();
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < path.length(); i++) {
-      switch (path.charAt(i)) {
-        case SEP:
-          String s = sb.toString();
-          elems.add(s.equals(NULL_SEGMENT)
-              ? null
-              : s);
-          sb.setLength(0);
-          break;
-        case ESC:
-          if (i < path.length() - 1 && path.charAt(i + 1) == SEP) {
-            sb.append(SEP);
-            ++i;
-          } else {
-            sb.append(ESC);
-          }
-          break;
-        default:
-          sb.append(path.charAt(i));
-      }
-    }
-    if (sb.length() > 0) {
-      String s = sb.toString();
-      elems.add(s.equals(NULL_SEGMENT)
-          ? null
-          : s);
-    } else if (path.endsWith(".")) {
-      elems.add(StringMethods.EMPTY);
-    }
-    return elems.toArray(String[]::new);
   }
 
 }

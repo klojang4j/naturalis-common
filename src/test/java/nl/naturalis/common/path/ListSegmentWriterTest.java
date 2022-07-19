@@ -14,7 +14,7 @@ public class ListSegmentWriterTest {
   public void test01a() {
     List l = new ArrayList(List.of(1, 2, 3, 4));
     ListSegmentWriter writer = new ListSegmentWriter(true, null);
-    assertTrue(writer.write(l, new Path("2"), 42));
+    assertTrue(writer.write(l, Path.of("2"), 42));
     assertEquals(42, l.get(2));
   }
 
@@ -22,7 +22,7 @@ public class ListSegmentWriterTest {
   public void test01b() {
     List l = new ArrayList(List.of(1, 2, 3, 4));
     ListSegmentWriter writer = new ListSegmentWriter(false, null);
-    assertTrue(writer.write(l, new Path("2"), 42));
+    assertTrue(writer.write(l, Path.of("2"), 42));
     assertEquals(42, l.get(2));
   }
 
@@ -30,7 +30,7 @@ public class ListSegmentWriterTest {
   public void test02() {
     List l = new ArrayList(List.of(1, 2, 3, 4));
     ListSegmentWriter writer = new ListSegmentWriter(true, null);
-    assertTrue(writer.write(l, new Path("path.to.list.3"), 42));
+    assertTrue(writer.write(l, Path.of("path.to.list.3"), 42));
     assertEquals(42, l.get(3));
   }
 
@@ -38,7 +38,7 @@ public class ListSegmentWriterTest {
   public void test03a() {
     List l = new ArrayList(List.of(1, 2, 3, 4));
     ListSegmentWriter writer = new ListSegmentWriter(true, null);
-    assertFalse(writer.write(l, new Path("8"), 42));
+    assertFalse(writer.write(l, Path.of("8"), 42));
   }
 
   @Test(expected = PathWalkerException.class)
@@ -46,7 +46,7 @@ public class ListSegmentWriterTest {
     List l = new ArrayList(List.of(1, 2, 3, 4));
     ListSegmentWriter writer = new ListSegmentWriter(false, null);
     try {
-      writer.write(l, new Path("8"), 42);
+      writer.write(l, Path.of("8"), 42);
     } catch (PathWalkerException e) {
       assertEquals(INDEX_OUT_OF_BOUNDS, e.getErrorCode());
       throw e;
@@ -57,7 +57,7 @@ public class ListSegmentWriterTest {
   public void test04a() {
     List l = new ArrayList(List.of(1, 2, 3, 4));
     ListSegmentWriter writer = new ListSegmentWriter(true, null);
-    assertFalse(writer.write(l, new Path("path.to.list.8"), 42));
+    assertFalse(writer.write(l, Path.of("path.to.list.8"), 42));
   }
 
   @Test(expected = PathWalkerException.class)
@@ -65,7 +65,7 @@ public class ListSegmentWriterTest {
     List l = new ArrayList(List.of(1, 2, 3, 4));
     ListSegmentWriter writer = new ListSegmentWriter(false, null);
     try {
-      writer.write(l, new Path("path.to.list.8"), 42);
+      writer.write(l, Path.of("path.to.list.8"), 42);
     } catch (PathWalkerException e) {
       assertEquals(INDEX_OUT_OF_BOUNDS, e.getErrorCode());
       throw e;
@@ -76,7 +76,7 @@ public class ListSegmentWriterTest {
   public void test05a() {
     List l = new ArrayList(List.of(1, 2, 3, 4));
     ListSegmentWriter writer = new ListSegmentWriter(true, null);
-    assertFalse(writer.write(l, new Path("path.to.list.foo"), 42));
+    assertFalse(writer.write(l, Path.of("path.to.list.foo"), 42));
   }
 
   @Test(expected = PathWalkerException.class)
@@ -84,7 +84,7 @@ public class ListSegmentWriterTest {
     List l = new ArrayList(List.of(1, 2, 3, 4));
     ListSegmentWriter writer = new ListSegmentWriter(false, null);
     try {
-      writer.write(l, new Path("path.to.list.foo"), 42);
+      writer.write(l, Path.of("path.to.list.foo"), 42);
     } catch (PathWalkerException e) {
       assertEquals(INDEX_EXPECTED, e.getErrorCode());
       throw e;
@@ -96,7 +96,7 @@ public class ListSegmentWriterTest {
     List l = new ArrayList(List.of(1, 2, 3, 4));
     ListSegmentWriter writer = new ListSegmentWriter(false, null);
     try {
-      writer.write(l, new Path("path.to.list."), 42);
+      writer.write(l, Path.of("path.to.list."), 42);
     } catch (PathWalkerException e) {
       assertEquals(INDEX_EXPECTED, e.getErrorCode());
       return;
@@ -108,7 +108,7 @@ public class ListSegmentWriterTest {
   public void test06b() {
     List l = new ArrayList(List.of(1, 2, 3, 4));
     ListSegmentWriter writer = new ListSegmentWriter(true, null);
-    assertFalse(writer.write(l, new Path("path.to.list."), 42));
+    assertFalse(writer.write(l, Path.of("path.to.list."), 42));
   }
 
 }

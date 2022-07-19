@@ -12,7 +12,7 @@ public class BeanSegmentWriterTest {
 
   @Test(expected = PathWalkerException.class)
   public void test00() {
-    PathWalker pw = new PathWalker(List.of(new Path("foo")), false);
+    PathWalker pw = new PathWalker(List.of(Path.of("foo")), false);
     try {
       Person person = new Person();
       pw.write(person, 666);
@@ -26,7 +26,7 @@ public class BeanSegmentWriterTest {
   public void test01() {
     BeanSegmentWriter bsw = new BeanSegmentWriter(true, null);
     Person person = new Person();
-    bsw.write(person, new Path("foo"), 666);
+    bsw.write(person, Path.of("foo"), 666);
     // not much happenin'
   }
 
@@ -35,7 +35,7 @@ public class BeanSegmentWriterTest {
     BeanSegmentWriter bsw = new BeanSegmentWriter(false, null);
     Person person = new Person();
     try {
-      bsw.write(person, new Path("firstName.hash"), 666);
+      bsw.write(person, Path.of("firstName.hash"), 666);
     } catch (PathWalkerException e) {
       assertEquals(NO_SUCH_PROPERTY, e.getErrorCode());
       throw e;
@@ -44,7 +44,7 @@ public class BeanSegmentWriterTest {
 
   @Test(expected = PathWalkerException.class)
   public void test03() {
-    PathWalker pw = new PathWalker(List.of(new Path("manager.address.street")),
+    PathWalker pw = new PathWalker(List.of(Path.of("manager.address.street")),
         false);
     Department dept = new Department();
     try {
@@ -57,7 +57,7 @@ public class BeanSegmentWriterTest {
 
   @Test(expected = PathWalkerException.class)
   public void test04() {
-    PathWalker pw = new PathWalker(List.of(new Path("manager..street")), false);
+    PathWalker pw = new PathWalker(List.of(Path.of("manager..street")), false);
     Department dept = new Department();
     dept.setManager(new Employee());
     try {
@@ -70,7 +70,7 @@ public class BeanSegmentWriterTest {
 
   @Test(expected = PathWalkerException.class)
   public void test05() {
-    PathWalker pw = new PathWalker(List.of(new Path("naughtyProperty")), false);
+    PathWalker pw = new PathWalker(List.of(Path.of("naughtyProperty")), false);
     Person person = new Person();
     try {
       pw.write(person, "foo");
@@ -82,7 +82,7 @@ public class BeanSegmentWriterTest {
 
   @Test(expected = PathWalkerException.class)
   public void test06() {
-    PathWalker pw = new PathWalker(List.of(new Path("firstName")), false);
+    PathWalker pw = new PathWalker(List.of(Path.of("firstName")), false);
     Person person = new Person();
     try {
       pw.write(person, new File("/tmp/foo.txt"));

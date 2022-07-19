@@ -215,7 +215,7 @@ public class PathWalkerTest {
   }
 
   private static List<Path> paths(String... strings) {
-    return Arrays.stream(strings).map(Path::new).collect(Collectors.toList());
+    return Arrays.stream(strings).map(Path::of).collect(Collectors.toList());
   }
 
   private static float[][] shellQuarterlySales =

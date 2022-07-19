@@ -99,7 +99,7 @@ public class MsgRelationTest {
       Check.that("foo").is(EQ(), 7);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("String must equal 7 (was foo)", e.getMessage());
+      assertEquals("argument must equal 7 (was foo)", e.getMessage());
       return;
     }
     fail();
@@ -111,7 +111,7 @@ public class MsgRelationTest {
       Check.that("foo").isNot(EQ(), "foo");
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("String must not equal foo", e.getMessage());
+      assertEquals("argument must not equal foo", e.getMessage());
       return;
     }
     fail();
@@ -135,7 +135,7 @@ public class MsgRelationTest {
       Check.that(9.0).is(GT(), 9.5);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("Double must be > 9.5 (was 9.0)", e.getMessage());
+      assertEquals("argument must be > 9.5 (was 9.0)", e.getMessage());
       return;
     }
     fail();
@@ -738,7 +738,8 @@ public class MsgRelationTest {
       Check.on(io(), "xyz").isNot(substringOf(), "xyz");
     } catch (IOException e) {
       System.out.println(e.getMessage());
-      assertEquals("String must not be substring of xyz (was xyz)", e.getMessage());
+      assertEquals("argument must not be substring of xyz (was xyz)",
+          e.getMessage());
       return;
     }
     fail();

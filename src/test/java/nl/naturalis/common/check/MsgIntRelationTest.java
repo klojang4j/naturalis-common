@@ -32,7 +32,7 @@ public class MsgIntRelationTest {
       Check.that(7).is(gt(), 9);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
-      assertEquals("int must be > 9 (was 7)", e.getMessage());
+      assertEquals("argument must be > 9 (was 7)", e.getMessage());
     }
   }
 

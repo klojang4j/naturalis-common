@@ -3,7 +3,7 @@ package nl.naturalis.common.util;
 import java.time.LocalDate;
 
 import org.junit.Test;
-import nl.naturalis.common.util.MapWriter.PathBlockedException;
+import nl.naturalis.common.util.MapWriter.PathOccupiedException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -37,7 +37,7 @@ public class MapWriterTest {
     assertEquals(expected, mw.getMap().toString());
   }
 
-  @Test(expected = PathBlockedException.class)
+  @Test(expected = PathOccupiedException.class)
   public void testWrite02() {
     MapWriter mw = new MapWriter();
     mw.set("person.address.street", "12 Revolutionay Rd.")
@@ -59,4 +59,5 @@ public class MapWriterTest {
             + "Revolutionay Rd., state=CA}}}";
     assertEquals(expected, mw.getMap().toString());
   }
+
 }
