@@ -20,6 +20,7 @@ public final class Param {
   public static final String VALUE = "value";
   public static final String PATH = "path";
   public static final String MAP = "map";
+  public static final String INDEX = "index";
 
   private Param() {
     throw new UnsupportedOperationException();

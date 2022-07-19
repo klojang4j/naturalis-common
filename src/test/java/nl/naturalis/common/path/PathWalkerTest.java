@@ -1,6 +1,5 @@
 package nl.naturalis.common.path;
 
-import nl.naturalis.common.ExceptionMethods;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -19,7 +18,7 @@ public class PathWalkerTest {
   @Test
   public void test01() throws MalformedURLException {
     Company shell = shell();
-    List<Path> paths = List.of(Path.EMPTY_PATH);
+    List<Path> paths = List.of(Path.empty());
     assertEquals(shell, new PathWalker(paths).read(shell));
   }
 
@@ -215,7 +214,7 @@ public class PathWalkerTest {
   }
 
   private static List<Path> paths(String... strings) {
-    return Arrays.stream(strings).map(Path::of).collect(Collectors.toList());
+    return Arrays.stream(strings).map(Path::from).collect(Collectors.toList());
   }
 
   private static float[][] shellQuarterlySales =
@@ -298,7 +297,7 @@ public class PathWalkerTest {
 
   @Test
   public void readValues00() {
-    PathWalker pw = new PathWalker(Path.of("a"), Path.of("b"), Path.of("c"));
+    PathWalker pw = new PathWalker(Path.from("a"), Path.from("b"), Path.from("c"));
     Map<String, Integer> map = Map.of("a", 100, "b", 200, "c", 300);
     Object[] vals = pw.readValues(map);
     assertEquals(3, vals.length);
@@ -309,7 +308,7 @@ public class PathWalkerTest {
 
   @Test
   public void readValues01() {
-    PathWalker pw = new PathWalker(Path.of("a"), Path.of("b"), Path.of("c"));
+    PathWalker pw = new PathWalker(Path.from("a"), Path.from("b"), Path.from("c"));
     Map<String, Integer> map = Map.of("a", 100, "b", 200, "c", 300);
     Object[] vals = new Object[4];
     pw.readValues(map, vals);
@@ -321,14 +320,14 @@ public class PathWalkerTest {
 
   @Test
   public void readValues02() {
-    PathWalker pw = new PathWalker(Path.of("a"), Path.of("b"), Path.of("c"));
+    PathWalker pw = new PathWalker(Path.from("a"), Path.from("b"), Path.from("c"));
     Map<String, Integer> mapIn = Map.of("a", 100, "b", 200, "c", 300);
     Map<Path, Object> mapOut = new HashMap();
     pw.readValues(mapIn, mapOut);
     assertEquals(3, mapOut.size());
-    assertEquals(100, mapOut.get(Path.of("a")));
-    assertEquals(200, mapOut.get(Path.of("b")));
-    assertEquals(300, mapOut.get(Path.of("c")));
+    assertEquals(100, mapOut.get(Path.from("a")));
+    assertEquals(200, mapOut.get(Path.from("b")));
+    assertEquals(300, mapOut.get(Path.from("c")));
   }
 
 }

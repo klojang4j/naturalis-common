@@ -10,7 +10,6 @@ import java.util.Map;
 
 import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.CommonChecks.*;
-import static nl.naturalis.common.path.Path.EMPTY_PATH;
 
 /**
  * <p>Provides a convenient way of writing {@code Map<String, Object>}
@@ -98,7 +97,7 @@ public final class MapWriter {
   public MapWriter(Map<String, Object> map, String rootPath) {
     Check.notNull(map, Param.MAP);
     Check.notNull(rootPath, "root path");
-    this.root = Path.of("rootPath");
+    this.root = Path.from("rootPath");
     this.map0 = new LinkedHashMap<>(map.size() * 2);
     this.parent = null;
     init(this, map);
@@ -203,7 +202,7 @@ public final class MapWriter {
    */
   public MapWriter in(String path) {
     Check.notNull(path, Param.PATH);
-    return in(this, Path.of(path));
+    return in(this, Path.from(path));
   }
 
   /**
@@ -265,7 +264,7 @@ public final class MapWriter {
    */
   public MapWriter set(String path, Object value) {
     Check.notNull(path, Param.PATH);
-    return set(Path.of(path), value);
+    return set(Path.from(path), value);
   }
 
   /**
@@ -293,7 +292,7 @@ public final class MapWriter {
    * @return whether it is set to a terminal value
    */
   public boolean isSet(String path) {
-    return isSet(this, Path.of(path));
+    return isSet(this, Path.from(path));
   }
 
   /**

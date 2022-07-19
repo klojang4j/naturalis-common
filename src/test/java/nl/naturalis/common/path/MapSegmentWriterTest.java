@@ -22,7 +22,7 @@ public class MapSegmentWriterTest {
   public void test01a() {
     Map m = new HashMap(Map.of(1, "john", 2, "mark", 3, "tom", 4, "jim"));
     MapSegmentWriter writer = new MapSegmentWriter(true, kds);
-    assertTrue(writer.write(m, Path.of("2"), "MARK"));
+    assertTrue(writer.write(m, Path.from("2"), "MARK"));
     assertEquals("MARK", m.get(2));
   }
 
@@ -30,7 +30,7 @@ public class MapSegmentWriterTest {
   public void test01b() {
     Map m = new HashMap(Map.of(1, "john", 2, "mark", 3, "tom", 4, "jim"));
     MapSegmentWriter writer = new MapSegmentWriter(false, kds);
-    assertTrue(writer.write(m, Path.of("2"), 42));
+    assertTrue(writer.write(m, Path.from("2"), 42));
     assertEquals(42, m.get(2));
   }
 
@@ -38,7 +38,7 @@ public class MapSegmentWriterTest {
   public void test02() {
     Map m = new HashMap(Map.of(1, "john", 2, "mark", 3, "tom", 4, "jim"));
     MapSegmentWriter writer = new MapSegmentWriter(true, kds);
-    assertTrue(writer.write(m, Path.of("path.to.map.3"), 42));
+    assertTrue(writer.write(m, Path.from("path.to.map.3"), 42));
     assertEquals(42, m.get(3));
   }
 
@@ -46,14 +46,14 @@ public class MapSegmentWriterTest {
   public void test03a() {
     Map m = new HashMap(Map.of(1, "john", 2, "mark", 3, "tom", 4, "jim"));
     MapSegmentWriter writer = new MapSegmentWriter(true, kds);
-    assertTrue(writer.write(m, Path.of("8"), 42));
+    assertTrue(writer.write(m, Path.from("8"), 42));
   }
 
   @Test
   public void test03b() {
     Map m = new HashMap(Map.of(1, "john", 2, "mark", 3, "tom", 4, "jim"));
     MapSegmentWriter writer = new MapSegmentWriter(false, kds);
-    writer.write(m, Path.of("8"), 42);
+    writer.write(m, Path.from("8"), 42);
     assertEquals(42, m.get(8));
   }
 
@@ -61,14 +61,14 @@ public class MapSegmentWriterTest {
   public void test04a() {
     Map m = new HashMap(Map.of(1, "john", 2, "mark", 3, "tom", 4, "jim"));
     MapSegmentWriter writer = new MapSegmentWriter(true, kds);
-    assertTrue(writer.write(m, Path.of("path.to.map.8"), 42));
+    assertTrue(writer.write(m, Path.from("path.to.map.8"), 42));
   }
 
   @Test
   public void test04b() {
     Map m = new HashMap(Map.of(1, "john", 2, "mark", 3, "tom", 4, "jim"));
     MapSegmentWriter writer = new MapSegmentWriter(false, kds);
-    writer.write(m, Path.of("path.to.map.8"), 42);
+    writer.write(m, Path.from("path.to.map.8"), 42);
     assertEquals(42, m.get(8));
   }
 
@@ -77,7 +77,7 @@ public class MapSegmentWriterTest {
     Map m = new HashMap(Map.of(1, "john", 2, "mark", 3, "tom", 4, "jim"));
     MapSegmentWriter writer = new MapSegmentWriter(true, kds);
     // KEY_DESERIALIZATION_FAILED
-    assertFalse(writer.write(m, Path.of("path.to.map.foo"), 42));
+    assertFalse(writer.write(m, Path.from("path.to.map.foo"), 42));
   }
 
   @Test(expected = PathWalkerException.class)
@@ -85,7 +85,7 @@ public class MapSegmentWriterTest {
     Map m = new HashMap(Map.of(1, "john", 2, "mark", 3, "tom", 4, "jim"));
     MapSegmentWriter writer = new MapSegmentWriter(false, kds);
     try {
-      writer.write(m, Path.of("path.to.map.foo"), 42);
+      writer.write(m, Path.from("path.to.map.foo"), 42);
     } catch (PathWalkerException e) {
       System.out.println(e.getMessage());
       assertEquals(KEY_DESERIALIZATION_FAILED, e.getErrorCode());
@@ -98,7 +98,7 @@ public class MapSegmentWriterTest {
     Map m = Map.of("foo", "bar");
     MapSegmentWriter writer = new MapSegmentWriter(false, null);
     try {
-      writer.write(m, Path.of("foo"), "fox");
+      writer.write(m, Path.from("foo"), "fox");
     } catch (PathWalkerException e) {
       assertEquals(NOT_MODIFIABLE, e.getErrorCode());
       throw e;
