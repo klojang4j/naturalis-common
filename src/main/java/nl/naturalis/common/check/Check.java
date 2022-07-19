@@ -2,6 +2,7 @@ package nl.naturalis.common.check;
 
 import nl.naturalis.common.StringMethods;
 import nl.naturalis.common.function.Relation;
+import nl.naturalis.common.x.Param;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,8 +14,9 @@ import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.MsgUtil.getCustomMessage;
 
 /**
- * Facilitates precondition and postcondition checking. See the {@linkplain
- * nl.naturalis.common.check package description} for a detailed explanation.
+ * Facilitates precondition and postcondition checking. See the
+ * {@linkplain nl.naturalis.common.check package description} for a detailed
+ * explanation.
  *
  * @author Ayco Holleman
  */
@@ -94,8 +96,8 @@ public final class Check {
 
   /**
    * Static factory method. Returns a new {@code Check} instance suitable for testing
-   * the provided argument. The argument will have already passed the {@link
-   * CommonChecks#notNull() notNull} test.
+   * the provided argument. The argument will have already passed the
+   * {@link CommonChecks#notNull() notNull} test.
    *
    * @param <U> The type of the argument
    * @param arg The argument
@@ -111,8 +113,8 @@ public final class Check {
 
   /**
    * Static factory method. Returns a new {@code Check} instance suitable for testing
-   * the provided argument. The argument will have already passed the {@link
-   * CommonChecks#notNull() notNull} test.
+   * the provided argument. The argument will have already passed the
+   * {@link CommonChecks#notNull() notNull} test.
    *
    * @param <U> The type of the argument
    * @param arg The argument
@@ -202,206 +204,149 @@ public final class Check {
   }
 
   /**
-   * <p>Verifies that {@code offset + length} is not greater than the size of the
-   * specified array and that {@code offset} is not negative and not greater than the
-   * length of the specified array. If any of these requirements do not apply, an
-   * {@link IndexOutOfBoundsException} is thrown. Returns {@code off + len} (i.e. the
-   * {@code toIndex}). A null check is executed on the string argument first.
+   * Throws an {@link IllegalArgumentException} if the provided array is
+   * {@code null}. Throws an {@link IndexOutOfBoundsException} if:
+   * <ul>
+   *   <li>{@code offset} or {@code length} is less than zero
+   *   <li>{@code offset} + {@code length} is greater than the array's length
+   * </ul>
    *
-   * <p>(This check stands somewhat apart from the rest of the check framework: it
-   * tests multiple things at once, and it does not ask you to provide a {@link
-   * Predicate} or {@link Relation} implementing the tests. It is included for
-   * convenience and performance reasons, and because it is such a ubiquitous
-   * check.)
-   *
-   * @param array The  array
-   * @param offset The offset within the array
-   * @param length The length of the segment
+   * @param array the  array
+   * @param offset the offset within the array
+   * @param length the length of the segment
    * @return The {@code toIndex} of the segment
    * @see #offsetLength(int, int, int)
    */
-  public static int offsetLength(byte[] array, int offset, int length) {
-    Check.that(array)
-        .isNot(NULL(), () -> new IllegalArgumentException("array must not be null"));
-    return Check.offsetLength(array.length, offset, length);
+  public static void offsetLength(byte[] array, int offset, int length) {
+    if (array == null) {
+      throw new IllegalArgumentException("array must not be null");
+    }
+    if ((offset | length) < 0 || offset + length > array.length) {
+      throw new IndexOutOfBoundsException();
+    }
   }
 
   /**
-   * <p>Verifies that {@code offset + length} is not greater than the size of the
-   * specified list and that {@code offset} is not negative and not greater than the
-   * length of the specified list. If any of these requirements do not apply, an
-   * {@link IndexOutOfBoundsException} is thrown. Returns {@code off + len} (i.e. the
-   * {@code toIndex}). A null check is executed on the string argument first.
+   * Throws an {@link IllegalArgumentException} if the provided array is
+   * {@code null}. Throws an {@link IndexOutOfBoundsException} if:
+   * <ul>
+   *   <li>{@code size} or {@code offset} or {@code length} is less than zero
+   *   <li>{@code offset} + {@code length} is greater than {@code size}
+   * </ul>
    *
-   * <p>(This check stands somewhat apart from the rest of the check framework: it
-   * tests multiple things at once, and it does not ask you to provide a {@link
-   * Predicate} or {@link Relation} implementing the tests. It is included for
-   * convenience and performance reasons, and because it is such a ubiquitous
-   * check.)
-   *
-   * @param list The list
-   * @param offset The offset within the list
-   * @param length The length of the segment
-   * @return The {@code toIndex} of the segment
-   * @see #offsetLength(int, int, int)
-   */
-  public static int offsetLength(List<?> list, int offset, int length) {
-    Check.that(list)
-        .isNot(NULL(), () -> new IllegalArgumentException("list must not be null"));
-    return Check.offsetLength(list.size(), offset, length);
-  }
-
-  /**
-   * <p>Verifies that {@code offset + length} is not greater than the size of the
-   * specified string and that {@code offset} is not negative and not greater than
-   * the length of the specified string. If any of these requirements do not apply,
-   * an {@link IndexOutOfBoundsException} is thrown. Returns {@code off + len} (i.e.
-   * the {@code toIndex}). A null check is executed on the string argument first.
-   *
-   * <p>(This check stands somewhat apart from the rest of the check framework: it
-   * tests multiple things at once, and it does not ask you to provide a {@link
-   * Predicate} or {@link Relation} implementing the tests. It is included for
-   * convenience and performance reasons, and because it is such a ubiquitous
-   * check.)
-   *
-   * @param string The string
-   * @param offset The offset within the string
-   * @param length The length of the segment
-   * @return The {@code toIndex} of the segment
-   * @see #offsetLength(int, int, int)
-   */
-  public static int offsetLength(String string, int offset, int length) {
-    Check.that(string).isNot(NULL(),
-        () -> new IllegalArgumentException("string must not be null"));
-    return Check.offsetLength(string.length(), offset, length);
-  }
-
-  /**
-   * <p>Verifies that {@code offset + length} is not greater than the specified size
-   * and that {@code offset} is not negative and not greater than the specified size.
-   * If any of these requirements do not apply, an {@link IndexOutOfBoundsException}
-   * is thrown. Returns {@code off + len} (i.e. the {@code toIndex}).
-   *
-   * <p>(This check stands somewhat apart from the rest of the check framework: it
-   * tests multiple things at once, and it does not ask you to provide a {@link
-   * Predicate} or {@link Relation} implementing the tests. It is included for
-   * convenience and performance reasons, and because it is such a ubiquitous
-   * check.)
-   *
-   * @param size The length of the array or array-like object from which to
+   * @param size the length of the array or array-like object from which to
    *     extract the segment
-   * @param offset The offset of the segment
-   * @param length The length of the segment
+   * @param offset the offset of the segment
+   * @param length the length of the segment
    * @return The {@code toIndex} of the segment
    */
-  public static int offsetLength(int size, int offset, int length) {
-    Check.that(size | offset | length).is(gte(), 0, NEGATIVE_SIZE_OR_INDEX);
-    return Check.on(indexOutOfBounds(), offset + length, "offset + length")
-        .is(lte(), size)
-        .ok();
+  public static void offsetLength(int size, int offset, int length) {
+    if ((size | offset | length) < 0 || size < offset + length) {
+      throw new IndexOutOfBoundsException();
+    }
   }
 
   /**
-   * Checks that the specified list is not {@code null} and verifies that the
-   * specified from-index and to-index are valid given the list. Returns {@code
-   * toIndex - fromIndex} (i.e. the size of the list). Note that custom has it that
-   * both the from-index and the to-index are allowed to be one position past last
-   * element of the list (i.e. they are both allowed to be {@code list.size()}).
+   * Throws an {@link IllegalArgumentException} if the provided list is {@code null}.
+   * Throws an {@link IndexOutOfBoundsException} if:
+   * <ul>
+   *   <li>{@code fromIndex} or {@code toIndex} is less than zero
+   *   <li>{@code toIndex} is less than {@code fromIndex}
+   *   <li>the list's size is less than {@code toIndex}
+   * </ul>
    *
-   * <p>(This check stands somewhat apart from the rest of the check framework: it
-   * tests multiple things at once, and it does not ask you to provide a {@link
-   * Predicate} or {@link Relation} implementing the tests. It is included for
-   * convenience and performance reasons, and because it is such a ubiquitous
-   * check.)
-   *
-   * @param list The list
-   * @param fromIndex The start index of the sublist
-   * @param toIndex The end index of the sublist
+   * @param list the list
+   * @param fromIndex the start index of the sublist
+   * @param toIndex the end index of the sublist
    * @return the {@code size} of the sublist
    * @see #fromTo(int, int, int)
    * @see List#subList(int, int)
    */
   public static int fromTo(List<?> list, int fromIndex, int toIndex) {
-    Check.that(list)
-        .isNot(NULL(), () -> new IllegalArgumentException("list must not be null"));
-    return Check.fromTo(list.size(), fromIndex, toIndex);
+    if (list == null) {
+      throw new IllegalArgumentException("list must not be null");
+    }
+    if ((fromIndex | toIndex) < 0
+        || toIndex < fromIndex
+        || list.size() < toIndex) {
+      throw new IndexOutOfBoundsException();
+    }
+    return toIndex - fromIndex;
   }
 
   /**
-   * Checks that the specified list is not {@code null} and verifies that the
-   * specified from-index and to-index are valid given the list. Returns {@code
-   * toIndex - fromIndex} (i.e. the size of the list). Note that custom has it that
-   * both the from-index and the to-index are allowed to be one position past last
-   * element of the list (i.e. they are both allowed to be {@code list.size()}).
+   * Throws an {@link IllegalArgumentException} if the provided array is
+   * {@code null}. Throws an {@link IndexOutOfBoundsException} if:
+   * <ul>
+   *   <li>{@code fromIndex} or {@code toIndex} is less than zero
+   *   <li>{@code toIndex} is less than {@code fromIndex}
+   *   <li>the array's length is less than {@code toIndex}
+   * </ul>
    *
-   * <p>(This check stands somewhat apart from the rest of the check framework: it
-   * tests multiple things at once, and it does not ask you to provide a {@link
-   * Predicate} or {@link Relation} implementing the tests. It is included for
-   * convenience and performance reasons, and because it is such a ubiquitous
-   * check.)
-   *
-   * @param array The array
-   * @param fromIndex The start index of the array segment
-   * @param toIndex The end index of the array segment
+   * @param array the array
+   * @param fromIndex the start index of the array segment
+   * @param toIndex the end index of the array segment
    * @return the {@code length} of the array segment
    * @see #fromTo(int, int, int)
    * @see Arrays#copyOfRange(Object[], int, int)
    */
   public static <T> int fromTo(T[] array, int fromIndex, int toIndex) {
-    Check.that(array)
-        .isNot(NULL(), () -> new IllegalArgumentException("array must not be null"));
-    return Check.fromTo(array.length, fromIndex, toIndex);
+    if (array == null) {
+      throw new IllegalArgumentException("array must not be null");
+    }
+    if ((fromIndex | toIndex) < 0
+        || toIndex < fromIndex
+        || array.length < toIndex) {
+      throw new IndexOutOfBoundsException();
+    }
+    return toIndex - fromIndex;
   }
 
   /**
-   * Checks that the specified string is not {@code null} and verifies that the
-   * specified from-index and to-index are valid given the string. Returns {@code
-   * toIndex - fromIndex} (i.e. the length of the string). Note that custom has it
-   * that both the from-index and the to-index are allowed to be one position past
-   * last character of the string (i.e. they are both allowed to be {@code
-   * string.length()}).
-   *
-   *
-   * <p>(This check stands somewhat apart from the rest of the check framework: it
-   * tests multiple things at once, and it does not ask you to provide a {@link
-   * Predicate} or {@link Relation} implementing the tests. It is included for
-   * convenience and performance reasons, and because it is such a ubiquitous
-   * check.)
+   * Throws an {@link IllegalArgumentException} if the provided string is
+   * {@code null}. Throws an {@link IndexOutOfBoundsException} if:
+   * <ul>
+   *   <li>{@code fromIndex} or {@code toIndex} is less than zero
+   *   <li>{@code toIndex} is less than {@code fromIndex}
+   *   <li>the string's length is less than {@code toIndex}
+   * </ul>
    *
    * @param string The string
-   * @param fromIndex The start index of the substring
-   * @param toIndex The end index of the substring
+   * @param fromIndex the start index of the substring
+   * @param toIndex the end index of the substring
    * @return the {@code length} of the substring
    * @see #fromTo(int, int, int)
    * @see String#substring(int, int)
    */
   public static int fromTo(String string, int fromIndex, int toIndex) {
-    Check.that(string)
-        .isNot(NULL(),
-            () -> new IllegalArgumentException("string must not be null"));
-    return Check.fromTo(string.length(), fromIndex, toIndex);
+    if (string == null) {
+      throw new IllegalArgumentException("string must not be null");
+    }
+    if ((fromIndex | toIndex) < 0
+        || toIndex < fromIndex
+        || string.length() < toIndex) {
+      throw new IndexOutOfBoundsException();
+    }
+    return toIndex - fromIndex;
   }
 
   /**
-   * <p>Verifies that the specified from-index and to-index are valid given the
-   * specified size (supposedly of an array or array-like object). Returns {@code
-   * toIndex - fromIndex} (i.e. the length of the segment).
+   * Throws an {@link IndexOutOfBoundsException} if:
+   * <ul>
+   *   <li>{@code size} or {@code fromIndex} or {@code toIndex} is less than zero
+   *   <li>{@code toIndex} is less than {@code fromIndex}
+   *   <li>{@code size} is less than {@code toIndex}
+   * </ul>
    *
-   * <p>(This check stands somewhat apart from the rest of the check framework: it
-   * tests multiple things at once, and it does not ask you to provide a {@link
-   * Predicate} or {@link Relation} implementing the tests. It is included for
-   * convenience and performance reasons, and because it is such a ubiquitous
-   * check.)
-   *
-   * @param size The size (or length) of the array, string, list, etc.
-   * @param fromIndex The start index of the segment
-   * @param toIndex The end index of the segment
+   * @param size the size (or length) of the array, string, list, etc.
+   * @param fromIndex the start index of the segment
+   * @param toIndex the end index of the segment
    * @return the {@code length} of the segment
    */
   public static int fromTo(int size, int fromIndex, int toIndex) {
-    Check.that(size | fromIndex | toIndex).is(gte(), 0, NEGATIVE_SIZE_OR_INDEX);
-    Check.that(fromIndex).is(lte(), toIndex, FROM_GREATER_THAN_TO);
-    Check.that(toIndex).is(lte(), size, TO_GREATER_THAN_SIZE);
+    if ((size | fromIndex | toIndex) < 0 || toIndex < fromIndex || size < toIndex) {
+      throw new IndexOutOfBoundsException();
+    }
     return toIndex - fromIndex;
   }
 

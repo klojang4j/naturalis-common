@@ -7,7 +7,6 @@ import org.junit.Test;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 
 import static nl.naturalis.common.invoke.IncludeExclude.EXCLUDE;
 import static nl.naturalis.common.invoke.IncludeExclude.INCLUDE;
@@ -290,7 +289,10 @@ public class BeanWriterTest {
     person1.setSomeCharSequence("Hi There");
     person1.setSomeChar('A');
 
-    BeanWriter writer = new BeanWriter(Person.class, EXCLUDE, "firstName", "lastName");
+    BeanWriter writer = new BeanWriter(Person.class,
+        EXCLUDE,
+        "firstName",
+        "lastName");
     writer.copy(person0, person1);
 
     assertEquals(person0.getId(), person1.getId()); // id not included
@@ -460,7 +462,7 @@ public class BeanWriterTest {
         .set("hobbies", null)
         .set("lastModified", LocalDate.of(2022, 04, 03))
         .set("someCharSequence", "Hello World")
-        .getMap();
+        .createMap();
 
     Person person1 = new Person();
     person1.setId(80);
@@ -499,7 +501,7 @@ public class BeanWriterTest {
         .set("hobbies", null)
         .set("lastModified", LocalDate.of(2022, 04, 03))
         .set("someCharSequence", "Hello World")
-        .getMap();
+        .createMap();
 
     Person person1 = new Person();
     person1.setId(80);
@@ -538,7 +540,7 @@ public class BeanWriterTest {
         .set("hobbies", null)
         .set("lastModified", LocalDate.of(2022, 04, 03))
         .set("someCharSequence", "Hello World")
-        .getMap();
+        .createMap();
 
     Person person1 = new Person();
     person1.setId(80);

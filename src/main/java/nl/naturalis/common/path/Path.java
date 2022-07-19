@@ -278,9 +278,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Emptyable
    * @return the path segment at the specified index.
    */
   public String segment(int index) {
-    int i = index < 0
-        ? elems.length + index
-        : index;
+    int i = index < 0 ? elems.length + index : index;
     return Check.that(i).is(lt(), elems.length).ok(x -> elems[x]);
   }
 
@@ -313,9 +311,11 @@ public final class Path implements Comparable<Path>, Iterable<String>, Emptyable
    *     segment {@code from}.
    */
   public Path subpath(int offset, int length) {
-    int from = offset < 0 ? elems.length + offset : offset;
-    int to = Check.offsetLength(elems.length, from, length);
-    return new Path(copyOfRange(elems, from, to));
+    if (offset < 0) {
+      offset = elems.length + offset;
+    }
+    Check.offsetLength(elems.length, offset, length);
+    return new Path(copyOfRange(elems, offset, offset + length));
   }
 
   /**

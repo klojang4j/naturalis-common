@@ -102,11 +102,6 @@ public class CheckTest {
     Check.offsetLength(10, 1, 10);
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void offsetLength09() {
-    Check.offsetLength((List) null, 1, 10);
-  }
-
   @Test
   public void fromTo00() {
     Check.fromTo("123", 0, 0);
