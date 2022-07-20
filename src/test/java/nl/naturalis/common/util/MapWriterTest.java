@@ -7,7 +7,7 @@ import java.util.Map;
 
 import nl.naturalis.common.Result;
 import org.junit.Test;
-import nl.naturalis.common.util.MapWriter.PathOccupiedException;
+import nl.naturalis.common.util.MapWriter.PathBlockedException;
 
 import static org.junit.Assert.*;
 
@@ -42,7 +42,7 @@ public class MapWriterTest {
     assertEquals(expected, mw.createMap().toString());
   }
 
-  @Test(expected = PathOccupiedException.class)
+  @Test(expected = PathBlockedException.class)
   public void set02() {
     MapWriter mw = new MapWriter();
     mw
@@ -50,7 +50,7 @@ public class MapWriterTest {
         .set("person.address.street.foo", "bar");
   }
 
-  @Test(expected = PathOccupiedException.class)
+  @Test(expected = PathBlockedException.class)
   public void set03() {
     MapWriter mw = new MapWriter();
     mw
@@ -70,12 +70,27 @@ public class MapWriterTest {
     mw.set("person.address.street", new MapWriter());
   }
 
-  @Test(expected = PathOccupiedException.class)
+  @Test(expected = PathBlockedException.class)
   public void set06() {
     MapWriter mw = new MapWriter();
     mw
         .set("person.address", "foo")
         .set("person.address.street", "Sunset Blvd");
+  }
+
+  @Test // do we make the null -> _NULL_ -> null round trip?
+  public void set07() {
+    MapWriter mw = new MapWriter();
+    mw
+        .set("foo.bar.teapot", null)
+        .set("foo.bar.fun", true)
+        .set("foo.bar.number", 8);
+    Map<String, Object> nested = new HashMap<>();
+    nested.put("teapot", null);
+    nested.put("fun", true);
+    nested.put("number", 8);
+    Map<String, Object> expected = Map.of("foo", Map.of("bar", nested));
+    assertEquals(expected, mw.createMap());
   }
 
   @Test
@@ -90,6 +105,14 @@ public class MapWriterTest {
     assertEquals(Result.none(), mw.get("person.address.teapot"));
     assertEquals(Result.none(), mw.get("person.teapot"));
     assertEquals(Result.none(), mw.get("teapot"));
+  }
+
+  @Test // do we make the null -> _NULL_ -> null round trip?
+  public void get01() {
+    MapWriter mw = new MapWriter();
+    mw.set("person.address.street", null);
+    assertTrue(mw.isSet("person.address.street"));
+    assertNull(mw.get("person.address.street").get());
   }
 
   @Test
@@ -108,13 +131,13 @@ public class MapWriterTest {
     assertEquals(expected, mw.createMap().toString());
   }
 
-  @Test(expected = PathOccupiedException.class)
+  @Test(expected = PathBlockedException.class)
   public void in01() {
     MapWriter mw = new MapWriter();
     mw.set("foo.bar.bozo", "teapot");
     try {
       mw.in("foo.bar.bozo");
-    } catch (PathOccupiedException e) {
+    } catch (PathBlockedException e) {
       System.out.println(e.getMessage());
       throw e;
     }
@@ -152,7 +175,7 @@ public class MapWriterTest {
     assertEquals(expected, mw.createMap());
   }
 
-  @Test(expected = PathOccupiedException.class)
+  @Test(expected = PathBlockedException.class)
   public void in04() {
     MapWriter mw = new MapWriter();
     mw.set("foo.bar.bozo", "teapot");
@@ -451,6 +474,14 @@ public class MapWriterTest {
       System.out.println(e.getMessage());
       throw e;
     }
+  }
+
+  @Test // make null -> _NULL_ -> null round trip
+  public void sourceMap02() {
+    Map source = new HashMap();
+    source.put("foo", null);
+    MapWriter mw = new MapWriter(source);
+    assertEquals(source, mw.createMap());
   }
 
   @Test(expected = IllegalArgumentException.class)

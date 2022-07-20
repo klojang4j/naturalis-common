@@ -9,7 +9,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static nl.naturalis.common.ObjectMethods.*;
-import static nl.naturalis.common.check.Check.fail;
 import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.strlen;
 
@@ -56,20 +55,20 @@ import static nl.naturalis.common.check.CommonGetters.strlen;
 public final class MapWriter {
 
   /**
-   * Thrown when attempting to write to a path that has already been set, or that is
-   * unwritable because one of its path segments has been already been set to a
-   * terminal value.
+   * Thrown if a path is unwritable because it has already been set, or because it
+   * extends beyond a path segment that has been set to a terminal value (anything
+   * other than a map).
    *
    * @author Ayco Holleman
    */
-  public static class PathOccupiedException extends IllegalArgumentException {
+  public static class PathBlockedException extends IllegalArgumentException {
 
-    private PathOccupiedException(Path path, Object value) {
+    private PathBlockedException(Path path, Object value) {
       super(createMessage(path, value));
     }
 
     private static String createMessage(Path path, Object value) {
-      String fmt = "path \"%s\" occupied by terminal value %s";
+      String fmt = "path \"%s\" blocked by terminal value %s";
       if (value instanceof String s) {
         value = '"' + s + '"';
       }
@@ -78,12 +77,14 @@ public final class MapWriter {
 
   }
 
-  //  static final String ERR_ILLEGAL_VALUE = "Illegal value for path \"${0}\": ${arg}";
-  //  static final String ERR_ILLEGAL_VALUE_IN_SOURCE_MAP = "Illegal value in source map for path \"${0}\": ${arg}";
+  /*
+   * When setting a path, and when processing the source mapped pas to the
+   * constructor, we replace null with this value. This way, if Map.get(key) returns
+   * null, we know for sure the map does not contain the key. No need to follow it up
+   * with a containsKey call. On its way out, _NULL_ is replaced again with null.
+   */
+  private static final Object _NULL_ = new Object();
 
-  private static final String NULL = new String();
-
-  private static final String ERR_EMPTY_SEGMENT = "illegal null or empty segment in path \"${0}\"";
   private static final String ERR_HOME_ALREADY = "already in root map";
 
   private final Map<String, Object> map;
@@ -119,11 +120,11 @@ public final class MapWriter {
 
   /**
    * Returns a {@code MapWriter} for the map at the specified path. All paths you
-   * specify will from now on be interpreted as relative to the specified path. If
-   * there is no map yet at the specified path, it will be created. Ancestral maps
-   * will be created as well, as and when needed. If any of the segments in the path
-   * (including the last segment) has already been set to a terminal value, a
-   * {@link PathOccupiedException} is thrown. A terminal value is anything that is
+   * specify will from now be taken relative to the specified path. If there is no
+   * map yet at the specified path, it will be created. Ancestral maps will be
+   * created as and when needed. If any of the segments in the path (including the
+   * last segment) has already been set to a terminal value, a
+   * {@link PathBlockedException} is thrown. A terminal value is anything that is
    * <i>not</i> a map.
    *
    * @param path the path to be used as the root path. The path must itself be
@@ -137,11 +138,10 @@ public final class MapWriter {
 
   /**
    * <p>Returns a {@code MapWriter} for the parent map of the map currently being
-   * written to. All paths you specify will from now on be interpreted as relative to
-   * the parent map's path. An {@link IllegalStateException} is thrown when trying to
-   * exit out of the root map. The argument to the {@code up} method must be the last
-   * segment of the parent map's path. An {@link IllegalArgumentException} is thrown
-   * if it isn't.
+   * written. All paths you specify will now be taken relative to the parent map's
+   * path. An {@link IllegalStateException} is thrown when trying to exit out of the
+   * root map. The argument to the {@code up} method must be the last segment of the
+   * parent map's path. An {@link IllegalArgumentException} is thrown if it isn't.
    *
    * <blockquote><pre>{@code
    * Map<String, Object> map = new MapWriter()
@@ -156,8 +156,8 @@ public final class MapWriter {
    *  .createMap();
    * }</pre></blockquote>
    *
-   * <p> You can chain {@code exit} calls. To exit from a map directly under the
-   * root map, specify {@code null} or {@code ""} (an empty string):
+   * <p>You can chain {@code exit} calls. To exit from a map directly under the root
+   * map, specify {@code null} or {@code ""} (an empty string):
    *
    * <blockquote><pre>{@code
    * MapWriter mw = new MapWriter();
@@ -216,7 +216,7 @@ public final class MapWriter {
    */
   public MapWriter set(String path, Object value) {
     Check.notNull(path, Param.PATH);
-    set(this, Path.from(path), ifNull(value, NULL));
+    set(this, Path.from(path), value);
     return this;
   }
 
@@ -272,6 +272,11 @@ public final class MapWriter {
     return createMap(this);
   }
 
+  /**
+   * Returns a string representation of the map created thus far.
+   *
+   * @return a string representation of the map created thus far
+   */
   @Override
   public String toString() {
     return createMap().toString();
@@ -294,23 +299,23 @@ public final class MapWriter {
       writer.map.put(k, mw);
       init(mw, nested);
     } else {
-      writer.map.put(k, val);
+      Check.that(val).isNot(instanceOf(), MapWriter.class); // prevent nasty usage
+      writer.map.put(k, ifNull(val, _NULL_));
     }
   }
 
-  private static void set(MapWriter writer, Path path, Object value) {
-    Check.that(value, Param.VALUE)
-        .isNot(instanceOf(), Map.class)
-        .isNot(instanceOf(), MapWriter.class);
+  private static void set(MapWriter writer, Path path, Object val) {
     String key = firstSegment(path);
     if (path.size() == 1) {
       if (writer.map.containsKey(key)) {
         throw overwriteNotAllowed(writer, key);
       }
-      writer.map.put(key, value);
+      Check.that(val, Param.VALUE)
+          .isNot(instanceOf(), Map.class)
+          .isNot(instanceOf(), MapWriter.class); // prevent nasty usage
+      writer.map.put(key, ifNull(val, _NULL_));
     } else {
-      MapWriter mw = getNestedWriter(writer, key);
-      set(mw, path.shift(), value);
+      set(getNestedWriter(writer, key), path.shift(), val);
     }
   }
 
@@ -322,8 +327,8 @@ public final class MapWriter {
         return Result.of(nested.createMap());
       }
       return get(nested, path.shift());
-    } else if (path.size() == 1 && (val != null || writer.map.containsKey(key))) {
-      return Result.of(nullIf(val, NULL));
+    } else if (path.size() == 1 && val != null) {
+      return Result.of(replaceIf(val, sameAs(), _NULL_, null));
     }
     return Result.none();
   }
@@ -333,12 +338,7 @@ public final class MapWriter {
       return writer;
     }
     String key = firstSegment(path);
-    Path root = writer.root.append(key);
-    Object val = writer.map.computeIfAbsent(key, k -> new MapWriter(root, writer));
-    if (val.getClass() != MapWriter.class) {
-      throw new PathOccupiedException(root, val);
-    }
-    return in((MapWriter) val, path.shift());
+    return in(getNestedWriter(writer, key), path.shift());
   }
 
   private static boolean isSet(MapWriter writer, Path path) {
@@ -367,7 +367,7 @@ public final class MapWriter {
       if (v instanceof MapWriter mw) {
         m.put(k, createMap(mw));
       } else {
-        m.put(k, nullIf(v, NULL));
+        m.put(k, replaceIf(v, sameAs(), _NULL_, null));
       }
     });
     return m;
@@ -379,22 +379,18 @@ public final class MapWriter {
     if (val instanceof MapWriter mw) {
       return mw;
     }
-    throw new PathOccupiedException(root, val);
+    throw new PathBlockedException(root, val);
   }
 
-  private static PathOccupiedException overwriteNotAllowed(MapWriter writer,
+  private static PathBlockedException overwriteNotAllowed(MapWriter writer,
       String key) {
     Path absPath = writer.root.append(key);
     Object curVal = writer.map.get(key);
-    return new PathOccupiedException(absPath, curVal);
+    return new PathBlockedException(absPath, curVal);
   }
 
   private static String firstSegment(Path path) {
-    return segment(path, 0);
-  }
-
-  private static String segment(Path path, int index) {
-    return Check.that(path.segment(index))
+    return Check.that(path.segment(0))
         .isNot(NULL(), "illegal null segment in path \"${0}\"", path)
         .has(strlen(), gt(), 0, "illegal empty segment in path \"${0}\"", path)
         .ok();
