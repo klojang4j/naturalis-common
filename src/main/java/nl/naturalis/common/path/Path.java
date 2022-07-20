@@ -271,15 +271,19 @@ public final class Path implements Comparable<Path>, Iterable<String>, Emptyable
 
   /**
    * Returns the path segment at the specified index. Specify a negative index to
-   * count back from the last segment of the {@code Path} (-1 returns the last path
-   * segment).
+   * retrieve a segment relative to end of the {@code Path} (-1 would return the last
+   * path segment).
    *
    * @param index The array index of the path segment
    * @return the path segment at the specified index.
    */
   public String segment(int index) {
-    int i = index < 0 ? elems.length + index : index;
-    return Check.that(i).is(lt(), elems.length).ok(x -> elems[x]);
+    if (index < 0) {
+      return Check.that(elems.length + index)
+          .is(arrayIndexOf(), elems)
+          .ok(x -> elems[x]);
+    }
+    return Check.that(index).is(arrayIndexOf(), elems).ok(x -> elems[x]);
   }
 
   /**

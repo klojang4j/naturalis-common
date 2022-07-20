@@ -1,5 +1,6 @@
 package nl.naturalis.common.util;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -107,8 +108,63 @@ public class MapWriterTest {
     assertEquals(expected, mw.createMap().toString());
   }
 
+  @Test(expected = PathOccupiedException.class)
+  public void in01() {
+    MapWriter mw = new MapWriter();
+    mw.set("foo.bar.bozo", "teapot");
+    try {
+      mw.in("foo.bar.bozo");
+    } catch (PathOccupiedException e) {
+      System.out.println(e.getMessage());
+      throw e;
+    }
+  }
+
   @Test
-  public void exit00() {
+  public void in02() {
+    MapWriter mw = new MapWriter();
+    mw.set("foo.bar.bozo", "teapot");
+    mw.in("foo.bar").set("ping", "pong");
+    Map<String, Object> expected = Map.of("foo",
+        Map.of("bar", Map.of("bozo", "teapot", "ping", "pong")));
+    assertEquals(expected, mw.createMap());
+  }
+
+  @Test
+  public void in03() {
+    MapWriter mw = new MapWriter();
+    mw.set("foo.bar.bozo", "teapot");
+    //@formatter:off
+    mw
+        .in("foo.bar")
+        .set("ping", "pong")
+        .set("boom", "bam")
+        .in("physics")
+        .set("big", "bang");
+    //@formatter:on
+    Map<String, Object> expected = Map.of("foo",
+        Map.of("bar", Map.of(
+            "bozo", "teapot",
+            "ping", "pong",
+            "boom", "bam",
+            "physics", Map.of("big", "bang")
+        )));
+    assertEquals(expected, mw.createMap());
+  }
+
+  @Test(expected = PathOccupiedException.class)
+  public void in04() {
+    MapWriter mw = new MapWriter();
+    mw.set("foo.bar.bozo", "teapot");
+    mw
+        .in("foo.bar")
+        .set("ping", "pong")
+        .set("boom", "bam")
+        .in("bozo");
+  }
+
+  @Test
+  public void up00() {
     MapWriter mw = new MapWriter();
     mw.in("person.address")
         .set("street", "Sunset Blvd")
@@ -119,33 +175,43 @@ public class MapWriterTest {
   }
 
   @Test
-  public void exit01() {
+  public void up01() {
     MapWriter mw = new MapWriter();
     mw.in("person.address")
         .set("street", "Sunset Blvd")
         .up("person")
         .set("firstName", "John");
-    assertEquals("{person={address={street=Sunset Blvd}, firstName=John}}",
-        mw.createMap().toString());
+    Map expected = Map.of("person",
+        Map.of("firstName", "John", "address", Map.of("street", "Sunset Blvd")));
+    assertEquals(expected, mw.createMap());
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void exit02() {
+  public void up02() {
     MapWriter mw = new MapWriter();
-    mw.in("person.address")
-        .set("street", "Sunset Blvd")
-        .up("teapot");
+    try {
+      mw.in("person.address")
+          .set("street", "Sunset Blvd")
+          .up("teapot");
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      throw e;
+    }
   }
 
   @Test(expected = IllegalStateException.class)
-  public void exit03() {
+  public void up03() {
     MapWriter mw = new MapWriter();
-    mw.up("teaport");
-
+    try {
+      mw.up("teapot");
+    } catch (IllegalStateException e) {
+      System.out.println(e.getMessage());
+      throw e;
+    }
   }
 
   @Test
-  public void exit04() {
+  public void up04() {
     MapWriter mw = new MapWriter();
     mw.in("department.manager.address")
         .set("street", "Sunset Blvd")
@@ -163,7 +229,7 @@ public class MapWriterTest {
   }
 
   @Test
-  public void exit05() {
+  public void up05() {
     MapWriter mw = new MapWriter();
     mw.in("department.manager.address")
         .set("street", "Sunset Blvd")
@@ -181,7 +247,7 @@ public class MapWriterTest {
   }
 
   @Test
-  public void exit06() {
+  public void up06() {
     MapWriter mw = new MapWriter();
     mw.in("department.manager.address")
         .set("street", "Sunset Blvd")
@@ -212,34 +278,152 @@ public class MapWriterTest {
   @Test(expected = IllegalStateException.class)
   public void reset01() {
     MapWriter mw = new MapWriter();
-    mw.reset();
+    try {
+      mw.reset();
+    } catch (IllegalStateException e) {
+      System.out.println(e.getMessage());
+      throw e;
+    }
   }
 
   @Test
   public void isSet00() {
     MapWriter mw = new MapWriter();
     mw.set("person.address.street", "foo");
+    assertTrue(mw.isSet("person.address.street.teapot"));
+  }
+
+  @Test
+  public void isSet01() {
+    MapWriter mw = new MapWriter();
+    mw.set("person.address.street", "foo");
     assertTrue(mw.isSet("person.address.street"));
+  }
+
+  @Test
+  public void isSet02() {
+    MapWriter mw = new MapWriter();
+    mw.set("person.address.street", "foo");
     assertTrue(mw.isSet("person.address"));
+  }
+
+  @Test
+  public void isSet03() {
+    MapWriter mw = new MapWriter();
+    mw.set("person.address.street", "foo");
     assertTrue(mw.isSet("person"));
+  }
+
+  @Test
+  public void isSet04() {
+    MapWriter mw = new MapWriter();
+    mw.set("person.address.street", "foo");
     assertFalse(mw.isSet("teapot"));
+  }
+
+  @Test
+  public void isSet05() {
+    MapWriter mw = new MapWriter();
+    mw.set("person.address.street", "foo");
     assertFalse(mw.isSet("person.teapot"));
+  }
+
+  @Test
+  public void isSet06() {
+    MapWriter mw = new MapWriter();
+    mw.set("person.address.street", "foo");
     assertFalse(mw.isSet("person.address.teapot"));
-    assertFalse(mw.isSet("person.address.street.teapot"));
+  }
+
+  @Test
+  public void isSet07() {
+    MapWriter mw = new MapWriter();
+    mw.set("person.address.street", "foo");
+    assertFalse(mw.isSet("person.teapot.address"));
+  }
+
+  @Test
+  public void isSet08() {
+    MapWriter mw = new MapWriter();
+    mw.set("person.address.street", "foo");
+    assertFalse(mw.isSet("person.teapot.address.coffee"));
+  }
+
+  @Test
+  public void isSet09() {
+    MapWriter mw = new MapWriter();
+    mw.set("person.address.street", "foo");
+    assertFalse(mw.isSet("person.teapot.address.coffee.pot"));
   }
 
   @Test
   public void unset00() {
     MapWriter mw = new MapWriter();
-    mw.set("person.address.street", "foo");
-    assertTrue(mw.isSet("person.address.street"));
-    mw.unset("person.address.street");
-    assertFalse(mw.isSet("person.address.street"));
-    mw.set("person.address.street", "foo");
-    assertTrue(mw.isSet("person.address.street"));
+    mw.set("person", "foo");
+    assertTrue(mw.isSet("person"));
+    mw.unset("person");
+    assertFalse(mw.isSet("person"));
+  }
+
+  @Test
+  public void unset01() {
+    MapWriter mw = new MapWriter();
+    mw.set("person.address", "foo");
+    assertTrue(mw.isSet("person.address"));
+    assertTrue(mw.isSet("person"));
     mw.unset("person.address");
     assertFalse(mw.isSet("person.address"));
+    assertTrue(mw.isSet("person"));
+    mw.unset("person");
+    assertFalse(mw.isSet("person"));
+  }
+
+  @Test
+  public void unset02() {
+    MapWriter mw = new MapWriter();
+    mw.set("person.address.street", "Sunset Blvd");
+    mw.set("person.address.zipcode", "CA 12345");
+
+    assertFalse(mw.isSet("person.address.country"));
+    // can do it nevertheless:
+    mw.unset("person.address.country");
+    mw.unset("person.address.country.planet");
+
+    assertTrue(mw.isSet("person.address.street"));
+    assertTrue(mw.isSet("person.address.zipcode"));
+    assertTrue(mw.isSet("person.address"));
+    assertTrue(mw.isSet("person"));
+
+    mw.unset("person");
+
     assertFalse(mw.isSet("person.address.street"));
+    assertFalse(mw.isSet("person.address.zipcode"));
+    assertFalse(mw.isSet("person.address"));
+    assertFalse(mw.isSet("person"));
+  }
+
+  @Test
+  public void unset03() {
+    MapWriter mw = new MapWriter();
+    mw.set("person.address.street", "Sunset Blvd");
+    mw.set("person.address.zipcode", "CA 12345");
+
+    assertFalse(mw.isSet("person.address.country"));
+    // can do it nevertheless:
+    mw.unset("person.address.country");
+    mw.unset("person.address.country.planet");
+
+    assertTrue(mw.isSet("person.address.street"));
+    assertTrue(mw.isSet("person.address.zipcode"));
+    assertTrue(mw.isSet("person.address"));
+    assertTrue(mw.isSet("person"));
+
+    mw.unset("person.address.street");
+
+    assertFalse(mw.isSet("person.address.street"));
+    assertTrue(mw.isSet("person.address.zipcode"));
+    assertTrue(mw.isSet("person.address"));
+    assertTrue(mw.isSet("person"));
   }
 
   @Test
@@ -256,6 +440,28 @@ public class MapWriterTest {
         "bar",
         true, "ping", 1, "pong", false);
     assertEquals(expected, mw.createMap());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void sourceMap01() {
+    Map source = Map.of(new File("/foo"), "bar");
+    try {
+      MapWriter mw = new MapWriter(source);
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void badSegment00() {
+    MapWriter mw = new MapWriter();
+    try {
+      mw.set("person.^0.street", "foo"); // ^0 is escape sequence for null
+    } catch (IllegalArgumentException e) {
+      System.out.println(e.getMessage());
+      throw e;
+    }
   }
 
 }
