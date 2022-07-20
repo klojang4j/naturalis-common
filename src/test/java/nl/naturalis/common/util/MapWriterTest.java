@@ -112,7 +112,7 @@ public class MapWriterTest {
     MapWriter mw = new MapWriter();
     mw.in("person.address")
         .set("street", "Sunset Blvd")
-        .exit("person")
+        .up("person")
         .set("firstName", "John");
     assertEquals("{person={address={street=Sunset Blvd}, firstName=John}}",
         mw.createMap().toString());
@@ -123,7 +123,7 @@ public class MapWriterTest {
     MapWriter mw = new MapWriter();
     mw.in("person.address")
         .set("street", "Sunset Blvd")
-        .exit("person")
+        .up("person")
         .set("firstName", "John");
     assertEquals("{person={address={street=Sunset Blvd}, firstName=John}}",
         mw.createMap().toString());
@@ -134,14 +134,68 @@ public class MapWriterTest {
     MapWriter mw = new MapWriter();
     mw.in("person.address")
         .set("street", "Sunset Blvd")
-        .exit("teapot");
+        .up("teapot");
   }
 
   @Test(expected = IllegalStateException.class)
   public void exit03() {
     MapWriter mw = new MapWriter();
-    mw.exit("teaport");
+    mw.up("teaport");
 
+  }
+
+  @Test
+  public void exit04() {
+    MapWriter mw = new MapWriter();
+    mw.in("department.manager.address")
+        .set("street", "Sunset Blvd")
+        .up("manager")
+        .up("department")
+        .set("foo", "bar");
+    Map<String, Object> expected = Map.of(
+        "department",
+        Map.of("foo",
+            "bar",
+            "manager",
+            Map.of("address", Map.of("street", "Sunset Blvd")))
+    );
+    assertEquals(expected, mw.createMap());
+  }
+
+  @Test
+  public void exit05() {
+    MapWriter mw = new MapWriter();
+    mw.in("department.manager.address")
+        .set("street", "Sunset Blvd")
+        .up("manager")
+        .up("department")
+        .up(null)
+        .set("foo", "bar");
+    Map<String, Object> expected = Map.of(
+        "foo", "bar",
+        "department",
+        Map.of("manager",
+            Map.of("address", Map.of("street", "Sunset Blvd")))
+    );
+    assertEquals(expected, mw.createMap());
+  }
+
+  @Test
+  public void exit06() {
+    MapWriter mw = new MapWriter();
+    mw.in("department.manager.address")
+        .set("street", "Sunset Blvd")
+        .up("manager")
+        .up("department")
+        .up(null)
+        .set("foo", "bar");
+    Map<String, Object> expected = Map.of(
+        "foo", "bar",
+        "department",
+        Map.of("manager",
+            Map.of("address", Map.of("street", "Sunset Blvd")))
+    );
+    assertEquals(expected, mw.createMap());
   }
 
   @Test
@@ -155,11 +209,10 @@ public class MapWriterTest {
         mw.createMap().toString());
   }
 
-  @Test
+  @Test(expected = IllegalStateException.class)
   public void reset01() {
     MapWriter mw = new MapWriter();
-    mw.reset(); // we can reset even if we are already in the root map
-    assertTrue(true);
+    mw.reset();
   }
 
   @Test
