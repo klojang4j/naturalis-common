@@ -7,15 +7,15 @@ import java.util.Map;
 
 import nl.naturalis.common.Result;
 import org.junit.Test;
-import nl.naturalis.common.util.MapWriter.PathBlockedException;
+import nl.naturalis.common.util.MapBuilder.PathBlockedException;
 
 import static org.junit.Assert.*;
 
-public class MapWriterTest {
+public class MapBuilderTest {
 
   @Test
   public void set00() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person.address.street", "12 Revolutionary Rd.")
         .set("person.address.state", "CA")
         .set("person.firstName", "John")
@@ -29,7 +29,7 @@ public class MapWriterTest {
 
   @Test // Are we OK with null values?
   public void set01() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw
         .set("person.address.street", "12 Revolutionary Rd.")
         .set("person.address.state", null)
@@ -44,7 +44,7 @@ public class MapWriterTest {
 
   @Test(expected = PathBlockedException.class)
   public void set02() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw
         .set("person.address.street", "12 Revolutionary Rd.")
         .set("person.address.street.foo", "bar");
@@ -52,7 +52,7 @@ public class MapWriterTest {
 
   @Test(expected = PathBlockedException.class)
   public void set03() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw
         .set("person.address.street", null)
         .set("person.address.street", null);
@@ -60,19 +60,19 @@ public class MapWriterTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void set04() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person.address.street", new HashMap<>());
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void set05() {
-    MapWriter mw = new MapWriter();
-    mw.set("person.address.street", new MapWriter());
+    MapBuilder mw = new MapBuilder();
+    mw.set("person.address.street", new MapBuilder());
   }
 
   @Test(expected = PathBlockedException.class)
   public void set06() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw
         .set("person.address", "foo")
         .set("person.address.street", "Sunset Blvd");
@@ -80,7 +80,7 @@ public class MapWriterTest {
 
   @Test // do we make the null -> _NULL_ -> null round trip?
   public void set07() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw
         .set("foo.bar.teapot", null)
         .set("foo.bar.fun", true)
@@ -95,7 +95,7 @@ public class MapWriterTest {
 
   @Test
   public void get00() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person.address.street", "foo");
     assertEquals("foo", mw.get("person.address.street").get());
     assertEquals(Map.of("street", "foo"), mw.get("person.address").get());
@@ -109,7 +109,7 @@ public class MapWriterTest {
 
   @Test // do we make the null -> _NULL_ -> null round trip?
   public void get01() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person.address.street", null);
     assertTrue(mw.isSet("person.address.street"));
     assertNull(mw.get("person.address.street").get());
@@ -117,7 +117,7 @@ public class MapWriterTest {
 
   @Test
   public void in00() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.in("person")
         .set("firstName", "John")
         .set("lastName", "Smith")
@@ -133,7 +133,7 @@ public class MapWriterTest {
 
   @Test(expected = PathBlockedException.class)
   public void in01() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("foo.bar.bozo", "teapot");
     try {
       mw.in("foo.bar.bozo");
@@ -145,7 +145,7 @@ public class MapWriterTest {
 
   @Test
   public void in02() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("foo.bar.bozo", "teapot");
     mw.in("foo.bar").set("ping", "pong");
     Map<String, Object> expected = Map.of("foo",
@@ -155,7 +155,7 @@ public class MapWriterTest {
 
   @Test
   public void in03() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("foo.bar.bozo", "teapot");
     //@formatter:off
     mw
@@ -177,7 +177,7 @@ public class MapWriterTest {
 
   @Test(expected = PathBlockedException.class)
   public void in04() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("foo.bar.bozo", "teapot");
     mw
         .in("foo.bar")
@@ -188,7 +188,7 @@ public class MapWriterTest {
 
   @Test
   public void up00() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.in("person.address")
         .set("street", "Sunset Blvd")
         .up("person")
@@ -199,7 +199,7 @@ public class MapWriterTest {
 
   @Test
   public void up01() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.in("person.address")
         .set("street", "Sunset Blvd")
         .up("person")
@@ -211,7 +211,7 @@ public class MapWriterTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void up02() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     try {
       mw.in("person.address")
           .set("street", "Sunset Blvd")
@@ -224,7 +224,7 @@ public class MapWriterTest {
 
   @Test(expected = IllegalStateException.class)
   public void up03() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     try {
       mw.up("teapot");
     } catch (IllegalStateException e) {
@@ -235,7 +235,7 @@ public class MapWriterTest {
 
   @Test
   public void up04() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.in("department.manager.address")
         .set("street", "Sunset Blvd")
         .up("manager")
@@ -253,7 +253,7 @@ public class MapWriterTest {
 
   @Test
   public void up05() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.in("department.manager.address")
         .set("street", "Sunset Blvd")
         .up("manager")
@@ -271,7 +271,7 @@ public class MapWriterTest {
 
   @Test
   public void up06() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.in("department.manager.address")
         .set("street", "Sunset Blvd")
         .up("manager")
@@ -289,7 +289,7 @@ public class MapWriterTest {
 
   @Test
   public void reset00() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.in("person.address")
         .set("street", "Sunset Blvd")
         .reset()
@@ -300,7 +300,7 @@ public class MapWriterTest {
 
   @Test(expected = IllegalStateException.class)
   public void reset01() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     try {
       mw.reset();
     } catch (IllegalStateException e) {
@@ -311,77 +311,77 @@ public class MapWriterTest {
 
   @Test
   public void isSet00() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person.address.street", "foo");
     assertTrue(mw.isSet("person.address.street.teapot"));
   }
 
   @Test
   public void isSet01() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person.address.street", "foo");
     assertTrue(mw.isSet("person.address.street"));
   }
 
   @Test
   public void isSet02() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person.address.street", "foo");
     assertTrue(mw.isSet("person.address"));
   }
 
   @Test
   public void isSet03() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person.address.street", "foo");
     assertTrue(mw.isSet("person"));
   }
 
   @Test
   public void isSet04() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person.address.street", "foo");
     assertFalse(mw.isSet("teapot"));
   }
 
   @Test
   public void isSet05() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person.address.street", "foo");
     assertFalse(mw.isSet("person.teapot"));
   }
 
   @Test
   public void isSet06() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person.address.street", "foo");
     assertFalse(mw.isSet("person.address.teapot"));
   }
 
   @Test
   public void isSet07() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person.address.street", "foo");
     assertFalse(mw.isSet("person.teapot.address"));
   }
 
   @Test
   public void isSet08() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person.address.street", "foo");
     assertFalse(mw.isSet("person.teapot.address.coffee"));
   }
 
   @Test
   public void isSet09() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person.address.street", "foo");
     assertFalse(mw.isSet("person.teapot.address.coffee.pot"));
   }
 
   @Test
   public void unset00() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person", "foo");
     assertTrue(mw.isSet("person"));
     mw.unset("person");
@@ -390,7 +390,7 @@ public class MapWriterTest {
 
   @Test
   public void unset01() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person.address", "foo");
     assertTrue(mw.isSet("person.address"));
     assertTrue(mw.isSet("person"));
@@ -403,7 +403,7 @@ public class MapWriterTest {
 
   @Test
   public void unset02() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person.address.street", "Sunset Blvd");
     mw.set("person.address.zipcode", "CA 12345");
 
@@ -427,7 +427,7 @@ public class MapWriterTest {
 
   @Test
   public void unset03() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     mw.set("person.address.street", "Sunset Blvd");
     mw.set("person.address.zipcode", "CA 12345");
 
@@ -455,7 +455,7 @@ public class MapWriterTest {
         Map.of("teapot", "coffee"),
         "bar",
         true);
-    MapWriter mw = new MapWriter(source);
+    MapBuilder mw = new MapBuilder(source);
     assertEquals(source, mw.createMap());
     mw.set("ping", 1).set("pong", false);
     Map<String, Object> expected = Map.of("foo",
@@ -469,7 +469,7 @@ public class MapWriterTest {
   public void sourceMap01() {
     Map source = Map.of(new File("/foo"), "bar");
     try {
-      MapWriter mw = new MapWriter(source);
+      MapBuilder mw = new MapBuilder(source);
     } catch (IllegalArgumentException e) {
       System.out.println(e.getMessage());
       throw e;
@@ -480,13 +480,13 @@ public class MapWriterTest {
   public void sourceMap02() {
     Map source = new HashMap();
     source.put("foo", null);
-    MapWriter mw = new MapWriter(source);
+    MapBuilder mw = new MapBuilder(source);
     assertEquals(source, mw.createMap());
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void badSegment00() {
-    MapWriter mw = new MapWriter();
+    MapBuilder mw = new MapBuilder();
     try {
       mw.set("person.^0.street", "foo"); // ^0 is escape sequence for null
     } catch (IllegalArgumentException e) {

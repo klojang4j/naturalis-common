@@ -13,24 +13,26 @@ import static nl.naturalis.common.check.CommonChecks.*;
 import static nl.naturalis.common.check.CommonGetters.strlen;
 
 /**
- * <p>Provides a convenient way of writing {@code Map<String, Object>}
- * pseudo-objects. Useful when serializing the maps again to JSON or some other
- * hierarchical format as it guarantees well-formedness. A {@code MapWriter} lets you
- * write deeply nested values without having to create the intermediate maps first.
- * If they are missing, they will be tacitly created.
+ * <p>An elaborate {@code Builder} for {@code Map<String, Object>} pseudo-objects.
+ * Especially useful when subsequently serializing the maps to JSON or some other
+ * hierarchical format as it guarantees well-formedness. A {@code MapBuilder} lets
+ * you write deeply nested values without having to create the intermediate maps
+ * first. If they are missing, they will tacitly be created. Map keys must not be
+ * {@code null} or an empty string. Map values can be anything, including
+ * {@code null}.
  *
- * <p>Internally, a {@code MapWriter} works with {@link Path} objects. See the
+ * <p>Internally, a {@code MapBuilder} works with {@link Path} objects. See the
  * documentation for the {@code Path} class for how to specify path strings.
  *
  * <h4>Example 1:</h4>
  *
  * <blockquote><pre>{@code
- * MapWriter mw = new MapWriter();
- * mw.write("person.address.street", "12 Revolutionary Rd.")
- *  .write("person.address.state", "CA")
- *  .write("person.firstName", "John")
- *  .write("person.lastName", "Smith")
- *  .write("person.dateOfBirth", LocalDate.of(1967, 4, 4));
+ * MapBuilder mw = new MapBuilder();
+ * mw.set("person.address.street", "12 Revolutionary Rd.")
+ *  .set("person.address.state", "CA")
+ *  .set("person.firstName", "John")
+ *  .set("person.lastName", "Smith")
+ *  .set("person.dateOfBirth", LocalDate.of(1967, 4, 4));
  * Map<String, Object> map = mw.createMap();
  * }</pre></blockquote>
  *
@@ -39,20 +41,25 @@ import static nl.naturalis.common.check.CommonGetters.strlen;
  * <h4>Example 2:</h4>
  *
  * <blockquote><pre>{@code
- * Map<String, Object> map = new MapWriter()
+ * Map<String, Object> map = new MapBuilder()
  *  .in("person")
- *    .write("firstName", "John")
- *    .write("lastName", "Smith")
- *    .write("dateOfBirth", LocalDate.of(1967, 4, 4))
+ *    .set("firstName", "John")
+ *    .set("lastName", "Smith")
+ *    .set("dateOfBirth", LocalDate.of(1967, 4, 4))
  *    .in("address")
- *      .write("street", "12 Revolutionary Rd.")
- *      .write("state", "CA")
+ *      .set("street", "12 Revolutionary Rd.")
+ *      .set("state", "CA")
+ *      .up("person")
+ *    .in("medical_status")
+ *      .set("allergies", false)
+ *      .set("smoker", true)
+ *      .set("prescriptions", null)
  *  .createMap();
  * }</pre></blockquote>
  *
  * @author Ayco Holleman
  */
-public final class MapWriter {
+public final class MapBuilder {
 
   /**
    * Thrown if a path is unwritable because it has already been set, or because it
@@ -78,10 +85,11 @@ public final class MapWriter {
   }
 
   /*
-   * When setting a path, and when processing the source mapped pas to the
+   * When setting a path, and when processing the source map passed to the
    * constructor, we replace null with this value. This way, if Map.get(key) returns
-   * null, we know for sure the map does not contain the key. No need to follow it up
-   * with a containsKey call. On its way out, _NULL_ is replaced again with null.
+   * null, we know for sure that the map does not contain the key. No need to follow
+   * it up with a containsKey call. On its way out, _NULL_ is replaced again with
+   * null.
    */
   private static final Object _NULL_ = new Object();
 
@@ -89,22 +97,22 @@ public final class MapWriter {
 
   private final Map<String, Object> map;
   private final Path root;
-  private final MapWriter parent;
+  private final MapBuilder parent;
 
   /**
-   * Creates a new {@code MapWriter}.
+   * Creates a new {@code MapBuilder}.
    */
-  public MapWriter() {
+  public MapBuilder() {
     this(new LinkedHashMap<>());
   }
 
   /**
-   * Creates a {@code MapWriter} that starts out with the entries in the specified
+   * Creates a {@code MapBuilder} that starts out with the entries in the specified
    * map. The map is read, but not modified.
    *
    * @param map The initial {@code Map}
    */
-  public MapWriter(Map<String, Object> map) {
+  public MapBuilder(Map<String, Object> map) {
     Check.notNull(map, Param.MAP);
     this.map = new LinkedHashMap<>(map.size() + 10);
     this.root = Path.empty();
@@ -112,47 +120,46 @@ public final class MapWriter {
     init(this, map);
   }
 
-  private MapWriter(Path root, MapWriter parent) {
+  private MapBuilder(Path root, MapBuilder parent) {
     this.root = root;
     this.map = new LinkedHashMap<>();
     this.parent = parent;
   }
 
   /**
-   * Returns a {@code MapWriter} for the map at the specified path. All paths you
-   * specify will from now be taken relative to the specified path. If there is no
-   * map yet at the specified path, it will be created. Ancestral maps will be
-   * created as and when needed. If any of the segments in the path (including the
-   * last segment) has already been set to a terminal value, a
-   * {@link PathBlockedException} is thrown. A terminal value is anything that is
-   * <i>not</i> a map.
+   * Returns a {@code MapBuilder} for the map at the specified path. Once this method
+   * has been called, all paths subsequently specified will be taken relative to the
+   * specified path. If there is no map yet at the specified path, it will be
+   * created. Ancestral maps will be created as well, as and when needed. If any of
+   * the segments in the path (including the last segment) has already been set, a
+   * {@link PathBlockedException} is thrown.
    *
    * @param path the path to be used as the root path. The path must itself be
    *     specified relative to the current root path
-   * @return a {@code MapWriter} for the map found or created at the specified path
+   * @return a {@code MapBuilder} for the map found or created at the specified path
    */
-  public MapWriter in(String path) {
+  public MapBuilder in(String path) {
     Check.notNull(path, Param.PATH);
     return in(this, Path.from(path));
   }
 
   /**
-   * <p>Returns a {@code MapWriter} for the parent map of the map currently being
+   * <p>Returns a {@code MapBuilder} for the parent map of the map currently being
    * written. All paths you specify will now be taken relative to the parent map's
    * path. An {@link IllegalStateException} is thrown when trying to exit out of the
    * root map. The argument to the {@code up} method must be the last segment of the
    * parent map's path. An {@link IllegalArgumentException} is thrown if it isn't.
    *
    * <blockquote><pre>{@code
-   * Map<String, Object> map = new MapWriter()
+   * Map<String, Object> map = new MapBuilder()
    *  .in("person")
-   *    .write("firstName", "John")
-   *    .write("lastName", "Smith")
+   *    .set("firstName", "John")
+   *    .set("lastName", "Smith")
    *    .in("address")
-   *      .write("street", "12 Revolutionary Rd.")
-   *      .write("state", "CA")
+   *      .set("street", "12 Revolutionary Rd.")
+   *      .set("state", "CA")
    *      .up("person")
-   *    .write("dateOfBirth", LocalDate.of(1967, 4, 4))
+   *    .set("dateOfBirth", LocalDate.of(1967, 4, 4))
    *  .createMap();
    * }</pre></blockquote>
    *
@@ -160,7 +167,7 @@ public final class MapWriter {
    * map, specify {@code null} or {@code ""} (an empty string):
    *
    * <blockquote><pre>{@code
-   * MapWriter mw = new MapWriter();
+   * MapBuilder mw = new MapBuilder();
    *  .in("department.manager.address")
    *    .set("street", "Sunset Blvd")
    *    .up("manager")
@@ -169,10 +176,10 @@ public final class MapWriter {
    *  .set("foo", "bar");
    * }</pre></blockquote>
    *
-   * @return a {@code MapWriter} for the parent map of the map currently being
+   * @return a {@code MapBuilder} for the parent map of the map currently being
    *     written to
    */
-  public MapWriter up(String parentSegment) {
+  public MapBuilder up(String parentSegment) {
     Check.on(illegalState(), parent).is(notNull(), ERR_HOME_ALREADY);
     if (root.size() == 1) {
       Check.that(parentSegment).is(empty(),
@@ -189,11 +196,11 @@ public final class MapWriter {
    * Takes you back to the root map. All paths you specify will from now on be
    * interpreted as absolute paths again.
    *
-   * @return a {@code MapWriter} for the root map
+   * @return a {@code MapBuilder} for the root map
    */
-  public MapWriter reset() {
+  public MapBuilder reset() {
     Check.on(illegalState(), parent).is(notNull(), ERR_HOME_ALREADY);
-    MapWriter mw = parent;
+    MapBuilder mw = parent;
     while (mw.parent != null) {
       mw = mw.parent;
     }
@@ -212,9 +219,9 @@ public final class MapWriter {
    *
    * @param path the path at which to write the value
    * @param value the value
-   * @return this {@code MapWriter}
+   * @return this {@code MapBuilder}
    */
-  public MapWriter set(String path, Object value) {
+  public MapBuilder set(String path, Object value) {
     Check.notNull(path, Param.PATH);
     set(this, Path.from(path), value);
     return this;
@@ -253,9 +260,9 @@ public final class MapWriter {
    * be removed.
    *
    * @param path the path to unset.
-   * @return this {@code MapWriter}
+   * @return this {@code MapBuilder}
    */
-  public MapWriter unset(String path) {
+  public MapBuilder unset(String path) {
     Check.notNull(path);
     unset(this, Path.from(path));
     return this;
@@ -264,7 +271,7 @@ public final class MapWriter {
   /**
    * Returns the {@code Map} resulting from the write actions. The returned map is
    * modifiable and retains the order in which the paths (now keys) were written. You
-   * can continue to use the {@code MapWriter} after a call to this method.
+   * can continue to use the {@code MapBuilder} after a call to this method.
    *
    * @return the {@code Map} resulting from the write actions
    */
@@ -283,11 +290,11 @@ public final class MapWriter {
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private static void init(MapWriter writer, Map map) {
+  private static void init(MapBuilder writer, Map map) {
     map.forEach((key, val) -> processEntry(writer, key, val));
   }
 
-  private static void processEntry(MapWriter writer, Object key, Object val) {
+  private static void processEntry(MapBuilder writer, Object key, Object val) {
     Check.that(key)
         .isNot(NULL(), "illegal null key in source map")
         .isNot(empty(), "illegal empty key in source map")
@@ -295,34 +302,34 @@ public final class MapWriter {
     String k = key.toString();
     if (val instanceof Map nested) {
       Path path = writer.root.append(k);
-      MapWriter mw = new MapWriter(path, writer);
+      MapBuilder mw = new MapBuilder(path, writer);
       writer.map.put(k, mw);
       init(mw, nested);
     } else {
-      Check.that(val).isNot(instanceOf(), MapWriter.class); // prevent nasty usage
+      Check.that(val).isNot(instanceOf(), MapBuilder.class); // prevent nasty usage
       writer.map.put(k, ifNull(val, _NULL_));
     }
   }
 
-  private static void set(MapWriter writer, Path path, Object val) {
+  private static void set(MapBuilder writer, Path path, Object val) {
     String key = firstSegment(path);
     if (path.size() == 1) {
       if (writer.map.containsKey(key)) {
-        throw overwriteNotAllowed(writer, key);
+        throw alreadySet(writer, key);
       }
       Check.that(val, Param.VALUE)
           .isNot(instanceOf(), Map.class)
-          .isNot(instanceOf(), MapWriter.class); // prevent nasty usage
+          .isNot(instanceOf(), MapBuilder.class); // prevent nasty usage
       writer.map.put(key, ifNull(val, _NULL_));
     } else {
       set(getNestedWriter(writer, key), path.shift(), val);
     }
   }
 
-  private static Result<Object> get(MapWriter writer, Path path) {
+  private static Result<Object> get(MapBuilder writer, Path path) {
     String key = path.segment(0);
     Object val = writer.map.get(key);
-    if (val instanceof MapWriter nested) {
+    if (val instanceof MapBuilder nested) {
       if (path.size() == 1) {
         return Result.of(nested.createMap());
       }
@@ -333,7 +340,7 @@ public final class MapWriter {
     return Result.none();
   }
 
-  private static MapWriter in(MapWriter writer, Path path) {
+  private static MapBuilder in(MapBuilder writer, Path path) {
     if (path.isEmpty()) {
       return writer;
     }
@@ -341,18 +348,18 @@ public final class MapWriter {
     return in(getNestedWriter(writer, key), path.shift());
   }
 
-  private static boolean isSet(MapWriter writer, Path path) {
+  private static boolean isSet(MapBuilder writer, Path path) {
     String key = firstSegment(path);
     Object val = writer.map.get(key);
     if (val == null) {
       return false;
-    } else if (path.size() == 1 || !(val instanceof MapWriter)) {
+    } else if (path.size() == 1 || !(val instanceof MapBuilder)) {
       return true;
     }
-    return isSet((MapWriter) val, path.shift());
+    return isSet((MapBuilder) val, path.shift());
   }
 
-  private static void unset(MapWriter writer, Path path) {
+  private static void unset(MapBuilder writer, Path path) {
     String key = firstSegment(path);
     if (path.size() == 1) {
       writer.map.remove(key);
@@ -361,10 +368,10 @@ public final class MapWriter {
     }
   }
 
-  private static Map<String, Object> createMap(MapWriter writer) {
+  private static Map<String, Object> createMap(MapBuilder writer) {
     Map<String, Object> m = new LinkedHashMap<>();
     writer.map.forEach((k, v) -> {
-      if (v instanceof MapWriter mw) {
+      if (v instanceof MapBuilder mw) {
         m.put(k, createMap(mw));
       } else {
         m.put(k, replaceIf(v, sameAs(), _NULL_, null));
@@ -373,16 +380,16 @@ public final class MapWriter {
     return m;
   }
 
-  private static MapWriter getNestedWriter(MapWriter writer, String key) {
+  private static MapBuilder getNestedWriter(MapBuilder writer, String key) {
     Path root = writer.root.append(key);
-    Object val = writer.map.computeIfAbsent(key, k -> new MapWriter(root, writer));
-    if (val instanceof MapWriter mw) {
+    Object val = writer.map.computeIfAbsent(key, k -> new MapBuilder(root, writer));
+    if (val instanceof MapBuilder mw) {
       return mw;
     }
     throw new PathBlockedException(root, val);
   }
 
-  private static PathBlockedException overwriteNotAllowed(MapWriter writer,
+  private static PathBlockedException alreadySet(MapBuilder writer,
       String key) {
     Path absPath = writer.root.append(key);
     Object curVal = writer.map.get(key);

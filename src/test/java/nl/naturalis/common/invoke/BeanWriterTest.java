@@ -1,7 +1,7 @@
 package nl.naturalis.common.invoke;
 
 import nl.naturalis.common.function.ThrowingBiFunction;
-import nl.naturalis.common.util.MapWriter;
+import nl.naturalis.common.util.MapBuilder;
 import org.junit.Test;
 
 import java.time.LocalDate;
@@ -456,7 +456,7 @@ public class BeanWriterTest {
 
   @Test
   public void mapCopy00() throws Throwable {
-    Map<String, Object> person0 = new MapWriter().set("id", 100)
+    Map<String, Object> person0 = new MapBuilder().set("id", 100)
         .set("firstName", "John")
         .set("lastName", "Smith")
         .set("hobbies", null)
@@ -495,7 +495,7 @@ public class BeanWriterTest {
   @Test
   public void mapCopyNonNull00() throws Throwable {
 
-    Map<String, Object> person0 = new MapWriter().set("id", 100)
+    Map<String, Object> person0 = new MapBuilder().set("id", 100)
         .set("firstName", "John")
         .set("lastName", null)
         .set("hobbies", null)
@@ -534,7 +534,7 @@ public class BeanWriterTest {
   @Test
   public void mapEnrich00() throws Throwable {
 
-    Map<String, Object> person0 = new MapWriter().set("id", 100)
+    Map<String, Object> person0 = new MapBuilder().set("id", 100)
         .set("firstName", "John")
         .set("lastName", null)
         .set("hobbies", null)
