@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.util.Iterator;
 
+import static nl.naturalis.common.ArrayMethods.pack;
 import static org.junit.Assert.*;
 
 public class PathTest {
@@ -271,6 +272,59 @@ public class PathTest {
   @Test // test unescape - escape route
   public void toString06() {
     assertEquals("foo.^0.bar^..bozo", Path.from("foo.^0.bar^..bozo").toString());
+  }
+
+  @Test
+  public void empty00() {
+    assertEquals(0, Path.empty().size());
+  }
+
+  @Test
+  public void of00() {
+    Path p = Path.of("foo");
+    assertEquals(1, p.size());
+  }
+
+  @Test
+  public void of01() {
+    Path p = Path.of("foo", null);
+    assertEquals(2, p.size());
+  }
+
+  @Test
+  public void of02() {
+    Path p = Path.of("foo", null, "bar");
+    assertEquals(3, p.size());
+  }
+
+  @Test
+  public void of03() {
+    Path p = Path.of("foo", null, "bar", null);
+    assertEquals(4, p.size());
+  }
+
+  @Test
+  public void of04() {
+    Path p = Path.of("foo", null, "bar", null, "bozo");
+    assertEquals(5, p.size());
+  }
+
+  @Test
+  public void of05() {
+    Path p = Path.of("foo", null, "bar", null, "bozo", null);
+    assertEquals(6, p.size());
+  }
+
+  @Test
+  public void of06() {
+    Path p = Path.of("foo", null, "bar", null, "bozo", null, "bonkers");
+    assertEquals(7, p.size());
+  }
+
+  @Test
+  public void ofSegments() {
+    Path p = Path.of(pack("foo", null, "bar", null, "bozo", null, "bonkers"));
+    assertEquals(7, p.size());
   }
 
 }

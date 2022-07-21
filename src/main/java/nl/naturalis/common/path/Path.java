@@ -173,7 +173,25 @@ public final class Path implements Comparable<Path>, Iterable<String>, Emptyable
     return new Path(new String[] {segment0, segment1, segment2, segment3, segment4});
   }
 
-  public static Path of(String[] segments) {
+  /**
+   * Returns a {@code Path} consisting of the specified segments. <i>Do not escape
+   * the segments.</i>
+   *
+   * @param segments the path segments
+   * @return a {@code Path} consisting of the specified segments
+   */
+  public static Path of(String... segments) {
+    return ofSegments(segments);
+  }
+
+  /**
+   * Returns a {@code Path} consisting of the specified segments. <i>Do not escape
+   * the segments.</i>
+   *
+   * @param segments the path segments
+   * @return a {@code Path} consisting of the specified segments
+   */
+  public static Path ofSegments(String[] segments) {
     Check.notNull(segments);
     return segments.length == 0 ? EMPTY_PATH : new Path(segments);
   }
