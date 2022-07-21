@@ -1,17 +1,18 @@
 /**
- * <h1>Precondition and Postcondition Verification</h1>
+ * <h1>Naturalis Check</h1>
  *
- * <p>The classes in this package facilitate the validation of method arguments, variables, object
- * state (preconditions) and computational outcomes (postconditions). Contrary to Google Guava's
- * <a href="https://guava.dev/releases/21.0/api/docs/com/google/common/base/Preconditions.html">Preconditions</a>
- * class and Apache's
- * <a href="https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html">Validate</a>
- * class, validation happens through instance methods rather than class methods. For example:
+ * <p>A package dedicated to validating preconditions and postconditions. It takes a
+ * rather different approach than, for example,
+ * <a
+ * href="https://guava.dev/releases/21.0/api/docs/com/google/common/base/Preconditions.html">Preconditions</a>
+ * class and Apache's <a
+ * href="https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html">Validate</a>
+ * class, validation is carried out by instances of {@code Check} objects rather than
+ * through static utility methods. This is what argument validation looks like with
+ * Naturalis Check:
  *
  * <blockquote>
  * <pre>{@code
- * // Verify that the number of chairs is greater than 0, less
- * // than or equal to 4, and that it is an even number of chairs:
  * this.numChairs = Check.that(numChairs).is(positive()).is(lte(), 4).is(even()).ok();
  * }</pre>
  * </blockquote>
@@ -20,18 +21,20 @@
  * <h2>Performance</h2>
  *
  * <p>In spite of the checks being carried out on an actual instance of {@link
- * nl.naturalis.common.check.IntCheck IntCheck} or {@link nl.naturalis.common.check.ObjectCheck
- * ObjectCheck}, benchmarking their performance yield no difference with hand-coded argument checks.
- * If the argument passes the test, there is literally no difference outside the error margin of the
- * benchmark. If the argument fails the test, and an exception needs to be thrown, the check
- * framework also performs equally well, except when you provide your own error message (see below).
- * In this case the message needs to be scanned for message arguments, which is relatively
- * expensive. Note, though, that in most cases you would not expect your precondition checks to be
- * violated often enough to make this is issue. Nevertheless, if you find yourself in this situation
- * and performance of the utmost importance, you can achieve it by specifying <i>exactly</i> one
- * message argument: {@code '\0'} (the NULL character). This will cause the message not to be
- * parsed, and simply be passed as-is to the exception. (Of course, the message cannot contain any
- * message arguments then.)
+ * nl.naturalis.common.check.IntCheck IntCheck} or
+ * {@link nl.naturalis.common.check.ObjectCheck ObjectCheck}, benchmarking their
+ * performance yield no difference with hand-coded argument checks. If the argument
+ * passes the test, there is literally no difference outside the error margin of the
+ * benchmark. If the argument fails the test, and an exception needs to be thrown,
+ * the check framework also performs equally well, except when you provide your own
+ * error message (see below). In this case the message needs to be scanned for
+ * message arguments, which is relatively expensive. Note, though, that in most cases
+ * you would not expect your precondition checks to be violated often enough to make
+ * this is issue. Nevertheless, if you find yourself in this situation and
+ * performance of the utmost importance, you can achieve it by specifying
+ * <i>exactly</i> one message argument: {@code '\0'} (the NULL character). This will
+ * cause the message not to be parsed, and simply be passed as-is to the exception.
+ * (Of course, the message cannot contain any message arguments then.)
  *
  *
  * <p>You can view the results of the JMH benchmarks
@@ -40,11 +43,12 @@
  *
  * <h2>Common checks</h2>
  *
- * <p>All checks come in two variants: one where you can provide a custom error message and one
- * where you can't. The latter is mainly meant to be used in combination with the {@link
- * nl.naturalis.common.check.CommonChecks} class. This class is a grab bag of common checks for
- * arguments. They are already associated with short, informative error messages, so you don't have
- * to invent them yourself.
+ * <p>All checks come in two variants: one where you can provide a custom error
+ * message and one where you can't. The latter is mainly meant to be used in
+ * combination with the {@link nl.naturalis.common.check.CommonChecks} class. This
+ * class is a grab bag of common checks for arguments. They are already associated
+ * with short, informative error messages, so you don't have to invent them
+ * yourself.
  * <blockquote>
  * <pre>{@code
  * import static nl.naturalis.common.check.CommonChecks.gt;
@@ -56,8 +60,9 @@
  * </blockquote>
  *
  * <h2>Custom error messages</h2>
- * <p>If you prefer to send out a custom error message, you can do so by specifying a message
- * pattern and zero or more message arguments. The first message argument can be referenced as
+ * <p>If you prefer to send out a custom error message, you can do so by specifying
+ * a message pattern and zero or more message arguments. The first message argument
+ * can be referenced as
  * <code>${0}</code>; the second as <code>${1}</code>, etc. For example:
  * <blockquote>
  * <pre>{@code
@@ -66,7 +71,8 @@
  * // Error message: "Spelling error. Did you mean: colleague?"
  * }</pre>
  * </blockquote>
- * <p>The following message arguments are automatically available within the message pattern:
+ * <p>The following message arguments are automatically available within the message
+ * pattern:
  * <ol>
  *   <li><b><code>${test}</code></b> The name of the check that was executed. E.g. "gt" or
  *   "notNull".
@@ -89,7 +95,7 @@
  * }</pre>
  * </blockquote>
  *
- * <h2>Checking argument properties</h2>
+ * <h2>Validating argument properties</h2>
  * <p>Besides validating arguments, you can also validate argument <i>properties</i>:
  * <blockquote>
  * <pre>{@code
