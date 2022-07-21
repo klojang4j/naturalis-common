@@ -181,19 +181,16 @@ public final class MapBuilder {
   /**
    * Jumps to another branch in the tree of nested maps. The difference between
    * {@code jump} and {@link #in(String) in} is that the path passed to {@code jump}
-   * is always interpreted as an absolute path (i.e. relative to the root map), while
-   * the path passed to {@code in} is taken relative to the path(s) passed to
-   * previous calls to {@code in} and {@code jump}.
+   * is always taken as an absolute path (i.e. relative to the root map), while the
+   * path passed to {@code in} is taken relative to the path(s) passed to previous
+   * calls to {@code in} and {@code jump}.
    *
    * @param path the absolute path to be used as the base path
    * @return a {@code MapBuilder} for the map found or created at the specified path
    * @see #in(String)
    */
   public MapBuilder jump(String path) {
-    if (parent != null) {
-      reset();
-    }
-    return in(path);
+    return parent == null ? in(path) : reset().in(path);
   }
 
   /**
@@ -248,8 +245,8 @@ public final class MapBuilder {
   }
 
   /**
-   * Takes you back to the root map. All paths you specify will from now on be
-   * interpreted as absolute paths again.
+   * Takes you back to the root map. All paths you specify will be interpreted as
+   * absolute paths again.
    *
    * @return a {@code MapBuilder} for the root map
    */
@@ -262,6 +259,12 @@ public final class MapBuilder {
     return mb;
   }
 
+  /**
+   * Returns the current branch within tree of nested {@code Map} objects. That is,
+   * the base path relative to which all paths are taken.
+   *
+   * @return the current branch within tree of nested {@code Map} objects
+   */
   public String where() {
     return root.toString();
   }

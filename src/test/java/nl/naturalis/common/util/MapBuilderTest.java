@@ -495,4 +495,23 @@ public class MapBuilderTest {
     }
   }
 
+  @Test
+  public void jump00() {
+    MapBuilder mw = new MapBuilder();
+    mw
+        .set("department.person.address.street", "Main St.")
+        .set("department.person.address.state", "CA")
+        .set("department.person.firstName", "John")
+        .set("car.brand.name", "BMW")
+        .set("person.born", LocalDate.of(1967, 4, 4));
+    mw = mw.jump("department.person");
+    assertEquals("department.person", mw.where());
+    mw = mw.jump("car.brand");
+    assertEquals("car.brand", mw.where());
+    mw = mw.up("car");
+    assertEquals("car", mw.where());
+    mw = mw.up("");
+    assertEquals("", mw.where());
+  }
+
 }
