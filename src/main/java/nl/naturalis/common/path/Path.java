@@ -67,6 +67,8 @@ import static nl.naturalis.common.check.CommonChecks.*;
  */
 public final class Path implements Comparable<Path>, Iterable<String>, Emptyable {
 
+  private static Path EMPTY_PATH = new Path();
+
   // segment separator
   private static final char SEP = '.';
 
@@ -76,31 +78,6 @@ public final class Path implements Comparable<Path>, Iterable<String>, Emptyable
   // escape sequence to use for null keys
   private static final String NULL_SEGMENT = "^0";
 
-  private static Path EMPTY_PATH = new Path();
-  private final String[] elems;
-  private String str; // Caches toString()
-  private int hash; // Caches hashCode()
-
-  private Path() {
-    elems = EMPTY_STRING_ARRAY;
-  }
-
-  private Path(String path) {
-    elems = parse(str = path);
-  }
-
-  private Path(String[] segments) {
-    elems = new String[segments.length];
-    arraycopy(segments, 0, elems, 0, segments.length);
-  }
-
-  private Path(Path other) {
-    // Since we are immutable we can happily share state
-    this.elems = other.elems;
-    this.str = other.str;
-    this.hash = other.hash;
-  }
-
   /**
    * Returns a new {@code Path} instance for the specified path string.
    *
@@ -109,6 +86,9 @@ public final class Path implements Comparable<Path>, Iterable<String>, Emptyable
    */
   public static Path from(String path) {
     Check.notNull(path, Param.PATH);
+    if (path.isEmpty()) {
+      return EMPTY_PATH;
+    }
     return new Path(path);
   }
 
@@ -205,7 +185,7 @@ public final class Path implements Comparable<Path>, Iterable<String>, Emptyable
    * @return
    */
   public static Path copyOf(Path other) {
-    return Check.notNull(other).ok(Path::new);
+    return other == EMPTY_PATH ? other : Check.notNull(other).ok(Path::new);
   }
 
   /**
@@ -238,35 +218,29 @@ public final class Path implements Comparable<Path>, Iterable<String>, Emptyable
     return sb.toString();
   }
 
-  private static String[] parse(String path) {
-    ArrayList<String> elems = new ArrayList<>();
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < path.length(); i++) {
-      switch (path.charAt(i)) {
-        case SEP:
-          String s = sb.toString();
-          elems.add(s.equals(NULL_SEGMENT) ? null : s);
-          sb.setLength(0);
-          break;
-        case ESC:
-          if (i < path.length() - 1 && path.charAt(i + 1) == SEP) {
-            sb.append(SEP);
-            ++i;
-          } else {
-            sb.append(ESC);
-          }
-          break;
-        default:
-          sb.append(path.charAt(i));
-      }
-    }
-    if (sb.length() > 0) {
-      String s = sb.toString();
-      elems.add(s.equals(NULL_SEGMENT) ? null : s);
-    } else if (path.endsWith(".")) {
-      elems.add(StringMethods.EMPTY);
-    }
-    return elems.toArray(String[]::new);
+  private final String[] elems;
+  private String str; // Caches toString()
+  private int hash; // Caches hashCode()
+
+  // Reserved for EMPTY_PATH
+  private Path() {
+    elems = EMPTY_STRING_ARRAY;
+  }
+
+  private Path(String path) {
+    elems = parse(str = path);
+  }
+
+  private Path(String[] segments) {
+    elems = new String[segments.length];
+    arraycopy(segments, 0, elems, 0, segments.length);
+  }
+
+  private Path(Path other) {
+    // Since we are immutable we can happily share state
+    this.elems = other.elems;
+    this.str = other.str;
+    this.hash = other.hash;
   }
 
   /**
@@ -495,6 +469,37 @@ public final class Path implements Comparable<Path>, Iterable<String>, Emptyable
       str = implode(elems, Path::escape, ".", 0, elems.length);
     }
     return str;
+  }
+
+  private static String[] parse(String path) {
+    ArrayList<String> elems = new ArrayList<>();
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < path.length(); i++) {
+      switch (path.charAt(i)) {
+        case SEP:
+          String s = sb.toString();
+          elems.add(s.equals(NULL_SEGMENT) ? null : s);
+          sb.setLength(0);
+          break;
+        case ESC:
+          if (i < path.length() - 1 && path.charAt(i + 1) == SEP) {
+            sb.append(SEP);
+            ++i;
+          } else {
+            sb.append(ESC);
+          }
+          break;
+        default:
+          sb.append(path.charAt(i));
+      }
+    }
+    if (sb.length() > 0) {
+      String s = sb.toString();
+      elems.add(s.equals(NULL_SEGMENT) ? null : s);
+    } else if (path.endsWith(".")) {
+      elems.add(StringMethods.EMPTY);
+    }
+    return elems.toArray(String[]::new);
   }
 
 }

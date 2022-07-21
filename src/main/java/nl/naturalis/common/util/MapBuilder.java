@@ -27,13 +27,13 @@ import static nl.naturalis.common.check.CommonGetters.strlen;
  * <h4>Example 1:</h4>
  *
  * <blockquote><pre>{@code
- * MapBuilder mw = new MapBuilder();
- * mw.set("person.address.street", "12 Revolutionary Rd.")
+ * MapBuilder mb = new MapBuilder();
+ * mb.set("person.address.street", "12 Revolutionary Rd.")
  *  .set("person.address.state", "CA")
  *  .set("person.firstName", "John")
  *  .set("person.lastName", "Smith")
  *  .set("person.dateOfBirth", LocalDate.of(1967, 4, 4));
- * Map<String, Object> map = mw.createMap();
+ * Map<String, Object> map = mb.createMap();
  * }</pre></blockquote>
  *
  * <p>
@@ -127,15 +127,50 @@ public final class MapBuilder {
   }
 
   /**
+   * <p>Sets the specified path to the specified value. It is not allowed to
+   * overwrite the value of a path that has already been set, even if set to
+   * {@code null}. If necessary, use {@link #unset(String)} to unset the path's value
+   * first.
+   *
+   * <p>It is not allowed to directly set the path to a value of type {@code Map}.
+   * Use the {@link #in(String) in} method to create a new map at the specified path.
+   * It is allowed to set a path's value to {@code null}.
+   *
+   * @param path the path at which to write the value
+   * @param value the value
+   * @return this {@code MapBuilder}
+   */
+  public MapBuilder set(String path, Object value) {
+    Check.notNull(path, Param.PATH);
+    set(this, Path.from(path), value);
+    return this;
+  }
+
+  /**
+   * Returns a {@link Result} object containing the value of the specified path, or
+   * {@link Result#none} if the path is not set.
+   *
+   * @param path the path
+   * @return a {@link Result} object containing the value of the specified path, or
+   *     {@link Result#none} if the path is not set
+   * @see #isSet(String)
+   */
+  public Result<Object> get(String path) {
+    Check.notNull(path, Param.PATH);
+    return get(this, Path.from(path));
+  }
+
+  /**
    * Returns a {@code MapBuilder} for the map at the specified path. Once this method
-   * has been called, all paths subsequently specified will be taken relative to the
-   * specified path. If there is no map yet at the specified path, it will be
-   * created. Ancestral maps will be created as well, as and when needed. If any of
-   * the segments in the path (including the last segment) has already been set, a
+   * has been called, <i>all</i> paths subsequently specified (including for
+   * subsequent calls to {@code in}) will be taken relative to the specified path. If
+   * there is no map yet at the specified path, it will be created. Ancestral maps
+   * will be created as well, as and when needed. If any of the segments in the path
+   * (including the last segment) has already been set, a
    * {@link PathBlockedException} is thrown.
    *
-   * @param path the path to be used as the root path. The path must itself be
-   *     specified relative to the current root path
+   * @param path the path to be used as the base path. The path will itself be
+   *     interpreted as relative to the <i>current</i> base path
    * @return a {@code MapBuilder} for the map found or created at the specified path
    */
   public MapBuilder in(String path) {
@@ -144,11 +179,31 @@ public final class MapBuilder {
   }
 
   /**
+   * Jumps to another branch in the tree of nested maps. The difference between
+   * {@code jump} and {@link #in(String) in} is that the path passed to {@code jump}
+   * is always interpreted as an absolute path (i.e. relative to the root map), while
+   * the path passed to {@code in} is taken relative to the path(s) passed to
+   * previous calls to {@code in} and {@code jump}.
+   *
+   * @param path the absolute path to be used as the base path
+   * @return a {@code MapBuilder} for the map found or created at the specified path
+   * @see #in(String)
+   */
+  public MapBuilder jump(String path) {
+    if (parent != null) {
+      reset();
+    }
+    return in(path);
+  }
+
+  /**
    * <p>Returns a {@code MapBuilder} for the parent map of the map currently being
    * written. All paths you specify will now be taken relative to the parent map's
    * path. An {@link IllegalStateException} is thrown when trying to exit out of the
-   * root map. The argument to the {@code up} method must be the last segment of the
-   * parent map's path. An {@link IllegalArgumentException} is thrown if it isn't.
+   * root map. This method must be passed the last segment of the parent map's path.
+   * An {@link IllegalArgumentException} is thrown if it isn't. This is to make sure
+   * you will not accidentally start writing to the wrong map, and it makes the
+   * map-building code more intelligible.
    *
    * <blockquote><pre>{@code
    * Map<String, Object> map = new MapBuilder()
@@ -167,7 +222,7 @@ public final class MapBuilder {
    * map, specify {@code null} or {@code ""} (an empty string):
    *
    * <blockquote><pre>{@code
-   * MapBuilder mw = new MapBuilder();
+   * MapBuilder mb = new MapBuilder();
    *  .in("department.manager.address")
    *    .set("street", "Sunset Blvd")
    *    .up("manager")
@@ -200,45 +255,15 @@ public final class MapBuilder {
    */
   public MapBuilder reset() {
     Check.on(illegalState(), parent).is(notNull(), ERR_HOME_ALREADY);
-    MapBuilder mw = parent;
-    while (mw.parent != null) {
-      mw = mw.parent;
+    MapBuilder mb = parent;
+    while (mb.parent != null) {
+      mb = mb.parent;
     }
-    return mw;
+    return mb;
   }
 
-  /**
-   * <p>Sets the specified path to the specified value. It is not allowed to
-   * overwrite the value of a path that has already been set, even if set to
-   * {@code null}. If necessary, use {@link #unset(String)} to unset the path's value
-   * first.
-   *
-   * <p>It is not allowed to directly set the path to a value of type {@code Map}.
-   * Use the {@link #in(String) in} method to create a new map at the specified path.
-   * It is allowed to set a path's value to {@code null}.
-   *
-   * @param path the path at which to write the value
-   * @param value the value
-   * @return this {@code MapBuilder}
-   */
-  public MapBuilder set(String path, Object value) {
-    Check.notNull(path, Param.PATH);
-    set(this, Path.from(path), value);
-    return this;
-  }
-
-  /**
-   * Returns a {@link Result} object containing the value of the specified path, or
-   * {@link Result#none} if the path is not set.
-   *
-   * @param path the path
-   * @return a {@link Result} object containing the value of the specified path, or
-   *     {@link Result#none} if the path is not set
-   * @see #isSet(String)
-   */
-  public Result<Object> get(String path) {
-    Check.notNull(path, Param.PATH);
-    return get(this, Path.from(path));
+  public String where() {
+    return root.toString();
   }
 
   /**
@@ -302,11 +327,11 @@ public final class MapBuilder {
     String k = key.toString();
     if (val instanceof Map nested) {
       Path path = writer.root.append(k);
-      MapBuilder mw = new MapBuilder(path, writer);
-      writer.map.put(k, mw);
-      init(mw, nested);
+      MapBuilder mb = new MapBuilder(path, writer);
+      writer.map.put(k, mb);
+      init(mb, nested);
     } else {
-      Check.that(val).isNot(instanceOf(), MapBuilder.class); // prevent nasty usage
+      Check.that(val).isNot(instanceOf(), MapBuilder.class); // stifle nasty usage
       writer.map.put(k, ifNull(val, _NULL_));
     }
   }
@@ -319,7 +344,7 @@ public final class MapBuilder {
       }
       Check.that(val, Param.VALUE)
           .isNot(instanceOf(), Map.class)
-          .isNot(instanceOf(), MapBuilder.class); // prevent nasty usage
+          .isNot(instanceOf(), MapBuilder.class); // stifle nasty usage
       writer.map.put(key, ifNull(val, _NULL_));
     } else {
       set(getNestedWriter(writer, key), path.shift(), val);
@@ -369,12 +394,13 @@ public final class MapBuilder {
   }
 
   private static Map<String, Object> createMap(MapBuilder writer) {
-    Map<String, Object> m = new LinkedHashMap<>();
-    writer.map.forEach((k, v) -> {
-      if (v instanceof MapBuilder mw) {
-        m.put(k, createMap(mw));
+    int sz = 1 + 4 * writer.map.size() / 3;
+    Map<String, Object> m = new LinkedHashMap<>(sz);
+    writer.map.forEach((key, val) -> {
+      if (val instanceof MapBuilder mb) {
+        m.put(key, createMap(mb));
       } else {
-        m.put(k, replaceIf(v, sameAs(), _NULL_, null));
+        m.put(key, replaceIf(val, sameAs(), _NULL_, null));
       }
     });
     return m;
@@ -383,8 +409,8 @@ public final class MapBuilder {
   private static MapBuilder getNestedWriter(MapBuilder writer, String key) {
     Path root = writer.root.append(key);
     Object val = writer.map.computeIfAbsent(key, k -> new MapBuilder(root, writer));
-    if (val instanceof MapBuilder mw) {
-      return mw;
+    if (val instanceof MapBuilder mb) {
+      return mb;
     }
     throw new PathBlockedException(root, val);
   }

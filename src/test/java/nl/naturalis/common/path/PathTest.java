@@ -238,4 +238,39 @@ public class PathTest {
     assertEquals(Path.from("a.b.c"), p1);
   }
 
+  @Test
+  public void toString00() {
+    assertEquals("", Path.empty().toString());
+  }
+
+  @Test
+  public void toString01() {
+    assertEquals("", Path.from("").toString());
+  }
+
+  @Test
+  public void toString02() {
+    assertEquals("foo.", Path.from("foo.").toString());
+  }
+
+  @Test // test unescape - escape route
+  public void toString03() {
+    assertEquals("foo.^0", Path.from("foo.^0").toString());
+  }
+
+  @Test // test unescape - escape route
+  public void toString04() {
+    assertEquals("foo.^0.bar", Path.from("foo.^0.bar").toString());
+  }
+
+  @Test // test unescape - escape route
+  public void toString05() {
+    assertEquals("foo.^0.bar^", Path.from("foo.^0.bar^").toString());
+  }
+
+  @Test // test unescape - escape route
+  public void toString06() {
+    assertEquals("foo.^0.bar^..bozo", Path.from("foo.^0.bar^..bozo").toString());
+  }
+
 }
